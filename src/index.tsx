@@ -1,10 +1,6 @@
-import * as React from 'react'
-import styles from './styles.module.css'
-
-interface Props {
-  text: string
-}
-
-export const ExampleComponent = ({ text }: Props) => {
-  return <div className={styles.test}>Example Component: {text}</div>
-}
+export {
+  FingerprintContext,
+  FingerprintProvider
+} from './context/FingerprintContext'
+export type { FingerprintProviderProps } from './context/FingerprintContext'
+export { useFingerprint } from './hooks/useFingerprint'
