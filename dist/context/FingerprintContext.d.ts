@@ -6,8 +6,8 @@ interface FingerprintContextInterface {
     visitor: VisitorState;
 }
 export declare type FingerprintProviderProps = {
-    appId: string;
-    children: React.ReactNode;
+    appId?: string;
+    children?: React.ReactNode;
     debug?: boolean;
 };
 export declare type FingerprintState = {

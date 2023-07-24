@@ -16,7 +16,6 @@ export const bootstrapSession = ({
   // then we'll set the firstVisit boolean to true. This is also the case if the
   // user has visited before but for some reason the App ID has been changed.
   if (!Cookies.get('_cm') || Cookies.get('_cm') !== appId) {
-    alert('new user')
     Cookies.set('_cm', appId, { expires: 365 })
     session.firstVisit = true
 

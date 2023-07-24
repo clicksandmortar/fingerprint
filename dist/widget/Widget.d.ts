@@ -1,2 +1,6 @@
 import React from 'react';
-export declare const Widget: () => React.JSX.Element;
+declare type Props = {
+    appId: string;
+};
+export declare const Widget: ({ appId }: Props) => React.JSX.Element;
+export {};
