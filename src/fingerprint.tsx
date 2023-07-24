@@ -21,7 +21,7 @@ document.head.appendChild(styles)
 // Renders widget
 ReactDOM.render(
   <React.StrictMode>
-    <Widget />
+    <Widget appId={document?.currentScript?.getAttribute('id')} />
   </React.StrictMode>,
   document.getElementById('fingerprint-widget')
 )

@@ -1,10 +1,14 @@
 import React from 'react'
 import { FingerprintProvider } from '../context/FingerprintContext'
 
-export const Widget = () => {
+type Props = {
+  appId: string
+}
+
+export const Widget = ({ appId }: Props) => {
   return (
-    <FingerprintProvider appId='my-app-id'>
-      <div>Hello World</div>
+    <FingerprintProvider appId={appId}>
+      <div className='fingerprint-widget' />
     </FingerprintProvider>
   )
 }
