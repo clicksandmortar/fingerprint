@@ -1,6 +1,6 @@
 export {
   FingerprintContext,
-  FingerprintProvider
+  FingerprintProvider,
+  useFingerprint
 } from './context/FingerprintContext'
 export type { FingerprintProviderProps } from './context/FingerprintContext'
-export { useFingerprint } from './hooks/useFingerprint'

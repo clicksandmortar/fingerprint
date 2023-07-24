@@ -13,18 +13,20 @@
 
     <!-- C&M Fingerprint Embed Code -->
     <script>
-      ;(function (f, i, n, g, e, r, p, ri, nt) {
+      ;(function (f, i, n, g, e, rp, ri, nt) {
         p = i.createElement(n)
         r = i.getElementsByTagName(n)[0]
         p.src = g
         p.id = e
+        p.setAttribute('data-debug', rp)
         r.parentNode.insertBefore(p, r)
       })(
         window,
         document,
         'script',
         '../dist/fingerprint.js',
-        'b2a2b2a2b2a2b2a2b2a2b2a2b2a2b2a2'
+        'b2a2b2a2b2a2b2a2b2a2b2a2b2a2b2a2',
+        true // Set to false to disable debug mode
       )
     </script>
     <!-- End C&M Fingerprint Embed Code -->

@@ -1,17 +1,10 @@
-import React, { createContext, useEffect, useState } from 'react'
-import { bootstrapSession } from '../sessions/bootstrap'
-import { VisitorState } from '../visitors/types'
-import { SessionState } from '../sessions/types'
-import { bootstrapVisitor } from '../visitors/bootstrap'
-import { bootstrapSettings } from '../settings/bootstrap'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { invokeFirstVisit } from '../behaviours/FirstVisit'
-import { invokeReturningVisit } from '../behaviours/ReturningVisit'
+import { LoggingProvider } from './LoggingContext'
+import { CollectorProvider } from './CollectorContext'
+import { VisitorProvider } from './VisitorContext'
 
-interface FingerprintContextInterface {
-  session: SessionState
-  visitor: VisitorState
-}
+const queryClient = new QueryClient()
 
 export type FingerprintProviderProps = {
   appId?: string
@@ -19,46 +12,11 @@ export type FingerprintProviderProps = {
   debug?: boolean
 }
 
-export type FingerprintState = {
-  session: SessionState
-  visitor: VisitorState
-}
-
-const queryClient = new QueryClient()
-
-const defaultFingerprintState: FingerprintState = {
-  session: {
-    firstVisit: undefined
-  },
-  visitor: {
-    id: undefined
-  }
-}
-
 // @todo split this into multiple providers, FingerprintProvider should
 // only bootstrap the app.
 export const FingerprintProvider = (props: FingerprintProviderProps) => {
-  const { appId, children, debug } = props
+  const { appId, debug } = props
   const [booted, setBooted] = useState(false)
-  const [fingerprint, setFingerprint] = useState<FingerprintState>(
-    defaultFingerprintState
-  )
-
-  const setSession = (session: SessionState) => {
-    console.log('setting session', session, fingerprint)
-    setFingerprint({
-      ...fingerprint,
-      session
-    })
-  }
-
-  const setVisitor = (visitor: VisitorState) => {
-    console.log('setting visitor', visitor, fingerprint)
-    setFingerprint({
-      ...fingerprint,
-      visitor
-    })
-  }
 
   useEffect(() => {
     if (!appId) {
@@ -70,51 +28,51 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
     }
 
     const performBoot = async () => {
-      await bootstrapSettings()
-
-      await bootstrapSession({
-        appId,
-        setSession
-      })
-
-      await bootstrapVisitor({
-        setVisitor
-      })
-
-      if (debug) {
-        console.log('C&M Fingerprint Booted')
-      }
-
+      // @todo this should be invoked when booted.
+      // It will call out to the API to confirm the
+      // appId is valid and return the app configuration.
       setBooted(true)
     }
 
     performBoot()
   }, [])
 
-  useEffect(() => {
-    if (debug) {
-      console.log('C&M Fingerprint: ', fingerprint)
-    }
-  }, [fingerprint])
-
-  console.log('final state', fingerprint)
+  if (!appId) {
+    return null
+  }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <FingerprintContext.Provider
-        value={{
-          ...fingerprint
-        }}
-      >
-        {children}
-        {fingerprint.session.firstVisit === true
-          ? invokeFirstVisit()
-          : invokeReturningVisit()}
-      </FingerprintContext.Provider>
-    </QueryClientProvider>
+    <LoggingProvider debug={debug}>
+      <QueryClientProvider client={queryClient}>
+        <FingerprintContext.Provider
+          value={{
+            appId,
+            booted
+          }}
+        >
+          <VisitorProvider>
+            <CollectorProvider />
+          </VisitorProvider>
+        </FingerprintContext.Provider>
+      </QueryClientProvider>
+    </LoggingProvider>
   )
+}
+
+export interface FingerprintContextInterface {
+  appId: string
+  booted: boolean
+}
+
+const defaultFingerprintState: FingerprintContextInterface = {
+  appId: '',
+  booted: false
 }
 
 export const FingerprintContext = createContext<FingerprintContextInterface>({
   ...defaultFingerprintState
 })
+
+export const useFingerprint = () => {
+  return useContext(FingerprintContext)
+}

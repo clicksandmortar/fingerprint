@@ -3,9 +3,9 @@ import { FingerprintContext } from '../context/FingerprintContext'
 
 // @todo update based on refactor of FingerprintContext
 export const useFingerprint = () => {
-  const { session } = useContext(FingerprintContext)
+  const { booted } = useContext(FingerprintContext)
 
   return {
-    session
+    booted
   }
 }
