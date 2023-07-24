@@ -2,12 +2,10 @@
 
 > Clicks &amp; Mortar Fingerprint Tracking &amp; Triggers
 
-[![NPM](https://img.shields.io/npm/v/fingerprint.svg)](https://www.npmjs.com/package/fingerprint) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-
 ## Install
 
 ```bash
-npm install --save fingerprint
+yard add fingerprint
 ```
 
 ## Usage
@@ -15,14 +13,21 @@ npm install --save fingerprint
 ```tsx
 import React, { Component } from 'react'
 
-import MyComponent from 'fingerprint'
+import { FingerprintProvider } from 'fingerprint'
 import 'fingerprint/dist/index.css'
 
-class Example extends Component {
-  render() {
-    return <MyComponent />
-  }
+const App = () => {
+  return (
+    <FingerprintProvider
+      appId='b2a2b2a2b2a2b2a2b2a2b2a2b2a2b2a2'
+      debug={process.env.NODE_ENV === 'development'}
+    >
+      <YourApp />
+    </FingerprintProvider>
+  )
 }
+
+export default App
 ```
 
 ## License
