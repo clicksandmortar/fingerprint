@@ -1,3 +1,3 @@
-export type VisitorState = {
+export type Visitor = {
   id?: string
 }

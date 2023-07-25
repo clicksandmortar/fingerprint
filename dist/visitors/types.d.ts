@@ -1,3 +1,3 @@
-export declare type VisitorState = {
+export declare type Visitor = {
     id?: string;
 };

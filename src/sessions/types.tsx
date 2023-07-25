@@ -1,4 +1,4 @@
-export type SessionState = {
+export type Session = {
   firstVisit?: boolean
   lastVisit?: Date
   visits?: number

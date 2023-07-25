@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
+import { sendEvent } from '../client/handler'
+import { CollectorResponse, CollectorUpdate } from '../client/types'
 // import axios, { AxiosResponse } from 'axios'
-
-// type CollectorUpdate = {}
 
 // export const useCollector = () => {
 //   // @ts-ignore
@@ -28,10 +28,10 @@ import { useMutation } from '@tanstack/react-query'
 
 // Local implementation of collector which does not make a network request
 export const useCollector = () => {
-  return useMutation<unknown, unknown, any, unknown>(
-    (data: any) => {
-      console.log(data)
-      return data
+  return useMutation<CollectorResponse, unknown, CollectorUpdate, unknown>(
+    (data: CollectorUpdate) => {
+      console.log('Sending CollectorUpdate to Mock Collector API', data)
+      return Promise.resolve(sendEvent(data))
     },
     {
       onSuccess: () => {

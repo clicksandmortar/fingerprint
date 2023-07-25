@@ -1,4 +1,4 @@
-import { VisitorState } from './types';
+import { Visitor } from './types';
 export declare const bootstrapVisitor: ({ setVisitor }: {
-    setVisitor: (session: VisitorState) => void;
+    setVisitor: (session: Visitor) => void;
 }) => void;

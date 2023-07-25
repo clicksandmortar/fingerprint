@@ -10,6 +10,7 @@ export type FingerprintProviderProps = {
   appId?: string
   children?: React.ReactNode
   debug?: boolean
+  triggers?: () => {}
 }
 
 // @todo split this into multiple providers, FingerprintProvider should
@@ -51,7 +52,7 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
           }}
         >
           <VisitorProvider>
-            <CollectorProvider />
+            <CollectorProvider>{props.children}</CollectorProvider>
           </VisitorProvider>
         </FingerprintContext.Provider>
       </QueryClientProvider>

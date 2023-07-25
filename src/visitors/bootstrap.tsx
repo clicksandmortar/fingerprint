@@ -1,24 +1,21 @@
-import Cookies from 'js-cookie'
 import { v4 as uuidv4 } from 'uuid'
-import { VisitorState } from './types'
+import { Visitor } from './types'
 import { validVisitorId } from './utils'
+import { getCookie, setCookie } from '../utils/cookies'
 
 export const bootstrapVisitor = ({
   setVisitor
 }: {
-  setVisitor: (session: VisitorState) => void
+  setVisitor: (session: Visitor) => void
 }) => {
-  const visitor: VisitorState = {
+  const visitor: Visitor = {
     id: undefined
   }
 
-  if (
-    !Cookies.get('_cm_id') ||
-    !validVisitorId(Cookies.get('_cm_id') as string)
-  ) {
+  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id') as string)) {
     const visitorId = uuidv4()
 
-    Cookies.set('_cm_id', visitorId, { expires: 365 })
+    setCookie('_cm_id', visitorId)
 
     visitor.id = visitorId
 
@@ -27,8 +24,8 @@ export const bootstrapVisitor = ({
     return
   }
 
-  if (Cookies.get('_cm_id')) {
-    visitor.id = Cookies.get('_cm_id')
+  if (getCookie('_cm_id')) {
+    visitor.id = getCookie('_cm_id')
 
     setVisitor(visitor)
   }
