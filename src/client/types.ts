@@ -9,6 +9,7 @@ export type CollectorUpdate = {
 
 export type Page = {
   url: string
+  path: string
   title: string
   params?: {
     [key: string]: string
@@ -38,5 +39,15 @@ export type CollectorResponse = {
 }
 
 export type Trigger = {
-  [key: string]: string
+  id?: string
+  behaviour?: string
+  data?: {
+    [key: string]: string
+  }
+}
+
+export type PageView = {
+  page: Page
+  referrer: Referrer
+  viewedAt: Date
 }

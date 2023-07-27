@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Trigger } from '../client/types'
 import ReactDOM from 'react-dom'
 
@@ -6,8 +6,14 @@ type Props = {
   trigger: Trigger
 }
 
-export const TriggerModal = ({ trigger }: Props) => {
-  return ReactDOM.createPortal(
+const Modal = ({ trigger }: Props) => {
+  const [open, setOpen] = useState(true)
+
+  if (!open) {
+    return null
+  }
+
+  return (
     <div
       style={{
         position: 'fixed',
@@ -34,7 +40,17 @@ export const TriggerModal = ({ trigger }: Props) => {
       >
         <h1>{trigger.text}</h1>
       </div>
-    </div>,
-    document.body
+      <button
+        onClick={() => {
+          setOpen(false)
+        }}
+      >
+        Close
+      </button>
+    </div>
   )
+}
+
+export const TriggerModal = ({ trigger }: Props) => {
+  return ReactDOM.createPortal(<Modal trigger={trigger} />, document.body)
 }

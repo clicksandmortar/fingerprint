@@ -1,21 +1,51 @@
 import React, { createContext, useEffect, useState } from 'react'
 import { useCollector } from '../hooks/useCollector'
 import { useLogging } from './LoggingContext'
-import { useFingerprint } from './FingerprintContext'
+import { Handler, useFingerprint } from './FingerprintContext'
 import { useVisitor } from './VisitorContext'
 import { Trigger } from '../client/types'
-import { TriggerModal } from '../behaviours/TriggerModal'
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
+  handlers?: Handler[]
 }
 
-export const CollectorProvider = ({ children }: CollectorProviderProps) => {
-  const { log } = useLogging()
+export const CollectorProvider = ({
+  children,
+  handlers
+}: CollectorProviderProps) => {
+  const { log, error } = useLogging()
   const { appId, booted } = useFingerprint()
   const { visitor } = useVisitor()
   const { mutateAsync: collect } = useCollector()
   const [trigger, setTrigger] = useState<Trigger>({})
+
+  const showTrigger = (trigger: Trigger) => {
+    if (!trigger) {
+      return null
+    }
+
+    const handler =
+      handlers?.find(
+        (handler: Handler) =>
+          handler.id === trigger.id && handler.behaviour === trigger.behaviour
+      ) ||
+      handlers?.find(
+        (handler: Handler) => handler.behaviour === trigger.behaviour
+      )
+
+    if (!handler) {
+      error('No handler found for trigger', trigger)
+      return null
+    }
+
+    if (!handler.invoke) {
+      error('No invoke method found for handler', handler)
+      return null
+    }
+
+    return handler.invoke(trigger)
+  }
 
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
@@ -32,6 +62,7 @@ export const CollectorProvider = ({ children }: CollectorProviderProps) => {
       visitor,
       page: {
         url: window.location.href,
+        path: window.location.pathname,
         title: document.title,
         params: new URLSearchParams(window.location.search)
           .toString()
@@ -56,13 +87,13 @@ export const CollectorProvider = ({ children }: CollectorProviderProps) => {
       }
     })
       .then((response) => {
-        console.log('Sent collector data, retreived:', response)
+        log('Sent collector data, retreived:', response)
         if (response.trigger) {
           setTrigger(response.trigger)
         }
       })
-      .catch((error) => {
-        console.error('failed to store collected data', error)
+      .catch((err) => {
+        error('failed to store collected data', err)
       })
 
     log('CollectorProvider: collected data')
@@ -71,9 +102,7 @@ export const CollectorProvider = ({ children }: CollectorProviderProps) => {
   return (
     <CollectorContext.Provider value={{}}>
       {children}
-      {trigger && trigger.behaviour === 'modal' && (
-        <TriggerModal trigger={trigger} />
-      )}
+      {showTrigger(trigger)}
     </CollectorContext.Provider>
   )
 }

@@ -65,7 +65,12 @@ const sendEvent = data => {
   const previousVisits = getCookie('visits') ? parseInt(getCookie('visits') || '0') : 0;
   const visits = previousVisits + 1;
   setCookie('visits', visits.toString());
-  const trigger = getTrigger(firstSeen, lastSeen, visits);
+  const trigger = getTrigger({
+    ...data,
+    firstSeen,
+    lastSeen,
+    visits
+  });
   return {
     firstSeen: new Date(firstSeen),
     lastSeen: new Date(lastSeen),
@@ -73,24 +78,48 @@ const sendEvent = data => {
     trigger
   };
 };
-const getTrigger = (firstSeen, lastSeen, visits) => {
+const getTrigger = data => {
   const trigger = {};
-  if (visits === 1) {
+  const context = {
+    firstSeen: data.firstSeen,
+    lastSeen: data.lastSeen,
+    visits: data.visits
+  };
+  if (data.visits === 1 && data.page.path === '/') {
+    trigger.id = 'welcome_on_homepage';
     trigger.behaviour = 'modal';
-    trigger.text = 'Welcome to the site!';
+    trigger.data = {
+      text: 'Welcome to the homepage!',
+      ...context
+    };
+    return trigger;
   }
-  if (visits > 1) {
-    const firstSeenDate = new Date(firstSeen);
-    const now = new Date();
-    const diff = now.getTime() - firstSeenDate.getTime();
-    const seconds = Math.floor(diff / 1000);
-    if (seconds > 30) {
-      trigger.behaviour = 'modal';
-      trigger.text = "You've been with us since " + lastSeen;
-    } else {
-      trigger.behaviour = 'modal';
-      trigger.text = 'Welcome back to the site! We last saw you on ' + lastSeen;
-    }
+  if (data.visits > 1 && data.page.path === '/') {
+    trigger.id = 'welcome_back_on_homepage';
+    trigger.behaviour = 'modal';
+    trigger.data = {
+      text: 'Welcome back to the homepage!',
+      ...context
+    };
+    return trigger;
+  }
+  if (data.visits === 1) {
+    trigger.id = 'welcome_any_page';
+    trigger.behaviour = 'modal';
+    trigger.data = {
+      text: 'Welcome to the site!',
+      ...context
+    };
+    return trigger;
+  }
+  if (data.visits > 1) {
+    trigger.id = 'welcome_any_page';
+    trigger.behaviour = 'modal';
+    trigger.data = {
+      text: 'Welcome back to the site!',
+      ...context
+    };
+    return trigger;
   }
   return trigger;
 };
@@ -194,6 +223,87 @@ const VisitorContext = createContext({
 const useVisitor = () => {
   return useContext(VisitorContext);
 };
+
+const CollectorProvider = ({
+  children,
+  handlers
+}) => {
+  const {
+    log,
+    error
+  } = useLogging();
+  const {
+    appId,
+    booted
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    mutateAsync: collect
+  } = useCollector();
+  const [trigger, setTrigger] = useState({});
+  const showTrigger = trigger => {
+    if (!trigger) {
+      return null;
+    }
+    const handler = (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.id === trigger.id && handler.behaviour === trigger.behaviour)) || (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour));
+    if (!handler) {
+      error('No handler found for trigger', trigger);
+      return null;
+    }
+    if (!handler.invoke) {
+      error('No invoke method found for handler', handler);
+      return null;
+    }
+    return handler.invoke(trigger);
+  };
+  useEffect(() => {
+    if (!booted) {
+      log('CollectorProvider: Not yet collecting, awaiting boot');
+      return;
+    }
+    log('CollectorProvider: collecting data');
+    collect({
+      appId,
+      visitor,
+      page: {
+        url: window.location.href,
+        path: window.location.pathname,
+        title: document.title,
+        params: new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+          const [key, value] = cur.split('=');
+          if (!key) return acc;
+          acc[key] = value;
+          return acc;
+        }, {})
+      },
+      referrer: {
+        url: document.referrer,
+        title: document.referrer,
+        utm: {
+          source: '',
+          medium: '',
+          campaign: '',
+          term: '',
+          content: ''
+        }
+      }
+    }).then(response => {
+      log('Sent collector data, retreived:', response);
+      if (response.trigger) {
+        setTrigger(response.trigger);
+      }
+    }).catch(err => {
+      error('failed to store collected data', err);
+    });
+    log('CollectorProvider: collected data');
+  }, [booted]);
+  return React.createElement(CollectorContext.Provider, {
+    value: {}
+  }, children, showTrigger(trigger));
+};
+const CollectorContext = createContext({});
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -31048,10 +31158,14 @@ if (process.env.NODE_ENV === 'production') {
 }
 });
 
-const TriggerModal = ({
+const Modal = ({
   trigger
 }) => {
-  return reactDom.createPortal(React.createElement("div", {
+  const [open, setOpen] = useState(true);
+  if (!open) {
+    return null;
+  }
+  return React.createElement("div", {
     style: {
       position: 'fixed',
       top: 0,
@@ -31073,81 +31187,41 @@ const TriggerModal = ({
       boxShadow: '0 0 1rem rgba(0,0,0,0.5)',
       zIndex: 9999
     }
-  }, React.createElement("h1", null, trigger.text))), document.body);
-};
-
-const CollectorProvider = ({
-  children
-}) => {
-  const {
-    log
-  } = useLogging();
-  const {
-    appId,
-    booted
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    mutateAsync: collect
-  } = useCollector();
-  const [trigger, setTrigger] = useState({});
-  useEffect(() => {
-    if (!booted) {
-      log('CollectorProvider: Not yet collecting, awaiting boot');
-      return;
+  }, React.createElement("h1", null, trigger.text)), React.createElement("button", {
+    onClick: () => {
+      setOpen(false);
     }
-    log('CollectorProvider: collecting data');
-    collect({
-      appId,
-      visitor,
-      page: {
-        url: window.location.href,
-        title: document.title,
-        params: new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-          const [key, value] = cur.split('=');
-          if (!key) return acc;
-          acc[key] = value;
-          return acc;
-        }, {})
-      },
-      referrer: {
-        url: document.referrer,
-        title: document.referrer,
-        utm: {
-          source: '',
-          medium: '',
-          campaign: '',
-          term: '',
-          content: ''
-        }
-      }
-    }).then(response => {
-      console.log('Sent collector data, retreived:', response);
-      if (response.trigger) {
-        setTrigger(response.trigger);
-      }
-    }).catch(error => {
-      console.error('failed to store collected data', error);
-    });
-    log('CollectorProvider: collected data');
-  }, [booted]);
-  return React.createElement(CollectorContext.Provider, {
-    value: {}
-  }, children, trigger && trigger.behaviour === 'modal' && React.createElement(TriggerModal, {
-    trigger: trigger
-  }));
+  }, "Close"));
 };
-const CollectorContext = createContext({});
+const TriggerModal = ({
+  trigger
+}) => {
+  return reactDom.createPortal(React.createElement(Modal, {
+    trigger: trigger
+  }), document.body);
+};
 
 const queryClient = new QueryClient();
-const FingerprintProvider = props => {
-  const {
-    appId,
-    debug
-  } = props;
+const includedHandlers = [{
+  id: 'modal',
+  behaviour: 'modal',
+  invoke: trigger => React.createElement(TriggerModal, {
+    trigger: trigger
+  })
+}];
+const FingerprintProvider = ({
+  appId,
+  children,
+  debug,
+  defaultHandlers
+}) => {
   const [booted, setBooted] = useState(false);
+  const [handlers, setHandlers] = useState(defaultHandlers || includedHandlers);
+  const registerHandler = trigger => {
+    setHandlers(handlers => {
+      return [...handlers, trigger];
+    });
+  };
   useEffect(() => {
     if (!appId) {
       throw new Error('C&M Fingerprint: appId is required');
@@ -31170,13 +31244,31 @@ const FingerprintProvider = props => {
   }, React.createElement(FingerprintContext.Provider, {
     value: {
       appId,
-      booted
+      booted,
+      currentTrigger: {},
+      registerHandler,
+      trackEvent: () => {
+        alert('trackEvent not implemented');
+      },
+      trackPageView: () => {
+        alert('trackPageView not implemented');
+      },
+      unregisterHandler: () => {
+        alert('unregisterHandler not implemented');
+      }
     }
-  }, React.createElement(VisitorProvider, null, React.createElement(CollectorProvider, null, props.children)))));
+  }, React.createElement(VisitorProvider, null, React.createElement(CollectorProvider, {
+    handlers: handlers
+  }, children)))));
 };
 const defaultFingerprintState = {
   appId: '',
-  booted: false
+  booted: false,
+  currentTrigger: {},
+  registerHandler: () => {},
+  trackEvent: () => {},
+  trackPageView: () => {},
+  unregisterHandler: () => {}
 };
 const FingerprintContext = createContext({
   ...defaultFingerprintState

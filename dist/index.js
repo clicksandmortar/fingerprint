@@ -122,7 +122,11 @@ var sendEvent = function sendEvent(data) {
   var previousVisits = getCookie('visits') ? parseInt(getCookie('visits') || '0') : 0;
   var visits = previousVisits + 1;
   setCookie('visits', visits.toString());
-  var trigger = getTrigger(firstSeen, lastSeen, visits);
+  var trigger = getTrigger(_extends({}, data, {
+    firstSeen: firstSeen,
+    lastSeen: lastSeen,
+    visits: visits
+  }));
   return {
     firstSeen: new Date(firstSeen),
     lastSeen: new Date(lastSeen),
@@ -130,24 +134,44 @@ var sendEvent = function sendEvent(data) {
     trigger: trigger
   };
 };
-var getTrigger = function getTrigger(firstSeen, lastSeen, visits) {
+var getTrigger = function getTrigger(data) {
   var trigger = {};
-  if (visits === 1) {
+  var context = {
+    firstSeen: data.firstSeen,
+    lastSeen: data.lastSeen,
+    visits: data.visits
+  };
+  if (data.visits === 1 && data.page.path === '/') {
+    trigger.id = 'welcome_on_homepage';
     trigger.behaviour = 'modal';
-    trigger.text = 'Welcome to the site!';
+    trigger.data = _extends({
+      text: 'Welcome to the homepage!'
+    }, context);
+    return trigger;
   }
-  if (visits > 1) {
-    var firstSeenDate = new Date(firstSeen);
-    var now = new Date();
-    var diff = now.getTime() - firstSeenDate.getTime();
-    var seconds = Math.floor(diff / 1000);
-    if (seconds > 30) {
-      trigger.behaviour = 'modal';
-      trigger.text = "You've been with us since " + lastSeen;
-    } else {
-      trigger.behaviour = 'modal';
-      trigger.text = 'Welcome back to the site! We last saw you on ' + lastSeen;
-    }
+  if (data.visits > 1 && data.page.path === '/') {
+    trigger.id = 'welcome_back_on_homepage';
+    trigger.behaviour = 'modal';
+    trigger.data = _extends({
+      text: 'Welcome back to the homepage!'
+    }, context);
+    return trigger;
+  }
+  if (data.visits === 1) {
+    trigger.id = 'welcome_any_page';
+    trigger.behaviour = 'modal';
+    trigger.data = _extends({
+      text: 'Welcome to the site!'
+    }, context);
+    return trigger;
+  }
+  if (data.visits > 1) {
+    trigger.id = 'welcome_any_page';
+    trigger.behaviour = 'modal';
+    trigger.data = _extends({
+      text: 'Welcome back to the site!'
+    }, context);
+    return trigger;
   }
   return trigger;
 };
@@ -255,6 +279,90 @@ var VisitorContext = React.createContext({
 var useVisitor = function useVisitor() {
   return React.useContext(VisitorContext);
 };
+
+var CollectorProvider = function CollectorProvider(_ref) {
+  var children = _ref.children,
+    handlers = _ref.handlers;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId,
+    booted = _useFingerprint.booted;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useCollector = useCollector(),
+    collect = _useCollector.mutateAsync;
+  var _useState = React.useState({}),
+    trigger = _useState[0],
+    setTrigger = _useState[1];
+  var showTrigger = function showTrigger(trigger) {
+    if (!trigger) {
+      return null;
+    }
+    var handler = (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return handler.id === trigger.id && handler.behaviour === trigger.behaviour;
+    })) || (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return handler.behaviour === trigger.behaviour;
+    }));
+    if (!handler) {
+      error('No handler found for trigger', trigger);
+      return null;
+    }
+    if (!handler.invoke) {
+      error('No invoke method found for handler', handler);
+      return null;
+    }
+    return handler.invoke(trigger);
+  };
+  React.useEffect(function () {
+    if (!booted) {
+      log('CollectorProvider: Not yet collecting, awaiting boot');
+      return;
+    }
+    log('CollectorProvider: collecting data');
+    collect({
+      appId: appId,
+      visitor: visitor,
+      page: {
+        url: window.location.href,
+        path: window.location.pathname,
+        title: document.title,
+        params: new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+          var _cur$split = cur.split('='),
+            key = _cur$split[0],
+            value = _cur$split[1];
+          if (!key) return acc;
+          acc[key] = value;
+          return acc;
+        }, {})
+      },
+      referrer: {
+        url: document.referrer,
+        title: document.referrer,
+        utm: {
+          source: '',
+          medium: '',
+          campaign: '',
+          term: '',
+          content: ''
+        }
+      }
+    }).then(function (response) {
+      log('Sent collector data, retreived:', response);
+      if (response.trigger) {
+        setTrigger(response.trigger);
+      }
+    })["catch"](function (err) {
+      error('failed to store collected data', err);
+    });
+    log('CollectorProvider: collected data');
+  }, [booted]);
+  return React__default.createElement(CollectorContext.Provider, {
+    value: {}
+  }, children, showTrigger(trigger));
+};
+var CollectorContext = React.createContext({});
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -31109,9 +31217,15 @@ if (process.env.NODE_ENV === 'production') {
 }
 });
 
-var TriggerModal = function TriggerModal(_ref) {
+var Modal = function Modal(_ref) {
   var trigger = _ref.trigger;
-  return reactDom.createPortal(React__default.createElement("div", {
+  var _useState = React.useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  if (!open) {
+    return null;
+  }
+  return React__default.createElement("div", {
     style: {
       position: 'fixed',
       top: 0,
@@ -31133,80 +31247,45 @@ var TriggerModal = function TriggerModal(_ref) {
       boxShadow: '0 0 1rem rgba(0,0,0,0.5)',
       zIndex: 9999
     }
-  }, React__default.createElement("h1", null, trigger.text))), document.body);
-};
-
-var CollectorProvider = function CollectorProvider(_ref) {
-  var children = _ref.children;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId,
-    booted = _useFingerprint.booted;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var _useCollector = useCollector(),
-    collect = _useCollector.mutateAsync;
-  var _useState = React.useState({}),
-    trigger = _useState[0],
-    setTrigger = _useState[1];
-  React.useEffect(function () {
-    if (!booted) {
-      log('CollectorProvider: Not yet collecting, awaiting boot');
-      return;
+  }, React__default.createElement("h1", null, trigger.text)), React__default.createElement("button", {
+    onClick: function onClick() {
+      setOpen(false);
     }
-    log('CollectorProvider: collecting data');
-    collect({
-      appId: appId,
-      visitor: visitor,
-      page: {
-        url: window.location.href,
-        title: document.title,
-        params: new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-          var _cur$split = cur.split('='),
-            key = _cur$split[0],
-            value = _cur$split[1];
-          if (!key) return acc;
-          acc[key] = value;
-          return acc;
-        }, {})
-      },
-      referrer: {
-        url: document.referrer,
-        title: document.referrer,
-        utm: {
-          source: '',
-          medium: '',
-          campaign: '',
-          term: '',
-          content: ''
-        }
-      }
-    }).then(function (response) {
-      console.log('Sent collector data, retreived:', response);
-      if (response.trigger) {
-        setTrigger(response.trigger);
-      }
-    })["catch"](function (error) {
-      console.error('failed to store collected data', error);
-    });
-    log('CollectorProvider: collected data');
-  }, [booted]);
-  return React__default.createElement(CollectorContext.Provider, {
-    value: {}
-  }, children, trigger && trigger.behaviour === 'modal' && React__default.createElement(TriggerModal, {
-    trigger: trigger
-  }));
+  }, "Close"));
 };
-var CollectorContext = React.createContext({});
+var TriggerModal = function TriggerModal(_ref2) {
+  var trigger = _ref2.trigger;
+  return reactDom.createPortal(React__default.createElement(Modal, {
+    trigger: trigger
+  }), document.body);
+};
 
 var queryClient = new reactQuery.QueryClient();
-var FingerprintProvider = function FingerprintProvider(props) {
-  var appId = props.appId,
-    debug = props.debug;
+var includedHandlers = [{
+  id: 'modal',
+  behaviour: 'modal',
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerModal, {
+      trigger: trigger
+    });
+  }
+}];
+var FingerprintProvider = function FingerprintProvider(_ref) {
+  var appId = _ref.appId,
+    children = _ref.children,
+    debug = _ref.debug,
+    defaultHandlers = _ref.defaultHandlers;
   var _useState = React.useState(false),
     booted = _useState[0],
     setBooted = _useState[1];
+  var _useState2 = React.useState(defaultHandlers || includedHandlers),
+    handlers = _useState2[0],
+    setHandlers = _useState2[1];
+  var registerHandler = function registerHandler(trigger) {
+    setHandlers(function (handlers) {
+      return [].concat(handlers, [trigger]);
+    });
+  };
   React.useEffect(function () {
     if (!appId) {
       throw new Error('C&M Fingerprint: appId is required');
@@ -31234,13 +31313,31 @@ var FingerprintProvider = function FingerprintProvider(props) {
   }, React__default.createElement(FingerprintContext.Provider, {
     value: {
       appId: appId,
-      booted: booted
+      booted: booted,
+      currentTrigger: {},
+      registerHandler: registerHandler,
+      trackEvent: function trackEvent() {
+        alert('trackEvent not implemented');
+      },
+      trackPageView: function trackPageView() {
+        alert('trackPageView not implemented');
+      },
+      unregisterHandler: function unregisterHandler() {
+        alert('unregisterHandler not implemented');
+      }
     }
-  }, React__default.createElement(VisitorProvider, null, React__default.createElement(CollectorProvider, null, props.children)))));
+  }, React__default.createElement(VisitorProvider, null, React__default.createElement(CollectorProvider, {
+    handlers: handlers
+  }, children)))));
 };
 var defaultFingerprintState = {
   appId: '',
-  booted: false
+  booted: false,
+  currentTrigger: {},
+  registerHandler: function registerHandler() {},
+  trackEvent: function trackEvent() {},
+  trackPageView: function trackPageView() {},
+  unregisterHandler: function unregisterHandler() {}
 };
 var FingerprintContext = React.createContext(_extends({}, defaultFingerprintState));
 var useFingerprint = function useFingerprint() {

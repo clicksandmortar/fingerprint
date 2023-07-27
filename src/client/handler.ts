@@ -29,7 +29,12 @@ export const sendEvent = (data: CollectorUpdate): CollectorResponse => {
   // Always update visits
   setCookie('visits', visits.toString())
 
-  const trigger = getTrigger(firstSeen, lastSeen, visits)
+  const trigger = getTrigger({
+    ...data,
+    firstSeen,
+    lastSeen,
+    visits
+  })
 
   return {
     firstSeen: new Date(firstSeen),
@@ -39,31 +44,72 @@ export const sendEvent = (data: CollectorUpdate): CollectorResponse => {
   }
 }
 
-const getTrigger = (
-  firstSeen: string,
-  lastSeen: string,
-  visits: number
-): { [key: string]: string } => {
+const getTrigger = (data: any): Trigger => {
   const trigger: Trigger = {}
+  const context = {
+    firstSeen: data.firstSeen,
+    lastSeen: data.lastSeen,
+    visits: data.visits
+  }
 
-  if (visits === 1) {
+  // User lands on the homepage, and it's their first visit
+  if (data.visits === 1 && data.page.path === '/') {
+    trigger.id = 'welcome_on_homepage'
     trigger.behaviour = 'modal'
-    trigger.text = 'Welcome to the site!'
+    trigger.data = {
+      text: 'Welcome to the homepage!',
+      ...context
+    }
+    return trigger
   }
 
-  if (visits > 1) {
-    const firstSeenDate = new Date(firstSeen)
-    const now = new Date()
-    const diff = now.getTime() - firstSeenDate.getTime()
-    const seconds = Math.floor(diff / 1000)
-    if (seconds > 30) {
-      trigger.behaviour = 'modal'
-      trigger.text = "You've been with us since " + lastSeen
-    } else {
-      trigger.behaviour = 'modal'
-      trigger.text = 'Welcome back to the site! We last saw you on ' + lastSeen
+  // User lands on the homepage, and it's not their first visit
+  if (data.visits > 1 && data.page.path === '/') {
+    trigger.id = 'welcome_back_on_homepage'
+    trigger.behaviour = 'modal'
+    trigger.data = {
+      text: 'Welcome back to the homepage!',
+      ...context
     }
+    return trigger
   }
+
+  // User lands on any page, and it's their first visit
+  if (data.visits === 1) {
+    trigger.id = 'welcome_any_page'
+    trigger.behaviour = 'modal'
+    trigger.data = {
+      text: 'Welcome to the site!',
+      ...context
+    }
+    return trigger
+  }
+
+  // User lands on any page, and it's not their first visit
+  if (data.visits > 1) {
+    trigger.id = 'welcome_any_page'
+    trigger.behaviour = 'modal'
+    trigger.data = {
+      text: 'Welcome back to the site!',
+      ...context
+    }
+    return trigger
+  }
+
+  // if (data.visits > 1) {
+  //   const firstSeenDate = new Date(data.firstSeen)
+  //   const now = new Date()
+  //   const diff = now.getTime() - firstSeenDate.getTime()
+  //   const seconds = Math.floor(diff / 1000)
+  //   if (seconds > 30) {
+  //     trigger.behaviour = 'modal'
+  //     trigger.text = "You've been with us since " + data.firstSeen
+  //   } else {
+  //     trigger.behaviour = 'modal'
+  //     trigger.text =
+  //       'Welcome back to the site! We last saw you on ' + data.lastSeen
+  //   }
+  // }
 
   return trigger
 }

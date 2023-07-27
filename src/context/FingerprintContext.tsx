@@ -3,21 +3,56 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LoggingProvider } from './LoggingContext'
 import { CollectorProvider } from './CollectorContext'
 import { VisitorProvider } from './VisitorContext'
+import { PageView, Trigger } from '../client/types'
+import { TriggerModal } from '../behaviours/TriggerModal'
 
 const queryClient = new QueryClient()
+
+// @todo refactor where this lives
+type TriggerCallback = (
+  trigger: Trigger
+) => void | JSX.Element | React.ReactPortal
+
+// @todo refactor where this lives
+export type Handler = {
+  id?: string
+  behaviour?: string
+  invoke?: TriggerCallback
+}
+
+// @todo refactor where this lives
+const includedHandlers: Handler[] = [
+  {
+    id: 'modal',
+    behaviour: 'modal',
+    invoke: (trigger: Trigger) => <TriggerModal trigger={trigger} />
+  }
+]
 
 export type FingerprintProviderProps = {
   appId?: string
   children?: React.ReactNode
   debug?: boolean
-  triggers?: () => {}
+  defaultHandlers?: Handler[]
 }
 
 // @todo split this into multiple providers, FingerprintProvider should
 // only bootstrap the app.
-export const FingerprintProvider = (props: FingerprintProviderProps) => {
-  const { appId, debug } = props
+export const FingerprintProvider = ({
+  appId,
+  children,
+  debug,
+  defaultHandlers
+}: FingerprintProviderProps) => {
   const [booted, setBooted] = useState(false)
+  const [handlers, setHandlers] = useState(defaultHandlers || includedHandlers)
+
+  // @todo Move this to a Handlers Context and add logging.
+  const registerHandler = (trigger: Trigger) => {
+    setHandlers((handlers) => {
+      return [...handlers, trigger]
+    })
+  }
 
   useEffect(() => {
     if (!appId) {
@@ -48,11 +83,24 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
         <FingerprintContext.Provider
           value={{
             appId,
-            booted
+            booted,
+            currentTrigger: {},
+            registerHandler,
+            trackEvent: () => {
+              alert('trackEvent not implemented')
+            },
+            trackPageView: () => {
+              alert('trackPageView not implemented')
+            },
+            unregisterHandler: () => {
+              alert('unregisterHandler not implemented')
+            }
           }}
         >
           <VisitorProvider>
-            <CollectorProvider>{props.children}</CollectorProvider>
+            <CollectorProvider handlers={handlers}>
+              {children}
+            </CollectorProvider>
           </VisitorProvider>
         </FingerprintContext.Provider>
       </QueryClientProvider>
@@ -63,11 +111,21 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
 export interface FingerprintContextInterface {
   appId: string
   booted: boolean
+  currentTrigger: Trigger
+  registerHandler: (trigger: Trigger) => void
+  trackEvent: (event: Event) => void
+  trackPageView: (pageView: PageView) => void
+  unregisterHandler: (trigger: Trigger) => void
 }
 
 const defaultFingerprintState: FingerprintContextInterface = {
   appId: '',
-  booted: false
+  booted: false,
+  currentTrigger: {},
+  registerHandler: () => {},
+  trackEvent: () => {},
+  trackPageView: () => {},
+  unregisterHandler: () => {}
 }
 
 export const FingerprintContext = createContext<FingerprintContextInterface>({
