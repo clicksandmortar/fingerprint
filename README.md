@@ -26,7 +26,7 @@ yarn link fingerprint
 
 ## Usage
 
-Simply wrap your app in the `FingerprintProvider` component:
+Simply wrap your app in the `FingerprintProvider` component with your provided app id:
 
 ```tsx
 import React, { Component } from 'react'
