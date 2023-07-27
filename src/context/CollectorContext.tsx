@@ -21,7 +21,7 @@ export const CollectorProvider = ({
   const [trigger, setTrigger] = useState<Trigger>({})
 
   const showTrigger = (trigger: Trigger) => {
-    if (!trigger) {
+    if (!trigger || !trigger.behaviour) {
       return null
     }
 
@@ -57,6 +57,16 @@ export const CollectorProvider = ({
 
     log('CollectorProvider: collecting data')
 
+    const params: any = new URLSearchParams(window.location.search)
+      .toString()
+      .split('&')
+      .reduce((acc, cur) => {
+        const [key, value] = cur.split('=')
+        if (!key) return acc
+        acc[key] = value
+        return acc
+      }, {})
+
     collect({
       appId,
       visitor,
@@ -64,25 +74,22 @@ export const CollectorProvider = ({
         url: window.location.href,
         path: window.location.pathname,
         title: document.title,
-        params: new URLSearchParams(window.location.search)
-          .toString()
-          .split('&')
-          .reduce((acc, cur) => {
-            const [key, value] = cur.split('=')
-            if (!key) return acc
-            acc[key] = value
-            return acc
-          }, {})
+        params
       },
       referrer: {
         url: document.referrer,
         title: document.referrer,
         utm: {
-          source: '',
-          medium: '',
-          campaign: '',
-          term: '',
-          content: ''
+          // eslint-disable-next-line camelcase
+          source: params?.utm_source,
+          // eslint-disable-next-line camelcase
+          medium: params?.utm_medium,
+          // eslint-disable-next-line camelcase
+          campaign: params?.utm_campaign,
+          // eslint-disable-next-line camelcase
+          term: params?.utm_term,
+          // eslint-disable-next-line camelcase
+          content: params?.utm_content
         }
       }
     })

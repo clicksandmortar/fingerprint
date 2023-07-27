@@ -79,12 +79,22 @@ const sendEvent = data => {
   };
 };
 const getTrigger = data => {
+  var _data$referrer, _data$referrer$utm;
   const trigger = {};
   const context = {
     firstSeen: data.firstSeen,
     lastSeen: data.lastSeen,
     visits: data.visits
   };
+  if (data !== null && data !== void 0 && (_data$referrer = data.referrer) !== null && _data$referrer !== void 0 && (_data$referrer$utm = _data$referrer.utm) !== null && _data$referrer$utm !== void 0 && _data$referrer$utm.campaign) {
+    trigger.id = 'utm_campaign';
+    trigger.behaviour = 'modal';
+    trigger.data = {
+      text: 'Welcome, you arrived from campaign: ' + data.referrer.utm.campaign,
+      ...context
+    };
+    return trigger;
+  }
   if (data.visits === 1 && data.page.path === '/') {
     trigger.id = 'welcome_on_homepage';
     trigger.behaviour = 'modal';
@@ -244,7 +254,7 @@ const CollectorProvider = ({
   } = useCollector();
   const [trigger, setTrigger] = useState({});
   const showTrigger = trigger => {
-    if (!trigger) {
+    if (!trigger || !trigger.behaviour) {
       return null;
     }
     const handler = (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.id === trigger.id && handler.behaviour === trigger.behaviour)) || (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour));
@@ -264,6 +274,12 @@ const CollectorProvider = ({
       return;
     }
     log('CollectorProvider: collecting data');
+    const params = new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+      const [key, value] = cur.split('=');
+      if (!key) return acc;
+      acc[key] = value;
+      return acc;
+    }, {});
     collect({
       appId,
       visitor,
@@ -271,22 +287,17 @@ const CollectorProvider = ({
         url: window.location.href,
         path: window.location.pathname,
         title: document.title,
-        params: new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-          const [key, value] = cur.split('=');
-          if (!key) return acc;
-          acc[key] = value;
-          return acc;
-        }, {})
+        params
       },
       referrer: {
         url: document.referrer,
         title: document.referrer,
         utm: {
-          source: '',
-          medium: '',
-          campaign: '',
-          term: '',
-          content: ''
+          source: params === null || params === void 0 ? void 0 : params.utm_source,
+          medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+          campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+          term: params === null || params === void 0 ? void 0 : params.utm_term,
+          content: params === null || params === void 0 ? void 0 : params.utm_content
         }
       }
     }).then(response => {
@@ -31161,6 +31172,7 @@ if (process.env.NODE_ENV === 'production') {
 const Modal = ({
   trigger
 }) => {
+  var _trigger$data;
   const [open, setOpen] = useState(true);
   if (!open) {
     return null;
@@ -31187,11 +31199,11 @@ const Modal = ({
       boxShadow: '0 0 1rem rgba(0,0,0,0.5)',
       zIndex: 9999
     }
-  }, React.createElement("h1", null, trigger.text)), React.createElement("button", {
+  }, React.createElement("h1", null, trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.text), React.createElement("button", {
     onClick: () => {
       setOpen(false);
     }
-  }, "Close"));
+  }, "Close")));
 };
 const TriggerModal = ({
   trigger

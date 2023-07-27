@@ -23,11 +23,11 @@ export type Referrer = {
     [key: string]: string
   }
   utm?: {
-    source: string
-    medium: string
-    campaign: string
-    content: string
-    term: string
+    source?: string
+    medium?: string
+    campaign?: string
+    content?: string
+    term?: string
   }
 }
 

@@ -52,6 +52,17 @@ const getTrigger = (data: any): Trigger => {
     visits: data.visits
   }
 
+  // User lands on any page, with a UTM parameter
+  if (data?.referrer?.utm?.campaign) {
+    trigger.id = 'utm_campaign'
+    trigger.behaviour = 'modal'
+    trigger.data = {
+      text: 'Welcome, you arrived from campaign: ' + data.referrer.utm.campaign,
+      ...context
+    }
+    return trigger
+  }
+
   // User lands on the homepage, and it's their first visit
   if (data.visits === 1 && data.page.path === '/') {
     trigger.id = 'welcome_on_homepage'
@@ -95,21 +106,6 @@ const getTrigger = (data: any): Trigger => {
     }
     return trigger
   }
-
-  // if (data.visits > 1) {
-  //   const firstSeenDate = new Date(data.firstSeen)
-  //   const now = new Date()
-  //   const diff = now.getTime() - firstSeenDate.getTime()
-  //   const seconds = Math.floor(diff / 1000)
-  //   if (seconds > 30) {
-  //     trigger.behaviour = 'modal'
-  //     trigger.text = "You've been with us since " + data.firstSeen
-  //   } else {
-  //     trigger.behaviour = 'modal'
-  //     trigger.text =
-  //       'Welcome back to the site! We last saw you on ' + data.lastSeen
-  //   }
-  // }
 
   return trigger
 }

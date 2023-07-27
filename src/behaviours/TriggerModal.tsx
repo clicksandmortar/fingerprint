@@ -38,15 +38,15 @@ const Modal = ({ trigger }: Props) => {
           zIndex: 9999
         }}
       >
-        <h1>{trigger.text}</h1>
+        <h1>{trigger?.data?.text}</h1>
+        <button
+          onClick={() => {
+            setOpen(false)
+          }}
+        >
+          Close
+        </button>
       </div>
-      <button
-        onClick={() => {
-          setOpen(false)
-        }}
-      >
-        Close
-      </button>
     </div>
   )
 }
