@@ -84,7 +84,11 @@ const getTrigger = (data: any): Trigger => {
 
 const getOffer = (url: string): string | undefined => {
   // if url contains tobycarvery.co.uk return Toby Carvery
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000')) {
+  if (
+    url.includes('tobycarvery.co.uk') ||
+    url.includes('localhost:8000') ||
+    url.includes('vercel.app')
+  ) {
     return 'complimentary drink'
   }
 

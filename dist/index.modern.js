@@ -128,7 +128,7 @@ const getTrigger = data => {
   return trigger;
 };
 const getOffer = url => {
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000')) {
+  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
     return 'complimentary drink';
   }
   if (url.includes('browns-restaurants.co.uk')) {
