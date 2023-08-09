@@ -99,6 +99,7 @@ const sendEvent = data => {
 };
 const getTrigger = data => {
   var _data$page, _data$page2, _data$page3, _data$referrer, _data$referrer$utm, _data$page4;
+  console.log('getting trigger', data);
   const trigger = {};
   const context = {
     firstSeen: data.firstSeen,

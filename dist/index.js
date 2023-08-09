@@ -122,6 +122,7 @@ var sendEvent = function sendEvent(data) {
 };
 var getTrigger = function getTrigger(data) {
   var _data$page, _data$page2, _data$page3, _data$referrer, _data$referrer$utm, _data$page4;
+  console.log('getting trigger', data);
   var trigger = {};
   var context = {
     firstSeen: data.firstSeen,

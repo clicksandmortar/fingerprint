@@ -45,6 +45,7 @@ export const sendEvent = (data: CollectorUpdate): CollectorResponse => {
 }
 
 const getTrigger = (data: any): Trigger => {
+  console.log('getting trigger', data)
   const trigger: Trigger = {}
   const context = {
     firstSeen: data.firstSeen,
