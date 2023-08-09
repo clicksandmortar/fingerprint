@@ -108,6 +108,7 @@ const getTrigger = data => {
   const brand = getBrand(data === null || data === void 0 ? void 0 : (_data$page = data.page) === null || _data$page === void 0 ? void 0 : _data$page.url);
   const offer = getOffer(data === null || data === void 0 ? void 0 : (_data$page2 = data.page) === null || _data$page2 === void 0 ? void 0 : _data$page2.url);
   const url = getUrl(data === null || data === void 0 ? void 0 : (_data$page3 = data.page) === null || _data$page3 === void 0 ? void 0 : _data$page3.url);
+  console.log('brand', brand, 'offer', offer, 'url', url);
   if (!brand || !offer) {
     return trigger;
   }

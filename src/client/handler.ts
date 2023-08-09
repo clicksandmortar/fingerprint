@@ -55,6 +55,8 @@ const getTrigger = (data: any): Trigger => {
   const offer = getOffer(data?.page?.url)
   const url = getUrl(data?.page?.url)
 
+  console.log('brand', brand, 'offer', offer, 'url', url)
+
   if (!brand || !offer) {
     return trigger
   }
