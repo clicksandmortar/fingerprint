@@ -103,12 +103,20 @@ const getOffer = (url: string): string | undefined => {
 
 const getUrl = (url: string): string | undefined => {
   // When already on a book page, don't link out to book page
-  if (url.includes('book.') || url.includes('localhost:8000')) {
+  if (
+    url.includes('book.') ||
+    url.includes('localhost:8000') ||
+    url.includes('vercel.app')
+  ) {
     return undefined
   }
 
   // if url contains tobycarvery.co.uk return Toby Carvery
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000')) {
+  if (
+    url.includes('tobycarvery.co.uk') ||
+    url.includes('localhost:8000') ||
+    url.includes('vercel.app')
+  ) {
     return 'https://book.tobycarvery.co.uk/'
   }
 

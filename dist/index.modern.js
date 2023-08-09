@@ -140,10 +140,10 @@ const getOffer = url => {
   return undefined;
 };
 const getUrl = url => {
-  if (url.includes('book.') || url.includes('localhost:8000')) {
+  if (url.includes('book.') || url.includes('localhost:8000') || url.includes('vercel.app')) {
     return undefined;
   }
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000')) {
+  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
     return 'https://book.tobycarvery.co.uk/';
   }
   if (url.includes('browns-restaurants.co.uk')) {
