@@ -155,7 +155,7 @@ const getUrl = url => {
   return undefined;
 };
 const getBrand = url => {
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000')) {
+  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
     return {
       name: 'Toby Carvery',
       fontColor: '#ffffff',
