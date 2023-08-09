@@ -693,7 +693,6 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       return;
     }
     if (!consentGiven) {
-      console.log('FingerprintProvider: consent not given');
       return;
     }
     var performBoot = function performBoot() {

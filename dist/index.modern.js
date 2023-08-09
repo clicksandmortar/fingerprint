@@ -647,7 +647,6 @@ const FingerprintProvider = ({
       return;
     }
     if (!consentGiven) {
-      console.log('FingerprintProvider: consent not given');
       return;
     }
     const performBoot = async () => {

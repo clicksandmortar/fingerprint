@@ -110,7 +110,6 @@ export const FingerprintProvider = ({
     }
 
     if (!consentGiven) {
-      console.log('FingerprintProvider: consent not given')
       return
     }
 
