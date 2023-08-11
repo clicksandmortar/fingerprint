@@ -7,6 +7,7 @@ import { Trigger } from '../client/types'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { useExitIntent } from 'use-exit-intent'
 import { IdleTimerProvider } from 'react-idle-timer'
+import { getBrand } from '../client/handler'
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
@@ -62,13 +63,17 @@ export const CollectorProvider = ({
     registerHandler({
       id: 'clientTriger',
       handler: () => {
-        log('CollectorProvider: openYoutube handler invoked for departure')
+        log('CollectorProvider: handler invoked for departure')
         setTrigger({
-          id: 'openYoutube',
-          behaviour: 'youtube',
+          id: 'exit_intent',
+          behaviour: 'modal',
           data: {
-            url: 'https://www.youtube.com/embed/bj1BMpUnzT8?start=13'
-          }
+            text: 'Before you go...',
+            message:
+              "Don't leave, there's still time to complete a booking now to get your offer",
+            button: 'Start Booking'
+          },
+          brand: getBrand(window.location.href)
         })
       }
     })
@@ -140,18 +145,22 @@ export const CollectorProvider = ({
 
   return (
     <IdleTimerProvider
-      timeout={1000 * 10}
+      timeout={1000 * 5}
       onPresenceChange={(presence: any) => log('presence changed', presence)}
       onIdle={() => {
         if (!idleTriggers) return
 
-        log('CollectorProvider: openYoutube handler invoked for presence')
+        log('CollectorProvider: handler invoked for presence')
         setTrigger({
-          id: 'openYoutube',
-          behaviour: 'youtube',
+          id: 'fb_ads_homepage',
+          behaviour: 'modal',
           data: {
-            url: 'https://www.youtube.com/embed/CSvFpBOe8eY?start=44'
-          }
+            text: 'Are you still there?',
+            message:
+              "We'd love to welcome to you to our restaurant, book now to get your offer",
+            button: 'Start Booking'
+          },
+          brand: getBrand(window.location.href)
         })
       }}
     >

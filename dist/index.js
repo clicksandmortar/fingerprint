@@ -101,7 +101,6 @@ var onCookieChanged = function onCookieChanged(callback, interval) {
 };
 
 var sendEvent = function sendEvent(data) {
-  console.log('Server received event', data);
   var firstSeen = getCookie('firstSeen') ? getCookie('firstSeen') || '' : setCookie('firstSeen', new Date().toISOString()) || '';
   var lastSeen = getCookie('lastSeen') ? getCookie('lastSeen') || '' : setCookie('lastSeen', new Date().toISOString()) || '';
   setCookie('lastSeen', new Date().toISOString());
@@ -122,7 +121,6 @@ var sendEvent = function sendEvent(data) {
 };
 var getTrigger = function getTrigger(data) {
   var _data$page, _data$page2, _data$page3, _data$referrer, _data$referrer$utm, _data$page4;
-  console.log('getting trigger', data);
   var trigger = {};
   var context = {
     firstSeen: data.firstSeen,
@@ -132,7 +130,6 @@ var getTrigger = function getTrigger(data) {
   var brand = getBrand(data === null || data === void 0 ? void 0 : (_data$page = data.page) === null || _data$page === void 0 ? void 0 : _data$page.url);
   var offer = getOffer(data === null || data === void 0 ? void 0 : (_data$page2 = data.page) === null || _data$page2 === void 0 ? void 0 : _data$page2.url);
   var url = getUrl(data === null || data === void 0 ? void 0 : (_data$page3 = data.page) === null || _data$page3 === void 0 ? void 0 : _data$page3.url);
-  console.log('brand', brand, 'offer', offer, 'url', url);
   if (!brand || !offer) {
     return trigger;
   }
@@ -365,13 +362,16 @@ var CollectorProvider = function CollectorProvider(_ref) {
     registerHandler({
       id: 'clientTriger',
       handler: function handler() {
-        log('CollectorProvider: openYoutube handler invoked for departure');
+        log('CollectorProvider: handler invoked for departure');
         setTrigger({
-          id: 'openYoutube',
-          behaviour: 'youtube',
+          id: 'exit_intent',
+          behaviour: 'modal',
           data: {
-            url: 'https://www.youtube.com/embed/bj1BMpUnzT8?start=13'
-          }
+            text: 'Before you go...',
+            message: "Don't leave, there's still time to complete a booking now to get your offer",
+            button: 'Start Booking'
+          },
+          brand: getBrand(window.location.href)
         });
       }
     });
@@ -427,19 +427,22 @@ var CollectorProvider = function CollectorProvider(_ref) {
     };
   }, [booted]);
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
-    timeout: 1000 * 10,
+    timeout: 1000 * 5,
     onPresenceChange: function onPresenceChange(presence) {
       return log('presence changed', presence);
     },
     onIdle: function onIdle() {
       if (!idleTriggers) return;
-      log('CollectorProvider: openYoutube handler invoked for presence');
+      log('CollectorProvider: handler invoked for presence');
       setTrigger({
-        id: 'openYoutube',
-        behaviour: 'youtube',
+        id: 'fb_ads_homepage',
+        behaviour: 'modal',
         data: {
-          url: 'https://www.youtube.com/embed/CSvFpBOe8eY?start=44'
-        }
+          text: 'Are you still there?',
+          message: "We'd love to welcome to you to our restaurant, book now to get your offer",
+          button: 'Start Booking'
+        },
+        brand: getBrand(window.location.href)
       });
     }
   }, React__default.createElement(CollectorContext.Provider, {
@@ -621,6 +624,109 @@ var TriggerYoutube = function TriggerYoutube(_ref2) {
   }), document.body);
 };
 
+const ErrorBoundaryContext = React.createContext(null);
+
+const initialState = {
+  didCatch: false,
+  error: null
+};
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.resetErrorBoundary = this.resetErrorBoundary.bind(this);
+    this.state = initialState;
+  }
+  static getDerivedStateFromError(error) {
+    return {
+      didCatch: true,
+      error
+    };
+  }
+  resetErrorBoundary() {
+    const {
+      error
+    } = this.state;
+    if (error !== null) {
+      var _this$props$onReset, _this$props;
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+      (_this$props$onReset = (_this$props = this.props).onReset) === null || _this$props$onReset === void 0 ? void 0 : _this$props$onReset.call(_this$props, {
+        args,
+        reason: "imperative-api"
+      });
+      this.setState(initialState);
+    }
+  }
+  componentDidCatch(error, info) {
+    var _this$props$onError, _this$props2;
+    (_this$props$onError = (_this$props2 = this.props).onError) === null || _this$props$onError === void 0 ? void 0 : _this$props$onError.call(_this$props2, error, info);
+  }
+  componentDidUpdate(prevProps, prevState) {
+    const {
+      didCatch
+    } = this.state;
+    const {
+      resetKeys
+    } = this.props;
+
+    // There's an edge case where if the thing that triggered the error happens to *also* be in the resetKeys array,
+    // we'd end up resetting the error boundary immediately.
+    // This would likely trigger a second error to be thrown.
+    // So we make sure that we don't check the resetKeys on the first call of cDU after the error is set.
+
+    if (didCatch && prevState.error !== null && hasArrayChanged(prevProps.resetKeys, resetKeys)) {
+      var _this$props$onReset2, _this$props3;
+      (_this$props$onReset2 = (_this$props3 = this.props).onReset) === null || _this$props$onReset2 === void 0 ? void 0 : _this$props$onReset2.call(_this$props3, {
+        next: resetKeys,
+        prev: prevProps.resetKeys,
+        reason: "keys"
+      });
+      this.setState(initialState);
+    }
+  }
+  render() {
+    const {
+      children,
+      fallbackRender,
+      FallbackComponent,
+      fallback
+    } = this.props;
+    const {
+      didCatch,
+      error
+    } = this.state;
+    let childToRender = children;
+    if (didCatch) {
+      const props = {
+        error,
+        resetErrorBoundary: this.resetErrorBoundary
+      };
+      if (React.isValidElement(fallback)) {
+        childToRender = fallback;
+      } else if (typeof fallbackRender === "function") {
+        childToRender = fallbackRender(props);
+      } else if (FallbackComponent) {
+        childToRender = React.createElement(FallbackComponent, props);
+      } else {
+        throw error;
+      }
+    }
+    return React.createElement(ErrorBoundaryContext.Provider, {
+      value: {
+        didCatch,
+        error,
+        resetErrorBoundary: this.resetErrorBoundary
+      }
+    }, childToRender);
+  }
+}
+function hasArrayChanged() {
+  let a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  let b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  return a.length !== b.length || a.some((item, index) => !Object.is(item, b[index]));
+}
+
 Sentry.init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [new Sentry.BrowserTracing({
@@ -659,9 +765,9 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     _ref$initialDelay = _ref.initialDelay,
     initialDelay = _ref$initialDelay === void 0 ? 0 : _ref$initialDelay,
     _ref$exitIntentTrigge = _ref.exitIntentTriggers,
-    exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? false : _ref$exitIntentTrigge,
+    exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
     _ref$idleTriggers = _ref.idleTriggers,
-    idleTriggers = _ref$idleTriggers === void 0 ? false : _ref$idleTriggers;
+    idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers;
   var _useState = React.useState(consent),
     consentGiven = _useState[0],
     setConsentGiven = _useState[1];
@@ -711,7 +817,10 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     return null;
   }
   return React__default.createElement(Sentry.ErrorBoundary, {
-    fallback: React__default.createElement("p", null, "An error has occurred")
+    fallback: React__default.createElement("p", null, "An error with Fingerprint has occurred."),
+    onError: function onError(error, info) {
+      return console.error(error, info);
+    }
   }, React__default.createElement(LoggingProvider, {
     debug: debug
   }, React__default.createElement(reactQuery.QueryClientProvider, {
@@ -737,7 +846,12 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     }
   }, React__default.createElement(VisitorProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
-  }, children))))));
+  }, React__default.createElement(ErrorBoundary, {
+    onError: function onError(error, info) {
+      return console.error(error, info);
+    },
+    fallback: React__default.createElement("div", null, "An application error occurred.")
+  }, children)))))));
 };
 var defaultFingerprintState = {
   appId: '',

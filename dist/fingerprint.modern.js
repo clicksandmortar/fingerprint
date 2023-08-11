@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, Component, isValidElement, createElement } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { validate, version, v4 } from 'uuid';
 import { useExitIntent } from 'use-exit-intent';
 import { IdleTimerProvider } from 'react-idle-timer';
-import ReactDOM from 'react-dom';
-import { init, BrowserTracing, Replay, ErrorBoundary as ErrorBoundary$1 } from '@sentry/react';
+import { init, BrowserTracing, Replay, ErrorBoundary } from '@sentry/react';
 
 const LoggingProvider = ({
   debug,
@@ -59,24 +59,9 @@ const setCookie = (name, value) => {
 const getCookie = name => {
   return Cookies.get(name);
 };
-const onCookieChanged = (callback, interval = 1000) => {
-  let lastCookie = document.cookie;
-  setInterval(() => {
-    const cookie = document.cookie;
-    if (cookie !== lastCookie) {
-      try {
-        callback({
-          oldValue: lastCookie,
-          newValue: cookie
-        });
-      } finally {
-        lastCookie = cookie;
-      }
-    }
-  }, interval);
-};
 
 const sendEvent = data => {
+  console.log('Server received event', data);
   const firstSeen = getCookie('firstSeen') ? getCookie('firstSeen') || '' : setCookie('firstSeen', new Date().toISOString()) || '';
   const lastSeen = getCookie('lastSeen') ? getCookie('lastSeen') || '' : setCookie('lastSeen', new Date().toISOString()) || '';
   setCookie('lastSeen', new Date().toISOString());
@@ -98,6 +83,7 @@ const sendEvent = data => {
 };
 const getTrigger = data => {
   var _data$page, _data$page2, _data$page3, _data$referrer, _data$referrer$utm, _data$page4;
+  console.log('getting trigger', data);
   const trigger = {};
   const context = {
     firstSeen: data.firstSeen,
@@ -107,6 +93,7 @@ const getTrigger = data => {
   const brand = getBrand(data === null || data === void 0 ? void 0 : (_data$page = data.page) === null || _data$page === void 0 ? void 0 : _data$page.url);
   const offer = getOffer(data === null || data === void 0 ? void 0 : (_data$page2 = data.page) === null || _data$page2 === void 0 ? void 0 : _data$page2.url);
   const url = getUrl(data === null || data === void 0 ? void 0 : (_data$page3 = data.page) === null || _data$page3 === void 0 ? void 0 : _data$page3.url);
+  console.log('brand', brand, 'offer', offer, 'url', url);
   if (!brand || !offer) {
     return trigger;
   }
@@ -333,20 +320,18 @@ const CollectorProvider = ({
     return handler.invoke(trigger);
   };
   useEffect(() => {
+    console.log('exitIntentTriggers', exitIntentTriggers);
     if (!exitIntentTriggers) return;
     registerHandler({
       id: 'clientTriger',
       handler: () => {
         log('CollectorProvider: handler invoked for departure');
         setTrigger({
-          id: 'exit_intent',
+          id: 'modal',
           behaviour: 'modal',
           data: {
-            text: 'Before you go...',
-            message: "Don't leave, there's still time to complete a booking now to get your offer",
-            button: 'Start Booking'
-          },
-          brand: getBrand(window.location.href)
+            url: 'https://www.youtube.com/embed/bj1BMpUnzT8?start=13'
+          }
         });
       }
     });
@@ -398,20 +383,18 @@ const CollectorProvider = ({
     return () => clearTimeout(delay);
   }, [booted]);
   return React.createElement(IdleTimerProvider, {
-    timeout: 1000 * 5,
+    timeout: 1000 * 10,
     onPresenceChange: presence => log('presence changed', presence),
     onIdle: () => {
+      console.log('user is idle');
       if (!idleTriggers) return;
       log('CollectorProvider: handler invoked for presence');
       setTrigger({
-        id: 'fb_ads_homepage',
+        id: 'modal',
         behaviour: 'modal',
         data: {
-          text: 'Are you still there?',
-          message: "We'd love to welcome to you to our restaurant, book now to get your offer",
-          button: 'Start Booking'
-        },
-        brand: getBrand(window.location.href)
+          url: 'https://www.youtube.com/embed/CSvFpBOe8eY?start=44'
+        }
       });
     }
   }, React.createElement(CollectorContext.Provider, {
@@ -593,109 +576,6 @@ const TriggerYoutube = ({
   }), document.body);
 };
 
-const ErrorBoundaryContext = createContext(null);
-
-const initialState = {
-  didCatch: false,
-  error: null
-};
-class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.resetErrorBoundary = this.resetErrorBoundary.bind(this);
-    this.state = initialState;
-  }
-  static getDerivedStateFromError(error) {
-    return {
-      didCatch: true,
-      error
-    };
-  }
-  resetErrorBoundary() {
-    const {
-      error
-    } = this.state;
-    if (error !== null) {
-      var _this$props$onReset, _this$props;
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-      (_this$props$onReset = (_this$props = this.props).onReset) === null || _this$props$onReset === void 0 ? void 0 : _this$props$onReset.call(_this$props, {
-        args,
-        reason: "imperative-api"
-      });
-      this.setState(initialState);
-    }
-  }
-  componentDidCatch(error, info) {
-    var _this$props$onError, _this$props2;
-    (_this$props$onError = (_this$props2 = this.props).onError) === null || _this$props$onError === void 0 ? void 0 : _this$props$onError.call(_this$props2, error, info);
-  }
-  componentDidUpdate(prevProps, prevState) {
-    const {
-      didCatch
-    } = this.state;
-    const {
-      resetKeys
-    } = this.props;
-
-    // There's an edge case where if the thing that triggered the error happens to *also* be in the resetKeys array,
-    // we'd end up resetting the error boundary immediately.
-    // This would likely trigger a second error to be thrown.
-    // So we make sure that we don't check the resetKeys on the first call of cDU after the error is set.
-
-    if (didCatch && prevState.error !== null && hasArrayChanged(prevProps.resetKeys, resetKeys)) {
-      var _this$props$onReset2, _this$props3;
-      (_this$props$onReset2 = (_this$props3 = this.props).onReset) === null || _this$props$onReset2 === void 0 ? void 0 : _this$props$onReset2.call(_this$props3, {
-        next: resetKeys,
-        prev: prevProps.resetKeys,
-        reason: "keys"
-      });
-      this.setState(initialState);
-    }
-  }
-  render() {
-    const {
-      children,
-      fallbackRender,
-      FallbackComponent,
-      fallback
-    } = this.props;
-    const {
-      didCatch,
-      error
-    } = this.state;
-    let childToRender = children;
-    if (didCatch) {
-      const props = {
-        error,
-        resetErrorBoundary: this.resetErrorBoundary
-      };
-      if (isValidElement(fallback)) {
-        childToRender = fallback;
-      } else if (typeof fallbackRender === "function") {
-        childToRender = fallbackRender(props);
-      } else if (FallbackComponent) {
-        childToRender = createElement(FallbackComponent, props);
-      } else {
-        throw error;
-      }
-    }
-    return createElement(ErrorBoundaryContext.Provider, {
-      value: {
-        didCatch,
-        error,
-        resetErrorBoundary: this.resetErrorBoundary
-      }
-    }, childToRender);
-  }
-}
-function hasArrayChanged() {
-  let a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-  let b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-  return a.length !== b.length || a.some((item, index) => !Object.is(item, b[index]));
-}
-
 init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [new BrowserTracing({
@@ -727,8 +607,8 @@ const FingerprintProvider = ({
   debug,
   defaultHandlers,
   initialDelay: _initialDelay = 0,
-  exitIntentTriggers: _exitIntentTriggers = true,
-  idleTriggers: _idleTriggers = true
+  exitIntentTriggers: _exitIntentTriggers = false,
+  idleTriggers: _idleTriggers = false
 }) => {
   const [consentGiven, setConsentGiven] = useState(_consent);
   const [booted, setBooted] = useState(false);
@@ -765,9 +645,8 @@ const FingerprintProvider = ({
   if (!appId) {
     return null;
   }
-  return React.createElement(ErrorBoundary$1, {
-    fallback: React.createElement("p", null, "An error with Fingerprint has occurred."),
-    onError: (error, info) => console.error(error, info)
+  return React.createElement(ErrorBoundary, {
+    fallback: React.createElement("p", null, "An error has occurred")
   }, React.createElement(LoggingProvider, {
     debug: debug
   }, React.createElement(QueryClientProvider, {
@@ -793,10 +672,7 @@ const FingerprintProvider = ({
     }
   }, React.createElement(VisitorProvider, null, React.createElement(CollectorProvider, {
     handlers: handlers
-  }, React.createElement(ErrorBoundary, {
-    onError: (error, info) => console.error(error, info),
-    fallback: React.createElement("div", null, "An application error occurred.")
-  }, children)))))));
+  }, children))))));
 };
 const defaultFingerprintState = {
   appId: '',
@@ -815,5 +691,29 @@ const FingerprintContext = createContext({
   ...defaultFingerprintState
 });
 
-export { FingerprintContext, FingerprintProvider, onCookieChanged, useFingerprint };
-//# sourceMappingURL=index.modern.js.map
+const Widget = ({
+  appId,
+  consent,
+  debug
+}) => {
+  return React.createElement(FingerprintProvider, {
+    appId: appId,
+    consent: consent,
+    debug: debug
+  });
+};
+
+var _document, _document$currentScri, _document2, _document2$currentScr, _document3, _document3$currentScr;
+const widget = document.createElement('div');
+widget.id = 'fingerprint-widget';
+document.body.appendChild(widget);
+const styles = document.createElement('link');
+styles.rel = 'stylesheet';
+styles.href = '../dist/fingerprint.css';
+document.head.appendChild(styles);
+ReactDOM.render(React.createElement(React.StrictMode, null, React.createElement(Widget, {
+  appId: ((_document = document) === null || _document === void 0 ? void 0 : (_document$currentScri = _document.currentScript) === null || _document$currentScri === void 0 ? void 0 : _document$currentScri.getAttribute('id')) || '',
+  consent: ((_document2 = document) === null || _document2 === void 0 ? void 0 : (_document2$currentScr = _document2.currentScript) === null || _document2$currentScr === void 0 ? void 0 : _document2$currentScr.getAttribute('data-consent')) === 'true',
+  debug: ((_document3 = document) === null || _document3 === void 0 ? void 0 : (_document3$currentScr = _document3.currentScript) === null || _document3$currentScr === void 0 ? void 0 : _document3$currentScr.getAttribute('data-debug')) === 'true'
+})), document.getElementById('fingerprint-widget'));
+//# sourceMappingURL=fingerprint.modern.js.map

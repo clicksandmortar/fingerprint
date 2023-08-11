@@ -7,6 +7,7 @@ import { PageView, Trigger } from '../client/types'
 import { TriggerModal } from '../behaviours/TriggerModal'
 import * as Sentry from '@sentry/react'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'
+import { ErrorBoundary } from 'react-error-boundary'
 
 Sentry.init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
@@ -74,8 +75,8 @@ export const FingerprintProvider = ({
   debug,
   defaultHandlers,
   initialDelay = 0,
-  exitIntentTriggers = false,
-  idleTriggers = false
+  exitIntentTriggers = true,
+  idleTriggers = true
 }: FingerprintProviderProps) => {
   const [consentGiven, setConsentGiven] = useState(consent)
   const [booted, setBooted] = useState(false)
@@ -129,7 +130,10 @@ export const FingerprintProvider = ({
 
   return (
     // @ts-ignore
-    <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>
+    <Sentry.ErrorBoundary
+      fallback={<p>An error with Fingerprint has occurred.</p>}
+      onError={(error, info) => console.error(error, info)}
+    >
       <LoggingProvider debug={debug}>
         <QueryClientProvider client={queryClient}>
           <FingerprintContext.Provider
@@ -154,7 +158,12 @@ export const FingerprintProvider = ({
           >
             <VisitorProvider>
               <CollectorProvider handlers={handlers}>
-                {children}
+                <ErrorBoundary
+                  onError={(error, info) => console.error(error, info)}
+                  fallback={<div>An application error occurred.</div>}
+                >
+                  {children}
+                </ErrorBoundary>
               </CollectorProvider>
             </VisitorProvider>
           </FingerprintContext.Provider>

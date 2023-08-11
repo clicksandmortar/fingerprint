@@ -6,8 +6,6 @@ import { getCookie, setCookie } from '../utils/cookies'
 // based on the data passed in. This is useful for testing the collector without
 // having to make a network request.
 export const sendEvent = (data: CollectorUpdate): CollectorResponse => {
-  console.log('Server received event', data)
-
   const firstSeen: string = getCookie('firstSeen')
     ? getCookie('firstSeen') || ''
     : setCookie('firstSeen', new Date().toISOString()) || ''
@@ -45,7 +43,6 @@ export const sendEvent = (data: CollectorUpdate): CollectorResponse => {
 }
 
 const getTrigger = (data: any): Trigger => {
-  console.log('getting trigger', data)
   const trigger: Trigger = {}
   const context = {
     firstSeen: data.firstSeen,
@@ -55,8 +52,6 @@ const getTrigger = (data: any): Trigger => {
   const brand = getBrand(data?.page?.url)
   const offer = getOffer(data?.page?.url)
   const url = getUrl(data?.page?.url)
-
-  console.log('brand', brand, 'offer', offer, 'url', url)
 
   if (!brand || !offer) {
     return trigger
@@ -85,7 +80,7 @@ const getTrigger = (data: any): Trigger => {
   return trigger
 }
 
-const getOffer = (url: string): string | undefined => {
+export const getOffer = (url: string): string | undefined => {
   // if url contains tobycarvery.co.uk return Toby Carvery
   if (
     url.includes('tobycarvery.co.uk') ||
@@ -108,7 +103,7 @@ const getOffer = (url: string): string | undefined => {
   return undefined
 }
 
-const getUrl = (url: string): string | undefined => {
+export const getUrl = (url: string): string | undefined => {
   // When already on a book page, don't link out to book page
   if (
     url.includes('book.') ||
@@ -140,7 +135,7 @@ const getUrl = (url: string): string | undefined => {
   return undefined
 }
 
-const getBrand = (url: string): any => {
+export const getBrand = (url: string): any => {
   // if url contains tobycarvery.co.uk return Toby Carvery
   if (
     url.includes('tobycarvery.co.uk') ||
