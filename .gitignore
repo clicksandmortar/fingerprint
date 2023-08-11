@@ -66,6 +66,6 @@ yarn-error.log
 # Yarn Integrity file
 .yarn-integrity
 .idea
-yarn.lock
+# yarn.lock
 
 .parcel-cache
