@@ -28,7 +28,7 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::228243989488:role/ci/fingerprint-upload
         role-session-name: fingerprint-upload
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: ${{ env.AWS_REGION }}
     - name: Staging Deploy
       # if: github.ref == 'refs/heads/main'
       working-directory: ./dist
@@ -38,7 +38,7 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::580831181531:role/ci/fingerprint-upload
         role-session-name: fingerprint-upload
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: ${{ env.AWS_REGION }}
     - name: Production Deploy
       # if: github.ref == 'refs/heads/main'
       working-directory: ./dist
