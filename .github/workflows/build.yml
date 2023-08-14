@@ -27,7 +27,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v2
       with:
         role-to-assume: arn:aws:iam::228243989488:role/ci/ci-fingerprint-upload
-        role-session-name: fingerprint-upload
+        role-session-name: ci-fingerprint-upload
         aws-region: ${{ vars.AWS_REGION }}
     - name: Staging Deploy
       # if: github.ref == 'refs/heads/main'
@@ -37,7 +37,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v2
       with:
         role-to-assume: arn:aws:iam::580831181531:role/ci/ci-fingerprint-upload
-        role-session-name: fingerprint-upload
+        role-session-name: ci-fingerprint-upload
         aws-region: ${{ vars.AWS_REGION }}
     - name: Production Deploy
       # if: github.ref == 'refs/heads/main'
