@@ -23,10 +23,22 @@ jobs:
         name: dist
         path: dist/
         retention-days: 7
+    - name: Configure AWS Credentials Staging
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::228243989488:role/ci/fingerprint-upload
+        role-session-name: fingerprint-upload
+        aws-region: ${{ secrets.AWS_REGION }}
     - name: Staging Deploy
       # if: github.ref == 'refs/heads/main'
       working-directory: ./dist
       run: aws s3 cp . s3://cam-cdn-fingerprint-script-staging-origin/ --recursive --exclude "*" --include="fingerprint.*"
+    - name: Configure AWS Credentials Production
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::580831181531:role/ci/fingerprint-upload
+        role-session-name: fingerprint-upload
+        aws-region: ${{ secrets.AWS_REGION }}
     - name: Production Deploy
       # if: github.ref == 'refs/heads/main'
       working-directory: ./dist
