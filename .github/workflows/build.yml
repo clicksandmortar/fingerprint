@@ -25,7 +25,9 @@ jobs:
         retention-days: 7
     - name: Staging Deploy
       # if: github.ref == 'refs/heads/main'
-      run: aws s3 cp . s3://cam-cdn-fingerprint-script-staging-origin/ --recursive --exclude "*" --include="fingerprint.*"`
+      working-directory: ./dist
+      run: aws s3 cp . s3://cam-cdn-fingerprint-script-staging-origin/ --recursive --exclude "*" --include="fingerprint.*"
     - name: Production Deploy
       # if: github.ref == 'refs/heads/main'
-      run: aws s3 cp . s3://cam-cdn-fingerprint-script-production-origin/ --recursive --exclude "*" --include="fingerprint.*"`
+      working-directory: ./dist
+      run: aws s3 cp . s3://cam-cdn-fingerprint-script-production-origin/ --recursive --exclude "*" --include="fingerprint.*"
