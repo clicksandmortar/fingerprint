@@ -26,7 +26,7 @@ jobs:
     - name: Configure AWS Credentials Staging
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: arn:aws:iam::228243989488:role/ci/fingerprint-upload
+        role-to-assume: arn:aws:iam::228243989488:role/ci/ci-fingerprint-upload
         role-session-name: fingerprint-upload
         aws-region: ${{ vars.AWS_REGION }}
     - name: Staging Deploy
@@ -36,7 +36,7 @@ jobs:
     - name: Configure AWS Credentials Production
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: arn:aws:iam::580831181531:role/ci/fingerprint-upload
+        role-to-assume: arn:aws:iam::580831181531:role/ci/ci-fingerprint-upload
         role-session-name: fingerprint-upload
         aws-region: ${{ vars.AWS_REGION }}
     - name: Production Deploy
