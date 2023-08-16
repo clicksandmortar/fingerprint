@@ -88,6 +88,11 @@ export const CollectorProvider = ({
     }
 
     const delay = setTimeout(() => {
+      if (!visitor.id) {
+        log('CollectorProvider: Not yet collecting, awaiting visitor ID')
+        return
+      }
+
       log('CollectorProvider: collecting data')
 
       const params: any = new URLSearchParams(window.location.search)
@@ -141,7 +146,7 @@ export const CollectorProvider = ({
     }, initialDelay)
 
     return () => clearTimeout(delay)
-  }, [booted])
+  }, [booted, visitor])
 
   return (
     <IdleTimerProvider

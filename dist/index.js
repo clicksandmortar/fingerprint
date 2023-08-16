@@ -9,6 +9,7 @@ var useExitIntent = require('use-exit-intent');
 var reactIdleTimer = require('react-idle-timer');
 var ReactDOM = _interopDefault(require('react-dom'));
 var Sentry = require('@sentry/react');
+var reactErrorBoundary = require('react-error-boundary');
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -71,6 +72,85 @@ var useLogging = function useLogging() {
   return React.useContext(LoggingContext);
 };
 
+var headers = {
+  'Content-Type': 'application/json'
+};
+var hostname = 'https://target-engine-api.starship-staging.com';
+var request = {
+  get: function (url, params) {
+    try {
+      return Promise.resolve(fetch(url + '?' + new URLSearchParams(params), {
+        method: 'GET',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  post: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  patch: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PATCH',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  put: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  "delete": function (url) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'DELETE',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+};
+
+var useCollector = function useCollector() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  return reactQuery.useMutation(function (data) {
+    var _data$visitor;
+    console.log('Sending CollectorUpdate to Collector API', data);
+    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(function (response) {
+      log('Collector API response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Collector API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: function onSuccess() {}
+  });
+};
+
 var setCookie = function setCookie(name, value) {
   return Cookies.set(name, value, {
     expires: 365,
@@ -98,119 +178,6 @@ var onCookieChanged = function onCookieChanged(callback, interval) {
       }
     }
   }, interval);
-};
-
-var sendEvent = function sendEvent(data) {
-  var firstSeen = getCookie('firstSeen') ? getCookie('firstSeen') || '' : setCookie('firstSeen', new Date().toISOString()) || '';
-  var lastSeen = getCookie('lastSeen') ? getCookie('lastSeen') || '' : setCookie('lastSeen', new Date().toISOString()) || '';
-  setCookie('lastSeen', new Date().toISOString());
-  var previousVisits = getCookie('visits') ? parseInt(getCookie('visits') || '0') : 0;
-  var visits = previousVisits + 1;
-  setCookie('visits', visits.toString());
-  var trigger = getTrigger(_extends({}, data, {
-    firstSeen: firstSeen,
-    lastSeen: lastSeen,
-    visits: visits
-  }));
-  return {
-    firstSeen: new Date(firstSeen),
-    lastSeen: new Date(lastSeen),
-    visits: visits,
-    trigger: trigger
-  };
-};
-var getTrigger = function getTrigger(data) {
-  var _data$page, _data$page2, _data$page3, _data$referrer, _data$referrer$utm, _data$page4;
-  var trigger = {};
-  var context = {
-    firstSeen: data.firstSeen,
-    lastSeen: data.lastSeen,
-    visits: data.visits
-  };
-  var brand = getBrand(data === null || data === void 0 ? void 0 : (_data$page = data.page) === null || _data$page === void 0 ? void 0 : _data$page.url);
-  var offer = getOffer(data === null || data === void 0 ? void 0 : (_data$page2 = data.page) === null || _data$page2 === void 0 ? void 0 : _data$page2.url);
-  var url = getUrl(data === null || data === void 0 ? void 0 : (_data$page3 = data.page) === null || _data$page3 === void 0 ? void 0 : _data$page3.url);
-  if (!brand || !offer) {
-    return trigger;
-  }
-  if ((data === null || data === void 0 ? void 0 : (_data$referrer = data.referrer) === null || _data$referrer === void 0 ? void 0 : (_data$referrer$utm = _data$referrer.utm) === null || _data$referrer$utm === void 0 ? void 0 : _data$referrer$utm.campaign) === 'UTM_OFFER' && (data === null || data === void 0 ? void 0 : (_data$page4 = data.page) === null || _data$page4 === void 0 ? void 0 : _data$page4.path) === '/') {
-    trigger.id = 'fb_ads_homepage';
-    trigger.behaviour = 'modal';
-    trigger.data = _extends({
-      text: 'Get your ' + offer + '!',
-      message: 'Find the closest location to you and complete your booking now to get ' + offer + '',
-      button: 'Start Booking'
-    }, url ? {
-      url: url
-    } : {}, context);
-    trigger.brand = brand;
-  }
-  return trigger;
-};
-var getOffer = function getOffer(url) {
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
-    return 'complimentary drink';
-  }
-  if (url.includes('browns-restaurants.co.uk')) {
-    return 'complimentary cocktail';
-  }
-  if (url.includes('vintageinn.co.uk')) {
-    return 'complimentary dessert';
-  }
-  return undefined;
-};
-var getUrl = function getUrl(url) {
-  if (url.includes('book.') || url.includes('localhost:8000') || url.includes('vercel.app')) {
-    return undefined;
-  }
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
-    return 'https://book.tobycarvery.co.uk/';
-  }
-  if (url.includes('browns-restaurants.co.uk')) {
-    return 'https://book.browns-restaurants.co.uk/';
-  }
-  if (url.includes('vintageinn.co.uk')) {
-    return 'https://book.vintageinn.co.uk/';
-  }
-  return undefined;
-};
-var getBrand = function getBrand(url) {
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
-    return {
-      name: 'Toby Carvery',
-      fontColor: '#ffffff',
-      primaryColor: '#8c1f1f',
-      overlayColor: 'rgba(96,32,50,0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/drink-bg.png'
-    };
-  }
-  if (url.includes('browns-restaurants.co.uk')) {
-    return {
-      name: 'Browns',
-      fontColor: '#ffffff',
-      primaryColor: '#B0A174',
-      overlayColor: 'rgba(136, 121, 76, 0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/cocktail-bg.png'
-    };
-  }
-  if (url.includes('vintageinn.co.uk')) {
-    return {
-      name: 'Vintage Inns',
-      fontColor: '#ffffff',
-      primaryColor: '#B0A174',
-      overlayColor: 'rgba(136, 121, 76, 0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/dessert-bg.png'
-    };
-  }
-};
-
-var useCollector = function useCollector() {
-  return reactQuery.useMutation(function (data) {
-    console.log('Sending CollectorUpdate to Mock Collector API', data);
-    return Promise.resolve(sendEvent(data));
-  }, {
-    onSuccess: function onSuccess() {}
-  });
 };
 
 var bootstrapSession = function bootstrapSession(_ref) {
@@ -311,6 +278,36 @@ var useVisitor = function useVisitor() {
   return React.useContext(VisitorContext);
 };
 
+var getBrand = function getBrand(url) {
+  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
+    return {
+      name: 'Toby Carvery',
+      fontColor: '#ffffff',
+      primaryColor: '#8c1f1f',
+      overlayColor: 'rgba(96,32,50,0.5)',
+      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/drink-bg.png'
+    };
+  }
+  if (url.includes('browns-restaurants.co.uk')) {
+    return {
+      name: 'Browns',
+      fontColor: '#ffffff',
+      primaryColor: '#B0A174',
+      overlayColor: 'rgba(136, 121, 76, 0.5)',
+      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/cocktail-bg.png'
+    };
+  }
+  if (url.includes('vintageinn.co.uk')) {
+    return {
+      name: 'Vintage Inns',
+      fontColor: '#ffffff',
+      primaryColor: '#B0A174',
+      overlayColor: 'rgba(136, 121, 76, 0.5)',
+      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/dessert-bg.png'
+    };
+  }
+};
+
 var CollectorProvider = function CollectorProvider(_ref) {
   var children = _ref.children,
     handlers = _ref.handlers;
@@ -382,6 +379,10 @@ var CollectorProvider = function CollectorProvider(_ref) {
       return;
     }
     var delay = setTimeout(function () {
+      if (!visitor.id) {
+        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
+        return;
+      }
       log('CollectorProvider: collecting data');
       var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
         var _cur$split = cur.split('='),
@@ -425,7 +426,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
     return function () {
       return clearTimeout(delay);
     };
-  }, [booted]);
+  }, [booted, visitor]);
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
     timeout: 1000 * 5,
     onPresenceChange: function onPresenceChange(presence) {
@@ -624,109 +625,6 @@ var TriggerYoutube = function TriggerYoutube(_ref2) {
   }), document.body);
 };
 
-const ErrorBoundaryContext = React.createContext(null);
-
-const initialState = {
-  didCatch: false,
-  error: null
-};
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.resetErrorBoundary = this.resetErrorBoundary.bind(this);
-    this.state = initialState;
-  }
-  static getDerivedStateFromError(error) {
-    return {
-      didCatch: true,
-      error
-    };
-  }
-  resetErrorBoundary() {
-    const {
-      error
-    } = this.state;
-    if (error !== null) {
-      var _this$props$onReset, _this$props;
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-      (_this$props$onReset = (_this$props = this.props).onReset) === null || _this$props$onReset === void 0 ? void 0 : _this$props$onReset.call(_this$props, {
-        args,
-        reason: "imperative-api"
-      });
-      this.setState(initialState);
-    }
-  }
-  componentDidCatch(error, info) {
-    var _this$props$onError, _this$props2;
-    (_this$props$onError = (_this$props2 = this.props).onError) === null || _this$props$onError === void 0 ? void 0 : _this$props$onError.call(_this$props2, error, info);
-  }
-  componentDidUpdate(prevProps, prevState) {
-    const {
-      didCatch
-    } = this.state;
-    const {
-      resetKeys
-    } = this.props;
-
-    // There's an edge case where if the thing that triggered the error happens to *also* be in the resetKeys array,
-    // we'd end up resetting the error boundary immediately.
-    // This would likely trigger a second error to be thrown.
-    // So we make sure that we don't check the resetKeys on the first call of cDU after the error is set.
-
-    if (didCatch && prevState.error !== null && hasArrayChanged(prevProps.resetKeys, resetKeys)) {
-      var _this$props$onReset2, _this$props3;
-      (_this$props$onReset2 = (_this$props3 = this.props).onReset) === null || _this$props$onReset2 === void 0 ? void 0 : _this$props$onReset2.call(_this$props3, {
-        next: resetKeys,
-        prev: prevProps.resetKeys,
-        reason: "keys"
-      });
-      this.setState(initialState);
-    }
-  }
-  render() {
-    const {
-      children,
-      fallbackRender,
-      FallbackComponent,
-      fallback
-    } = this.props;
-    const {
-      didCatch,
-      error
-    } = this.state;
-    let childToRender = children;
-    if (didCatch) {
-      const props = {
-        error,
-        resetErrorBoundary: this.resetErrorBoundary
-      };
-      if (React.isValidElement(fallback)) {
-        childToRender = fallback;
-      } else if (typeof fallbackRender === "function") {
-        childToRender = fallbackRender(props);
-      } else if (FallbackComponent) {
-        childToRender = React.createElement(FallbackComponent, props);
-      } else {
-        throw error;
-      }
-    }
-    return React.createElement(ErrorBoundaryContext.Provider, {
-      value: {
-        didCatch,
-        error,
-        resetErrorBoundary: this.resetErrorBoundary
-      }
-    }, childToRender);
-  }
-}
-function hasArrayChanged() {
-  let a = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-  let b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-  return a.length !== b.length || a.some((item, index) => !Object.is(item, b[index]));
-}
-
 Sentry.init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [new Sentry.BrowserTracing({
@@ -846,7 +744,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     }
   }, React__default.createElement(VisitorProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
-  }, React__default.createElement(ErrorBoundary, {
+  }, React__default.createElement(reactErrorBoundary.ErrorBoundary, {
     onError: function onError(error, info) {
       return console.error(error, info);
     },

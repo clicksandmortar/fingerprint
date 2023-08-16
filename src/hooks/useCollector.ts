@@ -1,42 +1,28 @@
 import { useMutation } from '@tanstack/react-query'
-import { sendEvent } from '../client/handler'
 import { CollectorResponse, CollectorUpdate } from '../client/types'
-// import axios, { AxiosResponse } from 'axios'
+import { hostname, request } from '../utils/http'
+import { useLogging } from '../context/LoggingContext'
 
-// export const useCollector = () => {
-//   // @ts-ignore
-//   const api = axios.create({
-//     // @todo up date this to use env
-//     baseURL: 'http://localhost:3000/api',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Accept: 'application/json'
-//     }
-//   })
-
-//   return useMutation<
-//     AxiosResponse<any, any>,
-//     unknown,
-//     CollectorUpdate,
-//     unknown
-//   >((data: CollectorUpdate) => api.patch(`/collect`, data), {
-//     onSuccess: () => {
-//       // console.log(response.data)
-//     }
-//   })
-// }
-
-// Local implementation of collector which does not make a network request
 export const useCollector = () => {
+  const { log, error } = useLogging()
+
   return useMutation<CollectorResponse, unknown, CollectorUpdate, unknown>(
     (data: CollectorUpdate) => {
-      console.log('Sending CollectorUpdate to Mock Collector API', data)
-      return Promise.resolve(sendEvent(data))
+      console.log('Sending CollectorUpdate to Collector API', data)
+
+      return request
+        .post(hostname + '/collector/' + data?.visitor?.id, data)
+        .then((response) => {
+          log('Collector API response', response)
+          return response
+        })
+        .catch((err) => {
+          error('Collector API error', err)
+          return err
+        })
     },
     {
-      onSuccess: () => {
-        // console.log(response.data)
-      }
+      onSuccess: () => {}
     }
   )
 }
