@@ -35,6 +35,7 @@ export declare type CollectorResponse = {
 };
 export declare type Trigger = {
     id?: string;
+    type?: 'idle' | 'exit' | 'default';
     behaviour?: string;
     data?: {
         [key: string]: string;

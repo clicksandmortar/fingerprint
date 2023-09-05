@@ -8,6 +8,7 @@ import { TriggerModal } from '../behaviours/TriggerModal'
 import * as Sentry from '@sentry/react'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'
 import { ErrorBoundary } from 'react-error-boundary'
+import TriggerInverse from '../behaviours/TriggerInverse'
 
 Sentry.init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
@@ -50,6 +51,11 @@ const includedHandlers: Handler[] = [
     id: 'youtube',
     behaviour: 'youtube',
     invoke: (trigger: Trigger) => <TriggerYoutube trigger={trigger} />
+  },
+  {
+    id: 'inverse',
+    behaviour: 'inverse',
+    invoke: (trigger: Trigger) => <TriggerInverse trigger={trigger} />
   }
 ]
 

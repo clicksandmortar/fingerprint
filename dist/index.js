@@ -5,11 +5,11 @@ var React__default = _interopDefault(React);
 var reactQuery = require('@tanstack/react-query');
 var Cookies = _interopDefault(require('js-cookie'));
 var uuid = require('uuid');
-var useExitIntent = require('use-exit-intent');
 var reactIdleTimer = require('react-idle-timer');
 var ReactDOM = _interopDefault(require('react-dom'));
 var Sentry = require('@sentry/react');
 var reactErrorBoundary = require('react-error-boundary');
+var reactHookForm = require('react-hook-form');
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -24,6 +24,9 @@ function _extends() {
     return target;
   };
   return _extends.apply(this, arguments);
+}
+function _objectDestructuringEmpty(obj) {
+  if (obj == null) throw new TypeError("Cannot destructure " + obj);
 }
 
 var LoggingProvider = function LoggingProvider(_ref) {
@@ -309,8 +312,7 @@ var getBrand = function getBrand(url) {
 };
 
 var CollectorProvider = function CollectorProvider(_ref) {
-  var children = _ref.children,
-    handlers = _ref.handlers;
+  var children = _ref.children;
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
@@ -324,54 +326,28 @@ var CollectorProvider = function CollectorProvider(_ref) {
     visitor = _useVisitor.visitor;
   var _useCollector = useCollector(),
     collect = _useCollector.mutateAsync;
-  var _useExitIntent = useExitIntent.useExitIntent({
-      cookie: {
-        key: 'cm_exit',
-        daysToExpire: 7
-      }
-    }),
-    registerHandler = _useExitIntent.registerHandler;
-  var _useState = React.useState({}),
-    trigger = _useState[0],
-    setTrigger = _useState[1];
-  var showTrigger = function showTrigger(trigger) {
-    if (!trigger || !trigger.behaviour) {
-      return null;
-    }
-    var handler = (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
-      return handler.id === trigger.id && handler.behaviour === trigger.behaviour;
-    })) || (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
-      return handler.behaviour === trigger.behaviour;
-    }));
-    log('CollectorProvider: showTrigger', trigger, handler);
-    if (!handler) {
-      error('No handler found for trigger', trigger);
-      return null;
-    }
-    if (!handler.invoke) {
-      error('No invoke method found for handler', handler);
-      return null;
-    }
-    return handler.invoke(trigger);
-  };
+  var _useState = React.useState([]),
+    pageTriggers = _useState[0];
+  var _useState2 = React.useState(null),
+    displayTrigger = _useState2[0],
+    setDisplayTrigger = _useState2[1];
+  var fireIdleTrigger = React.useCallback(function () {
+    if (!idleTriggers) return;
+    if (!displayTrigger) return;
+    log('CollectorProvider: fireIdleTrigger: xxx');
+    setDisplayTrigger({
+      id: 'fb_ads_homepage',
+      behaviour: 'modal',
+      data: {
+        text: 'Are you still there?',
+        message: "We'd love to welcome to you to our restaurant, book now to get your offer",
+        button: 'Start Booking'
+      },
+      brand: getBrand(window.location.href)
+    });
+  }, [pageTriggers, displayTrigger]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
-    registerHandler({
-      id: 'clientTriger',
-      handler: function handler() {
-        log('CollectorProvider: handler invoked for departure');
-        setTrigger({
-          id: 'exit_intent',
-          behaviour: 'modal',
-          data: {
-            text: 'Before you go...',
-            message: "Don't leave, there's still time to complete a booking now to get your offer",
-            button: 'Start Booking'
-          },
-          brand: getBrand(window.location.href)
-        });
-      }
-    });
   }, [exitIntentTriggers]);
   React.useEffect(function () {
     if (!booted) {
@@ -402,7 +378,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
           params: params
         },
         referrer: {
-          url: document.referrer,
+          url: 'https://example.com' ,
           title: document.referrer,
           utm: {
             source: params === null || params === void 0 ? void 0 : params.utm_source,
@@ -414,14 +390,10 @@ var CollectorProvider = function CollectorProvider(_ref) {
         }
       }).then(function (response) {
         log('Sent collector data, retrieved:', response);
-        if (response.trigger) {
-          setTrigger(response.trigger);
-        }
       })["catch"](function (err) {
         error('failed to store collected data', err);
       });
       log('CollectorProvider: collected data');
-      log('This will run after 1 second!');
     }, initialDelay);
     return function () {
       return clearTimeout(delay);
@@ -432,23 +404,10 @@ var CollectorProvider = function CollectorProvider(_ref) {
     onPresenceChange: function onPresenceChange(presence) {
       return log('presence changed', presence);
     },
-    onIdle: function onIdle() {
-      if (!idleTriggers) return;
-      log('CollectorProvider: handler invoked for presence');
-      setTrigger({
-        id: 'fb_ads_homepage',
-        behaviour: 'modal',
-        data: {
-          text: 'Are you still there?',
-          message: "We'd love to welcome to you to our restaurant, book now to get your offer",
-          button: 'Start Booking'
-        },
-        brand: getBrand(window.location.href)
-      });
-    }
+    onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: {}
-  }, children, showTrigger(trigger)));
+  }, children));
 };
 var CollectorContext = React.createContext({});
 
@@ -625,6 +584,230 @@ var TriggerYoutube = function TriggerYoutube(_ref2) {
   }), document.body);
 };
 
+var baseUrl = 'https://bookings-bff.starship-staging.com';
+var makeFullUrl = function makeFullUrl(resource, params) {
+  if (params === void 0) {
+    params = {};
+  }
+  if (resource.startsWith('/')) {
+    resource = resource.substring(1);
+  }
+  var fullUri = baseUrl + "/" + resource;
+  if (Object.keys(params).length === 0) {
+    return fullUri;
+  }
+  return fullUri + "?" + new URLSearchParams(params).toString();
+};
+var Button = function Button(_ref) {
+  var children = _ref.children,
+    className = _ref.className,
+    onClick = _ref.onClick,
+    disabled = _ref.disabled,
+    _ref$colour = _ref.colour,
+    colour = _ref$colour === void 0 ? 'primary' : _ref$colour;
+  var builtButtonClasses = "btn step-button bg-" + colour + " border-" + colour + " text-white hover:bg-" + colour + "/80 disabled:text-" + colour + "/50 disabled:border-" + colour + "/50" + (className ? ' ' + className : '');
+  if (disabled) {
+    builtButtonClasses += ' disabled';
+  }
+  return React.createElement("button", {
+    disabled: disabled,
+    className: builtButtonClasses,
+    onClick: onClick
+  }, children);
+};
+var Voucher = function Voucher(_ref2) {
+  var details = _ref2.details;
+  return React.createElement("div", null, React.createElement("h3", null, "Terms of Voucher"), React.createElement("p", {
+    className: 'text-sm'
+  }, details.termsAndConditions));
+};
+var TriggerInverse = function TriggerInverse(_ref3) {
+  var onSubmit = function onSubmit(data) {
+    try {
+      setState({
+        busy: true
+      });
+      try {
+        if (form.campaign !== '') {
+          submitVoucher(data).then(function () {
+            var eventData = {
+              item_name: landingPage === null || landingPage === void 0 ? void 0 : landingPage.name,
+              affiliation: 'Booking Flow'
+            };
+            console.log(eventData);
+          });
+        }
+      } catch (e) {}
+      return Promise.resolve();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+  var submitVoucher = function submitVoucher(data) {
+    try {
+      var reqData = _extends({}, data, {
+        bookingLink: (location === null || location === void 0 ? void 0 : location.origin) + "/" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.slug)
+      });
+      return Promise.resolve(fetch(makeFullUrl("campaigns/" + (form === null || form === void 0 ? void 0 : form.campaign) + "/voucher?locationID=" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.identifier)), {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(reqData)
+      })).then(function (response) {
+        response.json().then(function (responseData) {
+          if (response.ok) {
+            setState({
+              busy: false,
+              complete: true,
+              voucher: responseData.voucher
+            });
+          } else {
+            setState({
+              busy: false,
+              error: responseData,
+              responseStatusCode: response.status
+            });
+          }
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+  _objectDestructuringEmpty(_ref3);
+  var landingPage = {};
+  var form = {};
+  var location = {};
+  var _React$useState = React.useState(true),
+    open = _React$useState[0],
+    setOpen = _React$useState[1];
+  if (!open) {
+    return null;
+  }
+  var _useForm = reactHookForm.useForm(),
+    register = _useForm.register,
+    handleSubmit = _useForm.handleSubmit,
+    isSubmitting = _useForm.formState.isSubmitting;
+  var initialState = {
+    busy: false,
+    complete: false,
+    voucher: null,
+    error: null,
+    responseStatusCode: 0
+  };
+  var _React$useState2 = React.useState(initialState),
+    state = _React$useState2[0],
+    setState = _React$useState2[1];
+  if (state.complete === true) {
+    return React.createElement("div", {
+      className: 'container'
+    }, React.createElement("h2", null, "Voucher Sent!"), React.createElement("p", {
+      className: 'text-md'
+    }, "Good news! We've sent your voucher to the email provided!"), state.voucher && React.createElement("div", {
+      className: 'col-12 mt-3'
+    }, React.createElement(Voucher, {
+      details: state.voucher
+    })));
+  }
+  if (state.responseStatusCode === 409) {
+    return React.createElement("div", {
+      className: 'container'
+    }, React.createElement("h2", {
+      className: 'mt-3'
+    }, "Uh-oh!"), React.createElement("p", null, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\xA0", React.createElement("a", {
+      href: '/help',
+      className: 'underline font-serif tracking-wide',
+      onClick: function onClick() {
+        return setOpen(false);
+      }
+    }, "contact us")));
+  }
+  return React.createElement("div", {
+    style: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      zIndex: 9999
+    }
+  }, React.createElement("main", {
+    className: 'flex-grow flex flex-col justify-center container relative'
+  }, React.createElement("div", {
+    className: 'w-full'
+  }, React.createElement("div", {
+    className: 'cms-content text-center md:text-left'
+  }, React.createElement("h2", null, "Get Your Voucher"), React.createElement("p", null, "To receive your voucher, we just need a few details from you."), React.createElement("h3", {
+    className: "bar-title border-l-4 border-solid border-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour)
+  }, "Contact Info"), React.createElement("form", {
+    onSubmit: handleSubmit(onSubmit)
+  }, React.createElement("div", {
+    className: 'grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2'
+  }, React.createElement("div", null, React.createElement("label", {
+    htmlFor: 'first_name'
+  }, "First Name*"), React.createElement("input", Object.assign({}, register('firstName', {
+    required: true,
+    minLength: 2,
+    maxLength: 30,
+    validate: function validate(value) {
+      return value.trim().length >= 2;
+    }
+  }), {
+    type: 'text',
+    className: 'form-input',
+    id: 'firstName'
+  }))), React.createElement("div", null, React.createElement("label", {
+    htmlFor: 'last_name'
+  }, "Last Name*"), React.createElement("input", Object.assign({}, register('lastName', {
+    required: true,
+    minLength: 2,
+    maxLength: 30,
+    validate: function validate(value) {
+      return value.trim().length >= 2;
+    }
+  }), {
+    type: 'text',
+    className: 'form-input',
+    id: 'lastName'
+  }))), React.createElement("div", null, React.createElement("label", {
+    htmlFor: 'email'
+  }, "Email*"), React.createElement("input", Object.assign({}, register('emailAddress', {
+    required: true
+  }), {
+    type: 'email',
+    className: 'form-input',
+    id: 'email'
+  })))), React.createElement("div", null, React.createElement("p", null, "* Required Field")), React.createElement("div", {
+    className: 'flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start'
+  }, React.createElement("div", {
+    className: 'form-check'
+  }, React.createElement("input", Object.assign({
+    type: 'checkbox'
+  }, register('terms', {
+    required: true
+  }), {
+    className: 'form-check-input',
+    id: 'terms'
+  })), ' ', React.createElement("label", {
+    htmlFor: 'terms',
+    className: 'form-check-label'
+  }, "I confirm that I have read & agreed with the", ' ', React.createElement("a", {
+    href: landingPage === null || landingPage === void 0 ? void 0 : landingPage.privacyPolicy,
+    target: '_blank',
+    rel: 'noreferrer'
+  }, "Privacy Policy"), "*")), React.createElement(Button, {
+    className: 'btn mt-2 md:mt-0',
+    type: 'submit',
+    colour: landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour,
+    disabled: state.busy || isSubmitting
+  }, isSubmitting || state.busy ? 'Sending Voucher...' : 'Get My Voucher')), state.error && state.responseStatusCode !== 409 && React.createElement("div", {
+    className: "alert mt-5 bg-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour) + "/20"
+  }, "There was a problem sending your voucher. Please check your details and try again."))))));
+};
+
 Sentry.init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [new Sentry.BrowserTracing({
@@ -648,6 +831,14 @@ var includedHandlers = [{
   behaviour: 'youtube',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerYoutube, {
+      trigger: trigger
+    });
+  }
+}, {
+  id: 'inverse',
+  behaviour: 'inverse',
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerInverse, {
       trigger: trigger
     });
   }
