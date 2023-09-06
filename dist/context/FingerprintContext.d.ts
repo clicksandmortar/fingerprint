@@ -1,11 +1,6 @@
 import React from 'react';
 import { PageView, Trigger } from '../client/types';
-declare type TriggerCallback = (trigger: Trigger) => void | JSX.Element | React.ReactPortal;
-export declare type Handler = {
-    id?: string;
-    behaviour?: string;
-    invoke?: TriggerCallback;
-};
+import { Handler } from '../client/handler';
 export declare type FingerprintProviderProps = {
     appId?: string;
     children?: React.ReactNode;
@@ -32,4 +27,3 @@ export interface FingerprintContextInterface {
     unregisterHandler: (trigger: Trigger) => void;
 }
 export declare const FingerprintContext: React.Context<FingerprintContextInterface>;
-export {};

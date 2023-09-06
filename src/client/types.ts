@@ -35,7 +35,7 @@ export type CollectorResponse = {
   firstSeen: Date
   lastSeen: Date
   visits: number
-  trigger: Trigger
+  pageTriggers: Trigger[]
 }
 
 export type Trigger = {

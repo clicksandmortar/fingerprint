@@ -1,8 +1,12 @@
 import Cookies from 'js-cookie'
 
-export const setCookie = (name: string, value: string) => {
+export const setCookie = (
+  name: string,
+  value: string,
+  expires: number | undefined
+) => {
   return Cookies.set(name, value, {
-    expires: 365,
+    expires: expires || 365,
     sameSite: 'strict'
   })
 }

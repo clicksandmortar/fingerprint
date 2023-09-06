@@ -4,11 +4,10 @@ import { LoggingProvider } from './LoggingContext'
 import { CollectorProvider } from './CollectorContext'
 import { VisitorProvider } from './VisitorContext'
 import { PageView, Trigger } from '../client/types'
-import { TriggerModal } from '../behaviours/TriggerModal'
 import * as Sentry from '@sentry/react'
-import { TriggerYoutube } from '../behaviours/TriggerYoutube'
 import { ErrorBoundary } from 'react-error-boundary'
-import TriggerInverse from '../behaviours/TriggerInverse'
+import { Handler, clientHandlers } from '../client/handler'
+import { MixpanelProvider } from './MixpanelContext'
 
 Sentry.init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
@@ -27,37 +26,6 @@ Sentry.init({
 })
 
 const queryClient = new QueryClient()
-
-// @todo refactor where this lives
-type TriggerCallback = (
-  trigger: Trigger
-) => void | JSX.Element | React.ReactPortal
-
-// @todo refactor where this lives
-export type Handler = {
-  id?: string
-  behaviour?: string
-  invoke?: TriggerCallback
-}
-
-// @todo refactor where this lives
-const includedHandlers: Handler[] = [
-  {
-    id: 'modal',
-    behaviour: 'modal',
-    invoke: (trigger: Trigger) => <TriggerModal trigger={trigger} />
-  },
-  {
-    id: 'youtube',
-    behaviour: 'youtube',
-    invoke: (trigger: Trigger) => <TriggerYoutube trigger={trigger} />
-  },
-  {
-    id: 'inverse',
-    behaviour: 'inverse',
-    invoke: (trigger: Trigger) => <TriggerInverse trigger={trigger} />
-  }
-]
 
 export type FingerprintProviderProps = {
   appId?: string
@@ -86,7 +54,7 @@ export const FingerprintProvider = ({
 }: FingerprintProviderProps) => {
   const [consentGiven, setConsentGiven] = useState(consent)
   const [booted, setBooted] = useState(false)
-  const [handlers, setHandlers] = useState(defaultHandlers || includedHandlers)
+  const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
 
   // @todo Move this to a Handlers Context and add logging.
   const registerHandler = (trigger: Trigger) => {
@@ -163,14 +131,16 @@ export const FingerprintProvider = ({
             }}
           >
             <VisitorProvider>
-              <CollectorProvider handlers={handlers}>
-                <ErrorBoundary
-                  onError={(error, info) => console.error(error, info)}
-                  fallback={<div>An application error occurred.</div>}
-                >
-                  {children}
-                </ErrorBoundary>
-              </CollectorProvider>
+              <MixpanelProvider>
+                <CollectorProvider handlers={handlers}>
+                  <ErrorBoundary
+                    onError={(error, info) => console.error(error, info)}
+                    fallback={<div>An application error occurred.</div>}
+                  >
+                    {children}
+                  </ErrorBoundary>
+                </CollectorProvider>
+              </MixpanelProvider>
             </VisitorProvider>
           </FingerprintContext.Provider>
         </QueryClientProvider>
