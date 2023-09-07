@@ -9,9 +9,8 @@ import { CollectorProvider } from './CollectorContext'
 import { LoggingProvider } from './LoggingContext'
 import { VisitorProvider } from './VisitorContext'
 
-// TODO: undo
 Sentry.init({
-  // dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
+  dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [
     new Sentry.BrowserTracing({
       // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
@@ -112,6 +111,7 @@ FingerprintProviderProps) => {
     [setHandlers]
   )
 
+  // @Ed TODO: revisit this
   // useEffect(() => {
   //   if (!consentCallback) return
   //   const consent = consentCallback()

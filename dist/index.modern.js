@@ -596,6 +596,7 @@ const CollectorProvider = ({
 const CollectorContext = createContext({});
 
 init({
+  dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [new BrowserTracing({
     tracePropagationTargets: ['localhost:8000', 'https:yourserver.io/api/']
   }), new Replay()],
