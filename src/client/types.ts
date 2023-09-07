@@ -41,6 +41,9 @@ export type CollectorResponse = {
 export type Trigger = {
   id?: string
   behaviour?: string
+  // delay?: number
+  // invoke:(trigger: Trigger) => void;
+  // @todo: commented out, out of date?
   data?: {
     [key: string]: string
   }

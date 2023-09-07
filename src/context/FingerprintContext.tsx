@@ -1,16 +1,17 @@
-import React, { createContext, useEffect, useState } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { LoggingProvider } from './LoggingContext'
-import { CollectorProvider } from './CollectorContext'
-import { VisitorProvider } from './VisitorContext'
-import { PageView, Trigger } from '../client/types'
-import { TriggerModal } from '../behaviours/TriggerModal'
 import * as Sentry from '@sentry/react'
-import { TriggerYoutube } from '../behaviours/TriggerYoutube'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
+import { TriggerModal } from '../behaviours/TriggerModal'
+import { TriggerYoutube } from '../behaviours/TriggerYoutube'
+import { PageView, Trigger } from '../client/types'
+import { CollectorProvider } from './CollectorContext'
+import { LoggingProvider } from './LoggingContext'
+import { VisitorProvider } from './VisitorContext'
 
+// TODO: undo
 Sentry.init({
-  dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
+  // dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [
     new Sentry.BrowserTracing({
       // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
@@ -34,9 +35,27 @@ type TriggerCallback = (
 
 // @todo refactor where this lives
 export type Handler = {
+  /**
+   * currently supports idle, exit etc, until we agree on a list
+   */
   id?: string
+  /**
+   * modal | youtube, etc. string until we agree on a list
+   */
   behaviour?: string
+  /**
+   * function to be triggered once the id condition is met
+   */
   invoke?: TriggerCallback
+  /**
+   * useful primarily for "idle" id. Trigger the action only after the user has been inactive for a certain time.
+   * interval is cleared when the user becomes active and re-set once idle again
+   */
+  delay?: number
+  /**
+   * performance. don't run the logic if an explicit skip condition is provided
+   */
+  skip?: boolean
 }
 
 // @todo refactor where this lives
@@ -77,17 +96,40 @@ export const FingerprintProvider = ({
   initialDelay = 0,
   exitIntentTriggers = true,
   idleTriggers = true
-}: FingerprintProviderProps) => {
+}: // idleDelay = 0,
+FingerprintProviderProps) => {
   const [consentGiven, setConsentGiven] = useState(consent)
   const [booted, setBooted] = useState(false)
   const [handlers, setHandlers] = useState(defaultHandlers || includedHandlers)
 
   // @todo Move this to a Handlers Context and add logging.
-  const registerHandler = (trigger: Trigger) => {
-    setHandlers((handlers) => {
-      return [...handlers, trigger]
-    })
-  }
+  const registerHandler = React.useCallback(
+    (trigger: Trigger) => {
+      setHandlers((handlers) => {
+        return [...handlers, trigger]
+      })
+    },
+    [setHandlers]
+  )
+
+  // useEffect(() => {
+  //   if (!consentCallback) return
+  //   const consent = consentCallback()
+
+  //   console.log('CONSENT:', consent)
+
+  //   const interval = setInterval(() => {
+  //     console.log('checking consent')
+  //     setConsentGiven(consent)
+  //   }, 1000)
+
+  //   // if the user has consented, no reason to continue pinging every sec.
+  //   if (consent) {
+  //     clearInterval(interval)
+  //   }
+
+  //   return () => clearInterval(interval)
+  // }, [consentCallback, consent])
 
   useEffect(() => {
     if (!consentCallback) return
