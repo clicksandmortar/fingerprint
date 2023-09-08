@@ -704,16 +704,22 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     });
   }, [setHandlers]);
   React.useEffect(function () {
+    if (consent) {
+      setConsentGiven(consent);
+      return;
+    }
     if (!consentCallback) return;
+    var consentGivenViaCallback = consentCallback();
     var interval = setInterval(function () {
-      if (consentCallback) {
-        setConsentGiven(consentCallback());
-      }
+      setConsentGiven(consent);
     }, 1000);
+    if (consentGivenViaCallback) {
+      clearInterval(interval);
+    }
     return function () {
       return clearInterval(interval);
     };
-  }, []);
+  }, [consentCallback, consent]);
   React.useEffect(function () {
     if (!appId) {
       throw new Error('C&M Fingerprint: appId is required');
@@ -736,6 +742,9 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
   }, [consentGiven]);
   if (!appId) {
     return null;
+  }
+  if (!consentGiven) {
+    return children;
   }
   return React__default.createElement(Sentry.ErrorBoundary, {
     fallback: React__default.createElement("p", null, "An error with Fingerprint has occurred."),

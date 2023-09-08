@@ -638,14 +638,20 @@ const FingerprintProvider = ({
     });
   }, [setHandlers]);
   useEffect(() => {
+    if (_consent) {
+      setConsentGiven(_consent);
+      return;
+    }
     if (!consentCallback) return;
+    const consentGivenViaCallback = consentCallback();
     const interval = setInterval(() => {
-      if (consentCallback) {
-        setConsentGiven(consentCallback());
-      }
+      setConsentGiven(_consent);
     }, 1000);
+    if (consentGivenViaCallback) {
+      clearInterval(interval);
+    }
     return () => clearInterval(interval);
-  }, []);
+  }, [consentCallback, _consent]);
   useEffect(() => {
     if (!appId) {
       throw new Error('C&M Fingerprint: appId is required');
@@ -663,6 +669,9 @@ const FingerprintProvider = ({
   }, [consentGiven]);
   if (!appId) {
     return null;
+  }
+  if (!consentGiven) {
+    return children;
   }
   return React.createElement(ErrorBoundary, {
     fallback: React.createElement("p", null, "An error with Fingerprint has occurred."),

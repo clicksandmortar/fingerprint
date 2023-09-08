@@ -111,37 +111,32 @@ FingerprintProviderProps) => {
     [setHandlers]
   )
 
-  // @Ed TODO: revisit this
-  // useEffect(() => {
-  //   if (!consentCallback) return
-  //   const consent = consentCallback()
-
-  //   console.log('CONSENT:', consent)
-
-  //   const interval = setInterval(() => {
-  //     console.log('checking consent')
-  //     setConsentGiven(consent)
-  //   }, 1000)
-
-  //   // if the user has consented, no reason to continue pinging every sec.
-  //   if (consent) {
-  //     clearInterval(interval)
-  //   }
-
-  //   return () => clearInterval(interval)
-  // }, [consentCallback, consent])
-
+  /**
+   * Effect checks for user consent either via direct variable or a callback.
+   * in any case, once one of the conditions is met, the single state gets set to true, allowing the logic to flow.
+   * TODO: Think if it makes sense to memoize / derive that state instead? Gonna be tricky with an interval involved.
+   */
   useEffect(() => {
+    if (consent) {
+      setConsentGiven(consent)
+      return
+    }
+
     if (!consentCallback) return
+    const consentGivenViaCallback = consentCallback()
 
     const interval = setInterval(() => {
-      if (consentCallback) {
-        setConsentGiven(consentCallback())
-      }
+      setConsentGiven(consent)
     }, 1000)
 
+    // if the user has consented, no reason to continue pinging every sec.
+    if (consentGivenViaCallback) {
+      clearInterval(interval)
+    }
+
+    // clear on onmount
     return () => clearInterval(interval)
-  }, [])
+  }, [consentCallback, consent])
 
   useEffect(() => {
     if (!appId) {
@@ -168,6 +163,10 @@ FingerprintProviderProps) => {
 
   if (!appId) {
     return null
+  }
+
+  if (!consentGiven) {
+    return children
   }
 
   return (
