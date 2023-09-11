@@ -1,15 +1,15 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
+var Sentry = require('@sentry/react');
+var reactQuery = require('@tanstack/react-query');
 var React = require('react');
 var React__default = _interopDefault(React);
-var reactQuery = require('@tanstack/react-query');
+var reactErrorBoundary = require('react-error-boundary');
+var ReactDOM = _interopDefault(require('react-dom'));
+var reactIdleTimer = require('react-idle-timer');
+var useExitIntent = require('use-exit-intent');
 var Cookies = _interopDefault(require('js-cookie'));
 var uuid = require('uuid');
-var useExitIntent = require('use-exit-intent');
-var reactIdleTimer = require('react-idle-timer');
-var ReactDOM = _interopDefault(require('react-dom'));
-var Sentry = require('@sentry/react');
-var reactErrorBoundary = require('react-error-boundary');
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -25,432 +25,6 @@ function _extends() {
   };
   return _extends.apply(this, arguments);
 }
-
-var LoggingProvider = function LoggingProvider(_ref) {
-  var debug = _ref.debug,
-    children = _ref.children;
-  var log = function log() {
-    if (debug) {
-      var _console;
-      (_console = console).log.apply(_console, arguments);
-    }
-  };
-  var warn = function warn() {
-    if (debug) {
-      var _console2;
-      (_console2 = console).warn.apply(_console2, arguments);
-    }
-  };
-  var error = function error() {
-    if (debug) {
-      var _console3;
-      (_console3 = console).error.apply(_console3, arguments);
-    }
-  };
-  var info = function info() {
-    if (debug) {
-      var _console4;
-      (_console4 = console).info.apply(_console4, arguments);
-    }
-  };
-  return React__default.createElement(LoggingContext.Provider, {
-    value: {
-      log: log,
-      warn: warn,
-      error: error,
-      info: info
-    }
-  }, children);
-};
-var LoggingContext = React.createContext({
-  log: function log() {},
-  warn: function warn() {},
-  error: function error() {},
-  info: function info() {}
-});
-var useLogging = function useLogging() {
-  return React.useContext(LoggingContext);
-};
-
-var headers = {
-  'Content-Type': 'application/json'
-};
-var hostname = 'https://target-engine-api.starship-staging.com';
-var request = {
-  get: function (url, params) {
-    try {
-      return Promise.resolve(fetch(url + '?' + new URLSearchParams(params), {
-        method: 'GET',
-        headers: headers
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  post: function (url, body) {
-    try {
-      return Promise.resolve(fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(body)
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  patch: function (url, body) {
-    try {
-      return Promise.resolve(fetch(url, {
-        method: 'PATCH',
-        headers: headers,
-        body: JSON.stringify(body)
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  put: function (url, body) {
-    try {
-      return Promise.resolve(fetch(url, {
-        method: 'PUT',
-        headers: headers,
-        body: JSON.stringify(body)
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  "delete": function (url) {
-    try {
-      return Promise.resolve(fetch(url, {
-        method: 'DELETE',
-        headers: headers
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  }
-};
-
-var useCollector = function useCollector() {
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
-  return reactQuery.useMutation(function (data) {
-    var _data$visitor;
-    console.log('Sending CollectorUpdate to Collector API', data);
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(function (response) {
-      log('Collector API response', response);
-      return response;
-    })["catch"](function (err) {
-      error('Collector API error', err);
-      return err;
-    });
-  }, {
-    onSuccess: function onSuccess() {}
-  });
-};
-
-var setCookie = function setCookie(name, value) {
-  return Cookies.set(name, value, {
-    expires: 365,
-    sameSite: 'strict'
-  });
-};
-var getCookie = function getCookie(name) {
-  return Cookies.get(name);
-};
-var onCookieChanged = function onCookieChanged(callback, interval) {
-  if (interval === void 0) {
-    interval = 1000;
-  }
-  var lastCookie = document.cookie;
-  setInterval(function () {
-    var cookie = document.cookie;
-    if (cookie !== lastCookie) {
-      try {
-        callback({
-          oldValue: lastCookie,
-          newValue: cookie
-        });
-      } finally {
-        lastCookie = cookie;
-      }
-    }
-  }, interval);
-};
-
-var bootstrapSession = function bootstrapSession(_ref) {
-  var appId = _ref.appId,
-    setSession = _ref.setSession;
-  var session = {
-    firstVisit: undefined
-  };
-  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
-    setCookie('_cm', appId);
-    setSession(session);
-    return;
-  }
-  if (getCookie('_cm') && getCookie('_cm') === appId) {
-    session.firstVisit = false;
-    setSession(session);
-  }
-};
-
-var uuidValidateV4 = function uuidValidateV4(uuid$1) {
-  return uuid.validate(uuid$1) && uuid.version(uuid$1) === 4;
-};
-
-var validVisitorId = function validVisitorId(id) {
-  return uuidValidateV4(id);
-};
-
-var bootstrapVisitor = function bootstrapVisitor(_ref) {
-  var setVisitor = _ref.setVisitor;
-  var visitor = {
-    id: undefined
-  };
-  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
-    var visitorId = uuid.v4();
-    setCookie('_cm_id', visitorId);
-    visitor.id = visitorId;
-    setVisitor(visitor);
-    return;
-  }
-  if (getCookie('_cm_id')) {
-    visitor.id = getCookie('_cm_id');
-    setVisitor(visitor);
-  }
-};
-
-var useFingerprint = function useFingerprint() {
-  return React.useContext(FingerprintContext);
-};
-
-var VisitorProvider = function VisitorProvider(_ref) {
-  var children = _ref.children;
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId,
-    booted = _useFingerprint.booted;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  var _useState = React.useState({}),
-    session = _useState[0],
-    setSession = _useState[1];
-  var _useState2 = React.useState({}),
-    visitor = _useState2[0],
-    setVisitor = _useState2[1];
-  React.useEffect(function () {
-    if (!booted) {
-      log('VisitorProvider: not booted');
-      return;
-    }
-    log('VisitorProvider: booting');
-    var boot = function boot() {
-      try {
-        return Promise.resolve(bootstrapSession({
-          appId: appId,
-          setSession: setSession
-        })).then(function () {
-          return Promise.resolve(bootstrapVisitor({
-            setVisitor: setVisitor
-          })).then(function () {});
-        });
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    };
-    boot();
-    log('VisitorProvider: booted', session, visitor);
-  }, [appId, booted]);
-  return React__default.createElement(VisitorContext.Provider, {
-    value: {
-      session: session,
-      visitor: visitor
-    }
-  }, children);
-};
-var VisitorContext = React.createContext({
-  session: {},
-  visitor: {}
-});
-var useVisitor = function useVisitor() {
-  return React.useContext(VisitorContext);
-};
-
-var getBrand = function getBrand(url) {
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
-    return {
-      name: 'Toby Carvery',
-      fontColor: '#ffffff',
-      primaryColor: '#8c1f1f',
-      overlayColor: 'rgba(96,32,50,0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/drink-bg.png'
-    };
-  }
-  if (url.includes('browns-restaurants.co.uk')) {
-    return {
-      name: 'Browns',
-      fontColor: '#ffffff',
-      primaryColor: '#B0A174',
-      overlayColor: 'rgba(136, 121, 76, 0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/cocktail-bg.png'
-    };
-  }
-  if (url.includes('vintageinn.co.uk')) {
-    return {
-      name: 'Vintage Inns',
-      fontColor: '#ffffff',
-      primaryColor: '#B0A174',
-      overlayColor: 'rgba(136, 121, 76, 0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/dessert-bg.png'
-    };
-  }
-};
-
-var CollectorProvider = function CollectorProvider(_ref) {
-  var children = _ref.children,
-    handlers = _ref.handlers;
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId,
-    booted = _useFingerprint.booted,
-    initialDelay = _useFingerprint.initialDelay,
-    exitIntentTriggers = _useFingerprint.exitIntentTriggers,
-    idleTriggers = _useFingerprint.idleTriggers;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var _useCollector = useCollector(),
-    collect = _useCollector.mutateAsync;
-  var _useExitIntent = useExitIntent.useExitIntent({
-      cookie: {
-        key: 'cm_exit',
-        daysToExpire: 7
-      }
-    }),
-    registerHandler = _useExitIntent.registerHandler;
-  var _useState = React.useState({}),
-    trigger = _useState[0],
-    setTrigger = _useState[1];
-  var showTrigger = function showTrigger(trigger) {
-    if (!trigger || !trigger.behaviour) {
-      return null;
-    }
-    var handler = (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
-      return handler.id === trigger.id && handler.behaviour === trigger.behaviour;
-    })) || (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
-      return handler.behaviour === trigger.behaviour;
-    }));
-    log('CollectorProvider: showTrigger', trigger, handler);
-    if (!handler) {
-      error('No handler found for trigger', trigger);
-      return null;
-    }
-    if (!handler.invoke) {
-      error('No invoke method found for handler', handler);
-      return null;
-    }
-    return handler.invoke(trigger);
-  };
-  React.useEffect(function () {
-    if (!exitIntentTriggers) return;
-    registerHandler({
-      id: 'clientTriger',
-      handler: function handler() {
-        log('CollectorProvider: handler invoked for departure');
-        setTrigger({
-          id: 'exit_intent',
-          behaviour: 'modal',
-          data: {
-            text: 'Before you go...',
-            message: "Don't leave, there's still time to complete a booking now to get your offer",
-            button: 'Start Booking'
-          },
-          brand: getBrand(window.location.href)
-        });
-      }
-    });
-  }, [exitIntentTriggers]);
-  React.useEffect(function () {
-    if (!booted) {
-      log('CollectorProvider: Not yet collecting, awaiting boot');
-      return;
-    }
-    var delay = setTimeout(function () {
-      if (!visitor.id) {
-        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
-        return;
-      }
-      log('CollectorProvider: collecting data');
-      var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-        var _cur$split = cur.split('='),
-          key = _cur$split[0],
-          value = _cur$split[1];
-        if (!key) return acc;
-        acc[key] = value;
-        return acc;
-      }, {});
-      collect({
-        appId: appId,
-        visitor: visitor,
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params: params
-        },
-        referrer: {
-          url: document.referrer,
-          title: document.referrer,
-          utm: {
-            source: params === null || params === void 0 ? void 0 : params.utm_source,
-            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-            term: params === null || params === void 0 ? void 0 : params.utm_term,
-            content: params === null || params === void 0 ? void 0 : params.utm_content
-          }
-        }
-      }).then(function (response) {
-        log('Sent collector data, retrieved:', response);
-        if (response.trigger) {
-          setTrigger(response.trigger);
-        }
-      })["catch"](function (err) {
-        error('failed to store collected data', err);
-      });
-      log('CollectorProvider: collected data');
-      log('This will run after 1 second!');
-    }, initialDelay);
-    return function () {
-      return clearTimeout(delay);
-    };
-  }, [booted, visitor]);
-  return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
-    timeout: 1000 * 5,
-    onPresenceChange: function onPresenceChange(presence) {
-      return log('presence changed', presence);
-    },
-    onIdle: function onIdle() {
-      if (!idleTriggers) return;
-      log('CollectorProvider: handler invoked for presence');
-      setTrigger({
-        id: 'fb_ads_homepage',
-        behaviour: 'modal',
-        data: {
-          text: 'Are you still there?',
-          message: "We'd love to welcome to you to our restaurant, book now to get your offer",
-          button: 'Start Booking'
-        },
-        brand: getBrand(window.location.href)
-      });
-    }
-  }, React__default.createElement(CollectorContext.Provider, {
-    value: {}
-  }, children, showTrigger(trigger)));
-};
-var CollectorContext = React.createContext({});
 
 var Modal = function Modal(_ref) {
   var _trigger$brand, _trigger$brand2, _trigger$brand3, _trigger$brand4, _trigger$brand5, _trigger$data, _trigger$brand6, _trigger$data2, _trigger$brand7, _trigger$brand8, _trigger$data5;
@@ -625,6 +199,455 @@ var TriggerYoutube = function TriggerYoutube(_ref2) {
   }), document.body);
 };
 
+var setCookie = function setCookie(name, value) {
+  return Cookies.set(name, value, {
+    expires: 365,
+    sameSite: 'strict'
+  });
+};
+var getCookie = function getCookie(name) {
+  return Cookies.get(name);
+};
+var onCookieChanged = function onCookieChanged(callback, interval) {
+  if (interval === void 0) {
+    interval = 1000;
+  }
+  var lastCookie = document.cookie;
+  setInterval(function () {
+    var cookie = document.cookie;
+    if (cookie !== lastCookie) {
+      try {
+        callback({
+          oldValue: lastCookie,
+          newValue: cookie
+        });
+      } finally {
+        lastCookie = cookie;
+      }
+    }
+  }, interval);
+};
+
+var getBrand = function getBrand(url) {
+  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
+    return {
+      name: 'Toby Carvery',
+      fontColor: '#ffffff',
+      primaryColor: '#8c1f1f',
+      overlayColor: 'rgba(96,32,50,0.5)',
+      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/drink-bg.png'
+    };
+  }
+  if (url.includes('browns-restaurants.co.uk')) {
+    return {
+      name: 'Browns',
+      fontColor: '#ffffff',
+      primaryColor: '#B0A174',
+      overlayColor: 'rgba(136, 121, 76, 0.5)',
+      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/cocktail-bg.png'
+    };
+  }
+  if (url.includes('vintageinn.co.uk')) {
+    return {
+      name: 'Vintage Inns',
+      fontColor: '#ffffff',
+      primaryColor: '#B0A174',
+      overlayColor: 'rgba(136, 121, 76, 0.5)',
+      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/dessert-bg.png'
+    };
+  }
+};
+
+var headers = {
+  'Content-Type': 'application/json'
+};
+var hostname = 'https://target-engine-api.starship-staging.com';
+var request = {
+  get: function (url, params) {
+    try {
+      return Promise.resolve(fetch(url + '?' + new URLSearchParams(params), {
+        method: 'GET',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  post: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  patch: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PATCH',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  put: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  "delete": function (url) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'DELETE',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+};
+
+var LoggingProvider = function LoggingProvider(_ref) {
+  var debug = _ref.debug,
+    children = _ref.children;
+  var log = function log() {
+    if (debug) {
+      var _console;
+      (_console = console).log.apply(_console, arguments);
+    }
+  };
+  var warn = function warn() {
+    if (debug) {
+      var _console2;
+      (_console2 = console).warn.apply(_console2, arguments);
+    }
+  };
+  var error = function error() {
+    if (debug) {
+      var _console3;
+      (_console3 = console).error.apply(_console3, arguments);
+    }
+  };
+  var info = function info() {
+    if (debug) {
+      var _console4;
+      (_console4 = console).info.apply(_console4, arguments);
+    }
+  };
+  return React__default.createElement(LoggingContext.Provider, {
+    value: {
+      log: log,
+      warn: warn,
+      error: error,
+      info: info
+    }
+  }, children);
+};
+var LoggingContext = React.createContext({
+  log: function log() {},
+  warn: function warn() {},
+  error: function error() {},
+  info: function info() {}
+});
+var useLogging = function useLogging() {
+  return React.useContext(LoggingContext);
+};
+
+var useCollector = function useCollector() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  return reactQuery.useMutation(function (data) {
+    var _data$visitor;
+    console.log('Sending CollectorUpdate to Collector API', data);
+    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(function (response) {
+      log('Collector API response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Collector API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: function onSuccess() {}
+  });
+};
+
+var useFingerprint = function useFingerprint() {
+  return React.useContext(FingerprintContext);
+};
+
+var bootstrapSession = function bootstrapSession(_ref) {
+  var appId = _ref.appId,
+    setSession = _ref.setSession;
+  var session = {
+    firstVisit: undefined
+  };
+  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
+    setCookie('_cm', appId);
+    setSession(session);
+    return;
+  }
+  if (getCookie('_cm') && getCookie('_cm') === appId) {
+    session.firstVisit = false;
+    setSession(session);
+  }
+};
+
+var uuidValidateV4 = function uuidValidateV4(uuid$1) {
+  return uuid.validate(uuid$1) && uuid.version(uuid$1) === 4;
+};
+
+var validVisitorId = function validVisitorId(id) {
+  return uuidValidateV4(id);
+};
+
+var bootstrapVisitor = function bootstrapVisitor(_ref) {
+  var setVisitor = _ref.setVisitor;
+  var visitor = {
+    id: undefined
+  };
+  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
+    var visitorId = uuid.v4();
+    setCookie('_cm_id', visitorId);
+    visitor.id = visitorId;
+    setVisitor(visitor);
+    return;
+  }
+  if (getCookie('_cm_id')) {
+    visitor.id = getCookie('_cm_id');
+    setVisitor(visitor);
+  }
+};
+
+var VisitorProvider = function VisitorProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId,
+    booted = _useFingerprint.booted;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = React.useState({}),
+    session = _useState[0],
+    setSession = _useState[1];
+  var _useState2 = React.useState({}),
+    visitor = _useState2[0],
+    setVisitor = _useState2[1];
+  React.useEffect(function () {
+    if (!booted) {
+      log('VisitorProvider: not booted');
+      return;
+    }
+    log('VisitorProvider: booting');
+    var boot = function boot() {
+      try {
+        return Promise.resolve(bootstrapSession({
+          appId: appId,
+          setSession: setSession
+        })).then(function () {
+          return Promise.resolve(bootstrapVisitor({
+            setVisitor: setVisitor
+          })).then(function () {});
+        });
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    };
+    boot();
+    log('VisitorProvider: booted', session, visitor);
+  }, [appId, booted]);
+  return React__default.createElement(VisitorContext.Provider, {
+    value: {
+      session: session,
+      visitor: visitor
+    }
+  }, children);
+};
+var VisitorContext = React.createContext({
+  session: {},
+  visitor: {}
+});
+var useVisitor = function useVisitor() {
+  return React.useContext(VisitorContext);
+};
+
+var idleStatusAfterMs = 5 * 1000;
+var CollectorProvider = function CollectorProvider(_ref) {
+  var children = _ref.children,
+    handlers = _ref.handlers;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId,
+    booted = _useFingerprint.booted,
+    initialDelay = _useFingerprint.initialDelay,
+    exitIntentTriggers = _useFingerprint.exitIntentTriggers,
+    idleTriggers = _useFingerprint.idleTriggers;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useCollector = useCollector(),
+    collect = _useCollector.mutateAsync;
+  var _useExitIntent = useExitIntent.useExitIntent({
+      cookie: {
+        key: 'cm_exit',
+        daysToExpire: 7
+      }
+    }),
+    registerHandler = _useExitIntent.registerHandler;
+  var _useState = React.useState({}),
+    trigger = _useState[0],
+    setTrigger = _useState[1];
+  var _useState2 = React.useState(null),
+    timeoutId = _useState2[0],
+    setTimeoutId = _useState2[1];
+  var showTrigger = React__default.useCallback(function (trigger) {
+    if (!trigger || !trigger.behaviour) {
+      return null;
+    }
+    var handler = (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return handler.id === trigger.id && handler.behaviour === trigger.behaviour;
+    })) || (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return handler.behaviour === trigger.behaviour;
+    }));
+    log('CollectorProvider: showTrigger', trigger, handler);
+    if (!handler) {
+      error('No handler found for trigger', trigger);
+      return null;
+    }
+    if (handler.skip) {
+      log('Explicitly skipping trigger handler', trigger, handler);
+      return;
+    }
+    if (!handler.invoke) {
+      error('No invoke method found for handler', handler);
+      return null;
+    }
+    if (handler.delay) {
+      var tId = setTimeout(function () {
+        var _handler$invoke;
+        return (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
+      }, handler.delay);
+      setTimeoutId(tId);
+      return null;
+    }
+    return handler.invoke(trigger);
+  }, [setTimeoutId, log, handlers]);
+  React.useEffect(function () {
+    if (!exitIntentTriggers) return;
+    registerHandler({
+      id: 'clientTriger',
+      handler: function handler() {
+        log('CollectorProvider: handler invoked for departure');
+        setTrigger({
+          id: 'exit_intent',
+          behaviour: 'modal',
+          data: {
+            text: 'Before you go...',
+            message: "Don't leave, there's still time to complete a booking now to get your offer",
+            button: 'Start Booking'
+          },
+          brand: getBrand(window.location.href)
+        });
+      }
+    });
+  }, [exitIntentTriggers]);
+  React.useEffect(function () {
+    if (!booted) {
+      log('CollectorProvider: Not yet collecting, awaiting boot');
+      return;
+    }
+    var delay = setTimeout(function () {
+      if (!visitor.id) {
+        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
+        return;
+      }
+      log('CollectorProvider: collecting data');
+      var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+        var _cur$split = cur.split('='),
+          key = _cur$split[0],
+          value = _cur$split[1];
+        if (!key) return acc;
+        acc[key] = value;
+        return acc;
+      }, {});
+      collect({
+        appId: appId,
+        visitor: visitor,
+        page: {
+          url: window.location.href,
+          path: window.location.pathname,
+          title: document.title,
+          params: params
+        },
+        referrer: {
+          url: document.referrer,
+          title: document.referrer,
+          utm: {
+            source: params === null || params === void 0 ? void 0 : params.utm_source,
+            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+            term: params === null || params === void 0 ? void 0 : params.utm_term,
+            content: params === null || params === void 0 ? void 0 : params.utm_content
+          }
+        }
+      }).then(function (response) {
+        log('Sent collector data, retrieved:', response);
+        if (response.trigger) {
+          setTrigger(response.trigger);
+        }
+      })["catch"](function (err) {
+        error('failed to store collected data', err);
+      });
+      log('CollectorProvider: collected data');
+      log('This will run after 1 second!');
+    }, initialDelay);
+    return function () {
+      return clearTimeout(delay);
+    };
+  }, [booted, visitor]);
+  var renderedTrigger = React__default.useMemo(function () {
+    return showTrigger(trigger);
+  }, [showTrigger, trigger]);
+  return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
+    timeout: idleStatusAfterMs,
+    onPresenceChange: function onPresenceChange(presence) {
+      if (presence.type === 'active') {
+        if (timeoutId) clearTimeout(timeoutId);
+        setTimeoutId(null);
+      }
+      log('presence changed', presence);
+    },
+    onIdle: function onIdle() {
+      if (!idleTriggers) return;
+      log('CollectorProvider: handler invoked for presence');
+      setTrigger({
+        id: 'fb_ads_homepage',
+        behaviour: 'modal',
+        data: {
+          text: 'Are you still there?',
+          message: "We'd love to welcome to you to our restaurant, book now to get your offer",
+          button: 'Start Booking'
+        },
+        brand: getBrand(window.location.href)
+      });
+    }
+  }, React__default.createElement(CollectorContext.Provider, {
+    value: {}
+  }, children, renderedTrigger));
+};
+var CollectorContext = React.createContext({});
+
 Sentry.init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [new Sentry.BrowserTracing({
@@ -675,22 +698,28 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
   var _useState3 = React.useState(defaultHandlers || includedHandlers),
     handlers = _useState3[0],
     setHandlers = _useState3[1];
-  var registerHandler = function registerHandler(trigger) {
+  var registerHandler = React__default.useCallback(function (trigger) {
     setHandlers(function (handlers) {
       return [].concat(handlers, [trigger]);
     });
-  };
+  }, [setHandlers]);
   React.useEffect(function () {
+    if (consent) {
+      setConsentGiven(consent);
+      return;
+    }
     if (!consentCallback) return;
+    var consentGivenViaCallback = consentCallback();
     var interval = setInterval(function () {
-      if (consentCallback) {
-        setConsentGiven(consentCallback());
-      }
+      setConsentGiven(consent);
     }, 1000);
+    if (consentGivenViaCallback) {
+      clearInterval(interval);
+    }
     return function () {
       return clearInterval(interval);
     };
-  }, []);
+  }, [consentCallback, consent]);
   React.useEffect(function () {
     if (!appId) {
       throw new Error('C&M Fingerprint: appId is required');
@@ -713,6 +742,9 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
   }, [consentGiven]);
   if (!appId) {
     return null;
+  }
+  if (!consentGiven) {
+    return children;
   }
   return React__default.createElement(Sentry.ErrorBoundary, {
     fallback: React__default.createElement("p", null, "An error with Fingerprint has occurred."),

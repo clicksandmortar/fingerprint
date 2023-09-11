@@ -1,13 +1,15 @@
 import React, { createContext, useEffect, useState } from 'react'
-import { useCollector } from '../hooks/useCollector'
-import { useLogging } from './LoggingContext'
-import { Handler } from './FingerprintContext'
-import { useVisitor } from './VisitorContext'
-import { Trigger } from '../client/types'
-import { useFingerprint } from '../hooks/useFingerprint'
+import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { IdleTimerProvider } from 'react-idle-timer'
 import { getBrand } from '../client/handler'
+import { Trigger } from '../client/types'
+import { useCollector } from '../hooks/useCollector'
+import { useFingerprint } from '../hooks/useFingerprint'
+import { Handler } from './FingerprintContext'
+import { useLogging } from './LoggingContext'
+import { useVisitor } from './VisitorContext'
+
+const idleStatusAfterMs = 5 * 1000
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
@@ -28,34 +30,54 @@ export const CollectorProvider = ({
   })
   const [trigger, setTrigger] = useState<Trigger>({})
 
-  const showTrigger = (trigger: Trigger) => {
-    if (!trigger || !trigger.behaviour) {
-      return null
-    }
+  const [timeoutId, setTimeoutId] = useState<null | NodeJS.Timeout>(null)
 
-    const handler =
-      handlers?.find(
-        (handler: Handler) =>
-          handler.id === trigger.id && handler.behaviour === trigger.behaviour
-      ) ||
-      handlers?.find(
-        (handler: Handler) => handler.behaviour === trigger.behaviour
-      )
+  const showTrigger = React.useCallback(
+    (trigger: Trigger) => {
+      if (!trigger || !trigger.behaviour) {
+        return null
+      }
 
-    log('CollectorProvider: showTrigger', trigger, handler)
+      const handler =
+        handlers?.find(
+          (handler: Handler) =>
+            handler.id === trigger.id && handler.behaviour === trigger.behaviour
+        ) ||
+        handlers?.find(
+          (handler: Handler) => handler.behaviour === trigger.behaviour
+        )
 
-    if (!handler) {
-      error('No handler found for trigger', trigger)
-      return null
-    }
+      log('CollectorProvider: showTrigger', trigger, handler)
 
-    if (!handler.invoke) {
-      error('No invoke method found for handler', handler)
-      return null
-    }
+      if (!handler) {
+        error('No handler found for trigger', trigger)
+        return null
+      }
+      if (handler.skip) {
+        log('Explicitly skipping trigger handler', trigger, handler)
+        return
+      }
 
-    return handler.invoke(trigger)
-  }
+      if (!handler.invoke) {
+        error('No invoke method found for handler', handler)
+
+        return null
+      }
+
+      if (handler.delay) {
+        const tId = setTimeout(() => {
+          return handler.invoke?.(trigger)
+        }, handler.delay)
+
+        setTimeoutId(tId)
+
+        return null
+      }
+
+      return handler.invoke(trigger)
+    },
+    [setTimeoutId, log, handlers]
+  )
 
   useEffect(() => {
     if (!exitIntentTriggers) return
@@ -148,10 +170,21 @@ export const CollectorProvider = ({
     return () => clearTimeout(delay)
   }, [booted, visitor])
 
+  const renderedTrigger = React.useMemo(() => {
+    return showTrigger(trigger)
+  }, [showTrigger, trigger])
+
   return (
     <IdleTimerProvider
-      timeout={1000 * 5}
-      onPresenceChange={(presence: any) => log('presence changed', presence)}
+      timeout={idleStatusAfterMs}
+      onPresenceChange={(presence: PresenceType) => {
+        if (presence.type === 'active') {
+          if (timeoutId) clearTimeout(timeoutId)
+
+          setTimeoutId(null)
+        }
+        log('presence changed', presence)
+      }}
       onIdle={() => {
         if (!idleTriggers) return
 
@@ -171,7 +204,7 @@ export const CollectorProvider = ({
     >
       <CollectorContext.Provider value={{}}>
         {children}
-        {showTrigger(trigger)}
+        {renderedTrigger}
       </CollectorContext.Provider>
     </IdleTimerProvider>
   )

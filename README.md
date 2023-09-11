@@ -43,7 +43,7 @@ const App = () => {
       consent={true}
       consentCallback={() => {}}
       debug={process.env.NODE_ENV === 'development'}
-      defaultHandlers={{}}
+      defaultHandlers={[]}
       initialDelay={0}
       // Coming soon
       minimumDelay={15000}
