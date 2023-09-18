@@ -1,4 +1,4 @@
-import { init, BrowserTracing, Replay, ErrorBoundary } from '@sentry/react';
+import { init, BrowserTracing, ErrorBoundary } from '@sentry/react';
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { ErrorBoundary as ErrorBoundary$1 } from 'react-error-boundary';
@@ -599,10 +599,8 @@ init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [new BrowserTracing({
     tracePropagationTargets: ['localhost:8000', 'https:yourserver.io/api/']
-  }), new Replay()],
-  tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 1,
-  replaysOnErrorSampleRate: 1.0
+  })],
+  tracesSampleRate: 1.0
 });
 const queryClient = new QueryClient();
 const includedHandlers = [{

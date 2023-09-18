@@ -652,10 +652,8 @@ Sentry.init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
   integrations: [new Sentry.BrowserTracing({
     tracePropagationTargets: ['localhost:8000', 'https:yourserver.io/api/']
-  }), new Sentry.Replay()],
-  tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 1,
-  replaysOnErrorSampleRate: 1.0
+  })],
+  tracesSampleRate: 1.0
 });
 var queryClient = new reactQuery.QueryClient();
 var includedHandlers = [{
