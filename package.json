@@ -20,10 +20,10 @@
     "node": ">=10"
   },
   "scripts": {
-    "start": "microbundle-crl watch --no-compress --format modern,cjs",
+    "start": "MIXPANEL_TOKEN=d122fa924e1ea97d6b98569440c65a95 microbundle-crl watch --no-compress --format modern,cjs",
     "build": "microbundle-crl --no-compress --format modern,cjs",
     "build:fingerprint": "parcel build src/fingerprint.tsx --target legacy",
-    "watch:fingerprint": "parcel watch src/fingerprint.tsx --target legacy",
+    "watch:fingerprint": "MIXPANEL_TOKEN=d122fa924e1ea97d6b98569440c65a95 parcel watch src/fingerprint.tsx --target legacy",
     "prepare": "run-s build",
     "test": "run-s test:unit test:lint test:build",
     "test:build": "run-s build",
@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-unicode-property-regex": "^7.18.6",
+    "@parcel/packager-ts": "2.9.3",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
@@ -66,6 +67,7 @@
     "microbundle-crl": "^0.13.10",
     "npm-run-all": "^4.1.5",
     "parcel": "^2.9.3",
+    "parcel-transformer-env-variables-injection": "^0.1.2",
     "prettier": "^2.0.4",
     "react": ">16.13.1",
     "react-scripts": "^3.4.1",
@@ -90,5 +92,10 @@
     "use-exit-intent": "^1.0.7",
     "use-local-storage-state": "^18.3.3",
     "uuid": "^9.0.0"
+  },
+  "@parcel/transformer-js": {
+    "inlineEnvironment": [
+      "MIXPANEL_TOKEN"
+    ]
   }
 }

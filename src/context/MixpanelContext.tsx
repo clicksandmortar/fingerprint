@@ -4,11 +4,14 @@ import { useFingerprint } from '../hooks/useFingerprint'
 import { useVisitor } from './VisitorContext'
 import mixpanel, { Callback, Config } from 'mixpanel-browser'
 
-const MIXPANEL_TOKEN_STAGING = 'd122fa924e1ea97d6b98569440c65a95'
+if (process.env.MIXPANEL_TOKEN !== 'development') {
+  console.log('process.env.MIXPANEL_TOKEN', process.env.MIXPANEL_TOKEN)
+}
+
+const MIXPANEL_TOKEN = process.env.MIXPANEL_TOKEN || 'undefined'
 
 const init = (cfg: Partial<Config>) => {
-  // TODO: Create environment separation
-  mixpanel.init(MIXPANEL_TOKEN_STAGING, {
+  mixpanel.init(MIXPANEL_TOKEN, {
     debug: cfg.debug,
     track_pageview: true,
     persistence: 'localStorage'
