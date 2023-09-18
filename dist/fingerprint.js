@@ -26370,10 +26370,17 @@ var _reactQuery = require("@tanstack/react-query");
 var _loggingContext = require("./LoggingContext");
 var _collectorContext = require("./CollectorContext");
 var _visitorContext = require("./VisitorContext");
+<<<<<<< Updated upstream
 var _react1 = require("@sentry/react");
 var _reactErrorBoundary = require("react-error-boundary");
 var _handler = require("../client/handler");
 var _mixpanelContext = require("./MixpanelContext");
+=======
+var _triggerModal = require("../behaviours/TriggerModal");
+var _react1 = require("@sentry/react");
+var _triggerYoutube = require("../behaviours/TriggerYoutube");
+var _reactErrorBoundary = require("react-error-boundary");
+>>>>>>> Stashed changes
 var _s = $RefreshSig$();
 _react1.init({
     dsn: "https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144",
@@ -26394,11 +26401,47 @@ _react1.init({
     replaysOnErrorSampleRate: 1.0 // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
 });
 const queryClient = new (0, _reactQuery.QueryClient)();
+<<<<<<< Updated upstream
+=======
+// @todo refactor where this lives
+const includedHandlers = [
+    {
+        id: "modal",
+        behaviour: "modal",
+        invoke: (trigger)=>/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _triggerModal.TriggerModal), {
+                trigger: trigger,
+                __source: {
+                    fileName: "src/context/FingerprintContext.tsx",
+                    lineNumber: 47,
+                    columnNumber: 35
+                },
+                __self: undefined
+            })
+    },
+    {
+        id: "youtube",
+        behaviour: "youtube",
+        invoke: (trigger)=>/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _triggerYoutube.TriggerYoutube), {
+                trigger: trigger,
+                __source: {
+                    fileName: "src/context/FingerprintContext.tsx",
+                    lineNumber: 52,
+                    columnNumber: 35
+                },
+                __self: undefined
+            })
+    }
+];
+>>>>>>> Stashed changes
 const FingerprintProvider = ({ appId, children, consent = false, consentCallback, debug, defaultHandlers, initialDelay = 0, exitIntentTriggers = true, idleTriggers = true })=>{
     _s();
     const [consentGiven, setConsentGiven] = (0, _react.useState)(consent);
     const [booted, setBooted] = (0, _react.useState)(false);
+<<<<<<< Updated upstream
     const [handlers, setHandlers] = (0, _react.useState)(defaultHandlers || (0, _handler.clientHandlers));
+=======
+    const [handlers, setHandlers] = (0, _react.useState)(defaultHandlers || includedHandlers);
+>>>>>>> Stashed changes
     // @todo Move this to a Handlers Context and add logging.
     const registerHandler = (trigger)=>{
         setHandlers((handlers)=>{
@@ -26436,7 +26479,11 @@ const FingerprintProvider = ({ appId, children, consent = false, consentCallback
         onError: (error, info)=>console.error(error, info),
         __source: {
             fileName: "src/context/FingerprintContext.tsx",
+<<<<<<< Updated upstream
             lineNumber: 107,
+=======
+            lineNumber: 133,
+>>>>>>> Stashed changes
             columnNumber: 5
         },
         __self: undefined
@@ -26444,7 +26491,11 @@ const FingerprintProvider = ({ appId, children, consent = false, consentCallback
         debug: debug,
         __source: {
             fileName: "src/context/FingerprintContext.tsx",
+<<<<<<< Updated upstream
             lineNumber: 111,
+=======
+            lineNumber: 137,
+>>>>>>> Stashed changes
             columnNumber: 7
         },
         __self: undefined
@@ -26452,7 +26503,11 @@ const FingerprintProvider = ({ appId, children, consent = false, consentCallback
         client: queryClient,
         __source: {
             fileName: "src/context/FingerprintContext.tsx",
+<<<<<<< Updated upstream
             lineNumber: 112,
+=======
+            lineNumber: 138,
+>>>>>>> Stashed changes
             columnNumber: 9
         },
         __self: undefined
@@ -26477,13 +26532,18 @@ const FingerprintProvider = ({ appId, children, consent = false, consentCallback
         },
         __source: {
             fileName: "src/context/FingerprintContext.tsx",
+<<<<<<< Updated upstream
             lineNumber: 113,
+=======
+            lineNumber: 139,
+>>>>>>> Stashed changes
             columnNumber: 11
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _visitorContext.VisitorProvider), {
         __source: {
             fileName: "src/context/FingerprintContext.tsx",
+<<<<<<< Updated upstream
             lineNumber: 133,
             columnNumber: 13
         },
@@ -26495,12 +26555,23 @@ const FingerprintProvider = ({ appId, children, consent = false, consentCallback
             columnNumber: 15
         },
         __self: undefined
+=======
+            lineNumber: 159,
+            columnNumber: 13
+        },
+        __self: undefined
+>>>>>>> Stashed changes
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _collectorContext.CollectorProvider), {
         handlers: handlers,
         __source: {
             fileName: "src/context/FingerprintContext.tsx",
+<<<<<<< Updated upstream
             lineNumber: 135,
             columnNumber: 17
+=======
+            lineNumber: 160,
+            columnNumber: 15
+>>>>>>> Stashed changes
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _reactErrorBoundary.ErrorBoundary), {
@@ -26508,6 +26579,7 @@ const FingerprintProvider = ({ appId, children, consent = false, consentCallback
         fallback: /*#__PURE__*/ (0, _reactDefault.default).createElement("div", null, "An application error occurred."),
         __source: {
             fileName: "src/context/FingerprintContext.tsx",
+<<<<<<< Updated upstream
             lineNumber: 136,
             columnNumber: 19
         },
@@ -26515,6 +26587,15 @@ const FingerprintProvider = ({ appId, children, consent = false, consentCallback
     }, children)))))))));
 };
 _s(FingerprintProvider, "xV1wf/OC0RzPMjK8JyCXQvBtSRY=");
+=======
+            lineNumber: 161,
+            columnNumber: 17
+        },
+        __self: undefined
+    }, children))))))));
+};
+_s(FingerprintProvider, "PfU6kjr++R+DPmEa52zzDY8SKWE=");
+>>>>>>> Stashed changes
 _c = FingerprintProvider;
 const defaultFingerprintState = {
     appId: "",
@@ -26540,7 +26621,11 @@ $RefreshReg$(_c, "FingerprintProvider");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
+<<<<<<< Updated upstream
 },{"react":"9sfFD","@tanstack/react-query":"9B1CG","./LoggingContext":"8R5Tl","./CollectorContext":"cE6WZ","./VisitorContext":"dTu2f","@sentry/react":"dUbZl","react-error-boundary":"17wpY","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../client/handler":"k8Kyg","./MixpanelContext":"isrpc"}],"9B1CG":[function(require,module,exports) {
+=======
+},{"react":"9sfFD","@tanstack/react-query":"9B1CG","./LoggingContext":"8R5Tl","./CollectorContext":"cE6WZ","./VisitorContext":"dTu2f","@sentry/react":"dUbZl","react-error-boundary":"17wpY","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../behaviours/TriggerModal":"fRNGg","../behaviours/TriggerYoutube":"lFHbs"}],"9B1CG":[function(require,module,exports) {
+>>>>>>> Stashed changes
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "useQueries", ()=>(0, _useQueriesEsmJs.useQueries));
@@ -30074,21 +30159,29 @@ parcelHelpers.export(exports, "CollectorProvider", ()=>CollectorProvider);
 parcelHelpers.export(exports, "CollectorContext", ()=>CollectorContext);
 var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
+<<<<<<< Updated upstream
 var _useCollectorMutation = require("../hooks/useCollectorMutation");
+=======
+var _useCollector = require("../hooks/useCollector");
+>>>>>>> Stashed changes
 var _loggingContext = require("./LoggingContext");
 var _visitorContext = require("./VisitorContext");
 var _useFingerprint = require("../hooks/useFingerprint");
 var _useExitIntent = require("use-exit-intent");
 var _reactIdleTimer = require("react-idle-timer");
 var _handler = require("../client/handler");
+<<<<<<< Updated upstream
 var _mixpanelContext = require("./MixpanelContext");
 var _cookies = require("../utils/cookies");
+=======
+>>>>>>> Stashed changes
 var _s = $RefreshSig$();
 const CollectorProvider = ({ children, handlers })=>{
     _s();
     const { log, error } = (0, _loggingContext.useLogging)();
     const { appId, booted, initialDelay, exitIntentTriggers, idleTriggers } = (0, _useFingerprint.useFingerprint)();
     const { visitor } = (0, _visitorContext.useVisitor)();
+<<<<<<< Updated upstream
     const { trackEvent } = (0, _mixpanelContext.useMixpanel)();
     const { mutateAsync: collect } = (0, _useCollectorMutation.useCollectorMutation)();
     // @todo remove this for our own exit intent implementation, for instance:
@@ -30132,6 +30225,20 @@ const CollectorProvider = ({ children, handlers })=>{
         // Now grab the handler for the trigger (this could be optimised with a map)
         const handler = handlers?.find((handler)=>handler.behaviour === trigger.behaviour);
         log("CollectorProvider: attempting to show trigger", trigger, handler);
+=======
+    const { mutateAsync: collect } = (0, _useCollector.useCollector)();
+    const { registerHandler } = (0, _useExitIntent.useExitIntent)({
+        cookie: {
+            key: "cm_exit",
+            daysToExpire: 7
+        }
+    });
+    const [trigger, setTrigger] = (0, _react.useState)({});
+    const showTrigger = (trigger)=>{
+        if (!trigger || !trigger.behaviour) return null;
+        const handler = handlers?.find((handler)=>handler.id === trigger.id && handler.behaviour === trigger.behaviour) || handlers?.find((handler)=>handler.behaviour === trigger.behaviour);
+        log("CollectorProvider: showTrigger", trigger, handler);
+>>>>>>> Stashed changes
         if (!handler) {
             error("No handler found for trigger", trigger);
             return null;
@@ -30140,6 +30247,7 @@ const CollectorProvider = ({ children, handlers })=>{
             error("No invoke method found for handler", handler);
             return null;
         }
+<<<<<<< Updated upstream
         trackEvent("trigger_displayed", {
             triggerId: trigger.id,
             triggerType: trigger.type,
@@ -30187,6 +30295,31 @@ const CollectorProvider = ({ children, handlers })=>{
         });
     }, []);
     console.warn("displayTrigger", displayTrigger);
+=======
+        return handler.invoke(trigger);
+    };
+    (0, _react.useEffect)(()=>{
+        if (!exitIntentTriggers) return;
+        registerHandler({
+            id: "clientTriger",
+            handler: ()=>{
+                log("CollectorProvider: handler invoked for departure");
+                setTrigger({
+                    id: "exit_intent",
+                    behaviour: "modal",
+                    data: {
+                        text: "Before you go...",
+                        message: "Don't leave, there's still time to complete a booking now to get your offer",
+                        button: "Start Booking"
+                    },
+                    brand: (0, _handler.getBrand)(window.location.href)
+                });
+            }
+        });
+    }, [
+        exitIntentTriggers
+    ]);
+>>>>>>> Stashed changes
     // @todo this should be invoked when booted
     // and then on any window page URL changes.
     (0, _react.useEffect)(()=>{
@@ -30216,7 +30349,11 @@ const CollectorProvider = ({ children, handlers })=>{
                     params
                 },
                 referrer: {
+<<<<<<< Updated upstream
                     url: "https://example.com",
+=======
+                    url: document.referrer,
+>>>>>>> Stashed changes
                     title: document.referrer,
                     utm: {
                         // eslint-disable-next-line camelcase
@@ -30233,6 +30370,7 @@ const CollectorProvider = ({ children, handlers })=>{
                 }
             }).then((response)=>{
                 log("Sent collector data, retrieved:", response);
+<<<<<<< Updated upstream
                 // Set IdleTimer
                 // @todo turn this into the dynamic value
                 setIdleTimeout(3000);
@@ -30282,16 +30420,24 @@ const CollectorProvider = ({ children, handlers })=>{
                 // @todo Register default trigger, don't just fire it.
                 // That way we can defer the firing until a server configured delay.
                 fireDefaultTrigger();
+=======
+                if (response.trigger) setTrigger(response.trigger);
+>>>>>>> Stashed changes
             }).catch((err)=>{
                 error("failed to store collected data", err);
             });
             log("CollectorProvider: collected data");
+<<<<<<< Updated upstream
+=======
+            log("This will run after 1 second!");
+>>>>>>> Stashed changes
         }, initialDelay);
         return ()=>clearTimeout(delay);
     }, [
         booted,
         visitor
     ]);
+<<<<<<< Updated upstream
     // @todo would like to remove IdleTimer for our own, but unlike Exit Intent, the
     // Idle Timer we are using actually works nicely and is reactive to state changes.
     return /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _reactIdleTimer.IdleTimerProvider), {
@@ -30301,10 +30447,33 @@ const CollectorProvider = ({ children, handlers })=>{
         __source: {
             fileName: "src/context/CollectorContext.tsx",
             lineNumber: 292,
+=======
+    return /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _reactIdleTimer.IdleTimerProvider), {
+        timeout: 5000,
+        onPresenceChange: (presence)=>log("presence changed", presence),
+        onIdle: ()=>{
+            if (!idleTriggers) return;
+            log("CollectorProvider: handler invoked for presence");
+            setTrigger({
+                id: "fb_ads_homepage",
+                behaviour: "modal",
+                data: {
+                    text: "Are you still there?",
+                    message: "We'd love to welcome to you to our restaurant, book now to get your offer",
+                    button: "Start Booking"
+                },
+                brand: (0, _handler.getBrand)(window.location.href)
+            });
+        },
+        __source: {
+            fileName: "src/context/CollectorContext.tsx",
+            lineNumber: 152,
+>>>>>>> Stashed changes
             columnNumber: 5
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement(CollectorContext.Provider, {
+<<<<<<< Updated upstream
         value: {
             resetDisplayTrigger
         },
@@ -30317,19 +30486,39 @@ const CollectorProvider = ({ children, handlers })=>{
     }, children, showTrigger(displayTrigger)));
 };
 _s(CollectorProvider, "uI3E+nZGs4V4u6WdPBN4mr0pdq8=", false, function() {
+=======
+        value: {},
+        __source: {
+            fileName: "src/context/CollectorContext.tsx",
+            lineNumber: 172,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, children, showTrigger(trigger)));
+};
+_s(CollectorProvider, "ptMoBdfvjPNqa5vfOeatzMROdU8=", false, function() {
+>>>>>>> Stashed changes
     return [
         (0, _loggingContext.useLogging),
         (0, _useFingerprint.useFingerprint),
         (0, _visitorContext.useVisitor),
+<<<<<<< Updated upstream
         (0, _mixpanelContext.useMixpanel),
         (0, _useCollectorMutation.useCollectorMutation),
+=======
+        (0, _useCollector.useCollector),
+>>>>>>> Stashed changes
         (0, _useExitIntent.useExitIntent)
     ];
 });
 _c = CollectorProvider;
+<<<<<<< Updated upstream
 const CollectorContext = /*#__PURE__*/ (0, _react.createContext)({
     resetDisplayTrigger: ()=>{}
 });
+=======
+const CollectorContext = /*#__PURE__*/ (0, _react.createContext)({});
+>>>>>>> Stashed changes
 var _c;
 $RefreshReg$(_c, "CollectorProvider");
 
@@ -30338,7 +30527,11 @@ $RefreshReg$(_c, "CollectorProvider");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
+<<<<<<< Updated upstream
 },{"react":"9sfFD","./LoggingContext":"8R5Tl","./VisitorContext":"dTu2f","../hooks/useFingerprint":"5jzRW","react-idle-timer":"jyWNL","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","use-exit-intent":"dGlfY","../client/handler":"k8Kyg","./MixpanelContext":"isrpc","../hooks/useCollectorMutation":"cZ6dB","../utils/cookies":"1m4SD"}],"dTu2f":[function(require,module,exports) {
+=======
+},{"react":"9sfFD","./LoggingContext":"8R5Tl","./VisitorContext":"dTu2f","../hooks/useFingerprint":"5jzRW","react-idle-timer":"jyWNL","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","use-exit-intent":"dGlfY","../client/handler":"iY6MZ","../hooks/useCollector":"2crq3"}],"dTu2f":[function(require,module,exports) {
+>>>>>>> Stashed changes
 var $parcel$ReactRefreshHelpers$05a4 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -30449,9 +30642,15 @@ parcelHelpers.export(exports, "getCookie", ()=>getCookie);
 parcelHelpers.export(exports, "onCookieChanged", ()=>onCookieChanged);
 var _jsCookie = require("js-cookie");
 var _jsCookieDefault = parcelHelpers.interopDefault(_jsCookie);
+<<<<<<< Updated upstream
 const setCookie = (name, value, expires)=>{
     return (0, _jsCookieDefault.default).set(name, value, {
         expires: expires || 365,
+=======
+const setCookie = (name, value)=>{
+    return (0, _jsCookieDefault.default).set(name, value, {
+        expires: 365,
+>>>>>>> Stashed changes
         sameSite: "strict"
     });
 };
@@ -32698,6 +32897,7 @@ function $(e = {}) {
     };
 }
 
+<<<<<<< Updated upstream
 },{"react":"9sfFD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"k8Kyg":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$9c3b = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
@@ -32756,6 +32956,87 @@ const clientHandlers = [
             })
     }
 ];
+=======
+},{"react":"9sfFD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"iY6MZ":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "sendEvent", ()=>sendEvent);
+parcelHelpers.export(exports, "getOffer", ()=>getOffer);
+parcelHelpers.export(exports, "getUrl", ()=>getUrl);
+parcelHelpers.export(exports, "getBrand", ()=>getBrand);
+var _cookies = require("../utils/cookies");
+const sendEvent = (data)=>{
+    const firstSeen = (0, _cookies.getCookie)("firstSeen") ? (0, _cookies.getCookie)("firstSeen") || "" : (0, _cookies.setCookie)("firstSeen", new Date().toISOString()) || "";
+    const lastSeen = (0, _cookies.getCookie)("lastSeen") ? (0, _cookies.getCookie)("lastSeen") || "" : (0, _cookies.setCookie)("lastSeen", new Date().toISOString()) || "";
+    // Always update last seen
+    (0, _cookies.setCookie)("lastSeen", new Date().toISOString());
+    // Get visits from Cookies or set to 0
+    const previousVisits = (0, _cookies.getCookie)("visits") ? parseInt((0, _cookies.getCookie)("visits") || "0") : 0;
+    const visits = previousVisits + 1;
+    // Always update visits
+    (0, _cookies.setCookie)("visits", visits.toString());
+    const trigger = getTrigger({
+        ...data,
+        firstSeen,
+        lastSeen,
+        visits
+    });
+    return {
+        firstSeen: new Date(firstSeen),
+        lastSeen: new Date(lastSeen),
+        visits,
+        trigger
+    };
+};
+const getTrigger = (data)=>{
+    const trigger = {};
+    const context = {
+        firstSeen: data.firstSeen,
+        lastSeen: data.lastSeen,
+        visits: data.visits
+    };
+    const brand = getBrand(data?.page?.url);
+    const offer = getOffer(data?.page?.url);
+    const url = getUrl(data?.page?.url);
+    if (!brand || !offer) return trigger;
+    // User landing from FB Ads to the Home page (where all branded sites are listed)
+    if (data?.referrer?.utm?.campaign === "UTM_OFFER" && data?.page?.path === "/") {
+        trigger.id = "fb_ads_homepage";
+        trigger.behaviour = "modal";
+        trigger.data = {
+            text: "Get your " + offer + "!",
+            message: "Find the closest location to you and complete your booking now to get " + offer + "",
+            button: "Start Booking",
+            ...url ? {
+                url
+            } : {},
+            ...context
+        };
+        trigger.brand = brand;
+    }
+    return trigger;
+};
+const getOffer = (url)=>{
+    // if url contains tobycarvery.co.uk return Toby Carvery
+    if (url.includes("tobycarvery.co.uk") || url.includes("localhost:8000") || url.includes("vercel.app")) return "complimentary drink";
+    // if url contains browns-restaurants.co.uk return Browns
+    if (url.includes("browns-restaurants.co.uk")) return "complimentary cocktail";
+    // if url contains vintageinn.co.uk return Vintage Inns
+    if (url.includes("vintageinn.co.uk")) return "complimentary dessert";
+    return undefined;
+};
+const getUrl = (url)=>{
+    // When already on a book page, don't link out to book page
+    if (url.includes("book.") || url.includes("localhost:8000") || url.includes("vercel.app")) return undefined;
+    // if url contains tobycarvery.co.uk return Toby Carvery
+    if (url.includes("tobycarvery.co.uk") || url.includes("localhost:8000") || url.includes("vercel.app")) return "https://book.tobycarvery.co.uk/";
+    // if url contains browns-restaurants.co.uk return Browns
+    if (url.includes("browns-restaurants.co.uk")) return "https://book.browns-restaurants.co.uk/";
+    // if url contains vintageinn.co.uk return Vintage Inns
+    if (url.includes("vintageinn.co.uk")) return "https://book.vintageinn.co.uk/";
+    return undefined;
+};
+>>>>>>> Stashed changes
 const getBrand = (url)=>{
     // if url contains tobycarvery.co.uk return Toby Carvery
     if (url.includes("tobycarvery.co.uk") || url.includes("localhost:8000") || url.includes("vercel.app")) return {
@@ -32783,6 +33064,7 @@ const getBrand = (url)=>{
     };
 };
 
+<<<<<<< Updated upstream
   $parcel$ReactRefreshHelpers$9c3b.postlude(module);
 } finally {
   window.$RefreshReg$ = prevRefreshReg;
@@ -40564,6 +40846,16 @@ var _reactQuery = require("@tanstack/react-query");
 var _http = require("../utils/http");
 var _loggingContext = require("../context/LoggingContext");
 const useCollectorMutation = ()=>{
+=======
+},{"../utils/cookies":"1m4SD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"2crq3":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "useCollector", ()=>useCollector);
+var _reactQuery = require("@tanstack/react-query");
+var _http = require("../utils/http");
+var _loggingContext = require("../context/LoggingContext");
+const useCollector = ()=>{
+>>>>>>> Stashed changes
     const { log, error } = (0, _loggingContext.useLogging)();
     return (0, _reactQuery.useMutation)((data)=>{
         console.log("Sending CollectorUpdate to Collector API", data);
@@ -40579,7 +40871,11 @@ const useCollectorMutation = ()=>{
     });
 };
 
+<<<<<<< Updated upstream
 },{"@tanstack/react-query":"9B1CG","../utils/http":"8irnm","../context/LoggingContext":"8R5Tl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"8irnm":[function(require,module,exports) {
+=======
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@tanstack/react-query":"9B1CG","../utils/http":"8irnm","../context/LoggingContext":"8R5Tl"}],"8irnm":[function(require,module,exports) {
+>>>>>>> Stashed changes
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "hostname", ()=>hostname);
@@ -59526,6 +59822,312 @@ function withErrorBoundary(component, errorBoundaryProps) {
     return Wrapped;
 }
 
+<<<<<<< Updated upstream
 },{"react":"9sfFD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}]},["kzOiA","fp5lG","g4nFh"], "g4nFh", "parcelRequire34af")
+=======
+},{"react":"9sfFD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"fRNGg":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$29b4 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$29b4.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "TriggerModal", ()=>TriggerModal);
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _reactDom = require("react-dom");
+var _reactDomDefault = parcelHelpers.interopDefault(_reactDom);
+var _s = $RefreshSig$();
+const Modal = ({ trigger })=>{
+    _s();
+    const [open, setOpen] = (0, _react.useState)(true);
+    if (!open) return null;
+    return /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 9999
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 17,
+            columnNumber: 5
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            background: "#fff url('" + trigger?.brand?.backgroundImage + "') no-repeat center center",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%,-50%)",
+            backgroundColor: "#fff",
+            borderRadius: "0.5rem",
+            padding: 0,
+            boxShadow: "0 0 1rem rgba(0,0,0,0.5)",
+            border: "3px solid white",
+            zIndex: 9999
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 28,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            backgroundColor: trigger?.brand?.overlayColor,
+            maxWidth: "600px",
+            padding: "2rem",
+            borderRadius: "0.5rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 47,
+            columnNumber: 9
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
+        onClick: ()=>{
+            setOpen(false);
+        },
+        style: {
+            position: "absolute",
+            top: "0.5rem",
+            right: "0.5rem",
+            fontSize: "2rem",
+            backgroundColor: trigger?.brand?.fontColor,
+            color: trigger?.brand?.primaryColor,
+            border: "none",
+            borderRadius: "0.5rem",
+            padding: "0 1rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 56,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, "\xd7"), /*#__PURE__*/ (0, _reactDefault.default).createElement("h1", {
+        style: {
+            textAlign: "center",
+            fontSize: "2rem",
+            fontWeight: "bold",
+            marginTop: "1rem",
+            color: trigger?.brand?.fontColor,
+            textShadow: "0 1px 2px rgba(0,0,0,0.5)"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 74,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, trigger?.data?.text), /*#__PURE__*/ (0, _reactDefault.default).createElement("p", {
+        style: {
+            textAlign: "center",
+            fontSize: "1.5rem",
+            color: trigger?.brand?.fontColor,
+            fontWeight: 500,
+            marginTop: "1rem",
+            textShadow: "0 1px 2px rgba(0,0,0,0.5)"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 86,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, trigger?.data?.message), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            padding: "2rem 2rem 1rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 98,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
+        onClick: ()=>{
+            trigger?.data?.url ? window.open(trigger?.data?.url) : setOpen(false);
+        },
+        style: {
+            display: "block",
+            color: trigger?.brand?.primaryColor,
+            backgroundColor: trigger?.brand?.fontColor,
+            fontSize: "1.5rem",
+            width: "100%",
+            padding: "1rem",
+            borderRadius: "0.5rem",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.5)"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 99,
+            columnNumber: 13
+        },
+        __self: undefined
+    }, trigger?.data?.button)))));
+};
+_s(Modal, "dVkDIfRb5RN4FjtonjBYYwpg89o=");
+_c = Modal;
+const TriggerModal = ({ trigger })=>{
+    return /*#__PURE__*/ (0, _reactDomDefault.default).createPortal(/*#__PURE__*/ (0, _reactDefault.default).createElement(Modal, {
+        trigger: trigger,
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 126,
+            columnNumber: 32
+        },
+        __self: undefined
+    }), document.body);
+};
+_c1 = TriggerModal;
+var _c, _c1;
+$RefreshReg$(_c, "Modal");
+$RefreshReg$(_c1, "TriggerModal");
+
+  $parcel$ReactRefreshHelpers$29b4.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}],"lFHbs":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$ffea = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$ffea.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "TriggerYoutube", ()=>TriggerYoutube);
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _reactDom = require("react-dom");
+var _reactDomDefault = parcelHelpers.interopDefault(_reactDom);
+var _s = $RefreshSig$();
+const Youtube = ({ trigger })=>{
+    _s();
+    const [open, setOpen] = (0, _react.useState)(true);
+    if (!open) return null;
+    return /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 9999
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 17,
+            columnNumber: 5
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            background: "#fff url('" + trigger?.brand?.backgroundImage + "') no-repeat center center",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%,-50%)",
+            backgroundColor: "#fff",
+            borderRadius: "0.5rem",
+            padding: 0,
+            boxShadow: "0 0 1rem rgba(0,0,0,0.5)",
+            border: "3px solid white",
+            zIndex: 9999
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 28,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            backgroundColor: trigger?.brand?.overlayColor,
+            maxWidth: "600px",
+            padding: "2rem",
+            borderRadius: "0.5rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 47,
+            columnNumber: 9
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
+        onClick: ()=>{
+            setOpen(false);
+        },
+        style: {
+            position: "absolute",
+            top: "0.5rem",
+            right: "0.5rem",
+            fontSize: "2rem",
+            backgroundColor: trigger?.brand?.fontColor,
+            color: trigger?.brand?.primaryColor,
+            border: "none",
+            borderRadius: "0.5rem",
+            padding: "0 1rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 56,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, "\xd7"), /*#__PURE__*/ (0, _reactDefault.default).createElement("iframe", {
+        src: trigger?.data?.url,
+        allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+        style: {
+            width: "500px",
+            height: "260px",
+            marginTop: "1rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 74,
+            columnNumber: 11
+        },
+        __self: undefined
+    }))));
+};
+_s(Youtube, "dVkDIfRb5RN4FjtonjBYYwpg89o=");
+_c = Youtube;
+const TriggerYoutube = ({ trigger })=>{
+    return /*#__PURE__*/ (0, _reactDomDefault.default).createPortal(/*#__PURE__*/ (0, _reactDefault.default).createElement(Youtube, {
+        trigger: trigger,
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 86,
+            columnNumber: 32
+        },
+        __self: undefined
+    }), document.body);
+};
+_c1 = TriggerYoutube;
+var _c, _c1;
+$RefreshReg$(_c, "Youtube");
+$RefreshReg$(_c1, "TriggerYoutube");
+
+  $parcel$ReactRefreshHelpers$ffea.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}]},["kzOiA","fp5lG","g4nFh"], "g4nFh", "parcelRequire34af")
+>>>>>>> Stashed changes
 
 //# sourceMappingURL=fingerprint.js.map

@@ -24,6 +24,10 @@ yarn link
 yarn link fingerprint
 ```
 
+## Development (Coming Soon)
+
+You'll need a .env file for development, copy the .env.example file and fill in the values.
+
 ## Usage
 
 Simply wrap your app in the `FingerprintProvider` component:
