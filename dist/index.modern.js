@@ -561,8 +561,14 @@ const CollectorProvider = ({
       log('CollectorProvider: collected data');
       log('This will run after 1 second!');
     }, initialDelay);
-    return () => clearTimeout(delay);
+    return () => {
+      clearTimeout(delay);
+    };
   }, [booted, visitor]);
+  useEffect(() => {
+    if (!timeoutId) return;
+    return () => clearTimeout(timeoutId);
+  }, [timeoutId]);
   const renderedTrigger = React.useMemo(() => {
     return showTrigger(trigger);
   }, [showTrigger, trigger]);
@@ -570,8 +576,8 @@ const CollectorProvider = ({
     timeout: idleStatusAfterMs,
     onPresenceChange: presence => {
       if (presence.type === 'active') {
-        if (timeoutId) clearTimeout(timeoutId);
         setTimeoutId(null);
+        clearTimeout(timeoutId);
       }
       log('presence changed', presence);
     },
