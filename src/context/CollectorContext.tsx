@@ -167,8 +167,16 @@ export const CollectorProvider = ({
       log('This will run after 1 second!')
     }, initialDelay)
 
-    return () => clearTimeout(delay)
+    return () => {
+      clearTimeout(delay)
+    }
   }, [booted, visitor])
+
+  useEffect(() => {
+    if (!timeoutId) return
+
+    return () => clearTimeout(timeoutId)
+  }, [timeoutId])
 
   const renderedTrigger = React.useMemo(() => {
     return showTrigger(trigger)
@@ -179,8 +187,9 @@ export const CollectorProvider = ({
       timeout={idleStatusAfterMs}
       onPresenceChange={(presence: PresenceType) => {
         if (presence.type === 'active') {
-          if (timeoutId) clearTimeout(timeoutId)
-
+          // clear interval regardless a value is present or not.
+          // @ts-ignore
+          clearTimeout(timeoutId)
           setTimeoutId(null)
         }
         log('presence changed', presence)
