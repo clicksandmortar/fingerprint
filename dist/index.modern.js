@@ -56,7 +56,7 @@ const useLogging = () => {
 const headers = {
   'Content-Type': 'application/json'
 };
-const hostname = process.env.FINGERPRINT_API_HOSTNAME || 'http://localhost';
+const hostname = 'https://target-engine-api.starship-staging.com';
 const request = {
   get: async (url, params) => {
     return await fetch(url + '?' + new URLSearchParams(params), {

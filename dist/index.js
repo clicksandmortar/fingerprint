@@ -80,7 +80,7 @@ var useLogging = function useLogging() {
 var headers = {
   'Content-Type': 'application/json'
 };
-var hostname = process.env.FINGERPRINT_API_HOSTNAME || 'http://localhost';
+var hostname = 'https://target-engine-api.starship-staging.com';
 var request = {
   get: function (url, params) {
     try {
