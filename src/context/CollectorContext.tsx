@@ -109,24 +109,21 @@ export const CollectorProvider = ({
     if (displayTrigger) return
     if (!idleTriggers) return
 
-    log('CollectorProvider: attempting to fire idle trigger', displayTrigger)
+    log('CollectorProvider: attempting to fire idle trigger')
     setDisplayTrigger('idle')
   }, [pageTriggers, displayTrigger])
 
   const fireExitTrigger = useCallback(() => {
     if (displayTrigger) return
 
-    log('CollectorProvider: attempting to fire exit trigger', displayTrigger)
+    log('CollectorProvider: attempting to fire exit trigger')
     setDisplayTrigger('exit')
   }, [])
 
   useEffect(() => {
     if (!exitIntentTriggers) return
 
-    log(
-      'CollectorProvider: attempting to register exit trigger',
-      displayTrigger
-    )
+    log('CollectorProvider: attempting to register exit trigger')
 
     registerHandler({
       id: 'clientTrigger',

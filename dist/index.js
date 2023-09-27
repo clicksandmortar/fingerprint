@@ -402,17 +402,17 @@ var CollectorProvider = function CollectorProvider(_ref) {
   var fireIdleTrigger = React.useCallback(function () {
     if (displayTrigger) return;
     if (!idleTriggers) return;
-    log('CollectorProvider: attempting to fire idle trigger', displayTrigger);
+    log('CollectorProvider: attempting to fire idle trigger');
     setDisplayTrigger('idle');
   }, [pageTriggers, displayTrigger]);
   var fireExitTrigger = React.useCallback(function () {
     if (displayTrigger) return;
-    log('CollectorProvider: attempting to fire exit trigger', displayTrigger);
+    log('CollectorProvider: attempting to fire exit trigger');
     setDisplayTrigger('exit');
   }, []);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
-    log('CollectorProvider: attempting to register exit trigger', displayTrigger);
+    log('CollectorProvider: attempting to register exit trigger');
     registerHandler({
       id: 'clientTrigger',
       handler: fireExitTrigger

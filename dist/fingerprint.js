@@ -30158,7 +30158,7 @@ const CollectorProvider = ({ children, handlers })=>{
     const fireIdleTrigger = (0, _react.useCallback)(()=>{
         if (displayTrigger) return;
         if (!idleTriggers) return;
-        log("CollectorProvider: attempting to fire idle trigger", displayTrigger);
+        log("CollectorProvider: attempting to fire idle trigger");
         setDisplayTrigger("idle");
     }, [
         pageTriggers,
@@ -30166,12 +30166,12 @@ const CollectorProvider = ({ children, handlers })=>{
     ]);
     const fireExitTrigger = (0, _react.useCallback)(()=>{
         if (displayTrigger) return;
-        log("CollectorProvider: attempting to fire exit trigger", displayTrigger);
+        log("CollectorProvider: attempting to fire exit trigger");
         setDisplayTrigger("exit");
     }, []);
     (0, _react.useEffect)(()=>{
         if (!exitIntentTriggers) return;
-        log("CollectorProvider: attempting to register exit trigger", displayTrigger);
+        log("CollectorProvider: attempting to register exit trigger");
         registerHandler({
             id: "clientTrigger",
             handler: fireExitTrigger
@@ -30273,7 +30273,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 234,
+            lineNumber: 231,
             columnNumber: 5
         },
         __self: undefined
@@ -30283,7 +30283,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 247,
+            lineNumber: 244,
             columnNumber: 7
         },
         __self: undefined
