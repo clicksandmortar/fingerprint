@@ -613,9 +613,15 @@ var CollectorProvider = function CollectorProvider(_ref) {
       log('This will run after 1 second!');
     }, initialDelay);
     return function () {
-      return clearTimeout(delay);
+      clearTimeout(delay);
     };
   }, [booted, visitor]);
+  React.useEffect(function () {
+    if (!timeoutId) return;
+    return function () {
+      return clearTimeout(timeoutId);
+    };
+  }, [timeoutId]);
   var renderedTrigger = React__default.useMemo(function () {
     return showTrigger(trigger);
   }, [showTrigger, trigger]);
@@ -623,7 +629,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
     timeout: idleStatusAfterMs,
     onPresenceChange: function onPresenceChange(presence) {
       if (presence.type === 'active') {
-        if (timeoutId) clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
         setTimeoutId(null);
       }
       log('presence changed', presence);

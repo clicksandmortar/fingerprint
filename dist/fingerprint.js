@@ -30236,10 +30236,18 @@ const CollectorProvider = ({ children, handlers })=>{
             log("CollectorProvider: collected data");
             log("This will run after 1 second!");
         }, initialDelay);
-        return ()=>clearTimeout(delay);
+        return ()=>{
+            clearTimeout(delay);
+        };
     }, [
         booted,
         visitor
+    ]);
+    (0, _react.useEffect)(()=>{
+        if (!timeoutId) return;
+        return ()=>clearTimeout(timeoutId);
+    }, [
+        timeoutId
     ]);
     const renderedTrigger = (0, _reactDefault.default).useMemo(()=>{
         return showTrigger(trigger);
@@ -30251,7 +30259,9 @@ const CollectorProvider = ({ children, handlers })=>{
         timeout: idleStatusAfterMs,
         onPresenceChange: (presence)=>{
             if (presence.type === "active") {
-                if (timeoutId) clearTimeout(timeoutId);
+                // clear interval regardless a value is present or not.
+                // @ts-ignore
+                clearTimeout(timeoutId);
                 setTimeoutId(null);
             }
             log("presence changed", presence);
@@ -30272,7 +30282,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 178,
+            lineNumber: 186,
             columnNumber: 5
         },
         __self: undefined
@@ -30280,13 +30290,13 @@ const CollectorProvider = ({ children, handlers })=>{
         value: {},
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 205,
+            lineNumber: 214,
             columnNumber: 7
         },
         __self: undefined
     }, children, renderedTrigger));
 };
-_s(CollectorProvider, "UhuAntJ1IOxNf4VvyIjwJOq3Wx0=", false, function() {
+_s(CollectorProvider, "UG2+V+lnXrVkrRtczUBHTXwTI+w=", false, function() {
     return [
         (0, _loggingContext.useLogging),
         (0, _useFingerprint.useFingerprint),
@@ -32794,7 +32804,7 @@ const useCollector = ()=>{
     });
 };
 
-},{"@tanstack/react-query":"9B1CG","../utils/http":"8irnm","../context/LoggingContext":"8R5Tl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"8irnm":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@tanstack/react-query":"9B1CG","../utils/http":"8irnm","../context/LoggingContext":"8R5Tl"}],"8irnm":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "hostname", ()=>hostname);
