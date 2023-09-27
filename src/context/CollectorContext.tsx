@@ -198,12 +198,6 @@ export const CollectorProvider = ({
           // @todo turn this into the dynamic value
           setIdleTimeout(3 * 1000)
 
-          // if (response.pageTriggers) {
-          //   log(
-          //     'CollectorProvider: received page triggers',
-          //     response.pageTriggers
-          //   )
-
           // setPageTriggers(response.pageTriggers)
           // @todo this is a hardcoded hack
           setPageTriggers([

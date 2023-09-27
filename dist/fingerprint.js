@@ -2961,11 +2961,12 @@ styles.rel = "stylesheet";
 // @todo automatically strip any non-namespaced styles
 styles.href = "../dist/fingerprint.css";
 document.head.appendChild(styles);
+console.log("Fingerprint Widget Loaded");
 // Renders widget
 (0, _reactDomDefault.default).render(/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _reactDefault.default).StrictMode, {
     __source: {
         fileName: "src/fingerprint.tsx",
-        lineNumber: 23,
+        lineNumber: 25,
         columnNumber: 3
     },
     __self: undefined
@@ -2975,7 +2976,7 @@ document.head.appendChild(styles);
     debug: document?.currentScript?.getAttribute("data-debug") === "true",
     __source: {
         fileName: "src/fingerprint.tsx",
-        lineNumber: 24,
+        lineNumber: 26,
         columnNumber: 5
     },
     __self: undefined
@@ -30229,11 +30230,6 @@ const CollectorProvider = ({ children, handlers })=>{
                 // Set IdleTimer
                 // @todo turn this into the dynamic value
                 setIdleTimeout(3000);
-                // if (response.pageTriggers) {
-                //   log(
-                //     'CollectorProvider: received page triggers',
-                //     response.pageTriggers
-                //   )
                 // setPageTriggers(response.pageTriggers)
                 // @todo this is a hardcoded hack
                 setPageTriggers([
@@ -30313,7 +30309,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 276,
+            lineNumber: 270,
             columnNumber: 5
         },
         __self: undefined
@@ -30323,7 +30319,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 289,
+            lineNumber: 283,
             columnNumber: 7
         },
         __self: undefined

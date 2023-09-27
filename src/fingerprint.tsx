@@ -18,6 +18,8 @@ styles.rel = 'stylesheet'
 styles.href = '../dist/fingerprint.css'
 document.head.appendChild(styles)
 
+console.log('Fingerprint Widget Loaded')
+
 // Renders widget
 ReactDOM.render(
   <React.StrictMode>
