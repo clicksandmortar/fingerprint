@@ -30142,7 +30142,7 @@ const CollectorProvider = ({ children, handlers })=>{
         // Check if the server has provided a trigger for:
         // - the type of trigger we want to display (idle, exit, default, etc.)
         // - the behaviour of the trigger we want to display (modal, youtube, inverse, etc.)
-        const trigger = pageTriggers.find((trigger)=>trigger.type === displayTrigger && handlers?.find((handler)=>handler.behaviour === trigger.behaviour));
+        const trigger = pageTriggers.find((trigger)=>trigger.invocation === displayTrigger && handlers?.find((handler)=>handler.behaviour === trigger.behaviour));
         log("CollectorProvider: available triggers include: ", pageTriggers);
         log("CollectorProvider: attempting to show displayTrigger", displayTrigger, trigger);
         if (!trigger) {
@@ -30164,7 +30164,7 @@ const CollectorProvider = ({ children, handlers })=>{
         }
         trackEvent("trigger_displayed", {
             triggerId: trigger.id,
-            triggerType: trigger.type,
+            triggerType: trigger.invocation,
             triggerBehaviour: trigger.behaviour
         });
         return handler.invoke(trigger);

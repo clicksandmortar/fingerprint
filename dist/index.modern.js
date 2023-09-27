@@ -336,7 +336,7 @@ const CollectorProvider = ({
     if (!displayTrigger) {
       return null;
     }
-    const trigger = pageTriggers.find(trigger => trigger.type === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour)));
+    const trigger = pageTriggers.find(trigger => trigger.invocation === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour)));
     log('CollectorProvider: available triggers include: ', pageTriggers);
     log('CollectorProvider: attempting to show displayTrigger', displayTrigger, trigger);
     if (!trigger) {
@@ -357,7 +357,7 @@ const CollectorProvider = ({
     }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
-      triggerType: trigger.type,
+      triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     });
     return handler.invoke(trigger);

@@ -79,7 +79,7 @@ export const CollectorProvider = ({
     // - the behaviour of the trigger we want to display (modal, youtube, inverse, etc.)
     const trigger = pageTriggers.find(
       (trigger) =>
-        trigger.type === displayTrigger &&
+        trigger.invocation === displayTrigger &&
         handlers?.find((handler) => handler.behaviour === trigger.behaviour)
     )
 
@@ -117,7 +117,7 @@ export const CollectorProvider = ({
 
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
-      triggerType: trigger.type,
+      triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     })
 

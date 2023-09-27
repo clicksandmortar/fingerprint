@@ -42,7 +42,7 @@ export type CollectorResponse = {
 
 export type Trigger = {
   id?: string
-  type?:
+  invocation?:
     | 'INVOCATION_UNSPECIFIED'
     | 'INVOCATION_IDLE_TIME'
     | 'INVOCATION_EXIT_INTENT'

@@ -56,7 +56,7 @@ FingerprintProviderProps) => {
   // @todo Move this to a Handlers Context and add logging.
   const registerHandler = React.useCallback(
     (trigger: Trigger) => {
-      setHandlers((handlers: any) => {
+      setHandlers((handlers) => {
         return [...handlers, trigger]
       })
     },

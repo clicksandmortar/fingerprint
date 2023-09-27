@@ -386,7 +386,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
       return null;
     }
     var trigger = pageTriggers.find(function (trigger) {
-      return trigger.type === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return trigger.invocation === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
         return handler.behaviour === trigger.behaviour;
       }));
     });
@@ -412,7 +412,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
     }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
-      triggerType: trigger.type,
+      triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     });
     return handler.invoke(trigger);
