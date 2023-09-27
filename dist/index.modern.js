@@ -426,7 +426,17 @@ const CollectorProvider = ({
         const payload = await response.json();
         log('Sent collector data, retrieved:', payload);
         setIdleTimeout(idleStatusAfterMs);
-        setPageTriggers(payload.pageTriggers);
+        setPageTriggers([{
+          behaviour: 'BEHAVIOUR_MODAL',
+          data: {
+            buttonText: 'Click Here (go home)',
+            buttonURL: 'https://stage65-az.harvester.co.uk/',
+            heading: 'You have gone idle',
+            message: 'You have gone idle, click the button to go home'
+          },
+          id: 'e33c979d-74aa-4a3c-8241-31a3528dce1b',
+          invocation: 'INVOCATION_IDLE_TIME'
+        }]);
         if (!payload.intently) {
           log('CollectorProvider: user is in Fingerprint cohort');
           setIntently(false);
