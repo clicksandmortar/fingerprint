@@ -477,7 +477,6 @@ const useCollector = () => {
 const Modal = ({
   trigger
 }) => {
-  var _trigger$data, _trigger$data2, _trigger$data5;
   const {
     resetDisplayTrigger
   } = useCollector();
@@ -496,105 +495,10 @@ const Modal = ({
   if (!open) {
     return null;
   }
+  console.log('Showing trigger', trigger, closeModal);
   return React__default.createElement("div", {
-    id: 'variant-overlay-106412',
-    "data-browser": 'firefox',
-    "data-device": 'desktop'
-  }, React__default.createElement("div", {
-    className: 'variant-bg variant-animated variant-fadeIn',
-    style: {
-      display: 'block'
-    }
-  }, React__default.createElement("div", {
-    className: 'variant-overlay-outer variant-animated variant-bounceInDown variant-animDelay2',
-    style: {
-      display: 'block'
-    }
-  }, React__default.createElement("div", {
-    className: 'variant-overlay-inner smc_clearfix',
-    "data-bgtheme": 'dark',
-    "data-changes": 'variant-overlay-inner|width,background-image,background-color',
-    "data-edits": 'content6'
-  }, React__default.createElement("div", {
-    className: 'variant-img-outer'
-  }, React__default.createElement("div", {
-    className: 'variant-img variant-img1 variant-animated variant-bounceInDown variant-animDelay6',
-    "data-changes": '.variant-img1|margin-top,margin-bottom,image-upload',
-    "data-edits": 'content1'
-  }), React__default.createElement("div", {
-    className: 'variant-img variant-img2 variant-animated variant-bounceInRight variant-animDelay8',
-    "data-changes": '.variant-img2|margin-top,margin-bottom,image-upload',
-    "data-edits": 'content2'
-  }), React__default.createElement("div", {
-    className: 'variant-img variant-img3 variant-animated variant-bounceInRight variant-animDelay10',
-    "data-changes": '.variant-img3|margin-top,margin-bottom,image-upload',
-    "data-edits": 'content3'
-  }), React__default.createElement("div", {
-    className: 'variant-img variant-img4 variant-animated variant-bounceInRight variant-animDelay12',
-    "data-changes": '.variant-img4|margin-top,margin-bottom,image-upload',
-    "data-edits": 'content4'
-  })), React__default.createElement("div", {
-    className: 'variant-text-outer'
-  }, React__default.createElement("div", {
-    className: 'variant-text variant-text1 variant-animated variant-bounceInDown variant-animDelay4',
-    "data-edits": 'text1',
-    "data-changes": '.variant-text1|font-size,color,margin-top,margin-bottom'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.text), React__default.createElement("div", {
-    className: 'variant-text variant-text2 variant-animated variant-bounceInRight variant-animDelay6',
-    "data-edits": 'text2',
-    "data-changes": '.variant-text2|font-size,color,margin-top,margin-bottom'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.message), React__default.createElement("div", {
-    className: 'variant-text variant-text3 variant-animated variant-bounceInLeft variant-animDelay8',
-    "data-edits": 'text3',
-    "data-changes": '.variant-text3|font-size,color,margin-top,margin-bottom'
-  }), React__default.createElement("div", {
-    className: 'variant-text variant-text4 variant-animated variant-bounceInRight variant-animDelay10',
-    "data-edits": 'text4',
-    "data-changes": '.variant-text4|font-size,color,margin-top,margin-bottom'
-  })), React__default.createElement("div", {
-    className: 'variant-option variant-clickRedirect',
-    onClick: e => {
-      var _trigger$data3, _trigger$data4;
-      e.preventDefault();
-      trigger !== null && trigger !== void 0 && (_trigger$data3 = trigger.data) !== null && _trigger$data3 !== void 0 && _trigger$data3.url ? window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.url) : closeModal();
-    }
-  }, React__default.createElement("div", {
-    className: 'variant-input-group'
-  }, React__default.createElement("span", {
-    className: 'variant-button variant-animated variant-fadeInRight variant-animDelay10',
-    "data-edits": 'text10',
-    "data-changes": '.variant-button|font-size,background-color,color'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.button))), React__default.createElement("div", {
-    className: 'variant-long-close variant-animated variant-fadeInUp variant-animDelay14',
-    "data-engage-class": 'variant-engaged'
-  }, React__default.createElement("a", {
-    "data-close-type": 'long_close',
-    className: 'variant-link variant-closer',
-    href: '#rdl',
-    "data-engage-text": '',
-    "data-edits": 'text7,text11',
-    "data-changes": 'variant-long-close a.variant-link|font-size,color,margin-top,margin-bottom',
-    onClick: e => {
-      e.preventDefault();
-      closeModal();
-    }
-  })), React__default.createElement("div", {
-    className: 'variant-close variant-animated variant-fadeInRight variant-animDelay4 variant-closer'
-  }, React__default.createElement("a", {
-    "data-close-type": 'x_close',
-    className: 'variant-link',
-    href: '#rdl'
-  }, "\u2715")))), React__default.createElement("div", {
-    className: 'variant-close-safe variant-closer'
-  }, React__default.createElement("a", {
-    "data-close-type": 'x_close',
-    className: 'variant-link',
-    href: '#rdl',
-    onClick: e => {
-      e.preventDefault();
-      closeModal();
-    }
-  }, "[close]"))));
+    className: 'adens-test'
+  }, React__default.createElement("h1", null, "test"));
 };
 const TriggerModal = ({
   trigger

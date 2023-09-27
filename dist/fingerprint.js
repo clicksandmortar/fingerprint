@@ -56670,242 +56670,23 @@ const Modal = ({ trigger })=>{
         document.head.appendChild(styles);
     });
     if (!open) return null;
+    console.log("Showing trigger", trigger, closeModal);
     return /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        id: "variant-overlay-106412",
-        "data-browser": "firefox",
-        "data-device": "desktop",
+        className: "adens-test",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 34,
+            lineNumber: 36,
             columnNumber: 5
         },
         __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-bg variant-animated variant-fadeIn",
-        style: {
-            display: "block"
-        },
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("h1", {
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 39,
+            lineNumber: 37,
             columnNumber: 7
         },
         __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-overlay-outer variant-animated variant-bounceInDown variant-animDelay2",
-        style: {
-            display: "block"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 43,
-            columnNumber: 9
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-overlay-inner smc_clearfix",
-        "data-bgtheme": "dark",
-        "data-changes": "variant-overlay-inner|width,background-image,background-color",
-        "data-edits": "content6",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 47,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-img-outer",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 53,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-img variant-img1 variant-animated variant-bounceInDown variant-animDelay6",
-        "data-changes": ".variant-img1|margin-top,margin-bottom,image-upload",
-        "data-edits": "content1",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 54,
-            columnNumber: 15
-        },
-        __self: undefined
-    }), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-img variant-img2 variant-animated variant-bounceInRight variant-animDelay8",
-        "data-changes": ".variant-img2|margin-top,margin-bottom,image-upload",
-        "data-edits": "content2",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 59,
-            columnNumber: 15
-        },
-        __self: undefined
-    }), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-img variant-img3 variant-animated variant-bounceInRight variant-animDelay10",
-        "data-changes": ".variant-img3|margin-top,margin-bottom,image-upload",
-        "data-edits": "content3",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 64,
-            columnNumber: 15
-        },
-        __self: undefined
-    }), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-img variant-img4 variant-animated variant-bounceInRight variant-animDelay12",
-        "data-changes": ".variant-img4|margin-top,margin-bottom,image-upload",
-        "data-edits": "content4",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 69,
-            columnNumber: 15
-        },
-        __self: undefined
-    })), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-text-outer",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 75,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-text variant-text1 variant-animated variant-bounceInDown variant-animDelay4",
-        "data-edits": "text1",
-        "data-changes": ".variant-text1|font-size,color,margin-top,margin-bottom",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 76,
-            columnNumber: 15
-        },
-        __self: undefined
-    }, trigger?.data?.text), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-text variant-text2 variant-animated variant-bounceInRight variant-animDelay6",
-        "data-edits": "text2",
-        "data-changes": ".variant-text2|font-size,color,margin-top,margin-bottom",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 83,
-            columnNumber: 15
-        },
-        __self: undefined
-    }, trigger?.data?.message), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-text variant-text3 variant-animated variant-bounceInLeft variant-animDelay8",
-        "data-edits": "text3",
-        "data-changes": ".variant-text3|font-size,color,margin-top,margin-bottom",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 90,
-            columnNumber: 15
-        },
-        __self: undefined
-    }), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-text variant-text4 variant-animated variant-bounceInRight variant-animDelay10",
-        "data-edits": "text4",
-        "data-changes": ".variant-text4|font-size,color,margin-top,margin-bottom",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 95,
-            columnNumber: 15
-        },
-        __self: undefined
-    })), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-option variant-clickRedirect",
-        onClick: (e)=>{
-            e.preventDefault();
-            trigger?.data?.url ? window.open(trigger?.data?.url) : closeModal();
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 101,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-input-group",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 110,
-            columnNumber: 15
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("span", {
-        className: "variant-button variant-animated variant-fadeInRight variant-animDelay10",
-        "data-edits": "text10",
-        "data-changes": ".variant-button|font-size,background-color,color",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 111,
-            columnNumber: 17
-        },
-        __self: undefined
-    }, trigger?.data?.button))), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-long-close variant-animated variant-fadeInUp variant-animDelay14",
-        "data-engage-class": "variant-engaged",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 120,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("a", {
-        "data-close-type": "long_close",
-        className: "variant-link variant-closer",
-        href: "#rdl",
-        "data-engage-text": "",
-        "data-edits": "text7,text11",
-        "data-changes": "variant-long-close a.variant-link|font-size,color,margin-top,margin-bottom",
-        onClick: (e)=>{
-            e.preventDefault();
-            closeModal();
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 124,
-            columnNumber: 15
-        },
-        __self: undefined
-    })), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-close variant-animated variant-fadeInRight variant-animDelay4 variant-closer",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 137,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("a", {
-        "data-close-type": "x_close",
-        className: "variant-link",
-        href: "#rdl",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 138,
-            columnNumber: 15
-        },
-        __self: undefined
-    }, "✕")))), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "variant-close-safe variant-closer",
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 144,
-            columnNumber: 9
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("a", {
-        "data-close-type": "x_close",
-        className: "variant-link",
-        href: "#rdl",
-        onClick: (e)=>{
-            e.preventDefault();
-            closeModal();
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 145,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, "[close]"))));
+    }, "test"));
 };
 _s(Modal, "yQ/Kc9LKA9vheD3GtQ1JQ3r19ic=", false, function() {
     return [
@@ -56918,7 +56699,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 163,
+            lineNumber: 43,
             columnNumber: 32
         },
         __self: undefined
