@@ -12,7 +12,11 @@ type TriggerCallback = (
 // @todo refactor where this lives
 export type Handler = {
   id?: string
-  type?: 'exit' | 'idle' | 'default'
+  invocation?:
+    | 'INVOCATION_UNSPECIFIED'
+    | 'INVOCATION_IDLE_TIME'
+    | 'INVOCATION_EXIT_INTENT'
+    | 'INVOCATION_PAGE_LOAD'
   behaviour?: string
   invoke?: TriggerCallback
 }
@@ -20,7 +24,7 @@ export type Handler = {
 export const clientHandlers: Handler[] = [
   {
     id: 'modal_v1',
-    behaviour: 'modal',
+    behaviour: 'BEHAVIOUR_MODAL',
     invoke: (trigger: Trigger) => <TriggerModal trigger={trigger} />
   },
   {

@@ -941,7 +941,7 @@ var TriggerInverse = function TriggerInverse(_ref3) {
 
 var clientHandlers = [{
   id: 'modal_v1',
-  behaviour: 'modal',
+  behaviour: 'BEHAVIOUR_MODAL',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerModal, {
       trigger: trigger

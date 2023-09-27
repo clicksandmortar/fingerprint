@@ -47,7 +47,7 @@ export type Trigger = {
     | 'INVOCATION_IDLE_TIME'
     | 'INVOCATION_EXIT_INTENT'
     | 'INVOCATION_PAGE_LOAD'
-  behaviour?: string
+  behaviour?: 'BEHAVIOUR_MODAL'
   // delay?: number
   // invoke:(trigger: Trigger) => void;
   // @todo: commented out, out of date?

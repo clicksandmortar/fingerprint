@@ -859,7 +859,7 @@ const TriggerInverse = ({}) => {
 
 const clientHandlers = [{
   id: 'modal_v1',
-  behaviour: 'modal',
+  behaviour: 'BEHAVIOUR_MODAL',
   invoke: trigger => React__default.createElement(TriggerModal, {
     trigger: trigger
   })

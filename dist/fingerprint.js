@@ -56593,12 +56593,12 @@ var _reactDefault = parcelHelpers.interopDefault(_react);
 const clientHandlers = [
     {
         id: "modal_v1",
-        behaviour: "modal",
+        behaviour: "BEHAVIOUR_MODAL",
         invoke: (trigger)=>/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _triggerModal.TriggerModal), {
                 trigger: trigger,
                 __source: {
                     fileName: "src/client/handler.tsx",
-                    lineNumber: 24,
+                    lineNumber: 28,
                     columnNumber: 35
                 },
                 __self: undefined
@@ -56611,7 +56611,7 @@ const clientHandlers = [
                 trigger: trigger,
                 __source: {
                     fileName: "src/client/handler.tsx",
-                    lineNumber: 29,
+                    lineNumber: 33,
                     columnNumber: 35
                 },
                 __self: undefined
@@ -56624,7 +56624,7 @@ const clientHandlers = [
                 trigger: trigger,
                 __source: {
                     fileName: "src/client/handler.tsx",
-                    lineNumber: 34,
+                    lineNumber: 38,
                     columnNumber: 35
                 },
                 __self: undefined
