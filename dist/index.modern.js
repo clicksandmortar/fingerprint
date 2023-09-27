@@ -316,6 +316,22 @@ const CollectorProvider = ({
   const [pageTriggers, setPageTriggers] = useState([]);
   const [displayTrigger, setDisplayTrigger] = useState(undefined);
   const [timeoutId, setTimeoutId] = useState(null);
+  const [intently, setIntently] = useState(false);
+  useEffect(() => {
+    if (intently) return;
+    log('CollectorProvider: removing intently overlay');
+    const runningInterval = setInterval(function () {
+      var children = document.querySelectorAll('div[id=^smc-v5-overlay-]');
+      Array.prototype.forEach.call(children, function (node) {
+        node.parentNode.removeChild(node);
+        log('CollectorProvider: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, 100);
+    return () => {
+      clearInterval(runningInterval);
+    };
+  }, [intently]);
   const showTrigger = displayTrigger => {
     if (!displayTrigger) {
       return null;
@@ -412,8 +428,10 @@ const CollectorProvider = ({
         setPageTriggers(response.pageTriggers);
         if (!response.intently) {
           log('CollectorProvider: user is in Fingerprint cohort');
+          setIntently(false);
         } else {
           log('CollectorProvider: user is in Intently cohort');
+          setIntently(true);
         }
       }).catch(err => {
         error('failed to store collected data', err);

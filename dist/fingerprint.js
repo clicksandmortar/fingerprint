@@ -30118,6 +30118,25 @@ const CollectorProvider = ({ children, handlers })=>{
     const [pageTriggers, setPageTriggers] = (0, _react.useState)([]);
     const [displayTrigger, setDisplayTrigger] = (0, _react.useState)(undefined);
     const [timeoutId, setTimeoutId] = (0, _react.useState)(null);
+    const [intently, setIntently] = (0, _react.useState)(false);
+    // Removes the intently overlay, if intently is false
+    (0, _react.useEffect)(()=>{
+        if (intently) return;
+        log("CollectorProvider: removing intently overlay");
+        const runningInterval = setInterval(function() {
+            var children = document.querySelectorAll("div[id=^smc-v5-overlay-]");
+            Array.prototype.forEach.call(children, function(node) {
+                node.parentNode.removeChild(node);
+                log("CollectorProvider: successfully removed intently overlay");
+                clearInterval(runningInterval);
+            });
+        }, 100);
+        return ()=>{
+            clearInterval(runningInterval);
+        };
+    }, [
+        intently
+    ]);
     const showTrigger = (displayTrigger)=>{
         if (!displayTrigger) return null;
         // Check if the server has provided a trigger for:
@@ -30231,10 +30250,15 @@ const CollectorProvider = ({ children, handlers })=>{
                 // @todo turn this into the dynamic value
                 setIdleTimeout(idleStatusAfterMs);
                 setPageTriggers(response.pageTriggers);
-                if (!response.intently) // remove intently overlay here
-                log("CollectorProvider: user is in Fingerprint cohort");
-                else // show intently overlay here
-                log("CollectorProvider: user is in Intently cohort");
+                if (!response.intently) {
+                    // remove intently overlay here
+                    log("CollectorProvider: user is in Fingerprint cohort");
+                    setIntently(false);
+                } else {
+                    // show intently overlay here
+                    log("CollectorProvider: user is in Intently cohort");
+                    setIntently(true);
+                }
             }).catch((err)=>{
                 error("failed to store collected data", err);
             });
@@ -30273,7 +30297,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 231,
+            lineNumber: 255,
             columnNumber: 5
         },
         __self: undefined
@@ -30283,13 +30307,13 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 244,
+            lineNumber: 268,
             columnNumber: 7
         },
         __self: undefined
     }, children, renderedTrigger));
 };
-_s(CollectorProvider, "MzKMtQlFCTrjTsrjsvFuTCxCfs0=", false, function() {
+_s(CollectorProvider, "LVcGpzfo1R2jhAS+8BQOsO5SdO8=", false, function() {
     return [
         (0, _loggingContext.useLogging),
         (0, _useFingerprint.useFingerprint),

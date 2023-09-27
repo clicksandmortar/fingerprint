@@ -40,8 +40,30 @@ export const CollectorProvider = ({
   const [displayTrigger, setDisplayTrigger] = useState<
     DisplayTrigger | undefined
   >(undefined)
-
   const [timeoutId, setTimeoutId] = useState<null | NodeJS.Timeout>(null)
+  const [intently, setIntently] = useState<boolean>(false)
+
+  // Removes the intently overlay, if intently is false
+  useEffect(() => {
+    if (intently) return
+
+    log('CollectorProvider: removing intently overlay')
+
+    const runningInterval = setInterval(function () {
+      var children = document.querySelectorAll('div[id=^smc-v5-overlay-]')
+      Array.prototype.forEach.call(children, function (node: any) {
+        node.parentNode.removeChild(node)
+
+        log('CollectorProvider: successfully removed intently overlay')
+
+        clearInterval(runningInterval)
+      })
+    }, 100)
+
+    return () => {
+      clearInterval(runningInterval)
+    }
+  }, [intently])
 
   const showTrigger = (displayTrigger: DisplayTrigger | undefined) => {
     if (!displayTrigger) {
@@ -200,9 +222,11 @@ export const CollectorProvider = ({
           if (!response.intently) {
             // remove intently overlay here
             log('CollectorProvider: user is in Fingerprint cohort')
+            setIntently(false)
           } else {
             // show intently overlay here
             log('CollectorProvider: user is in Intently cohort')
+            setIntently(true)
           }
         })
         .catch((err) => {

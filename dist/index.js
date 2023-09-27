@@ -363,6 +363,24 @@ var CollectorProvider = function CollectorProvider(_ref) {
   var _useState4 = React.useState(null),
     timeoutId = _useState4[0],
     setTimeoutId = _useState4[1];
+  var _useState5 = React.useState(false),
+    intently = _useState5[0],
+    setIntently = _useState5[1];
+  React.useEffect(function () {
+    if (intently) return;
+    log('CollectorProvider: removing intently overlay');
+    var runningInterval = setInterval(function () {
+      var children = document.querySelectorAll('div[id=^smc-v5-overlay-]');
+      Array.prototype.forEach.call(children, function (node) {
+        node.parentNode.removeChild(node);
+        log('CollectorProvider: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, 100);
+    return function () {
+      clearInterval(runningInterval);
+    };
+  }, [intently]);
   var showTrigger = function showTrigger(displayTrigger) {
     if (!displayTrigger) {
       return null;
@@ -467,8 +485,10 @@ var CollectorProvider = function CollectorProvider(_ref) {
         setPageTriggers(response.pageTriggers);
         if (!response.intently) {
           log('CollectorProvider: user is in Fingerprint cohort');
+          setIntently(false);
         } else {
           log('CollectorProvider: user is in Intently cohort');
+          setIntently(true);
         }
       })["catch"](function (err) {
         error('failed to store collected data', err);
