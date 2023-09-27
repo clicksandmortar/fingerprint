@@ -2955,12 +2955,12 @@ widget.id = "fingerprint-widget";
 document.body.appendChild(widget);
 // Embeds widget styles
 // @todo this should be provided by CDN
-const styles = document.createElement("link");
-styles.rel = "stylesheet";
-// @todo update parcel to use the hashed styles
-// @todo automatically strip any non-namespaced styles
-styles.href = "../dist/fingerprint.css";
-document.head.appendChild(styles);
+// const styles = document.createElement('link')
+// styles.rel = 'stylesheet'
+// // @todo update parcel to use the hashed styles
+// // @todo automatically strip any non-namespaced styles
+// styles.href = '../dist/fingerprint.css'
+// document.head.appendChild(styles)
 console.log("Fingerprint Widget Loaded");
 // Renders widget
 (0, _reactDomDefault.default).render(/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _reactDefault.default).StrictMode, {
