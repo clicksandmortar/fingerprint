@@ -30185,9 +30185,12 @@ const CollectorProvider = ({ children, handlers })=>{
     ]);
     const fireExitTrigger = (0, _react.useCallback)(()=>{
         if (displayTrigger) return;
+        if (!pageTriggers?.find((trigger)=>trigger.invocation === "INVOCATION_EXIT_INTENT")) return;
         log("CollectorProvider: attempting to fire exit trigger");
         setDisplayTrigger("INVOCATION_EXIT_INTENT");
-    }, []);
+    }, [
+        pageTriggers
+    ]);
     (0, _react.useEffect)(()=>{
         if (!exitIntentTriggers) return;
         log("CollectorProvider: attempting to register exit trigger");
@@ -30298,7 +30301,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 261,
+            lineNumber: 268,
             columnNumber: 5
         },
         __self: undefined
@@ -30308,7 +30311,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 274,
+            lineNumber: 281,
             columnNumber: 7
         },
         __self: undefined
@@ -58826,6 +58829,10 @@ const Modal = ({ trigger })=>{
         "data-close-type": "x_close",
         className: "variant-link",
         href: "#rdl",
+        onClick: (e)=>{
+            e.preventDefault();
+            closeModal();
+        },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
             lineNumber: 2082,
@@ -58836,7 +58843,7 @@ const Modal = ({ trigger })=>{
         className: "variant-close-safe variant-closer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2092,
+            lineNumber: 2096,
             columnNumber: 11
         },
         __self: undefined
@@ -58850,7 +58857,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2093,
+            lineNumber: 2097,
             columnNumber: 13
         },
         __self: undefined
@@ -58867,7 +58874,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2112,
+            lineNumber: 2116,
             columnNumber: 32
         },
         __self: undefined

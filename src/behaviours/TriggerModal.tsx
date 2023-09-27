@@ -2083,6 +2083,10 @@ const Modal = ({ trigger }: Props) => {
                   data-close-type='x_close'
                   className='variant-link'
                   href='#rdl'
+                  onClick={(e) => {
+                    e.preventDefault()
+                    closeModal()
+                  }}
                 >
                   ✕
                 </a>

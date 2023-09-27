@@ -142,9 +142,16 @@ export const CollectorProvider = ({
   const fireExitTrigger = useCallback(() => {
     if (displayTrigger) return
 
+    if (
+      !pageTriggers?.find(
+        (trigger) => trigger.invocation === 'INVOCATION_EXIT_INTENT'
+      )
+    )
+      return
+
     log('CollectorProvider: attempting to fire exit trigger')
     setDisplayTrigger('INVOCATION_EXIT_INTENT')
-  }, [])
+  }, [pageTriggers])
 
   useEffect(() => {
     if (!exitIntentTriggers) return
