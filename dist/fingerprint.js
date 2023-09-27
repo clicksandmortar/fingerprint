@@ -2971,7 +2971,7 @@ document.head.appendChild(styles);
     __self: undefined
 }, /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _widget.Widget), {
     appId: document?.currentScript?.getAttribute("id") || "",
-    consent: document?.currentScript?.getAttribute("data-consent") === "true",
+    consent: document?.currentScript?.getAttribute("data-consent") === "false",
     debug: document?.currentScript?.getAttribute("data-debug") === "true",
     __source: {
         fileName: "src/fingerprint.tsx",
@@ -26376,7 +26376,7 @@ var _handler = require("../client/handler");
 var _mixpanelContext = require("./MixpanelContext");
 var _s = $RefreshSig$();
 _react1.init({
-    dsn: "https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144",
+    dsn: undefined,
     integrations: [
         new _react1.BrowserTracing({
             // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
@@ -30120,7 +30120,7 @@ const CollectorProvider = ({ children, handlers })=>{
         // Check if the server has provided a trigger for:
         // - the type of trigger we want to display (idle, exit, default, etc.)
         // - the behaviour of the trigger we want to display (modal, youtube, inverse, etc.)
-        const trigger = pageTriggers.find((trigger)=>trigger.type === displayTrigger && handlers?.find((handler)=>handler.behaviour === trigger.behaviour));
+        const trigger = pageTriggers.find((trigger)=>trigger.invocation === displayTrigger && handlers?.find((handler)=>handler.behaviour === trigger.behaviour));
         log("CollectorProvider: available triggers include: ", pageTriggers);
         log("CollectorProvider: attempting to show displayTrigger", displayTrigger, trigger);
         if (!trigger) {
@@ -30142,7 +30142,7 @@ const CollectorProvider = ({ children, handlers })=>{
         }
         trackEvent("trigger_displayed", {
             triggerId: trigger.id,
-            triggerType: trigger.type,
+            triggerInvocation: trigger.invocation,
             triggerBehaviour: trigger.behaviour
         });
         // @todo remove when we remove use-exit-intent plugin for our own implementation
@@ -30246,7 +30246,7 @@ const CollectorProvider = ({ children, handlers })=>{
                 setPageTriggers([
                     {
                         id: "welcome_modal",
-                        type: "default",
+                        invocation: "default",
                         behaviour: "modal",
                         data: {
                             text: "Hey, welcome to the site?",
@@ -30257,7 +30257,7 @@ const CollectorProvider = ({ children, handlers })=>{
                     },
                     {
                         id: "fb_ads_homepage",
-                        type: "idle",
+                        invocation: "idle",
                         behaviour: "modal",
                         data: {
                             text: "Are you still there?",
@@ -30268,7 +30268,7 @@ const CollectorProvider = ({ children, handlers })=>{
                     },
                     {
                         id: "fb_ads_homepage",
-                        type: "exit",
+                        invocation: "exit",
                         behaviour: "inverse_flow",
                         data: {
                             foo: "this is an example for Ed",
@@ -30369,7 +30369,7 @@ parcelHelpers.export(exports, "request", ()=>request);
 const headers = {
     "Content-Type": "application/json"
 };
-const hostname = "http://localhost";
+const hostname = "https://target-engine-api.starship-staging.com";
 const request = {
     get: async (url, params)=>{
         return await fetch(url + "?" + new URLSearchParams(params), {
@@ -35734,7 +35734,6 @@ var _visitorContext = require("./VisitorContext");
 var _mixpanelBrowser = require("mixpanel-browser");
 var _mixpanelBrowserDefault = parcelHelpers.interopDefault(_mixpanelBrowser);
 var _s = $RefreshSig$(), _s1 = $RefreshSig$();
-console.log("process.env.MIXPANEL_TOKEN", "d122fa924e1ea97d6b98569440c65a95");
 const MIXPANEL_TOKEN = "d122fa924e1ea97d6b98569440c65a95";
 const init = (cfg)=>{
     (0, _mixpanelBrowserDefault.default).init(MIXPANEL_TOKEN, {
@@ -35769,7 +35768,7 @@ const MixpanelProvider = ({ children })=>{
         },
         __source: {
             fileName: "src/context/MixpanelContext.tsx",
-            lineNumber: 49,
+            lineNumber: 45,
             columnNumber: 5
         },
         __self: undefined

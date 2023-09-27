@@ -20,10 +20,10 @@
     "node": ">=10"
   },
   "scripts": {
-    "start": "MIXPANEL_TOKEN=d122fa924e1ea97d6b98569440c65a95 microbundle-crl watch --no-compress --format modern,cjs",
+    "start": "microbundle-crl watch --no-compress --format modern,cjs",
     "build": "microbundle-crl --no-compress --format modern,cjs",
     "build:fingerprint": "parcel build src/fingerprint.tsx --target legacy",
-    "watch:fingerprint": "MIXPANEL_TOKEN=d122fa924e1ea97d6b98569440c65a95 parcel watch src/fingerprint.tsx --target legacy",
+    "watch:fingerprint": "parcel watch src/fingerprint.tsx --target legacy",
     "prepare": "run-s build",
     "test": "run-s test:unit test:lint test:build",
     "test:build": "run-s build",

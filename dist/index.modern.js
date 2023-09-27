@@ -56,7 +56,7 @@ const useLogging = () => {
 const headers = {
   'Content-Type': 'application/json'
 };
-const hostname = process.env.FINGERPRINT_API_HOSTNAME || 'http://localhost';
+const hostname = 'https://target-engine-api.starship-staging.com';
 const request = {
   get: async (url, params) => {
     return await fetch(url + '?' + new URLSearchParams(params), {
@@ -669,10 +669,7 @@ const getBrand = url => {
   }
 };
 
-if (process.env.MIXPANEL_TOKEN !== 'development') {
-  console.log('process.env.MIXPANEL_TOKEN', process.env.MIXPANEL_TOKEN);
-}
-const MIXPANEL_TOKEN = process.env.MIXPANEL_TOKEN || 'undefined';
+const MIXPANEL_TOKEN = 'd122fa924e1ea97d6b98569440c65a95';
 const init = cfg => {
   mixpanel.init(MIXPANEL_TOKEN, {
     debug: cfg.debug,
@@ -762,7 +759,7 @@ const CollectorProvider = ({
     if (!displayTrigger) {
       return null;
     }
-    const trigger = pageTriggers.find(trigger => trigger.type === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour)));
+    const trigger = pageTriggers.find(trigger => trigger.invocation === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour)));
     log('CollectorProvider: available triggers include: ', pageTriggers);
     log('CollectorProvider: attempting to show displayTrigger', displayTrigger, trigger);
     if (!trigger) {
@@ -783,7 +780,7 @@ const CollectorProvider = ({
     }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
-      triggerType: trigger.type,
+      triggerInvocation: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     });
     if (displayTrigger === 'exit') {
@@ -864,7 +861,7 @@ const CollectorProvider = ({
         setIdleTimeout(3 * 1000);
         setPageTriggers([{
           id: 'welcome_modal',
-          type: 'default',
+          invocation: 'default',
           behaviour: 'modal',
           data: {
             text: 'Hey, welcome to the site?',
@@ -874,7 +871,7 @@ const CollectorProvider = ({
           brand: getBrand(window.location.href)
         }, {
           id: 'fb_ads_homepage',
-          type: 'idle',
+          invocation: 'idle',
           behaviour: 'modal',
           data: {
             text: 'Are you still there?',
@@ -884,7 +881,7 @@ const CollectorProvider = ({
           brand: getBrand(window.location.href)
         }, {
           id: 'fb_ads_homepage',
-          type: 'exit',
+          invocation: 'exit',
           behaviour: 'inverse_flow',
           data: {
             foo: 'this is an example for Ed',
@@ -915,7 +912,7 @@ const CollectorContext = createContext({
 });
 
 init$1({
-  dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
+  dsn: process.env.SENTRY_DSN,
   integrations: [new BrowserTracing({
     tracePropagationTargets: ['localhost:8000', 'https:yourserver.io/api/']
   }), new Replay()],
