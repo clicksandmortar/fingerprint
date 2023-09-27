@@ -30209,8 +30209,8 @@ const CollectorProvider = ({ children, handlers })=>{
                     params
                 },
                 referrer: {
-                    url: "https://example.com",
-                    title: document.referrer,
+                    url: document.referrer,
+                    title: "",
                     utm: {
                         // eslint-disable-next-line camelcase
                         source: params?.utm_source,

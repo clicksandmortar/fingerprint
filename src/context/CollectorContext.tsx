@@ -175,8 +175,8 @@ export const CollectorProvider = ({
           params
         },
         referrer: {
-          url: 'https://example.com' || document.referrer,
-          title: document.referrer,
+          url: document.referrer,
+          title: '',
           utm: {
             // eslint-disable-next-line camelcase
             source: params?.utm_source,

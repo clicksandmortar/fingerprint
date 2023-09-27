@@ -455,8 +455,8 @@ var CollectorProvider = function CollectorProvider(_ref) {
           params: params
         },
         referrer: {
-          url: 'https://example.com' ,
-          title: document.referrer,
+          url: document.referrer,
+          title: '',
           utm: {
             source: params === null || params === void 0 ? void 0 : params.utm_source,
             medium: params === null || params === void 0 ? void 0 : params.utm_medium,
