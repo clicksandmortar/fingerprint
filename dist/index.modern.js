@@ -372,7 +372,7 @@ const CollectorProvider = ({
     if (displayTrigger) return;
     log('CollectorProvider: attempting to fire exit trigger');
     setDisplayTrigger('INVOCATION_EXIT_INTENT');
-  }, []);
+  }, [displayTrigger]);
   useEffect(() => {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -487,7 +487,7 @@ const useCollector = () => {
 const Modal = ({
   trigger
 }) => {
-  var _trigger$brand, _trigger$brand2, _trigger$brand3, _trigger$brand4, _trigger$brand5, _trigger$data, _trigger$brand6, _trigger$data2, _trigger$brand7, _trigger$brand8, _trigger$data5;
+  var _trigger$data, _trigger$data2, _trigger$data5;
   const {
     resetDisplayTrigger
   } = useCollector();
@@ -517,77 +517,104 @@ const Modal = ({
       zIndex: 9999
     }
   }, React__default.createElement("div", {
+    id: 'variant-overlay-106412',
+    "data-browser": 'firefox',
+    "data-device": 'desktop'
+  }, React__default.createElement("div", {
+    className: 'variant-bg variant-animated variant-fadeIn',
     style: {
-      background: "#fff url('" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$brand = trigger.brand) === null || _trigger$brand === void 0 ? void 0 : _trigger$brand.backgroundImage) + "') no-repeat center center",
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%,-50%)',
-      backgroundColor: '#fff',
-      borderRadius: '0.5rem',
-      padding: 0,
-      boxShadow: '0 0 1rem rgba(0,0,0,0.5)',
-      border: '3px solid white',
-      zIndex: 9999
+      display: 'block'
     }
   }, React__default.createElement("div", {
+    className: 'variant-overlay-outer variant-animated variant-bounceInDown variant-animDelay2',
     style: {
-      backgroundColor: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand2 = trigger.brand) === null || _trigger$brand2 === void 0 ? void 0 : _trigger$brand2.overlayColor,
-      maxWidth: '600px',
-      padding: '2rem',
-      borderRadius: '0.5rem'
+      display: 'block'
     }
-  }, React__default.createElement("button", {
-    onClick: closeModal,
-    style: {
-      position: 'absolute',
-      top: '0.5rem',
-      right: '0.5rem',
-      fontSize: '2rem',
-      backgroundColor: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand3 = trigger.brand) === null || _trigger$brand3 === void 0 ? void 0 : _trigger$brand3.fontColor,
-      color: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand4 = trigger.brand) === null || _trigger$brand4 === void 0 ? void 0 : _trigger$brand4.primaryColor,
-      border: 'none',
-      borderRadius: '0.5rem',
-      padding: '0 1rem'
-    }
-  }, "\u00D7"), React__default.createElement("h1", {
-    style: {
-      textAlign: 'center',
-      fontSize: '2rem',
-      fontWeight: 'bold',
-      marginTop: '1rem',
-      color: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand5 = trigger.brand) === null || _trigger$brand5 === void 0 ? void 0 : _trigger$brand5.fontColor,
-      textShadow: '0 1px 2px rgba(0,0,0,0.5)'
-    }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.text), React__default.createElement("p", {
-    style: {
-      textAlign: 'center',
-      fontSize: '1.5rem',
-      color: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand6 = trigger.brand) === null || _trigger$brand6 === void 0 ? void 0 : _trigger$brand6.fontColor,
-      fontWeight: 500,
-      marginTop: '1rem',
-      textShadow: '0 1px 2px rgba(0,0,0,0.5)'
-    }
+  }, React__default.createElement("div", {
+    className: 'variant-overlay-inner smc_clearfix',
+    "data-bgtheme": 'dark',
+    "data-changes": 'variant-overlay-inner|width,background-image,background-color',
+    "data-edits": 'content6'
+  }, React__default.createElement("div", {
+    className: 'variant-img-outer'
+  }, React__default.createElement("div", {
+    className: 'variant-img variant-img1 variant-animated variant-bounceInDown variant-animDelay6',
+    "data-changes": '.variant-img1|margin-top,margin-bottom,image-upload',
+    "data-edits": 'content1'
+  }), React__default.createElement("div", {
+    className: 'variant-img variant-img2 variant-animated variant-bounceInRight variant-animDelay8',
+    "data-changes": '.variant-img2|margin-top,margin-bottom,image-upload',
+    "data-edits": 'content2'
+  }), React__default.createElement("div", {
+    className: 'variant-img variant-img3 variant-animated variant-bounceInRight variant-animDelay10',
+    "data-changes": '.variant-img3|margin-top,margin-bottom,image-upload',
+    "data-edits": 'content3'
+  }), React__default.createElement("div", {
+    className: 'variant-img variant-img4 variant-animated variant-bounceInRight variant-animDelay12',
+    "data-changes": '.variant-img4|margin-top,margin-bottom,image-upload',
+    "data-edits": 'content4'
+  })), React__default.createElement("div", {
+    className: 'variant-text-outer'
+  }, React__default.createElement("div", {
+    className: 'variant-text variant-text1 variant-animated variant-bounceInDown variant-animDelay4',
+    "data-edits": 'text1',
+    "data-changes": '.variant-text1|font-size,color,margin-top,margin-bottom'
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.text), React__default.createElement("div", {
+    className: 'variant-text variant-text2 variant-animated variant-bounceInRight variant-animDelay6',
+    "data-edits": 'text2',
+    "data-changes": '.variant-text2|font-size,color,margin-top,margin-bottom'
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.message), React__default.createElement("div", {
-    style: {
-      padding: '2rem 2rem 1rem'
-    }
-  }, React__default.createElement("button", {
-    onClick: () => {
+    className: 'variant-text variant-text3 variant-animated variant-bounceInLeft variant-animDelay8',
+    "data-edits": 'text3',
+    "data-changes": '.variant-text3|font-size,color,margin-top,margin-bottom'
+  }), React__default.createElement("div", {
+    className: 'variant-text variant-text4 variant-animated variant-bounceInRight variant-animDelay10',
+    "data-edits": 'text4',
+    "data-changes": '.variant-text4|font-size,color,margin-top,margin-bottom'
+  })), React__default.createElement("div", {
+    className: 'variant-option variant-clickRedirect',
+    onClick: e => {
       var _trigger$data3, _trigger$data4;
-      trigger !== null && trigger !== void 0 && (_trigger$data3 = trigger.data) !== null && _trigger$data3 !== void 0 && _trigger$data3.url ? window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.url) : setOpen(false);
-    },
-    style: {
-      display: 'block',
-      color: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand7 = trigger.brand) === null || _trigger$brand7 === void 0 ? void 0 : _trigger$brand7.primaryColor,
-      backgroundColor: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand8 = trigger.brand) === null || _trigger$brand8 === void 0 ? void 0 : _trigger$brand8.fontColor,
-      fontSize: '1.5rem',
-      width: '100%',
-      padding: '1rem',
-      borderRadius: '0.5rem',
-      boxShadow: '0 1px 2px rgba(0,0,0,0.5)'
+      e.preventDefault();
+      trigger !== null && trigger !== void 0 && (_trigger$data3 = trigger.data) !== null && _trigger$data3 !== void 0 && _trigger$data3.url ? window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.url) : closeModal();
     }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.button)))));
+  }, React__default.createElement("div", {
+    className: 'variant-input-group'
+  }, React__default.createElement("span", {
+    className: 'variant-button variant-animated variant-fadeInRight variant-animDelay10',
+    "data-edits": 'text10',
+    "data-changes": '.variant-button|font-size,background-color,color'
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.button))), React__default.createElement("div", {
+    className: 'variant-long-close variant-animated variant-fadeInUp variant-animDelay14',
+    "data-engage-class": 'variant-engaged'
+  }, React__default.createElement("a", {
+    "data-close-type": 'long_close',
+    className: 'variant-link variant-closer',
+    href: '#rdl',
+    "data-engage-text": '',
+    "data-edits": 'text7,text11',
+    "data-changes": 'variant-long-close a.variant-link|font-size,color,margin-top,margin-bottom',
+    onClick: e => {
+      e.preventDefault();
+      closeModal();
+    }
+  })), React__default.createElement("div", {
+    className: 'variant-close variant-animated variant-fadeInRight variant-animDelay4 variant-closer'
+  }, React__default.createElement("a", {
+    "data-close-type": 'x_close',
+    className: 'variant-link',
+    href: '#rdl'
+  }, "\u2715")))), React__default.createElement("div", {
+    className: 'variant-close-safe variant-closer'
+  }, React__default.createElement("a", {
+    "data-close-type": 'x_close',
+    className: 'variant-link',
+    href: '#rdl',
+    onClick: e => {
+      e.preventDefault();
+      closeModal();
+    }
+  }, "[close]")))));
 };
 const TriggerModal = ({
   trigger
