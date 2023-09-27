@@ -143,7 +143,6 @@ var useCollectorMutation = function useCollectorMutation() {
     error = _useLogging.error;
   return reactQuery.useMutation(function (data) {
     var _data$visitor;
-    console.log('Sending CollectorUpdate to Collector API', data);
     return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(function (response) {
       log('Collector API response', response);
       return response;
@@ -283,10 +282,7 @@ var useVisitor = function useVisitor() {
   return React.useContext(VisitorContext);
 };
 
-if (process.env.MIXPANEL_TOKEN !== 'development') {
-  console.log('process.env.MIXPANEL_TOKEN', process.env.MIXPANEL_TOKEN);
-}
-var MIXPANEL_TOKEN = process.env.MIXPANEL_TOKEN || 'undefined';
+var MIXPANEL_TOKEN = 'd122fa924e1ea97d6b98569440c65a95';
 var init = function init(cfg) {
   mixpanel.init(MIXPANEL_TOKEN, {
     debug: cfg.debug,
@@ -469,6 +465,11 @@ var CollectorProvider = function CollectorProvider(_ref) {
         log('Sent collector data, retrieved:', response);
         setIdleTimeout(idleStatusAfterMs);
         setPageTriggers(response.pageTriggers);
+        if (!response.intently) {
+          log('CollectorProvider: user is in Fingerprint cohort');
+        } else {
+          log('CollectorProvider: user is in Intently cohort');
+        }
       })["catch"](function (err) {
         error('failed to store collected data', err);
       });

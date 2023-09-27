@@ -199,6 +199,14 @@ export const CollectorProvider = ({
           setIdleTimeout(idleStatusAfterMs)
 
           setPageTriggers(response.pageTriggers)
+
+          if (!response.intently) {
+            // remove intently overlay here
+            log('CollectorProvider: user is in Fingerprint cohort')
+          } else {
+            // show intently overlay here
+            log('CollectorProvider: user is in Intently cohort')
+          }
         })
         .catch((err) => {
           error('failed to store collected data', err)

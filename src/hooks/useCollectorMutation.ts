@@ -8,8 +8,6 @@ export const useCollectorMutation = () => {
 
   return useMutation<CollectorResponse, unknown, CollectorUpdate, unknown>(
     (data: CollectorUpdate) => {
-      console.log('Sending CollectorUpdate to Collector API', data)
-
       return request
         .post(hostname + '/collector/' + data?.visitor?.id, data)
         .then((response) => {

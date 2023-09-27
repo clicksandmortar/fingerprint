@@ -36,6 +36,8 @@ export type CollectorResponse = {
   lastSeen: Date
   visits: number
   pageTriggers: Trigger[]
+  // @todo remove this temp hack once split testing with Intently is complete
+  intently: boolean
 }
 
 export type Trigger = {

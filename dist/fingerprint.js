@@ -2973,7 +2973,8 @@ console.log("Fingerprint Widget Loaded");
 }, /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _widget.Widget), {
     appId: document?.currentScript?.getAttribute("id") || "",
     consent: document?.currentScript?.getAttribute("data-consent") === "false",
-    debug: document?.currentScript?.getAttribute("data-debug") === "true",
+    // @todo Revert this from 'false' to 'true'
+    debug: document?.currentScript?.getAttribute("data-debug") === "false",
     __source: {
         fileName: "src/fingerprint.tsx",
         lineNumber: 26,
@@ -30230,6 +30231,10 @@ const CollectorProvider = ({ children, handlers })=>{
                 // @todo turn this into the dynamic value
                 setIdleTimeout(idleStatusAfterMs);
                 setPageTriggers(response.pageTriggers);
+                if (!response.intently) // remove intently overlay here
+                log("CollectorProvider: user is in Fingerprint cohort");
+                else // show intently overlay here
+                log("CollectorProvider: user is in Intently cohort");
             }).catch((err)=>{
                 error("failed to store collected data", err);
             });
@@ -30268,7 +30273,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 226,
+            lineNumber: 234,
             columnNumber: 5
         },
         __self: undefined
@@ -30278,7 +30283,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 239,
+            lineNumber: 247,
             columnNumber: 7
         },
         __self: undefined
@@ -32676,7 +32681,6 @@ var _loggingContext = require("../context/LoggingContext");
 const useCollectorMutation = ()=>{
     const { log, error } = (0, _loggingContext.useLogging)();
     return (0, _reactQuery.useMutation)((data)=>{
-        console.log("Sending CollectorUpdate to Collector API", data);
         return (0, _http.request).post((0, _http.hostname) + "/collector/" + data?.visitor?.id, data).then((response)=>{
             log("Collector API response", response);
             return response;
@@ -32754,7 +32758,6 @@ var _visitorContext = require("./VisitorContext");
 var _mixpanelBrowser = require("mixpanel-browser");
 var _mixpanelBrowserDefault = parcelHelpers.interopDefault(_mixpanelBrowser);
 var _s = $RefreshSig$(), _s1 = $RefreshSig$();
-console.log("process.env.MIXPANEL_TOKEN", "d122fa924e1ea97d6b98569440c65a95");
 const MIXPANEL_TOKEN = "d122fa924e1ea97d6b98569440c65a95";
 const init = (cfg)=>{
     (0, _mixpanelBrowserDefault.default).init(MIXPANEL_TOKEN, {
@@ -32789,7 +32792,7 @@ const MixpanelProvider = ({ children })=>{
         },
         __source: {
             fileName: "src/context/MixpanelContext.tsx",
-            lineNumber: 49,
+            lineNumber: 45,
             columnNumber: 5
         },
         __self: undefined

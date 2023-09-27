@@ -4,11 +4,7 @@ import { useFingerprint } from '../hooks/useFingerprint'
 import { useVisitor } from './VisitorContext'
 import mixpanel, { Callback, Config } from 'mixpanel-browser'
 
-if (process.env.MIXPANEL_TOKEN !== 'development') {
-  console.log('process.env.MIXPANEL_TOKEN', process.env.MIXPANEL_TOKEN)
-}
-
-const MIXPANEL_TOKEN = process.env.MIXPANEL_TOKEN || 'undefined'
+const MIXPANEL_TOKEN = 'd122fa924e1ea97d6b98569440c65a95'
 
 const init = (cfg: Partial<Config>) => {
   mixpanel.init(MIXPANEL_TOKEN, {

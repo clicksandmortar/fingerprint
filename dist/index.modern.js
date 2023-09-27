@@ -100,7 +100,6 @@ const useCollectorMutation = () => {
   } = useLogging();
   return useMutation(data => {
     var _data$visitor;
-    console.log('Sending CollectorUpdate to Collector API', data);
     return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(response => {
       log('Collector API response', response);
       return response;
@@ -233,10 +232,7 @@ const useVisitor = () => {
   return useContext(VisitorContext);
 };
 
-if (process.env.MIXPANEL_TOKEN !== 'development') {
-  console.log('process.env.MIXPANEL_TOKEN', process.env.MIXPANEL_TOKEN);
-}
-const MIXPANEL_TOKEN = process.env.MIXPANEL_TOKEN || 'undefined';
+const MIXPANEL_TOKEN = 'd122fa924e1ea97d6b98569440c65a95';
 const init = cfg => {
   mixpanel.init(MIXPANEL_TOKEN, {
     debug: cfg.debug,
@@ -414,6 +410,11 @@ const CollectorProvider = ({
         log('Sent collector data, retrieved:', response);
         setIdleTimeout(idleStatusAfterMs);
         setPageTriggers(response.pageTriggers);
+        if (!response.intently) {
+          log('CollectorProvider: user is in Fingerprint cohort');
+        } else {
+          log('CollectorProvider: user is in Intently cohort');
+        }
       }).catch(err => {
         error('failed to store collected data', err);
       });
