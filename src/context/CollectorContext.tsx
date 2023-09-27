@@ -1,13 +1,13 @@
-import React, { createContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { getBrand } from '../client/handler'
-import { Trigger } from '../client/types'
-import { useCollector } from '../hooks/useCollector'
+import { Handler, getBrand } from '../client/handler'
+import { CollectorResponse, Trigger } from '../client/types'
+import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
-import { Handler } from './FingerprintContext'
 import { useLogging } from './LoggingContext'
 import { useVisitor } from './VisitorContext'
+import { useMixpanel } from './MixpanelContext'
 
 const idleStatusAfterMs = 5 * 1000
 
@@ -15,6 +15,8 @@ export type CollectorProviderProps = {
   children?: React.ReactNode
   handlers?: Handler[]
 }
+
+type DisplayTrigger = 'idle' | 'exit' | 'default'
 
 export const CollectorProvider = ({
   children,
@@ -24,82 +26,118 @@ export const CollectorProvider = ({
   const { appId, booted, initialDelay, exitIntentTriggers, idleTriggers } =
     useFingerprint()
   const { visitor } = useVisitor()
-  const { mutateAsync: collect } = useCollector()
+  const { trackEvent } = useMixpanel()
+  const { mutateAsync: collect } = useCollectorMutation()
+  // @todo remove this for our own exit intent implementation, for instance:
+  // https://fullstackheroes.com/tutorials/react/exit-intent-react/
   const { registerHandler } = useExitIntent({
-    cookie: { key: 'cm_exit', daysToExpire: 7 }
+    cookie: { key: '_cm_exit', daysToExpire: 7 }
   })
-  const [trigger, setTrigger] = useState<Trigger>({})
+  const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
+    idleStatusAfterMs
+  )
+  const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
+  const [displayTrigger, setDisplayTrigger] = useState<
+    DisplayTrigger | undefined
+  >(undefined)
 
   const [timeoutId, setTimeoutId] = useState<null | NodeJS.Timeout>(null)
 
-  const showTrigger = React.useCallback(
-    (trigger: Trigger) => {
-      if (!trigger || !trigger.behaviour) {
-        return null
-      }
+  const showTrigger = (displayTrigger: DisplayTrigger | undefined) => {
+    if (!displayTrigger) {
+      return null
+    }
 
-      const handler =
-        handlers?.find(
-          (handler: Handler) =>
-            handler.id === trigger.id && handler.behaviour === trigger.behaviour
-        ) ||
-        handlers?.find(
-          (handler: Handler) => handler.behaviour === trigger.behaviour
-        )
+    // Check if the server has provided a trigger for:
+    // - the type of trigger we want to display (idle, exit, default, etc.)
+    // - the behaviour of the trigger we want to display (modal, youtube, inverse, etc.)
+    const trigger = pageTriggers.find(
+      (trigger) =>
+        trigger.type === displayTrigger &&
+        handlers?.find((handler) => handler.behaviour === trigger.behaviour)
+    )
 
-      log('CollectorProvider: showTrigger', trigger, handler)
+    log('CollectorProvider: available triggers include: ', pageTriggers)
+    log(
+      'CollectorProvider: attempting to show displayTrigger',
+      displayTrigger,
+      trigger
+    )
 
-      if (!handler) {
-        error('No handler found for trigger', trigger)
-        return null
-      }
-      if (handler.skip) {
-        log('Explicitly skipping trigger handler', trigger, handler)
-        return
-      }
+    if (!trigger) {
+      error('No trigger found for displayTrigger', displayTrigger)
+      return null
+    }
 
-      if (!handler.invoke) {
-        error('No invoke method found for handler', handler)
+    log('CollectorProvider: available handlers include: ', handlers)
+    log('CollectorProvider: trigger to match is: ', trigger)
 
-        return null
-      }
+    // Now grab the handler for the trigger (this could be optimised with a map)
+    const handler = handlers?.find(
+      (handler) => handler.behaviour === trigger.behaviour
+    )
 
-      if (handler.delay) {
-        const tId = setTimeout(() => {
-          return handler.invoke?.(trigger)
-        }, handler.delay)
+    log('CollectorProvider: attempting to show trigger', trigger, handler)
 
-        setTimeoutId(tId)
+    if (!handler) {
+      error('No handler found for trigger', trigger)
+      return null
+    }
 
-        return null
-      }
+    if (!handler.invoke) {
+      error('No invoke method found for handler', handler)
+      return null
+    }
 
-      return handler.invoke(trigger)
-    },
-    [setTimeoutId, log, handlers]
-  )
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.type,
+      triggerBehaviour: trigger.behaviour
+    })
+
+    return handler.invoke(trigger)
+  }
+
+  const fireDefaultTrigger = useCallback(() => {
+    if (displayTrigger) return
+
+    log('CollectorProvider: attempting to fire default trigger', displayTrigger)
+    setDisplayTrigger('default')
+  }, [])
+
+  const fireIdleTrigger = useCallback(() => {
+    if (displayTrigger) return
+    if (!idleTriggers) return
+
+    log('CollectorProvider: attempting to fire idle trigger', displayTrigger)
+    setDisplayTrigger('idle')
+  }, [pageTriggers, displayTrigger])
+
+  const fireExitTrigger = useCallback(() => {
+    if (displayTrigger) return
+
+    log('CollectorProvider: attempting to fire exit trigger', displayTrigger)
+    setDisplayTrigger('exit')
+  }, [])
 
   useEffect(() => {
     if (!exitIntentTriggers) return
 
+    log(
+      'CollectorProvider: attempting to register exit trigger',
+      displayTrigger
+    )
+
     registerHandler({
-      id: 'clientTriger',
-      handler: () => {
-        log('CollectorProvider: handler invoked for departure')
-        setTrigger({
-          id: 'exit_intent',
-          behaviour: 'modal',
-          data: {
-            text: 'Before you go...',
-            message:
-              "Don't leave, there's still time to complete a booking now to get your offer",
-            button: 'Start Booking'
-          },
-          brand: getBrand(window.location.href)
-        })
-      }
+      id: 'clientTrigger',
+      handler: fireExitTrigger
     })
-  }, [exitIntentTriggers])
+  }, [])
+
+  const resetDisplayTrigger = useCallback(() => {
+    log('CollectorProvider: resetting displayTrigger')
+    setDisplayTrigger(undefined)
+  }, [])
 
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
@@ -137,7 +175,7 @@ export const CollectorProvider = ({
           params
         },
         referrer: {
-          url: document.referrer,
+          url: 'https://example.com' || document.referrer,
           title: document.referrer,
           utm: {
             // eslint-disable-next-line camelcase
@@ -153,18 +191,70 @@ export const CollectorProvider = ({
           }
         }
       })
-        .then((response) => {
+        .then((response: CollectorResponse) => {
           log('Sent collector data, retrieved:', response)
-          if (response.trigger) {
-            setTrigger(response.trigger)
-          }
+
+          // Set IdleTimer
+          // @todo turn this into the dynamic value
+          setIdleTimeout(3 * 1000)
+
+          // if (response.pageTriggers) {
+          //   log(
+          //     'CollectorProvider: received page triggers',
+          //     response.pageTriggers
+          //   )
+
+          // setPageTriggers(response.pageTriggers)
+          // @todo this is a hardcoded hack
+          setPageTriggers([
+            {
+              id: 'welcome_modal',
+              type: 'default',
+              behaviour: 'modal',
+              data: {
+                text: 'Hey, welcome to the site?',
+                message:
+                  "We'd love to welcome to you to our restaurant, book now to get your offer!",
+                button: 'Start Booking'
+              },
+              brand: getBrand(window.location.href)
+            },
+            {
+              id: 'fb_ads_homepage',
+              type: 'idle',
+              behaviour: 'modal',
+              data: {
+                text: 'Are you still there?',
+                message:
+                  "Don't be idle, stay active and book now to get your offer!",
+                button: 'Start Booking'
+              },
+              brand: getBrand(window.location.href)
+            },
+            {
+              id: 'fb_ads_homepage',
+              type: 'exit',
+              behaviour: 'inverse_flow',
+              data: {
+                foo: 'this is an example for Ed',
+                bar: 'is where aden is going to get his Negroni'
+              },
+              brand: getBrand(window.location.href)
+            }
+          ])
+          // }
+
+          // @todo we should register the idle triggers here
+
+          // @todo Register default trigger, don't just fire it.
+          // That way we can defer the firing until a server configured delay.
+          fireDefaultTrigger()
         })
         .catch((err) => {
           error('failed to store collected data', err)
         })
 
       log('CollectorProvider: collected data')
-      log('This will run after 1 second!')
     }, initialDelay)
 
     return () => {
@@ -179,12 +269,12 @@ export const CollectorProvider = ({
   }, [timeoutId])
 
   const renderedTrigger = React.useMemo(() => {
-    return showTrigger(trigger)
-  }, [showTrigger, trigger])
+    return showTrigger(displayTrigger)
+  }, [showTrigger, displayTrigger])
 
   return (
     <IdleTimerProvider
-      timeout={idleStatusAfterMs}
+      timeout={idleTimeout}
       onPresenceChange={(presence: PresenceType) => {
         if (presence.type === 'active') {
           // clear interval regardless a value is present or not.
@@ -194,30 +284,23 @@ export const CollectorProvider = ({
         }
         log('presence changed', presence)
       }}
-      onIdle={() => {
-        if (!idleTriggers) return
-
-        log('CollectorProvider: handler invoked for presence')
-        setTrigger({
-          id: 'fb_ads_homepage',
-          behaviour: 'modal',
-          data: {
-            text: 'Are you still there?',
-            message:
-              "We'd love to welcome to you to our restaurant, book now to get your offer",
-            button: 'Start Booking'
-          },
-          brand: getBrand(window.location.href)
-        })
-      }}
+      onIdle={fireIdleTrigger}
     >
-      <CollectorContext.Provider value={{}}>
+      <CollectorContext.Provider
+        value={{
+          resetDisplayTrigger
+        }}
+      >
         {children}
         {renderedTrigger}
       </CollectorContext.Provider>
     </IdleTimerProvider>
   )
 }
-export type CollectorContextInterface = {}
+export type CollectorContextInterface = {
+  resetDisplayTrigger: () => void
+}
 
-export const CollectorContext = createContext<CollectorContextInterface>({})
+export const CollectorContext = createContext<CollectorContextInterface>({
+  resetDisplayTrigger: () => {}
+})

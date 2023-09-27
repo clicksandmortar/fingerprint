@@ -1,13 +1,20 @@
 import React, { useState } from 'react'
 import { Trigger } from '../client/types'
 import ReactDOM from 'react-dom'
+import { useCollector } from '../hooks/useCollector'
 
 type Props = {
   trigger: Trigger
 }
 
 const Modal = ({ trigger }: Props) => {
+  const { resetDisplayTrigger } = useCollector()
   const [open, setOpen] = useState(true)
+
+  const closeModal = () => {
+    setOpen(false)
+    resetDisplayTrigger()
+  }
 
   if (!open) {
     return null
@@ -54,9 +61,7 @@ const Modal = ({ trigger }: Props) => {
         >
           {/** Close button */}
           <button
-            onClick={() => {
-              setOpen(false)
-            }}
+            onClick={closeModal}
             style={{
               position: 'absolute',
               top: '0.5rem',

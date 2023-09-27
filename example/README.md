@@ -24,7 +24,7 @@ To install the Fingerprint on your website, simply copy the script tag provided 
     'https://cdn.fingerprint.host/fingerprint.js',
     '{ YOUR APP ID }',
     { DEBUG }, // Set to false to disable debug mode. Always set to false in production.
-    true // Set to true when cookies are allowed.
+    true // Set to false to disable consent checks.
   )
 </script>
 <!-- End C&M Fingerprint Embed Code -->

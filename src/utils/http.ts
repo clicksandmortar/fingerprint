@@ -1,6 +1,7 @@
 const headers = { 'Content-Type': 'application/json' }
 
-export const hostname = 'https://target-engine-api.starship-staging.com'
+export const hostname =
+  process.env.FINGERPRINT_API_HOSTNAME || 'http://localhost'
 
 export const request = {
   get: async (url: string, params: any) => {
