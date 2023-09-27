@@ -2972,7 +2972,7 @@ console.log("Fingerprint Widget Loaded");
     __self: undefined
 }, /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _widget.Widget), {
     appId: document?.currentScript?.getAttribute("id") || "",
-    consent: document?.currentScript?.getAttribute("data-consent") === "true",
+    consent: document?.currentScript?.getAttribute("data-consent") === "false",
     debug: document?.currentScript?.getAttribute("data-debug") === "true",
     __source: {
         fileName: "src/fingerprint.tsx",
