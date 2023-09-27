@@ -42,7 +42,11 @@ export type CollectorResponse = {
 
 export type Trigger = {
   id?: string
-  type?: 'idle' | 'exit' | 'default'
+  type?:
+    | 'INVOCATION_UNSPECIFIED'
+    | 'INVOCATION_IDLE_TIME'
+    | 'INVOCATION_EXIT_INTENT'
+    | 'INVOCATION_PAGE_LOAD'
   behaviour?: string
   // delay?: number
   // invoke:(trigger: Trigger) => void;

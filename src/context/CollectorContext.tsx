@@ -16,7 +16,11 @@ export type CollectorProviderProps = {
   handlers?: Handler[]
 }
 
-type DisplayTrigger = 'idle' | 'exit' | 'default'
+type DisplayTrigger =
+  | 'INVOCATION_UNSPECIFIED'
+  | 'INVOCATION_IDLE_TIME'
+  | 'INVOCATION_EXIT_INTENT'
+  | 'INVOCATION_PAGE_LOAD'
 
 export const CollectorProvider = ({
   children,
@@ -132,14 +136,14 @@ export const CollectorProvider = ({
     if (!idleTriggers) return
 
     log('CollectorProvider: attempting to fire idle trigger')
-    setDisplayTrigger('idle')
+    setDisplayTrigger('INVOCATION_IDLE_TIME')
   }, [pageTriggers, displayTrigger])
 
   const fireExitTrigger = useCallback(() => {
     if (displayTrigger) return
 
     log('CollectorProvider: attempting to fire exit trigger')
-    setDisplayTrigger('exit')
+    setDisplayTrigger('INVOCATION_EXIT_INTENT')
   }, [])
 
   useEffect(() => {

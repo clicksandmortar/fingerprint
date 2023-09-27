@@ -366,12 +366,12 @@ const CollectorProvider = ({
     if (displayTrigger) return;
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle trigger');
-    setDisplayTrigger('idle');
+    setDisplayTrigger('INVOCATION_IDLE_TIME');
   }, [pageTriggers, displayTrigger]);
   const fireExitTrigger = useCallback(() => {
     if (displayTrigger) return;
     log('CollectorProvider: attempting to fire exit trigger');
-    setDisplayTrigger('exit');
+    setDisplayTrigger('INVOCATION_EXIT_INTENT');
   }, []);
   useEffect(() => {
     if (!exitIntentTriggers) return;

@@ -30178,7 +30178,7 @@ const CollectorProvider = ({ children, handlers })=>{
         if (displayTrigger) return;
         if (!idleTriggers) return;
         log("CollectorProvider: attempting to fire idle trigger");
-        setDisplayTrigger("idle");
+        setDisplayTrigger("INVOCATION_IDLE_TIME");
     }, [
         pageTriggers,
         displayTrigger
@@ -30186,7 +30186,7 @@ const CollectorProvider = ({ children, handlers })=>{
     const fireExitTrigger = (0, _react.useCallback)(()=>{
         if (displayTrigger) return;
         log("CollectorProvider: attempting to fire exit trigger");
-        setDisplayTrigger("exit");
+        setDisplayTrigger("INVOCATION_EXIT_INTENT");
     }, []);
     (0, _react.useEffect)(()=>{
         if (!exitIntentTriggers) return;
@@ -30298,7 +30298,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 257,
+            lineNumber: 261,
             columnNumber: 5
         },
         __self: undefined
@@ -30308,7 +30308,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 270,
+            lineNumber: 274,
             columnNumber: 7
         },
         __self: undefined

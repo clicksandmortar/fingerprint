@@ -421,12 +421,12 @@ var CollectorProvider = function CollectorProvider(_ref) {
     if (displayTrigger) return;
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle trigger');
-    setDisplayTrigger('idle');
+    setDisplayTrigger('INVOCATION_IDLE_TIME');
   }, [pageTriggers, displayTrigger]);
   var fireExitTrigger = React.useCallback(function () {
     if (displayTrigger) return;
     log('CollectorProvider: attempting to fire exit trigger');
-    setDisplayTrigger('exit');
+    setDisplayTrigger('INVOCATION_EXIT_INTENT');
   }, []);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
