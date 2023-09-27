@@ -422,11 +422,12 @@ const CollectorProvider = ({
             content: params === null || params === void 0 ? void 0 : params.utm_content
           }
         }
-      }).then(response => {
-        log('Sent collector data, retrieved:', response);
+      }).then(async response => {
+        const payload = await response.json();
+        log('Sent collector data, retrieved:', payload);
         setIdleTimeout(idleStatusAfterMs);
-        setPageTriggers(response.pageTriggers);
-        if (!response.intently) {
+        setPageTriggers(payload.pageTriggers);
+        if (!payload.intently) {
           log('CollectorProvider: user is in Fingerprint cohort');
           setIntently(false);
         } else {

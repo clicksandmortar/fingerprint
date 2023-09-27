@@ -1,12 +1,12 @@
 import { useMutation } from '@tanstack/react-query'
-import { CollectorResponse, CollectorUpdate } from '../client/types'
+import { CollectorUpdate } from '../client/types'
 import { hostname, request } from '../utils/http'
 import { useLogging } from '../context/LoggingContext'
 
 export const useCollectorMutation = () => {
   const { log, error } = useLogging()
 
-  return useMutation<CollectorResponse, unknown, CollectorUpdate, unknown>(
+  return useMutation<Response, unknown, CollectorUpdate, unknown>(
     (data: CollectorUpdate) => {
       return request
         .post(hostname + '/collector/' + data?.visitor?.id, data)

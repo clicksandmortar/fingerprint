@@ -30244,13 +30244,14 @@ const CollectorProvider = ({ children, handlers })=>{
                         content: params?.utm_content
                     }
                 }
-            }).then((response)=>{
-                log("Sent collector data, retrieved:", response);
+            }).then(async (response)=>{
+                const payload = await response.json();
+                log("Sent collector data, retrieved:", payload);
                 // Set IdleTimer
                 // @todo turn this into the dynamic value
                 setIdleTimeout(idleStatusAfterMs);
-                setPageTriggers(response.pageTriggers);
-                if (!response.intently) {
+                setPageTriggers(payload.pageTriggers);
+                if (!payload.intently) {
                     // remove intently overlay here
                     log("CollectorProvider: user is in Fingerprint cohort");
                     setIntently(false);
@@ -30297,7 +30298,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 255,
+            lineNumber: 257,
             columnNumber: 5
         },
         __self: undefined
@@ -30307,7 +30308,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 268,
+            lineNumber: 270,
             columnNumber: 7
         },
         __self: undefined

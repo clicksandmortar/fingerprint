@@ -210,16 +210,18 @@ export const CollectorProvider = ({
           }
         }
       })
-        .then((response: CollectorResponse) => {
-          log('Sent collector data, retrieved:', response)
+        .then(async (response: Response) => {
+          const payload: CollectorResponse = await response.json()
+
+          log('Sent collector data, retrieved:', payload)
 
           // Set IdleTimer
           // @todo turn this into the dynamic value
           setIdleTimeout(idleStatusAfterMs)
 
-          setPageTriggers(response.pageTriggers)
+          setPageTriggers(payload.pageTriggers)
 
-          if (!response.intently) {
+          if (!payload.intently) {
             // remove intently overlay here
             log('CollectorProvider: user is in Fingerprint cohort')
             setIntently(false)

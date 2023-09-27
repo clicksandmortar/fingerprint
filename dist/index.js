@@ -480,15 +480,21 @@ var CollectorProvider = function CollectorProvider(_ref) {
           }
         }
       }).then(function (response) {
-        log('Sent collector data, retrieved:', response);
-        setIdleTimeout(idleStatusAfterMs);
-        setPageTriggers(response.pageTriggers);
-        if (!response.intently) {
-          log('CollectorProvider: user is in Fingerprint cohort');
-          setIntently(false);
-        } else {
-          log('CollectorProvider: user is in Intently cohort');
-          setIntently(true);
+        try {
+          return Promise.resolve(response.json()).then(function (payload) {
+            log('Sent collector data, retrieved:', payload);
+            setIdleTimeout(idleStatusAfterMs);
+            setPageTriggers(payload.pageTriggers);
+            if (!payload.intently) {
+              log('CollectorProvider: user is in Fingerprint cohort');
+              setIntently(false);
+            } else {
+              log('CollectorProvider: user is in Intently cohort');
+              setIntently(true);
+            }
+          });
+        } catch (e) {
+          return Promise.reject(e);
         }
       })["catch"](function (err) {
         error('failed to store collected data', err);
