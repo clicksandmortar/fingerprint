@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { Handler, getBrand } from '../client/handler'
+import { Handler } from '../client/handler'
 import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -98,12 +98,12 @@ export const CollectorProvider = ({
     return handler.invoke(trigger)
   }
 
-  const fireDefaultTrigger = useCallback(() => {
-    if (displayTrigger) return
+  // const fireDefaultTrigger = useCallback(() => {
+  //   if (displayTrigger) return
 
-    log('CollectorProvider: attempting to fire default trigger', displayTrigger)
-    setDisplayTrigger('default')
-  }, [])
+  //   log('CollectorProvider: attempting to fire default trigger', displayTrigger)
+  //   setDisplayTrigger('default')
+  // }, [])
 
   const fireIdleTrigger = useCallback(() => {
     if (displayTrigger) return
@@ -196,53 +196,9 @@ export const CollectorProvider = ({
 
           // Set IdleTimer
           // @todo turn this into the dynamic value
-          setIdleTimeout(3 * 1000)
+          setIdleTimeout(idleStatusAfterMs)
 
-          // setPageTriggers(response.pageTriggers)
-          // @todo this is a hardcoded hack
-          setPageTriggers([
-            {
-              id: 'welcome_modal',
-              type: 'default',
-              behaviour: 'modal',
-              data: {
-                text: 'Hey, welcome to the site?',
-                message:
-                  "We'd love to welcome to you to our restaurant, book now to get your offer!",
-                button: 'Start Booking'
-              },
-              brand: getBrand(window.location.href)
-            },
-            {
-              id: 'fb_ads_homepage',
-              type: 'idle',
-              behaviour: 'modal',
-              data: {
-                text: 'Are you still there?',
-                message:
-                  "Don't be idle, stay active and book now to get your offer!",
-                button: 'Start Booking'
-              },
-              brand: getBrand(window.location.href)
-            },
-            {
-              id: 'fb_ads_homepage',
-              type: 'exit',
-              behaviour: 'inverse_flow',
-              data: {
-                foo: 'this is an example for Ed',
-                bar: 'is where aden is going to get his Negroni'
-              },
-              brand: getBrand(window.location.href)
-            }
-          ])
-          // }
-
-          // @todo we should register the idle triggers here
-
-          // @todo Register default trigger, don't just fire it.
-          // That way we can defer the firing until a server configured delay.
-          fireDefaultTrigger()
+          setPageTriggers(response.pageTriggers)
         })
         .catch((err) => {
           error('failed to store collected data', err)

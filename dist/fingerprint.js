@@ -30091,7 +30091,6 @@ var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
 var _reactIdleTimer = require("react-idle-timer");
 var _useExitIntent = require("use-exit-intent");
-var _handler = require("../client/handler");
 var _useCollectorMutation = require("../hooks/useCollectorMutation");
 var _useFingerprint = require("../hooks/useFingerprint");
 var _loggingContext = require("./LoggingContext");
@@ -30150,11 +30149,11 @@ const CollectorProvider = ({ children, handlers })=>{
         });
         return handler.invoke(trigger);
     };
-    const fireDefaultTrigger = (0, _react.useCallback)(()=>{
-        if (displayTrigger) return;
-        log("CollectorProvider: attempting to fire default trigger", displayTrigger);
-        setDisplayTrigger("default");
-    }, []);
+    // const fireDefaultTrigger = useCallback(() => {
+    //   if (displayTrigger) return
+    //   log('CollectorProvider: attempting to fire default trigger', displayTrigger)
+    //   setDisplayTrigger('default')
+    // }, [])
     const fireIdleTrigger = (0, _react.useCallback)(()=>{
         if (displayTrigger) return;
         if (!idleTriggers) return;
@@ -30229,48 +30228,8 @@ const CollectorProvider = ({ children, handlers })=>{
                 log("Sent collector data, retrieved:", response);
                 // Set IdleTimer
                 // @todo turn this into the dynamic value
-                setIdleTimeout(3000);
-                // setPageTriggers(response.pageTriggers)
-                // @todo this is a hardcoded hack
-                setPageTriggers([
-                    {
-                        id: "welcome_modal",
-                        type: "default",
-                        behaviour: "modal",
-                        data: {
-                            text: "Hey, welcome to the site?",
-                            message: "We'd love to welcome to you to our restaurant, book now to get your offer!",
-                            button: "Start Booking"
-                        },
-                        brand: (0, _handler.getBrand)(window.location.href)
-                    },
-                    {
-                        id: "fb_ads_homepage",
-                        type: "idle",
-                        behaviour: "modal",
-                        data: {
-                            text: "Are you still there?",
-                            message: "Don't be idle, stay active and book now to get your offer!",
-                            button: "Start Booking"
-                        },
-                        brand: (0, _handler.getBrand)(window.location.href)
-                    },
-                    {
-                        id: "fb_ads_homepage",
-                        type: "exit",
-                        behaviour: "inverse_flow",
-                        data: {
-                            foo: "this is an example for Ed",
-                            bar: "is where aden is going to get his Negroni"
-                        },
-                        brand: (0, _handler.getBrand)(window.location.href)
-                    }
-                ]);
-                // }
-                // @todo we should register the idle triggers here
-                // @todo Register default trigger, don't just fire it.
-                // That way we can defer the firing until a server configured delay.
-                fireDefaultTrigger();
+                setIdleTimeout(idleStatusAfterMs);
+                setPageTriggers(response.pageTriggers);
             }).catch((err)=>{
                 error("failed to store collected data", err);
             });
@@ -30309,7 +30268,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 270,
+            lineNumber: 226,
             columnNumber: 5
         },
         __self: undefined
@@ -30319,13 +30278,13 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 283,
+            lineNumber: 239,
             columnNumber: 7
         },
         __self: undefined
     }, children, renderedTrigger));
 };
-_s(CollectorProvider, "uHxrezuxt72lECGefMvEiCbcdgg=", false, function() {
+_s(CollectorProvider, "MzKMtQlFCTrjTsrjsvFuTCxCfs0=", false, function() {
     return [
         (0, _loggingContext.useLogging),
         (0, _useFingerprint.useFingerprint),
@@ -30347,7 +30306,7 @@ $RefreshReg$(_c, "CollectorProvider");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react":"9sfFD","./LoggingContext":"8R5Tl","./VisitorContext":"dTu2f","../hooks/useFingerprint":"5jzRW","use-exit-intent":"dGlfY","react-idle-timer":"jyWNL","../client/handler":"k8Kyg","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollectorMutation":"cZ6dB","./MixpanelContext":"isrpc"}],"dTu2f":[function(require,module,exports) {
+},{"react":"9sfFD","./LoggingContext":"8R5Tl","./VisitorContext":"dTu2f","../hooks/useFingerprint":"5jzRW","use-exit-intent":"dGlfY","react-idle-timer":"jyWNL","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollectorMutation":"cZ6dB","./MixpanelContext":"isrpc"}],"dTu2f":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$05a4 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -32707,2955 +32666,7 @@ module.exports = require("c4c10cbba9862d5f");
     exports.jsxs = jsxs;
 })();
 
-},{"593632ccebda0d3a":"9sfFD"}],"k8Kyg":[function(require,module,exports) {
-var $parcel$ReactRefreshHelpers$9c3b = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-$parcel$ReactRefreshHelpers$9c3b.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "clientHandlers", ()=>clientHandlers);
-parcelHelpers.export(exports, "getBrand", ()=>getBrand);
-var _triggerModal = require("../behaviours/TriggerModal");
-var _triggerYoutube = require("../behaviours/TriggerYoutube");
-var _triggerInverse = require("../behaviours/TriggerInverse");
-var _triggerInverseDefault = parcelHelpers.interopDefault(_triggerInverse);
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-const clientHandlers = [
-    {
-        id: "modal_v1",
-        behaviour: "modal",
-        invoke: (trigger)=>/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _triggerModal.TriggerModal), {
-                trigger: trigger,
-                __source: {
-                    fileName: "src/client/handler.tsx",
-                    lineNumber: 24,
-                    columnNumber: 35
-                },
-                __self: undefined
-            })
-    },
-    {
-        id: "youtube_v1",
-        behaviour: "youtube",
-        invoke: (trigger)=>/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _triggerYoutube.TriggerYoutube), {
-                trigger: trigger,
-                __source: {
-                    fileName: "src/client/handler.tsx",
-                    lineNumber: 29,
-                    columnNumber: 35
-                },
-                __self: undefined
-            })
-    },
-    {
-        id: "inverse_v1",
-        behaviour: "inverse_flow",
-        invoke: (trigger)=>/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _triggerInverseDefault.default), {
-                trigger: trigger,
-                __source: {
-                    fileName: "src/client/handler.tsx",
-                    lineNumber: 34,
-                    columnNumber: 35
-                },
-                __self: undefined
-            })
-    }
-];
-const getBrand = (url)=>{
-    // if url contains tobycarvery.co.uk return Toby Carvery
-    if (url.includes("tobycarvery.co.uk") || url.includes("localhost:8000") || url.includes("vercel.app")) return {
-        name: "Toby Carvery",
-        fontColor: "#ffffff",
-        primaryColor: "#8c1f1f",
-        overlayColor: "rgba(96,32,50,0.5)",
-        backgroundImage: "https://d26qevl4nkue45.cloudfront.net/drink-bg.png"
-    };
-    // if url contains browns-restaurants.co.uk return Browns
-    if (url.includes("browns-restaurants.co.uk")) return {
-        name: "Browns",
-        fontColor: "#ffffff",
-        primaryColor: "#B0A174",
-        overlayColor: "rgba(136, 121, 76, 0.5)",
-        backgroundImage: "https://d26qevl4nkue45.cloudfront.net/cocktail-bg.png"
-    };
-    // if url contains vintageinn.co.uk return Vintage Inns
-    if (url.includes("vintageinn.co.uk")) return {
-        name: "Vintage Inns",
-        fontColor: "#ffffff",
-        primaryColor: "#B0A174",
-        overlayColor: "rgba(136, 121, 76, 0.5)",
-        backgroundImage: "https://d26qevl4nkue45.cloudfront.net/dessert-bg.png"
-    };
-};
-
-  $parcel$ReactRefreshHelpers$9c3b.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-},{"../behaviours/TriggerModal":"fRNGg","../behaviours/TriggerYoutube":"lFHbs","../behaviours/TriggerInverse":"c5qgt","react":"9sfFD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}],"fRNGg":[function(require,module,exports) {
-var $parcel$ReactRefreshHelpers$29b4 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-$parcel$ReactRefreshHelpers$29b4.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "TriggerModal", ()=>TriggerModal);
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-var _reactDom = require("react-dom");
-var _reactDomDefault = parcelHelpers.interopDefault(_reactDom);
-var _useCollector = require("../hooks/useCollector");
-var _s = $RefreshSig$();
-const Modal = ({ trigger })=>{
-    _s();
-    const { resetDisplayTrigger } = (0, _useCollector.useCollector)();
-    const [open, setOpen] = (0, _react.useState)(true);
-    const closeModal = ()=>{
-        setOpen(false);
-        resetDisplayTrigger();
-    };
-    if (!open) return null;
-    return /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        style: {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            zIndex: 9999
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 24,
-            columnNumber: 5
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        style: {
-            background: "#fff url('" + trigger?.brand?.backgroundImage + "') no-repeat center center",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%,-50%)",
-            backgroundColor: "#fff",
-            borderRadius: "0.5rem",
-            padding: 0,
-            boxShadow: "0 0 1rem rgba(0,0,0,0.5)",
-            border: "3px solid white",
-            zIndex: 9999
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 35,
-            columnNumber: 7
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        style: {
-            backgroundColor: trigger?.brand?.overlayColor,
-            maxWidth: "600px",
-            padding: "2rem",
-            borderRadius: "0.5rem"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 54,
-            columnNumber: 9
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
-        onClick: closeModal,
-        style: {
-            position: "absolute",
-            top: "0.5rem",
-            right: "0.5rem",
-            fontSize: "2rem",
-            backgroundColor: trigger?.brand?.fontColor,
-            color: trigger?.brand?.primaryColor,
-            border: "none",
-            borderRadius: "0.5rem",
-            padding: "0 1rem"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 63,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, "\xd7"), /*#__PURE__*/ (0, _reactDefault.default).createElement("h1", {
-        style: {
-            textAlign: "center",
-            fontSize: "2rem",
-            fontWeight: "bold",
-            marginTop: "1rem",
-            color: trigger?.brand?.fontColor,
-            textShadow: "0 1px 2px rgba(0,0,0,0.5)"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 79,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, trigger?.data?.text), /*#__PURE__*/ (0, _reactDefault.default).createElement("p", {
-        style: {
-            textAlign: "center",
-            fontSize: "1.5rem",
-            color: trigger?.brand?.fontColor,
-            fontWeight: 500,
-            marginTop: "1rem",
-            textShadow: "0 1px 2px rgba(0,0,0,0.5)"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 91,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, trigger?.data?.message), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        style: {
-            padding: "2rem 2rem 1rem"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 103,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
-        onClick: ()=>{
-            trigger?.data?.url ? window.open(trigger?.data?.url) : setOpen(false);
-        },
-        style: {
-            display: "block",
-            color: trigger?.brand?.primaryColor,
-            backgroundColor: trigger?.brand?.fontColor,
-            fontSize: "1.5rem",
-            width: "100%",
-            padding: "1rem",
-            borderRadius: "0.5rem",
-            boxShadow: "0 1px 2px rgba(0,0,0,0.5)"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 104,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, trigger?.data?.button)))));
-};
-_s(Modal, "Y/Qxi3iHw77iQBA02rbNTf+qIlM=", false, function() {
-    return [
-        (0, _useCollector.useCollector)
-    ];
-});
-_c = Modal;
-const TriggerModal = ({ trigger })=>{
-    return /*#__PURE__*/ (0, _reactDomDefault.default).createPortal(/*#__PURE__*/ (0, _reactDefault.default).createElement(Modal, {
-        trigger: trigger,
-        __source: {
-            fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 131,
-            columnNumber: 32
-        },
-        __self: undefined
-    }), document.body);
-};
-_c1 = TriggerModal;
-var _c, _c1;
-$RefreshReg$(_c, "Modal");
-$RefreshReg$(_c1, "TriggerModal");
-
-  $parcel$ReactRefreshHelpers$29b4.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollector":"2crq3"}],"2crq3":[function(require,module,exports) {
-var $parcel$ReactRefreshHelpers$064f = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-$parcel$ReactRefreshHelpers$064f.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "useCollector", ()=>useCollector);
-var _react = require("react");
-var _collectorContext = require("../context/CollectorContext");
-const useCollector = ()=>{
-    return (0, _react.useContext)((0, _collectorContext.CollectorContext));
-};
-
-  $parcel$ReactRefreshHelpers$064f.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","react":"9sfFD","../context/CollectorContext":"cE6WZ","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}],"lFHbs":[function(require,module,exports) {
-var $parcel$ReactRefreshHelpers$ffea = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-$parcel$ReactRefreshHelpers$ffea.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "TriggerYoutube", ()=>TriggerYoutube);
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-var _reactDom = require("react-dom");
-var _reactDomDefault = parcelHelpers.interopDefault(_reactDom);
-var _s = $RefreshSig$();
-const Youtube = ({ trigger })=>{
-    _s();
-    const [open, setOpen] = (0, _react.useState)(true);
-    if (!open) return null;
-    return /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        style: {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            zIndex: 9999
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerYoutube.tsx",
-            lineNumber: 17,
-            columnNumber: 5
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        style: {
-            background: "#fff url('" + trigger?.brand?.backgroundImage + "') no-repeat center center",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%,-50%)",
-            backgroundColor: "#fff",
-            borderRadius: "0.5rem",
-            padding: 0,
-            boxShadow: "0 0 1rem rgba(0,0,0,0.5)",
-            border: "3px solid white",
-            zIndex: 9999
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerYoutube.tsx",
-            lineNumber: 28,
-            columnNumber: 7
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        style: {
-            backgroundColor: trigger?.brand?.overlayColor,
-            maxWidth: "600px",
-            padding: "2rem",
-            borderRadius: "0.5rem"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerYoutube.tsx",
-            lineNumber: 47,
-            columnNumber: 9
-        },
-        __self: undefined
-    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
-        onClick: ()=>{
-            setOpen(false);
-        },
-        style: {
-            position: "absolute",
-            top: "0.5rem",
-            right: "0.5rem",
-            fontSize: "2rem",
-            backgroundColor: trigger?.brand?.fontColor,
-            color: trigger?.brand?.primaryColor,
-            border: "none",
-            borderRadius: "0.5rem",
-            padding: "0 1rem"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerYoutube.tsx",
-            lineNumber: 56,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, "\xd7"), /*#__PURE__*/ (0, _reactDefault.default).createElement("iframe", {
-        src: trigger?.data?.url,
-        allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
-        style: {
-            width: "500px",
-            height: "260px",
-            marginTop: "1rem"
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerYoutube.tsx",
-            lineNumber: 74,
-            columnNumber: 11
-        },
-        __self: undefined
-    }))));
-};
-_s(Youtube, "dVkDIfRb5RN4FjtonjBYYwpg89o=");
-_c = Youtube;
-const TriggerYoutube = ({ trigger })=>{
-    return /*#__PURE__*/ (0, _reactDomDefault.default).createPortal(/*#__PURE__*/ (0, _reactDefault.default).createElement(Youtube, {
-        trigger: trigger,
-        __source: {
-            fileName: "src/behaviours/TriggerYoutube.tsx",
-            lineNumber: 86,
-            columnNumber: 32
-        },
-        __self: undefined
-    }), document.body);
-};
-_c1 = TriggerYoutube;
-var _c, _c1;
-$RefreshReg$(_c, "Youtube");
-$RefreshReg$(_c1, "TriggerYoutube");
-
-  $parcel$ReactRefreshHelpers$ffea.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}],"c5qgt":[function(require,module,exports) {
-var $parcel$ReactRefreshHelpers$1136 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-var prevRefreshReg = window.$RefreshReg$;
-var prevRefreshSig = window.$RefreshSig$;
-$parcel$ReactRefreshHelpers$1136.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _react = require("react");
-var _reactHookForm = require("react-hook-form");
-var _s = $RefreshSig$();
-const baseUrl = "https://bookings-bff.starship-staging.com";
-const makeFullUrl = (resource, params = {})=>{
-    if (resource.startsWith("/")) resource = resource.substring(1);
-    const fullUri = `${baseUrl}/${resource}`;
-    if (Object.keys(params).length === 0) return fullUri;
-    return `${fullUri}?${new URLSearchParams(params).toString()}`;
-};
-const Button = ({ children, className, onClick, disabled, colour = "primary" })=>{
-    let builtButtonClasses = `btn step-button bg-${colour} border-${colour} text-white hover:bg-${colour}/80 disabled:text-${colour}/50 disabled:border-${colour}/50` + (className ? " " + className : "");
-    if (disabled) builtButtonClasses += " disabled";
-    return /*#__PURE__*/ _react.createElement("button", {
-        disabled: disabled,
-        className: builtButtonClasses,
-        onClick: onClick,
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 36,
-            columnNumber: 5
-        },
-        __self: undefined
-    }, children);
-};
-_c = Button;
-const Voucher = ({ details })=>{
-    return /*#__PURE__*/ _react.createElement("div", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 48,
-            columnNumber: 5
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("h3", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 49,
-            columnNumber: 7
-        },
-        __self: undefined
-    }, "Terms of Voucher"), /*#__PURE__*/ _react.createElement("p", {
-        className: "text-sm",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 50,
-            columnNumber: 7
-        },
-        __self: undefined
-    }, details.termsAndConditions));
-};
-_c1 = Voucher;
-const TriggerInverse = ({})=>{
-    _s();
-    const landingPage = {};
-    const form = {};
-    const location = {};
-    const [open, setOpen] = _react.useState(true);
-    if (!open) return null;
-    const { register, handleSubmit, formState: { isSubmitting } } = (0, _reactHookForm.useForm)();
-    const initialState = {
-        busy: false,
-        complete: false,
-        voucher: null,
-        error: null,
-        responseStatusCode: 0
-    };
-    const [state, setState] = _react.useState(initialState);
-    async function submitVoucher(data) {
-        const reqData = {
-            ...data,
-            bookingLink: `${location?.origin}/${landingPage?.slug}`
-        };
-        const response = await fetch(makeFullUrl(`campaigns/${form?.campaign}/voucher?locationID=${landingPage?.identifier}`), {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-type": "application/json"
-            },
-            body: JSON.stringify(reqData)
-        });
-        response.json().then((responseData)=>{
-            if (response.ok) // @ts-ignore
-            setState({
-                busy: false,
-                complete: true,
-                voucher: responseData.voucher
-            });
-            else // @ts-ignore
-            setState({
-                busy: false,
-                error: responseData,
-                responseStatusCode: response.status
-            });
-        });
-    }
-    async function onSubmit(data) {
-        // @ts-ignore
-        setState({
-            busy: true
-        });
-        try {
-            if (form.campaign !== "") submitVoucher(data).then(()=>{
-                const eventData = {
-                    item_name: landingPage?.name,
-                    affiliation: "Booking Flow"
-                };
-                console.log(eventData);
-            // navigate(`/${landingPage?.slug}`)
-            });
-        } catch (e) {}
-    }
-    if (state.complete === true) return /*#__PURE__*/ _react.createElement("div", {
-        className: "container",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 137,
-            columnNumber: 7
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("h2", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 138,
-            columnNumber: 9
-        },
-        __self: undefined
-    }, "Voucher Sent!"), /*#__PURE__*/ _react.createElement("p", {
-        className: "text-md",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 139,
-            columnNumber: 9
-        },
-        __self: undefined
-    }, "Good news! We've sent your voucher to the email provided!"), state.voucher && /*#__PURE__*/ _react.createElement("div", {
-        className: "col-12 mt-3",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 143,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement(Voucher, {
-        details: state.voucher,
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 144,
-            columnNumber: 13
-        },
-        __self: undefined
-    })));
-    if (state.responseStatusCode === 409) return /*#__PURE__*/ _react.createElement("div", {
-        className: "container",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 153,
-            columnNumber: 7
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("h2", {
-        className: "mt-3",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 154,
-            columnNumber: 9
-        },
-        __self: undefined
-    }, "Uh-oh!"), /*#__PURE__*/ _react.createElement("p", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 155,
-            columnNumber: 9
-        },
-        __self: undefined
-    }, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\xa0", /*#__PURE__*/ _react.createElement("a", {
-        href: "/help",
-        className: "underline font-serif tracking-wide",
-        onClick: ()=>setOpen(false),
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 158,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, "contact us")));
-    return /*#__PURE__*/ _react.createElement("div", {
-        style: {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            zIndex: 9999
-        },
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 171,
-            columnNumber: 5
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("main", {
-        className: "flex-grow flex flex-col justify-center container relative",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 182,
-            columnNumber: 7
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("div", {
-        className: "w-full",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 183,
-            columnNumber: 9
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("div", {
-        className: "cms-content text-center md:text-left",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 184,
-            columnNumber: 11
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("h2", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 185,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, "Get Your Voucher"), /*#__PURE__*/ _react.createElement("p", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 186,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, "To receive your voucher, we just need a few details from you."), /*#__PURE__*/ _react.createElement("h3", {
-        className: `bar-title border-l-4 border-solid border-${landingPage?.colour}`,
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 187,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, "Contact Info"), /*#__PURE__*/ _react.createElement("form", {
-        onSubmit: handleSubmit(onSubmit),
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 192,
-            columnNumber: 13
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("div", {
-        className: "grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 193,
-            columnNumber: 15
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("div", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 194,
-            columnNumber: 17
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("label", {
-        htmlFor: "first_name",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 195,
-            columnNumber: 19
-        },
-        __self: undefined
-    }, "First Name*"), /*#__PURE__*/ _react.createElement("input", {
-        ...register("firstName", {
-            required: true,
-            minLength: 2,
-            maxLength: 30,
-            validate: (value)=>value.trim().length >= 2
-        }),
-        type: "text",
-        className: "form-input",
-        id: "firstName",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 196,
-            columnNumber: 19
-        },
-        __self: undefined
-    })), /*#__PURE__*/ _react.createElement("div", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 208,
-            columnNumber: 17
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("label", {
-        htmlFor: "last_name",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 209,
-            columnNumber: 19
-        },
-        __self: undefined
-    }, "Last Name*"), /*#__PURE__*/ _react.createElement("input", {
-        ...register("lastName", {
-            required: true,
-            minLength: 2,
-            maxLength: 30,
-            validate: (value)=>value.trim().length >= 2
-        }),
-        type: "text",
-        className: "form-input",
-        id: "lastName",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 210,
-            columnNumber: 19
-        },
-        __self: undefined
-    })), /*#__PURE__*/ _react.createElement("div", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 222,
-            columnNumber: 17
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("label", {
-        htmlFor: "email",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 223,
-            columnNumber: 19
-        },
-        __self: undefined
-    }, "Email*"), /*#__PURE__*/ _react.createElement("input", {
-        ...register("emailAddress", {
-            required: true
-        }),
-        type: "email",
-        className: "form-input",
-        id: "email",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 224,
-            columnNumber: 19
-        },
-        __self: undefined
-    }))), /*#__PURE__*/ _react.createElement("div", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 232,
-            columnNumber: 15
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("p", {
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 233,
-            columnNumber: 17
-        },
-        __self: undefined
-    }, "* Required Field")), /*#__PURE__*/ _react.createElement("div", {
-        className: "flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 236,
-            columnNumber: 15
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("div", {
-        className: "form-check",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 237,
-            columnNumber: 17
-        },
-        __self: undefined
-    }, /*#__PURE__*/ _react.createElement("input", {
-        type: "checkbox",
-        ...register("terms", {
-            required: true
-        }),
-        className: "form-check-input",
-        id: "terms",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 238,
-            columnNumber: 19
-        },
-        __self: undefined
-    }), " ", /*#__PURE__*/ _react.createElement("label", {
-        htmlFor: "terms",
-        className: "form-check-label",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 244,
-            columnNumber: 19
-        },
-        __self: undefined
-    }, "I confirm that I have read & agreed with the", " ", /*#__PURE__*/ _react.createElement("a", {
-        href: landingPage?.privacyPolicy,
-        target: "_blank",
-        rel: "noreferrer",
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 246,
-            columnNumber: 21
-        },
-        __self: undefined
-    }, "Privacy Policy"), "*")), /*#__PURE__*/ _react.createElement(Button, {
-        className: "btn mt-2 md:mt-0",
-        type: "submit",
-        colour: landingPage?.colour,
-        disabled: state.busy || isSubmitting,
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 256,
-            columnNumber: 17
-        },
-        __self: undefined
-    }, isSubmitting || state.busy ? "Sending Voucher..." : "Get My Voucher")), state.error && state.responseStatusCode !== 409 && /*#__PURE__*/ _react.createElement("div", {
-        className: `alert mt-5 bg-${landingPage?.colour}/20`,
-        __source: {
-            fileName: "src/behaviours/TriggerInverse.tsx",
-            lineNumber: 268,
-            columnNumber: 17
-        },
-        __self: undefined
-    }, "There was a problem sending your voucher. Please check your details and try again."))))));
-};
-_s(TriggerInverse, "9eVbsJtXuSGMFf5IiHvmyIBeiTE=", false, function() {
-    return [
-        (0, _reactHookForm.useForm)
-    ];
-});
-_c2 = TriggerInverse;
-exports.default = TriggerInverse;
-var _c, _c1, _c2;
-$RefreshReg$(_c, "Button");
-$RefreshReg$(_c1, "Voucher");
-$RefreshReg$(_c2, "TriggerInverse");
-
-  $parcel$ReactRefreshHelpers$1136.postlude(module);
-} finally {
-  window.$RefreshReg$ = prevRefreshReg;
-  window.$RefreshSig$ = prevRefreshSig;
-}
-},{"react":"9sfFD","react-hook-form":"c5cSR","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}],"c5cSR":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Controller", ()=>Controller);
-parcelHelpers.export(exports, "Form", ()=>Form);
-parcelHelpers.export(exports, "FormProvider", ()=>FormProvider);
-parcelHelpers.export(exports, "appendErrors", ()=>appendErrors);
-parcelHelpers.export(exports, "get", ()=>get);
-parcelHelpers.export(exports, "set", ()=>set);
-parcelHelpers.export(exports, "useController", ()=>useController);
-parcelHelpers.export(exports, "useFieldArray", ()=>useFieldArray);
-parcelHelpers.export(exports, "useForm", ()=>useForm);
-parcelHelpers.export(exports, "useFormContext", ()=>useFormContext);
-parcelHelpers.export(exports, "useFormState", ()=>useFormState);
-parcelHelpers.export(exports, "useWatch", ()=>useWatch);
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-var isCheckBoxInput = (element)=>element.type === "checkbox";
-var isDateObject = (value1)=>value1 instanceof Date;
-var isNullOrUndefined = (value1)=>value1 == null;
-const isObjectType = (value1)=>typeof value1 === "object";
-var isObject = (value1)=>!isNullOrUndefined(value1) && !Array.isArray(value1) && isObjectType(value1) && !isDateObject(value1);
-var getEventValue = (event)=>isObject(event) && event.target ? isCheckBoxInput(event.target) ? event.target.checked : event.target.value : event;
-var getNodeParentName = (name)=>name.substring(0, name.search(/\.\d+(\.|$)/)) || name;
-var isNameInFieldArray = (names, name)=>names.has(getNodeParentName(name));
-var isPlainObject = (tempObject)=>{
-    const prototypeCopy = tempObject.constructor && tempObject.constructor.prototype;
-    return isObject(prototypeCopy) && prototypeCopy.hasOwnProperty("isPrototypeOf");
-};
-var isWeb = typeof window !== "undefined" && typeof window.HTMLElement !== "undefined" && typeof document !== "undefined";
-function cloneObject(data) {
-    let copy;
-    const isArray = Array.isArray(data);
-    if (data instanceof Date) copy = new Date(data);
-    else if (data instanceof Set) copy = new Set(data);
-    else if (!(isWeb && (data instanceof Blob || data instanceof FileList)) && (isArray || isObject(data))) {
-        copy = isArray ? [] : {};
-        if (!isArray && !isPlainObject(data)) copy = data;
-        else {
-            for(const key in data)if (data.hasOwnProperty(key)) copy[key] = cloneObject(data[key]);
-        }
-    } else return data;
-    return copy;
-}
-var compact = (value1)=>Array.isArray(value1) ? value1.filter(Boolean) : [];
-var isUndefined = (val)=>val === undefined;
-var get = (obj, path, defaultValue)=>{
-    if (!path || !isObject(obj)) return defaultValue;
-    const result = compact(path.split(/[,[\].]+?/)).reduce((result, key)=>isNullOrUndefined(result) ? result : result[key], obj);
-    return isUndefined(result) || result === obj ? isUndefined(obj[path]) ? defaultValue : obj[path] : result;
-};
-const EVENTS = {
-    BLUR: "blur",
-    FOCUS_OUT: "focusout",
-    CHANGE: "change"
-};
-const VALIDATION_MODE = {
-    onBlur: "onBlur",
-    onChange: "onChange",
-    onSubmit: "onSubmit",
-    onTouched: "onTouched",
-    all: "all"
-};
-const INPUT_VALIDATION_RULES = {
-    max: "max",
-    min: "min",
-    maxLength: "maxLength",
-    minLength: "minLength",
-    pattern: "pattern",
-    required: "required",
-    validate: "validate"
-};
-const HookFormContext = (0, _reactDefault.default).createContext(null);
-/**
- * This custom hook allows you to access the form context. useFormContext is intended to be used in deeply nested structures, where it would become inconvenient to pass the context as a prop. To be used with {@link FormProvider}.
- *
- * @remarks
- * [API](https://react-hook-form.com/docs/useformcontext) • [Demo](https://codesandbox.io/s/react-hook-form-v7-form-context-ytudi)
- *
- * @returns return all useForm methods
- *
- * @example
- * ```tsx
- * function App() {
- *   const methods = useForm();
- *   const onSubmit = data => console.log(data);
- *
- *   return (
- *     <FormProvider {...methods} >
- *       <form onSubmit={methods.handleSubmit(onSubmit)}>
- *         <NestedInput />
- *         <input type="submit" />
- *       </form>
- *     </FormProvider>
- *   );
- * }
- *
- *  function NestedInput() {
- *   const { register } = useFormContext(); // retrieve all hook methods
- *   return <input {...register("test")} />;
- * }
- * ```
- */ const useFormContext = ()=>(0, _reactDefault.default).useContext(HookFormContext);
-/**
- * A provider component that propagates the `useForm` methods to all children components via [React Context](https://reactjs.org/docs/context.html) API. To be used with {@link useFormContext}.
- *
- * @remarks
- * [API](https://react-hook-form.com/docs/useformcontext) • [Demo](https://codesandbox.io/s/react-hook-form-v7-form-context-ytudi)
- *
- * @param props - all useFrom methods
- *
- * @example
- * ```tsx
- * function App() {
- *   const methods = useForm();
- *   const onSubmit = data => console.log(data);
- *
- *   return (
- *     <FormProvider {...methods} >
- *       <form onSubmit={methods.handleSubmit(onSubmit)}>
- *         <NestedInput />
- *         <input type="submit" />
- *       </form>
- *     </FormProvider>
- *   );
- * }
- *
- *  function NestedInput() {
- *   const { register } = useFormContext(); // retrieve all hook methods
- *   return <input {...register("test")} />;
- * }
- * ```
- */ const FormProvider = (props)=>{
-    const { children, ...data } = props;
-    return (0, _reactDefault.default).createElement(HookFormContext.Provider, {
-        value: data
-    }, children);
-};
-var getProxyFormState = (formState, control, localProxyFormState, isRoot = true)=>{
-    const result = {
-        defaultValues: control._defaultValues
-    };
-    for(const key in formState)Object.defineProperty(result, key, {
-        get: ()=>{
-            const _key = key;
-            if (control._proxyFormState[_key] !== VALIDATION_MODE.all) control._proxyFormState[_key] = !isRoot || VALIDATION_MODE.all;
-            localProxyFormState && (localProxyFormState[_key] = true);
-            return formState[_key];
-        }
-    });
-    return result;
-};
-var isEmptyObject = (value1)=>isObject(value1) && !Object.keys(value1).length;
-var shouldRenderFormState = (formStateData, _proxyFormState, updateFormState, isRoot)=>{
-    updateFormState(formStateData);
-    const { name, ...formState } = formStateData;
-    return isEmptyObject(formState) || Object.keys(formState).length >= Object.keys(_proxyFormState).length || Object.keys(formState).find((key)=>_proxyFormState[key] === (!isRoot || VALIDATION_MODE.all));
-};
-var convertToArrayPayload = (value1)=>Array.isArray(value1) ? value1 : [
-        value1
-    ];
-var shouldSubscribeByName = (name, signalName, exact)=>exact && signalName ? name === signalName : !name || !signalName || name === signalName || convertToArrayPayload(name).some((currentName)=>currentName && (currentName.startsWith(signalName) || signalName.startsWith(currentName)));
-function useSubscribe(props) {
-    const _props = (0, _reactDefault.default).useRef(props);
-    _props.current = props;
-    (0, _reactDefault.default).useEffect(()=>{
-        const subscription = !props.disabled && _props.current.subject && _props.current.subject.subscribe({
-            next: _props.current.next
-        });
-        return ()=>{
-            subscription && subscription.unsubscribe();
-        };
-    }, [
-        props.disabled
-    ]);
-}
-/**
- * This custom hook allows you to subscribe to each form state, and isolate the re-render at the custom hook level. It has its scope in terms of form state subscription, so it would not affect other useFormState and useForm. Using this hook can reduce the re-render impact on large and complex form application.
- *
- * @remarks
- * [API](https://react-hook-form.com/docs/useformstate) • [Demo](https://codesandbox.io/s/useformstate-75xly)
- *
- * @param props - include options on specify fields to subscribe. {@link UseFormStateReturn}
- *
- * @example
- * ```tsx
- * function App() {
- *   const { register, handleSubmit, control } = useForm({
- *     defaultValues: {
- *     firstName: "firstName"
- *   }});
- *   const { dirtyFields } = useFormState({
- *     control
- *   });
- *   const onSubmit = (data) => console.log(data);
- *
- *   return (
- *     <form onSubmit={handleSubmit(onSubmit)}>
- *       <input {...register("firstName")} placeholder="First Name" />
- *       {dirtyFields.firstName && <p>Field is dirty.</p>}
- *       <input type="submit" />
- *     </form>
- *   );
- * }
- * ```
- */ function useFormState(props) {
-    const methods = useFormContext();
-    const { control = methods.control, disabled, name, exact } = props || {};
-    const [formState, updateFormState] = (0, _reactDefault.default).useState(control._formState);
-    const _mounted = (0, _reactDefault.default).useRef(true);
-    const _localProxyFormState = (0, _reactDefault.default).useRef({
-        isDirty: false,
-        isLoading: false,
-        dirtyFields: false,
-        touchedFields: false,
-        isValidating: false,
-        isValid: false,
-        errors: false
-    });
-    const _name = (0, _reactDefault.default).useRef(name);
-    _name.current = name;
-    useSubscribe({
-        disabled,
-        next: (value1)=>_mounted.current && shouldSubscribeByName(_name.current, value1.name, exact) && shouldRenderFormState(value1, _localProxyFormState.current, control._updateFormState) && updateFormState({
-                ...control._formState,
-                ...value1
-            }),
-        subject: control._subjects.state
-    });
-    (0, _reactDefault.default).useEffect(()=>{
-        _mounted.current = true;
-        _localProxyFormState.current.isValid && control._updateValid(true);
-        return ()=>{
-            _mounted.current = false;
-        };
-    }, [
-        control
-    ]);
-    return getProxyFormState(formState, control, _localProxyFormState.current, false);
-}
-var isString = (value1)=>typeof value1 === "string";
-var generateWatchOutput = (names, _names, formValues, isGlobal, defaultValue)=>{
-    if (isString(names)) {
-        isGlobal && _names.watch.add(names);
-        return get(formValues, names, defaultValue);
-    }
-    if (Array.isArray(names)) return names.map((fieldName)=>(isGlobal && _names.watch.add(fieldName), get(formValues, fieldName)));
-    isGlobal && (_names.watchAll = true);
-    return formValues;
-};
-/**
- * Custom hook to subscribe to field change and isolate re-rendering at the component level.
- *
- * @remarks
- *
- * [API](https://react-hook-form.com/docs/usewatch) • [Demo](https://codesandbox.io/s/react-hook-form-v7-ts-usewatch-h9i5e)
- *
- * @example
- * ```tsx
- * const { watch } = useForm();
- * const values = useWatch({
- *   name: "fieldName"
- *   control,
- * })
- * ```
- */ function useWatch(props) {
-    const methods = useFormContext();
-    const { control = methods.control, name, defaultValue, disabled, exact } = props || {};
-    const _name = (0, _reactDefault.default).useRef(name);
-    _name.current = name;
-    useSubscribe({
-        disabled,
-        subject: control._subjects.values,
-        next: (formState)=>{
-            if (shouldSubscribeByName(_name.current, formState.name, exact)) updateValue(cloneObject(generateWatchOutput(_name.current, control._names, formState.values || control._formValues, false, defaultValue)));
-        }
-    });
-    const [value1, updateValue] = (0, _reactDefault.default).useState(control._getWatch(name, defaultValue));
-    (0, _reactDefault.default).useEffect(()=>control._removeUnmounted());
-    return value1;
-}
-var isKey = (value1)=>/^\w*$/.test(value1);
-var stringToPath = (input)=>compact(input.replace(/["|']|\]/g, "").split(/\.|\[/));
-function set(object, path, value1) {
-    let index = -1;
-    const tempPath = isKey(path) ? [
-        path
-    ] : stringToPath(path);
-    const length = tempPath.length;
-    const lastIndex = length - 1;
-    while(++index < length){
-        const key = tempPath[index];
-        let newValue = value1;
-        if (index !== lastIndex) {
-            const objValue = object[key];
-            newValue = isObject(objValue) || Array.isArray(objValue) ? objValue : !isNaN(+tempPath[index + 1]) ? [] : {};
-        }
-        object[key] = newValue;
-        object = object[key];
-    }
-    return object;
-}
-/**
- * Custom hook to work with controlled component, this function provide you with both form and field level state. Re-render is isolated at the hook level.
- *
- * @remarks
- * [API](https://react-hook-form.com/docs/usecontroller) • [Demo](https://codesandbox.io/s/usecontroller-0o8px)
- *
- * @param props - the path name to the form field value, and validation rules.
- *
- * @returns field properties, field and form state. {@link UseControllerReturn}
- *
- * @example
- * ```tsx
- * function Input(props) {
- *   const { field, fieldState, formState } = useController(props);
- *   return (
- *     <div>
- *       <input {...field} placeholder={props.name} />
- *       <p>{fieldState.isTouched && "Touched"}</p>
- *       <p>{formState.isSubmitted ? "submitted" : ""}</p>
- *     </div>
- *   );
- * }
- * ```
- */ function useController(props) {
-    const methods = useFormContext();
-    const { name, control = methods.control, shouldUnregister } = props;
-    const isArrayField = isNameInFieldArray(control._names.array, name);
-    const value1 = useWatch({
-        control,
-        name,
-        defaultValue: get(control._formValues, name, get(control._defaultValues, name, props.defaultValue)),
-        exact: true
-    });
-    const formState = useFormState({
-        control,
-        name
-    });
-    const _registerProps = (0, _reactDefault.default).useRef(control.register(name, {
-        ...props.rules,
-        value: value1
-    }));
-    _registerProps.current = control.register(name, props.rules);
-    (0, _reactDefault.default).useEffect(()=>{
-        const _shouldUnregisterField = control._options.shouldUnregister || shouldUnregister;
-        const updateMounted = (name, value1)=>{
-            const field = get(control._fields, name);
-            if (field) field._f.mount = value1;
-        };
-        updateMounted(name, true);
-        if (_shouldUnregisterField) {
-            const value1 = cloneObject(get(control._options.defaultValues, name));
-            set(control._defaultValues, name, value1);
-            if (isUndefined(get(control._formValues, name))) set(control._formValues, name, value1);
-        }
-        return ()=>{
-            (isArrayField ? _shouldUnregisterField && !control._state.action : _shouldUnregisterField) ? control.unregister(name) : updateMounted(name, false);
-        };
-    }, [
-        name,
-        control,
-        isArrayField,
-        shouldUnregister
-    ]);
-    return {
-        field: {
-            name,
-            value: value1,
-            onChange: (0, _reactDefault.default).useCallback((event)=>_registerProps.current.onChange({
-                    target: {
-                        value: getEventValue(event),
-                        name: name
-                    },
-                    type: EVENTS.CHANGE
-                }), [
-                name
-            ]),
-            onBlur: (0, _reactDefault.default).useCallback(()=>_registerProps.current.onBlur({
-                    target: {
-                        value: get(control._formValues, name),
-                        name: name
-                    },
-                    type: EVENTS.BLUR
-                }), [
-                name,
-                control
-            ]),
-            ref: (elm)=>{
-                const field = get(control._fields, name);
-                if (field && elm) field._f.ref = {
-                    focus: ()=>elm.focus(),
-                    select: ()=>elm.select(),
-                    setCustomValidity: (message)=>elm.setCustomValidity(message),
-                    reportValidity: ()=>elm.reportValidity()
-                };
-            }
-        },
-        formState,
-        fieldState: Object.defineProperties({}, {
-            invalid: {
-                enumerable: true,
-                get: ()=>!!get(formState.errors, name)
-            },
-            isDirty: {
-                enumerable: true,
-                get: ()=>!!get(formState.dirtyFields, name)
-            },
-            isTouched: {
-                enumerable: true,
-                get: ()=>!!get(formState.touchedFields, name)
-            },
-            error: {
-                enumerable: true,
-                get: ()=>get(formState.errors, name)
-            }
-        })
-    };
-}
-/**
- * Component based on `useController` hook to work with controlled component.
- *
- * @remarks
- * [API](https://react-hook-form.com/docs/usecontroller/controller) • [Demo](https://codesandbox.io/s/react-hook-form-v6-controller-ts-jwyzw) • [Video](https://www.youtube.com/watch?v=N2UNk_UCVyA)
- *
- * @param props - the path name to the form field value, and validation rules.
- *
- * @returns provide field handler functions, field and form state.
- *
- * @example
- * ```tsx
- * function App() {
- *   const { control } = useForm<FormValues>({
- *     defaultValues: {
- *       test: ""
- *     }
- *   });
- *
- *   return (
- *     <form>
- *       <Controller
- *         control={control}
- *         name="test"
- *         render={({ field: { onChange, onBlur, value, ref }, formState, fieldState }) => (
- *           <>
- *             <input
- *               onChange={onChange} // send value to hook form
- *               onBlur={onBlur} // notify when input is touched
- *               value={value} // return updated value
- *               ref={ref} // set ref for focus management
- *             />
- *             <p>{formState.isSubmitted ? "submitted" : ""}</p>
- *             <p>{fieldState.isTouched ? "touched" : ""}</p>
- *           </>
- *         )}
- *       />
- *     </form>
- *   );
- * }
- * ```
- */ const Controller = (props)=>props.render(useController(props));
-const POST_REQUEST = "post";
-/**
- * Form component to manage submission.
- *
- * @param props - to setup submission detail. {@link FormProps}
- *
- * @returns form component or headless render prop.
- *
- * @example
- * ```tsx
- * function App() {
- *   const { control, formState: { errors } } = useForm();
- *
- *   return (
- *     <Form action="/api" control={control}>
- *       <input {...register("name")} />
- *       <p>{errors?.root?.server && 'Server error'}</p>
- *       <button>Submit</button>
- *     </Form>
- *   );
- * }
- * ```
- */ function Form(props) {
-    const methods = useFormContext();
-    const [mounted, setMounted] = (0, _reactDefault.default).useState(false);
-    const { control = methods.control, onSubmit, children, action, method = POST_REQUEST, headers, encType, onError, render, onSuccess, validateStatus, ...rest } = props;
-    const submit = async (event)=>{
-        let hasError = false;
-        let type = "";
-        await control.handleSubmit(async (data)=>{
-            const formData = new FormData();
-            let formDataJson = "";
-            try {
-                formDataJson = JSON.stringify(data);
-            } catch (_a) {}
-            for (const name of control._names.mount)formData.append(name, get(data, name));
-            if (onSubmit) await onSubmit({
-                data,
-                event,
-                method,
-                formData,
-                formDataJson
-            });
-            if (action) try {
-                const shouldStringifySubmissionData = [
-                    headers && headers["Content-Type"],
-                    encType
-                ].some((value1)=>value1 && value1.includes("json"));
-                const response = await fetch(action, {
-                    method,
-                    headers: {
-                        ...headers,
-                        ...encType ? {
-                            "Content-Type": encType
-                        } : {}
-                    },
-                    body: shouldStringifySubmissionData ? formDataJson : formData
-                });
-                if (response && (validateStatus ? !validateStatus(response.status) : response.status < 200 || response.status >= 300)) {
-                    hasError = true;
-                    onError && onError({
-                        response
-                    });
-                    type = String(response.status);
-                } else onSuccess && onSuccess({
-                    response
-                });
-            } catch (error) {
-                hasError = true;
-                onError && onError({
-                    error
-                });
-            }
-        })(event);
-        if (hasError && props.control) {
-            props.control._subjects.state.next({
-                isSubmitSuccessful: false
-            });
-            props.control.setError("root.server", {
-                type
-            });
-        }
-    };
-    (0, _reactDefault.default).useEffect(()=>{
-        setMounted(true);
-    }, []);
-    return render ? (0, _reactDefault.default).createElement((0, _reactDefault.default).Fragment, null, render({
-        submit
-    })) : (0, _reactDefault.default).createElement("form", {
-        noValidate: mounted,
-        action: action,
-        method: method,
-        encType: encType,
-        onSubmit: submit,
-        ...rest
-    }, children);
-}
-var appendErrors = (name, validateAllFieldCriteria, errors, type, message)=>validateAllFieldCriteria ? {
-        ...errors[name],
-        types: {
-            ...errors[name] && errors[name].types ? errors[name].types : {},
-            [type]: message || true
-        }
-    } : {};
-const focusFieldBy = (fields, callback, fieldsNames)=>{
-    for (const key of fieldsNames || Object.keys(fields)){
-        const field = get(fields, key);
-        if (field) {
-            const { _f, ...currentField } = field;
-            if (_f && callback(_f.name)) {
-                if (_f.ref.focus) {
-                    _f.ref.focus();
-                    break;
-                } else if (_f.refs && _f.refs[0].focus) {
-                    _f.refs[0].focus();
-                    break;
-                }
-            } else if (isObject(currentField)) focusFieldBy(currentField, callback);
-        }
-    }
-};
-var generateId = ()=>{
-    const d = typeof performance === "undefined" ? Date.now() : performance.now() * 1000;
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c)=>{
-        const r = (Math.random() * 16 + d) % 16 | 0;
-        return (c == "x" ? r : r & 0x3 | 0x8).toString(16);
-    });
-};
-var getFocusFieldName = (name, index, options = {})=>options.shouldFocus || isUndefined(options.shouldFocus) ? options.focusName || `${name}.${isUndefined(options.focusIndex) ? index : options.focusIndex}.` : "";
-var getValidationModes = (mode)=>({
-        isOnSubmit: !mode || mode === VALIDATION_MODE.onSubmit,
-        isOnBlur: mode === VALIDATION_MODE.onBlur,
-        isOnChange: mode === VALIDATION_MODE.onChange,
-        isOnAll: mode === VALIDATION_MODE.all,
-        isOnTouch: mode === VALIDATION_MODE.onTouched
-    });
-var isWatched = (name, _names, isBlurEvent)=>!isBlurEvent && (_names.watchAll || _names.watch.has(name) || [
-        ..._names.watch
-    ].some((watchName)=>name.startsWith(watchName) && /^\.\w+/.test(name.slice(watchName.length))));
-var updateFieldArrayRootError = (errors, error, name)=>{
-    const fieldArrayErrors = compact(get(errors, name));
-    set(fieldArrayErrors, "root", error[name]);
-    set(errors, name, fieldArrayErrors);
-    return errors;
-};
-var isBoolean = (value1)=>typeof value1 === "boolean";
-var isFileInput = (element)=>element.type === "file";
-var isFunction = (value1)=>typeof value1 === "function";
-var isHTMLElement = (value1)=>{
-    if (!isWeb) return false;
-    const owner = value1 ? value1.ownerDocument : 0;
-    return value1 instanceof (owner && owner.defaultView ? owner.defaultView.HTMLElement : HTMLElement);
-};
-var isMessage = (value1)=>isString(value1);
-var isRadioInput = (element)=>element.type === "radio";
-var isRegex = (value1)=>value1 instanceof RegExp;
-const defaultResult = {
-    value: false,
-    isValid: false
-};
-const validResult = {
-    value: true,
-    isValid: true
-};
-var getCheckboxValue = (options)=>{
-    if (Array.isArray(options)) {
-        if (options.length > 1) {
-            const values = options.filter((option)=>option && option.checked && !option.disabled).map((option)=>option.value);
-            return {
-                value: values,
-                isValid: !!values.length
-            };
-        }
-        return options[0].checked && !options[0].disabled ? options[0].attributes && !isUndefined(options[0].attributes.value) ? isUndefined(options[0].value) || options[0].value === "" ? validResult : {
-            value: options[0].value,
-            isValid: true
-        } : validResult : defaultResult;
-    }
-    return defaultResult;
-};
-const defaultReturn = {
-    isValid: false,
-    value: null
-};
-var getRadioValue = (options)=>Array.isArray(options) ? options.reduce((previous, option)=>option && option.checked && !option.disabled ? {
-            isValid: true,
-            value: option.value
-        } : previous, defaultReturn) : defaultReturn;
-function getValidateError(result, ref, type = "validate") {
-    if (isMessage(result) || Array.isArray(result) && result.every(isMessage) || isBoolean(result) && !result) return {
-        type,
-        message: isMessage(result) ? result : "",
-        ref
-    };
-}
-var getValueAndMessage = (validationData)=>isObject(validationData) && !isRegex(validationData) ? validationData : {
-        value: validationData,
-        message: ""
-    };
-var validateField = async (field, formValues, validateAllFieldCriteria, shouldUseNativeValidation, isFieldArray)=>{
-    const { ref, refs, required, maxLength, minLength, min, max, pattern, validate, name, valueAsNumber, mount, disabled } = field._f;
-    const inputValue = get(formValues, name);
-    if (!mount || disabled) return {};
-    const inputRef = refs ? refs[0] : ref;
-    const setCustomValidity = (message)=>{
-        if (shouldUseNativeValidation && inputRef.reportValidity) {
-            inputRef.setCustomValidity(isBoolean(message) ? "" : message || "");
-            inputRef.reportValidity();
-        }
-    };
-    const error = {};
-    const isRadio = isRadioInput(ref);
-    const isCheckBox = isCheckBoxInput(ref);
-    const isRadioOrCheckbox = isRadio || isCheckBox;
-    const isEmpty = (valueAsNumber || isFileInput(ref)) && isUndefined(ref.value) && isUndefined(inputValue) || isHTMLElement(ref) && ref.value === "" || inputValue === "" || Array.isArray(inputValue) && !inputValue.length;
-    const appendErrorsCurry = appendErrors.bind(null, name, validateAllFieldCriteria, error);
-    const getMinMaxMessage = (exceedMax, maxLengthMessage, minLengthMessage, maxType = INPUT_VALIDATION_RULES.maxLength, minType = INPUT_VALIDATION_RULES.minLength)=>{
-        const message = exceedMax ? maxLengthMessage : minLengthMessage;
-        error[name] = {
-            type: exceedMax ? maxType : minType,
-            message,
-            ref,
-            ...appendErrorsCurry(exceedMax ? maxType : minType, message)
-        };
-    };
-    if (isFieldArray ? !Array.isArray(inputValue) || !inputValue.length : required && (!isRadioOrCheckbox && (isEmpty || isNullOrUndefined(inputValue)) || isBoolean(inputValue) && !inputValue || isCheckBox && !getCheckboxValue(refs).isValid || isRadio && !getRadioValue(refs).isValid)) {
-        const { value: value1, message } = isMessage(required) ? {
-            value: !!required,
-            message: required
-        } : getValueAndMessage(required);
-        if (value1) {
-            error[name] = {
-                type: INPUT_VALIDATION_RULES.required,
-                message,
-                ref: inputRef,
-                ...appendErrorsCurry(INPUT_VALIDATION_RULES.required, message)
-            };
-            if (!validateAllFieldCriteria) {
-                setCustomValidity(message);
-                return error;
-            }
-        }
-    }
-    if (!isEmpty && (!isNullOrUndefined(min) || !isNullOrUndefined(max))) {
-        let exceedMax;
-        let exceedMin;
-        const maxOutput = getValueAndMessage(max);
-        const minOutput = getValueAndMessage(min);
-        if (!isNullOrUndefined(inputValue) && !isNaN(inputValue)) {
-            const valueNumber = ref.valueAsNumber || (inputValue ? +inputValue : inputValue);
-            if (!isNullOrUndefined(maxOutput.value)) exceedMax = valueNumber > maxOutput.value;
-            if (!isNullOrUndefined(minOutput.value)) exceedMin = valueNumber < minOutput.value;
-        } else {
-            const valueDate = ref.valueAsDate || new Date(inputValue);
-            const convertTimeToDate = (time)=>new Date(new Date().toDateString() + " " + time);
-            const isTime = ref.type == "time";
-            const isWeek = ref.type == "week";
-            if (isString(maxOutput.value) && inputValue) exceedMax = isTime ? convertTimeToDate(inputValue) > convertTimeToDate(maxOutput.value) : isWeek ? inputValue > maxOutput.value : valueDate > new Date(maxOutput.value);
-            if (isString(minOutput.value) && inputValue) exceedMin = isTime ? convertTimeToDate(inputValue) < convertTimeToDate(minOutput.value) : isWeek ? inputValue < minOutput.value : valueDate < new Date(minOutput.value);
-        }
-        if (exceedMax || exceedMin) {
-            getMinMaxMessage(!!exceedMax, maxOutput.message, minOutput.message, INPUT_VALIDATION_RULES.max, INPUT_VALIDATION_RULES.min);
-            if (!validateAllFieldCriteria) {
-                setCustomValidity(error[name].message);
-                return error;
-            }
-        }
-    }
-    if ((maxLength || minLength) && !isEmpty && (isString(inputValue) || isFieldArray && Array.isArray(inputValue))) {
-        const maxLengthOutput = getValueAndMessage(maxLength);
-        const minLengthOutput = getValueAndMessage(minLength);
-        const exceedMax = !isNullOrUndefined(maxLengthOutput.value) && inputValue.length > +maxLengthOutput.value;
-        const exceedMin = !isNullOrUndefined(minLengthOutput.value) && inputValue.length < +minLengthOutput.value;
-        if (exceedMax || exceedMin) {
-            getMinMaxMessage(exceedMax, maxLengthOutput.message, minLengthOutput.message);
-            if (!validateAllFieldCriteria) {
-                setCustomValidity(error[name].message);
-                return error;
-            }
-        }
-    }
-    if (pattern && !isEmpty && isString(inputValue)) {
-        const { value: patternValue, message } = getValueAndMessage(pattern);
-        if (isRegex(patternValue) && !inputValue.match(patternValue)) {
-            error[name] = {
-                type: INPUT_VALIDATION_RULES.pattern,
-                message,
-                ref,
-                ...appendErrorsCurry(INPUT_VALIDATION_RULES.pattern, message)
-            };
-            if (!validateAllFieldCriteria) {
-                setCustomValidity(message);
-                return error;
-            }
-        }
-    }
-    if (validate) {
-        if (isFunction(validate)) {
-            const result = await validate(inputValue, formValues);
-            const validateError = getValidateError(result, inputRef);
-            if (validateError) {
-                error[name] = {
-                    ...validateError,
-                    ...appendErrorsCurry(INPUT_VALIDATION_RULES.validate, validateError.message)
-                };
-                if (!validateAllFieldCriteria) {
-                    setCustomValidity(validateError.message);
-                    return error;
-                }
-            }
-        } else if (isObject(validate)) {
-            let validationResult = {};
-            for(const key in validate){
-                if (!isEmptyObject(validationResult) && !validateAllFieldCriteria) break;
-                const validateError = getValidateError(await validate[key](inputValue, formValues), inputRef, key);
-                if (validateError) {
-                    validationResult = {
-                        ...validateError,
-                        ...appendErrorsCurry(key, validateError.message)
-                    };
-                    setCustomValidity(validateError.message);
-                    if (validateAllFieldCriteria) error[name] = validationResult;
-                }
-            }
-            if (!isEmptyObject(validationResult)) {
-                error[name] = {
-                    ref: inputRef,
-                    ...validationResult
-                };
-                if (!validateAllFieldCriteria) return error;
-            }
-        }
-    }
-    setCustomValidity(true);
-    return error;
-};
-function append(data, value1) {
-    return [
-        ...data,
-        ...convertToArrayPayload(value1)
-    ];
-}
-var fillEmptyArray = (value1)=>Array.isArray(value1) ? value1.map(()=>undefined) : undefined;
-function insert(data, index, value1) {
-    return [
-        ...data.slice(0, index),
-        ...convertToArrayPayload(value1),
-        ...data.slice(index)
-    ];
-}
-var moveArrayAt = (data, from, to)=>{
-    if (!Array.isArray(data)) return [];
-    if (isUndefined(data[to])) data[to] = undefined;
-    data.splice(to, 0, data.splice(from, 1)[0]);
-    return data;
-};
-function prepend(data, value1) {
-    return [
-        ...convertToArrayPayload(value1),
-        ...convertToArrayPayload(data)
-    ];
-}
-function removeAtIndexes(data, indexes) {
-    let i = 0;
-    const temp = [
-        ...data
-    ];
-    for (const index of indexes){
-        temp.splice(index - i, 1);
-        i++;
-    }
-    return compact(temp).length ? temp : [];
-}
-var removeArrayAt = (data, index)=>isUndefined(index) ? [] : removeAtIndexes(data, convertToArrayPayload(index).sort((a, b)=>a - b));
-var swapArrayAt = (data, indexA, indexB)=>{
-    data[indexA] = [
-        data[indexB],
-        data[indexB] = data[indexA]
-    ][0];
-};
-function baseGet(object, updatePath) {
-    const length = updatePath.slice(0, -1).length;
-    let index = 0;
-    while(index < length)object = isUndefined(object) ? index++ : object[updatePath[index++]];
-    return object;
-}
-function isEmptyArray(obj) {
-    for(const key in obj){
-        if (obj.hasOwnProperty(key) && !isUndefined(obj[key])) return false;
-    }
-    return true;
-}
-function unset(object, path) {
-    const paths = Array.isArray(path) ? path : isKey(path) ? [
-        path
-    ] : stringToPath(path);
-    const childObject = paths.length === 1 ? object : baseGet(object, paths);
-    const index = paths.length - 1;
-    const key = paths[index];
-    if (childObject) delete childObject[key];
-    if (index !== 0 && (isObject(childObject) && isEmptyObject(childObject) || Array.isArray(childObject) && isEmptyArray(childObject))) unset(object, paths.slice(0, -1));
-    return object;
-}
-var updateAt = (fieldValues, index, value1)=>{
-    fieldValues[index] = value1;
-    return fieldValues;
-};
-/**
- * A custom hook that exposes convenient methods to perform operations with a list of dynamic inputs that need to be appended, updated, removed etc. • [Demo](https://codesandbox.io/s/react-hook-form-usefieldarray-ssugn) • [Video](https://youtu.be/4MrbfGSFY2A)
- *
- * @remarks
- * [API](https://react-hook-form.com/docs/usefieldarray) • [Demo](https://codesandbox.io/s/react-hook-form-usefieldarray-ssugn)
- *
- * @param props - useFieldArray props
- *
- * @returns methods - functions to manipulate with the Field Arrays (dynamic inputs) {@link UseFieldArrayReturn}
- *
- * @example
- * ```tsx
- * function App() {
- *   const { register, control, handleSubmit, reset, trigger, setError } = useForm({
- *     defaultValues: {
- *       test: []
- *     }
- *   });
- *   const { fields, append } = useFieldArray({
- *     control,
- *     name: "test"
- *   });
- *
- *   return (
- *     <form onSubmit={handleSubmit(data => console.log(data))}>
- *       {fields.map((item, index) => (
- *          <input key={item.id} {...register(`test.${index}.firstName`)}  />
- *       ))}
- *       <button type="button" onClick={() => append({ firstName: "bill" })}>
- *         append
- *       </button>
- *       <input type="submit" />
- *     </form>
- *   );
- * }
- * ```
- */ function useFieldArray(props) {
-    const methods = useFormContext();
-    const { control = methods.control, name, keyName = "id", shouldUnregister } = props;
-    const [fields, setFields] = (0, _reactDefault.default).useState(control._getFieldArray(name));
-    const ids = (0, _reactDefault.default).useRef(control._getFieldArray(name).map(generateId));
-    const _fieldIds = (0, _reactDefault.default).useRef(fields);
-    const _name = (0, _reactDefault.default).useRef(name);
-    const _actioned = (0, _reactDefault.default).useRef(false);
-    _name.current = name;
-    _fieldIds.current = fields;
-    control._names.array.add(name);
-    props.rules && control.register(name, props.rules);
-    useSubscribe({
-        next: ({ values, name: fieldArrayName })=>{
-            if (fieldArrayName === _name.current || !fieldArrayName) {
-                const fieldValues = get(values, _name.current);
-                if (Array.isArray(fieldValues)) {
-                    setFields(fieldValues);
-                    ids.current = fieldValues.map(generateId);
-                }
-            }
-        },
-        subject: control._subjects.array
-    });
-    const updateValues = (0, _reactDefault.default).useCallback((updatedFieldArrayValues)=>{
-        _actioned.current = true;
-        control._updateFieldArray(name, updatedFieldArrayValues);
-    }, [
-        control,
-        name
-    ]);
-    const append$1 = (value1, options)=>{
-        const appendValue = convertToArrayPayload(cloneObject(value1));
-        const updatedFieldArrayValues = append(control._getFieldArray(name), appendValue);
-        control._names.focus = getFocusFieldName(name, updatedFieldArrayValues.length - 1, options);
-        ids.current = append(ids.current, appendValue.map(generateId));
-        updateValues(updatedFieldArrayValues);
-        setFields(updatedFieldArrayValues);
-        control._updateFieldArray(name, updatedFieldArrayValues, append, {
-            argA: fillEmptyArray(value1)
-        });
-    };
-    const prepend$1 = (value1, options)=>{
-        const prependValue = convertToArrayPayload(cloneObject(value1));
-        const updatedFieldArrayValues = prepend(control._getFieldArray(name), prependValue);
-        control._names.focus = getFocusFieldName(name, 0, options);
-        ids.current = prepend(ids.current, prependValue.map(generateId));
-        updateValues(updatedFieldArrayValues);
-        setFields(updatedFieldArrayValues);
-        control._updateFieldArray(name, updatedFieldArrayValues, prepend, {
-            argA: fillEmptyArray(value1)
-        });
-    };
-    const remove = (index)=>{
-        const updatedFieldArrayValues = removeArrayAt(control._getFieldArray(name), index);
-        ids.current = removeArrayAt(ids.current, index);
-        updateValues(updatedFieldArrayValues);
-        setFields(updatedFieldArrayValues);
-        control._updateFieldArray(name, updatedFieldArrayValues, removeArrayAt, {
-            argA: index
-        });
-    };
-    const insert$1 = (index, value1, options)=>{
-        const insertValue = convertToArrayPayload(cloneObject(value1));
-        const updatedFieldArrayValues = insert(control._getFieldArray(name), index, insertValue);
-        control._names.focus = getFocusFieldName(name, index, options);
-        ids.current = insert(ids.current, index, insertValue.map(generateId));
-        updateValues(updatedFieldArrayValues);
-        setFields(updatedFieldArrayValues);
-        control._updateFieldArray(name, updatedFieldArrayValues, insert, {
-            argA: index,
-            argB: fillEmptyArray(value1)
-        });
-    };
-    const swap = (indexA, indexB)=>{
-        const updatedFieldArrayValues = control._getFieldArray(name);
-        swapArrayAt(updatedFieldArrayValues, indexA, indexB);
-        swapArrayAt(ids.current, indexA, indexB);
-        updateValues(updatedFieldArrayValues);
-        setFields(updatedFieldArrayValues);
-        control._updateFieldArray(name, updatedFieldArrayValues, swapArrayAt, {
-            argA: indexA,
-            argB: indexB
-        }, false);
-    };
-    const move = (from, to)=>{
-        const updatedFieldArrayValues = control._getFieldArray(name);
-        moveArrayAt(updatedFieldArrayValues, from, to);
-        moveArrayAt(ids.current, from, to);
-        updateValues(updatedFieldArrayValues);
-        setFields(updatedFieldArrayValues);
-        control._updateFieldArray(name, updatedFieldArrayValues, moveArrayAt, {
-            argA: from,
-            argB: to
-        }, false);
-    };
-    const update = (index, value1)=>{
-        const updateValue = cloneObject(value1);
-        const updatedFieldArrayValues = updateAt(control._getFieldArray(name), index, updateValue);
-        ids.current = [
-            ...updatedFieldArrayValues
-        ].map((item, i)=>!item || i === index ? generateId() : ids.current[i]);
-        updateValues(updatedFieldArrayValues);
-        setFields([
-            ...updatedFieldArrayValues
-        ]);
-        control._updateFieldArray(name, updatedFieldArrayValues, updateAt, {
-            argA: index,
-            argB: updateValue
-        }, true, false);
-    };
-    const replace = (value1)=>{
-        const updatedFieldArrayValues = convertToArrayPayload(cloneObject(value1));
-        ids.current = updatedFieldArrayValues.map(generateId);
-        updateValues([
-            ...updatedFieldArrayValues
-        ]);
-        setFields([
-            ...updatedFieldArrayValues
-        ]);
-        control._updateFieldArray(name, [
-            ...updatedFieldArrayValues
-        ], (data)=>data, {}, true, false);
-    };
-    (0, _reactDefault.default).useEffect(()=>{
-        control._state.action = false;
-        isWatched(name, control._names) && control._subjects.state.next({
-            ...control._formState
-        });
-        if (_actioned.current && (!getValidationModes(control._options.mode).isOnSubmit || control._formState.isSubmitted)) {
-            if (control._options.resolver) control._executeSchema([
-                name
-            ]).then((result)=>{
-                const error = get(result.errors, name);
-                const existingError = get(control._formState.errors, name);
-                if (existingError ? !error && existingError.type || error && (existingError.type !== error.type || existingError.message !== error.message) : error && error.type) {
-                    error ? set(control._formState.errors, name, error) : unset(control._formState.errors, name);
-                    control._subjects.state.next({
-                        errors: control._formState.errors
-                    });
-                }
-            });
-            else {
-                const field = get(control._fields, name);
-                if (field && field._f) validateField(field, control._formValues, control._options.criteriaMode === VALIDATION_MODE.all, control._options.shouldUseNativeValidation, true).then((error)=>!isEmptyObject(error) && control._subjects.state.next({
-                        errors: updateFieldArrayRootError(control._formState.errors, error, name)
-                    }));
-            }
-        }
-        control._subjects.values.next({
-            name,
-            values: {
-                ...control._formValues
-            }
-        });
-        control._names.focus && focusFieldBy(control._fields, (key)=>!!key && key.startsWith(control._names.focus || ""));
-        control._names.focus = "";
-        control._updateValid();
-        _actioned.current = false;
-    }, [
-        fields,
-        name,
-        control
-    ]);
-    (0, _reactDefault.default).useEffect(()=>{
-        !get(control._formValues, name) && control._updateFieldArray(name);
-        return ()=>{
-            (control._options.shouldUnregister || shouldUnregister) && control.unregister(name);
-        };
-    }, [
-        name,
-        control,
-        keyName,
-        shouldUnregister
-    ]);
-    return {
-        swap: (0, _reactDefault.default).useCallback(swap, [
-            updateValues,
-            name,
-            control
-        ]),
-        move: (0, _reactDefault.default).useCallback(move, [
-            updateValues,
-            name,
-            control
-        ]),
-        prepend: (0, _reactDefault.default).useCallback(prepend$1, [
-            updateValues,
-            name,
-            control
-        ]),
-        append: (0, _reactDefault.default).useCallback(append$1, [
-            updateValues,
-            name,
-            control
-        ]),
-        remove: (0, _reactDefault.default).useCallback(remove, [
-            updateValues,
-            name,
-            control
-        ]),
-        insert: (0, _reactDefault.default).useCallback(insert$1, [
-            updateValues,
-            name,
-            control
-        ]),
-        update: (0, _reactDefault.default).useCallback(update, [
-            updateValues,
-            name,
-            control
-        ]),
-        replace: (0, _reactDefault.default).useCallback(replace, [
-            updateValues,
-            name,
-            control
-        ]),
-        fields: (0, _reactDefault.default).useMemo(()=>fields.map((field, index)=>({
-                    ...field,
-                    [keyName]: ids.current[index] || generateId()
-                })), [
-            fields,
-            keyName
-        ])
-    };
-}
-function createSubject() {
-    let _observers = [];
-    const next = (value1)=>{
-        for (const observer of _observers)observer.next && observer.next(value1);
-    };
-    const subscribe = (observer)=>{
-        _observers.push(observer);
-        return {
-            unsubscribe: ()=>{
-                _observers = _observers.filter((o)=>o !== observer);
-            }
-        };
-    };
-    const unsubscribe = ()=>{
-        _observers = [];
-    };
-    return {
-        get observers () {
-            return _observers;
-        },
-        next,
-        subscribe,
-        unsubscribe
-    };
-}
-var isPrimitive = (value1)=>isNullOrUndefined(value1) || !isObjectType(value1);
-function deepEqual(object1, object2) {
-    if (isPrimitive(object1) || isPrimitive(object2)) return object1 === object2;
-    if (isDateObject(object1) && isDateObject(object2)) return object1.getTime() === object2.getTime();
-    const keys1 = Object.keys(object1);
-    const keys2 = Object.keys(object2);
-    if (keys1.length !== keys2.length) return false;
-    for (const key of keys1){
-        const val1 = object1[key];
-        if (!keys2.includes(key)) return false;
-        if (key !== "ref") {
-            const val2 = object2[key];
-            if (isDateObject(val1) && isDateObject(val2) || isObject(val1) && isObject(val2) || Array.isArray(val1) && Array.isArray(val2) ? !deepEqual(val1, val2) : val1 !== val2) return false;
-        }
-    }
-    return true;
-}
-var isMultipleSelect = (element)=>element.type === `select-multiple`;
-var isRadioOrCheckbox = (ref)=>isRadioInput(ref) || isCheckBoxInput(ref);
-var live = (ref)=>isHTMLElement(ref) && ref.isConnected;
-var objectHasFunction = (data)=>{
-    for(const key in data){
-        if (isFunction(data[key])) return true;
-    }
-    return false;
-};
-function markFieldsDirty(data, fields = {}) {
-    const isParentNodeArray = Array.isArray(data);
-    if (isObject(data) || isParentNodeArray) for(const key in data){
-        if (Array.isArray(data[key]) || isObject(data[key]) && !objectHasFunction(data[key])) {
-            fields[key] = Array.isArray(data[key]) ? [] : {};
-            markFieldsDirty(data[key], fields[key]);
-        } else if (!isNullOrUndefined(data[key])) fields[key] = true;
-    }
-    return fields;
-}
-function getDirtyFieldsFromDefaultValues(data, formValues, dirtyFieldsFromValues) {
-    const isParentNodeArray = Array.isArray(data);
-    if (isObject(data) || isParentNodeArray) {
-        for(const key in data)if (Array.isArray(data[key]) || isObject(data[key]) && !objectHasFunction(data[key])) {
-            if (isUndefined(formValues) || isPrimitive(dirtyFieldsFromValues[key])) dirtyFieldsFromValues[key] = Array.isArray(data[key]) ? markFieldsDirty(data[key], []) : {
-                ...markFieldsDirty(data[key])
-            };
-            else getDirtyFieldsFromDefaultValues(data[key], isNullOrUndefined(formValues) ? {} : formValues[key], dirtyFieldsFromValues[key]);
-        } else dirtyFieldsFromValues[key] = !deepEqual(data[key], formValues[key]);
-    }
-    return dirtyFieldsFromValues;
-}
-var getDirtyFields = (defaultValues, formValues)=>getDirtyFieldsFromDefaultValues(defaultValues, formValues, markFieldsDirty(formValues));
-var getFieldValueAs = (value1, { valueAsNumber, valueAsDate, setValueAs })=>isUndefined(value1) ? value1 : valueAsNumber ? value1 === "" ? NaN : value1 ? +value1 : value1 : valueAsDate && isString(value1) ? new Date(value1) : setValueAs ? setValueAs(value1) : value1;
-function getFieldValue(_f) {
-    const ref = _f.ref;
-    if (_f.refs ? _f.refs.every((ref)=>ref.disabled) : ref.disabled) return;
-    if (isFileInput(ref)) return ref.files;
-    if (isRadioInput(ref)) return getRadioValue(_f.refs).value;
-    if (isMultipleSelect(ref)) return [
-        ...ref.selectedOptions
-    ].map(({ value: value1 })=>value1);
-    if (isCheckBoxInput(ref)) return getCheckboxValue(_f.refs).value;
-    return getFieldValueAs(isUndefined(ref.value) ? _f.ref.value : ref.value, _f);
-}
-var getResolverOptions = (fieldsNames, _fields, criteriaMode, shouldUseNativeValidation)=>{
-    const fields = {};
-    for (const name of fieldsNames){
-        const field = get(_fields, name);
-        field && set(fields, name, field._f);
-    }
-    return {
-        criteriaMode,
-        names: [
-            ...fieldsNames
-        ],
-        fields,
-        shouldUseNativeValidation
-    };
-};
-var getRuleValue = (rule)=>isUndefined(rule) ? rule : isRegex(rule) ? rule.source : isObject(rule) ? isRegex(rule.value) ? rule.value.source : rule.value : rule;
-var hasValidation = (options)=>options.mount && (options.required || options.min || options.max || options.maxLength || options.minLength || options.pattern || options.validate);
-function schemaErrorLookup(errors, _fields, name) {
-    const error = get(errors, name);
-    if (error || isKey(name)) return {
-        error,
-        name
-    };
-    const names = name.split(".");
-    while(names.length){
-        const fieldName = names.join(".");
-        const field = get(_fields, fieldName);
-        const foundError = get(errors, fieldName);
-        if (field && !Array.isArray(field) && name !== fieldName) return {
-            name
-        };
-        if (foundError && foundError.type) return {
-            name: fieldName,
-            error: foundError
-        };
-        names.pop();
-    }
-    return {
-        name
-    };
-}
-var skipValidation = (isBlurEvent, isTouched, isSubmitted, reValidateMode, mode)=>{
-    if (mode.isOnAll) return false;
-    else if (!isSubmitted && mode.isOnTouch) return !(isTouched || isBlurEvent);
-    else if (isSubmitted ? reValidateMode.isOnBlur : mode.isOnBlur) return !isBlurEvent;
-    else if (isSubmitted ? reValidateMode.isOnChange : mode.isOnChange) return isBlurEvent;
-    return true;
-};
-var unsetEmptyArray = (ref, name)=>!compact(get(ref, name)).length && unset(ref, name);
-const defaultOptions = {
-    mode: VALIDATION_MODE.onSubmit,
-    reValidateMode: VALIDATION_MODE.onChange,
-    shouldFocusError: true
-};
-function createFormControl(props = {}, flushRootRender) {
-    let _options = {
-        ...defaultOptions,
-        ...props
-    };
-    let _formState = {
-        submitCount: 0,
-        isDirty: false,
-        isLoading: isFunction(_options.defaultValues),
-        isValidating: false,
-        isSubmitted: false,
-        isSubmitting: false,
-        isSubmitSuccessful: false,
-        isValid: false,
-        touchedFields: {},
-        dirtyFields: {},
-        errors: {}
-    };
-    let _fields = {};
-    let _defaultValues = isObject(_options.defaultValues) || isObject(_options.values) ? cloneObject(_options.defaultValues || _options.values) || {} : {};
-    let _formValues = _options.shouldUnregister ? {} : cloneObject(_defaultValues);
-    let _state = {
-        action: false,
-        mount: false,
-        watch: false
-    };
-    let _names = {
-        mount: new Set(),
-        unMount: new Set(),
-        array: new Set(),
-        watch: new Set()
-    };
-    let delayErrorCallback;
-    let timer = 0;
-    const _proxyFormState = {
-        isDirty: false,
-        dirtyFields: false,
-        touchedFields: false,
-        isValidating: false,
-        isValid: false,
-        errors: false
-    };
-    const _subjects = {
-        values: createSubject(),
-        array: createSubject(),
-        state: createSubject()
-    };
-    const shouldCaptureDirtyFields = props.resetOptions && props.resetOptions.keepDirtyValues;
-    const validationModeBeforeSubmit = getValidationModes(_options.mode);
-    const validationModeAfterSubmit = getValidationModes(_options.reValidateMode);
-    const shouldDisplayAllAssociatedErrors = _options.criteriaMode === VALIDATION_MODE.all;
-    const debounce = (callback)=>(wait)=>{
-            clearTimeout(timer);
-            timer = setTimeout(callback, wait);
-        };
-    const _updateValid = async (shouldUpdateValid)=>{
-        if (_proxyFormState.isValid || shouldUpdateValid) {
-            const isValid = _options.resolver ? isEmptyObject((await _executeSchema()).errors) : await executeBuiltInValidation(_fields, true);
-            if (isValid !== _formState.isValid) _subjects.state.next({
-                isValid
-            });
-        }
-    };
-    const _updateIsValidating = (value1)=>_proxyFormState.isValidating && _subjects.state.next({
-            isValidating: value1
-        });
-    const _updateFieldArray = (name, values = [], method, args, shouldSetValues = true, shouldUpdateFieldsAndState = true)=>{
-        if (args && method) {
-            _state.action = true;
-            if (shouldUpdateFieldsAndState && Array.isArray(get(_fields, name))) {
-                const fieldValues = method(get(_fields, name), args.argA, args.argB);
-                shouldSetValues && set(_fields, name, fieldValues);
-            }
-            if (shouldUpdateFieldsAndState && Array.isArray(get(_formState.errors, name))) {
-                const errors = method(get(_formState.errors, name), args.argA, args.argB);
-                shouldSetValues && set(_formState.errors, name, errors);
-                unsetEmptyArray(_formState.errors, name);
-            }
-            if (_proxyFormState.touchedFields && shouldUpdateFieldsAndState && Array.isArray(get(_formState.touchedFields, name))) {
-                const touchedFields = method(get(_formState.touchedFields, name), args.argA, args.argB);
-                shouldSetValues && set(_formState.touchedFields, name, touchedFields);
-            }
-            if (_proxyFormState.dirtyFields) _formState.dirtyFields = getDirtyFields(_defaultValues, _formValues);
-            _subjects.state.next({
-                name,
-                isDirty: _getDirty(name, values),
-                dirtyFields: _formState.dirtyFields,
-                errors: _formState.errors,
-                isValid: _formState.isValid
-            });
-        } else set(_formValues, name, values);
-    };
-    const updateErrors = (name, error)=>{
-        set(_formState.errors, name, error);
-        _subjects.state.next({
-            errors: _formState.errors
-        });
-    };
-    const updateValidAndValue = (name, shouldSkipSetValueAs, value1, ref)=>{
-        const field = get(_fields, name);
-        if (field) {
-            const defaultValue = get(_formValues, name, isUndefined(value1) ? get(_defaultValues, name) : value1);
-            isUndefined(defaultValue) || ref && ref.defaultChecked || shouldSkipSetValueAs ? set(_formValues, name, shouldSkipSetValueAs ? defaultValue : getFieldValue(field._f)) : setFieldValue(name, defaultValue);
-            _state.mount && _updateValid();
-        }
-    };
-    const updateTouchAndDirty = (name, fieldValue, isBlurEvent, shouldDirty, shouldRender)=>{
-        let shouldUpdateField = false;
-        let isPreviousDirty = false;
-        const output = {
-            name
-        };
-        if (!isBlurEvent || shouldDirty) {
-            if (_proxyFormState.isDirty) {
-                isPreviousDirty = _formState.isDirty;
-                _formState.isDirty = output.isDirty = _getDirty();
-                shouldUpdateField = isPreviousDirty !== output.isDirty;
-            }
-            const isCurrentFieldPristine = deepEqual(get(_defaultValues, name), fieldValue);
-            isPreviousDirty = get(_formState.dirtyFields, name);
-            isCurrentFieldPristine ? unset(_formState.dirtyFields, name) : set(_formState.dirtyFields, name, true);
-            output.dirtyFields = _formState.dirtyFields;
-            shouldUpdateField = shouldUpdateField || _proxyFormState.dirtyFields && isPreviousDirty !== !isCurrentFieldPristine;
-        }
-        if (isBlurEvent) {
-            const isPreviousFieldTouched = get(_formState.touchedFields, name);
-            if (!isPreviousFieldTouched) {
-                set(_formState.touchedFields, name, isBlurEvent);
-                output.touchedFields = _formState.touchedFields;
-                shouldUpdateField = shouldUpdateField || _proxyFormState.touchedFields && isPreviousFieldTouched !== isBlurEvent;
-            }
-        }
-        shouldUpdateField && shouldRender && _subjects.state.next(output);
-        return shouldUpdateField ? output : {};
-    };
-    const shouldRenderByError = (name, isValid, error, fieldState)=>{
-        const previousFieldError = get(_formState.errors, name);
-        const shouldUpdateValid = _proxyFormState.isValid && isBoolean(isValid) && _formState.isValid !== isValid;
-        if (props.delayError && error) {
-            delayErrorCallback = debounce(()=>updateErrors(name, error));
-            delayErrorCallback(props.delayError);
-        } else {
-            clearTimeout(timer);
-            delayErrorCallback = null;
-            error ? set(_formState.errors, name, error) : unset(_formState.errors, name);
-        }
-        if ((error ? !deepEqual(previousFieldError, error) : previousFieldError) || !isEmptyObject(fieldState) || shouldUpdateValid) {
-            const updatedFormState = {
-                ...fieldState,
-                ...shouldUpdateValid && isBoolean(isValid) ? {
-                    isValid
-                } : {},
-                errors: _formState.errors,
-                name
-            };
-            _formState = {
-                ..._formState,
-                ...updatedFormState
-            };
-            _subjects.state.next(updatedFormState);
-        }
-        _updateIsValidating(false);
-    };
-    const _executeSchema = async (name)=>_options.resolver(_formValues, _options.context, getResolverOptions(name || _names.mount, _fields, _options.criteriaMode, _options.shouldUseNativeValidation));
-    const executeSchemaAndUpdateState = async (names)=>{
-        const { errors } = await _executeSchema();
-        if (names) for (const name of names){
-            const error = get(errors, name);
-            error ? set(_formState.errors, name, error) : unset(_formState.errors, name);
-        }
-        else _formState.errors = errors;
-        return errors;
-    };
-    const executeBuiltInValidation = async (fields, shouldOnlyCheckValid, context = {
-        valid: true
-    })=>{
-        for(const name in fields){
-            const field = fields[name];
-            if (field) {
-                const { _f, ...fieldValue } = field;
-                if (_f) {
-                    const isFieldArrayRoot = _names.array.has(_f.name);
-                    const fieldError = await validateField(field, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
-                    if (fieldError[_f.name]) {
-                        context.valid = false;
-                        if (shouldOnlyCheckValid) break;
-                    }
-                    !shouldOnlyCheckValid && (get(fieldError, _f.name) ? isFieldArrayRoot ? updateFieldArrayRootError(_formState.errors, fieldError, _f.name) : set(_formState.errors, _f.name, fieldError[_f.name]) : unset(_formState.errors, _f.name));
-                }
-                fieldValue && await executeBuiltInValidation(fieldValue, shouldOnlyCheckValid, context);
-            }
-        }
-        return context.valid;
-    };
-    const _removeUnmounted = ()=>{
-        for (const name of _names.unMount){
-            const field = get(_fields, name);
-            field && (field._f.refs ? field._f.refs.every((ref)=>!live(ref)) : !live(field._f.ref)) && unregister(name);
-        }
-        _names.unMount = new Set();
-    };
-    const _getDirty = (name, data)=>(name && data && set(_formValues, name, data), !deepEqual(getValues(), _defaultValues));
-    const _getWatch = (names, defaultValue, isGlobal)=>generateWatchOutput(names, _names, {
-            ..._state.mount ? _formValues : isUndefined(defaultValue) ? _defaultValues : isString(names) ? {
-                [names]: defaultValue
-            } : defaultValue
-        }, isGlobal, defaultValue);
-    const _getFieldArray = (name)=>compact(get(_state.mount ? _formValues : _defaultValues, name, props.shouldUnregister ? get(_defaultValues, name, []) : []));
-    const setFieldValue = (name, value1, options = {})=>{
-        const field = get(_fields, name);
-        let fieldValue = value1;
-        if (field) {
-            const fieldReference = field._f;
-            if (fieldReference) {
-                !fieldReference.disabled && set(_formValues, name, getFieldValueAs(value1, fieldReference));
-                fieldValue = isHTMLElement(fieldReference.ref) && isNullOrUndefined(value1) ? "" : value1;
-                if (isMultipleSelect(fieldReference.ref)) [
-                    ...fieldReference.ref.options
-                ].forEach((optionRef)=>optionRef.selected = fieldValue.includes(optionRef.value));
-                else if (fieldReference.refs) {
-                    if (isCheckBoxInput(fieldReference.ref)) fieldReference.refs.length > 1 ? fieldReference.refs.forEach((checkboxRef)=>(!checkboxRef.defaultChecked || !checkboxRef.disabled) && (checkboxRef.checked = Array.isArray(fieldValue) ? !!fieldValue.find((data)=>data === checkboxRef.value) : fieldValue === checkboxRef.value)) : fieldReference.refs[0] && (fieldReference.refs[0].checked = !!fieldValue);
-                    else fieldReference.refs.forEach((radioRef)=>radioRef.checked = radioRef.value === fieldValue);
-                } else if (isFileInput(fieldReference.ref)) fieldReference.ref.value = "";
-                else {
-                    fieldReference.ref.value = fieldValue;
-                    if (!fieldReference.ref.type) _subjects.values.next({
-                        name,
-                        values: {
-                            ..._formValues
-                        }
-                    });
-                }
-            }
-        }
-        (options.shouldDirty || options.shouldTouch) && updateTouchAndDirty(name, fieldValue, options.shouldTouch, options.shouldDirty, true);
-        options.shouldValidate && trigger(name);
-    };
-    const setValues = (name, value1, options)=>{
-        for(const fieldKey in value1){
-            const fieldValue = value1[fieldKey];
-            const fieldName = `${name}.${fieldKey}`;
-            const field = get(_fields, fieldName);
-            (_names.array.has(name) || !isPrimitive(fieldValue) || field && !field._f) && !isDateObject(fieldValue) ? setValues(fieldName, fieldValue, options) : setFieldValue(fieldName, fieldValue, options);
-        }
-    };
-    const setValue = (name, value1, options = {})=>{
-        const field = get(_fields, name);
-        const isFieldArray = _names.array.has(name);
-        const cloneValue = cloneObject(value1);
-        set(_formValues, name, cloneValue);
-        if (isFieldArray) {
-            _subjects.array.next({
-                name,
-                values: {
-                    ..._formValues
-                }
-            });
-            if ((_proxyFormState.isDirty || _proxyFormState.dirtyFields) && options.shouldDirty) _subjects.state.next({
-                name,
-                dirtyFields: getDirtyFields(_defaultValues, _formValues),
-                isDirty: _getDirty(name, cloneValue)
-            });
-        } else field && !field._f && !isNullOrUndefined(cloneValue) ? setValues(name, cloneValue, options) : setFieldValue(name, cloneValue, options);
-        isWatched(name, _names) && _subjects.state.next({
-            ..._formState
-        });
-        _subjects.values.next({
-            name,
-            values: {
-                ..._formValues
-            }
-        });
-        !_state.mount && flushRootRender();
-    };
-    const onChange = async (event)=>{
-        const target = event.target;
-        let name = target.name;
-        let isFieldValueUpdated = true;
-        const field = get(_fields, name);
-        const getCurrentFieldValue = ()=>target.type ? getFieldValue(field._f) : getEventValue(event);
-        if (field) {
-            let error;
-            let isValid;
-            const fieldValue = getCurrentFieldValue();
-            const isBlurEvent = event.type === EVENTS.BLUR || event.type === EVENTS.FOCUS_OUT;
-            const shouldSkipValidation = !hasValidation(field._f) && !_options.resolver && !get(_formState.errors, name) && !field._f.deps || skipValidation(isBlurEvent, get(_formState.touchedFields, name), _formState.isSubmitted, validationModeAfterSubmit, validationModeBeforeSubmit);
-            const watched = isWatched(name, _names, isBlurEvent);
-            set(_formValues, name, fieldValue);
-            if (isBlurEvent) {
-                field._f.onBlur && field._f.onBlur(event);
-                delayErrorCallback && delayErrorCallback(0);
-            } else if (field._f.onChange) field._f.onChange(event);
-            const fieldState = updateTouchAndDirty(name, fieldValue, isBlurEvent, false);
-            const shouldRender = !isEmptyObject(fieldState) || watched;
-            !isBlurEvent && _subjects.values.next({
-                name,
-                type: event.type,
-                values: {
-                    ..._formValues
-                }
-            });
-            if (shouldSkipValidation) {
-                _proxyFormState.isValid && _updateValid();
-                return shouldRender && _subjects.state.next({
-                    name,
-                    ...watched ? {} : fieldState
-                });
-            }
-            !isBlurEvent && watched && _subjects.state.next({
-                ..._formState
-            });
-            _updateIsValidating(true);
-            if (_options.resolver) {
-                const { errors } = await _executeSchema([
-                    name
-                ]);
-                const previousErrorLookupResult = schemaErrorLookup(_formState.errors, _fields, name);
-                const errorLookupResult = schemaErrorLookup(errors, _fields, previousErrorLookupResult.name || name);
-                error = errorLookupResult.error;
-                name = errorLookupResult.name;
-                isValid = isEmptyObject(errors);
-            } else {
-                error = (await validateField(field, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation))[name];
-                isFieldValueUpdated = isNaN(fieldValue) || fieldValue === get(_formValues, name, fieldValue);
-                if (isFieldValueUpdated) {
-                    if (error) isValid = false;
-                    else if (_proxyFormState.isValid) isValid = await executeBuiltInValidation(_fields, true);
-                }
-            }
-            if (isFieldValueUpdated) {
-                field._f.deps && trigger(field._f.deps);
-                shouldRenderByError(name, isValid, error, fieldState);
-            }
-        }
-    };
-    const trigger = async (name, options = {})=>{
-        let isValid;
-        let validationResult;
-        const fieldNames = convertToArrayPayload(name);
-        _updateIsValidating(true);
-        if (_options.resolver) {
-            const errors = await executeSchemaAndUpdateState(isUndefined(name) ? name : fieldNames);
-            isValid = isEmptyObject(errors);
-            validationResult = name ? !fieldNames.some((name)=>get(errors, name)) : isValid;
-        } else if (name) {
-            validationResult = (await Promise.all(fieldNames.map(async (fieldName)=>{
-                const field = get(_fields, fieldName);
-                return await executeBuiltInValidation(field && field._f ? {
-                    [fieldName]: field
-                } : field);
-            }))).every(Boolean);
-            !(!validationResult && !_formState.isValid) && _updateValid();
-        } else validationResult = isValid = await executeBuiltInValidation(_fields);
-        _subjects.state.next({
-            ...!isString(name) || _proxyFormState.isValid && isValid !== _formState.isValid ? {} : {
-                name
-            },
-            ..._options.resolver || !name ? {
-                isValid
-            } : {},
-            errors: _formState.errors,
-            isValidating: false
-        });
-        options.shouldFocus && !validationResult && focusFieldBy(_fields, (key)=>key && get(_formState.errors, key), name ? fieldNames : _names.mount);
-        return validationResult;
-    };
-    const getValues = (fieldNames)=>{
-        const values = {
-            ..._defaultValues,
-            ..._state.mount ? _formValues : {}
-        };
-        return isUndefined(fieldNames) ? values : isString(fieldNames) ? get(values, fieldNames) : fieldNames.map((name)=>get(values, name));
-    };
-    const getFieldState = (name, formState)=>({
-            invalid: !!get((formState || _formState).errors, name),
-            isDirty: !!get((formState || _formState).dirtyFields, name),
-            isTouched: !!get((formState || _formState).touchedFields, name),
-            error: get((formState || _formState).errors, name)
-        });
-    const clearErrors = (name)=>{
-        name && convertToArrayPayload(name).forEach((inputName)=>unset(_formState.errors, inputName));
-        _subjects.state.next({
-            errors: name ? _formState.errors : {}
-        });
-    };
-    const setError = (name, error, options)=>{
-        const ref = (get(_fields, name, {
-            _f: {}
-        })._f || {}).ref;
-        set(_formState.errors, name, {
-            ...error,
-            ref
-        });
-        _subjects.state.next({
-            name,
-            errors: _formState.errors,
-            isValid: false
-        });
-        options && options.shouldFocus && ref && ref.focus && ref.focus();
-    };
-    const watch = (name, defaultValue)=>isFunction(name) ? _subjects.values.subscribe({
-            next: (payload)=>name(_getWatch(undefined, defaultValue), payload)
-        }) : _getWatch(name, defaultValue, true);
-    const unregister = (name, options = {})=>{
-        for (const fieldName of name ? convertToArrayPayload(name) : _names.mount){
-            _names.mount.delete(fieldName);
-            _names.array.delete(fieldName);
-            if (!options.keepValue) {
-                unset(_fields, fieldName);
-                unset(_formValues, fieldName);
-            }
-            !options.keepError && unset(_formState.errors, fieldName);
-            !options.keepDirty && unset(_formState.dirtyFields, fieldName);
-            !options.keepTouched && unset(_formState.touchedFields, fieldName);
-            !_options.shouldUnregister && !options.keepDefaultValue && unset(_defaultValues, fieldName);
-        }
-        _subjects.values.next({
-            values: {
-                ..._formValues
-            }
-        });
-        _subjects.state.next({
-            ..._formState,
-            ...!options.keepDirty ? {} : {
-                isDirty: _getDirty()
-            }
-        });
-        !options.keepIsValid && _updateValid();
-    };
-    const register = (name, options = {})=>{
-        let field = get(_fields, name);
-        const disabledIsDefined = isBoolean(options.disabled);
-        set(_fields, name, {
-            ...field || {},
-            _f: {
-                ...field && field._f ? field._f : {
-                    ref: {
-                        name
-                    }
-                },
-                name,
-                mount: true,
-                ...options
-            }
-        });
-        _names.mount.add(name);
-        field ? disabledIsDefined && set(_formValues, name, options.disabled ? undefined : get(_formValues, name, getFieldValue(field._f))) : updateValidAndValue(name, true, options.value);
-        return {
-            ...disabledIsDefined ? {
-                disabled: options.disabled
-            } : {},
-            ..._options.progressive ? {
-                required: !!options.required,
-                min: getRuleValue(options.min),
-                max: getRuleValue(options.max),
-                minLength: getRuleValue(options.minLength),
-                maxLength: getRuleValue(options.maxLength),
-                pattern: getRuleValue(options.pattern)
-            } : {},
-            name,
-            onChange,
-            onBlur: onChange,
-            ref: (ref)=>{
-                if (ref) {
-                    register(name, options);
-                    field = get(_fields, name);
-                    const fieldRef = isUndefined(ref.value) ? ref.querySelectorAll ? ref.querySelectorAll("input,select,textarea")[0] || ref : ref : ref;
-                    const radioOrCheckbox = isRadioOrCheckbox(fieldRef);
-                    const refs = field._f.refs || [];
-                    if (radioOrCheckbox ? refs.find((option)=>option === fieldRef) : fieldRef === field._f.ref) return;
-                    set(_fields, name, {
-                        _f: {
-                            ...field._f,
-                            ...radioOrCheckbox ? {
-                                refs: [
-                                    ...refs.filter(live),
-                                    fieldRef,
-                                    ...Array.isArray(get(_defaultValues, name)) ? [
-                                        {}
-                                    ] : []
-                                ],
-                                ref: {
-                                    type: fieldRef.type,
-                                    name
-                                }
-                            } : {
-                                ref: fieldRef
-                            }
-                        }
-                    });
-                    updateValidAndValue(name, false, undefined, fieldRef);
-                } else {
-                    field = get(_fields, name, {});
-                    if (field._f) field._f.mount = false;
-                    (_options.shouldUnregister || options.shouldUnregister) && !(isNameInFieldArray(_names.array, name) && _state.action) && _names.unMount.add(name);
-                }
-            }
-        };
-    };
-    const _focusError = ()=>_options.shouldFocusError && focusFieldBy(_fields, (key)=>key && get(_formState.errors, key), _names.mount);
-    const handleSubmit = (onValid, onInvalid)=>async (e)=>{
-            if (e) {
-                e.preventDefault && e.preventDefault();
-                e.persist && e.persist();
-            }
-            let fieldValues = cloneObject(_formValues);
-            _subjects.state.next({
-                isSubmitting: true
-            });
-            if (_options.resolver) {
-                const { errors, values } = await _executeSchema();
-                _formState.errors = errors;
-                fieldValues = values;
-            } else await executeBuiltInValidation(_fields);
-            unset(_formState.errors, "root");
-            if (isEmptyObject(_formState.errors)) {
-                _subjects.state.next({
-                    errors: {}
-                });
-                await onValid(fieldValues, e);
-            } else {
-                if (onInvalid) await onInvalid({
-                    ..._formState.errors
-                }, e);
-                _focusError();
-                setTimeout(_focusError);
-            }
-            _subjects.state.next({
-                isSubmitted: true,
-                isSubmitting: false,
-                isSubmitSuccessful: isEmptyObject(_formState.errors),
-                submitCount: _formState.submitCount + 1,
-                errors: _formState.errors
-            });
-        };
-    const resetField = (name, options = {})=>{
-        if (get(_fields, name)) {
-            if (isUndefined(options.defaultValue)) setValue(name, get(_defaultValues, name));
-            else {
-                setValue(name, options.defaultValue);
-                set(_defaultValues, name, options.defaultValue);
-            }
-            if (!options.keepTouched) unset(_formState.touchedFields, name);
-            if (!options.keepDirty) {
-                unset(_formState.dirtyFields, name);
-                _formState.isDirty = options.defaultValue ? _getDirty(name, get(_defaultValues, name)) : _getDirty();
-            }
-            if (!options.keepError) {
-                unset(_formState.errors, name);
-                _proxyFormState.isValid && _updateValid();
-            }
-            _subjects.state.next({
-                ..._formState
-            });
-        }
-    };
-    const _reset = (formValues, keepStateOptions = {})=>{
-        const updatedValues = formValues || _defaultValues;
-        const cloneUpdatedValues = cloneObject(updatedValues);
-        const values = formValues && !isEmptyObject(formValues) ? cloneUpdatedValues : _defaultValues;
-        if (!keepStateOptions.keepDefaultValues) _defaultValues = updatedValues;
-        if (!keepStateOptions.keepValues) {
-            if (keepStateOptions.keepDirtyValues || shouldCaptureDirtyFields) for (const fieldName of _names.mount)get(_formState.dirtyFields, fieldName) ? set(values, fieldName, get(_formValues, fieldName)) : setValue(fieldName, get(values, fieldName));
-            else {
-                if (isWeb && isUndefined(formValues)) for (const name of _names.mount){
-                    const field = get(_fields, name);
-                    if (field && field._f) {
-                        const fieldReference = Array.isArray(field._f.refs) ? field._f.refs[0] : field._f.ref;
-                        if (isHTMLElement(fieldReference)) {
-                            const form = fieldReference.closest("form");
-                            if (form) {
-                                form.reset();
-                                break;
-                            }
-                        }
-                    }
-                }
-                _fields = {};
-            }
-            _formValues = props.shouldUnregister ? keepStateOptions.keepDefaultValues ? cloneObject(_defaultValues) : {} : cloneObject(values);
-            _subjects.array.next({
-                values: {
-                    ...values
-                }
-            });
-            _subjects.values.next({
-                values: {
-                    ...values
-                }
-            });
-        }
-        _names = {
-            mount: new Set(),
-            unMount: new Set(),
-            array: new Set(),
-            watch: new Set(),
-            watchAll: false,
-            focus: ""
-        };
-        !_state.mount && flushRootRender();
-        _state.mount = !_proxyFormState.isValid || !!keepStateOptions.keepIsValid;
-        _state.watch = !!props.shouldUnregister;
-        _subjects.state.next({
-            submitCount: keepStateOptions.keepSubmitCount ? _formState.submitCount : 0,
-            isDirty: keepStateOptions.keepDirty ? _formState.isDirty : !!(keepStateOptions.keepDefaultValues && !deepEqual(formValues, _defaultValues)),
-            isSubmitted: keepStateOptions.keepIsSubmitted ? _formState.isSubmitted : false,
-            dirtyFields: keepStateOptions.keepDirtyValues ? _formState.dirtyFields : keepStateOptions.keepDefaultValues && formValues ? getDirtyFields(_defaultValues, formValues) : {},
-            touchedFields: keepStateOptions.keepTouched ? _formState.touchedFields : {},
-            errors: keepStateOptions.keepErrors ? _formState.errors : {},
-            isSubmitting: false,
-            isSubmitSuccessful: false
-        });
-    };
-    const reset = (formValues, keepStateOptions)=>_reset(isFunction(formValues) ? formValues(_formValues) : formValues, keepStateOptions);
-    const setFocus = (name, options = {})=>{
-        const field = get(_fields, name);
-        const fieldReference = field && field._f;
-        if (fieldReference) {
-            const fieldRef = fieldReference.refs ? fieldReference.refs[0] : fieldReference.ref;
-            if (fieldRef.focus) {
-                fieldRef.focus();
-                options.shouldSelect && fieldRef.select();
-            }
-        }
-    };
-    const _updateFormState = (updatedFormState)=>{
-        _formState = {
-            ..._formState,
-            ...updatedFormState
-        };
-    };
-    const _resetDefaultValues = ()=>isFunction(_options.defaultValues) && _options.defaultValues().then((values)=>{
-            reset(values, _options.resetOptions);
-            _subjects.state.next({
-                isLoading: false
-            });
-        });
-    return {
-        control: {
-            register,
-            unregister,
-            getFieldState,
-            handleSubmit,
-            setError,
-            _executeSchema,
-            _getWatch,
-            _getDirty,
-            _updateValid,
-            _removeUnmounted,
-            _updateFieldArray,
-            _getFieldArray,
-            _reset,
-            _resetDefaultValues,
-            _updateFormState,
-            _subjects,
-            _proxyFormState,
-            get _fields () {
-                return _fields;
-            },
-            get _formValues () {
-                return _formValues;
-            },
-            get _state () {
-                return _state;
-            },
-            set _state (value){
-                _state = value;
-            },
-            get _defaultValues () {
-                return _defaultValues;
-            },
-            get _names () {
-                return _names;
-            },
-            set _names (value){
-                _names = value;
-            },
-            get _formState () {
-                return _formState;
-            },
-            set _formState (value){
-                _formState = value;
-            },
-            get _options () {
-                return _options;
-            },
-            set _options (value){
-                _options = {
-                    ..._options,
-                    ...value
-                };
-            }
-        },
-        trigger,
-        register,
-        handleSubmit,
-        watch,
-        setValue,
-        getValues,
-        reset,
-        resetField,
-        clearErrors,
-        unregister,
-        setError,
-        setFocus,
-        getFieldState
-    };
-}
-/**
- * Custom hook to manage the entire form.
- *
- * @remarks
- * [API](https://react-hook-form.com/docs/useform) • [Demo](https://codesandbox.io/s/react-hook-form-get-started-ts-5ksmm) • [Video](https://www.youtube.com/watch?v=RkXv4AXXC_4)
- *
- * @param props - form configuration and validation parameters.
- *
- * @returns methods - individual functions to manage the form state. {@link UseFormReturn}
- *
- * @example
- * ```tsx
- * function App() {
- *   const { register, handleSubmit, watch, formState: { errors } } = useForm();
- *   const onSubmit = data => console.log(data);
- *
- *   console.log(watch("example"));
- *
- *   return (
- *     <form onSubmit={handleSubmit(onSubmit)}>
- *       <input defaultValue="test" {...register("example")} />
- *       <input {...register("exampleRequired", { required: true })} />
- *       {errors.exampleRequired && <span>This field is required</span>}
- *       <button>Submit</button>
- *     </form>
- *   );
- * }
- * ```
- */ function useForm(props = {}) {
-    const _formControl = (0, _reactDefault.default).useRef();
-    const _values = (0, _reactDefault.default).useRef();
-    const [formState, updateFormState] = (0, _reactDefault.default).useState({
-        isDirty: false,
-        isValidating: false,
-        isLoading: isFunction(props.defaultValues),
-        isSubmitted: false,
-        isSubmitting: false,
-        isSubmitSuccessful: false,
-        isValid: false,
-        submitCount: 0,
-        dirtyFields: {},
-        touchedFields: {},
-        errors: {},
-        defaultValues: isFunction(props.defaultValues) ? undefined : props.defaultValues
-    });
-    if (!_formControl.current) _formControl.current = {
-        ...createFormControl(props, ()=>updateFormState((formState)=>({
-                    ...formState
-                }))),
-        formState
-    };
-    const control = _formControl.current.control;
-    control._options = props;
-    useSubscribe({
-        subject: control._subjects.state,
-        next: (value1)=>{
-            if (shouldRenderFormState(value1, control._proxyFormState, control._updateFormState, true)) updateFormState({
-                ...control._formState
-            });
-        }
-    });
-    (0, _reactDefault.default).useEffect(()=>{
-        if (props.values && !deepEqual(props.values, _values.current)) {
-            control._reset(props.values, control._options.resetOptions);
-            _values.current = props.values;
-        } else control._resetDefaultValues();
-    }, [
-        props.values,
-        control
-    ]);
-    (0, _reactDefault.default).useEffect(()=>{
-        if (!control._state.mount) {
-            control._updateValid();
-            control._state.mount = true;
-        }
-        if (control._state.watch) {
-            control._state.watch = false;
-            control._subjects.state.next({
-                ...control._formState
-            });
-        }
-        control._removeUnmounted();
-    });
-    _formControl.current.formState = getProxyFormState(formState, control);
-    return _formControl.current;
-}
-
-},{"react":"9sfFD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"cZ6dB":[function(require,module,exports) {
+},{"593632ccebda0d3a":"9sfFD"}],"cZ6dB":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "useCollectorMutation", ()=>useCollectorMutation);
@@ -59533,6 +56544,2927 @@ function withErrorBoundary(component, errorBoundaryProps) {
     const name = component.displayName || component.name || "Unknown";
     Wrapped.displayName = "withErrorBoundary(".concat(name, ")");
     return Wrapped;
+}
+
+},{"react":"9sfFD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"k8Kyg":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$9c3b = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$9c3b.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "clientHandlers", ()=>clientHandlers);
+var _triggerModal = require("../behaviours/TriggerModal");
+var _triggerYoutube = require("../behaviours/TriggerYoutube");
+var _triggerInverse = require("../behaviours/TriggerInverse");
+var _triggerInverseDefault = parcelHelpers.interopDefault(_triggerInverse);
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+const clientHandlers = [
+    {
+        id: "modal_v1",
+        behaviour: "modal",
+        invoke: (trigger)=>/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _triggerModal.TriggerModal), {
+                trigger: trigger,
+                __source: {
+                    fileName: "src/client/handler.tsx",
+                    lineNumber: 24,
+                    columnNumber: 35
+                },
+                __self: undefined
+            })
+    },
+    {
+        id: "youtube_v1",
+        behaviour: "youtube",
+        invoke: (trigger)=>/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _triggerYoutube.TriggerYoutube), {
+                trigger: trigger,
+                __source: {
+                    fileName: "src/client/handler.tsx",
+                    lineNumber: 29,
+                    columnNumber: 35
+                },
+                __self: undefined
+            })
+    },
+    {
+        id: "inverse_v1",
+        behaviour: "inverse_flow",
+        invoke: (trigger)=>/*#__PURE__*/ (0, _reactDefault.default).createElement((0, _triggerInverseDefault.default), {
+                trigger: trigger,
+                __source: {
+                    fileName: "src/client/handler.tsx",
+                    lineNumber: 34,
+                    columnNumber: 35
+                },
+                __self: undefined
+            })
+    }
+];
+
+  $parcel$ReactRefreshHelpers$9c3b.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"../behaviours/TriggerModal":"fRNGg","../behaviours/TriggerYoutube":"lFHbs","../behaviours/TriggerInverse":"c5qgt","react":"9sfFD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}],"fRNGg":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$29b4 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$29b4.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "TriggerModal", ()=>TriggerModal);
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _reactDom = require("react-dom");
+var _reactDomDefault = parcelHelpers.interopDefault(_reactDom);
+var _useCollector = require("../hooks/useCollector");
+var _s = $RefreshSig$();
+const Modal = ({ trigger })=>{
+    _s();
+    const { resetDisplayTrigger } = (0, _useCollector.useCollector)();
+    const [open, setOpen] = (0, _react.useState)(true);
+    const closeModal = ()=>{
+        setOpen(false);
+        resetDisplayTrigger();
+    };
+    if (!open) return null;
+    return /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 9999
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 24,
+            columnNumber: 5
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            background: "#fff url('" + trigger?.brand?.backgroundImage + "') no-repeat center center",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%,-50%)",
+            backgroundColor: "#fff",
+            borderRadius: "0.5rem",
+            padding: 0,
+            boxShadow: "0 0 1rem rgba(0,0,0,0.5)",
+            border: "3px solid white",
+            zIndex: 9999
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 35,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            backgroundColor: trigger?.brand?.overlayColor,
+            maxWidth: "600px",
+            padding: "2rem",
+            borderRadius: "0.5rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 54,
+            columnNumber: 9
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
+        onClick: closeModal,
+        style: {
+            position: "absolute",
+            top: "0.5rem",
+            right: "0.5rem",
+            fontSize: "2rem",
+            backgroundColor: trigger?.brand?.fontColor,
+            color: trigger?.brand?.primaryColor,
+            border: "none",
+            borderRadius: "0.5rem",
+            padding: "0 1rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 63,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, "\xd7"), /*#__PURE__*/ (0, _reactDefault.default).createElement("h1", {
+        style: {
+            textAlign: "center",
+            fontSize: "2rem",
+            fontWeight: "bold",
+            marginTop: "1rem",
+            color: trigger?.brand?.fontColor,
+            textShadow: "0 1px 2px rgba(0,0,0,0.5)"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 79,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, trigger?.data?.text), /*#__PURE__*/ (0, _reactDefault.default).createElement("p", {
+        style: {
+            textAlign: "center",
+            fontSize: "1.5rem",
+            color: trigger?.brand?.fontColor,
+            fontWeight: 500,
+            marginTop: "1rem",
+            textShadow: "0 1px 2px rgba(0,0,0,0.5)"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 91,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, trigger?.data?.message), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            padding: "2rem 2rem 1rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 103,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
+        onClick: ()=>{
+            trigger?.data?.url ? window.open(trigger?.data?.url) : setOpen(false);
+        },
+        style: {
+            display: "block",
+            color: trigger?.brand?.primaryColor,
+            backgroundColor: trigger?.brand?.fontColor,
+            fontSize: "1.5rem",
+            width: "100%",
+            padding: "1rem",
+            borderRadius: "0.5rem",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.5)"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 104,
+            columnNumber: 13
+        },
+        __self: undefined
+    }, trigger?.data?.button)))));
+};
+_s(Modal, "Y/Qxi3iHw77iQBA02rbNTf+qIlM=", false, function() {
+    return [
+        (0, _useCollector.useCollector)
+    ];
+});
+_c = Modal;
+const TriggerModal = ({ trigger })=>{
+    return /*#__PURE__*/ (0, _reactDomDefault.default).createPortal(/*#__PURE__*/ (0, _reactDefault.default).createElement(Modal, {
+        trigger: trigger,
+        __source: {
+            fileName: "src/behaviours/TriggerModal.tsx",
+            lineNumber: 131,
+            columnNumber: 32
+        },
+        __self: undefined
+    }), document.body);
+};
+_c1 = TriggerModal;
+var _c, _c1;
+$RefreshReg$(_c, "Modal");
+$RefreshReg$(_c1, "TriggerModal");
+
+  $parcel$ReactRefreshHelpers$29b4.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollector":"2crq3"}],"2crq3":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$064f = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$064f.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "useCollector", ()=>useCollector);
+var _react = require("react");
+var _collectorContext = require("../context/CollectorContext");
+const useCollector = ()=>{
+    return (0, _react.useContext)((0, _collectorContext.CollectorContext));
+};
+
+  $parcel$ReactRefreshHelpers$064f.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","react":"9sfFD","../context/CollectorContext":"cE6WZ","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}],"lFHbs":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$ffea = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$ffea.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "TriggerYoutube", ()=>TriggerYoutube);
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _reactDom = require("react-dom");
+var _reactDomDefault = parcelHelpers.interopDefault(_reactDom);
+var _s = $RefreshSig$();
+const Youtube = ({ trigger })=>{
+    _s();
+    const [open, setOpen] = (0, _react.useState)(true);
+    if (!open) return null;
+    return /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 9999
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 17,
+            columnNumber: 5
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            background: "#fff url('" + trigger?.brand?.backgroundImage + "') no-repeat center center",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%,-50%)",
+            backgroundColor: "#fff",
+            borderRadius: "0.5rem",
+            padding: 0,
+            boxShadow: "0 0 1rem rgba(0,0,0,0.5)",
+            border: "3px solid white",
+            zIndex: 9999
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 28,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
+        style: {
+            backgroundColor: trigger?.brand?.overlayColor,
+            maxWidth: "600px",
+            padding: "2rem",
+            borderRadius: "0.5rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 47,
+            columnNumber: 9
+        },
+        __self: undefined
+    }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
+        onClick: ()=>{
+            setOpen(false);
+        },
+        style: {
+            position: "absolute",
+            top: "0.5rem",
+            right: "0.5rem",
+            fontSize: "2rem",
+            backgroundColor: trigger?.brand?.fontColor,
+            color: trigger?.brand?.primaryColor,
+            border: "none",
+            borderRadius: "0.5rem",
+            padding: "0 1rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 56,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, "\xd7"), /*#__PURE__*/ (0, _reactDefault.default).createElement("iframe", {
+        src: trigger?.data?.url,
+        allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+        style: {
+            width: "500px",
+            height: "260px",
+            marginTop: "1rem"
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 74,
+            columnNumber: 11
+        },
+        __self: undefined
+    }))));
+};
+_s(Youtube, "dVkDIfRb5RN4FjtonjBYYwpg89o=");
+_c = Youtube;
+const TriggerYoutube = ({ trigger })=>{
+    return /*#__PURE__*/ (0, _reactDomDefault.default).createPortal(/*#__PURE__*/ (0, _reactDefault.default).createElement(Youtube, {
+        trigger: trigger,
+        __source: {
+            fileName: "src/behaviours/TriggerYoutube.tsx",
+            lineNumber: 86,
+            columnNumber: 32
+        },
+        __self: undefined
+    }), document.body);
+};
+_c1 = TriggerYoutube;
+var _c, _c1;
+$RefreshReg$(_c, "Youtube");
+$RefreshReg$(_c1, "TriggerYoutube");
+
+  $parcel$ReactRefreshHelpers$ffea.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}],"c5qgt":[function(require,module,exports) {
+var $parcel$ReactRefreshHelpers$1136 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+$parcel$ReactRefreshHelpers$1136.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _react = require("react");
+var _reactHookForm = require("react-hook-form");
+var _s = $RefreshSig$();
+const baseUrl = "https://bookings-bff.starship-staging.com";
+const makeFullUrl = (resource, params = {})=>{
+    if (resource.startsWith("/")) resource = resource.substring(1);
+    const fullUri = `${baseUrl}/${resource}`;
+    if (Object.keys(params).length === 0) return fullUri;
+    return `${fullUri}?${new URLSearchParams(params).toString()}`;
+};
+const Button = ({ children, className, onClick, disabled, colour = "primary" })=>{
+    let builtButtonClasses = `btn step-button bg-${colour} border-${colour} text-white hover:bg-${colour}/80 disabled:text-${colour}/50 disabled:border-${colour}/50` + (className ? " " + className : "");
+    if (disabled) builtButtonClasses += " disabled";
+    return /*#__PURE__*/ _react.createElement("button", {
+        disabled: disabled,
+        className: builtButtonClasses,
+        onClick: onClick,
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 36,
+            columnNumber: 5
+        },
+        __self: undefined
+    }, children);
+};
+_c = Button;
+const Voucher = ({ details })=>{
+    return /*#__PURE__*/ _react.createElement("div", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 48,
+            columnNumber: 5
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("h3", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 49,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, "Terms of Voucher"), /*#__PURE__*/ _react.createElement("p", {
+        className: "text-sm",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 50,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, details.termsAndConditions));
+};
+_c1 = Voucher;
+const TriggerInverse = ({})=>{
+    _s();
+    const landingPage = {};
+    const form = {};
+    const location = {};
+    const [open, setOpen] = _react.useState(true);
+    if (!open) return null;
+    const { register, handleSubmit, formState: { isSubmitting } } = (0, _reactHookForm.useForm)();
+    const initialState = {
+        busy: false,
+        complete: false,
+        voucher: null,
+        error: null,
+        responseStatusCode: 0
+    };
+    const [state, setState] = _react.useState(initialState);
+    async function submitVoucher(data) {
+        const reqData = {
+            ...data,
+            bookingLink: `${location?.origin}/${landingPage?.slug}`
+        };
+        const response = await fetch(makeFullUrl(`campaigns/${form?.campaign}/voucher?locationID=${landingPage?.identifier}`), {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-type": "application/json"
+            },
+            body: JSON.stringify(reqData)
+        });
+        response.json().then((responseData)=>{
+            if (response.ok) // @ts-ignore
+            setState({
+                busy: false,
+                complete: true,
+                voucher: responseData.voucher
+            });
+            else // @ts-ignore
+            setState({
+                busy: false,
+                error: responseData,
+                responseStatusCode: response.status
+            });
+        });
+    }
+    async function onSubmit(data) {
+        // @ts-ignore
+        setState({
+            busy: true
+        });
+        try {
+            if (form.campaign !== "") submitVoucher(data).then(()=>{
+                const eventData = {
+                    item_name: landingPage?.name,
+                    affiliation: "Booking Flow"
+                };
+                console.log(eventData);
+            // navigate(`/${landingPage?.slug}`)
+            });
+        } catch (e) {}
+    }
+    if (state.complete === true) return /*#__PURE__*/ _react.createElement("div", {
+        className: "container",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 137,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("h2", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 138,
+            columnNumber: 9
+        },
+        __self: undefined
+    }, "Voucher Sent!"), /*#__PURE__*/ _react.createElement("p", {
+        className: "text-md",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 139,
+            columnNumber: 9
+        },
+        __self: undefined
+    }, "Good news! We've sent your voucher to the email provided!"), state.voucher && /*#__PURE__*/ _react.createElement("div", {
+        className: "col-12 mt-3",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 143,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement(Voucher, {
+        details: state.voucher,
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 144,
+            columnNumber: 13
+        },
+        __self: undefined
+    })));
+    if (state.responseStatusCode === 409) return /*#__PURE__*/ _react.createElement("div", {
+        className: "container",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 153,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("h2", {
+        className: "mt-3",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 154,
+            columnNumber: 9
+        },
+        __self: undefined
+    }, "Uh-oh!"), /*#__PURE__*/ _react.createElement("p", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 155,
+            columnNumber: 9
+        },
+        __self: undefined
+    }, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\xa0", /*#__PURE__*/ _react.createElement("a", {
+        href: "/help",
+        className: "underline font-serif tracking-wide",
+        onClick: ()=>setOpen(false),
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 158,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, "contact us")));
+    return /*#__PURE__*/ _react.createElement("div", {
+        style: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 9999
+        },
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 171,
+            columnNumber: 5
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("main", {
+        className: "flex-grow flex flex-col justify-center container relative",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 182,
+            columnNumber: 7
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("div", {
+        className: "w-full",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 183,
+            columnNumber: 9
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("div", {
+        className: "cms-content text-center md:text-left",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 184,
+            columnNumber: 11
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("h2", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 185,
+            columnNumber: 13
+        },
+        __self: undefined
+    }, "Get Your Voucher"), /*#__PURE__*/ _react.createElement("p", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 186,
+            columnNumber: 13
+        },
+        __self: undefined
+    }, "To receive your voucher, we just need a few details from you."), /*#__PURE__*/ _react.createElement("h3", {
+        className: `bar-title border-l-4 border-solid border-${landingPage?.colour}`,
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 187,
+            columnNumber: 13
+        },
+        __self: undefined
+    }, "Contact Info"), /*#__PURE__*/ _react.createElement("form", {
+        onSubmit: handleSubmit(onSubmit),
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 192,
+            columnNumber: 13
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("div", {
+        className: "grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 193,
+            columnNumber: 15
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("div", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 194,
+            columnNumber: 17
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("label", {
+        htmlFor: "first_name",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 195,
+            columnNumber: 19
+        },
+        __self: undefined
+    }, "First Name*"), /*#__PURE__*/ _react.createElement("input", {
+        ...register("firstName", {
+            required: true,
+            minLength: 2,
+            maxLength: 30,
+            validate: (value)=>value.trim().length >= 2
+        }),
+        type: "text",
+        className: "form-input",
+        id: "firstName",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 196,
+            columnNumber: 19
+        },
+        __self: undefined
+    })), /*#__PURE__*/ _react.createElement("div", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 208,
+            columnNumber: 17
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("label", {
+        htmlFor: "last_name",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 209,
+            columnNumber: 19
+        },
+        __self: undefined
+    }, "Last Name*"), /*#__PURE__*/ _react.createElement("input", {
+        ...register("lastName", {
+            required: true,
+            minLength: 2,
+            maxLength: 30,
+            validate: (value)=>value.trim().length >= 2
+        }),
+        type: "text",
+        className: "form-input",
+        id: "lastName",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 210,
+            columnNumber: 19
+        },
+        __self: undefined
+    })), /*#__PURE__*/ _react.createElement("div", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 222,
+            columnNumber: 17
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("label", {
+        htmlFor: "email",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 223,
+            columnNumber: 19
+        },
+        __self: undefined
+    }, "Email*"), /*#__PURE__*/ _react.createElement("input", {
+        ...register("emailAddress", {
+            required: true
+        }),
+        type: "email",
+        className: "form-input",
+        id: "email",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 224,
+            columnNumber: 19
+        },
+        __self: undefined
+    }))), /*#__PURE__*/ _react.createElement("div", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 232,
+            columnNumber: 15
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("p", {
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 233,
+            columnNumber: 17
+        },
+        __self: undefined
+    }, "* Required Field")), /*#__PURE__*/ _react.createElement("div", {
+        className: "flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 236,
+            columnNumber: 15
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("div", {
+        className: "form-check",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 237,
+            columnNumber: 17
+        },
+        __self: undefined
+    }, /*#__PURE__*/ _react.createElement("input", {
+        type: "checkbox",
+        ...register("terms", {
+            required: true
+        }),
+        className: "form-check-input",
+        id: "terms",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 238,
+            columnNumber: 19
+        },
+        __self: undefined
+    }), " ", /*#__PURE__*/ _react.createElement("label", {
+        htmlFor: "terms",
+        className: "form-check-label",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 244,
+            columnNumber: 19
+        },
+        __self: undefined
+    }, "I confirm that I have read & agreed with the", " ", /*#__PURE__*/ _react.createElement("a", {
+        href: landingPage?.privacyPolicy,
+        target: "_blank",
+        rel: "noreferrer",
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 246,
+            columnNumber: 21
+        },
+        __self: undefined
+    }, "Privacy Policy"), "*")), /*#__PURE__*/ _react.createElement(Button, {
+        className: "btn mt-2 md:mt-0",
+        type: "submit",
+        colour: landingPage?.colour,
+        disabled: state.busy || isSubmitting,
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 256,
+            columnNumber: 17
+        },
+        __self: undefined
+    }, isSubmitting || state.busy ? "Sending Voucher..." : "Get My Voucher")), state.error && state.responseStatusCode !== 409 && /*#__PURE__*/ _react.createElement("div", {
+        className: `alert mt-5 bg-${landingPage?.colour}/20`,
+        __source: {
+            fileName: "src/behaviours/TriggerInverse.tsx",
+            lineNumber: 268,
+            columnNumber: 17
+        },
+        __self: undefined
+    }, "There was a problem sending your voucher. Please check your details and try again."))))));
+};
+_s(TriggerInverse, "9eVbsJtXuSGMFf5IiHvmyIBeiTE=", false, function() {
+    return [
+        (0, _reactHookForm.useForm)
+    ];
+});
+_c2 = TriggerInverse;
+exports.default = TriggerInverse;
+var _c, _c1, _c2;
+$RefreshReg$(_c, "Button");
+$RefreshReg$(_c1, "Voucher");
+$RefreshReg$(_c2, "TriggerInverse");
+
+  $parcel$ReactRefreshHelpers$1136.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+},{"react":"9sfFD","react-hook-form":"c5cSR","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk"}],"c5cSR":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Controller", ()=>Controller);
+parcelHelpers.export(exports, "Form", ()=>Form);
+parcelHelpers.export(exports, "FormProvider", ()=>FormProvider);
+parcelHelpers.export(exports, "appendErrors", ()=>appendErrors);
+parcelHelpers.export(exports, "get", ()=>get);
+parcelHelpers.export(exports, "set", ()=>set);
+parcelHelpers.export(exports, "useController", ()=>useController);
+parcelHelpers.export(exports, "useFieldArray", ()=>useFieldArray);
+parcelHelpers.export(exports, "useForm", ()=>useForm);
+parcelHelpers.export(exports, "useFormContext", ()=>useFormContext);
+parcelHelpers.export(exports, "useFormState", ()=>useFormState);
+parcelHelpers.export(exports, "useWatch", ()=>useWatch);
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var isCheckBoxInput = (element)=>element.type === "checkbox";
+var isDateObject = (value1)=>value1 instanceof Date;
+var isNullOrUndefined = (value1)=>value1 == null;
+const isObjectType = (value1)=>typeof value1 === "object";
+var isObject = (value1)=>!isNullOrUndefined(value1) && !Array.isArray(value1) && isObjectType(value1) && !isDateObject(value1);
+var getEventValue = (event)=>isObject(event) && event.target ? isCheckBoxInput(event.target) ? event.target.checked : event.target.value : event;
+var getNodeParentName = (name)=>name.substring(0, name.search(/\.\d+(\.|$)/)) || name;
+var isNameInFieldArray = (names, name)=>names.has(getNodeParentName(name));
+var isPlainObject = (tempObject)=>{
+    const prototypeCopy = tempObject.constructor && tempObject.constructor.prototype;
+    return isObject(prototypeCopy) && prototypeCopy.hasOwnProperty("isPrototypeOf");
+};
+var isWeb = typeof window !== "undefined" && typeof window.HTMLElement !== "undefined" && typeof document !== "undefined";
+function cloneObject(data) {
+    let copy;
+    const isArray = Array.isArray(data);
+    if (data instanceof Date) copy = new Date(data);
+    else if (data instanceof Set) copy = new Set(data);
+    else if (!(isWeb && (data instanceof Blob || data instanceof FileList)) && (isArray || isObject(data))) {
+        copy = isArray ? [] : {};
+        if (!isArray && !isPlainObject(data)) copy = data;
+        else {
+            for(const key in data)if (data.hasOwnProperty(key)) copy[key] = cloneObject(data[key]);
+        }
+    } else return data;
+    return copy;
+}
+var compact = (value1)=>Array.isArray(value1) ? value1.filter(Boolean) : [];
+var isUndefined = (val)=>val === undefined;
+var get = (obj, path, defaultValue)=>{
+    if (!path || !isObject(obj)) return defaultValue;
+    const result = compact(path.split(/[,[\].]+?/)).reduce((result, key)=>isNullOrUndefined(result) ? result : result[key], obj);
+    return isUndefined(result) || result === obj ? isUndefined(obj[path]) ? defaultValue : obj[path] : result;
+};
+const EVENTS = {
+    BLUR: "blur",
+    FOCUS_OUT: "focusout",
+    CHANGE: "change"
+};
+const VALIDATION_MODE = {
+    onBlur: "onBlur",
+    onChange: "onChange",
+    onSubmit: "onSubmit",
+    onTouched: "onTouched",
+    all: "all"
+};
+const INPUT_VALIDATION_RULES = {
+    max: "max",
+    min: "min",
+    maxLength: "maxLength",
+    minLength: "minLength",
+    pattern: "pattern",
+    required: "required",
+    validate: "validate"
+};
+const HookFormContext = (0, _reactDefault.default).createContext(null);
+/**
+ * This custom hook allows you to access the form context. useFormContext is intended to be used in deeply nested structures, where it would become inconvenient to pass the context as a prop. To be used with {@link FormProvider}.
+ *
+ * @remarks
+ * [API](https://react-hook-form.com/docs/useformcontext) • [Demo](https://codesandbox.io/s/react-hook-form-v7-form-context-ytudi)
+ *
+ * @returns return all useForm methods
+ *
+ * @example
+ * ```tsx
+ * function App() {
+ *   const methods = useForm();
+ *   const onSubmit = data => console.log(data);
+ *
+ *   return (
+ *     <FormProvider {...methods} >
+ *       <form onSubmit={methods.handleSubmit(onSubmit)}>
+ *         <NestedInput />
+ *         <input type="submit" />
+ *       </form>
+ *     </FormProvider>
+ *   );
+ * }
+ *
+ *  function NestedInput() {
+ *   const { register } = useFormContext(); // retrieve all hook methods
+ *   return <input {...register("test")} />;
+ * }
+ * ```
+ */ const useFormContext = ()=>(0, _reactDefault.default).useContext(HookFormContext);
+/**
+ * A provider component that propagates the `useForm` methods to all children components via [React Context](https://reactjs.org/docs/context.html) API. To be used with {@link useFormContext}.
+ *
+ * @remarks
+ * [API](https://react-hook-form.com/docs/useformcontext) • [Demo](https://codesandbox.io/s/react-hook-form-v7-form-context-ytudi)
+ *
+ * @param props - all useFrom methods
+ *
+ * @example
+ * ```tsx
+ * function App() {
+ *   const methods = useForm();
+ *   const onSubmit = data => console.log(data);
+ *
+ *   return (
+ *     <FormProvider {...methods} >
+ *       <form onSubmit={methods.handleSubmit(onSubmit)}>
+ *         <NestedInput />
+ *         <input type="submit" />
+ *       </form>
+ *     </FormProvider>
+ *   );
+ * }
+ *
+ *  function NestedInput() {
+ *   const { register } = useFormContext(); // retrieve all hook methods
+ *   return <input {...register("test")} />;
+ * }
+ * ```
+ */ const FormProvider = (props)=>{
+    const { children, ...data } = props;
+    return (0, _reactDefault.default).createElement(HookFormContext.Provider, {
+        value: data
+    }, children);
+};
+var getProxyFormState = (formState, control, localProxyFormState, isRoot = true)=>{
+    const result = {
+        defaultValues: control._defaultValues
+    };
+    for(const key in formState)Object.defineProperty(result, key, {
+        get: ()=>{
+            const _key = key;
+            if (control._proxyFormState[_key] !== VALIDATION_MODE.all) control._proxyFormState[_key] = !isRoot || VALIDATION_MODE.all;
+            localProxyFormState && (localProxyFormState[_key] = true);
+            return formState[_key];
+        }
+    });
+    return result;
+};
+var isEmptyObject = (value1)=>isObject(value1) && !Object.keys(value1).length;
+var shouldRenderFormState = (formStateData, _proxyFormState, updateFormState, isRoot)=>{
+    updateFormState(formStateData);
+    const { name, ...formState } = formStateData;
+    return isEmptyObject(formState) || Object.keys(formState).length >= Object.keys(_proxyFormState).length || Object.keys(formState).find((key)=>_proxyFormState[key] === (!isRoot || VALIDATION_MODE.all));
+};
+var convertToArrayPayload = (value1)=>Array.isArray(value1) ? value1 : [
+        value1
+    ];
+var shouldSubscribeByName = (name, signalName, exact)=>exact && signalName ? name === signalName : !name || !signalName || name === signalName || convertToArrayPayload(name).some((currentName)=>currentName && (currentName.startsWith(signalName) || signalName.startsWith(currentName)));
+function useSubscribe(props) {
+    const _props = (0, _reactDefault.default).useRef(props);
+    _props.current = props;
+    (0, _reactDefault.default).useEffect(()=>{
+        const subscription = !props.disabled && _props.current.subject && _props.current.subject.subscribe({
+            next: _props.current.next
+        });
+        return ()=>{
+            subscription && subscription.unsubscribe();
+        };
+    }, [
+        props.disabled
+    ]);
+}
+/**
+ * This custom hook allows you to subscribe to each form state, and isolate the re-render at the custom hook level. It has its scope in terms of form state subscription, so it would not affect other useFormState and useForm. Using this hook can reduce the re-render impact on large and complex form application.
+ *
+ * @remarks
+ * [API](https://react-hook-form.com/docs/useformstate) • [Demo](https://codesandbox.io/s/useformstate-75xly)
+ *
+ * @param props - include options on specify fields to subscribe. {@link UseFormStateReturn}
+ *
+ * @example
+ * ```tsx
+ * function App() {
+ *   const { register, handleSubmit, control } = useForm({
+ *     defaultValues: {
+ *     firstName: "firstName"
+ *   }});
+ *   const { dirtyFields } = useFormState({
+ *     control
+ *   });
+ *   const onSubmit = (data) => console.log(data);
+ *
+ *   return (
+ *     <form onSubmit={handleSubmit(onSubmit)}>
+ *       <input {...register("firstName")} placeholder="First Name" />
+ *       {dirtyFields.firstName && <p>Field is dirty.</p>}
+ *       <input type="submit" />
+ *     </form>
+ *   );
+ * }
+ * ```
+ */ function useFormState(props) {
+    const methods = useFormContext();
+    const { control = methods.control, disabled, name, exact } = props || {};
+    const [formState, updateFormState] = (0, _reactDefault.default).useState(control._formState);
+    const _mounted = (0, _reactDefault.default).useRef(true);
+    const _localProxyFormState = (0, _reactDefault.default).useRef({
+        isDirty: false,
+        isLoading: false,
+        dirtyFields: false,
+        touchedFields: false,
+        isValidating: false,
+        isValid: false,
+        errors: false
+    });
+    const _name = (0, _reactDefault.default).useRef(name);
+    _name.current = name;
+    useSubscribe({
+        disabled,
+        next: (value1)=>_mounted.current && shouldSubscribeByName(_name.current, value1.name, exact) && shouldRenderFormState(value1, _localProxyFormState.current, control._updateFormState) && updateFormState({
+                ...control._formState,
+                ...value1
+            }),
+        subject: control._subjects.state
+    });
+    (0, _reactDefault.default).useEffect(()=>{
+        _mounted.current = true;
+        _localProxyFormState.current.isValid && control._updateValid(true);
+        return ()=>{
+            _mounted.current = false;
+        };
+    }, [
+        control
+    ]);
+    return getProxyFormState(formState, control, _localProxyFormState.current, false);
+}
+var isString = (value1)=>typeof value1 === "string";
+var generateWatchOutput = (names, _names, formValues, isGlobal, defaultValue)=>{
+    if (isString(names)) {
+        isGlobal && _names.watch.add(names);
+        return get(formValues, names, defaultValue);
+    }
+    if (Array.isArray(names)) return names.map((fieldName)=>(isGlobal && _names.watch.add(fieldName), get(formValues, fieldName)));
+    isGlobal && (_names.watchAll = true);
+    return formValues;
+};
+/**
+ * Custom hook to subscribe to field change and isolate re-rendering at the component level.
+ *
+ * @remarks
+ *
+ * [API](https://react-hook-form.com/docs/usewatch) • [Demo](https://codesandbox.io/s/react-hook-form-v7-ts-usewatch-h9i5e)
+ *
+ * @example
+ * ```tsx
+ * const { watch } = useForm();
+ * const values = useWatch({
+ *   name: "fieldName"
+ *   control,
+ * })
+ * ```
+ */ function useWatch(props) {
+    const methods = useFormContext();
+    const { control = methods.control, name, defaultValue, disabled, exact } = props || {};
+    const _name = (0, _reactDefault.default).useRef(name);
+    _name.current = name;
+    useSubscribe({
+        disabled,
+        subject: control._subjects.values,
+        next: (formState)=>{
+            if (shouldSubscribeByName(_name.current, formState.name, exact)) updateValue(cloneObject(generateWatchOutput(_name.current, control._names, formState.values || control._formValues, false, defaultValue)));
+        }
+    });
+    const [value1, updateValue] = (0, _reactDefault.default).useState(control._getWatch(name, defaultValue));
+    (0, _reactDefault.default).useEffect(()=>control._removeUnmounted());
+    return value1;
+}
+var isKey = (value1)=>/^\w*$/.test(value1);
+var stringToPath = (input)=>compact(input.replace(/["|']|\]/g, "").split(/\.|\[/));
+function set(object, path, value1) {
+    let index = -1;
+    const tempPath = isKey(path) ? [
+        path
+    ] : stringToPath(path);
+    const length = tempPath.length;
+    const lastIndex = length - 1;
+    while(++index < length){
+        const key = tempPath[index];
+        let newValue = value1;
+        if (index !== lastIndex) {
+            const objValue = object[key];
+            newValue = isObject(objValue) || Array.isArray(objValue) ? objValue : !isNaN(+tempPath[index + 1]) ? [] : {};
+        }
+        object[key] = newValue;
+        object = object[key];
+    }
+    return object;
+}
+/**
+ * Custom hook to work with controlled component, this function provide you with both form and field level state. Re-render is isolated at the hook level.
+ *
+ * @remarks
+ * [API](https://react-hook-form.com/docs/usecontroller) • [Demo](https://codesandbox.io/s/usecontroller-0o8px)
+ *
+ * @param props - the path name to the form field value, and validation rules.
+ *
+ * @returns field properties, field and form state. {@link UseControllerReturn}
+ *
+ * @example
+ * ```tsx
+ * function Input(props) {
+ *   const { field, fieldState, formState } = useController(props);
+ *   return (
+ *     <div>
+ *       <input {...field} placeholder={props.name} />
+ *       <p>{fieldState.isTouched && "Touched"}</p>
+ *       <p>{formState.isSubmitted ? "submitted" : ""}</p>
+ *     </div>
+ *   );
+ * }
+ * ```
+ */ function useController(props) {
+    const methods = useFormContext();
+    const { name, control = methods.control, shouldUnregister } = props;
+    const isArrayField = isNameInFieldArray(control._names.array, name);
+    const value1 = useWatch({
+        control,
+        name,
+        defaultValue: get(control._formValues, name, get(control._defaultValues, name, props.defaultValue)),
+        exact: true
+    });
+    const formState = useFormState({
+        control,
+        name
+    });
+    const _registerProps = (0, _reactDefault.default).useRef(control.register(name, {
+        ...props.rules,
+        value: value1
+    }));
+    _registerProps.current = control.register(name, props.rules);
+    (0, _reactDefault.default).useEffect(()=>{
+        const _shouldUnregisterField = control._options.shouldUnregister || shouldUnregister;
+        const updateMounted = (name, value1)=>{
+            const field = get(control._fields, name);
+            if (field) field._f.mount = value1;
+        };
+        updateMounted(name, true);
+        if (_shouldUnregisterField) {
+            const value1 = cloneObject(get(control._options.defaultValues, name));
+            set(control._defaultValues, name, value1);
+            if (isUndefined(get(control._formValues, name))) set(control._formValues, name, value1);
+        }
+        return ()=>{
+            (isArrayField ? _shouldUnregisterField && !control._state.action : _shouldUnregisterField) ? control.unregister(name) : updateMounted(name, false);
+        };
+    }, [
+        name,
+        control,
+        isArrayField,
+        shouldUnregister
+    ]);
+    return {
+        field: {
+            name,
+            value: value1,
+            onChange: (0, _reactDefault.default).useCallback((event)=>_registerProps.current.onChange({
+                    target: {
+                        value: getEventValue(event),
+                        name: name
+                    },
+                    type: EVENTS.CHANGE
+                }), [
+                name
+            ]),
+            onBlur: (0, _reactDefault.default).useCallback(()=>_registerProps.current.onBlur({
+                    target: {
+                        value: get(control._formValues, name),
+                        name: name
+                    },
+                    type: EVENTS.BLUR
+                }), [
+                name,
+                control
+            ]),
+            ref: (elm)=>{
+                const field = get(control._fields, name);
+                if (field && elm) field._f.ref = {
+                    focus: ()=>elm.focus(),
+                    select: ()=>elm.select(),
+                    setCustomValidity: (message)=>elm.setCustomValidity(message),
+                    reportValidity: ()=>elm.reportValidity()
+                };
+            }
+        },
+        formState,
+        fieldState: Object.defineProperties({}, {
+            invalid: {
+                enumerable: true,
+                get: ()=>!!get(formState.errors, name)
+            },
+            isDirty: {
+                enumerable: true,
+                get: ()=>!!get(formState.dirtyFields, name)
+            },
+            isTouched: {
+                enumerable: true,
+                get: ()=>!!get(formState.touchedFields, name)
+            },
+            error: {
+                enumerable: true,
+                get: ()=>get(formState.errors, name)
+            }
+        })
+    };
+}
+/**
+ * Component based on `useController` hook to work with controlled component.
+ *
+ * @remarks
+ * [API](https://react-hook-form.com/docs/usecontroller/controller) • [Demo](https://codesandbox.io/s/react-hook-form-v6-controller-ts-jwyzw) • [Video](https://www.youtube.com/watch?v=N2UNk_UCVyA)
+ *
+ * @param props - the path name to the form field value, and validation rules.
+ *
+ * @returns provide field handler functions, field and form state.
+ *
+ * @example
+ * ```tsx
+ * function App() {
+ *   const { control } = useForm<FormValues>({
+ *     defaultValues: {
+ *       test: ""
+ *     }
+ *   });
+ *
+ *   return (
+ *     <form>
+ *       <Controller
+ *         control={control}
+ *         name="test"
+ *         render={({ field: { onChange, onBlur, value, ref }, formState, fieldState }) => (
+ *           <>
+ *             <input
+ *               onChange={onChange} // send value to hook form
+ *               onBlur={onBlur} // notify when input is touched
+ *               value={value} // return updated value
+ *               ref={ref} // set ref for focus management
+ *             />
+ *             <p>{formState.isSubmitted ? "submitted" : ""}</p>
+ *             <p>{fieldState.isTouched ? "touched" : ""}</p>
+ *           </>
+ *         )}
+ *       />
+ *     </form>
+ *   );
+ * }
+ * ```
+ */ const Controller = (props)=>props.render(useController(props));
+const POST_REQUEST = "post";
+/**
+ * Form component to manage submission.
+ *
+ * @param props - to setup submission detail. {@link FormProps}
+ *
+ * @returns form component or headless render prop.
+ *
+ * @example
+ * ```tsx
+ * function App() {
+ *   const { control, formState: { errors } } = useForm();
+ *
+ *   return (
+ *     <Form action="/api" control={control}>
+ *       <input {...register("name")} />
+ *       <p>{errors?.root?.server && 'Server error'}</p>
+ *       <button>Submit</button>
+ *     </Form>
+ *   );
+ * }
+ * ```
+ */ function Form(props) {
+    const methods = useFormContext();
+    const [mounted, setMounted] = (0, _reactDefault.default).useState(false);
+    const { control = methods.control, onSubmit, children, action, method = POST_REQUEST, headers, encType, onError, render, onSuccess, validateStatus, ...rest } = props;
+    const submit = async (event)=>{
+        let hasError = false;
+        let type = "";
+        await control.handleSubmit(async (data)=>{
+            const formData = new FormData();
+            let formDataJson = "";
+            try {
+                formDataJson = JSON.stringify(data);
+            } catch (_a) {}
+            for (const name of control._names.mount)formData.append(name, get(data, name));
+            if (onSubmit) await onSubmit({
+                data,
+                event,
+                method,
+                formData,
+                formDataJson
+            });
+            if (action) try {
+                const shouldStringifySubmissionData = [
+                    headers && headers["Content-Type"],
+                    encType
+                ].some((value1)=>value1 && value1.includes("json"));
+                const response = await fetch(action, {
+                    method,
+                    headers: {
+                        ...headers,
+                        ...encType ? {
+                            "Content-Type": encType
+                        } : {}
+                    },
+                    body: shouldStringifySubmissionData ? formDataJson : formData
+                });
+                if (response && (validateStatus ? !validateStatus(response.status) : response.status < 200 || response.status >= 300)) {
+                    hasError = true;
+                    onError && onError({
+                        response
+                    });
+                    type = String(response.status);
+                } else onSuccess && onSuccess({
+                    response
+                });
+            } catch (error) {
+                hasError = true;
+                onError && onError({
+                    error
+                });
+            }
+        })(event);
+        if (hasError && props.control) {
+            props.control._subjects.state.next({
+                isSubmitSuccessful: false
+            });
+            props.control.setError("root.server", {
+                type
+            });
+        }
+    };
+    (0, _reactDefault.default).useEffect(()=>{
+        setMounted(true);
+    }, []);
+    return render ? (0, _reactDefault.default).createElement((0, _reactDefault.default).Fragment, null, render({
+        submit
+    })) : (0, _reactDefault.default).createElement("form", {
+        noValidate: mounted,
+        action: action,
+        method: method,
+        encType: encType,
+        onSubmit: submit,
+        ...rest
+    }, children);
+}
+var appendErrors = (name, validateAllFieldCriteria, errors, type, message)=>validateAllFieldCriteria ? {
+        ...errors[name],
+        types: {
+            ...errors[name] && errors[name].types ? errors[name].types : {},
+            [type]: message || true
+        }
+    } : {};
+const focusFieldBy = (fields, callback, fieldsNames)=>{
+    for (const key of fieldsNames || Object.keys(fields)){
+        const field = get(fields, key);
+        if (field) {
+            const { _f, ...currentField } = field;
+            if (_f && callback(_f.name)) {
+                if (_f.ref.focus) {
+                    _f.ref.focus();
+                    break;
+                } else if (_f.refs && _f.refs[0].focus) {
+                    _f.refs[0].focus();
+                    break;
+                }
+            } else if (isObject(currentField)) focusFieldBy(currentField, callback);
+        }
+    }
+};
+var generateId = ()=>{
+    const d = typeof performance === "undefined" ? Date.now() : performance.now() * 1000;
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c)=>{
+        const r = (Math.random() * 16 + d) % 16 | 0;
+        return (c == "x" ? r : r & 0x3 | 0x8).toString(16);
+    });
+};
+var getFocusFieldName = (name, index, options = {})=>options.shouldFocus || isUndefined(options.shouldFocus) ? options.focusName || `${name}.${isUndefined(options.focusIndex) ? index : options.focusIndex}.` : "";
+var getValidationModes = (mode)=>({
+        isOnSubmit: !mode || mode === VALIDATION_MODE.onSubmit,
+        isOnBlur: mode === VALIDATION_MODE.onBlur,
+        isOnChange: mode === VALIDATION_MODE.onChange,
+        isOnAll: mode === VALIDATION_MODE.all,
+        isOnTouch: mode === VALIDATION_MODE.onTouched
+    });
+var isWatched = (name, _names, isBlurEvent)=>!isBlurEvent && (_names.watchAll || _names.watch.has(name) || [
+        ..._names.watch
+    ].some((watchName)=>name.startsWith(watchName) && /^\.\w+/.test(name.slice(watchName.length))));
+var updateFieldArrayRootError = (errors, error, name)=>{
+    const fieldArrayErrors = compact(get(errors, name));
+    set(fieldArrayErrors, "root", error[name]);
+    set(errors, name, fieldArrayErrors);
+    return errors;
+};
+var isBoolean = (value1)=>typeof value1 === "boolean";
+var isFileInput = (element)=>element.type === "file";
+var isFunction = (value1)=>typeof value1 === "function";
+var isHTMLElement = (value1)=>{
+    if (!isWeb) return false;
+    const owner = value1 ? value1.ownerDocument : 0;
+    return value1 instanceof (owner && owner.defaultView ? owner.defaultView.HTMLElement : HTMLElement);
+};
+var isMessage = (value1)=>isString(value1);
+var isRadioInput = (element)=>element.type === "radio";
+var isRegex = (value1)=>value1 instanceof RegExp;
+const defaultResult = {
+    value: false,
+    isValid: false
+};
+const validResult = {
+    value: true,
+    isValid: true
+};
+var getCheckboxValue = (options)=>{
+    if (Array.isArray(options)) {
+        if (options.length > 1) {
+            const values = options.filter((option)=>option && option.checked && !option.disabled).map((option)=>option.value);
+            return {
+                value: values,
+                isValid: !!values.length
+            };
+        }
+        return options[0].checked && !options[0].disabled ? options[0].attributes && !isUndefined(options[0].attributes.value) ? isUndefined(options[0].value) || options[0].value === "" ? validResult : {
+            value: options[0].value,
+            isValid: true
+        } : validResult : defaultResult;
+    }
+    return defaultResult;
+};
+const defaultReturn = {
+    isValid: false,
+    value: null
+};
+var getRadioValue = (options)=>Array.isArray(options) ? options.reduce((previous, option)=>option && option.checked && !option.disabled ? {
+            isValid: true,
+            value: option.value
+        } : previous, defaultReturn) : defaultReturn;
+function getValidateError(result, ref, type = "validate") {
+    if (isMessage(result) || Array.isArray(result) && result.every(isMessage) || isBoolean(result) && !result) return {
+        type,
+        message: isMessage(result) ? result : "",
+        ref
+    };
+}
+var getValueAndMessage = (validationData)=>isObject(validationData) && !isRegex(validationData) ? validationData : {
+        value: validationData,
+        message: ""
+    };
+var validateField = async (field, formValues, validateAllFieldCriteria, shouldUseNativeValidation, isFieldArray)=>{
+    const { ref, refs, required, maxLength, minLength, min, max, pattern, validate, name, valueAsNumber, mount, disabled } = field._f;
+    const inputValue = get(formValues, name);
+    if (!mount || disabled) return {};
+    const inputRef = refs ? refs[0] : ref;
+    const setCustomValidity = (message)=>{
+        if (shouldUseNativeValidation && inputRef.reportValidity) {
+            inputRef.setCustomValidity(isBoolean(message) ? "" : message || "");
+            inputRef.reportValidity();
+        }
+    };
+    const error = {};
+    const isRadio = isRadioInput(ref);
+    const isCheckBox = isCheckBoxInput(ref);
+    const isRadioOrCheckbox = isRadio || isCheckBox;
+    const isEmpty = (valueAsNumber || isFileInput(ref)) && isUndefined(ref.value) && isUndefined(inputValue) || isHTMLElement(ref) && ref.value === "" || inputValue === "" || Array.isArray(inputValue) && !inputValue.length;
+    const appendErrorsCurry = appendErrors.bind(null, name, validateAllFieldCriteria, error);
+    const getMinMaxMessage = (exceedMax, maxLengthMessage, minLengthMessage, maxType = INPUT_VALIDATION_RULES.maxLength, minType = INPUT_VALIDATION_RULES.minLength)=>{
+        const message = exceedMax ? maxLengthMessage : minLengthMessage;
+        error[name] = {
+            type: exceedMax ? maxType : minType,
+            message,
+            ref,
+            ...appendErrorsCurry(exceedMax ? maxType : minType, message)
+        };
+    };
+    if (isFieldArray ? !Array.isArray(inputValue) || !inputValue.length : required && (!isRadioOrCheckbox && (isEmpty || isNullOrUndefined(inputValue)) || isBoolean(inputValue) && !inputValue || isCheckBox && !getCheckboxValue(refs).isValid || isRadio && !getRadioValue(refs).isValid)) {
+        const { value: value1, message } = isMessage(required) ? {
+            value: !!required,
+            message: required
+        } : getValueAndMessage(required);
+        if (value1) {
+            error[name] = {
+                type: INPUT_VALIDATION_RULES.required,
+                message,
+                ref: inputRef,
+                ...appendErrorsCurry(INPUT_VALIDATION_RULES.required, message)
+            };
+            if (!validateAllFieldCriteria) {
+                setCustomValidity(message);
+                return error;
+            }
+        }
+    }
+    if (!isEmpty && (!isNullOrUndefined(min) || !isNullOrUndefined(max))) {
+        let exceedMax;
+        let exceedMin;
+        const maxOutput = getValueAndMessage(max);
+        const minOutput = getValueAndMessage(min);
+        if (!isNullOrUndefined(inputValue) && !isNaN(inputValue)) {
+            const valueNumber = ref.valueAsNumber || (inputValue ? +inputValue : inputValue);
+            if (!isNullOrUndefined(maxOutput.value)) exceedMax = valueNumber > maxOutput.value;
+            if (!isNullOrUndefined(minOutput.value)) exceedMin = valueNumber < minOutput.value;
+        } else {
+            const valueDate = ref.valueAsDate || new Date(inputValue);
+            const convertTimeToDate = (time)=>new Date(new Date().toDateString() + " " + time);
+            const isTime = ref.type == "time";
+            const isWeek = ref.type == "week";
+            if (isString(maxOutput.value) && inputValue) exceedMax = isTime ? convertTimeToDate(inputValue) > convertTimeToDate(maxOutput.value) : isWeek ? inputValue > maxOutput.value : valueDate > new Date(maxOutput.value);
+            if (isString(minOutput.value) && inputValue) exceedMin = isTime ? convertTimeToDate(inputValue) < convertTimeToDate(minOutput.value) : isWeek ? inputValue < minOutput.value : valueDate < new Date(minOutput.value);
+        }
+        if (exceedMax || exceedMin) {
+            getMinMaxMessage(!!exceedMax, maxOutput.message, minOutput.message, INPUT_VALIDATION_RULES.max, INPUT_VALIDATION_RULES.min);
+            if (!validateAllFieldCriteria) {
+                setCustomValidity(error[name].message);
+                return error;
+            }
+        }
+    }
+    if ((maxLength || minLength) && !isEmpty && (isString(inputValue) || isFieldArray && Array.isArray(inputValue))) {
+        const maxLengthOutput = getValueAndMessage(maxLength);
+        const minLengthOutput = getValueAndMessage(minLength);
+        const exceedMax = !isNullOrUndefined(maxLengthOutput.value) && inputValue.length > +maxLengthOutput.value;
+        const exceedMin = !isNullOrUndefined(minLengthOutput.value) && inputValue.length < +minLengthOutput.value;
+        if (exceedMax || exceedMin) {
+            getMinMaxMessage(exceedMax, maxLengthOutput.message, minLengthOutput.message);
+            if (!validateAllFieldCriteria) {
+                setCustomValidity(error[name].message);
+                return error;
+            }
+        }
+    }
+    if (pattern && !isEmpty && isString(inputValue)) {
+        const { value: patternValue, message } = getValueAndMessage(pattern);
+        if (isRegex(patternValue) && !inputValue.match(patternValue)) {
+            error[name] = {
+                type: INPUT_VALIDATION_RULES.pattern,
+                message,
+                ref,
+                ...appendErrorsCurry(INPUT_VALIDATION_RULES.pattern, message)
+            };
+            if (!validateAllFieldCriteria) {
+                setCustomValidity(message);
+                return error;
+            }
+        }
+    }
+    if (validate) {
+        if (isFunction(validate)) {
+            const result = await validate(inputValue, formValues);
+            const validateError = getValidateError(result, inputRef);
+            if (validateError) {
+                error[name] = {
+                    ...validateError,
+                    ...appendErrorsCurry(INPUT_VALIDATION_RULES.validate, validateError.message)
+                };
+                if (!validateAllFieldCriteria) {
+                    setCustomValidity(validateError.message);
+                    return error;
+                }
+            }
+        } else if (isObject(validate)) {
+            let validationResult = {};
+            for(const key in validate){
+                if (!isEmptyObject(validationResult) && !validateAllFieldCriteria) break;
+                const validateError = getValidateError(await validate[key](inputValue, formValues), inputRef, key);
+                if (validateError) {
+                    validationResult = {
+                        ...validateError,
+                        ...appendErrorsCurry(key, validateError.message)
+                    };
+                    setCustomValidity(validateError.message);
+                    if (validateAllFieldCriteria) error[name] = validationResult;
+                }
+            }
+            if (!isEmptyObject(validationResult)) {
+                error[name] = {
+                    ref: inputRef,
+                    ...validationResult
+                };
+                if (!validateAllFieldCriteria) return error;
+            }
+        }
+    }
+    setCustomValidity(true);
+    return error;
+};
+function append(data, value1) {
+    return [
+        ...data,
+        ...convertToArrayPayload(value1)
+    ];
+}
+var fillEmptyArray = (value1)=>Array.isArray(value1) ? value1.map(()=>undefined) : undefined;
+function insert(data, index, value1) {
+    return [
+        ...data.slice(0, index),
+        ...convertToArrayPayload(value1),
+        ...data.slice(index)
+    ];
+}
+var moveArrayAt = (data, from, to)=>{
+    if (!Array.isArray(data)) return [];
+    if (isUndefined(data[to])) data[to] = undefined;
+    data.splice(to, 0, data.splice(from, 1)[0]);
+    return data;
+};
+function prepend(data, value1) {
+    return [
+        ...convertToArrayPayload(value1),
+        ...convertToArrayPayload(data)
+    ];
+}
+function removeAtIndexes(data, indexes) {
+    let i = 0;
+    const temp = [
+        ...data
+    ];
+    for (const index of indexes){
+        temp.splice(index - i, 1);
+        i++;
+    }
+    return compact(temp).length ? temp : [];
+}
+var removeArrayAt = (data, index)=>isUndefined(index) ? [] : removeAtIndexes(data, convertToArrayPayload(index).sort((a, b)=>a - b));
+var swapArrayAt = (data, indexA, indexB)=>{
+    data[indexA] = [
+        data[indexB],
+        data[indexB] = data[indexA]
+    ][0];
+};
+function baseGet(object, updatePath) {
+    const length = updatePath.slice(0, -1).length;
+    let index = 0;
+    while(index < length)object = isUndefined(object) ? index++ : object[updatePath[index++]];
+    return object;
+}
+function isEmptyArray(obj) {
+    for(const key in obj){
+        if (obj.hasOwnProperty(key) && !isUndefined(obj[key])) return false;
+    }
+    return true;
+}
+function unset(object, path) {
+    const paths = Array.isArray(path) ? path : isKey(path) ? [
+        path
+    ] : stringToPath(path);
+    const childObject = paths.length === 1 ? object : baseGet(object, paths);
+    const index = paths.length - 1;
+    const key = paths[index];
+    if (childObject) delete childObject[key];
+    if (index !== 0 && (isObject(childObject) && isEmptyObject(childObject) || Array.isArray(childObject) && isEmptyArray(childObject))) unset(object, paths.slice(0, -1));
+    return object;
+}
+var updateAt = (fieldValues, index, value1)=>{
+    fieldValues[index] = value1;
+    return fieldValues;
+};
+/**
+ * A custom hook that exposes convenient methods to perform operations with a list of dynamic inputs that need to be appended, updated, removed etc. • [Demo](https://codesandbox.io/s/react-hook-form-usefieldarray-ssugn) • [Video](https://youtu.be/4MrbfGSFY2A)
+ *
+ * @remarks
+ * [API](https://react-hook-form.com/docs/usefieldarray) • [Demo](https://codesandbox.io/s/react-hook-form-usefieldarray-ssugn)
+ *
+ * @param props - useFieldArray props
+ *
+ * @returns methods - functions to manipulate with the Field Arrays (dynamic inputs) {@link UseFieldArrayReturn}
+ *
+ * @example
+ * ```tsx
+ * function App() {
+ *   const { register, control, handleSubmit, reset, trigger, setError } = useForm({
+ *     defaultValues: {
+ *       test: []
+ *     }
+ *   });
+ *   const { fields, append } = useFieldArray({
+ *     control,
+ *     name: "test"
+ *   });
+ *
+ *   return (
+ *     <form onSubmit={handleSubmit(data => console.log(data))}>
+ *       {fields.map((item, index) => (
+ *          <input key={item.id} {...register(`test.${index}.firstName`)}  />
+ *       ))}
+ *       <button type="button" onClick={() => append({ firstName: "bill" })}>
+ *         append
+ *       </button>
+ *       <input type="submit" />
+ *     </form>
+ *   );
+ * }
+ * ```
+ */ function useFieldArray(props) {
+    const methods = useFormContext();
+    const { control = methods.control, name, keyName = "id", shouldUnregister } = props;
+    const [fields, setFields] = (0, _reactDefault.default).useState(control._getFieldArray(name));
+    const ids = (0, _reactDefault.default).useRef(control._getFieldArray(name).map(generateId));
+    const _fieldIds = (0, _reactDefault.default).useRef(fields);
+    const _name = (0, _reactDefault.default).useRef(name);
+    const _actioned = (0, _reactDefault.default).useRef(false);
+    _name.current = name;
+    _fieldIds.current = fields;
+    control._names.array.add(name);
+    props.rules && control.register(name, props.rules);
+    useSubscribe({
+        next: ({ values, name: fieldArrayName })=>{
+            if (fieldArrayName === _name.current || !fieldArrayName) {
+                const fieldValues = get(values, _name.current);
+                if (Array.isArray(fieldValues)) {
+                    setFields(fieldValues);
+                    ids.current = fieldValues.map(generateId);
+                }
+            }
+        },
+        subject: control._subjects.array
+    });
+    const updateValues = (0, _reactDefault.default).useCallback((updatedFieldArrayValues)=>{
+        _actioned.current = true;
+        control._updateFieldArray(name, updatedFieldArrayValues);
+    }, [
+        control,
+        name
+    ]);
+    const append$1 = (value1, options)=>{
+        const appendValue = convertToArrayPayload(cloneObject(value1));
+        const updatedFieldArrayValues = append(control._getFieldArray(name), appendValue);
+        control._names.focus = getFocusFieldName(name, updatedFieldArrayValues.length - 1, options);
+        ids.current = append(ids.current, appendValue.map(generateId));
+        updateValues(updatedFieldArrayValues);
+        setFields(updatedFieldArrayValues);
+        control._updateFieldArray(name, updatedFieldArrayValues, append, {
+            argA: fillEmptyArray(value1)
+        });
+    };
+    const prepend$1 = (value1, options)=>{
+        const prependValue = convertToArrayPayload(cloneObject(value1));
+        const updatedFieldArrayValues = prepend(control._getFieldArray(name), prependValue);
+        control._names.focus = getFocusFieldName(name, 0, options);
+        ids.current = prepend(ids.current, prependValue.map(generateId));
+        updateValues(updatedFieldArrayValues);
+        setFields(updatedFieldArrayValues);
+        control._updateFieldArray(name, updatedFieldArrayValues, prepend, {
+            argA: fillEmptyArray(value1)
+        });
+    };
+    const remove = (index)=>{
+        const updatedFieldArrayValues = removeArrayAt(control._getFieldArray(name), index);
+        ids.current = removeArrayAt(ids.current, index);
+        updateValues(updatedFieldArrayValues);
+        setFields(updatedFieldArrayValues);
+        control._updateFieldArray(name, updatedFieldArrayValues, removeArrayAt, {
+            argA: index
+        });
+    };
+    const insert$1 = (index, value1, options)=>{
+        const insertValue = convertToArrayPayload(cloneObject(value1));
+        const updatedFieldArrayValues = insert(control._getFieldArray(name), index, insertValue);
+        control._names.focus = getFocusFieldName(name, index, options);
+        ids.current = insert(ids.current, index, insertValue.map(generateId));
+        updateValues(updatedFieldArrayValues);
+        setFields(updatedFieldArrayValues);
+        control._updateFieldArray(name, updatedFieldArrayValues, insert, {
+            argA: index,
+            argB: fillEmptyArray(value1)
+        });
+    };
+    const swap = (indexA, indexB)=>{
+        const updatedFieldArrayValues = control._getFieldArray(name);
+        swapArrayAt(updatedFieldArrayValues, indexA, indexB);
+        swapArrayAt(ids.current, indexA, indexB);
+        updateValues(updatedFieldArrayValues);
+        setFields(updatedFieldArrayValues);
+        control._updateFieldArray(name, updatedFieldArrayValues, swapArrayAt, {
+            argA: indexA,
+            argB: indexB
+        }, false);
+    };
+    const move = (from, to)=>{
+        const updatedFieldArrayValues = control._getFieldArray(name);
+        moveArrayAt(updatedFieldArrayValues, from, to);
+        moveArrayAt(ids.current, from, to);
+        updateValues(updatedFieldArrayValues);
+        setFields(updatedFieldArrayValues);
+        control._updateFieldArray(name, updatedFieldArrayValues, moveArrayAt, {
+            argA: from,
+            argB: to
+        }, false);
+    };
+    const update = (index, value1)=>{
+        const updateValue = cloneObject(value1);
+        const updatedFieldArrayValues = updateAt(control._getFieldArray(name), index, updateValue);
+        ids.current = [
+            ...updatedFieldArrayValues
+        ].map((item, i)=>!item || i === index ? generateId() : ids.current[i]);
+        updateValues(updatedFieldArrayValues);
+        setFields([
+            ...updatedFieldArrayValues
+        ]);
+        control._updateFieldArray(name, updatedFieldArrayValues, updateAt, {
+            argA: index,
+            argB: updateValue
+        }, true, false);
+    };
+    const replace = (value1)=>{
+        const updatedFieldArrayValues = convertToArrayPayload(cloneObject(value1));
+        ids.current = updatedFieldArrayValues.map(generateId);
+        updateValues([
+            ...updatedFieldArrayValues
+        ]);
+        setFields([
+            ...updatedFieldArrayValues
+        ]);
+        control._updateFieldArray(name, [
+            ...updatedFieldArrayValues
+        ], (data)=>data, {}, true, false);
+    };
+    (0, _reactDefault.default).useEffect(()=>{
+        control._state.action = false;
+        isWatched(name, control._names) && control._subjects.state.next({
+            ...control._formState
+        });
+        if (_actioned.current && (!getValidationModes(control._options.mode).isOnSubmit || control._formState.isSubmitted)) {
+            if (control._options.resolver) control._executeSchema([
+                name
+            ]).then((result)=>{
+                const error = get(result.errors, name);
+                const existingError = get(control._formState.errors, name);
+                if (existingError ? !error && existingError.type || error && (existingError.type !== error.type || existingError.message !== error.message) : error && error.type) {
+                    error ? set(control._formState.errors, name, error) : unset(control._formState.errors, name);
+                    control._subjects.state.next({
+                        errors: control._formState.errors
+                    });
+                }
+            });
+            else {
+                const field = get(control._fields, name);
+                if (field && field._f) validateField(field, control._formValues, control._options.criteriaMode === VALIDATION_MODE.all, control._options.shouldUseNativeValidation, true).then((error)=>!isEmptyObject(error) && control._subjects.state.next({
+                        errors: updateFieldArrayRootError(control._formState.errors, error, name)
+                    }));
+            }
+        }
+        control._subjects.values.next({
+            name,
+            values: {
+                ...control._formValues
+            }
+        });
+        control._names.focus && focusFieldBy(control._fields, (key)=>!!key && key.startsWith(control._names.focus || ""));
+        control._names.focus = "";
+        control._updateValid();
+        _actioned.current = false;
+    }, [
+        fields,
+        name,
+        control
+    ]);
+    (0, _reactDefault.default).useEffect(()=>{
+        !get(control._formValues, name) && control._updateFieldArray(name);
+        return ()=>{
+            (control._options.shouldUnregister || shouldUnregister) && control.unregister(name);
+        };
+    }, [
+        name,
+        control,
+        keyName,
+        shouldUnregister
+    ]);
+    return {
+        swap: (0, _reactDefault.default).useCallback(swap, [
+            updateValues,
+            name,
+            control
+        ]),
+        move: (0, _reactDefault.default).useCallback(move, [
+            updateValues,
+            name,
+            control
+        ]),
+        prepend: (0, _reactDefault.default).useCallback(prepend$1, [
+            updateValues,
+            name,
+            control
+        ]),
+        append: (0, _reactDefault.default).useCallback(append$1, [
+            updateValues,
+            name,
+            control
+        ]),
+        remove: (0, _reactDefault.default).useCallback(remove, [
+            updateValues,
+            name,
+            control
+        ]),
+        insert: (0, _reactDefault.default).useCallback(insert$1, [
+            updateValues,
+            name,
+            control
+        ]),
+        update: (0, _reactDefault.default).useCallback(update, [
+            updateValues,
+            name,
+            control
+        ]),
+        replace: (0, _reactDefault.default).useCallback(replace, [
+            updateValues,
+            name,
+            control
+        ]),
+        fields: (0, _reactDefault.default).useMemo(()=>fields.map((field, index)=>({
+                    ...field,
+                    [keyName]: ids.current[index] || generateId()
+                })), [
+            fields,
+            keyName
+        ])
+    };
+}
+function createSubject() {
+    let _observers = [];
+    const next = (value1)=>{
+        for (const observer of _observers)observer.next && observer.next(value1);
+    };
+    const subscribe = (observer)=>{
+        _observers.push(observer);
+        return {
+            unsubscribe: ()=>{
+                _observers = _observers.filter((o)=>o !== observer);
+            }
+        };
+    };
+    const unsubscribe = ()=>{
+        _observers = [];
+    };
+    return {
+        get observers () {
+            return _observers;
+        },
+        next,
+        subscribe,
+        unsubscribe
+    };
+}
+var isPrimitive = (value1)=>isNullOrUndefined(value1) || !isObjectType(value1);
+function deepEqual(object1, object2) {
+    if (isPrimitive(object1) || isPrimitive(object2)) return object1 === object2;
+    if (isDateObject(object1) && isDateObject(object2)) return object1.getTime() === object2.getTime();
+    const keys1 = Object.keys(object1);
+    const keys2 = Object.keys(object2);
+    if (keys1.length !== keys2.length) return false;
+    for (const key of keys1){
+        const val1 = object1[key];
+        if (!keys2.includes(key)) return false;
+        if (key !== "ref") {
+            const val2 = object2[key];
+            if (isDateObject(val1) && isDateObject(val2) || isObject(val1) && isObject(val2) || Array.isArray(val1) && Array.isArray(val2) ? !deepEqual(val1, val2) : val1 !== val2) return false;
+        }
+    }
+    return true;
+}
+var isMultipleSelect = (element)=>element.type === `select-multiple`;
+var isRadioOrCheckbox = (ref)=>isRadioInput(ref) || isCheckBoxInput(ref);
+var live = (ref)=>isHTMLElement(ref) && ref.isConnected;
+var objectHasFunction = (data)=>{
+    for(const key in data){
+        if (isFunction(data[key])) return true;
+    }
+    return false;
+};
+function markFieldsDirty(data, fields = {}) {
+    const isParentNodeArray = Array.isArray(data);
+    if (isObject(data) || isParentNodeArray) for(const key in data){
+        if (Array.isArray(data[key]) || isObject(data[key]) && !objectHasFunction(data[key])) {
+            fields[key] = Array.isArray(data[key]) ? [] : {};
+            markFieldsDirty(data[key], fields[key]);
+        } else if (!isNullOrUndefined(data[key])) fields[key] = true;
+    }
+    return fields;
+}
+function getDirtyFieldsFromDefaultValues(data, formValues, dirtyFieldsFromValues) {
+    const isParentNodeArray = Array.isArray(data);
+    if (isObject(data) || isParentNodeArray) {
+        for(const key in data)if (Array.isArray(data[key]) || isObject(data[key]) && !objectHasFunction(data[key])) {
+            if (isUndefined(formValues) || isPrimitive(dirtyFieldsFromValues[key])) dirtyFieldsFromValues[key] = Array.isArray(data[key]) ? markFieldsDirty(data[key], []) : {
+                ...markFieldsDirty(data[key])
+            };
+            else getDirtyFieldsFromDefaultValues(data[key], isNullOrUndefined(formValues) ? {} : formValues[key], dirtyFieldsFromValues[key]);
+        } else dirtyFieldsFromValues[key] = !deepEqual(data[key], formValues[key]);
+    }
+    return dirtyFieldsFromValues;
+}
+var getDirtyFields = (defaultValues, formValues)=>getDirtyFieldsFromDefaultValues(defaultValues, formValues, markFieldsDirty(formValues));
+var getFieldValueAs = (value1, { valueAsNumber, valueAsDate, setValueAs })=>isUndefined(value1) ? value1 : valueAsNumber ? value1 === "" ? NaN : value1 ? +value1 : value1 : valueAsDate && isString(value1) ? new Date(value1) : setValueAs ? setValueAs(value1) : value1;
+function getFieldValue(_f) {
+    const ref = _f.ref;
+    if (_f.refs ? _f.refs.every((ref)=>ref.disabled) : ref.disabled) return;
+    if (isFileInput(ref)) return ref.files;
+    if (isRadioInput(ref)) return getRadioValue(_f.refs).value;
+    if (isMultipleSelect(ref)) return [
+        ...ref.selectedOptions
+    ].map(({ value: value1 })=>value1);
+    if (isCheckBoxInput(ref)) return getCheckboxValue(_f.refs).value;
+    return getFieldValueAs(isUndefined(ref.value) ? _f.ref.value : ref.value, _f);
+}
+var getResolverOptions = (fieldsNames, _fields, criteriaMode, shouldUseNativeValidation)=>{
+    const fields = {};
+    for (const name of fieldsNames){
+        const field = get(_fields, name);
+        field && set(fields, name, field._f);
+    }
+    return {
+        criteriaMode,
+        names: [
+            ...fieldsNames
+        ],
+        fields,
+        shouldUseNativeValidation
+    };
+};
+var getRuleValue = (rule)=>isUndefined(rule) ? rule : isRegex(rule) ? rule.source : isObject(rule) ? isRegex(rule.value) ? rule.value.source : rule.value : rule;
+var hasValidation = (options)=>options.mount && (options.required || options.min || options.max || options.maxLength || options.minLength || options.pattern || options.validate);
+function schemaErrorLookup(errors, _fields, name) {
+    const error = get(errors, name);
+    if (error || isKey(name)) return {
+        error,
+        name
+    };
+    const names = name.split(".");
+    while(names.length){
+        const fieldName = names.join(".");
+        const field = get(_fields, fieldName);
+        const foundError = get(errors, fieldName);
+        if (field && !Array.isArray(field) && name !== fieldName) return {
+            name
+        };
+        if (foundError && foundError.type) return {
+            name: fieldName,
+            error: foundError
+        };
+        names.pop();
+    }
+    return {
+        name
+    };
+}
+var skipValidation = (isBlurEvent, isTouched, isSubmitted, reValidateMode, mode)=>{
+    if (mode.isOnAll) return false;
+    else if (!isSubmitted && mode.isOnTouch) return !(isTouched || isBlurEvent);
+    else if (isSubmitted ? reValidateMode.isOnBlur : mode.isOnBlur) return !isBlurEvent;
+    else if (isSubmitted ? reValidateMode.isOnChange : mode.isOnChange) return isBlurEvent;
+    return true;
+};
+var unsetEmptyArray = (ref, name)=>!compact(get(ref, name)).length && unset(ref, name);
+const defaultOptions = {
+    mode: VALIDATION_MODE.onSubmit,
+    reValidateMode: VALIDATION_MODE.onChange,
+    shouldFocusError: true
+};
+function createFormControl(props = {}, flushRootRender) {
+    let _options = {
+        ...defaultOptions,
+        ...props
+    };
+    let _formState = {
+        submitCount: 0,
+        isDirty: false,
+        isLoading: isFunction(_options.defaultValues),
+        isValidating: false,
+        isSubmitted: false,
+        isSubmitting: false,
+        isSubmitSuccessful: false,
+        isValid: false,
+        touchedFields: {},
+        dirtyFields: {},
+        errors: {}
+    };
+    let _fields = {};
+    let _defaultValues = isObject(_options.defaultValues) || isObject(_options.values) ? cloneObject(_options.defaultValues || _options.values) || {} : {};
+    let _formValues = _options.shouldUnregister ? {} : cloneObject(_defaultValues);
+    let _state = {
+        action: false,
+        mount: false,
+        watch: false
+    };
+    let _names = {
+        mount: new Set(),
+        unMount: new Set(),
+        array: new Set(),
+        watch: new Set()
+    };
+    let delayErrorCallback;
+    let timer = 0;
+    const _proxyFormState = {
+        isDirty: false,
+        dirtyFields: false,
+        touchedFields: false,
+        isValidating: false,
+        isValid: false,
+        errors: false
+    };
+    const _subjects = {
+        values: createSubject(),
+        array: createSubject(),
+        state: createSubject()
+    };
+    const shouldCaptureDirtyFields = props.resetOptions && props.resetOptions.keepDirtyValues;
+    const validationModeBeforeSubmit = getValidationModes(_options.mode);
+    const validationModeAfterSubmit = getValidationModes(_options.reValidateMode);
+    const shouldDisplayAllAssociatedErrors = _options.criteriaMode === VALIDATION_MODE.all;
+    const debounce = (callback)=>(wait)=>{
+            clearTimeout(timer);
+            timer = setTimeout(callback, wait);
+        };
+    const _updateValid = async (shouldUpdateValid)=>{
+        if (_proxyFormState.isValid || shouldUpdateValid) {
+            const isValid = _options.resolver ? isEmptyObject((await _executeSchema()).errors) : await executeBuiltInValidation(_fields, true);
+            if (isValid !== _formState.isValid) _subjects.state.next({
+                isValid
+            });
+        }
+    };
+    const _updateIsValidating = (value1)=>_proxyFormState.isValidating && _subjects.state.next({
+            isValidating: value1
+        });
+    const _updateFieldArray = (name, values = [], method, args, shouldSetValues = true, shouldUpdateFieldsAndState = true)=>{
+        if (args && method) {
+            _state.action = true;
+            if (shouldUpdateFieldsAndState && Array.isArray(get(_fields, name))) {
+                const fieldValues = method(get(_fields, name), args.argA, args.argB);
+                shouldSetValues && set(_fields, name, fieldValues);
+            }
+            if (shouldUpdateFieldsAndState && Array.isArray(get(_formState.errors, name))) {
+                const errors = method(get(_formState.errors, name), args.argA, args.argB);
+                shouldSetValues && set(_formState.errors, name, errors);
+                unsetEmptyArray(_formState.errors, name);
+            }
+            if (_proxyFormState.touchedFields && shouldUpdateFieldsAndState && Array.isArray(get(_formState.touchedFields, name))) {
+                const touchedFields = method(get(_formState.touchedFields, name), args.argA, args.argB);
+                shouldSetValues && set(_formState.touchedFields, name, touchedFields);
+            }
+            if (_proxyFormState.dirtyFields) _formState.dirtyFields = getDirtyFields(_defaultValues, _formValues);
+            _subjects.state.next({
+                name,
+                isDirty: _getDirty(name, values),
+                dirtyFields: _formState.dirtyFields,
+                errors: _formState.errors,
+                isValid: _formState.isValid
+            });
+        } else set(_formValues, name, values);
+    };
+    const updateErrors = (name, error)=>{
+        set(_formState.errors, name, error);
+        _subjects.state.next({
+            errors: _formState.errors
+        });
+    };
+    const updateValidAndValue = (name, shouldSkipSetValueAs, value1, ref)=>{
+        const field = get(_fields, name);
+        if (field) {
+            const defaultValue = get(_formValues, name, isUndefined(value1) ? get(_defaultValues, name) : value1);
+            isUndefined(defaultValue) || ref && ref.defaultChecked || shouldSkipSetValueAs ? set(_formValues, name, shouldSkipSetValueAs ? defaultValue : getFieldValue(field._f)) : setFieldValue(name, defaultValue);
+            _state.mount && _updateValid();
+        }
+    };
+    const updateTouchAndDirty = (name, fieldValue, isBlurEvent, shouldDirty, shouldRender)=>{
+        let shouldUpdateField = false;
+        let isPreviousDirty = false;
+        const output = {
+            name
+        };
+        if (!isBlurEvent || shouldDirty) {
+            if (_proxyFormState.isDirty) {
+                isPreviousDirty = _formState.isDirty;
+                _formState.isDirty = output.isDirty = _getDirty();
+                shouldUpdateField = isPreviousDirty !== output.isDirty;
+            }
+            const isCurrentFieldPristine = deepEqual(get(_defaultValues, name), fieldValue);
+            isPreviousDirty = get(_formState.dirtyFields, name);
+            isCurrentFieldPristine ? unset(_formState.dirtyFields, name) : set(_formState.dirtyFields, name, true);
+            output.dirtyFields = _formState.dirtyFields;
+            shouldUpdateField = shouldUpdateField || _proxyFormState.dirtyFields && isPreviousDirty !== !isCurrentFieldPristine;
+        }
+        if (isBlurEvent) {
+            const isPreviousFieldTouched = get(_formState.touchedFields, name);
+            if (!isPreviousFieldTouched) {
+                set(_formState.touchedFields, name, isBlurEvent);
+                output.touchedFields = _formState.touchedFields;
+                shouldUpdateField = shouldUpdateField || _proxyFormState.touchedFields && isPreviousFieldTouched !== isBlurEvent;
+            }
+        }
+        shouldUpdateField && shouldRender && _subjects.state.next(output);
+        return shouldUpdateField ? output : {};
+    };
+    const shouldRenderByError = (name, isValid, error, fieldState)=>{
+        const previousFieldError = get(_formState.errors, name);
+        const shouldUpdateValid = _proxyFormState.isValid && isBoolean(isValid) && _formState.isValid !== isValid;
+        if (props.delayError && error) {
+            delayErrorCallback = debounce(()=>updateErrors(name, error));
+            delayErrorCallback(props.delayError);
+        } else {
+            clearTimeout(timer);
+            delayErrorCallback = null;
+            error ? set(_formState.errors, name, error) : unset(_formState.errors, name);
+        }
+        if ((error ? !deepEqual(previousFieldError, error) : previousFieldError) || !isEmptyObject(fieldState) || shouldUpdateValid) {
+            const updatedFormState = {
+                ...fieldState,
+                ...shouldUpdateValid && isBoolean(isValid) ? {
+                    isValid
+                } : {},
+                errors: _formState.errors,
+                name
+            };
+            _formState = {
+                ..._formState,
+                ...updatedFormState
+            };
+            _subjects.state.next(updatedFormState);
+        }
+        _updateIsValidating(false);
+    };
+    const _executeSchema = async (name)=>_options.resolver(_formValues, _options.context, getResolverOptions(name || _names.mount, _fields, _options.criteriaMode, _options.shouldUseNativeValidation));
+    const executeSchemaAndUpdateState = async (names)=>{
+        const { errors } = await _executeSchema();
+        if (names) for (const name of names){
+            const error = get(errors, name);
+            error ? set(_formState.errors, name, error) : unset(_formState.errors, name);
+        }
+        else _formState.errors = errors;
+        return errors;
+    };
+    const executeBuiltInValidation = async (fields, shouldOnlyCheckValid, context = {
+        valid: true
+    })=>{
+        for(const name in fields){
+            const field = fields[name];
+            if (field) {
+                const { _f, ...fieldValue } = field;
+                if (_f) {
+                    const isFieldArrayRoot = _names.array.has(_f.name);
+                    const fieldError = await validateField(field, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation && !shouldOnlyCheckValid, isFieldArrayRoot);
+                    if (fieldError[_f.name]) {
+                        context.valid = false;
+                        if (shouldOnlyCheckValid) break;
+                    }
+                    !shouldOnlyCheckValid && (get(fieldError, _f.name) ? isFieldArrayRoot ? updateFieldArrayRootError(_formState.errors, fieldError, _f.name) : set(_formState.errors, _f.name, fieldError[_f.name]) : unset(_formState.errors, _f.name));
+                }
+                fieldValue && await executeBuiltInValidation(fieldValue, shouldOnlyCheckValid, context);
+            }
+        }
+        return context.valid;
+    };
+    const _removeUnmounted = ()=>{
+        for (const name of _names.unMount){
+            const field = get(_fields, name);
+            field && (field._f.refs ? field._f.refs.every((ref)=>!live(ref)) : !live(field._f.ref)) && unregister(name);
+        }
+        _names.unMount = new Set();
+    };
+    const _getDirty = (name, data)=>(name && data && set(_formValues, name, data), !deepEqual(getValues(), _defaultValues));
+    const _getWatch = (names, defaultValue, isGlobal)=>generateWatchOutput(names, _names, {
+            ..._state.mount ? _formValues : isUndefined(defaultValue) ? _defaultValues : isString(names) ? {
+                [names]: defaultValue
+            } : defaultValue
+        }, isGlobal, defaultValue);
+    const _getFieldArray = (name)=>compact(get(_state.mount ? _formValues : _defaultValues, name, props.shouldUnregister ? get(_defaultValues, name, []) : []));
+    const setFieldValue = (name, value1, options = {})=>{
+        const field = get(_fields, name);
+        let fieldValue = value1;
+        if (field) {
+            const fieldReference = field._f;
+            if (fieldReference) {
+                !fieldReference.disabled && set(_formValues, name, getFieldValueAs(value1, fieldReference));
+                fieldValue = isHTMLElement(fieldReference.ref) && isNullOrUndefined(value1) ? "" : value1;
+                if (isMultipleSelect(fieldReference.ref)) [
+                    ...fieldReference.ref.options
+                ].forEach((optionRef)=>optionRef.selected = fieldValue.includes(optionRef.value));
+                else if (fieldReference.refs) {
+                    if (isCheckBoxInput(fieldReference.ref)) fieldReference.refs.length > 1 ? fieldReference.refs.forEach((checkboxRef)=>(!checkboxRef.defaultChecked || !checkboxRef.disabled) && (checkboxRef.checked = Array.isArray(fieldValue) ? !!fieldValue.find((data)=>data === checkboxRef.value) : fieldValue === checkboxRef.value)) : fieldReference.refs[0] && (fieldReference.refs[0].checked = !!fieldValue);
+                    else fieldReference.refs.forEach((radioRef)=>radioRef.checked = radioRef.value === fieldValue);
+                } else if (isFileInput(fieldReference.ref)) fieldReference.ref.value = "";
+                else {
+                    fieldReference.ref.value = fieldValue;
+                    if (!fieldReference.ref.type) _subjects.values.next({
+                        name,
+                        values: {
+                            ..._formValues
+                        }
+                    });
+                }
+            }
+        }
+        (options.shouldDirty || options.shouldTouch) && updateTouchAndDirty(name, fieldValue, options.shouldTouch, options.shouldDirty, true);
+        options.shouldValidate && trigger(name);
+    };
+    const setValues = (name, value1, options)=>{
+        for(const fieldKey in value1){
+            const fieldValue = value1[fieldKey];
+            const fieldName = `${name}.${fieldKey}`;
+            const field = get(_fields, fieldName);
+            (_names.array.has(name) || !isPrimitive(fieldValue) || field && !field._f) && !isDateObject(fieldValue) ? setValues(fieldName, fieldValue, options) : setFieldValue(fieldName, fieldValue, options);
+        }
+    };
+    const setValue = (name, value1, options = {})=>{
+        const field = get(_fields, name);
+        const isFieldArray = _names.array.has(name);
+        const cloneValue = cloneObject(value1);
+        set(_formValues, name, cloneValue);
+        if (isFieldArray) {
+            _subjects.array.next({
+                name,
+                values: {
+                    ..._formValues
+                }
+            });
+            if ((_proxyFormState.isDirty || _proxyFormState.dirtyFields) && options.shouldDirty) _subjects.state.next({
+                name,
+                dirtyFields: getDirtyFields(_defaultValues, _formValues),
+                isDirty: _getDirty(name, cloneValue)
+            });
+        } else field && !field._f && !isNullOrUndefined(cloneValue) ? setValues(name, cloneValue, options) : setFieldValue(name, cloneValue, options);
+        isWatched(name, _names) && _subjects.state.next({
+            ..._formState
+        });
+        _subjects.values.next({
+            name,
+            values: {
+                ..._formValues
+            }
+        });
+        !_state.mount && flushRootRender();
+    };
+    const onChange = async (event)=>{
+        const target = event.target;
+        let name = target.name;
+        let isFieldValueUpdated = true;
+        const field = get(_fields, name);
+        const getCurrentFieldValue = ()=>target.type ? getFieldValue(field._f) : getEventValue(event);
+        if (field) {
+            let error;
+            let isValid;
+            const fieldValue = getCurrentFieldValue();
+            const isBlurEvent = event.type === EVENTS.BLUR || event.type === EVENTS.FOCUS_OUT;
+            const shouldSkipValidation = !hasValidation(field._f) && !_options.resolver && !get(_formState.errors, name) && !field._f.deps || skipValidation(isBlurEvent, get(_formState.touchedFields, name), _formState.isSubmitted, validationModeAfterSubmit, validationModeBeforeSubmit);
+            const watched = isWatched(name, _names, isBlurEvent);
+            set(_formValues, name, fieldValue);
+            if (isBlurEvent) {
+                field._f.onBlur && field._f.onBlur(event);
+                delayErrorCallback && delayErrorCallback(0);
+            } else if (field._f.onChange) field._f.onChange(event);
+            const fieldState = updateTouchAndDirty(name, fieldValue, isBlurEvent, false);
+            const shouldRender = !isEmptyObject(fieldState) || watched;
+            !isBlurEvent && _subjects.values.next({
+                name,
+                type: event.type,
+                values: {
+                    ..._formValues
+                }
+            });
+            if (shouldSkipValidation) {
+                _proxyFormState.isValid && _updateValid();
+                return shouldRender && _subjects.state.next({
+                    name,
+                    ...watched ? {} : fieldState
+                });
+            }
+            !isBlurEvent && watched && _subjects.state.next({
+                ..._formState
+            });
+            _updateIsValidating(true);
+            if (_options.resolver) {
+                const { errors } = await _executeSchema([
+                    name
+                ]);
+                const previousErrorLookupResult = schemaErrorLookup(_formState.errors, _fields, name);
+                const errorLookupResult = schemaErrorLookup(errors, _fields, previousErrorLookupResult.name || name);
+                error = errorLookupResult.error;
+                name = errorLookupResult.name;
+                isValid = isEmptyObject(errors);
+            } else {
+                error = (await validateField(field, _formValues, shouldDisplayAllAssociatedErrors, _options.shouldUseNativeValidation))[name];
+                isFieldValueUpdated = isNaN(fieldValue) || fieldValue === get(_formValues, name, fieldValue);
+                if (isFieldValueUpdated) {
+                    if (error) isValid = false;
+                    else if (_proxyFormState.isValid) isValid = await executeBuiltInValidation(_fields, true);
+                }
+            }
+            if (isFieldValueUpdated) {
+                field._f.deps && trigger(field._f.deps);
+                shouldRenderByError(name, isValid, error, fieldState);
+            }
+        }
+    };
+    const trigger = async (name, options = {})=>{
+        let isValid;
+        let validationResult;
+        const fieldNames = convertToArrayPayload(name);
+        _updateIsValidating(true);
+        if (_options.resolver) {
+            const errors = await executeSchemaAndUpdateState(isUndefined(name) ? name : fieldNames);
+            isValid = isEmptyObject(errors);
+            validationResult = name ? !fieldNames.some((name)=>get(errors, name)) : isValid;
+        } else if (name) {
+            validationResult = (await Promise.all(fieldNames.map(async (fieldName)=>{
+                const field = get(_fields, fieldName);
+                return await executeBuiltInValidation(field && field._f ? {
+                    [fieldName]: field
+                } : field);
+            }))).every(Boolean);
+            !(!validationResult && !_formState.isValid) && _updateValid();
+        } else validationResult = isValid = await executeBuiltInValidation(_fields);
+        _subjects.state.next({
+            ...!isString(name) || _proxyFormState.isValid && isValid !== _formState.isValid ? {} : {
+                name
+            },
+            ..._options.resolver || !name ? {
+                isValid
+            } : {},
+            errors: _formState.errors,
+            isValidating: false
+        });
+        options.shouldFocus && !validationResult && focusFieldBy(_fields, (key)=>key && get(_formState.errors, key), name ? fieldNames : _names.mount);
+        return validationResult;
+    };
+    const getValues = (fieldNames)=>{
+        const values = {
+            ..._defaultValues,
+            ..._state.mount ? _formValues : {}
+        };
+        return isUndefined(fieldNames) ? values : isString(fieldNames) ? get(values, fieldNames) : fieldNames.map((name)=>get(values, name));
+    };
+    const getFieldState = (name, formState)=>({
+            invalid: !!get((formState || _formState).errors, name),
+            isDirty: !!get((formState || _formState).dirtyFields, name),
+            isTouched: !!get((formState || _formState).touchedFields, name),
+            error: get((formState || _formState).errors, name)
+        });
+    const clearErrors = (name)=>{
+        name && convertToArrayPayload(name).forEach((inputName)=>unset(_formState.errors, inputName));
+        _subjects.state.next({
+            errors: name ? _formState.errors : {}
+        });
+    };
+    const setError = (name, error, options)=>{
+        const ref = (get(_fields, name, {
+            _f: {}
+        })._f || {}).ref;
+        set(_formState.errors, name, {
+            ...error,
+            ref
+        });
+        _subjects.state.next({
+            name,
+            errors: _formState.errors,
+            isValid: false
+        });
+        options && options.shouldFocus && ref && ref.focus && ref.focus();
+    };
+    const watch = (name, defaultValue)=>isFunction(name) ? _subjects.values.subscribe({
+            next: (payload)=>name(_getWatch(undefined, defaultValue), payload)
+        }) : _getWatch(name, defaultValue, true);
+    const unregister = (name, options = {})=>{
+        for (const fieldName of name ? convertToArrayPayload(name) : _names.mount){
+            _names.mount.delete(fieldName);
+            _names.array.delete(fieldName);
+            if (!options.keepValue) {
+                unset(_fields, fieldName);
+                unset(_formValues, fieldName);
+            }
+            !options.keepError && unset(_formState.errors, fieldName);
+            !options.keepDirty && unset(_formState.dirtyFields, fieldName);
+            !options.keepTouched && unset(_formState.touchedFields, fieldName);
+            !_options.shouldUnregister && !options.keepDefaultValue && unset(_defaultValues, fieldName);
+        }
+        _subjects.values.next({
+            values: {
+                ..._formValues
+            }
+        });
+        _subjects.state.next({
+            ..._formState,
+            ...!options.keepDirty ? {} : {
+                isDirty: _getDirty()
+            }
+        });
+        !options.keepIsValid && _updateValid();
+    };
+    const register = (name, options = {})=>{
+        let field = get(_fields, name);
+        const disabledIsDefined = isBoolean(options.disabled);
+        set(_fields, name, {
+            ...field || {},
+            _f: {
+                ...field && field._f ? field._f : {
+                    ref: {
+                        name
+                    }
+                },
+                name,
+                mount: true,
+                ...options
+            }
+        });
+        _names.mount.add(name);
+        field ? disabledIsDefined && set(_formValues, name, options.disabled ? undefined : get(_formValues, name, getFieldValue(field._f))) : updateValidAndValue(name, true, options.value);
+        return {
+            ...disabledIsDefined ? {
+                disabled: options.disabled
+            } : {},
+            ..._options.progressive ? {
+                required: !!options.required,
+                min: getRuleValue(options.min),
+                max: getRuleValue(options.max),
+                minLength: getRuleValue(options.minLength),
+                maxLength: getRuleValue(options.maxLength),
+                pattern: getRuleValue(options.pattern)
+            } : {},
+            name,
+            onChange,
+            onBlur: onChange,
+            ref: (ref)=>{
+                if (ref) {
+                    register(name, options);
+                    field = get(_fields, name);
+                    const fieldRef = isUndefined(ref.value) ? ref.querySelectorAll ? ref.querySelectorAll("input,select,textarea")[0] || ref : ref : ref;
+                    const radioOrCheckbox = isRadioOrCheckbox(fieldRef);
+                    const refs = field._f.refs || [];
+                    if (radioOrCheckbox ? refs.find((option)=>option === fieldRef) : fieldRef === field._f.ref) return;
+                    set(_fields, name, {
+                        _f: {
+                            ...field._f,
+                            ...radioOrCheckbox ? {
+                                refs: [
+                                    ...refs.filter(live),
+                                    fieldRef,
+                                    ...Array.isArray(get(_defaultValues, name)) ? [
+                                        {}
+                                    ] : []
+                                ],
+                                ref: {
+                                    type: fieldRef.type,
+                                    name
+                                }
+                            } : {
+                                ref: fieldRef
+                            }
+                        }
+                    });
+                    updateValidAndValue(name, false, undefined, fieldRef);
+                } else {
+                    field = get(_fields, name, {});
+                    if (field._f) field._f.mount = false;
+                    (_options.shouldUnregister || options.shouldUnregister) && !(isNameInFieldArray(_names.array, name) && _state.action) && _names.unMount.add(name);
+                }
+            }
+        };
+    };
+    const _focusError = ()=>_options.shouldFocusError && focusFieldBy(_fields, (key)=>key && get(_formState.errors, key), _names.mount);
+    const handleSubmit = (onValid, onInvalid)=>async (e)=>{
+            if (e) {
+                e.preventDefault && e.preventDefault();
+                e.persist && e.persist();
+            }
+            let fieldValues = cloneObject(_formValues);
+            _subjects.state.next({
+                isSubmitting: true
+            });
+            if (_options.resolver) {
+                const { errors, values } = await _executeSchema();
+                _formState.errors = errors;
+                fieldValues = values;
+            } else await executeBuiltInValidation(_fields);
+            unset(_formState.errors, "root");
+            if (isEmptyObject(_formState.errors)) {
+                _subjects.state.next({
+                    errors: {}
+                });
+                await onValid(fieldValues, e);
+            } else {
+                if (onInvalid) await onInvalid({
+                    ..._formState.errors
+                }, e);
+                _focusError();
+                setTimeout(_focusError);
+            }
+            _subjects.state.next({
+                isSubmitted: true,
+                isSubmitting: false,
+                isSubmitSuccessful: isEmptyObject(_formState.errors),
+                submitCount: _formState.submitCount + 1,
+                errors: _formState.errors
+            });
+        };
+    const resetField = (name, options = {})=>{
+        if (get(_fields, name)) {
+            if (isUndefined(options.defaultValue)) setValue(name, get(_defaultValues, name));
+            else {
+                setValue(name, options.defaultValue);
+                set(_defaultValues, name, options.defaultValue);
+            }
+            if (!options.keepTouched) unset(_formState.touchedFields, name);
+            if (!options.keepDirty) {
+                unset(_formState.dirtyFields, name);
+                _formState.isDirty = options.defaultValue ? _getDirty(name, get(_defaultValues, name)) : _getDirty();
+            }
+            if (!options.keepError) {
+                unset(_formState.errors, name);
+                _proxyFormState.isValid && _updateValid();
+            }
+            _subjects.state.next({
+                ..._formState
+            });
+        }
+    };
+    const _reset = (formValues, keepStateOptions = {})=>{
+        const updatedValues = formValues || _defaultValues;
+        const cloneUpdatedValues = cloneObject(updatedValues);
+        const values = formValues && !isEmptyObject(formValues) ? cloneUpdatedValues : _defaultValues;
+        if (!keepStateOptions.keepDefaultValues) _defaultValues = updatedValues;
+        if (!keepStateOptions.keepValues) {
+            if (keepStateOptions.keepDirtyValues || shouldCaptureDirtyFields) for (const fieldName of _names.mount)get(_formState.dirtyFields, fieldName) ? set(values, fieldName, get(_formValues, fieldName)) : setValue(fieldName, get(values, fieldName));
+            else {
+                if (isWeb && isUndefined(formValues)) for (const name of _names.mount){
+                    const field = get(_fields, name);
+                    if (field && field._f) {
+                        const fieldReference = Array.isArray(field._f.refs) ? field._f.refs[0] : field._f.ref;
+                        if (isHTMLElement(fieldReference)) {
+                            const form = fieldReference.closest("form");
+                            if (form) {
+                                form.reset();
+                                break;
+                            }
+                        }
+                    }
+                }
+                _fields = {};
+            }
+            _formValues = props.shouldUnregister ? keepStateOptions.keepDefaultValues ? cloneObject(_defaultValues) : {} : cloneObject(values);
+            _subjects.array.next({
+                values: {
+                    ...values
+                }
+            });
+            _subjects.values.next({
+                values: {
+                    ...values
+                }
+            });
+        }
+        _names = {
+            mount: new Set(),
+            unMount: new Set(),
+            array: new Set(),
+            watch: new Set(),
+            watchAll: false,
+            focus: ""
+        };
+        !_state.mount && flushRootRender();
+        _state.mount = !_proxyFormState.isValid || !!keepStateOptions.keepIsValid;
+        _state.watch = !!props.shouldUnregister;
+        _subjects.state.next({
+            submitCount: keepStateOptions.keepSubmitCount ? _formState.submitCount : 0,
+            isDirty: keepStateOptions.keepDirty ? _formState.isDirty : !!(keepStateOptions.keepDefaultValues && !deepEqual(formValues, _defaultValues)),
+            isSubmitted: keepStateOptions.keepIsSubmitted ? _formState.isSubmitted : false,
+            dirtyFields: keepStateOptions.keepDirtyValues ? _formState.dirtyFields : keepStateOptions.keepDefaultValues && formValues ? getDirtyFields(_defaultValues, formValues) : {},
+            touchedFields: keepStateOptions.keepTouched ? _formState.touchedFields : {},
+            errors: keepStateOptions.keepErrors ? _formState.errors : {},
+            isSubmitting: false,
+            isSubmitSuccessful: false
+        });
+    };
+    const reset = (formValues, keepStateOptions)=>_reset(isFunction(formValues) ? formValues(_formValues) : formValues, keepStateOptions);
+    const setFocus = (name, options = {})=>{
+        const field = get(_fields, name);
+        const fieldReference = field && field._f;
+        if (fieldReference) {
+            const fieldRef = fieldReference.refs ? fieldReference.refs[0] : fieldReference.ref;
+            if (fieldRef.focus) {
+                fieldRef.focus();
+                options.shouldSelect && fieldRef.select();
+            }
+        }
+    };
+    const _updateFormState = (updatedFormState)=>{
+        _formState = {
+            ..._formState,
+            ...updatedFormState
+        };
+    };
+    const _resetDefaultValues = ()=>isFunction(_options.defaultValues) && _options.defaultValues().then((values)=>{
+            reset(values, _options.resetOptions);
+            _subjects.state.next({
+                isLoading: false
+            });
+        });
+    return {
+        control: {
+            register,
+            unregister,
+            getFieldState,
+            handleSubmit,
+            setError,
+            _executeSchema,
+            _getWatch,
+            _getDirty,
+            _updateValid,
+            _removeUnmounted,
+            _updateFieldArray,
+            _getFieldArray,
+            _reset,
+            _resetDefaultValues,
+            _updateFormState,
+            _subjects,
+            _proxyFormState,
+            get _fields () {
+                return _fields;
+            },
+            get _formValues () {
+                return _formValues;
+            },
+            get _state () {
+                return _state;
+            },
+            set _state (value){
+                _state = value;
+            },
+            get _defaultValues () {
+                return _defaultValues;
+            },
+            get _names () {
+                return _names;
+            },
+            set _names (value){
+                _names = value;
+            },
+            get _formState () {
+                return _formState;
+            },
+            set _formState (value){
+                _formState = value;
+            },
+            get _options () {
+                return _options;
+            },
+            set _options (value){
+                _options = {
+                    ..._options,
+                    ...value
+                };
+            }
+        },
+        trigger,
+        register,
+        handleSubmit,
+        watch,
+        setValue,
+        getValues,
+        reset,
+        resetField,
+        clearErrors,
+        unregister,
+        setError,
+        setFocus,
+        getFieldState
+    };
+}
+/**
+ * Custom hook to manage the entire form.
+ *
+ * @remarks
+ * [API](https://react-hook-form.com/docs/useform) • [Demo](https://codesandbox.io/s/react-hook-form-get-started-ts-5ksmm) • [Video](https://www.youtube.com/watch?v=RkXv4AXXC_4)
+ *
+ * @param props - form configuration and validation parameters.
+ *
+ * @returns methods - individual functions to manage the form state. {@link UseFormReturn}
+ *
+ * @example
+ * ```tsx
+ * function App() {
+ *   const { register, handleSubmit, watch, formState: { errors } } = useForm();
+ *   const onSubmit = data => console.log(data);
+ *
+ *   console.log(watch("example"));
+ *
+ *   return (
+ *     <form onSubmit={handleSubmit(onSubmit)}>
+ *       <input defaultValue="test" {...register("example")} />
+ *       <input {...register("exampleRequired", { required: true })} />
+ *       {errors.exampleRequired && <span>This field is required</span>}
+ *       <button>Submit</button>
+ *     </form>
+ *   );
+ * }
+ * ```
+ */ function useForm(props = {}) {
+    const _formControl = (0, _reactDefault.default).useRef();
+    const _values = (0, _reactDefault.default).useRef();
+    const [formState, updateFormState] = (0, _reactDefault.default).useState({
+        isDirty: false,
+        isValidating: false,
+        isLoading: isFunction(props.defaultValues),
+        isSubmitted: false,
+        isSubmitting: false,
+        isSubmitSuccessful: false,
+        isValid: false,
+        submitCount: 0,
+        dirtyFields: {},
+        touchedFields: {},
+        errors: {},
+        defaultValues: isFunction(props.defaultValues) ? undefined : props.defaultValues
+    });
+    if (!_formControl.current) _formControl.current = {
+        ...createFormControl(props, ()=>updateFormState((formState)=>({
+                    ...formState
+                }))),
+        formState
+    };
+    const control = _formControl.current.control;
+    control._options = props;
+    useSubscribe({
+        subject: control._subjects.state,
+        next: (value1)=>{
+            if (shouldRenderFormState(value1, control._proxyFormState, control._updateFormState, true)) updateFormState({
+                ...control._formState
+            });
+        }
+    });
+    (0, _reactDefault.default).useEffect(()=>{
+        if (props.values && !deepEqual(props.values, _values.current)) {
+            control._reset(props.values, control._options.resetOptions);
+            _values.current = props.values;
+        } else control._resetDefaultValues();
+    }, [
+        props.values,
+        control
+    ]);
+    (0, _reactDefault.default).useEffect(()=>{
+        if (!control._state.mount) {
+            control._updateValid();
+            control._state.mount = true;
+        }
+        if (control._state.watch) {
+            control._state.watch = false;
+            control._subjects.state.next({
+                ...control._formState
+            });
+        }
+        control._removeUnmounted();
+    });
+    _formControl.current.formState = getProxyFormState(formState, control);
+    return _formControl.current;
 }
 
 },{"react":"9sfFD","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}]},["kzOiA","fp5lG","g4nFh"], "g4nFh", "parcelRequire34af")

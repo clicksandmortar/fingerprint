@@ -1,14 +1,14 @@
-import React__default, { createContext, useContext, useState, createElement, useEffect, useCallback } from 'react';
+import React__default, { createContext, useContext, useState, useEffect, useCallback, createElement } from 'react';
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
-import ReactDOM from 'react-dom';
-import { useForm } from 'react-hook-form';
 import Cookies from 'js-cookie';
 import { validate, version, v4 } from 'uuid';
 import mixpanel from 'mixpanel-browser';
 import { init as init$1, BrowserTracing, ErrorBoundary } from '@sentry/react';
 import { ErrorBoundary as ErrorBoundary$1 } from 'react-error-boundary';
+import ReactDOM from 'react-dom';
+import { useForm } from 'react-hook-form';
 
 const LoggingProvider = ({
   debug,
@@ -52,6 +52,403 @@ const LoggingContext = createContext({
 const useLogging = () => {
   return useContext(LoggingContext);
 };
+
+const headers = {
+  'Content-Type': 'application/json'
+};
+const hostname = process.env.FINGERPRINT_API_HOSTNAME || 'http://localhost';
+const request = {
+  get: async (url, params) => {
+    return await fetch(url + '?' + new URLSearchParams(params), {
+      method: 'GET',
+      headers
+    });
+  },
+  post: async (url, body) => {
+    return await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
+    });
+  },
+  patch: async (url, body) => {
+    return await fetch(url, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify(body)
+    });
+  },
+  put: async (url, body) => {
+    return await fetch(url, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body)
+    });
+  },
+  delete: async url => {
+    return await fetch(url, {
+      method: 'DELETE',
+      headers
+    });
+  }
+};
+
+const useCollectorMutation = () => {
+  const {
+    log,
+    error
+  } = useLogging();
+  return useMutation(data => {
+    var _data$visitor;
+    console.log('Sending CollectorUpdate to Collector API', data);
+    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(response => {
+      log('Collector API response', response);
+      return response;
+    }).catch(err => {
+      error('Collector API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: () => {}
+  });
+};
+
+const useFingerprint = () => {
+  return useContext(FingerprintContext);
+};
+
+const setCookie = (name, value, expires) => {
+  return Cookies.set(name, value, {
+    expires: expires || 365,
+    sameSite: 'strict'
+  });
+};
+const getCookie = name => {
+  return Cookies.get(name);
+};
+const onCookieChanged = (callback, interval = 1000) => {
+  let lastCookie = document.cookie;
+  setInterval(() => {
+    const cookie = document.cookie;
+    if (cookie !== lastCookie) {
+      try {
+        callback({
+          oldValue: lastCookie,
+          newValue: cookie
+        });
+      } finally {
+        lastCookie = cookie;
+      }
+    }
+  }, interval);
+};
+
+const bootstrapSession = ({
+  appId,
+  setSession
+}) => {
+  const session = {
+    firstVisit: undefined
+  };
+  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
+    setCookie('_cm', appId, 365);
+    setSession(session);
+    return;
+  }
+  if (getCookie('_cm') && getCookie('_cm') === appId) {
+    session.firstVisit = false;
+    setSession(session);
+  }
+};
+
+const uuidValidateV4 = uuid => {
+  return validate(uuid) && version(uuid) === 4;
+};
+
+const validVisitorId = id => {
+  return uuidValidateV4(id);
+};
+
+const bootstrapVisitor = ({
+  setVisitor
+}) => {
+  const visitor = {
+    id: undefined
+  };
+  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
+    const visitorId = v4();
+    setCookie('_cm_id', visitorId, 365);
+    visitor.id = visitorId;
+    setVisitor(visitor);
+    return;
+  }
+  if (getCookie('_cm_id')) {
+    visitor.id = getCookie('_cm_id');
+    setVisitor(visitor);
+  }
+};
+
+const VisitorProvider = ({
+  children
+}) => {
+  const {
+    appId,
+    booted
+  } = useFingerprint();
+  const {
+    log
+  } = useLogging();
+  const [session, setSession] = useState({});
+  const [visitor, setVisitor] = useState({});
+  useEffect(() => {
+    if (!booted) {
+      log('VisitorProvider: not booted');
+      return;
+    }
+    log('VisitorProvider: booting');
+    const boot = async () => {
+      await bootstrapSession({
+        appId,
+        setSession
+      });
+      await bootstrapVisitor({
+        setVisitor
+      });
+    };
+    boot();
+    log('VisitorProvider: booted', session, visitor);
+  }, [appId, booted]);
+  return React__default.createElement(VisitorContext.Provider, {
+    value: {
+      session,
+      visitor
+    }
+  }, children);
+};
+const VisitorContext = createContext({
+  session: {},
+  visitor: {}
+});
+const useVisitor = () => {
+  return useContext(VisitorContext);
+};
+
+if (process.env.MIXPANEL_TOKEN !== 'development') {
+  console.log('process.env.MIXPANEL_TOKEN', process.env.MIXPANEL_TOKEN);
+}
+const MIXPANEL_TOKEN = process.env.MIXPANEL_TOKEN || 'undefined';
+const init = cfg => {
+  mixpanel.init(MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+const trackEvent = (event, props, callback) => {
+  return mixpanel.track(event, props, callback);
+};
+const MixpanelProvider = ({
+  children
+}) => {
+  const {
+    appId
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  useEffect(() => {
+    if (!appId || !visitor.id) {
+      return;
+    }
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  return React__default.createElement(MixpanelContext.Provider, {
+    value: {
+      trackEvent
+    }
+  }, children);
+};
+const MixpanelContext = createContext({
+  trackEvent: () => {}
+});
+const useMixpanel = () => {
+  return useContext(MixpanelContext);
+};
+
+const idleStatusAfterMs = 5 * 1000;
+const CollectorProvider = ({
+  children,
+  handlers
+}) => {
+  const {
+    log,
+    error
+  } = useLogging();
+  const {
+    appId,
+    booted,
+    initialDelay,
+    exitIntentTriggers,
+    idleTriggers
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    trackEvent
+  } = useMixpanel();
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const {
+    registerHandler
+  } = useExitIntent({
+    cookie: {
+      key: '_cm_exit',
+      daysToExpire: 7
+    }
+  });
+  const [idleTimeout, setIdleTimeout] = useState(idleStatusAfterMs);
+  const [pageTriggers, setPageTriggers] = useState([]);
+  const [displayTrigger, setDisplayTrigger] = useState(undefined);
+  const [timeoutId, setTimeoutId] = useState(null);
+  const showTrigger = displayTrigger => {
+    if (!displayTrigger) {
+      return null;
+    }
+    const trigger = pageTriggers.find(trigger => trigger.type === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour)));
+    log('CollectorProvider: available triggers include: ', pageTriggers);
+    log('CollectorProvider: attempting to show displayTrigger', displayTrigger, trigger);
+    if (!trigger) {
+      error('No trigger found for displayTrigger', displayTrigger);
+      return null;
+    }
+    log('CollectorProvider: available handlers include: ', handlers);
+    log('CollectorProvider: trigger to match is: ', trigger);
+    const handler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour);
+    log('CollectorProvider: attempting to show trigger', trigger, handler);
+    if (!handler) {
+      error('No handler found for trigger', trigger);
+      return null;
+    }
+    if (!handler.invoke) {
+      error('No invoke method found for handler', handler);
+      return null;
+    }
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.type,
+      triggerBehaviour: trigger.behaviour
+    });
+    return handler.invoke(trigger);
+  };
+  const fireIdleTrigger = useCallback(() => {
+    if (displayTrigger) return;
+    if (!idleTriggers) return;
+    log('CollectorProvider: attempting to fire idle trigger', displayTrigger);
+    setDisplayTrigger('idle');
+  }, [pageTriggers, displayTrigger]);
+  const fireExitTrigger = useCallback(() => {
+    if (displayTrigger) return;
+    log('CollectorProvider: attempting to fire exit trigger', displayTrigger);
+    setDisplayTrigger('exit');
+  }, []);
+  useEffect(() => {
+    if (!exitIntentTriggers) return;
+    log('CollectorProvider: attempting to register exit trigger', displayTrigger);
+    registerHandler({
+      id: 'clientTrigger',
+      handler: fireExitTrigger
+    });
+  }, []);
+  const resetDisplayTrigger = useCallback(() => {
+    log('CollectorProvider: resetting displayTrigger');
+    setDisplayTrigger(undefined);
+  }, []);
+  useEffect(() => {
+    if (!booted) {
+      log('CollectorProvider: Not yet collecting, awaiting boot');
+      return;
+    }
+    const delay = setTimeout(() => {
+      if (!visitor.id) {
+        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
+        return;
+      }
+      log('CollectorProvider: collecting data');
+      const params = new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+        const [key, value] = cur.split('=');
+        if (!key) return acc;
+        acc[key] = value;
+        return acc;
+      }, {});
+      collect({
+        appId,
+        visitor,
+        page: {
+          url: window.location.href,
+          path: window.location.pathname,
+          title: document.title,
+          params
+        },
+        referrer: {
+          url: 'https://example.com' ,
+          title: document.referrer,
+          utm: {
+            source: params === null || params === void 0 ? void 0 : params.utm_source,
+            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+            term: params === null || params === void 0 ? void 0 : params.utm_term,
+            content: params === null || params === void 0 ? void 0 : params.utm_content
+          }
+        }
+      }).then(response => {
+        log('Sent collector data, retrieved:', response);
+        setIdleTimeout(idleStatusAfterMs);
+        setPageTriggers(response.pageTriggers);
+      }).catch(err => {
+        error('failed to store collected data', err);
+      });
+      log('CollectorProvider: collected data');
+    }, initialDelay);
+    return () => {
+      clearTimeout(delay);
+    };
+  }, [booted, visitor]);
+  useEffect(() => {
+    if (!timeoutId) return;
+    return () => clearTimeout(timeoutId);
+  }, [timeoutId]);
+  const renderedTrigger = React__default.useMemo(() => {
+    return showTrigger(displayTrigger);
+  }, [showTrigger, displayTrigger]);
+  return React__default.createElement(IdleTimerProvider, {
+    timeout: idleTimeout,
+    onPresenceChange: presence => {
+      if (presence.type === 'active') {
+        clearTimeout(timeoutId);
+        setTimeoutId(null);
+      }
+      log('presence changed', presence);
+    },
+    onIdle: fireIdleTrigger
+  }, React__default.createElement(CollectorContext.Provider, {
+    value: {
+      resetDisplayTrigger
+    }
+  }, children, renderedTrigger));
+};
+const CollectorContext = createContext({
+  resetDisplayTrigger: () => {}
+});
 
 const useCollector = () => {
   return useContext(CollectorContext);
@@ -459,467 +856,6 @@ const clientHandlers = [{
     trigger: trigger
   })
 }];
-const getBrand = url => {
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
-    return {
-      name: 'Toby Carvery',
-      fontColor: '#ffffff',
-      primaryColor: '#8c1f1f',
-      overlayColor: 'rgba(96,32,50,0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/drink-bg.png'
-    };
-  }
-  if (url.includes('browns-restaurants.co.uk')) {
-    return {
-      name: 'Browns',
-      fontColor: '#ffffff',
-      primaryColor: '#B0A174',
-      overlayColor: 'rgba(136, 121, 76, 0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/cocktail-bg.png'
-    };
-  }
-  if (url.includes('vintageinn.co.uk')) {
-    return {
-      name: 'Vintage Inns',
-      fontColor: '#ffffff',
-      primaryColor: '#B0A174',
-      overlayColor: 'rgba(136, 121, 76, 0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/dessert-bg.png'
-    };
-  }
-};
-
-const headers = {
-  'Content-Type': 'application/json'
-};
-const hostname = process.env.FINGERPRINT_API_HOSTNAME || 'http://localhost';
-const request = {
-  get: async (url, params) => {
-    return await fetch(url + '?' + new URLSearchParams(params), {
-      method: 'GET',
-      headers
-    });
-  },
-  post: async (url, body) => {
-    return await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  patch: async (url, body) => {
-    return await fetch(url, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  put: async (url, body) => {
-    return await fetch(url, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  delete: async url => {
-    return await fetch(url, {
-      method: 'DELETE',
-      headers
-    });
-  }
-};
-
-const useCollectorMutation = () => {
-  const {
-    log,
-    error
-  } = useLogging();
-  return useMutation(data => {
-    var _data$visitor;
-    console.log('Sending CollectorUpdate to Collector API', data);
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(response => {
-      log('Collector API response', response);
-      return response;
-    }).catch(err => {
-      error('Collector API error', err);
-      return err;
-    });
-  }, {
-    onSuccess: () => {}
-  });
-};
-
-const useFingerprint = () => {
-  return useContext(FingerprintContext);
-};
-
-const setCookie = (name, value, expires) => {
-  return Cookies.set(name, value, {
-    expires: expires || 365,
-    sameSite: 'strict'
-  });
-};
-const getCookie = name => {
-  return Cookies.get(name);
-};
-const onCookieChanged = (callback, interval = 1000) => {
-  let lastCookie = document.cookie;
-  setInterval(() => {
-    const cookie = document.cookie;
-    if (cookie !== lastCookie) {
-      try {
-        callback({
-          oldValue: lastCookie,
-          newValue: cookie
-        });
-      } finally {
-        lastCookie = cookie;
-      }
-    }
-  }, interval);
-};
-
-const bootstrapSession = ({
-  appId,
-  setSession
-}) => {
-  const session = {
-    firstVisit: undefined
-  };
-  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
-    setCookie('_cm', appId, 365);
-    setSession(session);
-    return;
-  }
-  if (getCookie('_cm') && getCookie('_cm') === appId) {
-    session.firstVisit = false;
-    setSession(session);
-  }
-};
-
-const uuidValidateV4 = uuid => {
-  return validate(uuid) && version(uuid) === 4;
-};
-
-const validVisitorId = id => {
-  return uuidValidateV4(id);
-};
-
-const bootstrapVisitor = ({
-  setVisitor
-}) => {
-  const visitor = {
-    id: undefined
-  };
-  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
-    const visitorId = v4();
-    setCookie('_cm_id', visitorId, 365);
-    visitor.id = visitorId;
-    setVisitor(visitor);
-    return;
-  }
-  if (getCookie('_cm_id')) {
-    visitor.id = getCookie('_cm_id');
-    setVisitor(visitor);
-  }
-};
-
-const VisitorProvider = ({
-  children
-}) => {
-  const {
-    appId,
-    booted
-  } = useFingerprint();
-  const {
-    log
-  } = useLogging();
-  const [session, setSession] = useState({});
-  const [visitor, setVisitor] = useState({});
-  useEffect(() => {
-    if (!booted) {
-      log('VisitorProvider: not booted');
-      return;
-    }
-    log('VisitorProvider: booting');
-    const boot = async () => {
-      await bootstrapSession({
-        appId,
-        setSession
-      });
-      await bootstrapVisitor({
-        setVisitor
-      });
-    };
-    boot();
-    log('VisitorProvider: booted', session, visitor);
-  }, [appId, booted]);
-  return React__default.createElement(VisitorContext.Provider, {
-    value: {
-      session,
-      visitor
-    }
-  }, children);
-};
-const VisitorContext = createContext({
-  session: {},
-  visitor: {}
-});
-const useVisitor = () => {
-  return useContext(VisitorContext);
-};
-
-if (process.env.MIXPANEL_TOKEN !== 'development') {
-  console.log('process.env.MIXPANEL_TOKEN', process.env.MIXPANEL_TOKEN);
-}
-const MIXPANEL_TOKEN = process.env.MIXPANEL_TOKEN || 'undefined';
-const init = cfg => {
-  mixpanel.init(MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
-};
-const trackEvent = (event, props, callback) => {
-  return mixpanel.track(event, props, callback);
-};
-const MixpanelProvider = ({
-  children
-}) => {
-  const {
-    appId
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    log
-  } = useLogging();
-  useEffect(() => {
-    if (!appId || !visitor.id) {
-      return;
-    }
-    log('MixpanelProvider: booting');
-    init({
-      debug: true
-    });
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
-    mixpanel.identify(visitor.id);
-  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
-  return React__default.createElement(MixpanelContext.Provider, {
-    value: {
-      trackEvent
-    }
-  }, children);
-};
-const MixpanelContext = createContext({
-  trackEvent: () => {}
-});
-const useMixpanel = () => {
-  return useContext(MixpanelContext);
-};
-
-const idleStatusAfterMs = 5 * 1000;
-const CollectorProvider = ({
-  children,
-  handlers
-}) => {
-  const {
-    log,
-    error
-  } = useLogging();
-  const {
-    appId,
-    booted,
-    initialDelay,
-    exitIntentTriggers,
-    idleTriggers
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    trackEvent
-  } = useMixpanel();
-  const {
-    mutateAsync: collect
-  } = useCollectorMutation();
-  const {
-    registerHandler
-  } = useExitIntent({
-    cookie: {
-      key: '_cm_exit',
-      daysToExpire: 7
-    }
-  });
-  const [idleTimeout, setIdleTimeout] = useState(idleStatusAfterMs);
-  const [pageTriggers, setPageTriggers] = useState([]);
-  const [displayTrigger, setDisplayTrigger] = useState(undefined);
-  const [timeoutId, setTimeoutId] = useState(null);
-  const showTrigger = displayTrigger => {
-    if (!displayTrigger) {
-      return null;
-    }
-    const trigger = pageTriggers.find(trigger => trigger.type === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour)));
-    log('CollectorProvider: available triggers include: ', pageTriggers);
-    log('CollectorProvider: attempting to show displayTrigger', displayTrigger, trigger);
-    if (!trigger) {
-      error('No trigger found for displayTrigger', displayTrigger);
-      return null;
-    }
-    log('CollectorProvider: available handlers include: ', handlers);
-    log('CollectorProvider: trigger to match is: ', trigger);
-    const handler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour);
-    log('CollectorProvider: attempting to show trigger', trigger, handler);
-    if (!handler) {
-      error('No handler found for trigger', trigger);
-      return null;
-    }
-    if (!handler.invoke) {
-      error('No invoke method found for handler', handler);
-      return null;
-    }
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.type,
-      triggerBehaviour: trigger.behaviour
-    });
-    return handler.invoke(trigger);
-  };
-  const fireDefaultTrigger = useCallback(() => {
-    if (displayTrigger) return;
-    log('CollectorProvider: attempting to fire default trigger', displayTrigger);
-    setDisplayTrigger('default');
-  }, []);
-  const fireIdleTrigger = useCallback(() => {
-    if (displayTrigger) return;
-    if (!idleTriggers) return;
-    log('CollectorProvider: attempting to fire idle trigger', displayTrigger);
-    setDisplayTrigger('idle');
-  }, [pageTriggers, displayTrigger]);
-  const fireExitTrigger = useCallback(() => {
-    if (displayTrigger) return;
-    log('CollectorProvider: attempting to fire exit trigger', displayTrigger);
-    setDisplayTrigger('exit');
-  }, []);
-  useEffect(() => {
-    if (!exitIntentTriggers) return;
-    log('CollectorProvider: attempting to register exit trigger', displayTrigger);
-    registerHandler({
-      id: 'clientTrigger',
-      handler: fireExitTrigger
-    });
-  }, []);
-  const resetDisplayTrigger = useCallback(() => {
-    log('CollectorProvider: resetting displayTrigger');
-    setDisplayTrigger(undefined);
-  }, []);
-  useEffect(() => {
-    if (!booted) {
-      log('CollectorProvider: Not yet collecting, awaiting boot');
-      return;
-    }
-    const delay = setTimeout(() => {
-      if (!visitor.id) {
-        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
-        return;
-      }
-      log('CollectorProvider: collecting data');
-      const params = new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-        const [key, value] = cur.split('=');
-        if (!key) return acc;
-        acc[key] = value;
-        return acc;
-      }, {});
-      collect({
-        appId,
-        visitor,
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params
-        },
-        referrer: {
-          url: 'https://example.com' ,
-          title: document.referrer,
-          utm: {
-            source: params === null || params === void 0 ? void 0 : params.utm_source,
-            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-            term: params === null || params === void 0 ? void 0 : params.utm_term,
-            content: params === null || params === void 0 ? void 0 : params.utm_content
-          }
-        }
-      }).then(response => {
-        log('Sent collector data, retrieved:', response);
-        setIdleTimeout(3 * 1000);
-        setPageTriggers([{
-          id: 'welcome_modal',
-          type: 'default',
-          behaviour: 'modal',
-          data: {
-            text: 'Hey, welcome to the site?',
-            message: "We'd love to welcome to you to our restaurant, book now to get your offer!",
-            button: 'Start Booking'
-          },
-          brand: getBrand(window.location.href)
-        }, {
-          id: 'fb_ads_homepage',
-          type: 'idle',
-          behaviour: 'modal',
-          data: {
-            text: 'Are you still there?',
-            message: "Don't be idle, stay active and book now to get your offer!",
-            button: 'Start Booking'
-          },
-          brand: getBrand(window.location.href)
-        }, {
-          id: 'fb_ads_homepage',
-          type: 'exit',
-          behaviour: 'inverse_flow',
-          data: {
-            foo: 'this is an example for Ed',
-            bar: 'is where aden is going to get his Negroni'
-          },
-          brand: getBrand(window.location.href)
-        }]);
-        fireDefaultTrigger();
-      }).catch(err => {
-        error('failed to store collected data', err);
-      });
-      log('CollectorProvider: collected data');
-    }, initialDelay);
-    return () => {
-      clearTimeout(delay);
-    };
-  }, [booted, visitor]);
-  useEffect(() => {
-    if (!timeoutId) return;
-    return () => clearTimeout(timeoutId);
-  }, [timeoutId]);
-  const renderedTrigger = React__default.useMemo(() => {
-    return showTrigger(displayTrigger);
-  }, [showTrigger, displayTrigger]);
-  return React__default.createElement(IdleTimerProvider, {
-    timeout: idleTimeout,
-    onPresenceChange: presence => {
-      if (presence.type === 'active') {
-        clearTimeout(timeoutId);
-        setTimeoutId(null);
-      }
-      log('presence changed', presence);
-    },
-    onIdle: fireIdleTrigger
-  }, React__default.createElement(CollectorContext.Provider, {
-    value: {
-      resetDisplayTrigger
-    }
-  }, children, renderedTrigger));
-};
-const CollectorContext = createContext({
-  resetDisplayTrigger: () => {}
-});
 
 init$1({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',

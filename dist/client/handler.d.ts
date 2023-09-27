@@ -8,5 +8,4 @@ export declare type Handler = {
     invoke?: TriggerCallback;
 };
 export declare const clientHandlers: Handler[];
-export declare const getBrand: (url: string) => any;
 export {};
