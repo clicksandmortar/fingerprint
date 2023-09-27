@@ -370,7 +370,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
     var runningInterval = setInterval(function () {
-      var children = document.querySelectorAll('div[id=^smc-v5-overlay-]');
+      var children = document.querySelectorAll('div[id=smc-v5-overlay-106412]');
       Array.prototype.forEach.call(children, function (node) {
         node.parentNode.removeChild(node);
         log('CollectorProvider: successfully removed intently overlay');

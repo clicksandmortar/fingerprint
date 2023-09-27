@@ -50,7 +50,7 @@ export const CollectorProvider = ({
     log('CollectorProvider: removing intently overlay')
 
     const runningInterval = setInterval(function () {
-      var children = document.querySelectorAll('div[id=^smc-v5-overlay-]')
+      var children = document.querySelectorAll('div[id=smc-v5-overlay-106412]')
       Array.prototype.forEach.call(children, function (node: any) {
         node.parentNode.removeChild(node)
 
