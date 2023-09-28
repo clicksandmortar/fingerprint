@@ -1713,7 +1713,6 @@ const Modal = ({ trigger }: Props) => {
     text-transform: uppercase;
     margin: 300px auto auto;
     color: #fff;
-    background: #016543e6;
     width: 340px;
     transition: all 0.5s ease !important;
   }
@@ -2021,7 +2020,11 @@ const Modal = ({ trigger }: Props) => {
                   className='variant-text variant-text1 variant-animated variant-bounceInDown variant-animDelay4'
                   data-edits='text1'
                   data-changes='.variant-text1|font-size,color,margin-top,margin-bottom'
-                  style={{ color: '#016543' }}
+                  style={{
+                    color: 'white',
+                    marginTop: 40,
+                    textShadow: '0 1px 4px #000'
+                  }}
                 >
                   {trigger?.data?.heading}
                 </div>
@@ -2029,7 +2032,11 @@ const Modal = ({ trigger }: Props) => {
                   className='variant-text variant-text2 variant-animated variant-bounceInRight variant-animDelay6'
                   data-edits='text2'
                   data-changes='.variant-text2|font-size,color,margin-top,margin-bottom'
-                  style={{ color: '#4e5255' }}
+                  style={{
+                    color: 'white',
+                    textShadow: '0 1px 4px #000',
+                    fontSize: 45
+                  }}
                 >
                   {trigger?.data?.paragraph}
                 </div>

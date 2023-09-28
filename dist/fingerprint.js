@@ -61546,7 +61546,6 @@ const Modal = ({ trigger })=>{
     text-transform: uppercase;
     margin: 300px auto auto;
     color: #fff;
-    background: #016543e6;
     width: 340px;
     transition: all 0.5s ease !important;
   }
@@ -61800,7 +61799,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 1963,
+            lineNumber: 1962,
             columnNumber: 5
         },
         __self: undefined
@@ -61810,7 +61809,7 @@ const Modal = ({ trigger })=>{
         "data-device": "desktop",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 1974,
+            lineNumber: 1973,
             columnNumber: 7
         },
         __self: undefined
@@ -61821,7 +61820,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 1979,
+            lineNumber: 1978,
             columnNumber: 9
         },
         __self: undefined
@@ -61832,7 +61831,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 1983,
+            lineNumber: 1982,
             columnNumber: 11
         },
         __self: undefined
@@ -61847,7 +61846,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 1987,
+            lineNumber: 1986,
             columnNumber: 13
         },
         __self: undefined
@@ -61855,7 +61854,7 @@ const Modal = ({ trigger })=>{
         className: "variant-img-outer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 1997,
+            lineNumber: 1996,
             columnNumber: 15
         },
         __self: undefined
@@ -61865,7 +61864,7 @@ const Modal = ({ trigger })=>{
         "data-edits": "content1",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 1998,
+            lineNumber: 1997,
             columnNumber: 17
         },
         __self: undefined
@@ -61875,7 +61874,7 @@ const Modal = ({ trigger })=>{
         "data-edits": "content2",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2003,
+            lineNumber: 2002,
             columnNumber: 17
         },
         __self: undefined
@@ -61885,7 +61884,7 @@ const Modal = ({ trigger })=>{
         "data-edits": "content3",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2008,
+            lineNumber: 2007,
             columnNumber: 17
         },
         __self: undefined
@@ -61895,7 +61894,7 @@ const Modal = ({ trigger })=>{
         "data-edits": "content4",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2013,
+            lineNumber: 2012,
             columnNumber: 17
         },
         __self: undefined
@@ -61903,7 +61902,7 @@ const Modal = ({ trigger })=>{
         className: "variant-text-outer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2019,
+            lineNumber: 2018,
             columnNumber: 15
         },
         __self: undefined
@@ -61912,11 +61911,13 @@ const Modal = ({ trigger })=>{
         "data-edits": "text1",
         "data-changes": ".variant-text1|font-size,color,margin-top,margin-bottom",
         style: {
-            color: "#016543"
+            color: "white",
+            marginTop: 40,
+            textShadow: "0 1px 4px #000"
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2020,
+            lineNumber: 2019,
             columnNumber: 17
         },
         __self: undefined
@@ -61925,11 +61926,13 @@ const Modal = ({ trigger })=>{
         "data-edits": "text2",
         "data-changes": ".variant-text2|font-size,color,margin-top,margin-bottom",
         style: {
-            color: "#4e5255"
+            color: "white",
+            textShadow: "0 1px 4px #000",
+            fontSize: 45
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2028,
+            lineNumber: 2031,
             columnNumber: 17
         },
         __self: undefined
@@ -61939,7 +61942,7 @@ const Modal = ({ trigger })=>{
         "data-changes": ".variant-text3|font-size,color,margin-top,margin-bottom",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2036,
+            lineNumber: 2043,
             columnNumber: 17
         },
         __self: undefined
@@ -61949,7 +61952,7 @@ const Modal = ({ trigger })=>{
         "data-changes": ".variant-text4|font-size,color,margin-top,margin-bottom",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2041,
+            lineNumber: 2048,
             columnNumber: 17
         },
         __self: undefined
@@ -61961,7 +61964,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2047,
+            lineNumber: 2054,
             columnNumber: 15
         },
         __self: undefined
@@ -61969,7 +61972,7 @@ const Modal = ({ trigger })=>{
         className: "variant-input-group",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2056,
+            lineNumber: 2063,
             columnNumber: 17
         },
         __self: undefined
@@ -61979,7 +61982,7 @@ const Modal = ({ trigger })=>{
         "data-changes": ".variant-button|font-size,background-color,color",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2057,
+            lineNumber: 2064,
             columnNumber: 19
         },
         __self: undefined
@@ -61988,7 +61991,7 @@ const Modal = ({ trigger })=>{
         "data-engage-class": "variant-engaged",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2066,
+            lineNumber: 2073,
             columnNumber: 15
         },
         __self: undefined
@@ -62005,7 +62008,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2070,
+            lineNumber: 2077,
             columnNumber: 17
         },
         __self: undefined
@@ -62013,7 +62016,7 @@ const Modal = ({ trigger })=>{
         className: "variant-close variant-animated variant-fadeInRight variant-animDelay4 variant-closer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2083,
+            lineNumber: 2090,
             columnNumber: 15
         },
         __self: undefined
@@ -62027,7 +62030,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2084,
+            lineNumber: 2091,
             columnNumber: 17
         },
         __self: undefined
@@ -62035,7 +62038,7 @@ const Modal = ({ trigger })=>{
         className: "variant-close-safe variant-closer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2098,
+            lineNumber: 2105,
             columnNumber: 11
         },
         __self: undefined
@@ -62049,7 +62052,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2099,
+            lineNumber: 2106,
             columnNumber: 13
         },
         __self: undefined
@@ -62066,7 +62069,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 2118,
+            lineNumber: 2125,
             columnNumber: 32
         },
         __self: undefined
