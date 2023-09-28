@@ -8,6 +8,7 @@ import { useFingerprint } from '../hooks/useFingerprint'
 import { useLogging } from './LoggingContext'
 import { useVisitor } from './VisitorContext'
 import { useMixpanel } from './MixpanelContext'
+import { isMobile } from 'react-device-detect'
 
 const idleStatusAfterMs = 5 * 1000
 
@@ -35,7 +36,7 @@ export const CollectorProvider = ({
   // @todo remove this for our own exit intent implementation, for instance:
   // https://fullstackheroes.com/tutorials/react/exit-intent-react/
   const { registerHandler } = useExitIntent({
-    cookie: { key: '_cm_exit', daysToExpire: 7 }
+    cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
     idleStatusAfterMs
@@ -46,6 +47,8 @@ export const CollectorProvider = ({
   >(undefined)
   const [timeoutId, setTimeoutId] = useState<null | NodeJS.Timeout>(null)
   const [intently, setIntently] = useState<boolean>(false)
+
+  console.log('current pageTrigger', pageTriggers)
 
   // Removes the intently overlay, if intently is false
   useEffect(() => {
@@ -140,18 +143,9 @@ export const CollectorProvider = ({
   }, [pageTriggers, displayTrigger])
 
   const fireExitTrigger = useCallback(() => {
-    if (displayTrigger) return
-
-    if (
-      !pageTriggers?.find(
-        (trigger) => trigger.invocation === 'INVOCATION_EXIT_INTENT'
-      )
-    )
-      return
-
     log('CollectorProvider: attempting to fire exit trigger')
     setDisplayTrigger('INVOCATION_EXIT_INTENT')
-  }, [pageTriggers])
+  }, [])
 
   useEffect(() => {
     if (!exitIntentTriggers) return
@@ -230,7 +224,13 @@ export const CollectorProvider = ({
           // @todo turn this into the dynamic value
           setIdleTimeout(idleStatusAfterMs)
 
-          setPageTriggers(payload.pageTriggers)
+          setPageTriggers(
+            payload?.pageTriggers?.filter(
+              (trigger) =>
+                (isMobile && trigger.invocation === 'INVOCATION_IDLE_TIME') ||
+                (!isMobile && trigger.invocation === 'INVOCATION_EXIT_INTENT')
+            ) || []
+          )
 
           if (!payload.intently) {
             // remove intently overlay here
