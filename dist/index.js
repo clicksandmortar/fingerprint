@@ -1428,7 +1428,7 @@ exports.withOrientationChange = withOrientationChange;
 unwrapExports(lib);
 var lib_44 = lib.isMobile;
 
-var idleStatusAfterMs = 5 * 1000;
+var idleStatusAfterMs = 30 * 1000;
 var CollectorProvider = function CollectorProvider(_ref) {
   var children = _ref.children,
     handlers = _ref.handlers;
