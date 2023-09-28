@@ -2021,6 +2021,7 @@ const Modal = ({ trigger }: Props) => {
                   className='variant-text variant-text1 variant-animated variant-bounceInDown variant-animDelay4'
                   data-edits='text1'
                   data-changes='.variant-text1|font-size,color,margin-top,margin-bottom'
+                  style={{ color: '#016543' }}
                 >
                   {trigger?.data?.heading}
                 </div>
@@ -2028,6 +2029,7 @@ const Modal = ({ trigger }: Props) => {
                   className='variant-text variant-text2 variant-animated variant-bounceInRight variant-animDelay6'
                   data-edits='text2'
                   data-changes='.variant-text2|font-size,color,margin-top,margin-bottom'
+                  style={{ color: '#4e5255' }}
                 >
                   {trigger?.data?.paragraph}
                 </div>

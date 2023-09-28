@@ -1723,11 +1723,17 @@ var Modal = function Modal(_ref) {
   }, React__default.createElement("div", {
     className: 'variant-text variant-text1 variant-animated variant-bounceInDown variant-animDelay4',
     "data-edits": 'text1',
-    "data-changes": '.variant-text1|font-size,color,margin-top,margin-bottom'
+    "data-changes": '.variant-text1|font-size,color,margin-top,margin-bottom',
+    style: {
+      color: '#016543'
+    }
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading), React__default.createElement("div", {
     className: 'variant-text variant-text2 variant-animated variant-bounceInRight variant-animDelay6',
     "data-edits": 'text2',
-    "data-changes": '.variant-text2|font-size,color,margin-top,margin-bottom'
+    "data-changes": '.variant-text2|font-size,color,margin-top,margin-bottom',
+    style: {
+      color: '#4e5255'
+    }
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph), React__default.createElement("div", {
     className: 'variant-text variant-text3 variant-animated variant-bounceInLeft variant-animDelay8',
     "data-edits": 'text3',
