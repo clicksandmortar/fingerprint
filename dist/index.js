@@ -1653,6 +1653,11 @@ var useCollector = function useCollector() {
   return React.useContext(CollectorContext);
 };
 
+var useCollector$1 = {
+  __proto__: null,
+  useCollector: useCollector
+};
+
 var Modal = function Modal(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data7;
   var trigger = _ref.trigger;
@@ -2267,6 +2272,6 @@ var FingerprintContext = React.createContext(_extends({}, defaultFingerprintStat
 exports.FingerprintContext = FingerprintContext;
 exports.FingerprintProvider = FingerprintProvider;
 exports.onCookieChanged = onCookieChanged;
-exports.useCollector = useCollector;
+exports.useCollector = useCollector$1;
 exports.useFingerprint = useFingerprint;
 //# sourceMappingURL=index.js.map

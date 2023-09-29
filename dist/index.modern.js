@@ -1587,6 +1587,11 @@ const useCollector = () => {
   return useContext(CollectorContext);
 };
 
+var useCollector$1 = {
+  __proto__: null,
+  useCollector: useCollector
+};
+
 const Modal = ({
   trigger
 }) => {
@@ -4084,5 +4089,5 @@ const FingerprintContext = createContext({
   ...defaultFingerprintState
 });
 
-export { FingerprintContext, FingerprintProvider, onCookieChanged, useCollector, useFingerprint };
+export { FingerprintContext, FingerprintProvider, onCookieChanged, useCollector$1 as useCollector, useFingerprint };
 //# sourceMappingURL=index.modern.js.map
