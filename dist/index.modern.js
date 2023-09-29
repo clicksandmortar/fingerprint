@@ -4084,5 +4084,5 @@ const FingerprintContext = createContext({
   ...defaultFingerprintState
 });
 
-export { FingerprintContext, FingerprintProvider, onCookieChanged, useFingerprint };
+export { FingerprintContext, FingerprintProvider, onCookieChanged, useCollector, useFingerprint };
 //# sourceMappingURL=index.modern.js.map

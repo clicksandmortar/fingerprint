@@ -2267,5 +2267,6 @@ var FingerprintContext = React.createContext(_extends({}, defaultFingerprintStat
 exports.FingerprintContext = FingerprintContext;
 exports.FingerprintProvider = FingerprintProvider;
 exports.onCookieChanged = onCookieChanged;
+exports.useCollector = useCollector;
 exports.useFingerprint = useFingerprint;
 //# sourceMappingURL=index.js.map
