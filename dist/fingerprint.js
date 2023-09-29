@@ -30099,7 +30099,7 @@ var _visitorContext = require("./VisitorContext");
 var _mixpanelContext = require("./MixpanelContext");
 var _reactDeviceDetect = require("react-device-detect");
 var _s = $RefreshSig$();
-const idleStatusAfterMs = 30000;
+const idleStatusAfterMs = 1000;
 const CollectorProvider = ({ children, handlers })=>{
     _s();
     const { log, error } = (0, _loggingContext.useLogging)();

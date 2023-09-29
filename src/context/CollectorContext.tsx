@@ -10,7 +10,7 @@ import { useVisitor } from './VisitorContext'
 import { useMixpanel } from './MixpanelContext'
 import { isMobile } from 'react-device-detect'
 
-const idleStatusAfterMs = 30 * 1000
+const idleStatusAfterMs = 1 * 1000
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
