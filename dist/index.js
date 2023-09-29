@@ -1655,8 +1655,8 @@ var Modal = function Modal(_ref) {
     open = _useState[0],
     setOpen = _useState[1];
   var closeModal = function closeModal() {
-    setOpen(false);
     resetDisplayTrigger();
+    setOpen(false);
   };
   console.log('trigger', trigger, trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL);
   React.useEffect(function () {

@@ -59849,8 +59849,8 @@ const Modal = ({ trigger })=>{
     const { resetDisplayTrigger } = (0, _useCollector.useCollector)();
     const [open, setOpen] = (0, _react.useState)(true);
     const closeModal = ()=>{
-        setOpen(false);
         resetDisplayTrigger();
+        setOpen(false);
     };
     console.log("trigger", trigger, trigger?.data?.buttonURL);
     (0, _react.useEffect)(()=>{

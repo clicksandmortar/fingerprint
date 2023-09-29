@@ -12,8 +12,8 @@ const Modal = ({ trigger }: Props) => {
   const [open, setOpen] = useState(true)
 
   const closeModal = () => {
-    setOpen(false)
     resetDisplayTrigger()
+    setOpen(false)
   }
 
   console.log('trigger', trigger, trigger?.data?.buttonURL)

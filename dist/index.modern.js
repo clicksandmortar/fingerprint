@@ -1589,8 +1589,8 @@ const Modal = ({
   } = useCollector();
   const [open, setOpen] = useState(true);
   const closeModal = () => {
-    setOpen(false);
     resetDisplayTrigger();
+    setOpen(false);
   };
   console.log('trigger', trigger, trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL);
   useEffect(() => {
