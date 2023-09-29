@@ -30287,6 +30287,16 @@ const CollectorProvider = ({ children, handlers })=>{
         showTrigger,
         displayTrigger
     ]);
+    const setTrigger = (0, _react.useCallback)((trigger)=>{
+        log("CollectorProvider: manually setting trigger", trigger);
+        setPageTriggers([
+            ...pageTriggers,
+            trigger
+        ]);
+        setDisplayTrigger(trigger.invocation);
+    }, [
+        pageTriggers
+    ]);
     return /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _reactIdleTimer.IdleTimerProvider), {
         timeout: idleTimeout,
         onPresenceChange: (presence)=>{
@@ -30301,23 +30311,24 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 271,
+            lineNumber: 280,
             columnNumber: 5
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement(CollectorContext.Provider, {
         value: {
-            resetDisplayTrigger
+            resetDisplayTrigger,
+            setTrigger
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 284,
+            lineNumber: 293,
             columnNumber: 7
         },
         __self: undefined
     }, children, renderedTrigger));
 };
-_s(CollectorProvider, "LVcGpzfo1R2jhAS+8BQOsO5SdO8=", false, function() {
+_s(CollectorProvider, "gHXDFjMqTvTQOLTPffBpkq8eC04=", false, function() {
     return [
         (0, _loggingContext.useLogging),
         (0, _useFingerprint.useFingerprint),
@@ -30329,7 +30340,8 @@ _s(CollectorProvider, "LVcGpzfo1R2jhAS+8BQOsO5SdO8=", false, function() {
 });
 _c = CollectorProvider;
 const CollectorContext = /*#__PURE__*/ (0, _react.createContext)({
-    resetDisplayTrigger: ()=>{}
+    resetDisplayTrigger: ()=>{},
+    setTrigger: ()=>{}
 });
 var _c;
 $RefreshReg$(_c, "CollectorProvider");

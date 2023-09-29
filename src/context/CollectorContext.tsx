@@ -267,6 +267,15 @@ export const CollectorProvider = ({
     return showTrigger(displayTrigger)
   }, [showTrigger, displayTrigger])
 
+  const setTrigger = useCallback(
+    (trigger: Trigger) => {
+      log('CollectorProvider: manually setting trigger', trigger)
+      setPageTriggers([...pageTriggers, trigger])
+      setDisplayTrigger(trigger.invocation)
+    },
+    [pageTriggers]
+  )
+
   return (
     <IdleTimerProvider
       timeout={idleTimeout}
@@ -283,7 +292,8 @@ export const CollectorProvider = ({
     >
       <CollectorContext.Provider
         value={{
-          resetDisplayTrigger
+          resetDisplayTrigger,
+          setTrigger
         }}
       >
         {children}
@@ -294,8 +304,10 @@ export const CollectorProvider = ({
 }
 export type CollectorContextInterface = {
   resetDisplayTrigger: () => void
+  setTrigger: (trigger: Trigger) => void
 }
 
 export const CollectorContext = createContext<CollectorContextInterface>({
-  resetDisplayTrigger: () => {}
+  resetDisplayTrigger: () => {},
+  setTrigger: () => {}
 })

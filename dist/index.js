@@ -1622,6 +1622,11 @@ var CollectorProvider = function CollectorProvider(_ref) {
   var renderedTrigger = React__default.useMemo(function () {
     return showTrigger(displayTrigger);
   }, [showTrigger, displayTrigger]);
+  var setTrigger = React.useCallback(function (trigger) {
+    log('CollectorProvider: manually setting trigger', trigger);
+    setPageTriggers([].concat(pageTriggers, [trigger]));
+    setDisplayTrigger(trigger.invocation);
+  }, [pageTriggers]);
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
     timeout: idleTimeout,
     onPresenceChange: function onPresenceChange(presence) {
@@ -1634,12 +1639,14 @@ var CollectorProvider = function CollectorProvider(_ref) {
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: {
-      resetDisplayTrigger: resetDisplayTrigger
+      resetDisplayTrigger: resetDisplayTrigger,
+      setTrigger: setTrigger
     }
   }, children, renderedTrigger));
 };
 var CollectorContext = React.createContext({
-  resetDisplayTrigger: function resetDisplayTrigger() {}
+  resetDisplayTrigger: function resetDisplayTrigger() {},
+  setTrigger: function setTrigger() {}
 });
 
 var useCollector = function useCollector() {

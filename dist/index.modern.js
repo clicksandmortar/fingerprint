@@ -1556,6 +1556,11 @@ const CollectorProvider = ({
   const renderedTrigger = React__default.useMemo(() => {
     return showTrigger(displayTrigger);
   }, [showTrigger, displayTrigger]);
+  const setTrigger = useCallback(trigger => {
+    log('CollectorProvider: manually setting trigger', trigger);
+    setPageTriggers([...pageTriggers, trigger]);
+    setDisplayTrigger(trigger.invocation);
+  }, [pageTriggers]);
   return React__default.createElement(IdleTimerProvider, {
     timeout: idleTimeout,
     onPresenceChange: presence => {
@@ -1568,12 +1573,14 @@ const CollectorProvider = ({
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: {
-      resetDisplayTrigger
+      resetDisplayTrigger,
+      setTrigger
     }
   }, children, renderedTrigger));
 };
 const CollectorContext = createContext({
-  resetDisplayTrigger: () => {}
+  resetDisplayTrigger: () => {},
+  setTrigger: () => {}
 });
 
 const useCollector = () => {
