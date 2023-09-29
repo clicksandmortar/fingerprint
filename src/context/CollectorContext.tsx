@@ -50,6 +50,8 @@ export const CollectorProvider = ({
 
   console.log('current pageTrigger', pageTriggers)
 
+  log('CollectorProvider: user is on mobile?', isMobile)
+
   // Removes the intently overlay, if intently is false
   useEffect(() => {
     if (intently) return

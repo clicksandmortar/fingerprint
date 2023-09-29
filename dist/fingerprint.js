@@ -30121,6 +30121,7 @@ const CollectorProvider = ({ children, handlers })=>{
     const [timeoutId, setTimeoutId] = (0, _react.useState)(null);
     const [intently, setIntently] = (0, _react.useState)(false);
     console.log("current pageTrigger", pageTriggers);
+    log("CollectorProvider: user is on mobile?", (0, _reactDeviceDetect.isMobile));
     // Removes the intently overlay, if intently is false
     (0, _react.useEffect)(()=>{
         if (intently) return;
@@ -30300,7 +30301,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 269,
+            lineNumber: 271,
             columnNumber: 5
         },
         __self: undefined
@@ -30310,7 +30311,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 282,
+            lineNumber: 284,
             columnNumber: 7
         },
         __self: undefined

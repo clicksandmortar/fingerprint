@@ -1421,6 +1421,7 @@ const CollectorProvider = ({
   const [timeoutId, setTimeoutId] = useState(null);
   const [intently, setIntently] = useState(false);
   console.log('current pageTrigger', pageTriggers);
+  log('CollectorProvider: user is on mobile?', lib_44);
   useEffect(() => {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');

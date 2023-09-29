@@ -1470,6 +1470,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
     intently = _useState5[0],
     setIntently = _useState5[1];
   console.log('current pageTrigger', pageTriggers);
+  log('CollectorProvider: user is on mobile?', lib_44);
   React.useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
