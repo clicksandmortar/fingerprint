@@ -30191,6 +30191,7 @@ const CollectorProvider = ({ children, handlers })=>{
     }, []);
     (0, _react.useEffect)(()=>{
         if (!exitIntentTriggers) return;
+        if (0, _reactDeviceDetect.isMobile) return;
         log("CollectorProvider: attempting to register exit trigger");
         registerHandler({
             id: "clientTrigger",
@@ -30299,7 +30300,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 268,
+            lineNumber: 269,
             columnNumber: 5
         },
         __self: undefined
@@ -30309,7 +30310,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 281,
+            lineNumber: 282,
             columnNumber: 7
         },
         __self: undefined

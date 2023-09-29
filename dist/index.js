@@ -1533,6 +1533,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
   }, []);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
+    if (lib_44) return;
     log('CollectorProvider: attempting to register exit trigger');
     registerHandler({
       id: 'clientTrigger',

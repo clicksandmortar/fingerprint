@@ -149,6 +149,7 @@ export const CollectorProvider = ({
 
   useEffect(() => {
     if (!exitIntentTriggers) return
+    if (isMobile) return
 
     log('CollectorProvider: attempting to register exit trigger')
 
