@@ -302,6 +302,7 @@ export const CollectorProvider = ({
     </IdleTimerProvider>
   )
 }
+
 export type CollectorContextInterface = {
   resetDisplayTrigger: () => void
   setTrigger: (trigger: Trigger) => void
