@@ -30287,16 +30287,14 @@ const CollectorProvider = ({ children, handlers })=>{
         showTrigger,
         displayTrigger
     ]);
-    const setTrigger = (0, _react.useCallback)((trigger)=>{
+    const setTrigger = (trigger)=>{
         log("CollectorProvider: manually setting trigger", trigger);
         setPageTriggers([
             ...pageTriggers,
             trigger
         ]);
         setDisplayTrigger(trigger.invocation);
-    }, [
-        pageTriggers
-    ]);
+    };
     return /*#__PURE__*/ (0, _reactDefault.default).createElement((0, _reactIdleTimer.IdleTimerProvider), {
         timeout: idleTimeout,
         onPresenceChange: (presence)=>{

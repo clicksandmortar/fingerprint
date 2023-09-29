@@ -267,14 +267,11 @@ export const CollectorProvider = ({
     return showTrigger(displayTrigger)
   }, [showTrigger, displayTrigger])
 
-  const setTrigger = useCallback(
-    (trigger: Trigger) => {
-      log('CollectorProvider: manually setting trigger', trigger)
-      setPageTriggers([...pageTriggers, trigger])
-      setDisplayTrigger(trigger.invocation)
-    },
-    [pageTriggers]
-  )
+  const setTrigger = (trigger: Trigger) => {
+    log('CollectorProvider: manually setting trigger', trigger)
+    setPageTriggers([...pageTriggers, trigger])
+    setDisplayTrigger(trigger.invocation)
+  }
 
   return (
     <IdleTimerProvider
