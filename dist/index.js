@@ -502,9 +502,15 @@ var CollectorProvider = function CollectorProvider(_ref) {
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
               setIntently(false);
+              trackEvent('user_cohort', {
+                cohort: 'fingerprint'
+              });
             } else {
               log('CollectorProvider: user is in Intently cohort');
               setIntently(true);
+              trackEvent('user_cohort', {
+                cohort: 'intently'
+              });
             }
           });
         } catch (e) {
