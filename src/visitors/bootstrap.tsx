@@ -15,7 +15,7 @@ export const bootstrapVisitor = ({
   if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id') as string)) {
     const visitorId = uuidv4()
 
-    setCookie('_cm_id', visitorId)
+    setCookie('_cm_id', visitorId, 365)
 
     visitor.id = visitorId
 

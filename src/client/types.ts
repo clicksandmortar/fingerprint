@@ -35,12 +35,20 @@ export type CollectorResponse = {
   firstSeen: Date
   lastSeen: Date
   visits: number
-  trigger: Trigger
+  pageTriggers: Trigger[]
+  // @todo remove this temp hack once split testing with Intently is complete
+  intently: boolean
 }
 
 export type Trigger = {
   id?: string
-  behaviour?: string
+
+  invocation?:
+    | 'INVOCATION_UNSPECIFIED'
+    | 'INVOCATION_IDLE_TIME'
+    | 'INVOCATION_EXIT_INTENT'
+    | 'INVOCATION_PAGE_LOAD'
+  behaviour?: 'BEHAVIOUR_MODAL'
   // delay?: number
   // invoke:(trigger: Trigger) => void;
   // @todo: commented out, out of date?
