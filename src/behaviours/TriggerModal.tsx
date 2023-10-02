@@ -19,7 +19,7 @@ const CurlyText = ({ randomHash, text }: { randomHash: string; text: any }) => {
       xmlnsXlink='http://www.w3.org/1999/xlink'
       version='1.1'
       viewBox='0 0 500 500'
-      className={randomHash + '-curlyText'}
+      className={'f' + randomHash + '-curlyText'}
     >
       <defs>
         <path id='textPath' d='M 0 500 A 175,100 0 0 1 500,500' />
@@ -101,7 +101,7 @@ const Modal = ({ trigger }: Props) => {
   font-family: "proxima-nova", sans-serif;
 }
 
-.` +
+.f` +
       randomHash +
       `-overlay {
   position: fixed;
@@ -119,7 +119,7 @@ const Modal = ({ trigger }: Props) => {
   font-style: normal;
 }
 
-.` +
+.f` +
       randomHash +
       `-modal {
   width: 80%;
@@ -141,7 +141,7 @@ const Modal = ({ trigger }: Props) => {
   }
 }
 
-.` +
+.f` +
       randomHash +
       `-modalImage {
   position: absolute;
@@ -162,7 +162,7 @@ const Modal = ({ trigger }: Props) => {
 }
 
 
-.` +
+.f` +
       randomHash +
       `-curlyText {
   font-family: "proxima-nova", sans-serif;
@@ -179,14 +179,14 @@ const Modal = ({ trigger }: Props) => {
   margin-right: auto;
 }
 
-.` +
+.f` +
       randomHash +
       `-curlyText text {
   font-size: 1.3rem;
 }
 
 
-.` +
+.f` +
       randomHash +
       `-mainText {
   font-weight: 200;
@@ -222,7 +222,7 @@ const Modal = ({ trigger }: Props) => {
   }
 }
 
-.` +
+.f` +
       randomHash +
       `-cta {
   font-family: "proxima-nova", sans-serif;
@@ -240,14 +240,14 @@ const Modal = ({ trigger }: Props) => {
   text-decoration: none;
 }
 
-.` +
+.f` +
       randomHash +
       `-cta:hover {
   transition: all 0.3s;
   filter: brightness(0.95);
 }
 
-.` +
+.f` +
       randomHash +
       `-close-button {
   border-radius: 100%;
@@ -264,7 +264,7 @@ const Modal = ({ trigger }: Props) => {
   cursor: pointer;
 }
 
-.` +
+.f` +
       randomHash +
       `-button-container {
   flex: 1;
@@ -272,7 +272,7 @@ const Modal = ({ trigger }: Props) => {
   place-content: center;
 }
 
-.` +
+.f` +
       randomHash +
       `-image-darken {
   background: rgba(0,0,0,0.2);
@@ -299,9 +299,9 @@ const Modal = ({ trigger }: Props) => {
   }
 
   return (
-    <div className={randomHash + '-overlay'}>
+    <div className={'f' + randomHash + '-overlay'}>
       <div
-        className={randomHash + '-modal'}
+        className={'f' + randomHash + '-modal'}
         style={{
           background: `url(${trigger?.data?.backgroundURL})`,
           backgroundPosition: 'center',
@@ -311,8 +311,11 @@ const Modal = ({ trigger }: Props) => {
           height: 500
         }}
       >
-        <div className={randomHash + '-image-darken'}>
-          <button className={randomHash + '-close-button'} onClick={closeModal}>
+        <div className={'f' + randomHash + '-image-darken'}>
+          <button
+            className={'f' + randomHash + '-close-button'}
+            onClick={closeModal}
+          >
             <svg
               xmlns='http://www.w3.org/2000/svg'
               width='16'
@@ -329,7 +332,7 @@ const Modal = ({ trigger }: Props) => {
 
           <CurlyText text={trigger?.data?.heading} randomHash={randomHash} />
 
-          <div style={{ flex: 1 }} className={randomHash + '--spacer'} />
+          <div style={{ flex: 1 }} className={'f' + randomHash + '--spacer'} />
           <div
             style={{
               flex: 1,
@@ -339,14 +342,14 @@ const Modal = ({ trigger }: Props) => {
               letterSpacing: '2pt'
             }}
           >
-            <span className={randomHash + '-mainText'}>
+            <span className={'f' + randomHash + '-mainText'}>
               {trigger?.data?.paragraph}
             </span>
           </div>
-          <div className={randomHash + '-buttonContainer'}>
+          <div className={'f' + randomHash + '-buttonContainer'}>
             <a
               href={trigger?.data?.buttonURL}
-              className={randomHash + '-cta'}
+              className={'f' + randomHash + '-cta'}
               onClick={(e) => redirectUser(e)}
             >
               {trigger?.data?.buttonText}

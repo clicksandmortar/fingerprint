@@ -41548,7 +41548,7 @@ const CurlyText = ({ randomHash, text })=>{
         xmlnsXlink: "http://www.w3.org/1999/xlink",
         version: "1.1",
         viewBox: "0 0 500 500",
-        className: randomHash + "-curlyText",
+        className: "f" + randomHash + "-curlyText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
             lineNumber: 17,
@@ -41655,7 +41655,7 @@ const Modal = ({ trigger })=>{
   font-family: "proxima-nova", sans-serif;
 }
 
-.` + randomHash + `-overlay {
+.f` + randomHash + `-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -41671,7 +41671,7 @@ const Modal = ({ trigger })=>{
   font-style: normal;
 }
 
-.` + randomHash + `-modal {
+.f` + randomHash + `-modal {
   width: 80%;
   max-width: 400px;
   height: 500px;
@@ -41691,7 +41691,7 @@ const Modal = ({ trigger })=>{
   }
 }
 
-.` + randomHash + `-modalImage {
+.f` + randomHash + `-modalImage {
   position: absolute;
   left: 0;
   right: 0;
@@ -41710,7 +41710,7 @@ const Modal = ({ trigger })=>{
 }
 
 
-.` + randomHash + `-curlyText {
+.f` + randomHash + `-curlyText {
   font-family: "proxima-nova", sans-serif;
   font-weight: 500;
   font-style: normal;
@@ -41725,12 +41725,12 @@ const Modal = ({ trigger })=>{
   margin-right: auto;
 }
 
-.` + randomHash + `-curlyText text {
+.f` + randomHash + `-curlyText text {
   font-size: 1.3rem;
 }
 
 
-.` + randomHash + `-mainText {
+.f` + randomHash + `-mainText {
   font-weight: 200;
   font-family: "proxima-nova", sans-serif;
   color: var(--secondary);
@@ -41764,7 +41764,7 @@ const Modal = ({ trigger })=>{
   }
 }
 
-.` + randomHash + `-cta {
+.f` + randomHash + `-cta {
   font-family: "proxima-nova", sans-serif;
   cursor: pointer;
   background-color: var(--secondary);
@@ -41780,12 +41780,12 @@ const Modal = ({ trigger })=>{
   text-decoration: none;
 }
 
-.` + randomHash + `-cta:hover {
+.f` + randomHash + `-cta:hover {
   transition: all 0.3s;
   filter: brightness(0.95);
 }
 
-.` + randomHash + `-close-button {
+.f` + randomHash + `-close-button {
   border-radius: 100%;
   background-color: var(--secondary);
   width: 2rem;
@@ -41800,13 +41800,13 @@ const Modal = ({ trigger })=>{
   cursor: pointer;
 }
 
-.` + randomHash + `-button-container {
+.f` + randomHash + `-button-container {
   flex: 1;
   display: grid;
   place-content: center;
 }
 
-.` + randomHash + `-image-darken {
+.f` + randomHash + `-image-darken {
   background: rgba(0,0,0,0.2);
   width: 100%;
   height: 100%;
@@ -41824,7 +41824,7 @@ const Modal = ({ trigger })=>{
     if (!stylesLoaded) return null;
     if (!open) return null;
     return /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: randomHash + "-overlay",
+        className: "f" + randomHash + "-overlay",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
             lineNumber: 302,
@@ -41832,7 +41832,7 @@ const Modal = ({ trigger })=>{
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: randomHash + "-modal",
+        className: "f" + randomHash + "-modal",
         style: {
             background: `url(${trigger?.data?.backgroundURL})`,
             backgroundPosition: "center",
@@ -41848,7 +41848,7 @@ const Modal = ({ trigger })=>{
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: randomHash + "-image-darken",
+        className: "f" + randomHash + "-image-darken",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
             lineNumber: 314,
@@ -41856,7 +41856,7 @@ const Modal = ({ trigger })=>{
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
-        className: randomHash + "-close-button",
+        className: "f" + randomHash + "-close-button",
         onClick: closeModal,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
@@ -41871,7 +41871,7 @@ const Modal = ({ trigger })=>{
         viewBox: "0 0 16 16",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 316,
+            lineNumber: 319,
             columnNumber: 13
         },
         __self: undefined
@@ -41881,7 +41881,7 @@ const Modal = ({ trigger })=>{
         d: "M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 322,
+            lineNumber: 325,
             columnNumber: 15
         },
         __self: undefined
@@ -41890,7 +41890,7 @@ const Modal = ({ trigger })=>{
         randomHash: randomHash,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 330,
+            lineNumber: 333,
             columnNumber: 11
         },
         __self: undefined
@@ -41898,10 +41898,10 @@ const Modal = ({ trigger })=>{
         style: {
             flex: 1
         },
-        className: randomHash + "--spacer",
+        className: "f" + randomHash + "--spacer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 332,
+            lineNumber: 335,
             columnNumber: 11
         },
         __self: undefined
@@ -41915,33 +41915,33 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 333,
+            lineNumber: 336,
             columnNumber: 11
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("span", {
-        className: randomHash + "-mainText",
+        className: "f" + randomHash + "-mainText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 342,
+            lineNumber: 345,
             columnNumber: 13
         },
         __self: undefined
     }, trigger?.data?.paragraph)), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: randomHash + "-buttonContainer",
+        className: "f" + randomHash + "-buttonContainer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 346,
+            lineNumber: 349,
             columnNumber: 11
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("a", {
         href: trigger?.data?.buttonURL,
-        className: randomHash + "-cta",
+        className: "f" + randomHash + "-cta",
         onClick: (e)=>redirectUser(e),
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 347,
+            lineNumber: 350,
             columnNumber: 13
         },
         __self: undefined
@@ -41961,7 +41961,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 362,
+            lineNumber: 365,
             columnNumber: 32
         },
         __self: undefined

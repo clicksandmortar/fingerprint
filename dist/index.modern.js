@@ -513,7 +513,7 @@ const CurlyText = ({
     xmlnsXlink: 'http://www.w3.org/1999/xlink',
     version: '1.1',
     viewBox: '0 0 500 500',
-    className: randomHash + '-curlyText'
+    className: 'f' + randomHash + '-curlyText'
   }, React__default.createElement("defs", null, React__default.createElement("path", {
     id: 'textPath',
     d: 'M 0 500 A 175,100 0 0 1 500,500'
@@ -599,7 +599,7 @@ const Modal = ({
   font-family: "proxima-nova", sans-serif;
 }
 
-.` + randomHash + `-overlay {
+.f` + randomHash + `-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -615,7 +615,7 @@ const Modal = ({
   font-style: normal;
 }
 
-.` + randomHash + `-modal {
+.f` + randomHash + `-modal {
   width: 80%;
   max-width: 400px;
   height: 500px;
@@ -635,7 +635,7 @@ const Modal = ({
   }
 }
 
-.` + randomHash + `-modalImage {
+.f` + randomHash + `-modalImage {
   position: absolute;
   left: 0;
   right: 0;
@@ -654,7 +654,7 @@ const Modal = ({
 }
 
 
-.` + randomHash + `-curlyText {
+.f` + randomHash + `-curlyText {
   font-family: "proxima-nova", sans-serif;
   font-weight: 500;
   font-style: normal;
@@ -669,12 +669,12 @@ const Modal = ({
   margin-right: auto;
 }
 
-.` + randomHash + `-curlyText text {
+.f` + randomHash + `-curlyText text {
   font-size: 1.3rem;
 }
 
 
-.` + randomHash + `-mainText {
+.f` + randomHash + `-mainText {
   font-weight: 200;
   font-family: "proxima-nova", sans-serif;
   color: var(--secondary);
@@ -708,7 +708,7 @@ const Modal = ({
   }
 }
 
-.` + randomHash + `-cta {
+.f` + randomHash + `-cta {
   font-family: "proxima-nova", sans-serif;
   cursor: pointer;
   background-color: var(--secondary);
@@ -724,12 +724,12 @@ const Modal = ({
   text-decoration: none;
 }
 
-.` + randomHash + `-cta:hover {
+.f` + randomHash + `-cta:hover {
   transition: all 0.3s;
   filter: brightness(0.95);
 }
 
-.` + randomHash + `-close-button {
+.f` + randomHash + `-close-button {
   border-radius: 100%;
   background-color: var(--secondary);
   width: 2rem;
@@ -744,13 +744,13 @@ const Modal = ({
   cursor: pointer;
 }
 
-.` + randomHash + `-button-container {
+.f` + randomHash + `-button-container {
   flex: 1;
   display: grid;
   place-content: center;
 }
 
-.` + randomHash + `-image-darken {
+.f` + randomHash + `-image-darken {
   background: rgba(0,0,0,0.2);
   width: 100%;
   height: 100%;
@@ -772,9 +772,9 @@ const Modal = ({
     return null;
   }
   return React__default.createElement("div", {
-    className: randomHash + '-overlay'
+    className: 'f' + randomHash + '-overlay'
   }, React__default.createElement("div", {
-    className: randomHash + '-modal',
+    className: 'f' + randomHash + '-modal',
     style: {
       background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.backgroundURL})`,
       backgroundPosition: 'center',
@@ -784,9 +784,9 @@ const Modal = ({
       height: 500
     }
   }, React__default.createElement("div", {
-    className: randomHash + '-image-darken'
+    className: 'f' + randomHash + '-image-darken'
   }, React__default.createElement("button", {
-    className: randomHash + '-close-button',
+    className: 'f' + randomHash + '-close-button',
     onClick: closeModal
   }, React__default.createElement("svg", {
     xmlns: 'http://www.w3.org/2000/svg',
@@ -804,7 +804,7 @@ const Modal = ({
     style: {
       flex: 1
     },
-    className: randomHash + '--spacer'
+    className: 'f' + randomHash + '--spacer'
   }), React__default.createElement("div", {
     style: {
       flex: 1,
@@ -814,12 +814,12 @@ const Modal = ({
       letterSpacing: '2pt'
     }
   }, React__default.createElement("span", {
-    className: randomHash + '-mainText'
+    className: 'f' + randomHash + '-mainText'
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.paragraph)), React__default.createElement("div", {
-    className: randomHash + '-buttonContainer'
+    className: 'f' + randomHash + '-buttonContainer'
   }, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonURL,
-    className: randomHash + '-cta',
+    className: 'f' + randomHash + '-cta',
     onClick: e => redirectUser(e)
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonText)))));
 };
