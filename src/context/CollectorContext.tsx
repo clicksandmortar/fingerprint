@@ -116,11 +116,12 @@ export const CollectorProvider = ({
       error('No handler found for trigger', trigger)
       return null
     }
-    if (handler.skip) {
-      log('Explicitly skipping trigger handler', trigger, handler)
-      return
-    }
 
+    if (!handler.invoke) {
+      error('No invoke method found for handler', handler)
+
+      return null
+    }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,

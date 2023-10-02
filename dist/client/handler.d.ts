@@ -1,5 +1,5 @@
-import { Trigger } from './types';
 import React from 'react';
+import { Trigger } from './types';
 declare type TriggerCallback = (trigger: Trigger) => void | JSX.Element | React.ReactPortal;
 export declare type Handler = {
     id?: string;

@@ -1,144 +1,401 @@
-<<<<<<< HEAD
-import { init, BrowserTracing, Replay, ErrorBoundary } from '@sentry/react';
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { ErrorBoundary as ErrorBoundary$1 } from 'react-error-boundary';
+import React__default, { useState, createElement, createContext, useContext, useEffect, useCallback } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
-=======
-import React__default, { createContext, useContext, useState, useEffect, useCallback, createElement } from 'react';
-import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
->>>>>>> develop
+import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 import Cookies from 'js-cookie';
 import { validate, version, v4 } from 'uuid';
-<<<<<<< HEAD
-=======
 import mixpanel from 'mixpanel-browser';
-import { isMobile } from 'react-device-detect';
-import { ErrorBoundary } from 'react-error-boundary';
-import ReactDOM from 'react-dom';
-import { useForm } from 'react-hook-form';
 
-const LoggingProvider = ({
-  debug,
-  children
-}) => {
-  const log = (...message) => {
-    if (debug) {
-      console.log(...message);
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+function _objectDestructuringEmpty(obj) {
+  if (obj == null) throw new TypeError("Cannot destructure " + obj);
+}
+
+var baseUrl = 'https://bookings-bff.starship-staging.com';
+var makeFullUrl = function makeFullUrl(resource, params) {
+  if (params === void 0) {
+    params = {};
+  }
+  if (resource.startsWith('/')) {
+    resource = resource.substring(1);
+  }
+  var fullUri = baseUrl + "/" + resource;
+  if (Object.keys(params).length === 0) {
+    return fullUri;
+  }
+  return fullUri + "?" + new URLSearchParams(params).toString();
+};
+var Button = function Button(_ref) {
+  var children = _ref.children,
+    className = _ref.className,
+    onClick = _ref.onClick,
+    disabled = _ref.disabled,
+    _ref$colour = _ref.colour,
+    colour = _ref$colour === void 0 ? 'primary' : _ref$colour;
+  var builtButtonClasses = "btn step-button bg-" + colour + " border-" + colour + " text-white hover:bg-" + colour + "/80 disabled:text-" + colour + "/50 disabled:border-" + colour + "/50" + (className ? ' ' + className : '');
+  if (disabled) {
+    builtButtonClasses += ' disabled';
+  }
+  return createElement("button", {
+    disabled: disabled,
+    className: builtButtonClasses,
+    onClick: onClick
+  }, children);
+};
+var Voucher = function Voucher(_ref2) {
+  var details = _ref2.details;
+  return createElement("div", null, createElement("h3", null, "Terms of Voucher"), createElement("p", {
+    className: 'text-sm'
+  }, details.termsAndConditions));
+};
+var TriggerInverse = function TriggerInverse(_ref3) {
+  var onSubmit = function onSubmit(data) {
+    try {
+      setState({
+        busy: true
+      });
+      try {
+        if (form.campaign !== '') {
+          submitVoucher(data).then(function () {
+            var eventData = {
+              item_name: landingPage === null || landingPage === void 0 ? void 0 : landingPage.name,
+              affiliation: 'Booking Flow'
+            };
+            console.log(eventData);
+          });
+        }
+      } catch (e) {}
+      return Promise.resolve();
+    } catch (e) {
+      return Promise.reject(e);
     }
   };
-  const warn = (...message) => {
-    if (debug) {
-      console.warn(...message);
+  var submitVoucher = function submitVoucher(data) {
+    try {
+      var reqData = _extends({}, data, {
+        bookingLink: (location === null || location === void 0 ? void 0 : location.origin) + "/" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.slug)
+      });
+      return Promise.resolve(fetch(makeFullUrl("campaigns/" + (form === null || form === void 0 ? void 0 : form.campaign) + "/voucher?locationID=" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.identifier)), {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(reqData)
+      })).then(function (response) {
+        response.json().then(function (responseData) {
+          if (response.ok) {
+            setState({
+              busy: false,
+              complete: true,
+              voucher: responseData.voucher
+            });
+          } else {
+            setState({
+              busy: false,
+              error: responseData,
+              responseStatusCode: response.status
+            });
+          }
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
     }
   };
-  const error = (...message) => {
+  _objectDestructuringEmpty(_ref3);
+  var landingPage = {};
+  var form = {};
+  var location = {};
+  var _React$useState = useState(true),
+    open = _React$useState[0],
+    setOpen = _React$useState[1];
+  if (!open) {
+    return null;
+  }
+  var _useForm = useForm(),
+    register = _useForm.register,
+    handleSubmit = _useForm.handleSubmit,
+    isSubmitting = _useForm.formState.isSubmitting;
+  var initialState = {
+    busy: false,
+    complete: false,
+    voucher: null,
+    error: null,
+    responseStatusCode: 0
+  };
+  var _React$useState2 = useState(initialState),
+    state = _React$useState2[0],
+    setState = _React$useState2[1];
+  if (state.complete === true) {
+    return createElement("div", {
+      className: 'container'
+    }, createElement("h2", null, "Voucher Sent!"), createElement("p", {
+      className: 'text-md'
+    }, "Good news! We've sent your voucher to the email provided!"), state.voucher && createElement("div", {
+      className: 'col-12 mt-3'
+    }, createElement(Voucher, {
+      details: state.voucher
+    })));
+  }
+  if (state.responseStatusCode === 409) {
+    return createElement("div", {
+      className: 'container'
+    }, createElement("h2", {
+      className: 'mt-3'
+    }, "Uh-oh!"), createElement("p", null, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\xA0", createElement("a", {
+      href: '/help',
+      className: 'underline font-serif tracking-wide',
+      onClick: function onClick() {
+        return setOpen(false);
+      }
+    }, "contact us")));
+  }
+  return createElement("div", {
+    style: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      zIndex: 9999
+    }
+  }, createElement("main", {
+    className: 'flex-grow flex flex-col justify-center container relative'
+  }, createElement("div", {
+    className: 'w-full'
+  }, createElement("div", {
+    className: 'cms-content text-center md:text-left'
+  }, createElement("h2", null, "Get Your Voucher"), createElement("p", null, "To receive your voucher, we just need a few details from you."), createElement("h3", {
+    className: "bar-title border-l-4 border-solid border-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour)
+  }, "Contact Info"), createElement("form", {
+    onSubmit: handleSubmit(onSubmit)
+  }, createElement("div", {
+    className: 'grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2'
+  }, createElement("div", null, createElement("label", {
+    htmlFor: 'first_name'
+  }, "First Name*"), createElement("input", Object.assign({}, register('firstName', {
+    required: true,
+    minLength: 2,
+    maxLength: 30,
+    validate: function validate(value) {
+      return value.trim().length >= 2;
+    }
+  }), {
+    type: 'text',
+    className: 'form-input',
+    id: 'firstName'
+  }))), createElement("div", null, createElement("label", {
+    htmlFor: 'last_name'
+  }, "Last Name*"), createElement("input", Object.assign({}, register('lastName', {
+    required: true,
+    minLength: 2,
+    maxLength: 30,
+    validate: function validate(value) {
+      return value.trim().length >= 2;
+    }
+  }), {
+    type: 'text',
+    className: 'form-input',
+    id: 'lastName'
+  }))), createElement("div", null, createElement("label", {
+    htmlFor: 'email'
+  }, "Email*"), createElement("input", Object.assign({}, register('emailAddress', {
+    required: true
+  }), {
+    type: 'email',
+    className: 'form-input',
+    id: 'email'
+  })))), createElement("div", null, createElement("p", null, "* Required Field")), createElement("div", {
+    className: 'flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start'
+  }, createElement("div", {
+    className: 'form-check'
+  }, createElement("input", Object.assign({
+    type: 'checkbox'
+  }, register('terms', {
+    required: true
+  }), {
+    className: 'form-check-input',
+    id: 'terms'
+  })), ' ', createElement("label", {
+    htmlFor: 'terms',
+    className: 'form-check-label'
+  }, "I confirm that I have read & agreed with the", ' ', createElement("a", {
+    href: landingPage === null || landingPage === void 0 ? void 0 : landingPage.privacyPolicy,
+    target: '_blank',
+    rel: 'noreferrer'
+  }, "Privacy Policy"), "*")), createElement(Button, {
+    className: 'btn mt-2 md:mt-0',
+    type: 'submit',
+    colour: landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour,
+    disabled: state.busy || isSubmitting
+  }, isSubmitting || state.busy ? 'Sending Voucher...' : 'Get My Voucher')), state.error && state.responseStatusCode !== 409 && createElement("div", {
+    className: "alert mt-5 bg-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour) + "/20"
+  }, "There was a problem sending your voucher. Please check your details and try again."))))));
+};
+
+var headers = {
+  'Content-Type': 'application/json'
+};
+var hostname = 'https://target-engine-api.starship-staging.com';
+var request = {
+  get: function (url, params) {
+    try {
+      return Promise.resolve(fetch(url + '?' + new URLSearchParams(params), {
+        method: 'GET',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  post: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  patch: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PATCH',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  put: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  "delete": function (url) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'DELETE',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+};
+
+var LoggingProvider = function LoggingProvider(_ref) {
+  var debug = _ref.debug,
+    children = _ref.children;
+  var log = function log() {
     if (debug) {
-      console.error(...message);
+      var _console;
+      (_console = console).log.apply(_console, arguments);
     }
   };
-  const info = (...message) => {
+  var warn = function warn() {
     if (debug) {
-      console.info(...message);
+      var _console2;
+      (_console2 = console).warn.apply(_console2, arguments);
+    }
+  };
+  var error = function error() {
+    if (debug) {
+      var _console3;
+      (_console3 = console).error.apply(_console3, arguments);
+    }
+  };
+  var info = function info() {
+    if (debug) {
+      var _console4;
+      (_console4 = console).info.apply(_console4, arguments);
     }
   };
   return React__default.createElement(LoggingContext.Provider, {
     value: {
-      log,
-      warn,
-      error,
-      info
+      log: log,
+      warn: warn,
+      error: error,
+      info: info
     }
   }, children);
 };
-const LoggingContext = createContext({
-  log: () => {},
-  warn: () => {},
-  error: () => {},
-  info: () => {}
+var LoggingContext = createContext({
+  log: function log() {},
+  warn: function warn() {},
+  error: function error() {},
+  info: function info() {}
 });
-const useLogging = () => {
+var useLogging = function useLogging() {
   return useContext(LoggingContext);
 };
 
-const headers = {
-  'Content-Type': 'application/json'
-};
-const hostname = 'https://target-engine-api.starship-staging.com';
-const request = {
-  get: async (url, params) => {
-    return await fetch(url + '?' + new URLSearchParams(params), {
-      method: 'GET',
-      headers
-    });
-  },
-  post: async (url, body) => {
-    return await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  patch: async (url, body) => {
-    return await fetch(url, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  put: async (url, body) => {
-    return await fetch(url, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  delete: async url => {
-    return await fetch(url, {
-      method: 'DELETE',
-      headers
-    });
-  }
-};
-
-const useCollectorMutation = () => {
-  const {
-    log,
-    error
-  } = useLogging();
-  return useMutation(data => {
+var useCollectorMutation = function useCollectorMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  return useMutation(function (data) {
     var _data$visitor;
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(response => {
+    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(function (response) {
       log('Collector API response', response);
       return response;
-    }).catch(err => {
+    })["catch"](function (err) {
       error('Collector API error', err);
       return err;
     });
   }, {
-    onSuccess: () => {}
+    onSuccess: function onSuccess() {}
   });
 };
 
-const useFingerprint = () => {
+var useFingerprint = function useFingerprint() {
   return useContext(FingerprintContext);
 };
 
-const setCookie = (name, value, expires) => {
+var setCookie = function setCookie(name, value, expires) {
   return Cookies.set(name, value, {
     expires: expires || 365,
     sameSite: 'strict'
   });
 };
-const getCookie = name => {
+var getCookie = function getCookie(name) {
   return Cookies.get(name);
 };
-const onCookieChanged = (callback, interval = 1000) => {
-  let lastCookie = document.cookie;
-  setInterval(() => {
-    const cookie = document.cookie;
+var onCookieChanged = function onCookieChanged(callback, interval) {
+  if (interval === void 0) {
+    interval = 1000;
+  }
+  var lastCookie = document.cookie;
+  setInterval(function () {
+    var cookie = document.cookie;
     if (cookie !== lastCookie) {
       try {
         callback({
@@ -152,11 +409,10 @@ const onCookieChanged = (callback, interval = 1000) => {
   }, interval);
 };
 
-const bootstrapSession = ({
-  appId,
-  setSession
-}) => {
-  const session = {
+var bootstrapSession = function bootstrapSession(_ref) {
+  var appId = _ref.appId,
+    setSession = _ref.setSession;
+  var session = {
     firstVisit: undefined
   };
   if (!getCookie('_cm') || getCookie('_cm') !== appId) {
@@ -170,22 +426,21 @@ const bootstrapSession = ({
   }
 };
 
-const uuidValidateV4 = uuid => {
+var uuidValidateV4 = function uuidValidateV4(uuid) {
   return validate(uuid) && version(uuid) === 4;
 };
 
-const validVisitorId = id => {
+var validVisitorId = function validVisitorId(id) {
   return uuidValidateV4(id);
 };
 
-const bootstrapVisitor = ({
-  setVisitor
-}) => {
-  const visitor = {
+var bootstrapVisitor = function bootstrapVisitor(_ref) {
+  var setVisitor = _ref.setVisitor;
+  var visitor = {
     id: undefined
   };
   if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
-    const visitorId = v4();
+    var visitorId = v4();
     setCookie('_cm_id', visitorId, 365);
     visitor.id = visitorId;
     setVisitor(visitor);
@@ -197,75 +452,77 @@ const bootstrapVisitor = ({
   }
 };
 
-const VisitorProvider = ({
-  children
-}) => {
-  const {
-    appId,
-    booted
-  } = useFingerprint();
-  const {
-    log
-  } = useLogging();
-  const [session, setSession] = useState({});
-  const [visitor, setVisitor] = useState({});
-  useEffect(() => {
+var VisitorProvider = function VisitorProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId,
+    booted = _useFingerprint.booted;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = useState({}),
+    session = _useState[0],
+    setSession = _useState[1];
+  var _useState2 = useState({}),
+    visitor = _useState2[0],
+    setVisitor = _useState2[1];
+  useEffect(function () {
     if (!booted) {
       log('VisitorProvider: not booted');
       return;
     }
     log('VisitorProvider: booting');
-    const boot = async () => {
-      await bootstrapSession({
-        appId,
-        setSession
-      });
-      await bootstrapVisitor({
-        setVisitor
-      });
+    var boot = function boot() {
+      try {
+        return Promise.resolve(bootstrapSession({
+          appId: appId,
+          setSession: setSession
+        })).then(function () {
+          return Promise.resolve(bootstrapVisitor({
+            setVisitor: setVisitor
+          })).then(function () {});
+        });
+      } catch (e) {
+        return Promise.reject(e);
+      }
     };
     boot();
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
   return React__default.createElement(VisitorContext.Provider, {
     value: {
-      session,
-      visitor
+      session: session,
+      visitor: visitor
     }
   }, children);
 };
-const VisitorContext = createContext({
+var VisitorContext = createContext({
   session: {},
   visitor: {}
 });
-const useVisitor = () => {
+var useVisitor = function useVisitor() {
   return useContext(VisitorContext);
 };
 
-const MIXPANEL_TOKEN = 'd122fa924e1ea97d6b98569440c65a95';
-const init = cfg => {
+var MIXPANEL_TOKEN = 'd122fa924e1ea97d6b98569440c65a95';
+var init = function init(cfg) {
   mixpanel.init(MIXPANEL_TOKEN, {
     debug: cfg.debug,
     track_pageview: true,
     persistence: 'localStorage'
   });
 };
-const trackEvent = (event, props, callback) => {
+var trackEvent = function trackEvent(event, props, callback) {
   return mixpanel.track(event, props, callback);
 };
-const MixpanelProvider = ({
-  children
-}) => {
-  const {
-    appId
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    log
-  } = useLogging();
-  useEffect(() => {
+var MixpanelProvider = function MixpanelProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  useEffect(function () {
     if (!appId || !visitor.id) {
       return;
     }
@@ -278,61 +535,64 @@ const MixpanelProvider = ({
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
-      trackEvent
+      trackEvent: trackEvent
     }
   }, children);
 };
-const MixpanelContext = createContext({
-  trackEvent: () => {}
+var MixpanelContext = createContext({
+  trackEvent: function trackEvent() {}
 });
-const useMixpanel = () => {
+var useMixpanel = function useMixpanel() {
   return useContext(MixpanelContext);
 };
 
-const idleStatusAfterMs = 5 * 1000;
-const CollectorProvider = ({
-  children,
-  handlers
-}) => {
-  const {
-    log,
-    error
-  } = useLogging();
-  const {
-    appId,
-    booted,
-    initialDelay,
-    exitIntentTriggers,
-    idleTriggers
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    trackEvent
-  } = useMixpanel();
-  const {
-    mutateAsync: collect
-  } = useCollectorMutation();
-  const {
-    registerHandler
-  } = useExitIntent({
-    cookie: {
-      key: '_cm_exit',
-      daysToExpire: 0
-    }
-  });
-  const [idleTimeout, setIdleTimeout] = useState(idleStatusAfterMs);
-  const [pageTriggers, setPageTriggers] = useState([]);
-  const [displayTrigger, setDisplayTrigger] = useState(undefined);
-  const [timeoutId, setTimeoutId] = useState(null);
-  const [intently, setIntently] = useState(false);
+var idleStatusAfterMs = 5 * 1000;
+var CollectorProvider = function CollectorProvider(_ref) {
+  var children = _ref.children,
+    handlers = _ref.handlers;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId,
+    booted = _useFingerprint.booted,
+    initialDelay = _useFingerprint.initialDelay,
+    exitIntentTriggers = _useFingerprint.exitIntentTriggers,
+    idleTriggers = _useFingerprint.idleTriggers;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useExitIntent = useExitIntent({
+      cookie: {
+        key: '_cm_exit',
+        daysToExpire: 0
+      }
+    }),
+    registerHandler = _useExitIntent.registerHandler;
+  var _useState = useState(idleStatusAfterMs),
+    idleTimeout = _useState[0],
+    setIdleTimeout = _useState[1];
+  var _useState2 = useState([]),
+    pageTriggers = _useState2[0],
+    setPageTriggers = _useState2[1];
+  var _useState3 = useState(undefined),
+    displayTrigger = _useState3[0],
+    setDisplayTrigger = _useState3[1];
+  var _useState4 = useState(null),
+    timeoutId = _useState4[0],
+    setTimeoutId = _useState4[1];
+  var _useState5 = useState(false),
+    intently = _useState5[0],
+    setIntently = _useState5[1];
   console.log('current pageTrigger', pageTriggers);
   log('CollectorProvider: user is on mobile?', isMobile);
-  useEffect(() => {
+  useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
-    const runningInterval = setInterval(function () {
+    var runningInterval = setInterval(function () {
       var children = document.querySelectorAll('div[id=smc-v5-overlay-106412]');
       Array.prototype.forEach.call(children, function (node) {
         node.parentNode.removeChild(node);
@@ -340,15 +600,19 @@ const CollectorProvider = ({
         clearInterval(runningInterval);
       });
     }, 100);
-    return () => {
+    return function () {
       clearInterval(runningInterval);
     };
   }, [intently]);
-  const showTrigger = displayTrigger => {
+  var showTrigger = function showTrigger(displayTrigger) {
     if (!displayTrigger) {
       return null;
     }
-    const trigger = pageTriggers.find(trigger => trigger.invocation === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour)));
+    var trigger = pageTriggers.find(function (trigger) {
+      return trigger.invocation === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+        return handler.behaviour === trigger.behaviour;
+      }));
+    });
     log('CollectorProvider: available triggers include: ', pageTriggers);
     log('CollectorProvider: attempting to show displayTrigger', displayTrigger, trigger);
     if (!trigger) {
@@ -357,8 +621,11 @@ const CollectorProvider = ({
     }
     log('CollectorProvider: available handlers include: ', handlers);
     log('CollectorProvider: trigger to match is: ', trigger);
-    const handler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour);
+    var handler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return handler.behaviour === trigger.behaviour;
+    });
     log('CollectorProvider: attempting to show trigger', trigger, handler);
+    log('CollectorProvider: showTrigger', trigger, handler);
     if (!handler) {
       error('No handler found for trigger', trigger);
       return null;
@@ -374,17 +641,17 @@ const CollectorProvider = ({
     });
     return handler.invoke(trigger);
   };
-  const fireIdleTrigger = useCallback(() => {
+  var fireIdleTrigger = useCallback(function () {
     if (displayTrigger) return;
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle trigger');
     setDisplayTrigger('INVOCATION_IDLE_TIME');
   }, [pageTriggers, displayTrigger]);
-  const fireExitTrigger = useCallback(() => {
+  var fireExitTrigger = useCallback(function () {
     log('CollectorProvider: attempting to fire exit trigger');
     setDisplayTrigger('INVOCATION_EXIT_INTENT');
   }, []);
-  useEffect(() => {
+  useEffect(function () {
     if (!exitIntentTriggers) return;
     if (isMobile) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -393,35 +660,37 @@ const CollectorProvider = ({
       handler: fireExitTrigger
     });
   }, []);
-  const resetDisplayTrigger = useCallback(() => {
+  var resetDisplayTrigger = useCallback(function () {
     log('CollectorProvider: resetting displayTrigger');
     setDisplayTrigger(undefined);
   }, []);
-  useEffect(() => {
+  useEffect(function () {
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot');
       return;
     }
-    const delay = setTimeout(() => {
+    var delay = setTimeout(function () {
       if (!visitor.id) {
         log('CollectorProvider: Not yet collecting, awaiting visitor ID');
         return;
       }
       log('CollectorProvider: collecting data');
-      const params = new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-        const [key, value] = cur.split('=');
+      var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+        var _cur$split = cur.split('='),
+          key = _cur$split[0],
+          value = _cur$split[1];
         if (!key) return acc;
         acc[key] = value;
         return acc;
       }, {});
       collect({
-        appId,
-        visitor,
+        appId: appId,
+        visitor: visitor,
         page: {
           url: window.location.href,
           path: window.location.pathname,
           title: document.title,
-          params
+          params: params
         },
         referrer: {
           url: document.referrer,
@@ -434,43 +703,52 @@ const CollectorProvider = ({
             content: params === null || params === void 0 ? void 0 : params.utm_content
           }
         }
-      }).then(async response => {
-        var _payload$pageTriggers;
-        const payload = await response.json();
-        log('Sent collector data, retrieved:', payload);
-        setIdleTimeout(idleStatusAfterMs);
-        setPageTriggers((payload === null || payload === void 0 ? void 0 : (_payload$pageTriggers = payload.pageTriggers) === null || _payload$pageTriggers === void 0 ? void 0 : _payload$pageTriggers.filter(trigger => isMobile && trigger.invocation === 'INVOCATION_IDLE_TIME' || !isMobile && trigger.invocation === 'INVOCATION_EXIT_INTENT')) || []);
-        if (!payload.intently) {
-          log('CollectorProvider: user is in Fingerprint cohort');
-          setIntently(false);
-        } else {
-          log('CollectorProvider: user is in Intently cohort');
-          setIntently(true);
+      }).then(function (response) {
+        try {
+          return Promise.resolve(response.json()).then(function (payload) {
+            var _payload$pageTriggers;
+            log('Sent collector data, retrieved:', payload);
+            setIdleTimeout(idleStatusAfterMs);
+            setPageTriggers((payload === null || payload === void 0 ? void 0 : (_payload$pageTriggers = payload.pageTriggers) === null || _payload$pageTriggers === void 0 ? void 0 : _payload$pageTriggers.filter(function (trigger) {
+              return isMobile && trigger.invocation === 'INVOCATION_IDLE_TIME' || !isMobile && trigger.invocation === 'INVOCATION_EXIT_INTENT';
+            })) || []);
+            if (!payload.intently) {
+              log('CollectorProvider: user is in Fingerprint cohort');
+              setIntently(false);
+            } else {
+              log('CollectorProvider: user is in Intently cohort');
+              setIntently(true);
+            }
+          });
+        } catch (e) {
+          return Promise.reject(e);
         }
-      }).catch(err => {
+      })["catch"](function (err) {
         error('failed to store collected data', err);
       });
       log('CollectorProvider: collected data');
     }, initialDelay);
-    return () => {
+    return function () {
       clearTimeout(delay);
     };
   }, [booted, visitor]);
-  useEffect(() => {
+  useEffect(function () {
     if (!timeoutId) return;
-    return () => clearTimeout(timeoutId);
+    return function () {
+      return clearTimeout(timeoutId);
+    };
   }, [timeoutId]);
-  const renderedTrigger = React__default.useMemo(() => {
+  var renderedTrigger = React__default.useMemo(function () {
     return showTrigger(displayTrigger);
   }, [showTrigger, displayTrigger]);
-  const setTrigger = trigger => {
+  var setTrigger = function setTrigger(trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
-    setPageTriggers([...pageTriggers, trigger]);
+    setPageTriggers([].concat(pageTriggers, [trigger]));
     setDisplayTrigger(trigger.invocation);
   };
   return React__default.createElement(IdleTimerProvider, {
     timeout: idleTimeout,
-    onPresenceChange: presence => {
+    onPresenceChange: function onPresenceChange(presence) {
       if (presence.type === 'active') {
         clearTimeout(timeoutId);
         setTimeoutId(null);
@@ -480,1965 +758,38 @@ const CollectorProvider = ({
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: {
-      resetDisplayTrigger,
-      setTrigger
+      resetDisplayTrigger: resetDisplayTrigger,
+      setTrigger: setTrigger
     }
   }, children, renderedTrigger));
 };
-const CollectorContext = createContext({
-  resetDisplayTrigger: () => {},
-  setTrigger: () => {}
+var CollectorContext = createContext({
+  resetDisplayTrigger: function resetDisplayTrigger() {},
+  setTrigger: function setTrigger() {}
 });
 
-const useCollector = () => {
+var useCollector = function useCollector() {
   return useContext(CollectorContext);
 };
->>>>>>> develop
 
-const Modal = ({
-  trigger
-}) => {
+var Modal = function Modal(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data6;
-  const {
-    resetDisplayTrigger
-  } = useCollector();
-  const [open, setOpen] = useState(true);
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  const closeModal = () => {
+  var trigger = _ref.trigger;
+  var _useCollector = useCollector(),
+    resetDisplayTrigger = _useCollector.resetDisplayTrigger;
+  var _useState = useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  var _useState2 = useState(false),
+    stylesLoaded = _useState2[0],
+    setStylesLoaded = _useState2[1];
+  var closeModal = function closeModal() {
     resetDisplayTrigger();
     setOpen(false);
   };
-  useEffect(() => {
-    const css = `
-  @charset "UTF-8";
-  @import "https://fonts.smct.co/Din/font.css";
-  .variant-bg,
-  .variant-overlay-outer,
-  .variant-bar,
-  .variant-final-message,
-  .variant-success-message {
-    display: none;
-    font-family: Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  }
-  .variant-bg,
-  .variant-bar {
-    z-index: 99999999999;
-  }
-  .variant-bar,
-  .variant-handle,
-  .variant-final-message,
-  .variant-success-message-inner,
-  .variant-overlay-inner {
-    background-color: rgba(0, 0, 0, 1);
-  }
-  .variant-bar,
-  .variant-option,
-  .variant-handle,
-  .variant-final-message,
-  .variant-text-outer > .variant-text,
-  a.variant-link {
-    color: #fff;
-  }
-  .variant-bg,
-  .variant-bg * {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-  }
-  .variant-bg * {
-    line-height: 100%;
-  }
-  .variant-overlay-inner,
-  .variant-input,
-  .variant-text,
-  .variant-text-outer,
-  .variant-item,
-  .variant-progress,
-  .variant-panel .variant-bg,
-  .variant-handle > span,
-  .variant-loader,
-  .variant-loader-single,
-  .variant-loader-double,
-  .variant-option,
-  .variant-long-close {
-    display: block;
-  }
-  .variant-text-outer,
-  .variant-option {
-    width: 50%;
-    min-width: 280px;
-    margin: auto;
-  }
-  .variant-input {
-    background-color: rgba(255, 255, 255, 0.8);
-  }
-  .variant-bg {
-    background-color: rgba(0, 0, 0, 0.6);
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow-y: scroll;
-  }
-  .variant-overlay-outer {
-    position: relative;
-    transition: height 0.2s ease;
-  }
-  .variant-overlay-inner {
-    width: 700px;
-    min-height: 400px;
-    position: relative;
-    margin: 10% auto;
-    transition: all 0.2s ease;
-    padding: 10px 10px 30px;
-    min-width: 300px;
-  }
-  .variant-close {
-    border-radius: 50%;
-    color: #333;
-    cursor: pointer;
-    display: block;
-    font-size: 20px;
-    font-weight: 700;
-    height: 30px;
-    line-height: 30px;
-    position: absolute;
-    right: 10px;
-    text-align: center;
-    top: 10px;
-    width: 30px;
-    z-index: 100;
-  }
-  .variant-close a {
-    font-family: Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  }
-  .variant-close:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-  }
-  .variant-close-safe {
-    text-shadow: 1px 1px 1px #000;
-    color: #fff;
-    width: 100%;
-    text-align: center;
-    cursor: pointer;
-    display: none;
-    position: fixed;
-    bottom: 30px;
-    left: 0;
-  }
-  .variant-close-safe a {
-    color: #fff !important;
-  }
-  .variant-closer {
-    cursor: pointer;
-  }
-  .variant-long-close {
-    font-size: 14px;
-    position: absolute;
-    bottom: 10px;
-    width: 100%;
-    left: 0;
-    text-align: center;
-  }
-  .variant-long-close a.variant-link {
-    width: auto;
-  }
-  a.variant-link {
-    display: inline-block;
-    text-decoration: none;
-    height: 100%;
-    width: 100%;
-  }
-  .variant-input,
-  .variant-button,
-  .variant-reveal {
-    width: 100%;
-  }
-  .variant-button,
-  .variant-cover {
-    background: #333;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-  .variant-input {
-    color: #000;
-    text-align: center;
-    border: 1px solid #333;
-    margin: 10px auto;
-    padding: 10px;
-  }
-  .variant-input::-webkit-input-placeholder,
-  .variant-input:-moz-placeholder,
-  .variant-input::-moz-placeholder,
-  .variant-input:-ms-input-placeholder {
-    color: #ccc;
-    text-transform: uppercase;
-  }
-  .variant-input:focus {
-    outline: none;
-  }
-  .variant-button {
-    border: medium none;
-    color: #fff;
-    outline: medium none;
-    display: block;
-    margin: 10px auto;
-    font-size: 20px;
-    padding: 10px;
-    cursor: pointer;
-  }
-  .variant-reveal {
-    display: block;
-    margin: 10px auto;
-    position: relative;
-    text-align: center;
-  }
-  .variant-cover,
-  .variant-code {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 10px;
-    font-size: 20px;
-  }
-  .variant-cover {
-    z-index: 2;
-    color: #fff;
-    padding: 11px;
-    cursor: pointer;
-  }
-  .variant-button:hover,
-  .variant-cover:hover {
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
-  }
-  .variant-code {
-    z-index: 1;
-    border: 1px solid #333;
-    background: rgba(255, 255, 255, 0.8);
-    color: #333;
-    font-weight: 700;
-    -moz-user-select: text;
-    -webkit-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-  }
-  .variant-text {
-    text-align: center;
-    font-size: 20px;
-  }
-  .variant-text2 {
-    font-size: 40px;
-    font-weight: 700;
-  }
-  .variant-img-outer {
-    position: relative;
-    width: 100%;
-    display: block;
-  }
-  .variant-img {
-    display: block;
-    width: 100%;
-  }
-  .variant-img img {
-    border: medium none;
-    display: block;
-    margin: auto;
-    outline: medium none;
-    max-width: 100%;
-  }
-  .variant-clearfix:after {
-    visibility: hidden;
-    display: block;
-    font-size: 0;
-    content: " ";
-    clear: both;
-    height: 0;
-  }
-  .variant-clearfix {
-    display: inline-block;
-    height: 1%;
-    display: block;
-  }
-  .variant-item {
-    height: 80px;
-    padding: 10px;
-    border-bottom: 1px dashed #ccc;
-  }
-  .variant-item .variant-item-img {
-    display: inline-block;
-    text-align: center;
-  }
-  .variant-item .variant-item-img img {
-    max-width: 60px;
-    max-height: 60px;
-  }
-  .variant-item .variant-title {
-    font-weight: 700;
-    display: inline-block;
-  }
-  .variant-item .variant-price {
-    display: inline-block;
-  }
-  .variant-item .variant-qty {
-    display: inline-block;
-  }
-  .variant-progress {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 0;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
-    height: 21px;
-    margin-bottom: 21px;
-    overflow: hidden;
-    width: 100%;
-  }
-  .variant-progress-bar {
-    background-color: #007932;
-    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15) inset;
-    color: #fff;
-    float: left;
-    font-size: 12px;
-    height: 100%;
-    line-height: 21px;
-    text-align: center;
-    transition: width 0.6s ease 0s;
-    width: 0;
-  }
-  .variant-progress .variant-progress-bar {
-    background-image: linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.15) 25%,
-      transparent 25%,
-      transparent 50%,
-      rgba(255, 255, 255, 0.15) 50%,
-      rgba(255, 255, 255, 0.15) 75%,
-      transparent 75%,
-      transparent
-    );
-    background-size: 40px 40px;
-    animation: 0.5s linear 0s normal none infinite running
-      .variant-progress-bar-stripes;
-  }
-  @-webkit-keyframes .variant-progress-bar-stripes {
-    from {
-      background-position: 40px 0;
-    }
-    to {
-      background-position: 0 0;
-    }
-  }
-  @-o-keyframes .variant-progress-bar-stripes {
-    from {
-      background-position: 40px 0;
-    }
-    to {
-      background-position: 0 0;
-    }
-  }
-  @keyframes .variant-progress-bar-stripes {
-    from {
-      background-position: 40px 0;
-    }
-    to {
-      background-position: 0 0;
-    }
-  }
-  .variant-overlay {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  }
-  .variant-overlay:before,
-  .variant-overlay:after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-    top: 0;
-    bottom: 0;
-    left: 10px;
-    right: 10px;
-    border-radius: 100px / 10px;
-  }
-  .variant-overlay:after {
-    right: 10px;
-    left: auto;
-    transform: skew(8deg) rotate(3deg);
-  }
-  .variant-panel .variant-bg {
-    width: 0;
-    height: 100%;
-    position: fixed;
-    z-index: 1001;
-    top: 0;
-    background-color: #111;
-    padding: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    color: #fff;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    transition: width 0.5s;
-  }
-  .variant-panel-body-cover {
-    position: fixed;
-    z-index: 1000;
-    background-color: rgba(0, 0, 0, 0.5);
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-  }
-  .variant-panel.variant-panel-left .variant-bg {
-    right: auto;
-  }
-  .variant-panel.variant-panel-right .variant-bg {
-    left: auto;
-  }
-  .variant-panel .variant-overlay-inner {
-    width: 90%;
-  }
-  .variant-input-group {
-    display: block;
-    text-align: center;
-  }
-  .variant-input-group input[type="checkbox"],
-  .variant-input-group input[type="radio"] {
-    margin-right: 3px;
-    margin-left: 10px;
-  }
-  .variant-input-error ::-webkit-input-placeholder,
-  .variant-input-error :-moz-placeholder,
-  .variant-input-error ::-moz-placeholder,
-  .variant-input-error :-ms-input-placeholder {
-    color: #d30003;
-  }
-  .variant-input-error label {
-    color: #d30003;
-  }
-  .variant-input-error input,
-  .variant-input-error select,
-  .variant-input-error textarea {
-    border-color: #d30003;
-  }
-  .variant-bar,
-  .variant-handle {
-    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.3);
-    border-bottom-left-radius: 3px;
-    border-bottom-right-radius: 3px;
-  }
-  .variant-bar {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 25%;
-    right: 25%;
-    width: 50%;
-    font-weight: 700;
-    font-size: 16px;
-    text-shadow: none;
-    text-align: center;
-    height: 30px;
-    line-height: 30px;
-    padding: 0 20px;
-  }
-  @media (max-width: 500px) {
-    .variant-bar {
-      width: 80%;
-      left: 10%;
-    }
-  }
-  .variant-bar-close {
-    cursor: pointer;
-    height: 10px;
-    line-height: 10px;
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    width: 10px;
-  }
-  .variant-handle {
-    position: absolute;
-    width: 50px;
-    margin-left: -25px;
-    height: 20px;
-    left: 50%;
-    bottom: -20px;
-    cursor: pointer;
-    line-height: 12px;
-    letter-spacing: -2px;
-  }
-  .variant-handle > span {
-    position: absolute;
-    width: 60%;
-    left: 20%;
-    height: 2px;
-    background: #fff;
-  }
-  .variant-bar1 {
-    top: 20%;
-  }
-  .variant-bar2 {
-    top: 40%;
-  }
-  .variant-bar3 {
-    top: 60%;
-  }
-  .variant-arrow-up {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 5px solid #000;
-  }
-  .variant-arrow-down {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #000;
-  }
-  .variant-arrow-right {
-    width: 0;
-    height: 0;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    border-left: 5px solid #000;
-  }
-  .variant-arrow-left {
-    width: 0;
-    height: 0;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    border-right: 5px solid #000;
-  }
-  .variant-preview {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    margin-left: -160px;
-    width: 320px;
-    padding: 5px 10px;
-    background: #ff0;
-    color: #000;
-    font-family: Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 12px;
-    text-align: center;
-    border-radius: 5px;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-  }
-  .variant-preview-close {
-    font-size: 7px;
-    height: 3px;
-    position: absolute;
-    right: 4px;
-    top: 0;
-    width: 3px;
-  }
-  .variant-preview .variant-arrow-up {
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    margin-left: -10px;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-bottom: 20px solid #ff0;
-  }
-  .variant-notices {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    transition: height 0.3s ease;
-  }
-  .variant-notice-box {
-    padding: 5px 10px;
-    background: #ec6952;
-    font-size: 12px;
-    text-align: left;
-    border-radius: 5px;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-    min-height: 30px;
-    min-width: 100px;
-    max-width: 500px;
-    width: auto;
-    margin-bottom: 5px;
-    color: #fff;
-    float: right;
-    clear: both;
-    z-index: 100;
-    transition: all 0.5s ease;
-    overflow: hidden;
-  }
-  .variant-notice-box.success {
-    background: #24a233;
-  }
-  .variant-notice-box.warning {
-    background: #cf9d0f;
-  }
-  .variant-notice-box.danger {
-    background: #d30003;
-  }
-  @media screen {
-    .variant-preloader {
-      position: fixed;
-      left: -9999px;
-      top: -9999px;
-    }
-    .variant-preloader img {
-      display: block;
-    }
-  }
-  @media print {
-    .variant-preloader,
-    .variant-preloader img {
-      visibility: hidden;
-      display: none;
-    }
-  }
-  .variant-final-message {
-    border-radius: 2px;
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-    bottom: 10px;
-    font-size: 16px;
-    padding: 10px 20px;
-    position: fixed;
-    right: 10px;
-    z-index: 1e15;
-  }
-  .variant-final-message-close {
-    position: absolute;
-    top: 3px;
-    right: 1px;
-    width: 10px;
-    height: 10px;
-    cursor: pointer;
-    font-size: 10px;
-    opacity: 0.5;
-  }
-  .variant-final-message .variant-select {
-    font-weight: 700;
-  }
-  .variant-final-message:hover .variant-final-message-close {
-    opacity: 1;
-  }
-  .variant-success-message {
-    position: absolute;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    height: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    text-align: center;
-  }
-  .variant-success-message-inner {
-    background: #08ad00 none repeat scroll 0 0;
-    border-radius: 5px;
-    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
-    color: #fff;
-    display: inline-block;
-    font-size: 30px;
-    margin: 20% auto auto;
-    padding: 10px 30px;
-    position: relative;
-  }
-  .variant-success-close {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    cursor: pointer;
-    font-size: 12px;
-  }
-  @-webkit-keyframes .variant-spin {
-    0% {
-      -webkit-transform: rotate(0deg);
-      transform: rotate(0deg);
-    }
-    100% {
-      -webkit-transform: rotate(360deg);
-      transform: rotate(360deg);
-    }
-  }
-  @keyframes .variant-spin {
-    0% {
-      -webkit-transform: rotate(0deg);
-      transform: rotate(0deg);
-    }
-    100% {
-      -webkit-transform: rotate(360deg);
-      transform: rotate(360deg);
-    }
-  }
-  @-webkit-keyframes .variant-pulse {
-    50% {
-      background: #fff;
-    }
-  }
-  @keyframes .variant-pulse {
-    50% {
-      background: #fff;
-    }
-  }
-  .variant-loader-bg,
-  .variant-dc-placeholder {
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    background: rgba(0, 0, 0, 0.8);
-    width: 60px;
-    margin-left: -30px;
-    height: 60px;
-    z-index: 10;
-    border-radius: 10px;
-    display: none;
-  }
-  .variant-loader,
-  .variant-loader-single,
-  .variant-loader-double {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin: 5px;
-    border: 0.25rem solid rgba(255, 255, 255, 0.2);
-    border-top-color: #fff;
-    -webkit-animation: variant-spin 1s infinite linear;
-    animation: variant-spin 1s infinite linear;
-  }
-  .variant-loader-double {
-    border-style: double;
-    border-width: 0.5rem;
-  }
-  .variant-loader-pulse {
-    -webkit-animation: variant-pulse 750ms infinite;
-    animation: variant-pulse 750ms infinite;
-    -webkit-animation-delay: 250ms;
-    animation-delay: 250ms;
-    height: 30px;
-    left: 25px;
-    position: absolute;
-    top: 14px;
-    width: 10px;
-  }
-  .variant-loader-pulse:before,
-  .variant-loader-pulse:after {
-    content: "";
-    position: absolute;
-    display: block;
-    height: 16px;
-    width: 6px;
-    top: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    -webkit-transform: translateY(-50%);
-    transform: translateY(-50%);
-    -webkit-animation: variant-pulse 750ms infinite;
-    animation: variant-pulse 750ms infinite;
-  }
-  .variant-loader-pulse:before {
-    left: -12px;
-  }
-  .variant-loader-pulse:after {
-    left: 16px;
-    -webkit-animation-delay: 500ms;
-    animation-delay: 500ms;
-  }
-  .variant-loader-bg[data-theme="white"],
-  .variant-dc-placeholder {
-    background: rgba(255, 255, 255, 0.8);
-  }
-  .variant-loader-bg[data-theme="white"] .variant-loader-single,
-  .variant-dc-placeholder .variant-loader-single,
-  .variant-loader-bg[data-theme="white"] .variant-loader-double,
-  .variant-dc-placeholder .variant-loader-double,
-  .variant-loader-bg[data-theme="white"] .variant-loader-pulse,
-  .variant-dc-placeholder .variant-loader-pulse {
-    border-color: rgba(0, 0, 0, 0.2);
-    border-top-color: #000;
-  }
-  .variant-terms {
-    background-color: #fff;
-    border: 1px solid #333;
-    border-radius: 3px;
-    bottom: 5%;
-    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.4);
-    left: 5%;
-    padding: 10px;
-    position: absolute;
-    right: 5%;
-    top: 5%;
-    z-index: 101;
-    display: none;
-  }
-  .variant-terms-header,
-  .variant-terms-para,
-  .variant-terms-close,
-  .variant-terms-close-x {
-    color: #333;
-    display: block;
-  }
-  .variant-terms-scroller {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    bottom: 30px;
-    overflow: auto;
-  }
-  .variant-terms-header {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 5px 0;
-    text-align: center;
-  }
-  .variant-terms-para {
-    margin: 5px 0;
-    font-size: 12px;
-  }
-  .variant-terms-close {
-    bottom: 10px;
-    cursor: pointer;
-    left: 10px;
-    position: absolute;
-    right: 10px;
-    text-align: center;
-  }
-  .variant-show-terms,
-  .variant-show-terms {
-    text-decoration: underline;
-    cursor: pointer;
-  }
-  .variant-terms[data-theme="dark"] {
-    background-color: #333;
-  }
-  .variant-terms[data-theme="dark"] .variant-terms-header,
-  .variant-terms[data-theme="dark"] .variant-terms-para,
-  .variant-terms[data-theme="dark"] .variant-terms-close,
-  .variant-terms[data-theme="dark"] .variant-terms-close-x {
-    color: #fff;
-  }
-  .variant-terms-close-x {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    cursor: pointer;
-    opacity: 0.7;
-    -webkit-transition: all 0.25s ease-in-out;
-    -ms-transition: all 0.25s ease-in-out;
-    -o-transition: all 0.25s ease-in-out;
-    -moz-transition: all 0.25s ease-in-out;
-    transition: transform all 0.25s ease-in-out;
-  }
-  .variant-terms-close-x:hover {
-    opacity: 1;
-    -webkit-transform: rotate(180deg) scale(1.3);
-    -ms-transform: rotate(180deg) scale(1.3);
-    -o-transform: rotate(180deg) scale(1.3);
-    -moz-transform: rotate(180deg) scale(1.3);
-    transform: rotate(180deg) scale(1.3);
-  }
-  .variant-cp {
-    -youbkit-touch-callout: none;
-    -youbkit-user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-  .variant-cp,
-  .variant-cp-msg {
-    display: none;
-  }
-  .variant-hidden-consents {
-    opacity: 0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 1px;
-    height: 1px;
-    visibility: hidden;
-  }
-  .variant-requestNotifications .variant-agree-yes,
-  .variant-requestNotifications .variant-agree-no {
-    display: none;
-  }
-  .variant-notices {
-    padding: 10px;
-    right: 20px;
-    left: auto;
-    max-width: 300px;
-    z-index: 100;
-  }
-  .variant-dc-placeholder {
-    display: block;
-    height: 30px;
-    width: 30px;
-    top: 3px;
-  }
-  .variant-dc-placeholder > * {
-    height: 20px;
-    width: 20px;
-  }
-  .variant-shake-msg {
-    display: none;
-  }
-  .variant-animated {
-    -webkit-animation-duration: 1s;
-    animation-duration: 1s;
-    -webkit-animation-fill-mode: both;
-    animation-fill-mode: both;
-  }
-  .variant-animated.variant-infinite {
-    -webkit-animation-iteration-count: infinite;
-    animation-iteration-count: infinite;
-  }
-  .variant-animated.variant-hinge {
-    -webkit-animation-duration: 2s;
-    animation-duration: 2s;
-  }
-  .variant-animated.variant-bounceIn,
-  .variant-animated.variant-bounceOut,
-  .variant-animated.variant-flipOutX,
-  .variant-animated.variant-flipOutY {
-    -webkit-animation-duration: 0.75s;
-    animation-duration: 0.75s;
-  }
-  @-webkit-keyframes .variant-fadeIn {
-    0% {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  @keyframes .variant-fadeIn {
-    0% {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  .variant-fadeIn {
-    -webkit-animation-name: variant-fadeIn;
-    animation-name: variant-fadeIn;
-  }
-  @-webkit-keyframes .variant-bounceInDown {
-    0%,
-    60%,
-    75%,
-    90%,
-    to {
-      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(0, -3000px, 0);
-      transform: translate3d(0, -3000px, 0);
-    }
-    60% {
-      opacity: 1;
-      -webkit-transform: translate3d(0, 25px, 0);
-      transform: translate3d(0, 25px, 0);
-    }
-    75% {
-      -webkit-transform: translate3d(0, -10px, 0);
-      transform: translate3d(0, -10px, 0);
-    }
-    90% {
-      -webkit-transform: translate3d(0, 5px, 0);
-      transform: translate3d(0, 5px, 0);
-    }
-    to {
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  @keyframes .variant-bounceInDown {
-    0%,
-    60%,
-    75%,
-    90%,
-    to {
-      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(0, -3000px, 0);
-      transform: translate3d(0, -3000px, 0);
-    }
-    60% {
-      opacity: 1;
-      -webkit-transform: translate3d(0, 25px, 0);
-      transform: translate3d(0, 25px, 0);
-    }
-    75% {
-      -webkit-transform: translate3d(0, -10px, 0);
-      transform: translate3d(0, -10px, 0);
-    }
-    90% {
-      -webkit-transform: translate3d(0, 5px, 0);
-      transform: translate3d(0, 5px, 0);
-    }
-    to {
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  .variant-bounceInDown {
-    -webkit-animation-name: variant-bounceInDown;
-    animation-name: variant-bounceInDown;
-  }
-  .variant-animDelay2 {
-    -webkit-animation-delay: 0.2s !important;
-    -moz-animation-delay: 0.2s !important;
-    -ms-animation-delay: 0.2s !important;
-    -o-animation-delay: 0.2s !important;
-    animation-delay: 0.2s !important;
-  }
-  .variant-animDelay6 {
-    -webkit-animation-delay: 0.6s !important;
-    -moz-animation-delay: 0.6s !important;
-    -ms-animation-delay: 0.6s !important;
-    -o-animation-delay: 0.6s !important;
-    animation-delay: 0.6s !important;
-  }
-  @-webkit-keyframes .variant-bounceInRight {
-    0%,
-    60%,
-    75%,
-    90%,
-    to {
-      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(3000px, 0, 0);
-      transform: translate3d(3000px, 0, 0);
-    }
-    60% {
-      opacity: 1;
-      -webkit-transform: translate3d(-25px, 0, 0);
-      transform: translate3d(-25px, 0, 0);
-    }
-    75% {
-      -webkit-transform: translate3d(10px, 0, 0);
-      transform: translate3d(10px, 0, 0);
-    }
-    90% {
-      -webkit-transform: translate3d(-5px, 0, 0);
-      transform: translate3d(-5px, 0, 0);
-    }
-    to {
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  @keyframes .variant-bounceInRight {
-    0%,
-    60%,
-    75%,
-    90%,
-    to {
-      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(3000px, 0, 0);
-      transform: translate3d(3000px, 0, 0);
-    }
-    60% {
-      opacity: 1;
-      -webkit-transform: translate3d(-25px, 0, 0);
-      transform: translate3d(-25px, 0, 0);
-    }
-    75% {
-      -webkit-transform: translate3d(10px, 0, 0);
-      transform: translate3d(10px, 0, 0);
-    }
-    90% {
-      -webkit-transform: translate3d(-5px, 0, 0);
-      transform: translate3d(-5px, 0, 0);
-    }
-    to {
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  .variant-bounceInRight {
-    -webkit-animation-name: variant-bounceInRight;
-    animation-name: variant-bounceInRight;
-  }
-  .variant-animDelay8 {
-    -webkit-animation-delay: 0.8s !important;
-    -moz-animation-delay: 0.8s !important;
-    -ms-animation-delay: 0.8s !important;
-    -o-animation-delay: 0.8s !important;
-    animation-delay: 0.8s !important;
-  }
-  .variant-animDelay10 {
-    -webkit-animation-delay: 1s !important;
-    -moz-animation-delay: 1s !important;
-    -ms-animation-delay: 1s !important;
-    -o-animation-delay: 1s !important;
-    animation-delay: 1s !important;
-  }
-  .variant-animDelay12 {
-    -webkit-animation-delay: 1.2s !important;
-    -moz-animation-delay: 1.2s !important;
-    -ms-animation-delay: 1.2s !important;
-    -o-animation-delay: 1.2s !important;
-    animation-delay: 1.2s !important;
-  }
-  .variant-animDelay4 {
-    -webkit-animation-delay: 0.4s !important;
-    -moz-animation-delay: 0.4s !important;
-    -ms-animation-delay: 0.4s !important;
-    -o-animation-delay: 0.4s !important;
-    animation-delay: 0.4s !important;
-  }
-  @-webkit-keyframes .variant-bounceInLeft {
-    0%,
-    60%,
-    75%,
-    90%,
-    to {
-      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(-3000px, 0, 0);
-      transform: translate3d(-3000px, 0, 0);
-    }
-    60% {
-      opacity: 1;
-      -webkit-transform: translate3d(25px, 0, 0);
-      transform: translate3d(25px, 0, 0);
-    }
-    75% {
-      -webkit-transform: translate3d(-10px, 0, 0);
-      transform: translate3d(-10px, 0, 0);
-    }
-    90% {
-      -webkit-transform: translate3d(5px, 0, 0);
-      transform: translate3d(5px, 0, 0);
-    }
-    to {
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  @keyframes .variant-bounceInLeft {
-    0%,
-    60%,
-    75%,
-    90%,
-    to {
-      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(-3000px, 0, 0);
-      transform: translate3d(-3000px, 0, 0);
-    }
-    60% {
-      opacity: 1;
-      -webkit-transform: translate3d(25px, 0, 0);
-      transform: translate3d(25px, 0, 0);
-    }
-    75% {
-      -webkit-transform: translate3d(-10px, 0, 0);
-      transform: translate3d(-10px, 0, 0);
-    }
-    90% {
-      -webkit-transform: translate3d(5px, 0, 0);
-      transform: translate3d(5px, 0, 0);
-    }
-    to {
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  .variant-bounceInLeft {
-    -webkit-animation-name: variant-bounceInLeft;
-    animation-name: variant-bounceInLeft;
-  }
-  @-webkit-keyframes .variant-fadeInLeft {
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(-100%, 0, 0);
-      transform: translate3d(-100%, 0, 0);
-    }
-    to {
-      opacity: 1;
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  @keyframes .variant-fadeInLeft {
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(-100%, 0, 0);
-      transform: translate3d(-100%, 0, 0);
-    }
-    to {
-      opacity: 1;
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  .variant-fadeInLeft {
-    -webkit-animation-name: variant-fadeInLeft;
-    animation-name: variant-fadeInLeft;
-  }
-  @-webkit-keyframes .variant-fadeInRight {
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(100%, 0, 0);
-      transform: translate3d(100%, 0, 0);
-    }
-    to {
-      opacity: 1;
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  @keyframes .variant-fadeInRight {
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(100%, 0, 0);
-      transform: translate3d(100%, 0, 0);
-    }
-    to {
-      opacity: 1;
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  .variant-fadeInRight {
-    -webkit-animation-name: variant-fadeInRight;
-    animation-name: variant-fadeInRight;
-  }
-  @-webkit-keyframes .variant-bounceInUp {
-    0%,
-    60%,
-    75%,
-    90%,
-    to {
-      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(0, 3000px, 0);
-      transform: translate3d(0, 3000px, 0);
-    }
-    60% {
-      opacity: 1;
-      -webkit-transform: translate3d(0, -20px, 0);
-      transform: translate3d(0, -20px, 0);
-    }
-    75% {
-      -webkit-transform: translate3d(0, 10px, 0);
-      transform: translate3d(0, 10px, 0);
-    }
-    90% {
-      -webkit-transform: translate3d(0, -5px, 0);
-      transform: translate3d(0, -5px, 0);
-    }
-    to {
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-    }
-  }
-  @keyframes .variant-bounceInUp {
-    0%,
-    60%,
-    75%,
-    90%,
-    to {
-      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(0, 3000px, 0);
-      transform: translate3d(0, 3000px, 0);
-    }
-    60% {
-      opacity: 1;
-      -webkit-transform: translate3d(0, -20px, 0);
-      transform: translate3d(0, -20px, 0);
-    }
-    75% {
-      -webkit-transform: translate3d(0, 10px, 0);
-      transform: translate3d(0, 10px, 0);
-    }
-    90% {
-      -webkit-transform: translate3d(0, -5px, 0);
-      transform: translate3d(0, -5px, 0);
-    }
-    to {
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-    }
-  }
-  .variant-bounceInUp {
-    -webkit-animation-name: variant-bounceInUp;
-    animation-name: variant-bounceInUp;
-  }
-  .variant-animDelay7 {
-    -webkit-animation-delay: 0.7s !important;
-    -moz-animation-delay: 0.7s !important;
-    -ms-animation-delay: 0.7s !important;
-    -o-animation-delay: 0.7s !important;
-    animation-delay: 0.7s !important;
-  }
-  .variant-animDelay9 {
-    -webkit-animation-delay: 0.9s !important;
-    -moz-animation-delay: 0.9s !important;
-    -ms-animation-delay: 0.9s !important;
-    -o-animation-delay: 0.9s !important;
-    animation-delay: 0.9s !important;
-  }
-  @-webkit-keyframes .variant-fadeInUp {
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(0, 100%, 0);
-      transform: translate3d(0, 100%, 0);
-    }
-    to {
-      opacity: 1;
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  @keyframes .variant-fadeInUp {
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(0, 100%, 0);
-      transform: translate3d(0, 100%, 0);
-    }
-    to {
-      opacity: 1;
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  .variant-fadeInUp {
-    -webkit-animation-name: variant-fadeInUp;
-    animation-name: variant-fadeInUp;
-  }
-  .variant-animDelay14 {
-    -webkit-animation-delay: 1.4s !important;
-    -moz-animation-delay: 1.4s !important;
-    -ms-animation-delay: 1.4s !important;
-    -o-animation-delay: 1.4s !important;
-    animation-delay: 1.4s !important;
-  }
-  .variant-animDelay1 {
-    -webkit-animation-delay: 0.1s !important;
-    -moz-animation-delay: 0.1s !important;
-    -ms-animation-delay: 0.1s !important;
-    -o-animation-delay: 0.1s !important;
-    animation-delay: 0.1s !important;
-  }
-  @-webkit-keyframes .variant-fadeInDown {
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(0, -100%, 0);
-      transform: translate3d(0, -100%, 0);
-    }
-    to {
-      opacity: 1;
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  @keyframes .variant-fadeInDown {
-    0% {
-      opacity: 0;
-      -webkit-transform: translate3d(0, -100%, 0);
-      transform: translate3d(0, -100%, 0);
-    }
-    to {
-      opacity: 1;
-      -webkit-transform: none;
-      transform: none;
-    }
-  }
-  .variant-fadeInDown {
-    -webkit-animation-name: variant-fadeInDown;
-    animation-name: variant-fadeInDown;
-  }
-  @-webkit-keyframes .variant-fadeOutUp {
-    0% {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(0, -100%, 0);
-      transform: translate3d(0, -100%, 0);
-    }
-  }
-  @keyframes .variant-fadeOutUp {
-    0% {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(0, -100%, 0);
-      transform: translate3d(0, -100%, 0);
-    }
-  }
-  .variant-fadeOutUp {
-    -webkit-animation-name: variant-fadeOutUp;
-    animation-name: variant-fadeOutUp;
-  }
-  @-webkit-keyframes .variant-fadeOutDown {
-    0% {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(0, 100%, 0);
-      transform: translate3d(0, 100%, 0);
-    }
-  }
-  @keyframes .variant-fadeOutDown {
-    0% {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(0, 100%, 0);
-      transform: translate3d(0, 100%, 0);
-    }
-  }
-  .variant-fadeOutDown {
-    -webkit-animation-name: variant-fadeOutDown;
-    animation-name: variant-fadeOutDown;
-  }
-  @-webkit-keyframes .variant-fadeOut {
-    0% {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
-  }
-  @keyframes .variant-fadeOut {
-    0% {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
-  }
-  .variant-fadeOut {
-    -webkit-animation-name: variant-fadeOut;
-    animation-name: variant-fadeOut;
-  }
-  @-webkit-keyframes .variant-bounceOutUp {
-    20% {
-      -webkit-transform: translate3d(0, -10px, 0);
-      transform: translate3d(0, -10px, 0);
-    }
-    40%,
-    45% {
-      opacity: 1;
-      -webkit-transform: translate3d(0, 20px, 0);
-      transform: translate3d(0, 20px, 0);
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(0, -2000px, 0);
-      transform: translate3d(0, -2000px, 0);
-    }
-  }
-  @keyframes .variant-bounceOutUp {
-    20% {
-      -webkit-transform: translate3d(0, -10px, 0);
-      transform: translate3d(0, -10px, 0);
-    }
-    40%,
-    45% {
-      opacity: 1;
-      -webkit-transform: translate3d(0, 20px, 0);
-      transform: translate3d(0, 20px, 0);
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(0, -2000px, 0);
-      transform: translate3d(0, -2000px, 0);
-    }
-  }
-  .variant-bounceOutUp {
-    -webkit-animation-name: variant-bounceOutUp;
-    animation-name: variant-bounceOutUp;
-  }
-  @-webkit-keyframes .variant-bounceOutDown {
-    20% {
-      -webkit-transform: translate3d(0, 10px, 0);
-      transform: translate3d(0, 10px, 0);
-    }
-    40%,
-    45% {
-      opacity: 1;
-      -webkit-transform: translate3d(0, -20px, 0);
-      transform: translate3d(0, -20px, 0);
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(0, 2000px, 0);
-      transform: translate3d(0, 2000px, 0);
-    }
-  }
-  @keyframes .variant-bounceOutDown {
-    20% {
-      -webkit-transform: translate3d(0, 10px, 0);
-      transform: translate3d(0, 10px, 0);
-    }
-    40%,
-    45% {
-      opacity: 1;
-      -webkit-transform: translate3d(0, -20px, 0);
-      transform: translate3d(0, -20px, 0);
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(0, 2000px, 0);
-      transform: translate3d(0, 2000px, 0);
-    }
-  }
-  .variant-bounceOutDown {
-    -webkit-animation-name: variant-bounceOutDown;
-    animation-name: variant-bounceOutDown;
-  }
-  @-webkit-keyframes .variant-rubberBand {
-    0% {
-      -webkit-transform: scaleX(1);
-      transform: scaleX(1);
-    }
-    30% {
-      -webkit-transform: scale3d(1.25, 0.75, 1);
-      transform: scale3d(1.25, 0.75, 1);
-    }
-    40% {
-      -webkit-transform: scale3d(0.75, 1.25, 1);
-      transform: scale3d(0.75, 1.25, 1);
-    }
-    50% {
-      -webkit-transform: scale3d(1.15, 0.85, 1);
-      transform: scale3d(1.15, 0.85, 1);
-    }
-    65% {
-      -webkit-transform: scale3d(0.95, 1.05, 1);
-      transform: scale3d(0.95, 1.05, 1);
-    }
-    75% {
-      -webkit-transform: scale3d(1.05, 0.95, 1);
-      transform: scale3d(1.05, 0.95, 1);
-    }
-    to {
-      -webkit-transform: scaleX(1);
-      transform: scaleX(1);
-    }
-  }
-  @keyframes .variant-rubberBand {
-    0% {
-      -webkit-transform: scaleX(1);
-      transform: scaleX(1);
-    }
-    30% {
-      -webkit-transform: scale3d(1.25, 0.75, 1);
-      transform: scale3d(1.25, 0.75, 1);
-    }
-    40% {
-      -webkit-transform: scale3d(0.75, 1.25, 1);
-      transform: scale3d(0.75, 1.25, 1);
-    }
-    50% {
-      -webkit-transform: scale3d(1.15, 0.85, 1);
-      transform: scale3d(1.15, 0.85, 1);
-    }
-    65% {
-      -webkit-transform: scale3d(0.95, 1.05, 1);
-      transform: scale3d(0.95, 1.05, 1);
-    }
-    75% {
-      -webkit-transform: scale3d(1.05, 0.95, 1);
-      transform: scale3d(1.05, 0.95, 1);
-    }
-    to {
-      -webkit-transform: scaleX(1);
-      transform: scaleX(1);
-    }
-  }
-  .variant-rubberBand {
-    -webkit-animation-name: variant-rubberBand;
-    animation-name: variant-rubberBand;
-  }
-  @-webkit-keyframes .variant-shake {
-    0%,
-    to {
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-    }
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
-      -webkit-transform: translate3d(-10px, 0, 0);
-      transform: translate3d(-10px, 0, 0);
-    }
-    20%,
-    40%,
-    60%,
-    80% {
-      -webkit-transform: translate3d(10px, 0, 0);
-      transform: translate3d(10px, 0, 0);
-    }
-  }
-  @keyframes .variant-shake {
-    0%,
-    to {
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-    }
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
-      -webkit-transform: translate3d(-10px, 0, 0);
-      transform: translate3d(-10px, 0, 0);
-    }
-    20%,
-    40%,
-    60%,
-    80% {
-      -webkit-transform: translate3d(10px, 0, 0);
-      transform: translate3d(10px, 0, 0);
-    }
-  }
-  .variant-shake {
-    -webkit-animation-name: variant-shake;
-    animation-name: variant-shake;
-  }
-  @-webkit-keyframes .variant-rollOut {
-    0% {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(100%, 0, 0) rotate(120deg);
-      transform: translate3d(100%, 0, 0) rotate(120deg);
-    }
-  }
-  @keyframes .variant-rollOut {
-    0% {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-      -webkit-transform: translate3d(100%, 0, 0) rotate(120deg);
-      transform: translate3d(100%, 0, 0) rotate(120deg);
-    }
-  }
-  .variant-rollOut {
-    -webkit-animation-name: variant-rollOut;
-    animation-name: variant-rollOut;
-  }
-  .variant-bg * {
-    font-family: "DINCompPro-CondMedium";
-  }
-  .variant-overlay-inner {
-    background-size: cover;
-    width: 420px;
-    min-height: 520px;
-    border-radius: 5px;
-    padding-bottom: 0;
-    border: 2px solid #fff;
-  }
-  .variant-text-outer,
-  .variant-option {
-    width: 380px;
-    margin: auto;
-  }
-  .variant-text1,
-  .variant-text2 {
-    font-size: 26px;
-    font-weight: 400;
-    margin: 15px auto;
-    text-align: center;
-    color: #4e5255;
-    text-transform: uppercase;
-  }
-  .variant-text1 {
-    font-size: 34px;
-    font-weight: 600;
-    margin: 25px auto 15px;
-    color: #016543;
-  }
-  .variant-button {
-    font-size: 24px;
-    padding: 10px;
-    text-transform: uppercase;
-    margin: 300px auto auto;
-    color: #fff;
-    width: 340px;
-    transition: all 0.5s ease !important;
-  }
-  .variant-button:hover {
-    background-color: #016543;
-  }
-  .variant-close {
-    font-size: 14px;
-    background-color: #fff;
-    top: -10px;
-    right: -10px;
-  }
-  .variant-close a.variant-link {
-    color: #000;
-  }
-  @media screen and (max-width: 420px) {
-    .variant-close-safe {
-      display: block;
-    }
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.95);
-      transform-origin: 5% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 420px;
-    }
-  }
-  @media screen and (max-width: 412px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.93);
-      transform-origin: 4.9% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 412px;
-    }
-  }
-  @media screen and (max-width: 403px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.91);
-      transform-origin: 4.8% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 403px;
-    }
-  }
-  @media screen and (max-width: 395px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.89);
-      transform-origin: 4.7% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 395px;
-    }
-  }
-  @media screen and (max-width: 386px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.87);
-      transform-origin: 4.6% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 386px;
-    }
-  }
-  @media screen and (max-width: 378px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.85);
-      transform-origin: 4.5% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 378px;
-    }
-  }
-  @media screen and (max-width: 370px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.84);
-      transform-origin: 4.4% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 370px;
-    }
-  }
-  @media screen and (max-width: 361px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.82);
-      transform-origin: 4.3% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 361px;
-    }
-  }
-  @media screen and (max-width: 353px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.8);
-      transform-origin: 4.2% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 353px;
-    }
-  }
-  @media screen and (max-width: 344px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.78);
-      transform-origin: 4.1% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 344px;
-    }
-  }
-  @media screen and (max-width: 336px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.76);
-      transform-origin: 4% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 336px;
-    }
-  }
-  @media screen and (max-width: 328px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.74);
-      transform-origin: 3.9% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 328px;
-    }
-  }
-  @media screen and (max-width: 319px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.72);
-      transform-origin: 3.8% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 319px;
-    }
-  }
-  @media screen and (max-width: 311px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.7);
-      transform-origin: 3.7% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 311px;
-    }
-  }
-  @media screen and (max-width: 302px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.68);
-      transform-origin: 3.6% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 302px;
-    }
-  }
-  @media screen and (max-width: 294px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.66);
-      transform-origin: 3.5% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 294px;
-    }
-  }
-  @media screen and (max-width: 286px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.65);
-      transform-origin: 3.4% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 286px;
-    }
-  }
-  @media screen and (max-width: 277px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.63);
-      transform-origin: 3.3% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 277px;
-    }
-  }
-  @media screen and (max-width: 269px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.61);
-      transform-origin: 3.2% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 269px;
-    }
-  }
-  @media screen and (max-width: 260px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.59);
-      transform-origin: 3.1% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 260px;
-    }
-  }
-  @media screen and (max-width: 252px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.57);
-      transform-origin: 3% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 252px;
-    }
-  }
-  @media screen and (max-width: 244px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.55);
-      transform-origin: 2.9% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 244px;
-    }
-  }
-  @media screen and (max-width: 235px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.53);
-      transform-origin: 2.8% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 235px;
-    }
-  }
-  @media screen and (max-width: 227px) {
-    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {
-      transform: scale(0.51);
-      transform-origin: 2.7% 0 0;
-    }
-    .variant-overlay-outer {
-      height: 227px;
-    }
-  }
-`;
-    const styles = document.createElement('style');
+  useEffect(function () {
+    var css = "\n  @charset \"UTF-8\";\n  @import \"https://fonts.smct.co/Din/font.css\";\n  .variant-bg,\n  .variant-overlay-outer,\n  .variant-bar,\n  .variant-final-message,\n  .variant-success-message {\n    display: none;\n    font-family: Gotham, \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n  }\n  .variant-bg,\n  .variant-bar {\n    z-index: 99999999999;\n  }\n  .variant-bar,\n  .variant-handle,\n  .variant-final-message,\n  .variant-success-message-inner,\n  .variant-overlay-inner {\n    background-color: rgba(0, 0, 0, 1);\n  }\n  .variant-bar,\n  .variant-option,\n  .variant-handle,\n  .variant-final-message,\n  .variant-text-outer > .variant-text,\n  a.variant-link {\n    color: #fff;\n  }\n  .variant-bg,\n  .variant-bg * {\n    -moz-box-sizing: border-box;\n    -webkit-box-sizing: border-box;\n    box-sizing: border-box;\n  }\n  .variant-bg * {\n    line-height: 100%;\n  }\n  .variant-overlay-inner,\n  .variant-input,\n  .variant-text,\n  .variant-text-outer,\n  .variant-item,\n  .variant-progress,\n  .variant-panel .variant-bg,\n  .variant-handle > span,\n  .variant-loader,\n  .variant-loader-single,\n  .variant-loader-double,\n  .variant-option,\n  .variant-long-close {\n    display: block;\n  }\n  .variant-text-outer,\n  .variant-option {\n    width: 50%;\n    min-width: 280px;\n    margin: auto;\n  }\n  .variant-input {\n    background-color: rgba(255, 255, 255, 0.8);\n  }\n  .variant-bg {\n    background-color: rgba(0, 0, 0, 0.6);\n    width: 100%;\n    height: 100%;\n    position: fixed;\n    top: 0;\n    left: 0;\n    right: 0;\n    bottom: 0;\n    overflow-y: scroll;\n  }\n  .variant-overlay-outer {\n    position: relative;\n    transition: height 0.2s ease;\n  }\n  .variant-overlay-inner {\n    width: 700px;\n    min-height: 400px;\n    position: relative;\n    margin: 10% auto;\n    transition: all 0.2s ease;\n    padding: 10px 10px 30px;\n    min-width: 300px;\n  }\n  .variant-close {\n    border-radius: 50%;\n    color: #333;\n    cursor: pointer;\n    display: block;\n    font-size: 20px;\n    font-weight: 700;\n    height: 30px;\n    line-height: 30px;\n    position: absolute;\n    right: 10px;\n    text-align: center;\n    top: 10px;\n    width: 30px;\n    z-index: 100;\n  }\n  .variant-close a {\n    font-family: Gotham, \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n  }\n  .variant-close:hover {\n    background-color: rgba(255, 255, 255, 0.3);\n  }\n  .variant-close-safe {\n    text-shadow: 1px 1px 1px #000;\n    color: #fff;\n    width: 100%;\n    text-align: center;\n    cursor: pointer;\n    display: none;\n    position: fixed;\n    bottom: 30px;\n    left: 0;\n  }\n  .variant-close-safe a {\n    color: #fff !important;\n  }\n  .variant-closer {\n    cursor: pointer;\n  }\n  .variant-long-close {\n    font-size: 14px;\n    position: absolute;\n    bottom: 10px;\n    width: 100%;\n    left: 0;\n    text-align: center;\n  }\n  .variant-long-close a.variant-link {\n    width: auto;\n  }\n  a.variant-link {\n    display: inline-block;\n    text-decoration: none;\n    height: 100%;\n    width: 100%;\n  }\n  .variant-input,\n  .variant-button,\n  .variant-reveal {\n    width: 100%;\n  }\n  .variant-button,\n  .variant-cover {\n    background: #333;\n    -moz-user-select: none;\n    -webkit-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n  }\n  .variant-input {\n    color: #000;\n    text-align: center;\n    border: 1px solid #333;\n    margin: 10px auto;\n    padding: 10px;\n  }\n  .variant-input::-webkit-input-placeholder,\n  .variant-input:-moz-placeholder,\n  .variant-input::-moz-placeholder,\n  .variant-input:-ms-input-placeholder {\n    color: #ccc;\n    text-transform: uppercase;\n  }\n  .variant-input:focus {\n    outline: none;\n  }\n  .variant-button {\n    border: medium none;\n    color: #fff;\n    outline: medium none;\n    display: block;\n    margin: 10px auto;\n    font-size: 20px;\n    padding: 10px;\n    cursor: pointer;\n  }\n  .variant-reveal {\n    display: block;\n    margin: 10px auto;\n    position: relative;\n    text-align: center;\n  }\n  .variant-cover,\n  .variant-code {\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 100%;\n    padding: 10px;\n    font-size: 20px;\n  }\n  .variant-cover {\n    z-index: 2;\n    color: #fff;\n    padding: 11px;\n    cursor: pointer;\n  }\n  .variant-button:hover,\n  .variant-cover:hover {\n    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);\n  }\n  .variant-code {\n    z-index: 1;\n    border: 1px solid #333;\n    background: rgba(255, 255, 255, 0.8);\n    color: #333;\n    font-weight: 700;\n    -moz-user-select: text;\n    -webkit-user-select: text;\n    -ms-user-select: text;\n    user-select: text;\n  }\n  .variant-text {\n    text-align: center;\n    font-size: 20px;\n  }\n  .variant-text2 {\n    font-size: 40px;\n    font-weight: 700;\n  }\n  .variant-img-outer {\n    position: relative;\n    width: 100%;\n    display: block;\n  }\n  .variant-img {\n    display: block;\n    width: 100%;\n  }\n  .variant-img img {\n    border: medium none;\n    display: block;\n    margin: auto;\n    outline: medium none;\n    max-width: 100%;\n  }\n  .variant-clearfix:after {\n    visibility: hidden;\n    display: block;\n    font-size: 0;\n    content: \" \";\n    clear: both;\n    height: 0;\n  }\n  .variant-clearfix {\n    display: inline-block;\n    height: 1%;\n    display: block;\n  }\n  .variant-item {\n    height: 80px;\n    padding: 10px;\n    border-bottom: 1px dashed #ccc;\n  }\n  .variant-item .variant-item-img {\n    display: inline-block;\n    text-align: center;\n  }\n  .variant-item .variant-item-img img {\n    max-width: 60px;\n    max-height: 60px;\n  }\n  .variant-item .variant-title {\n    font-weight: 700;\n    display: inline-block;\n  }\n  .variant-item .variant-price {\n    display: inline-block;\n  }\n  .variant-item .variant-qty {\n    display: inline-block;\n  }\n  .variant-progress {\n    background-color: rgba(0, 0, 0, 0.1);\n    border-radius: 0;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;\n    height: 21px;\n    margin-bottom: 21px;\n    overflow: hidden;\n    width: 100%;\n  }\n  .variant-progress-bar {\n    background-color: #007932;\n    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15) inset;\n    color: #fff;\n    float: left;\n    font-size: 12px;\n    height: 100%;\n    line-height: 21px;\n    text-align: center;\n    transition: width 0.6s ease 0s;\n    width: 0;\n  }\n  .variant-progress .variant-progress-bar {\n    background-image: linear-gradient(\n      45deg,\n      rgba(255, 255, 255, 0.15) 25%,\n      transparent 25%,\n      transparent 50%,\n      rgba(255, 255, 255, 0.15) 50%,\n      rgba(255, 255, 255, 0.15) 75%,\n      transparent 75%,\n      transparent\n    );\n    background-size: 40px 40px;\n    animation: 0.5s linear 0s normal none infinite running\n      .variant-progress-bar-stripes;\n  }\n  @-webkit-keyframes .variant-progress-bar-stripes {\n    from {\n      background-position: 40px 0;\n    }\n    to {\n      background-position: 0 0;\n    }\n  }\n  @-o-keyframes .variant-progress-bar-stripes {\n    from {\n      background-position: 40px 0;\n    }\n    to {\n      background-position: 0 0;\n    }\n  }\n  @keyframes .variant-progress-bar-stripes {\n    from {\n      background-position: 40px 0;\n    }\n    to {\n      background-position: 0 0;\n    }\n  }\n  .variant-overlay {\n    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;\n  }\n  .variant-overlay:before,\n  .variant-overlay:after {\n    content: \"\";\n    position: absolute;\n    z-index: -1;\n    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);\n    top: 0;\n    bottom: 0;\n    left: 10px;\n    right: 10px;\n    border-radius: 100px / 10px;\n  }\n  .variant-overlay:after {\n    right: 10px;\n    left: auto;\n    transform: skew(8deg) rotate(3deg);\n  }\n  .variant-panel .variant-bg {\n    width: 0;\n    height: 100%;\n    position: fixed;\n    z-index: 1001;\n    top: 0;\n    background-color: #111;\n    padding: 0;\n    left: 0;\n    bottom: 0;\n    right: 0;\n    color: #fff;\n    overflow-x: hidden;\n    overflow-y: scroll;\n    transition: width 0.5s;\n  }\n  .variant-panel-body-cover {\n    position: fixed;\n    z-index: 1000;\n    background-color: rgba(0, 0, 0, 0.5);\n    left: 0;\n    right: 0;\n    top: 0;\n    bottom: 0;\n    width: 100%;\n    height: 100%;\n    display: none;\n  }\n  .variant-panel.variant-panel-left .variant-bg {\n    right: auto;\n  }\n  .variant-panel.variant-panel-right .variant-bg {\n    left: auto;\n  }\n  .variant-panel .variant-overlay-inner {\n    width: 90%;\n  }\n  .variant-input-group {\n    display: block;\n    text-align: center;\n  }\n  .variant-input-group input[type=\"checkbox\"],\n  .variant-input-group input[type=\"radio\"] {\n    margin-right: 3px;\n    margin-left: 10px;\n  }\n  .variant-input-error ::-webkit-input-placeholder,\n  .variant-input-error :-moz-placeholder,\n  .variant-input-error ::-moz-placeholder,\n  .variant-input-error :-ms-input-placeholder {\n    color: #d30003;\n  }\n  .variant-input-error label {\n    color: #d30003;\n  }\n  .variant-input-error input,\n  .variant-input-error select,\n  .variant-input-error textarea {\n    border-color: #d30003;\n  }\n  .variant-bar,\n  .variant-handle {\n    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.3);\n    border-bottom-left-radius: 3px;\n    border-bottom-right-radius: 3px;\n  }\n  .variant-bar {\n    display: none;\n    position: fixed;\n    top: 0;\n    left: 25%;\n    right: 25%;\n    width: 50%;\n    font-weight: 700;\n    font-size: 16px;\n    text-shadow: none;\n    text-align: center;\n    height: 30px;\n    line-height: 30px;\n    padding: 0 20px;\n  }\n  @media (max-width: 500px) {\n    .variant-bar {\n      width: 80%;\n      left: 10%;\n    }\n  }\n  .variant-bar-close {\n    cursor: pointer;\n    height: 10px;\n    line-height: 10px;\n    position: absolute;\n    right: 10px;\n    top: 10px;\n    width: 10px;\n  }\n  .variant-handle {\n    position: absolute;\n    width: 50px;\n    margin-left: -25px;\n    height: 20px;\n    left: 50%;\n    bottom: -20px;\n    cursor: pointer;\n    line-height: 12px;\n    letter-spacing: -2px;\n  }\n  .variant-handle > span {\n    position: absolute;\n    width: 60%;\n    left: 20%;\n    height: 2px;\n    background: #fff;\n  }\n  .variant-bar1 {\n    top: 20%;\n  }\n  .variant-bar2 {\n    top: 40%;\n  }\n  .variant-bar3 {\n    top: 60%;\n  }\n  .variant-arrow-up {\n    width: 0;\n    height: 0;\n    border-left: 5px solid transparent;\n    border-right: 5px solid transparent;\n    border-bottom: 5px solid #000;\n  }\n  .variant-arrow-down {\n    width: 0;\n    height: 0;\n    border-left: 5px solid transparent;\n    border-right: 5px solid transparent;\n    border-top: 5px solid #000;\n  }\n  .variant-arrow-right {\n    width: 0;\n    height: 0;\n    border-top: 5px solid transparent;\n    border-bottom: 5px solid transparent;\n    border-left: 5px solid #000;\n  }\n  .variant-arrow-left {\n    width: 0;\n    height: 0;\n    border-top: 5px solid transparent;\n    border-bottom: 5px solid transparent;\n    border-right: 5px solid #000;\n  }\n  .variant-preview {\n    position: fixed;\n    top: 20px;\n    left: 50%;\n    margin-left: -160px;\n    width: 320px;\n    padding: 5px 10px;\n    background: #ff0;\n    color: #000;\n    font-family: Gotham, \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n    font-size: 12px;\n    text-align: center;\n    border-radius: 5px;\n    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);\n    cursor: pointer;\n  }\n  .variant-preview-close {\n    font-size: 7px;\n    height: 3px;\n    position: absolute;\n    right: 4px;\n    top: 0;\n    width: 3px;\n  }\n  .variant-preview .variant-arrow-up {\n    position: absolute;\n    top: -20px;\n    left: 50%;\n    margin-left: -10px;\n    border-left: 20px solid transparent;\n    border-right: 20px solid transparent;\n    border-bottom: 20px solid #ff0;\n  }\n  .variant-notices {\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 100%;\n    transition: height 0.3s ease;\n  }\n  .variant-notice-box {\n    padding: 5px 10px;\n    background: #ec6952;\n    font-size: 12px;\n    text-align: left;\n    border-radius: 5px;\n    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);\n    cursor: pointer;\n    min-height: 30px;\n    min-width: 100px;\n    max-width: 500px;\n    width: auto;\n    margin-bottom: 5px;\n    color: #fff;\n    float: right;\n    clear: both;\n    z-index: 100;\n    transition: all 0.5s ease;\n    overflow: hidden;\n  }\n  .variant-notice-box.success {\n    background: #24a233;\n  }\n  .variant-notice-box.warning {\n    background: #cf9d0f;\n  }\n  .variant-notice-box.danger {\n    background: #d30003;\n  }\n  @media screen {\n    .variant-preloader {\n      position: fixed;\n      left: -9999px;\n      top: -9999px;\n    }\n    .variant-preloader img {\n      display: block;\n    }\n  }\n  @media print {\n    .variant-preloader,\n    .variant-preloader img {\n      visibility: hidden;\n      display: none;\n    }\n  }\n  .variant-final-message {\n    border-radius: 2px;\n    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);\n    bottom: 10px;\n    font-size: 16px;\n    padding: 10px 20px;\n    position: fixed;\n    right: 10px;\n    z-index: 1e15;\n  }\n  .variant-final-message-close {\n    position: absolute;\n    top: 3px;\n    right: 1px;\n    width: 10px;\n    height: 10px;\n    cursor: pointer;\n    font-size: 10px;\n    opacity: 0.5;\n  }\n  .variant-final-message .variant-select {\n    font-weight: 700;\n  }\n  .variant-final-message:hover .variant-final-message-close {\n    opacity: 1;\n  }\n  .variant-success-message {\n    position: absolute;\n    width: 100%;\n    background: rgba(0, 0, 0, 0.5);\n    height: 100%;\n    top: 0;\n    left: 0;\n    right: 0;\n    bottom: 0;\n    text-align: center;\n  }\n  .variant-success-message-inner {\n    background: #08ad00 none repeat scroll 0 0;\n    border-radius: 5px;\n    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);\n    color: #fff;\n    display: inline-block;\n    font-size: 30px;\n    margin: 20% auto auto;\n    padding: 10px 30px;\n    position: relative;\n  }\n  .variant-success-close {\n    position: absolute;\n    top: 5px;\n    right: 5px;\n    cursor: pointer;\n    font-size: 12px;\n  }\n  @-webkit-keyframes .variant-spin {\n    0% {\n      -webkit-transform: rotate(0deg);\n      transform: rotate(0deg);\n    }\n    100% {\n      -webkit-transform: rotate(360deg);\n      transform: rotate(360deg);\n    }\n  }\n  @keyframes .variant-spin {\n    0% {\n      -webkit-transform: rotate(0deg);\n      transform: rotate(0deg);\n    }\n    100% {\n      -webkit-transform: rotate(360deg);\n      transform: rotate(360deg);\n    }\n  }\n  @-webkit-keyframes .variant-pulse {\n    50% {\n      background: #fff;\n    }\n  }\n  @keyframes .variant-pulse {\n    50% {\n      background: #fff;\n    }\n  }\n  .variant-loader-bg,\n  .variant-dc-placeholder {\n    position: absolute;\n    top: 10%;\n    left: 50%;\n    background: rgba(0, 0, 0, 0.8);\n    width: 60px;\n    margin-left: -30px;\n    height: 60px;\n    z-index: 10;\n    border-radius: 10px;\n    display: none;\n  }\n  .variant-loader,\n  .variant-loader-single,\n  .variant-loader-double {\n    border-radius: 50%;\n    width: 50px;\n    height: 50px;\n    margin: 5px;\n    border: 0.25rem solid rgba(255, 255, 255, 0.2);\n    border-top-color: #fff;\n    -webkit-animation: variant-spin 1s infinite linear;\n    animation: variant-spin 1s infinite linear;\n  }\n  .variant-loader-double {\n    border-style: double;\n    border-width: 0.5rem;\n  }\n  .variant-loader-pulse {\n    -webkit-animation: variant-pulse 750ms infinite;\n    animation: variant-pulse 750ms infinite;\n    -webkit-animation-delay: 250ms;\n    animation-delay: 250ms;\n    height: 30px;\n    left: 25px;\n    position: absolute;\n    top: 14px;\n    width: 10px;\n  }\n  .variant-loader-pulse:before,\n  .variant-loader-pulse:after {\n    content: \"\";\n    position: absolute;\n    display: block;\n    height: 16px;\n    width: 6px;\n    top: 50%;\n    background: rgba(255, 255, 255, 0.2);\n    -webkit-transform: translateY(-50%);\n    transform: translateY(-50%);\n    -webkit-animation: variant-pulse 750ms infinite;\n    animation: variant-pulse 750ms infinite;\n  }\n  .variant-loader-pulse:before {\n    left: -12px;\n  }\n  .variant-loader-pulse:after {\n    left: 16px;\n    -webkit-animation-delay: 500ms;\n    animation-delay: 500ms;\n  }\n  .variant-loader-bg[data-theme=\"white\"],\n  .variant-dc-placeholder {\n    background: rgba(255, 255, 255, 0.8);\n  }\n  .variant-loader-bg[data-theme=\"white\"] .variant-loader-single,\n  .variant-dc-placeholder .variant-loader-single,\n  .variant-loader-bg[data-theme=\"white\"] .variant-loader-double,\n  .variant-dc-placeholder .variant-loader-double,\n  .variant-loader-bg[data-theme=\"white\"] .variant-loader-pulse,\n  .variant-dc-placeholder .variant-loader-pulse {\n    border-color: rgba(0, 0, 0, 0.2);\n    border-top-color: #000;\n  }\n  .variant-terms {\n    background-color: #fff;\n    border: 1px solid #333;\n    border-radius: 3px;\n    bottom: 5%;\n    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.4);\n    left: 5%;\n    padding: 10px;\n    position: absolute;\n    right: 5%;\n    top: 5%;\n    z-index: 101;\n    display: none;\n  }\n  .variant-terms-header,\n  .variant-terms-para,\n  .variant-terms-close,\n  .variant-terms-close-x {\n    color: #333;\n    display: block;\n  }\n  .variant-terms-scroller {\n    position: absolute;\n    top: 10px;\n    left: 10px;\n    right: 10px;\n    bottom: 30px;\n    overflow: auto;\n  }\n  .variant-terms-header {\n    font-size: 20px;\n    font-weight: 700;\n    margin: 5px 0;\n    text-align: center;\n  }\n  .variant-terms-para {\n    margin: 5px 0;\n    font-size: 12px;\n  }\n  .variant-terms-close {\n    bottom: 10px;\n    cursor: pointer;\n    left: 10px;\n    position: absolute;\n    right: 10px;\n    text-align: center;\n  }\n  .variant-show-terms,\n  .variant-show-terms {\n    text-decoration: underline;\n    cursor: pointer;\n  }\n  .variant-terms[data-theme=\"dark\"] {\n    background-color: #333;\n  }\n  .variant-terms[data-theme=\"dark\"] .variant-terms-header,\n  .variant-terms[data-theme=\"dark\"] .variant-terms-para,\n  .variant-terms[data-theme=\"dark\"] .variant-terms-close,\n  .variant-terms[data-theme=\"dark\"] .variant-terms-close-x {\n    color: #fff;\n  }\n  .variant-terms-close-x {\n    position: absolute;\n    top: 5px;\n    right: 5px;\n    cursor: pointer;\n    opacity: 0.7;\n    -webkit-transition: all 0.25s ease-in-out;\n    -ms-transition: all 0.25s ease-in-out;\n    -o-transition: all 0.25s ease-in-out;\n    -moz-transition: all 0.25s ease-in-out;\n    transition: transform all 0.25s ease-in-out;\n  }\n  .variant-terms-close-x:hover {\n    opacity: 1;\n    -webkit-transform: rotate(180deg) scale(1.3);\n    -ms-transform: rotate(180deg) scale(1.3);\n    -o-transform: rotate(180deg) scale(1.3);\n    -moz-transform: rotate(180deg) scale(1.3);\n    transform: rotate(180deg) scale(1.3);\n  }\n  .variant-cp {\n    -youbkit-touch-callout: none;\n    -youbkit-user-select: none;\n    -webkit-user-select: none;\n    -moz-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n  }\n  .variant-cp,\n  .variant-cp-msg {\n    display: none;\n  }\n  .variant-hidden-consents {\n    opacity: 0;\n    position: fixed;\n    bottom: 0;\n    left: 0;\n    width: 1px;\n    height: 1px;\n    visibility: hidden;\n  }\n  .variant-requestNotifications .variant-agree-yes,\n  .variant-requestNotifications .variant-agree-no {\n    display: none;\n  }\n  .variant-notices {\n    padding: 10px;\n    right: 20px;\n    left: auto;\n    max-width: 300px;\n    z-index: 100;\n  }\n  .variant-dc-placeholder {\n    display: block;\n    height: 30px;\n    width: 30px;\n    top: 3px;\n  }\n  .variant-dc-placeholder > * {\n    height: 20px;\n    width: 20px;\n  }\n  .variant-shake-msg {\n    display: none;\n  }\n  .variant-animated {\n    -webkit-animation-duration: 1s;\n    animation-duration: 1s;\n    -webkit-animation-fill-mode: both;\n    animation-fill-mode: both;\n  }\n  .variant-animated.variant-infinite {\n    -webkit-animation-iteration-count: infinite;\n    animation-iteration-count: infinite;\n  }\n  .variant-animated.variant-hinge {\n    -webkit-animation-duration: 2s;\n    animation-duration: 2s;\n  }\n  .variant-animated.variant-bounceIn,\n  .variant-animated.variant-bounceOut,\n  .variant-animated.variant-flipOutX,\n  .variant-animated.variant-flipOutY {\n    -webkit-animation-duration: 0.75s;\n    animation-duration: 0.75s;\n  }\n  @-webkit-keyframes .variant-fadeIn {\n    0% {\n      opacity: 0;\n    }\n    to {\n      opacity: 1;\n    }\n  }\n  @keyframes .variant-fadeIn {\n    0% {\n      opacity: 0;\n    }\n    to {\n      opacity: 1;\n    }\n  }\n  .variant-fadeIn {\n    -webkit-animation-name: variant-fadeIn;\n    animation-name: variant-fadeIn;\n  }\n  @-webkit-keyframes .variant-bounceInDown {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -3000px, 0);\n      transform: translate3d(0, -3000px, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, 25px, 0);\n      transform: translate3d(0, 25px, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(0, -10px, 0);\n      transform: translate3d(0, -10px, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(0, 5px, 0);\n      transform: translate3d(0, 5px, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-bounceInDown {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -3000px, 0);\n      transform: translate3d(0, -3000px, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, 25px, 0);\n      transform: translate3d(0, 25px, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(0, -10px, 0);\n      transform: translate3d(0, -10px, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(0, 5px, 0);\n      transform: translate3d(0, 5px, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-bounceInDown {\n    -webkit-animation-name: variant-bounceInDown;\n    animation-name: variant-bounceInDown;\n  }\n  .variant-animDelay2 {\n    -webkit-animation-delay: 0.2s !important;\n    -moz-animation-delay: 0.2s !important;\n    -ms-animation-delay: 0.2s !important;\n    -o-animation-delay: 0.2s !important;\n    animation-delay: 0.2s !important;\n  }\n  .variant-animDelay6 {\n    -webkit-animation-delay: 0.6s !important;\n    -moz-animation-delay: 0.6s !important;\n    -ms-animation-delay: 0.6s !important;\n    -o-animation-delay: 0.6s !important;\n    animation-delay: 0.6s !important;\n  }\n  @-webkit-keyframes .variant-bounceInRight {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(3000px, 0, 0);\n      transform: translate3d(3000px, 0, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(-25px, 0, 0);\n      transform: translate3d(-25px, 0, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(10px, 0, 0);\n      transform: translate3d(10px, 0, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(-5px, 0, 0);\n      transform: translate3d(-5px, 0, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-bounceInRight {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(3000px, 0, 0);\n      transform: translate3d(3000px, 0, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(-25px, 0, 0);\n      transform: translate3d(-25px, 0, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(10px, 0, 0);\n      transform: translate3d(10px, 0, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(-5px, 0, 0);\n      transform: translate3d(-5px, 0, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-bounceInRight {\n    -webkit-animation-name: variant-bounceInRight;\n    animation-name: variant-bounceInRight;\n  }\n  .variant-animDelay8 {\n    -webkit-animation-delay: 0.8s !important;\n    -moz-animation-delay: 0.8s !important;\n    -ms-animation-delay: 0.8s !important;\n    -o-animation-delay: 0.8s !important;\n    animation-delay: 0.8s !important;\n  }\n  .variant-animDelay10 {\n    -webkit-animation-delay: 1s !important;\n    -moz-animation-delay: 1s !important;\n    -ms-animation-delay: 1s !important;\n    -o-animation-delay: 1s !important;\n    animation-delay: 1s !important;\n  }\n  .variant-animDelay12 {\n    -webkit-animation-delay: 1.2s !important;\n    -moz-animation-delay: 1.2s !important;\n    -ms-animation-delay: 1.2s !important;\n    -o-animation-delay: 1.2s !important;\n    animation-delay: 1.2s !important;\n  }\n  .variant-animDelay4 {\n    -webkit-animation-delay: 0.4s !important;\n    -moz-animation-delay: 0.4s !important;\n    -ms-animation-delay: 0.4s !important;\n    -o-animation-delay: 0.4s !important;\n    animation-delay: 0.4s !important;\n  }\n  @-webkit-keyframes .variant-bounceInLeft {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(-3000px, 0, 0);\n      transform: translate3d(-3000px, 0, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(25px, 0, 0);\n      transform: translate3d(25px, 0, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(-10px, 0, 0);\n      transform: translate3d(-10px, 0, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(5px, 0, 0);\n      transform: translate3d(5px, 0, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-bounceInLeft {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(-3000px, 0, 0);\n      transform: translate3d(-3000px, 0, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(25px, 0, 0);\n      transform: translate3d(25px, 0, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(-10px, 0, 0);\n      transform: translate3d(-10px, 0, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(5px, 0, 0);\n      transform: translate3d(5px, 0, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-bounceInLeft {\n    -webkit-animation-name: variant-bounceInLeft;\n    animation-name: variant-bounceInLeft;\n  }\n  @-webkit-keyframes .variant-fadeInLeft {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(-100%, 0, 0);\n      transform: translate3d(-100%, 0, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-fadeInLeft {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(-100%, 0, 0);\n      transform: translate3d(-100%, 0, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-fadeInLeft {\n    -webkit-animation-name: variant-fadeInLeft;\n    animation-name: variant-fadeInLeft;\n  }\n  @-webkit-keyframes .variant-fadeInRight {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(100%, 0, 0);\n      transform: translate3d(100%, 0, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-fadeInRight {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(100%, 0, 0);\n      transform: translate3d(100%, 0, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-fadeInRight {\n    -webkit-animation-name: variant-fadeInRight;\n    animation-name: variant-fadeInRight;\n  }\n  @-webkit-keyframes .variant-bounceInUp {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 3000px, 0);\n      transform: translate3d(0, 3000px, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, -20px, 0);\n      transform: translate3d(0, -20px, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(0, 10px, 0);\n      transform: translate3d(0, 10px, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(0, -5px, 0);\n      transform: translate3d(0, -5px, 0);\n    }\n    to {\n      -webkit-transform: translateZ(0);\n      transform: translateZ(0);\n    }\n  }\n  @keyframes .variant-bounceInUp {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 3000px, 0);\n      transform: translate3d(0, 3000px, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, -20px, 0);\n      transform: translate3d(0, -20px, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(0, 10px, 0);\n      transform: translate3d(0, 10px, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(0, -5px, 0);\n      transform: translate3d(0, -5px, 0);\n    }\n    to {\n      -webkit-transform: translateZ(0);\n      transform: translateZ(0);\n    }\n  }\n  .variant-bounceInUp {\n    -webkit-animation-name: variant-bounceInUp;\n    animation-name: variant-bounceInUp;\n  }\n  .variant-animDelay7 {\n    -webkit-animation-delay: 0.7s !important;\n    -moz-animation-delay: 0.7s !important;\n    -ms-animation-delay: 0.7s !important;\n    -o-animation-delay: 0.7s !important;\n    animation-delay: 0.7s !important;\n  }\n  .variant-animDelay9 {\n    -webkit-animation-delay: 0.9s !important;\n    -moz-animation-delay: 0.9s !important;\n    -ms-animation-delay: 0.9s !important;\n    -o-animation-delay: 0.9s !important;\n    animation-delay: 0.9s !important;\n  }\n  @-webkit-keyframes .variant-fadeInUp {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 100%, 0);\n      transform: translate3d(0, 100%, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-fadeInUp {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 100%, 0);\n      transform: translate3d(0, 100%, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-fadeInUp {\n    -webkit-animation-name: variant-fadeInUp;\n    animation-name: variant-fadeInUp;\n  }\n  .variant-animDelay14 {\n    -webkit-animation-delay: 1.4s !important;\n    -moz-animation-delay: 1.4s !important;\n    -ms-animation-delay: 1.4s !important;\n    -o-animation-delay: 1.4s !important;\n    animation-delay: 1.4s !important;\n  }\n  .variant-animDelay1 {\n    -webkit-animation-delay: 0.1s !important;\n    -moz-animation-delay: 0.1s !important;\n    -ms-animation-delay: 0.1s !important;\n    -o-animation-delay: 0.1s !important;\n    animation-delay: 0.1s !important;\n  }\n  @-webkit-keyframes .variant-fadeInDown {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -100%, 0);\n      transform: translate3d(0, -100%, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-fadeInDown {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -100%, 0);\n      transform: translate3d(0, -100%, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-fadeInDown {\n    -webkit-animation-name: variant-fadeInDown;\n    animation-name: variant-fadeInDown;\n  }\n  @-webkit-keyframes .variant-fadeOutUp {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -100%, 0);\n      transform: translate3d(0, -100%, 0);\n    }\n  }\n  @keyframes .variant-fadeOutUp {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -100%, 0);\n      transform: translate3d(0, -100%, 0);\n    }\n  }\n  .variant-fadeOutUp {\n    -webkit-animation-name: variant-fadeOutUp;\n    animation-name: variant-fadeOutUp;\n  }\n  @-webkit-keyframes .variant-fadeOutDown {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 100%, 0);\n      transform: translate3d(0, 100%, 0);\n    }\n  }\n  @keyframes .variant-fadeOutDown {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 100%, 0);\n      transform: translate3d(0, 100%, 0);\n    }\n  }\n  .variant-fadeOutDown {\n    -webkit-animation-name: variant-fadeOutDown;\n    animation-name: variant-fadeOutDown;\n  }\n  @-webkit-keyframes .variant-fadeOut {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n    }\n  }\n  @keyframes .variant-fadeOut {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n    }\n  }\n  .variant-fadeOut {\n    -webkit-animation-name: variant-fadeOut;\n    animation-name: variant-fadeOut;\n  }\n  @-webkit-keyframes .variant-bounceOutUp {\n    20% {\n      -webkit-transform: translate3d(0, -10px, 0);\n      transform: translate3d(0, -10px, 0);\n    }\n    40%,\n    45% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, 20px, 0);\n      transform: translate3d(0, 20px, 0);\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -2000px, 0);\n      transform: translate3d(0, -2000px, 0);\n    }\n  }\n  @keyframes .variant-bounceOutUp {\n    20% {\n      -webkit-transform: translate3d(0, -10px, 0);\n      transform: translate3d(0, -10px, 0);\n    }\n    40%,\n    45% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, 20px, 0);\n      transform: translate3d(0, 20px, 0);\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -2000px, 0);\n      transform: translate3d(0, -2000px, 0);\n    }\n  }\n  .variant-bounceOutUp {\n    -webkit-animation-name: variant-bounceOutUp;\n    animation-name: variant-bounceOutUp;\n  }\n  @-webkit-keyframes .variant-bounceOutDown {\n    20% {\n      -webkit-transform: translate3d(0, 10px, 0);\n      transform: translate3d(0, 10px, 0);\n    }\n    40%,\n    45% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, -20px, 0);\n      transform: translate3d(0, -20px, 0);\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 2000px, 0);\n      transform: translate3d(0, 2000px, 0);\n    }\n  }\n  @keyframes .variant-bounceOutDown {\n    20% {\n      -webkit-transform: translate3d(0, 10px, 0);\n      transform: translate3d(0, 10px, 0);\n    }\n    40%,\n    45% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, -20px, 0);\n      transform: translate3d(0, -20px, 0);\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 2000px, 0);\n      transform: translate3d(0, 2000px, 0);\n    }\n  }\n  .variant-bounceOutDown {\n    -webkit-animation-name: variant-bounceOutDown;\n    animation-name: variant-bounceOutDown;\n  }\n  @-webkit-keyframes .variant-rubberBand {\n    0% {\n      -webkit-transform: scaleX(1);\n      transform: scaleX(1);\n    }\n    30% {\n      -webkit-transform: scale3d(1.25, 0.75, 1);\n      transform: scale3d(1.25, 0.75, 1);\n    }\n    40% {\n      -webkit-transform: scale3d(0.75, 1.25, 1);\n      transform: scale3d(0.75, 1.25, 1);\n    }\n    50% {\n      -webkit-transform: scale3d(1.15, 0.85, 1);\n      transform: scale3d(1.15, 0.85, 1);\n    }\n    65% {\n      -webkit-transform: scale3d(0.95, 1.05, 1);\n      transform: scale3d(0.95, 1.05, 1);\n    }\n    75% {\n      -webkit-transform: scale3d(1.05, 0.95, 1);\n      transform: scale3d(1.05, 0.95, 1);\n    }\n    to {\n      -webkit-transform: scaleX(1);\n      transform: scaleX(1);\n    }\n  }\n  @keyframes .variant-rubberBand {\n    0% {\n      -webkit-transform: scaleX(1);\n      transform: scaleX(1);\n    }\n    30% {\n      -webkit-transform: scale3d(1.25, 0.75, 1);\n      transform: scale3d(1.25, 0.75, 1);\n    }\n    40% {\n      -webkit-transform: scale3d(0.75, 1.25, 1);\n      transform: scale3d(0.75, 1.25, 1);\n    }\n    50% {\n      -webkit-transform: scale3d(1.15, 0.85, 1);\n      transform: scale3d(1.15, 0.85, 1);\n    }\n    65% {\n      -webkit-transform: scale3d(0.95, 1.05, 1);\n      transform: scale3d(0.95, 1.05, 1);\n    }\n    75% {\n      -webkit-transform: scale3d(1.05, 0.95, 1);\n      transform: scale3d(1.05, 0.95, 1);\n    }\n    to {\n      -webkit-transform: scaleX(1);\n      transform: scaleX(1);\n    }\n  }\n  .variant-rubberBand {\n    -webkit-animation-name: variant-rubberBand;\n    animation-name: variant-rubberBand;\n  }\n  @-webkit-keyframes .variant-shake {\n    0%,\n    to {\n      -webkit-transform: translateZ(0);\n      transform: translateZ(0);\n    }\n    10%,\n    30%,\n    50%,\n    70%,\n    90% {\n      -webkit-transform: translate3d(-10px, 0, 0);\n      transform: translate3d(-10px, 0, 0);\n    }\n    20%,\n    40%,\n    60%,\n    80% {\n      -webkit-transform: translate3d(10px, 0, 0);\n      transform: translate3d(10px, 0, 0);\n    }\n  }\n  @keyframes .variant-shake {\n    0%,\n    to {\n      -webkit-transform: translateZ(0);\n      transform: translateZ(0);\n    }\n    10%,\n    30%,\n    50%,\n    70%,\n    90% {\n      -webkit-transform: translate3d(-10px, 0, 0);\n      transform: translate3d(-10px, 0, 0);\n    }\n    20%,\n    40%,\n    60%,\n    80% {\n      -webkit-transform: translate3d(10px, 0, 0);\n      transform: translate3d(10px, 0, 0);\n    }\n  }\n  .variant-shake {\n    -webkit-animation-name: variant-shake;\n    animation-name: variant-shake;\n  }\n  @-webkit-keyframes .variant-rollOut {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(100%, 0, 0) rotate(120deg);\n      transform: translate3d(100%, 0, 0) rotate(120deg);\n    }\n  }\n  @keyframes .variant-rollOut {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(100%, 0, 0) rotate(120deg);\n      transform: translate3d(100%, 0, 0) rotate(120deg);\n    }\n  }\n  .variant-rollOut {\n    -webkit-animation-name: variant-rollOut;\n    animation-name: variant-rollOut;\n  }\n  .variant-bg * {\n    font-family: \"DINCompPro-CondMedium\";\n  }\n  .variant-overlay-inner {\n    background-size: cover;\n    width: 420px;\n    min-height: 520px;\n    border-radius: 5px;\n    padding-bottom: 0;\n    border: 2px solid #fff;\n  }\n  .variant-text-outer,\n  .variant-option {\n    width: 380px;\n    margin: auto;\n  }\n  .variant-text1,\n  .variant-text2 {\n    font-size: 26px;\n    font-weight: 400;\n    margin: 15px auto;\n    text-align: center;\n    color: #4e5255;\n    text-transform: uppercase;\n  }\n  .variant-text1 {\n    font-size: 34px;\n    font-weight: 600;\n    margin: 25px auto 15px;\n    color: #016543;\n  }\n  .variant-button {\n    font-size: 24px;\n    padding: 10px;\n    text-transform: uppercase;\n    margin: 300px auto auto;\n    color: #fff;\n    width: 340px;\n    transition: all 0.5s ease !important;\n  }\n  .variant-button:hover {\n    background-color: #016543;\n  }\n  .variant-close {\n    font-size: 14px;\n    background-color: #fff;\n    top: -10px;\n    right: -10px;\n  }\n  .variant-close a.variant-link {\n    color: #000;\n  }\n  @media screen and (max-width: 420px) {\n    .variant-close-safe {\n      display: block;\n    }\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.95);\n      transform-origin: 5% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 420px;\n    }\n  }\n  @media screen and (max-width: 412px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.93);\n      transform-origin: 4.9% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 412px;\n    }\n  }\n  @media screen and (max-width: 403px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.91);\n      transform-origin: 4.8% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 403px;\n    }\n  }\n  @media screen and (max-width: 395px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.89);\n      transform-origin: 4.7% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 395px;\n    }\n  }\n  @media screen and (max-width: 386px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.87);\n      transform-origin: 4.6% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 386px;\n    }\n  }\n  @media screen and (max-width: 378px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.85);\n      transform-origin: 4.5% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 378px;\n    }\n  }\n  @media screen and (max-width: 370px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.84);\n      transform-origin: 4.4% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 370px;\n    }\n  }\n  @media screen and (max-width: 361px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.82);\n      transform-origin: 4.3% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 361px;\n    }\n  }\n  @media screen and (max-width: 353px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.8);\n      transform-origin: 4.2% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 353px;\n    }\n  }\n  @media screen and (max-width: 344px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.78);\n      transform-origin: 4.1% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 344px;\n    }\n  }\n  @media screen and (max-width: 336px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.76);\n      transform-origin: 4% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 336px;\n    }\n  }\n  @media screen and (max-width: 328px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.74);\n      transform-origin: 3.9% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 328px;\n    }\n  }\n  @media screen and (max-width: 319px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.72);\n      transform-origin: 3.8% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 319px;\n    }\n  }\n  @media screen and (max-width: 311px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.7);\n      transform-origin: 3.7% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 311px;\n    }\n  }\n  @media screen and (max-width: 302px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.68);\n      transform-origin: 3.6% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 302px;\n    }\n  }\n  @media screen and (max-width: 294px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.66);\n      transform-origin: 3.5% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 294px;\n    }\n  }\n  @media screen and (max-width: 286px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.65);\n      transform-origin: 3.4% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 286px;\n    }\n  }\n  @media screen and (max-width: 277px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.63);\n      transform-origin: 3.3% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 277px;\n    }\n  }\n  @media screen and (max-width: 269px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.61);\n      transform-origin: 3.2% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 269px;\n    }\n  }\n  @media screen and (max-width: 260px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.59);\n      transform-origin: 3.1% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 260px;\n    }\n  }\n  @media screen and (max-width: 252px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.57);\n      transform-origin: 3% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 252px;\n    }\n  }\n  @media screen and (max-width: 244px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.55);\n      transform-origin: 2.9% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 244px;\n    }\n  }\n  @media screen and (max-width: 235px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.53);\n      transform-origin: 2.8% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 235px;\n    }\n  }\n  @media screen and (max-width: 227px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.51);\n      transform-origin: 2.7% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 227px;\n    }\n  }\n";
+    var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(css));
     document.head.appendChild(styles);
@@ -2480,7 +831,7 @@ const Modal = ({
     "data-changes": 'variant-overlay-inner|width,background-image,background-color',
     "data-edits": 'content6',
     style: {
-      backgroundImage: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
+      backgroundImage: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
       backgroundColor: '#f1f1f1'
     }
   }, React__default.createElement("div", {
@@ -2531,7 +882,7 @@ const Modal = ({
     "data-changes": '.variant-text4|font-size,color,margin-top,margin-bottom'
   })), React__default.createElement("div", {
     className: 'variant-option variant-clickRedirect',
-    onClick: e => {
+    onClick: function onClick(e) {
       var _trigger$data4, _trigger$data5;
       e.preventDefault();
       trigger !== null && trigger !== void 0 && (_trigger$data4 = trigger.data) !== null && _trigger$data4 !== void 0 && _trigger$data4.buttonURL ? window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonURL) : closeModal();
@@ -2552,7 +903,7 @@ const Modal = ({
     "data-engage-text": '',
     "data-edits": 'text7,text11',
     "data-changes": 'variant-long-close a.variant-link|font-size,color,margin-top,margin-bottom',
-    onClick: e => {
+    onClick: function onClick(e) {
       e.preventDefault();
       closeModal();
     }
@@ -2562,7 +913,7 @@ const Modal = ({
     "data-close-type": 'x_close',
     className: 'variant-link',
     href: '#rdl',
-    onClick: e => {
+    onClick: function onClick(e) {
       e.preventDefault();
       closeModal();
     }
@@ -2572,25 +923,25 @@ const Modal = ({
     "data-close-type": 'x_close',
     className: 'variant-link',
     href: '#rdl',
-    onClick: e => {
+    onClick: function onClick(e) {
       e.preventDefault();
       closeModal();
     }
   }, "[close]")))));
 };
-const TriggerModal = ({
-  trigger
-}) => {
+var TriggerModal = function TriggerModal(_ref2) {
+  var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Modal, {
     trigger: trigger
   }), document.body);
 };
 
-const Youtube = ({
-  trigger
-}) => {
+var Youtube = function Youtube(_ref) {
   var _trigger$brand, _trigger$brand2, _trigger$brand3, _trigger$brand4, _trigger$data;
-  const [open, setOpen] = useState(true);
+  var trigger = _ref.trigger;
+  var _useState = useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
   if (!open) {
     return null;
   }
@@ -2626,7 +977,7 @@ const Youtube = ({
       borderRadius: '0.5rem'
     }
   }, React__default.createElement("button", {
-    onClick: () => {
+    onClick: function onClick() {
       setOpen(false);
     },
     style: {
@@ -2640,7 +991,7 @@ const Youtube = ({
       borderRadius: '0.5rem',
       padding: '0 1rem'
     }
-  }, "\u00D7"), React__default.createElement("iframe", {
+  }, "\xD7"), React__default.createElement("iframe", {
     src: trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.url,
     allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
     style: {
@@ -2650,717 +1001,86 @@ const Youtube = ({
     }
   }))));
 };
-const TriggerYoutube = ({
-  trigger
-}) => {
+var TriggerYoutube = function TriggerYoutube(_ref2) {
+  var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Youtube, {
     trigger: trigger
   }), document.body);
 };
 
-<<<<<<< HEAD
-const setCookie = (name, value) => {
-  return Cookies.set(name, value, {
-    expires: 365,
-    sameSite: 'strict'
-  });
-};
-const getCookie = name => {
-  return Cookies.get(name);
-};
-const onCookieChanged = (callback, interval = 1000) => {
-  let lastCookie = document.cookie;
-  setInterval(() => {
-    const cookie = document.cookie;
-    if (cookie !== lastCookie) {
-      try {
-        callback({
-          oldValue: lastCookie,
-          newValue: cookie
-        });
-      } finally {
-        lastCookie = cookie;
-      }
-    }
-  }, interval);
-};
-
-const getBrand = url => {
-  if (url.includes('tobycarvery.co.uk') || url.includes('localhost:8000') || url.includes('vercel.app')) {
-    return {
-      name: 'Toby Carvery',
-      fontColor: '#ffffff',
-      primaryColor: '#8c1f1f',
-      overlayColor: 'rgba(96,32,50,0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/drink-bg.png'
-    };
-  }
-  if (url.includes('browns-restaurants.co.uk')) {
-    return {
-      name: 'Browns',
-      fontColor: '#ffffff',
-      primaryColor: '#B0A174',
-      overlayColor: 'rgba(136, 121, 76, 0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/cocktail-bg.png'
-    };
-  }
-  if (url.includes('vintageinn.co.uk')) {
-    return {
-      name: 'Vintage Inns',
-      fontColor: '#ffffff',
-      primaryColor: '#B0A174',
-      overlayColor: 'rgba(136, 121, 76, 0.5)',
-      backgroundImage: 'https://d26qevl4nkue45.cloudfront.net/dessert-bg.png'
-    };
-  }
-};
-
-const headers = {
-  'Content-Type': 'application/json'
-};
-const hostname = 'https://target-engine-api.starship-staging.com';
-const request = {
-  get: async (url, params) => {
-    return await fetch(url + '?' + new URLSearchParams(params), {
-      method: 'GET',
-      headers
-    });
-  },
-  post: async (url, body) => {
-    return await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  patch: async (url, body) => {
-    return await fetch(url, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  put: async (url, body) => {
-    return await fetch(url, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  delete: async url => {
-    return await fetch(url, {
-      method: 'DELETE',
-      headers
-    });
-  }
-};
-
-const LoggingProvider = ({
-  debug,
-  children
-}) => {
-  const log = (...message) => {
-    if (debug) {
-      console.log(...message);
-    }
-  };
-  const warn = (...message) => {
-    if (debug) {
-      console.warn(...message);
-    }
-  };
-  const error = (...message) => {
-    if (debug) {
-      console.error(...message);
-    }
-  };
-  const info = (...message) => {
-    if (debug) {
-      console.info(...message);
-    }
-  };
-  return React.createElement(LoggingContext.Provider, {
-    value: {
-      log,
-      warn,
-      error,
-      info
-    }
-  }, children);
-};
-const LoggingContext = createContext({
-  log: () => {},
-  warn: () => {},
-  error: () => {},
-  info: () => {}
-});
-const useLogging = () => {
-  return useContext(LoggingContext);
-};
-
-const useCollector = () => {
-  const {
-    log,
-    error
-  } = useLogging();
-  return useMutation(data => {
-    var _data$visitor;
-    console.log('Sending CollectorUpdate to Collector API', data);
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(response => {
-      log('Collector API response', response);
-      return response;
-    }).catch(err => {
-      error('Collector API error', err);
-      return err;
-    });
-  }, {
-    onSuccess: () => {}
-  });
-};
-
-const useFingerprint = () => {
-  return useContext(FingerprintContext);
-};
-
-const bootstrapSession = ({
-  appId,
-  setSession
-}) => {
-  const session = {
-    firstVisit: undefined
-  };
-  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
-    setCookie('_cm', appId);
-    setSession(session);
-    return;
-  }
-  if (getCookie('_cm') && getCookie('_cm') === appId) {
-    session.firstVisit = false;
-    setSession(session);
-  }
-};
-
-const uuidValidateV4 = uuid => {
-  return validate(uuid) && version(uuid) === 4;
-};
-
-const validVisitorId = id => {
-  return uuidValidateV4(id);
-};
-
-const bootstrapVisitor = ({
-  setVisitor
-}) => {
-  const visitor = {
-    id: undefined
-  };
-  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
-    const visitorId = v4();
-    setCookie('_cm_id', visitorId);
-    visitor.id = visitorId;
-    setVisitor(visitor);
-    return;
-  }
-  if (getCookie('_cm_id')) {
-    visitor.id = getCookie('_cm_id');
-    setVisitor(visitor);
-  }
-};
-
-const VisitorProvider = ({
-  children
-}) => {
-  const {
-    appId,
-    booted
-  } = useFingerprint();
-  const {
-    log
-  } = useLogging();
-  const [session, setSession] = useState({});
-  const [visitor, setVisitor] = useState({});
-  useEffect(() => {
-    if (!booted) {
-      log('VisitorProvider: not booted');
-      return;
-    }
-    log('VisitorProvider: booting');
-    const boot = async () => {
-      await bootstrapSession({
-        appId,
-        setSession
-      });
-      await bootstrapVisitor({
-        setVisitor
-      });
-    };
-    boot();
-    log('VisitorProvider: booted', session, visitor);
-  }, [appId, booted]);
-  return React.createElement(VisitorContext.Provider, {
-    value: {
-      session,
-      visitor
-    }
-  }, children);
-};
-const VisitorContext = createContext({
-  session: {},
-  visitor: {}
-});
-const useVisitor = () => {
-  return useContext(VisitorContext);
-};
-
-const idleStatusAfterMs = 5 * 1000;
-const CollectorProvider = ({
-  children,
-  handlers
-}) => {
-  const {
-    log,
-    error
-  } = useLogging();
-  const {
-    appId,
-    booted,
-    initialDelay,
-    exitIntentTriggers,
-    idleTriggers
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    mutateAsync: collect
-  } = useCollector();
-  const {
-    registerHandler
-  } = useExitIntent({
-    cookie: {
-      key: 'cm_exit',
-      daysToExpire: 7
-    }
-  });
-  const [trigger, setTrigger] = useState({});
-  const [timeoutId, setTimeoutId] = useState(null);
-  const showTrigger = React.useCallback(trigger => {
-    if (!trigger || !trigger.behaviour) {
-      return null;
-    }
-    const handler = (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.id === trigger.id && handler.behaviour === trigger.behaviour)) || (handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === trigger.behaviour));
-    log('CollectorProvider: showTrigger', trigger, handler);
-    if (!handler) {
-      error('No handler found for trigger', trigger);
-      return null;
-    }
-    if (handler.skip) {
-      log('Explicitly skipping trigger handler', trigger, handler);
-      return;
-    }
-    if (!handler.invoke) {
-      error('No invoke method found for handler', handler);
-      return null;
-    }
-    if (handler.delay) {
-      const tId = setTimeout(() => {
-        var _handler$invoke;
-        return (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
-      }, handler.delay);
-      setTimeoutId(tId);
-      return null;
-    }
-    return handler.invoke(trigger);
-  }, [setTimeoutId, log, handlers]);
-  useEffect(() => {
-    if (!exitIntentTriggers) return;
-    registerHandler({
-      id: 'clientTriger',
-      handler: () => {
-        log('CollectorProvider: handler invoked for departure');
-        setTrigger({
-          id: 'exit_intent',
-          behaviour: 'modal',
-          data: {
-            text: 'Before you go...',
-            message: "Don't leave, there's still time to complete a booking now to get your offer",
-            button: 'Start Booking'
-          },
-          brand: getBrand(window.location.href)
-        });
-      }
-    });
-  }, [exitIntentTriggers]);
-  useEffect(() => {
-    if (!booted) {
-      log('CollectorProvider: Not yet collecting, awaiting boot');
-      return;
-    }
-    const delay = setTimeout(() => {
-      if (!visitor.id) {
-        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
-        return;
-      }
-      log('CollectorProvider: collecting data');
-      const params = new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-        const [key, value] = cur.split('=');
-        if (!key) return acc;
-        acc[key] = value;
-        return acc;
-      }, {});
-      collect({
-        appId,
-        visitor,
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params
-        },
-        referrer: {
-          url: document.referrer,
-          title: document.referrer,
-          utm: {
-            source: params === null || params === void 0 ? void 0 : params.utm_source,
-            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-            term: params === null || params === void 0 ? void 0 : params.utm_term,
-            content: params === null || params === void 0 ? void 0 : params.utm_content
-          }
-        }
-      }).then(response => {
-        log('Sent collector data, retrieved:', response);
-        if (response.trigger) {
-          setTrigger(response.trigger);
-        }
-      }).catch(err => {
-        error('failed to store collected data', err);
-      });
-      log('CollectorProvider: collected data');
-      log('This will run after 1 second!');
-    }, initialDelay);
-    return () => {
-      clearTimeout(delay);
-    };
-  }, [booted, visitor]);
-  useEffect(() => {
-    if (!timeoutId) return;
-    return () => clearTimeout(timeoutId);
-  }, [timeoutId]);
-  const renderedTrigger = React.useMemo(() => {
-    return showTrigger(trigger);
-  }, [showTrigger, trigger]);
-  return React.createElement(IdleTimerProvider, {
-    timeout: idleStatusAfterMs,
-    onPresenceChange: presence => {
-      if (presence.type === 'active') {
-        setTimeoutId(null);
-        clearTimeout(timeoutId);
-      }
-      log('presence changed', presence);
-    },
-    onIdle: () => {
-      if (!idleTriggers) return;
-      log('CollectorProvider: handler invoked for presence');
-      setTrigger({
-        id: 'fb_ads_homepage',
-        behaviour: 'modal',
-        data: {
-          text: 'Are you still there?',
-          message: "We'd love to welcome to you to our restaurant, book now to get your offer",
-          button: 'Start Booking'
-        },
-        brand: getBrand(window.location.href)
-      });
-    }
-  }, React.createElement(CollectorContext.Provider, {
-    value: {}
-  }, children, renderedTrigger));
-};
-const CollectorContext = createContext({});
-
-init({
-  dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
-  integrations: [new BrowserTracing({
-    tracePropagationTargets: ['localhost:8000', 'https:yourserver.io/api/']
-  }), new Replay()],
-  tracesSampleRate: 1.0,
-  replaysSessionSampleRate: 1,
-  replaysOnErrorSampleRate: 1.0
-});
-const queryClient = new QueryClient();
-const includedHandlers = [{
-  id: 'modal',
-  behaviour: 'modal',
-  invoke: trigger => React.createElement(TriggerModal, {
-=======
-const baseUrl = 'https://bookings-bff.starship-staging.com';
-const makeFullUrl = (resource, params = {}) => {
-  if (resource.startsWith('/')) {
-    resource = resource.substring(1);
-  }
-  const fullUri = `${baseUrl}/${resource}`;
-  if (Object.keys(params).length === 0) {
-    return fullUri;
-  }
-  return `${fullUri}?${new URLSearchParams(params).toString()}`;
-};
-const Button = ({
-  children,
-  className,
-  onClick,
-  disabled,
-  colour: _colour = 'primary'
-}) => {
-  let builtButtonClasses = `btn step-button bg-${_colour} border-${_colour} text-white hover:bg-${_colour}/80 disabled:text-${_colour}/50 disabled:border-${_colour}/50` + (className ? ' ' + className : '');
-  if (disabled) {
-    builtButtonClasses += ' disabled';
-  }
-  return createElement("button", {
-    disabled: disabled,
-    className: builtButtonClasses,
-    onClick: onClick
-  }, children);
-};
-const Voucher = ({
-  details
-}) => {
-  return createElement("div", null, createElement("h3", null, "Terms of Voucher"), createElement("p", {
-    className: 'text-sm'
-  }, details.termsAndConditions));
-};
-const TriggerInverse = ({}) => {
-  const landingPage = {};
-  const form = {};
-  const location = {};
-  const [open, setOpen] = useState(true);
-  if (!open) {
-    return null;
-  }
-  const {
-    register,
-    handleSubmit,
-    formState: {
-      isSubmitting
-    }
-  } = useForm();
-  const initialState = {
-    busy: false,
-    complete: false,
-    voucher: null,
-    error: null,
-    responseStatusCode: 0
-  };
-  const [state, setState] = useState(initialState);
-  async function submitVoucher(data) {
-    const reqData = {
-      ...data,
-      bookingLink: `${location === null || location === void 0 ? void 0 : location.origin}/${landingPage === null || landingPage === void 0 ? void 0 : landingPage.slug}`
-    };
-    const response = await fetch(makeFullUrl(`campaigns/${form === null || form === void 0 ? void 0 : form.campaign}/voucher?locationID=${landingPage === null || landingPage === void 0 ? void 0 : landingPage.identifier}`), {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-type': 'application/json'
-      },
-      body: JSON.stringify(reqData)
-    });
-    response.json().then(responseData => {
-      if (response.ok) {
-        setState({
-          busy: false,
-          complete: true,
-          voucher: responseData.voucher
-        });
-      } else {
-        setState({
-          busy: false,
-          error: responseData,
-          responseStatusCode: response.status
-        });
-      }
-    });
-  }
-  async function onSubmit(data) {
-    setState({
-      busy: true
-    });
-    try {
-      if (form.campaign !== '') {
-        submitVoucher(data).then(() => {
-          const eventData = {
-            item_name: landingPage === null || landingPage === void 0 ? void 0 : landingPage.name,
-            affiliation: 'Booking Flow'
-          };
-          console.log(eventData);
-        });
-      }
-    } catch (e) {}
-  }
-  if (state.complete === true) {
-    return createElement("div", {
-      className: 'container'
-    }, createElement("h2", null, "Voucher Sent!"), createElement("p", {
-      className: 'text-md'
-    }, "Good news! We've sent your voucher to the email provided!"), state.voucher && createElement("div", {
-      className: 'col-12 mt-3'
-    }, createElement(Voucher, {
-      details: state.voucher
-    })));
-  }
-  if (state.responseStatusCode === 409) {
-    return createElement("div", {
-      className: 'container'
-    }, createElement("h2", {
-      className: 'mt-3'
-    }, "Uh-oh!"), createElement("p", null, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\u00A0", createElement("a", {
-      href: '/help',
-      className: 'underline font-serif tracking-wide',
-      onClick: () => setOpen(false)
-    }, "contact us")));
-  }
-  return createElement("div", {
-    style: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 9999
-    }
-  }, createElement("main", {
-    className: 'flex-grow flex flex-col justify-center container relative'
-  }, createElement("div", {
-    className: 'w-full'
-  }, createElement("div", {
-    className: 'cms-content text-center md:text-left'
-  }, createElement("h2", null, "Get Your Voucher"), createElement("p", null, "To receive your voucher, we just need a few details from you."), createElement("h3", {
-    className: `bar-title border-l-4 border-solid border-${landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour}`
-  }, "Contact Info"), createElement("form", {
-    onSubmit: handleSubmit(onSubmit)
-  }, createElement("div", {
-    className: 'grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2'
-  }, createElement("div", null, createElement("label", {
-    htmlFor: 'first_name'
-  }, "First Name*"), createElement("input", Object.assign({}, register('firstName', {
-    required: true,
-    minLength: 2,
-    maxLength: 30,
-    validate: value => value.trim().length >= 2
-  }), {
-    type: 'text',
-    className: 'form-input',
-    id: 'firstName'
-  }))), createElement("div", null, createElement("label", {
-    htmlFor: 'last_name'
-  }, "Last Name*"), createElement("input", Object.assign({}, register('lastName', {
-    required: true,
-    minLength: 2,
-    maxLength: 30,
-    validate: value => value.trim().length >= 2
-  }), {
-    type: 'text',
-    className: 'form-input',
-    id: 'lastName'
-  }))), createElement("div", null, createElement("label", {
-    htmlFor: 'email'
-  }, "Email*"), createElement("input", Object.assign({}, register('emailAddress', {
-    required: true
-  }), {
-    type: 'email',
-    className: 'form-input',
-    id: 'email'
-  })))), createElement("div", null, createElement("p", null, "* Required Field")), createElement("div", {
-    className: 'flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start'
-  }, createElement("div", {
-    className: 'form-check'
-  }, createElement("input", Object.assign({
-    type: 'checkbox'
-  }, register('terms', {
-    required: true
-  }), {
-    className: 'form-check-input',
-    id: 'terms'
-  })), ' ', createElement("label", {
-    htmlFor: 'terms',
-    className: 'form-check-label'
-  }, "I confirm that I have read & agreed with the", ' ', createElement("a", {
-    href: landingPage === null || landingPage === void 0 ? void 0 : landingPage.privacyPolicy,
-    target: '_blank',
-    rel: 'noreferrer'
-  }, "Privacy Policy"), "*")), createElement(Button, {
-    className: 'btn mt-2 md:mt-0',
-    type: 'submit',
-    colour: landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour,
-    disabled: state.busy || isSubmitting
-  }, isSubmitting || state.busy ? 'Sending Voucher...' : 'Get My Voucher')), state.error && state.responseStatusCode !== 409 && createElement("div", {
-    className: `alert mt-5 bg-${landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour}/20`
-  }, "There was a problem sending your voucher. Please check your details and try again."))))));
-};
-
-const clientHandlers = [{
+var clientHandlers = [{
   id: 'modal_v1',
   behaviour: 'BEHAVIOUR_MODAL',
-  invoke: trigger => React__default.createElement(TriggerModal, {
->>>>>>> develop
-    trigger: trigger
-  })
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerModal, {
+      trigger: trigger
+    });
+  }
 }, {
   id: 'youtube_v1',
   behaviour: 'youtube',
-  invoke: trigger => React__default.createElement(TriggerYoutube, {
-    trigger: trigger
-  })
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerYoutube, {
+      trigger: trigger
+    });
+  }
 }, {
   id: 'inverse_v1',
   behaviour: 'inverse_flow',
-  invoke: trigger => React__default.createElement(TriggerInverse, {
-    trigger: trigger
-  })
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerInverse, {
+      trigger: trigger
+    });
+  }
 }];
 
-const queryClient = new QueryClient();
-const FingerprintProvider = ({
-  appId,
-  children,
-  consent: _consent = false,
-  consentCallback,
-  debug,
-  defaultHandlers,
-  initialDelay: _initialDelay = 0,
-  exitIntentTriggers: _exitIntentTriggers = true,
-  idleTriggers: _idleTriggers = true
-}) => {
-  const [consentGiven, setConsentGiven] = useState(_consent);
-  const [booted, setBooted] = useState(false);
-<<<<<<< HEAD
-  const [handlers, setHandlers] = useState(defaultHandlers || includedHandlers);
-  const registerHandler = React.useCallback(trigger => {
-=======
-  const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers);
-  const registerHandler = React__default.useCallback(trigger => {
->>>>>>> develop
-    setHandlers(handlers => {
-      return [...handlers, trigger];
+var queryClient = new QueryClient();
+var FingerprintProvider = function FingerprintProvider(_ref) {
+  var appId = _ref.appId,
+    children = _ref.children,
+    _ref$consent = _ref.consent,
+    consent = _ref$consent === void 0 ? false : _ref$consent,
+    consentCallback = _ref.consentCallback,
+    debug = _ref.debug,
+    defaultHandlers = _ref.defaultHandlers,
+    _ref$initialDelay = _ref.initialDelay,
+    initialDelay = _ref$initialDelay === void 0 ? 0 : _ref$initialDelay,
+    _ref$exitIntentTrigge = _ref.exitIntentTriggers,
+    exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
+    _ref$idleTriggers = _ref.idleTriggers,
+    idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers;
+  var _useState = useState(consent),
+    consentGiven = _useState[0],
+    setConsentGiven = _useState[1];
+  var _useState2 = useState(false),
+    booted = _useState2[0],
+    setBooted = _useState2[1];
+  var _useState3 = useState(defaultHandlers || clientHandlers),
+    handlers = _useState3[0],
+    setHandlers = _useState3[1];
+  var registerHandler = React__default.useCallback(function (trigger) {
+    setHandlers(function (handlers) {
+      return [].concat(handlers, [trigger]);
     });
   }, [setHandlers]);
-  useEffect(() => {
-    if (_consent) {
-      setConsentGiven(_consent);
+  useEffect(function () {
+    if (consent) {
+      setConsentGiven(consent);
       return;
     }
     if (!consentCallback) return;
-    const consentGivenViaCallback = consentCallback();
-    const interval = setInterval(() => {
-      setConsentGiven(_consent);
+    var consentGivenViaCallback = consentCallback();
+    var interval = setInterval(function () {
+      setConsentGiven(consent);
     }, 1000);
     if (consentGivenViaCallback) {
       clearInterval(interval);
     }
-    return () => clearInterval(interval);
-  }, [consentCallback, _consent]);
-  useEffect(() => {
+    return function () {
+      return clearInterval(interval);
+    };
+  }, [consentCallback, consent]);
+  useEffect(function () {
     if (!appId) {
       throw new Error('C&M Fingerprint: appId is required');
     }
@@ -3370,8 +1090,13 @@ const FingerprintProvider = ({
     if (!consentGiven) {
       return;
     }
-    const performBoot = async () => {
-      setBooted(true);
+    var performBoot = function performBoot() {
+      try {
+        setBooted(true);
+        return Promise.resolve();
+      } catch (e) {
+        return Promise.reject(e);
+      }
     };
     performBoot();
   }, [consentGiven]);
@@ -3381,44 +1106,39 @@ const FingerprintProvider = ({
   if (!consentGiven) {
     return children;
   }
-<<<<<<< HEAD
-  return React.createElement(ErrorBoundary, {
-    fallback: React.createElement("p", null, "An error with Fingerprint has occurred."),
-    onError: (error, info) => console.error(error, info)
-  }, React.createElement(LoggingProvider, {
-=======
   return React__default.createElement(LoggingProvider, {
->>>>>>> develop
     debug: debug
   }, React__default.createElement(QueryClientProvider, {
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {
     value: {
-      appId,
-      booted,
+      appId: appId,
+      booted: booted,
       currentTrigger: {},
-      registerHandler,
-      trackEvent: () => {
+      registerHandler: registerHandler,
+      trackEvent: function trackEvent() {
         alert('trackEvent not implemented');
       },
-      trackPageView: () => {
+      trackPageView: function trackPageView() {
         alert('trackPageView not implemented');
       },
-      unregisterHandler: () => {
+      unregisterHandler: function unregisterHandler() {
         alert('unregisterHandler not implemented');
       },
-      initialDelay: _initialDelay,
-      idleTriggers: _idleTriggers,
-      exitIntentTriggers: _exitIntentTriggers
+      initialDelay: initialDelay,
+      idleTriggers: idleTriggers,
+      exitIntentTriggers: exitIntentTriggers
     }
   }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
   }, React__default.createElement(ErrorBoundary, {
-    onError: (error, info) => console.error(error, info),
+    onError: function onError(error, info) {
+      return console.error(error, info);
+    },
     fallback: React__default.createElement("div", null, "An application error occurred.")
   }, children)))))));
 };
-const defaultFingerprintState = {
+var defaultFingerprintState = {
   appId: '',
   booted: false,
   consent: false,
@@ -3426,14 +1146,12 @@ const defaultFingerprintState = {
   exitIntentTriggers: false,
   idleTriggers: false,
   initialDelay: 0,
-  registerHandler: () => {},
-  trackEvent: () => {},
-  trackPageView: () => {},
-  unregisterHandler: () => {}
+  registerHandler: function registerHandler() {},
+  trackEvent: function trackEvent() {},
+  trackPageView: function trackPageView() {},
+  unregisterHandler: function unregisterHandler() {}
 };
-const FingerprintContext = createContext({
-  ...defaultFingerprintState
-});
+var FingerprintContext = createContext(_extends({}, defaultFingerprintState));
 
 export { CollectorContext, CollectorProvider, FingerprintContext, FingerprintProvider, onCookieChanged, useCollector, useFingerprint };
 //# sourceMappingURL=index.modern.js.map

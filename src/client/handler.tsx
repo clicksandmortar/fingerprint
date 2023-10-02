@@ -1,8 +1,8 @@
-import { Trigger } from './types'
+import React from 'react'
+import TriggerInverse from '../behaviours/TriggerInverse'
 import { TriggerModal } from '../behaviours/TriggerModal'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'
-import TriggerInverse from '../behaviours/TriggerInverse'
-import React from 'react'
+import { Trigger } from './types'
 
 // @todo refactor where this lives
 type TriggerCallback = (
