@@ -383,7 +383,7 @@ const CollectorProvider = ({
     try {
       request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
         seenTriggerIDs: [trigger.id]
-      }).then(r => r.json()).then(log);
+      }).then(log);
     } catch (e) {
       error(e);
     }

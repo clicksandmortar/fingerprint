@@ -30155,7 +30155,7 @@ const CollectorProvider = ({ children, handlers })=>{
                 seenTriggerIDs: [
                     trigger.id
                 ]
-            }).then((r)=>r.json()).then(log);
+            }).then(log);
         } catch (e) {
             error(e);
         }
@@ -30304,7 +30304,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 296,
+            lineNumber: 295,
             columnNumber: 5
         },
         __self: undefined
@@ -30316,7 +30316,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 309,
+            lineNumber: 308,
             columnNumber: 7
         },
         __self: undefined

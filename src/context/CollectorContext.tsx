@@ -133,7 +133,6 @@ export const CollectorProvider = ({
         .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
           seenTriggerIDs: [trigger.id]
         })
-        .then((r) => r.json())
         .then(log)
     } catch (e) {
       error(e)

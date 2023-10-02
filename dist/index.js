@@ -438,8 +438,6 @@ var CollectorProvider = function CollectorProvider(_ref) {
     try {
       request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
         seenTriggerIDs: [trigger.id]
-      }).then(function (r) {
-        return r.json();
       }).then(log);
     } catch (e) {
       error(e);
