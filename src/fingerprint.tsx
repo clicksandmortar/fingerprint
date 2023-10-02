@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './styles.module.css'
 import { Widget } from './widget/Widget'
 
 // Creates widget container

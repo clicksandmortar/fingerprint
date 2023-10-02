@@ -6,8 +6,13 @@ type EnvVars = {
 export function getEnvVars(): EnvVars {
   // TODO: temp hack for managing prod and dev env.
   let isDev = false
-  if (window.location.host.includes('localhost')) isDev = true
-  if (window.location.host === `stage65-az.harvester.co.uk`) isDev = true
+
+  if (typeof window === 'undefined') {
+    isDev = true
+  } else {
+    if (window?.location?.host?.includes('localhost')) isDev = true
+    if (window?.location?.host === `stage65-az.harvester.co.uk`) isDev = true
+  }
 
   if (isDev)
     return {
