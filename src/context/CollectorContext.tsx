@@ -1,14 +1,15 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react'
+import { isMobile } from 'react-device-detect'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
 import { Handler } from '../client/handler'
 import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
+import { hostname, request } from '../utils/http'
 import { useLogging } from './LoggingContext'
-import { useVisitor } from './VisitorContext'
 import { useMixpanel } from './MixpanelContext'
-import { isMobile } from 'react-device-detect'
+import { useVisitor } from './VisitorContext'
 
 const idleStatusAfterMs = 5 * 1000
 
@@ -120,11 +121,24 @@ export const CollectorProvider = ({
       return null
     }
 
+    // might be worth combining tracking at some point
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     })
+
+    try {
+      request
+        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+          seenTriggerIDs: [trigger.id]
+        })
+        .then((r) => r.json())
+        .then(log)
+        .catch(error)
+    } catch (e) {
+      error(e)
+    }
 
     return handler.invoke(trigger)
   }
