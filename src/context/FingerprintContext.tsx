@@ -4,22 +4,9 @@ import { LoggingProvider } from './LoggingContext'
 import { CollectorProvider } from './CollectorContext'
 import { VisitorProvider } from './VisitorContext'
 import { PageView, Trigger } from '../client/types'
-import * as Sentry from '@sentry/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { MixpanelProvider } from './MixpanelContext'
 import { Handler, clientHandlers } from '../client/handler'
-
-Sentry.init({
-  dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
-  integrations: [
-    new Sentry.BrowserTracing({
-      // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-      tracePropagationTargets: ['localhost:8000', 'https:yourserver.io/api/']
-    })
-  ],
-  // Performance Monitoring
-  tracesSampleRate: 1.0 // Capture 100% of the transactions, reduce in production!
-})
 
 const queryClient = new QueryClient()
 
@@ -122,49 +109,43 @@ FingerprintProviderProps) => {
   }
 
   return (
-    // @ts-ignore
-    <Sentry.ErrorBoundary
-      fallback={<p>An error with Fingerprint has occurred.</p>}
-      onError={(error, info) => console.error(error, info)}
-    >
-      <LoggingProvider debug={debug}>
-        <QueryClientProvider client={queryClient}>
-          <FingerprintContext.Provider
-            value={{
-              appId,
-              booted,
-              currentTrigger: {},
-              registerHandler,
-              trackEvent: () => {
-                alert('trackEvent not implemented')
-              },
-              trackPageView: () => {
-                alert('trackPageView not implemented')
-              },
-              unregisterHandler: () => {
-                alert('unregisterHandler not implemented')
-              },
-              initialDelay,
-              idleTriggers,
-              exitIntentTriggers
-            }}
-          >
-            <VisitorProvider>
-              <MixpanelProvider>
-                <CollectorProvider handlers={handlers}>
-                  <ErrorBoundary
-                    onError={(error, info) => console.error(error, info)}
-                    fallback={<div>An application error occurred.</div>}
-                  >
-                    {children}
-                  </ErrorBoundary>
-                </CollectorProvider>
-              </MixpanelProvider>
-            </VisitorProvider>
-          </FingerprintContext.Provider>
-        </QueryClientProvider>
-      </LoggingProvider>
-    </Sentry.ErrorBoundary>
+    <LoggingProvider debug={debug}>
+      <QueryClientProvider client={queryClient}>
+        <FingerprintContext.Provider
+          value={{
+            appId,
+            booted,
+            currentTrigger: {},
+            registerHandler,
+            trackEvent: () => {
+              alert('trackEvent not implemented')
+            },
+            trackPageView: () => {
+              alert('trackPageView not implemented')
+            },
+            unregisterHandler: () => {
+              alert('unregisterHandler not implemented')
+            },
+            initialDelay,
+            idleTriggers,
+            exitIntentTriggers
+          }}
+        >
+          <VisitorProvider>
+            <MixpanelProvider>
+              <CollectorProvider handlers={handlers}>
+                <ErrorBoundary
+                  onError={(error, info) => console.error(error, info)}
+                  fallback={<div>An application error occurred.</div>}
+                >
+                  {children}
+                </ErrorBoundary>
+              </CollectorProvider>
+            </MixpanelProvider>
+          </VisitorProvider>
+        </FingerprintContext.Provider>
+      </QueryClientProvider>
+    </LoggingProvider>
   )
 }
 
