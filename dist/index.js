@@ -1,6 +1,5 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var Sentry = require('@sentry/react');
 var reactQuery = require('@tanstack/react-query');
 var React = require('react');
 var React__default = _interopDefault(React);
@@ -33,10 +32,14 @@ function _objectDestructuringEmpty(obj) {
 }
 
 function getEnvVars() {
-  return {
+  var isDev = window.location.host.includes('localhost');
+  if (isDev) return {
     FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95',
-    SENTRY_DSN: ''
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
   };
 }
 
@@ -1044,13 +1047,6 @@ var clientHandlers = [{
   }
 }];
 
-Sentry.init({
-  dsn: getEnvVars().SENTRY_DSN,
-  integrations: [new Sentry.BrowserTracing({
-    tracePropagationTargets: ['localhost:8000', 'https:yourserver.io/api/']
-  })],
-  tracesSampleRate: 1.0
-});
 var queryClient = new reactQuery.QueryClient();
 var FingerprintProvider = function FingerprintProvider(_ref) {
   var appId = _ref.appId,

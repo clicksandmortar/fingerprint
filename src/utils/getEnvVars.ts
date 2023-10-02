@@ -4,22 +4,20 @@ type EnvVars = {
 }
 
 export function getEnvVars(): EnvVars {
-  // TODO: find a proper way to manage env vars.
-  // AT THE MOMENT, literally uncomment / recomment the bit needed based on branch.
-  // DO NOTE during merges
+  // TODO: temp hack for managing prod and dev env.
+  const isDev = window.location.host.includes('localhost')
 
-  // production
-  // return {
-  //   FINGERPRINT_API_HOSTNAME:
-  //     'https://target-engine-api.starship-production.com',
-  //   MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27',
-  //
-  // }
+  if (isDev)
+    return {
+      FINGERPRINT_API_HOSTNAME:
+        'https://target-engine-api.starship-staging.com',
+      MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+    }
 
-  // dev
   return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+    FINGERPRINT_API_HOSTNAME:
+      'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
   }
 }
 
