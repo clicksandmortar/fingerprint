@@ -128,6 +128,22 @@ export const CollectorProvider = ({
       triggerBehaviour: trigger.behaviour
     })
 
+    if (!handler.invoke) {
+      error('No invoke method found for handler', handler)
+
+      return null
+    }
+
+    if (handler.delay) {
+      const tId = setTimeout(() => {
+        return handler.invoke?.(trigger)
+      }, handler.delay)
+
+      setTimeoutId(tId)
+
+      return null
+    }
+
     return handler.invoke(trigger)
   }
 
