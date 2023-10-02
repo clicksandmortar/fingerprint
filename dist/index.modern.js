@@ -1,11 +1,11 @@
 import React__default, { createContext, useContext, useState, useEffect, useCallback, createElement } from 'react';
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 import Cookies from 'js-cookie';
 import { validate, version, v4 } from 'uuid';
 import mixpanel from 'mixpanel-browser';
-import { isMobile } from 'react-device-detect';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactDOM from 'react-dom';
 import { useForm } from 'react-hook-form';
@@ -362,6 +362,13 @@ const CollectorProvider = ({
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     });
+    try {
+      request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+        seenTriggerIDs: [trigger.id]
+      }).then(r => r.json()).then(log).catch(error);
+    } catch (e) {
+      error(e);
+    }
     return handler.invoke(trigger);
   };
   const fireIdleTrigger = useCallback(() => {

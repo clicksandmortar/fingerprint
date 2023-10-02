@@ -3,12 +3,12 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var React = require('react');
 var React__default = _interopDefault(React);
 var reactQuery = require('@tanstack/react-query');
+var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
 var Cookies = _interopDefault(require('js-cookie'));
 var uuid = require('uuid');
 var mixpanel = _interopDefault(require('mixpanel-browser'));
-var reactDeviceDetect = require('react-device-detect');
 var reactErrorBoundary = require('react-error-boundary');
 var ReactDOM = _interopDefault(require('react-dom'));
 var reactHookForm = require('react-hook-form');
@@ -417,6 +417,15 @@ var CollectorProvider = function CollectorProvider(_ref) {
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     });
+    try {
+      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+        seenTriggerIDs: [trigger.id]
+      }).then(function (r) {
+        return r.json();
+      }).then(log)["catch"](error);
+    } catch (e) {
+      error(e);
+    }
     return handler.invoke(trigger);
   };
   var fireIdleTrigger = React.useCallback(function () {
