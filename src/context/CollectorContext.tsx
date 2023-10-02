@@ -239,10 +239,16 @@ export const CollectorProvider = ({
             // remove intently overlay here
             log('CollectorProvider: user is in Fingerprint cohort')
             setIntently(false)
+            trackEvent('user_cohort', {
+              cohort: 'fingerprint'
+            })
           } else {
             // show intently overlay here
             log('CollectorProvider: user is in Intently cohort')
             setIntently(true)
+            trackEvent('user_cohort', {
+              cohort: 'intently'
+            })
           }
         })
         .catch((err) => {
