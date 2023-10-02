@@ -135,7 +135,6 @@ export const CollectorProvider = ({
         })
         .then((r) => r.json())
         .then(log)
-        .catch(error)
     } catch (e) {
       error(e)
     }
