@@ -41218,6 +41218,7 @@ const Modal = ({ trigger })=>{
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
 }
 
 @media screen and (min-width: 768px) {
@@ -41362,7 +41363,7 @@ const Modal = ({ trigger })=>{
         className: "overlay",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 245,
+            lineNumber: 246,
             columnNumber: 5
         },
         __self: undefined
@@ -41378,7 +41379,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 246,
+            lineNumber: 247,
             columnNumber: 7
         },
         __self: undefined
@@ -41386,7 +41387,7 @@ const Modal = ({ trigger })=>{
         className: "image-darken",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 257,
+            lineNumber: 258,
             columnNumber: 9
         },
         __self: undefined
@@ -41395,7 +41396,7 @@ const Modal = ({ trigger })=>{
         onClick: closeModal,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 258,
+            lineNumber: 259,
             columnNumber: 11
         },
         __self: undefined
@@ -41406,7 +41407,7 @@ const Modal = ({ trigger })=>{
         viewBox: "0 0 16 16",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 259,
+            lineNumber: 260,
             columnNumber: 13
         },
         __self: undefined
@@ -41416,7 +41417,7 @@ const Modal = ({ trigger })=>{
         d: "M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 265,
+            lineNumber: 266,
             columnNumber: 15
         },
         __self: undefined
@@ -41424,7 +41425,7 @@ const Modal = ({ trigger })=>{
         text: trigger?.data?.heading,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 273,
+            lineNumber: 274,
             columnNumber: 11
         },
         __self: undefined
@@ -41435,7 +41436,7 @@ const Modal = ({ trigger })=>{
         className: "empty-div-spacer-whaaaaat-69696969",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 275,
+            lineNumber: 276,
             columnNumber: 11
         },
         __self: undefined
@@ -41449,7 +41450,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 279,
+            lineNumber: 280,
             columnNumber: 11
         },
         __self: undefined
@@ -41457,7 +41458,7 @@ const Modal = ({ trigger })=>{
         className: "mainText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 288,
+            lineNumber: 289,
             columnNumber: 13
         },
         __self: undefined
@@ -41465,7 +41466,7 @@ const Modal = ({ trigger })=>{
         className: "buttonContainer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 290,
+            lineNumber: 291,
             columnNumber: 11
         },
         __self: undefined
@@ -41475,7 +41476,7 @@ const Modal = ({ trigger })=>{
         onClick: (e)=>redirectUser(e),
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 291,
+            lineNumber: 292,
             columnNumber: 13
         },
         __self: undefined
@@ -41492,7 +41493,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 306,
+            lineNumber: 307,
             columnNumber: 32
         },
         __self: undefined

@@ -94,6 +94,7 @@ const Modal = ({ trigger }: Props) => {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
 }
 
 @media screen and (min-width: 768px) {
