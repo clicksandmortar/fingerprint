@@ -1,16 +1,17 @@
-import React, { createContext, useEffect, useState } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { LoggingProvider } from './LoggingContext'
-import { CollectorProvider } from './CollectorContext'
-import { VisitorProvider } from './VisitorContext'
-import { PageView, Trigger } from '../client/types'
 import * as Sentry from '@sentry/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { MixpanelProvider } from './MixpanelContext'
 import { Handler, clientHandlers } from '../client/handler'
+import { PageView, Trigger } from '../client/types'
+import { getEnvVars } from '../utils/getEnvVars'
+import { CollectorProvider } from './CollectorContext'
+import { LoggingProvider } from './LoggingContext'
+import { MixpanelProvider } from './MixpanelContext'
+import { VisitorProvider } from './VisitorContext'
 
 Sentry.init({
-  dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
+  dsn: getEnvVars().SENTRY_DSN,
   integrations: [
     new Sentry.BrowserTracing({
       // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
