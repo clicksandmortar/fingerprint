@@ -219,7 +219,7 @@ const Modal = ({ trigger }: Props) => {
 }
 
 .image-darken {
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.2);
   width: 100%;
   height: 100%;
   display: flex;
