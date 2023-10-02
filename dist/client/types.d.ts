@@ -31,11 +31,13 @@ export declare type CollectorResponse = {
     firstSeen: Date;
     lastSeen: Date;
     visits: number;
-    trigger: Trigger;
+    pageTriggers: Trigger[];
+    intently: boolean;
 };
 export declare type Trigger = {
     id?: string;
-    behaviour?: string;
+    invocation?: 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
+    behaviour?: 'BEHAVIOUR_MODAL';
     data?: {
         [key: string]: string;
     };

@@ -13,7 +13,7 @@ export const bootstrapSession = ({
   }
 
   if (!getCookie('_cm') || getCookie('_cm') !== appId) {
-    setCookie('_cm', appId)
+    setCookie('_cm', appId, 365)
 
     setSession(session)
 

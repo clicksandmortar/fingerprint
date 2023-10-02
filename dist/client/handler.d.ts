@@ -1,5 +1,11 @@
-import { CollectorResponse, CollectorUpdate } from './types';
-export declare const sendEvent: (data: CollectorUpdate) => CollectorResponse;
-export declare const getOffer: (url: string) => string | undefined;
-export declare const getUrl: (url: string) => string | undefined;
-export declare const getBrand: (url: string) => any;
+import React from 'react';
+import { Trigger } from './types';
+declare type TriggerCallback = (trigger: Trigger) => void | JSX.Element | React.ReactPortal;
+export declare type Handler = {
+    id?: string;
+    invocation?: 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
+    behaviour?: string;
+    invoke?: TriggerCallback;
+};
+export declare const clientHandlers: Handler[];
+export {};
