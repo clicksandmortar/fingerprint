@@ -41685,7 +41685,7 @@ const Modal = ({ trigger })=>{
 }
 
 @media screen and (min-width: 768px) {
-  .modal {
+  .f` + randomHash + `modal {
     width: 50%;
     max-width: 600px;
   }
@@ -41704,7 +41704,7 @@ const Modal = ({ trigger })=>{
 
 
 @media screen and (max-width:768px) {
-  .modal {
+  .f` + randomHash + `modal {
     width: 100vw;
   }
 }
@@ -41743,23 +41743,23 @@ const Modal = ({ trigger })=>{
 
 
 @media screen and (min-width: 768px) {
-  .curlyText {
+  .f` + randomHash + `curlyText {
     margin-top: -200px;
   }
 }
 
 @media screen and (min-width: 1024px) {
-  .curlyText {
+  .f` + randomHash + `curlyText {
     margin-top: -200px;
   }
 
-  .mainText {
+  .f` + randomHash + `mainText {
     font-size: 2.4rem;
   }
 }
 
 @media screen and (min-width: 1150px) {
-  .mainText {
+  .f` + randomHash + `mainText {
     font-size: 2.7rem;
   }
 }
@@ -41827,7 +41827,7 @@ const Modal = ({ trigger })=>{
         className: "f" + randomHash + "-overlay",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 302,
+            lineNumber: 314,
             columnNumber: 5
         },
         __self: undefined
@@ -41843,7 +41843,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 303,
+            lineNumber: 315,
             columnNumber: 7
         },
         __self: undefined
@@ -41851,7 +41851,7 @@ const Modal = ({ trigger })=>{
         className: "f" + randomHash + "-image-darken",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 314,
+            lineNumber: 326,
             columnNumber: 9
         },
         __self: undefined
@@ -41860,7 +41860,7 @@ const Modal = ({ trigger })=>{
         onClick: closeModal,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 315,
+            lineNumber: 327,
             columnNumber: 11
         },
         __self: undefined
@@ -41871,7 +41871,7 @@ const Modal = ({ trigger })=>{
         viewBox: "0 0 16 16",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 319,
+            lineNumber: 331,
             columnNumber: 13
         },
         __self: undefined
@@ -41881,7 +41881,7 @@ const Modal = ({ trigger })=>{
         d: "M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 325,
+            lineNumber: 337,
             columnNumber: 15
         },
         __self: undefined
@@ -41890,7 +41890,7 @@ const Modal = ({ trigger })=>{
         randomHash: randomHash,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 333,
+            lineNumber: 345,
             columnNumber: 11
         },
         __self: undefined
@@ -41901,7 +41901,7 @@ const Modal = ({ trigger })=>{
         className: "f" + randomHash + "--spacer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 335,
+            lineNumber: 347,
             columnNumber: 11
         },
         __self: undefined
@@ -41915,7 +41915,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 336,
+            lineNumber: 348,
             columnNumber: 11
         },
         __self: undefined
@@ -41923,7 +41923,7 @@ const Modal = ({ trigger })=>{
         className: "f" + randomHash + "-mainText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 345,
+            lineNumber: 357,
             columnNumber: 13
         },
         __self: undefined
@@ -41931,7 +41931,7 @@ const Modal = ({ trigger })=>{
         className: "f" + randomHash + "-buttonContainer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 349,
+            lineNumber: 361,
             columnNumber: 11
         },
         __self: undefined
@@ -41941,7 +41941,7 @@ const Modal = ({ trigger })=>{
         onClick: (e)=>redirectUser(e),
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 350,
+            lineNumber: 362,
             columnNumber: 13
         },
         __self: undefined
@@ -41961,7 +41961,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 365,
+            lineNumber: 377,
             columnNumber: 32
         },
         __self: undefined
