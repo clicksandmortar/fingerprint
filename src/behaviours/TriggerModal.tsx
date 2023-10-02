@@ -137,7 +137,7 @@ const Modal = ({ trigger }: Props) => {
 @media screen and (min-width: 768px) {
   .f` +
       randomHash +
-      `modal {
+      `-modal {
     width: 50%;
     max-width: 600px;
   }
@@ -160,7 +160,7 @@ const Modal = ({ trigger }: Props) => {
 @media screen and (max-width:768px) {
   .f` +
       randomHash +
-      `modal {
+      `-modal {
     width: 100vw;
   }
 }
@@ -207,7 +207,7 @@ const Modal = ({ trigger }: Props) => {
 @media screen and (min-width: 768px) {
   .f` +
       randomHash +
-      `curlyText {
+      `-curlyText {
     margin-top: -200px;
   }
 }
@@ -215,13 +215,13 @@ const Modal = ({ trigger }: Props) => {
 @media screen and (min-width: 1024px) {
   .f` +
       randomHash +
-      `curlyText {
+      `-curlyText {
     margin-top: -200px;
   }
 
   .f` +
       randomHash +
-      `mainText {
+      `-mainText {
     font-size: 2.4rem;
   }
 }
@@ -229,7 +229,7 @@ const Modal = ({ trigger }: Props) => {
 @media screen and (min-width: 1150px) {
   .f` +
       randomHash +
-      `mainText {
+      `-mainText {
     font-size: 2.7rem;
   }
 }

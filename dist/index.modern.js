@@ -629,7 +629,7 @@ const Modal = ({
 }
 
 @media screen and (min-width: 768px) {
-  .f` + randomHash + `modal {
+  .f` + randomHash + `-modal {
     width: 50%;
     max-width: 600px;
   }
@@ -648,7 +648,7 @@ const Modal = ({
 
 
 @media screen and (max-width:768px) {
-  .f` + randomHash + `modal {
+  .f` + randomHash + `-modal {
     width: 100vw;
   }
 }
@@ -687,23 +687,23 @@ const Modal = ({
 
 
 @media screen and (min-width: 768px) {
-  .f` + randomHash + `curlyText {
+  .f` + randomHash + `-curlyText {
     margin-top: -200px;
   }
 }
 
 @media screen and (min-width: 1024px) {
-  .f` + randomHash + `curlyText {
+  .f` + randomHash + `-curlyText {
     margin-top: -200px;
   }
 
-  .f` + randomHash + `mainText {
+  .f` + randomHash + `-mainText {
     font-size: 2.4rem;
   }
 }
 
 @media screen and (min-width: 1150px) {
-  .f` + randomHash + `mainText {
+  .f` + randomHash + `-mainText {
     font-size: 2.7rem;
   }
 }
