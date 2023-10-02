@@ -41770,6 +41770,7 @@ const Modal = ({ trigger })=>{
   text-transform: uppercase;
   max-width: 400px;
   margin: 0 auto;
+  text-decoration: none;
 }
 
 .` + randomHash + `cta:hover {
@@ -41819,7 +41820,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-overlay",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 274,
+            lineNumber: 275,
             columnNumber: 5
         },
         __self: undefined
@@ -41835,7 +41836,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 275,
+            lineNumber: 276,
             columnNumber: 7
         },
         __self: undefined
@@ -41843,7 +41844,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-image-darken",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 286,
+            lineNumber: 287,
             columnNumber: 9
         },
         __self: undefined
@@ -41852,7 +41853,7 @@ const Modal = ({ trigger })=>{
         onClick: closeModal,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 287,
+            lineNumber: 288,
             columnNumber: 11
         },
         __self: undefined
@@ -41863,7 +41864,7 @@ const Modal = ({ trigger })=>{
         viewBox: "0 0 16 16",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 288,
+            lineNumber: 289,
             columnNumber: 13
         },
         __self: undefined
@@ -41873,7 +41874,7 @@ const Modal = ({ trigger })=>{
         d: "M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 294,
+            lineNumber: 295,
             columnNumber: 15
         },
         __self: undefined
@@ -41882,7 +41883,7 @@ const Modal = ({ trigger })=>{
         randomHash: randomHash,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 302,
+            lineNumber: 303,
             columnNumber: 11
         },
         __self: undefined
@@ -41893,7 +41894,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "--spacer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 304,
+            lineNumber: 305,
             columnNumber: 11
         },
         __self: undefined
@@ -41907,7 +41908,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 305,
+            lineNumber: 306,
             columnNumber: 11
         },
         __self: undefined
@@ -41915,7 +41916,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-mainText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 314,
+            lineNumber: 315,
             columnNumber: 13
         },
         __self: undefined
@@ -41923,7 +41924,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-buttonContainer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 318,
+            lineNumber: 319,
             columnNumber: 11
         },
         __self: undefined
@@ -41933,7 +41934,7 @@ const Modal = ({ trigger })=>{
         onClick: (e)=>redirectUser(e),
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 319,
+            lineNumber: 320,
             columnNumber: 13
         },
         __self: undefined
@@ -41950,7 +41951,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 334,
+            lineNumber: 335,
             columnNumber: 32
         },
         __self: undefined

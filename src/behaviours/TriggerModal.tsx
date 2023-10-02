@@ -210,6 +210,7 @@ const Modal = ({ trigger }: Props) => {
   text-transform: uppercase;
   max-width: 400px;
   margin: 0 auto;
+  text-decoration: none;
 }
 
 .` +

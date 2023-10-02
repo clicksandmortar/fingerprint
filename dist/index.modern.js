@@ -709,6 +709,7 @@ const Modal = ({
   text-transform: uppercase;
   max-width: 400px;
   margin: 0 auto;
+  text-decoration: none;
 }
 
 .` + randomHash + `cta:hover {
