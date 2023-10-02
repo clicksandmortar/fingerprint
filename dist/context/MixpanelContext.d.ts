@@ -1,5 +1,5 @@
-import React from 'react';
 import { Callback } from 'mixpanel-browser';
+import React from 'react';
 export declare type MixpanelProviderProps = {
     children?: React.ReactNode;
 };

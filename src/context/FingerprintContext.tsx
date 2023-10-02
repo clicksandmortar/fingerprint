@@ -1,12 +1,12 @@
-import React, { createContext, useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { LoggingProvider } from './LoggingContext'
-import { CollectorProvider } from './CollectorContext'
-import { VisitorProvider } from './VisitorContext'
-import { PageView, Trigger } from '../client/types'
+import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { MixpanelProvider } from './MixpanelContext'
 import { Handler, clientHandlers } from '../client/handler'
+import { PageView, Trigger } from '../client/types'
+import { CollectorProvider } from './CollectorContext'
+import { LoggingProvider } from './LoggingContext'
+import { MixpanelProvider } from './MixpanelContext'
+import { VisitorProvider } from './VisitorContext'
 
 const queryClient = new QueryClient()
 

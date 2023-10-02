@@ -1,6 +1,6 @@
 import React from 'react';
-import { PageView, Trigger } from '../client/types';
 import { Handler } from '../client/handler';
+import { PageView, Trigger } from '../client/types';
 export declare type FingerprintProviderProps = {
     appId?: string;
     children?: React.ReactNode;

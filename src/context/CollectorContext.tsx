@@ -309,7 +309,8 @@ export const CollectorProvider = ({
       <CollectorContext.Provider
         value={{
           resetDisplayTrigger,
-          setTrigger
+          setTrigger,
+          trackEvent
         }}
       >
         {children}
@@ -322,9 +323,11 @@ export const CollectorProvider = ({
 export type CollectorContextInterface = {
   resetDisplayTrigger: () => void
   setTrigger: (trigger: Trigger) => void
+  trackEvent: (event: string, properties?: any) => void
 }
 
 export const CollectorContext = createContext<CollectorContextInterface>({
   resetDisplayTrigger: () => {},
-  setTrigger: () => {}
+  setTrigger: () => {},
+  trackEvent: () => {}
 })
