@@ -1,5 +1,5 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { createContext, useContext, useState, useEffect, useCallback, createElement } from 'react';
+import React__default, { createContext, useContext, useState, useEffect, useCallback, useMemo, createElement } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactDOM from 'react-dom';
 import { isMobile } from 'react-device-detect';
@@ -518,6 +518,7 @@ const useCollector = () => {
 };
 
 const CurlyText = ({
+  randomHash,
   text
 }) => {
   return React__default.createElement("svg", {
@@ -525,7 +526,7 @@ const CurlyText = ({
     xmlnsXlink: 'http://www.w3.org/1999/xlink',
     version: '1.1',
     viewBox: '0 0 500 500',
-    className: 'curlyText'
+    className: randomHash + '-curlyText'
   }, React__default.createElement("defs", null, React__default.createElement("path", {
     id: 'textPath',
     d: 'M 0 500 A 175,100 0 0 1 500,500'
@@ -560,6 +561,9 @@ const Modal = ({
     trackEvent('user_clicked_button', trigger);
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
+  const randomHash = useMemo(() => {
+    return v4().split('-')[0];
+  }, []);
   useEffect(() => {
     const css = `
       @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");
@@ -583,7 +587,7 @@ const Modal = ({
   font-family: "proxima-nova", sans-serif;
 }
 
-.overlay {
+.` + randomHash + `overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -599,7 +603,7 @@ const Modal = ({
   font-style: normal;
 }
 
-.modal {
+.` + randomHash + `modal {
   width: 80%;
   max-width: 400px;
   height: 500px;
@@ -619,7 +623,7 @@ const Modal = ({
   }
 }
 
-.modalImage {
+.` + randomHash + `modalImage {
   position: absolute;
   left: 0;
   right: 0;
@@ -638,7 +642,7 @@ const Modal = ({
 }
 
 
-.curlyText {
+.` + randomHash + `curlyText {
   font-family: "proxima-nova", sans-serif;
   font-weight: 500;
   font-style: normal;
@@ -653,12 +657,12 @@ const Modal = ({
   margin-right: auto;
 }
 
-.curlyText text {
+.` + randomHash + `curlyText text {
   font-size: 1.3rem;
 }
 
 
-.mainText {
+.` + randomHash + `mainText {
   font-weight: 200;
   font-family: "proxima-nova", sans-serif;
   color: var(--secondary);
@@ -692,7 +696,7 @@ const Modal = ({
   }
 }
 
-.cta {
+.` + randomHash + `cta {
   font-family: "proxima-nova", sans-serif;
   cursor: pointer;
   background-color: var(--secondary);
@@ -707,12 +711,12 @@ const Modal = ({
   margin: 0 auto;
 }
 
-.cta:hover {
+.` + randomHash + `cta:hover {
   transition: all 0.3s;
   filter: brightness(0.95);
 }
 
-.close-button {
+.` + randomHash + `close-button {
   border-radius: 100%;
   background-color: var(--secondary);
   width: 2rem;
@@ -727,13 +731,13 @@ const Modal = ({
   cursor: pointer;
 }
 
-.button-container {
+.` + randomHash + `button-container {
   flex: 1;
   display: grid;
   place-content: center;
 }
 
-.image-darken {
+.` + randomHash + `image-darken {
   background: rgba(0,0,0,0.2);
   width: 100%;
   height: 100%;
@@ -755,9 +759,9 @@ const Modal = ({
     return null;
   }
   return React__default.createElement("div", {
-    className: 'overlay'
+    className: randomHash + '-overlay'
   }, React__default.createElement("div", {
-    className: 'modal',
+    className: randomHash + '-modal',
     style: {
       background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.backgroundURL})`,
       backgroundPosition: 'center',
@@ -767,9 +771,9 @@ const Modal = ({
       height: 500
     }
   }, React__default.createElement("div", {
-    className: 'image-darken'
+    className: randomHash + '-image-darken'
   }, React__default.createElement("button", {
-    className: 'close-button',
+    className: randomHash + '-close-button',
     onClick: closeModal
   }, React__default.createElement("svg", {
     xmlns: 'http://www.w3.org/2000/svg',
@@ -781,12 +785,13 @@ const Modal = ({
     fillRule: 'evenodd',
     d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
   }))), React__default.createElement(CurlyText, {
-    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading,
+    randomHash: randomHash
   }), React__default.createElement("div", {
     style: {
       flex: 1
     },
-    className: 'empty-div-spacer-whaaaaat-69696969'
+    className: randomHash + '--spacer'
   }), React__default.createElement("div", {
     style: {
       flex: 1,
@@ -796,12 +801,12 @@ const Modal = ({
       letterSpacing: '2pt'
     }
   }, React__default.createElement("span", {
-    className: 'mainText'
+    className: randomHash + '-mainText'
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.paragraph)), React__default.createElement("div", {
-    className: 'buttonContainer'
+    className: randomHash + '-buttonContainer'
   }, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonURL,
-    className: 'cta',
+    className: randomHash + '-cta',
     onClick: e => redirectUser(e)
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonText)))));
 };

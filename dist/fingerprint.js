@@ -30627,38 +30627,76 @@ var _stringifyJsDefault = parcelHelpers.interopDefault(_stringifyJs);
 var _parseJs = require("./parse.js");
 var _parseJsDefault = parcelHelpers.interopDefault(_parseJs);
 
-},{"./v1.js":false,"./v3.js":false,"./v4.js":"6RfIs","./v5.js":false,"./nil.js":false,"./version.js":"4vEj5","./validate.js":"dfZI5","./stringify.js":false,"./parse.js":false,"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"6RfIs":[function(require,module,exports) {
+},{"./v1.js":"jG1dk","./v3.js":"ap9Ro","./v4.js":"6RfIs","./v5.js":"eBz2t","./nil.js":"8sEtz","./version.js":"4vEj5","./validate.js":"dfZI5","./stringify.js":"bFRkJ","./parse.js":"1KoND","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"jG1dk":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-var _nativeJs = require("./native.js");
-var _nativeJsDefault = parcelHelpers.interopDefault(_nativeJs);
 var _rngJs = require("./rng.js");
 var _rngJsDefault = parcelHelpers.interopDefault(_rngJs);
-var _stringifyJs = require("./stringify.js");
-function v4(options, buf, offset) {
-    if ((0, _nativeJsDefault.default).randomUUID && !buf && !options) return (0, _nativeJsDefault.default).randomUUID();
+var _stringifyJs = require("./stringify.js"); // **`v1()` - Generate time-based UUID**
+//
+// Inspired by https://github.com/LiosK/UUID.js
+// and http://docs.python.org/library/uuid.html
+let _nodeId;
+let _clockseq; // Previous uuid creation time
+let _lastMSecs = 0;
+let _lastNSecs = 0; // See https://github.com/uuidjs/uuid for API details
+function v1(options, buf, offset) {
+    let i = buf && offset || 0;
+    const b = buf || new Array(16);
     options = options || {};
-    const rnds = options.random || (options.rng || (0, _rngJsDefault.default))(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
-    rnds[6] = rnds[6] & 0x0f | 0x40;
-    rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
-    if (buf) {
-        offset = offset || 0;
-        for(let i = 0; i < 16; ++i)buf[offset + i] = rnds[i];
-        return buf;
-    }
-    return (0, _stringifyJs.unsafeStringify)(rnds);
+    let node = options.node || _nodeId;
+    let clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq; // node and clockseq need to be initialized to random values if they're not
+    // specified.  We do this lazily to minimize issues related to insufficient
+    // system entropy.  See #189
+    if (node == null || clockseq == null) {
+        const seedBytes = options.random || (options.rng || (0, _rngJsDefault.default))();
+        if (node == null) // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
+        node = _nodeId = [
+            seedBytes[0] | 0x01,
+            seedBytes[1],
+            seedBytes[2],
+            seedBytes[3],
+            seedBytes[4],
+            seedBytes[5]
+        ];
+        if (clockseq == null) // Per 4.2.2, randomize (14 bit) clockseq
+        clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 0x3fff;
+    } // UUID timestamps are 100 nano-second units since the Gregorian epoch,
+    // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
+    // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
+    // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
+    let msecs = options.msecs !== undefined ? options.msecs : Date.now(); // Per 4.2.1.2, use count of uuid's generated during the current clock
+    // cycle to simulate higher resolution clock
+    let nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1; // Time since last uuid creation (in msecs)
+    const dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 10000; // Per 4.2.1.2, Bump clockseq on clock regression
+    if (dt < 0 && options.clockseq === undefined) clockseq = clockseq + 1 & 0x3fff;
+     // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
+    // time interval
+    if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) nsecs = 0;
+     // Per 4.2.1.2 Throw error if too many uuids are requested
+    if (nsecs >= 10000) throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
+    _lastMSecs = msecs;
+    _lastNSecs = nsecs;
+    _clockseq = clockseq; // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
+    msecs += 12219292800000; // `time_low`
+    const tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
+    b[i++] = tl >>> 24 & 0xff;
+    b[i++] = tl >>> 16 & 0xff;
+    b[i++] = tl >>> 8 & 0xff;
+    b[i++] = tl & 0xff; // `time_mid`
+    const tmh = msecs / 0x100000000 * 10000 & 0xfffffff;
+    b[i++] = tmh >>> 8 & 0xff;
+    b[i++] = tmh & 0xff; // `time_high_and_version`
+    b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
+    b[i++] = tmh >>> 16 & 0xff; // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
+    b[i++] = clockseq >>> 8 | 0x80; // `clock_seq_low`
+    b[i++] = clockseq & 0xff; // `node`
+    for(let n = 0; n < 6; ++n)b[i + n] = node[n];
+    return buf || (0, _stringifyJs.unsafeStringify)(b);
 }
-exports.default = v4;
+exports.default = v1;
 
-},{"./native.js":"8mdcZ","./rng.js":"cHt7R","./stringify.js":"bFRkJ","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"8mdcZ":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-const randomUUID = typeof crypto !== "undefined" && crypto.randomUUID && crypto.randomUUID.bind(crypto);
-exports.default = {
-    randomUUID
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"cHt7R":[function(require,module,exports) {
+},{"./rng.js":"cHt7R","./stringify.js":"bFRkJ","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"cHt7R":[function(require,module,exports) {
 // Unique ID creation requires a high quality random # generator. In the browser we therefore
 // require the crypto API and do not support built-in fallback to lower quality random number
 // generators (like Math.random()).
@@ -30718,6 +30756,420 @@ exports.default = validate;
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 exports.default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"ap9Ro":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _v35Js = require("./v35.js");
+var _v35JsDefault = parcelHelpers.interopDefault(_v35Js);
+var _md5Js = require("./md5.js");
+var _md5JsDefault = parcelHelpers.interopDefault(_md5Js);
+const v3 = (0, _v35JsDefault.default)("v3", 0x30, (0, _md5JsDefault.default));
+exports.default = v3;
+
+},{"./v35.js":"asOV2","./md5.js":"ieSzG","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"asOV2":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "DNS", ()=>DNS);
+parcelHelpers.export(exports, "URL", ()=>URL);
+parcelHelpers.export(exports, "default", ()=>v35);
+var _stringifyJs = require("./stringify.js");
+var _parseJs = require("./parse.js");
+var _parseJsDefault = parcelHelpers.interopDefault(_parseJs);
+function stringToBytes(str) {
+    str = unescape(encodeURIComponent(str)); // UTF8 escape
+    const bytes = [];
+    for(let i = 0; i < str.length; ++i)bytes.push(str.charCodeAt(i));
+    return bytes;
+}
+const DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+const URL = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
+function v35(name, version, hashfunc) {
+    function generateUUID(value, namespace, buf, offset) {
+        var _namespace;
+        if (typeof value === "string") value = stringToBytes(value);
+        if (typeof namespace === "string") namespace = (0, _parseJsDefault.default)(namespace);
+        if (((_namespace = namespace) === null || _namespace === void 0 ? void 0 : _namespace.length) !== 16) throw TypeError("Namespace must be array-like (16 iterable integer values, 0-255)");
+         // Compute hash of namespace and value, Per 4.3
+        // Future: Use spread syntax when supported on all platforms, e.g. `bytes =
+        // hashfunc([...namespace, ... value])`
+        let bytes = new Uint8Array(16 + value.length);
+        bytes.set(namespace);
+        bytes.set(value, namespace.length);
+        bytes = hashfunc(bytes);
+        bytes[6] = bytes[6] & 0x0f | version;
+        bytes[8] = bytes[8] & 0x3f | 0x80;
+        if (buf) {
+            offset = offset || 0;
+            for(let i = 0; i < 16; ++i)buf[offset + i] = bytes[i];
+            return buf;
+        }
+        return (0, _stringifyJs.unsafeStringify)(bytes);
+    } // Function#name is not settable on some platforms (#270)
+    try {
+        generateUUID.name = name; // eslint-disable-next-line no-empty
+    } catch (err) {} // For CommonJS default export support
+    generateUUID.DNS = DNS;
+    generateUUID.URL = URL;
+    return generateUUID;
+}
+
+},{"./stringify.js":"bFRkJ","./parse.js":"1KoND","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"1KoND":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _validateJs = require("./validate.js");
+var _validateJsDefault = parcelHelpers.interopDefault(_validateJs);
+function parse(uuid) {
+    if (!(0, _validateJsDefault.default)(uuid)) throw TypeError("Invalid UUID");
+    let v;
+    const arr = new Uint8Array(16); // Parse ########-....-....-....-............
+    arr[0] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
+    arr[1] = v >>> 16 & 0xff;
+    arr[2] = v >>> 8 & 0xff;
+    arr[3] = v & 0xff; // Parse ........-####-....-....-............
+    arr[4] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
+    arr[5] = v & 0xff; // Parse ........-....-####-....-............
+    arr[6] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
+    arr[7] = v & 0xff; // Parse ........-....-....-####-............
+    arr[8] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
+    arr[9] = v & 0xff; // Parse ........-....-....-....-############
+    // (Use "/" to avoid 32-bit truncation when bit-shifting high-order bytes)
+    arr[10] = (v = parseInt(uuid.slice(24, 36), 16)) / 0x10000000000 & 0xff;
+    arr[11] = v / 0x100000000 & 0xff;
+    arr[12] = v >>> 24 & 0xff;
+    arr[13] = v >>> 16 & 0xff;
+    arr[14] = v >>> 8 & 0xff;
+    arr[15] = v & 0xff;
+    return arr;
+}
+exports.default = parse;
+
+},{"./validate.js":"dfZI5","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"ieSzG":[function(require,module,exports) {
+/*
+ * Browser-compatible JavaScript MD5
+ *
+ * Modification of JavaScript MD5
+ * https://github.com/blueimp/JavaScript-MD5
+ *
+ * Copyright 2011, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * https://opensource.org/licenses/MIT
+ *
+ * Based on
+ * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
+ * Digest Algorithm, as defined in RFC 1321.
+ * Version 2.2 Copyright (C) Paul Johnston 1999 - 2009
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ * Distributed under the BSD License
+ * See http://pajhome.org.uk/crypt/md5 for more info.
+ */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+function md5(bytes) {
+    if (typeof bytes === "string") {
+        const msg = unescape(encodeURIComponent(bytes)); // UTF8 escape
+        bytes = new Uint8Array(msg.length);
+        for(let i = 0; i < msg.length; ++i)bytes[i] = msg.charCodeAt(i);
+    }
+    return md5ToHexEncodedArray(wordsToMd5(bytesToWords(bytes), bytes.length * 8));
+}
+/*
+ * Convert an array of little-endian words to an array of bytes
+ */ function md5ToHexEncodedArray(input) {
+    const output = [];
+    const length32 = input.length * 32;
+    const hexTab = "0123456789abcdef";
+    for(let i = 0; i < length32; i += 8){
+        const x = input[i >> 5] >>> i % 32 & 0xff;
+        const hex = parseInt(hexTab.charAt(x >>> 4 & 0x0f) + hexTab.charAt(x & 0x0f), 16);
+        output.push(hex);
+    }
+    return output;
+}
+/**
+ * Calculate output length with padding and bit length
+ */ function getOutputLength(inputLength8) {
+    return (inputLength8 + 64 >>> 9 << 4) + 14 + 1;
+}
+/*
+ * Calculate the MD5 of an array of little-endian words, and a bit length.
+ */ function wordsToMd5(x, len) {
+    /* append padding */ x[len >> 5] |= 0x80 << len % 32;
+    x[getOutputLength(len) - 1] = len;
+    let a = 1732584193;
+    let b = -271733879;
+    let c = -1732584194;
+    let d = 271733878;
+    for(let i = 0; i < x.length; i += 16){
+        const olda = a;
+        const oldb = b;
+        const oldc = c;
+        const oldd = d;
+        a = md5ff(a, b, c, d, x[i], 7, -680876936);
+        d = md5ff(d, a, b, c, x[i + 1], 12, -389564586);
+        c = md5ff(c, d, a, b, x[i + 2], 17, 606105819);
+        b = md5ff(b, c, d, a, x[i + 3], 22, -1044525330);
+        a = md5ff(a, b, c, d, x[i + 4], 7, -176418897);
+        d = md5ff(d, a, b, c, x[i + 5], 12, 1200080426);
+        c = md5ff(c, d, a, b, x[i + 6], 17, -1473231341);
+        b = md5ff(b, c, d, a, x[i + 7], 22, -45705983);
+        a = md5ff(a, b, c, d, x[i + 8], 7, 1770035416);
+        d = md5ff(d, a, b, c, x[i + 9], 12, -1958414417);
+        c = md5ff(c, d, a, b, x[i + 10], 17, -42063);
+        b = md5ff(b, c, d, a, x[i + 11], 22, -1990404162);
+        a = md5ff(a, b, c, d, x[i + 12], 7, 1804603682);
+        d = md5ff(d, a, b, c, x[i + 13], 12, -40341101);
+        c = md5ff(c, d, a, b, x[i + 14], 17, -1502002290);
+        b = md5ff(b, c, d, a, x[i + 15], 22, 1236535329);
+        a = md5gg(a, b, c, d, x[i + 1], 5, -165796510);
+        d = md5gg(d, a, b, c, x[i + 6], 9, -1069501632);
+        c = md5gg(c, d, a, b, x[i + 11], 14, 643717713);
+        b = md5gg(b, c, d, a, x[i], 20, -373897302);
+        a = md5gg(a, b, c, d, x[i + 5], 5, -701558691);
+        d = md5gg(d, a, b, c, x[i + 10], 9, 38016083);
+        c = md5gg(c, d, a, b, x[i + 15], 14, -660478335);
+        b = md5gg(b, c, d, a, x[i + 4], 20, -405537848);
+        a = md5gg(a, b, c, d, x[i + 9], 5, 568446438);
+        d = md5gg(d, a, b, c, x[i + 14], 9, -1019803690);
+        c = md5gg(c, d, a, b, x[i + 3], 14, -187363961);
+        b = md5gg(b, c, d, a, x[i + 8], 20, 1163531501);
+        a = md5gg(a, b, c, d, x[i + 13], 5, -1444681467);
+        d = md5gg(d, a, b, c, x[i + 2], 9, -51403784);
+        c = md5gg(c, d, a, b, x[i + 7], 14, 1735328473);
+        b = md5gg(b, c, d, a, x[i + 12], 20, -1926607734);
+        a = md5hh(a, b, c, d, x[i + 5], 4, -378558);
+        d = md5hh(d, a, b, c, x[i + 8], 11, -2022574463);
+        c = md5hh(c, d, a, b, x[i + 11], 16, 1839030562);
+        b = md5hh(b, c, d, a, x[i + 14], 23, -35309556);
+        a = md5hh(a, b, c, d, x[i + 1], 4, -1530992060);
+        d = md5hh(d, a, b, c, x[i + 4], 11, 1272893353);
+        c = md5hh(c, d, a, b, x[i + 7], 16, -155497632);
+        b = md5hh(b, c, d, a, x[i + 10], 23, -1094730640);
+        a = md5hh(a, b, c, d, x[i + 13], 4, 681279174);
+        d = md5hh(d, a, b, c, x[i], 11, -358537222);
+        c = md5hh(c, d, a, b, x[i + 3], 16, -722521979);
+        b = md5hh(b, c, d, a, x[i + 6], 23, 76029189);
+        a = md5hh(a, b, c, d, x[i + 9], 4, -640364487);
+        d = md5hh(d, a, b, c, x[i + 12], 11, -421815835);
+        c = md5hh(c, d, a, b, x[i + 15], 16, 530742520);
+        b = md5hh(b, c, d, a, x[i + 2], 23, -995338651);
+        a = md5ii(a, b, c, d, x[i], 6, -198630844);
+        d = md5ii(d, a, b, c, x[i + 7], 10, 1126891415);
+        c = md5ii(c, d, a, b, x[i + 14], 15, -1416354905);
+        b = md5ii(b, c, d, a, x[i + 5], 21, -57434055);
+        a = md5ii(a, b, c, d, x[i + 12], 6, 1700485571);
+        d = md5ii(d, a, b, c, x[i + 3], 10, -1894986606);
+        c = md5ii(c, d, a, b, x[i + 10], 15, -1051523);
+        b = md5ii(b, c, d, a, x[i + 1], 21, -2054922799);
+        a = md5ii(a, b, c, d, x[i + 8], 6, 1873313359);
+        d = md5ii(d, a, b, c, x[i + 15], 10, -30611744);
+        c = md5ii(c, d, a, b, x[i + 6], 15, -1560198380);
+        b = md5ii(b, c, d, a, x[i + 13], 21, 1309151649);
+        a = md5ii(a, b, c, d, x[i + 4], 6, -145523070);
+        d = md5ii(d, a, b, c, x[i + 11], 10, -1120210379);
+        c = md5ii(c, d, a, b, x[i + 2], 15, 718787259);
+        b = md5ii(b, c, d, a, x[i + 9], 21, -343485551);
+        a = safeAdd(a, olda);
+        b = safeAdd(b, oldb);
+        c = safeAdd(c, oldc);
+        d = safeAdd(d, oldd);
+    }
+    return [
+        a,
+        b,
+        c,
+        d
+    ];
+}
+/*
+ * Convert an array bytes to an array of little-endian words
+ * Characters >255 have their high-byte silently ignored.
+ */ function bytesToWords(input) {
+    if (input.length === 0) return [];
+    const length8 = input.length * 8;
+    const output = new Uint32Array(getOutputLength(length8));
+    for(let i = 0; i < length8; i += 8)output[i >> 5] |= (input[i / 8] & 0xff) << i % 32;
+    return output;
+}
+/*
+ * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+ * to work around bugs in some JS interpreters.
+ */ function safeAdd(x, y) {
+    const lsw = (x & 0xffff) + (y & 0xffff);
+    const msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+    return msw << 16 | lsw & 0xffff;
+}
+/*
+ * Bitwise rotate a 32-bit number to the left.
+ */ function bitRotateLeft(num, cnt) {
+    return num << cnt | num >>> 32 - cnt;
+}
+/*
+ * These functions implement the four basic operations the algorithm uses.
+ */ function md5cmn(q, a, b, x, s, t) {
+    return safeAdd(bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b);
+}
+function md5ff(a, b, c, d, x, s, t) {
+    return md5cmn(b & c | ~b & d, a, b, x, s, t);
+}
+function md5gg(a, b, c, d, x, s, t) {
+    return md5cmn(b & d | c & ~d, a, b, x, s, t);
+}
+function md5hh(a, b, c, d, x, s, t) {
+    return md5cmn(b ^ c ^ d, a, b, x, s, t);
+}
+function md5ii(a, b, c, d, x, s, t) {
+    return md5cmn(c ^ (b | ~d), a, b, x, s, t);
+}
+exports.default = md5;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"6RfIs":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _nativeJs = require("./native.js");
+var _nativeJsDefault = parcelHelpers.interopDefault(_nativeJs);
+var _rngJs = require("./rng.js");
+var _rngJsDefault = parcelHelpers.interopDefault(_rngJs);
+var _stringifyJs = require("./stringify.js");
+function v4(options, buf, offset) {
+    if ((0, _nativeJsDefault.default).randomUUID && !buf && !options) return (0, _nativeJsDefault.default).randomUUID();
+    options = options || {};
+    const rnds = options.random || (options.rng || (0, _rngJsDefault.default))(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+    rnds[6] = rnds[6] & 0x0f | 0x40;
+    rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
+    if (buf) {
+        offset = offset || 0;
+        for(let i = 0; i < 16; ++i)buf[offset + i] = rnds[i];
+        return buf;
+    }
+    return (0, _stringifyJs.unsafeStringify)(rnds);
+}
+exports.default = v4;
+
+},{"./native.js":"8mdcZ","./rng.js":"cHt7R","./stringify.js":"bFRkJ","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"8mdcZ":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+const randomUUID = typeof crypto !== "undefined" && crypto.randomUUID && crypto.randomUUID.bind(crypto);
+exports.default = {
+    randomUUID
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"eBz2t":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _v35Js = require("./v35.js");
+var _v35JsDefault = parcelHelpers.interopDefault(_v35Js);
+var _sha1Js = require("./sha1.js");
+var _sha1JsDefault = parcelHelpers.interopDefault(_sha1Js);
+const v5 = (0, _v35JsDefault.default)("v5", 0x50, (0, _sha1JsDefault.default));
+exports.default = v5;
+
+},{"./v35.js":"asOV2","./sha1.js":"lger1","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"lger1":[function(require,module,exports) {
+// Adapted from Chris Veness' SHA1 code at
+// http://www.movable-type.co.uk/scripts/sha1.html
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+function f(s, x, y, z) {
+    switch(s){
+        case 0:
+            return x & y ^ ~x & z;
+        case 1:
+            return x ^ y ^ z;
+        case 2:
+            return x & y ^ x & z ^ y & z;
+        case 3:
+            return x ^ y ^ z;
+    }
+}
+function ROTL(x, n) {
+    return x << n | x >>> 32 - n;
+}
+function sha1(bytes) {
+    const K = [
+        0x5a827999,
+        0x6ed9eba1,
+        0x8f1bbcdc,
+        0xca62c1d6
+    ];
+    const H = [
+        0x67452301,
+        0xefcdab89,
+        0x98badcfe,
+        0x10325476,
+        0xc3d2e1f0
+    ];
+    if (typeof bytes === "string") {
+        const msg = unescape(encodeURIComponent(bytes)); // UTF8 escape
+        bytes = [];
+        for(let i = 0; i < msg.length; ++i)bytes.push(msg.charCodeAt(i));
+    } else if (!Array.isArray(bytes)) // Convert Array-like to Array
+    bytes = Array.prototype.slice.call(bytes);
+    bytes.push(0x80);
+    const l = bytes.length / 4 + 2;
+    const N = Math.ceil(l / 16);
+    const M = new Array(N);
+    for(let i = 0; i < N; ++i){
+        const arr = new Uint32Array(16);
+        for(let j = 0; j < 16; ++j)arr[j] = bytes[i * 64 + j * 4] << 24 | bytes[i * 64 + j * 4 + 1] << 16 | bytes[i * 64 + j * 4 + 2] << 8 | bytes[i * 64 + j * 4 + 3];
+        M[i] = arr;
+    }
+    M[N - 1][14] = (bytes.length - 1) * 8 / Math.pow(2, 32);
+    M[N - 1][14] = Math.floor(M[N - 1][14]);
+    M[N - 1][15] = (bytes.length - 1) * 8 & 0xffffffff;
+    for(let i = 0; i < N; ++i){
+        const W = new Uint32Array(80);
+        for(let t = 0; t < 16; ++t)W[t] = M[i][t];
+        for(let t = 16; t < 80; ++t)W[t] = ROTL(W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16], 1);
+        let a = H[0];
+        let b = H[1];
+        let c = H[2];
+        let d = H[3];
+        let e = H[4];
+        for(let t = 0; t < 80; ++t){
+            const s = Math.floor(t / 20);
+            const T = ROTL(a, 5) + f(s, b, c, d) + e + K[s] + W[t] >>> 0;
+            e = d;
+            d = c;
+            c = ROTL(b, 30) >>> 0;
+            b = a;
+            a = T;
+        }
+        H[0] = H[0] + a >>> 0;
+        H[1] = H[1] + b >>> 0;
+        H[2] = H[2] + c >>> 0;
+        H[3] = H[3] + d >>> 0;
+        H[4] = H[4] + e >>> 0;
+    }
+    return [
+        H[0] >> 24 & 0xff,
+        H[0] >> 16 & 0xff,
+        H[0] >> 8 & 0xff,
+        H[0] & 0xff,
+        H[1] >> 24 & 0xff,
+        H[1] >> 16 & 0xff,
+        H[1] >> 8 & 0xff,
+        H[1] & 0xff,
+        H[2] >> 24 & 0xff,
+        H[2] >> 16 & 0xff,
+        H[2] >> 8 & 0xff,
+        H[2] & 0xff,
+        H[3] >> 24 & 0xff,
+        H[3] >> 16 & 0xff,
+        H[3] >> 8 & 0xff,
+        H[3] & 0xff,
+        H[4] >> 24 & 0xff,
+        H[4] >> 16 & 0xff,
+        H[4] >> 8 & 0xff,
+        H[4] & 0xff
+    ];
+}
+exports.default = sha1;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"8sEtz":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+exports.default = "00000000-0000-0000-0000-000000000000";
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"4vEj5":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -41101,24 +41553,25 @@ var _reactDefault = parcelHelpers.interopDefault(_react);
 var _reactDom = require("react-dom");
 var _reactDomDefault = parcelHelpers.interopDefault(_reactDom);
 var _useCollector = require("../hooks/useCollector");
+var _uuid = require("uuid");
 var _s = $RefreshSig$();
-const CurlyText = ({ text })=>{
+const CurlyText = ({ randomHash, text })=>{
     return /*#__PURE__*/ (0, _reactDefault.default).createElement("svg", {
         xmlns: "http://www.w3.org/2000/svg",
         xmlnsXlink: "http://www.w3.org/1999/xlink",
         version: "1.1",
         viewBox: "0 0 500 500",
-        className: "curlyText",
+        className: randomHash + "-curlyText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 12,
+            lineNumber: 13,
             columnNumber: 5
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("defs", {
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 19,
+            lineNumber: 20,
             columnNumber: 7
         },
         __self: undefined
@@ -41127,7 +41580,7 @@ const CurlyText = ({ text })=>{
         d: "M 0 500 A 175,100 0 0 1 500,500",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 20,
+            lineNumber: 21,
             columnNumber: 9
         },
         __self: undefined
@@ -41137,7 +41590,7 @@ const CurlyText = ({ text })=>{
         textAnchor: "middle",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 22,
+            lineNumber: 23,
             columnNumber: 7
         },
         __self: undefined
@@ -41147,7 +41600,7 @@ const CurlyText = ({ text })=>{
         startOffset: "50%",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 23,
+            lineNumber: 24,
             columnNumber: 9
         },
         __self: undefined
@@ -41169,6 +41622,9 @@ const Modal = ({ trigger })=>{
         trackEvent("user_clicked_button", trigger);
         trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, "_self");
     };
+    const randomHash = (0, _react.useMemo)(()=>{
+        return (0, _uuid.v4)().split("-")[0];
+    }, []);
     (0, _react.useEffect)(()=>{
         const css = `
       @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");
@@ -41192,7 +41648,7 @@ const Modal = ({ trigger })=>{
   font-family: "proxima-nova", sans-serif;
 }
 
-.overlay {
+.` + randomHash + `overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -41208,7 +41664,7 @@ const Modal = ({ trigger })=>{
   font-style: normal;
 }
 
-.modal {
+.` + randomHash + `modal {
   width: 80%;
   max-width: 400px;
   height: 500px;
@@ -41228,7 +41684,7 @@ const Modal = ({ trigger })=>{
   }
 }
 
-.modalImage {
+.` + randomHash + `modalImage {
   position: absolute;
   left: 0;
   right: 0;
@@ -41247,7 +41703,7 @@ const Modal = ({ trigger })=>{
 }
 
 
-.curlyText {
+.` + randomHash + `curlyText {
   font-family: "proxima-nova", sans-serif;
   font-weight: 500;
   font-style: normal;
@@ -41262,12 +41718,12 @@ const Modal = ({ trigger })=>{
   margin-right: auto;
 }
 
-.curlyText text {
+.` + randomHash + `curlyText text {
   font-size: 1.3rem;
 }
 
 
-.mainText {
+.` + randomHash + `mainText {
   font-weight: 200;
   font-family: "proxima-nova", sans-serif;
   color: var(--secondary);
@@ -41301,7 +41757,7 @@ const Modal = ({ trigger })=>{
   }
 }
 
-.cta {
+.` + randomHash + `cta {
   font-family: "proxima-nova", sans-serif;
   cursor: pointer;
   background-color: var(--secondary);
@@ -41316,12 +41772,12 @@ const Modal = ({ trigger })=>{
   margin: 0 auto;
 }
 
-.cta:hover {
+.` + randomHash + `cta:hover {
   transition: all 0.3s;
   filter: brightness(0.95);
 }
 
-.close-button {
+.` + randomHash + `close-button {
   border-radius: 100%;
   background-color: var(--secondary);
   width: 2rem;
@@ -41336,13 +41792,13 @@ const Modal = ({ trigger })=>{
   cursor: pointer;
 }
 
-.button-container {
+.` + randomHash + `button-container {
   flex: 1;
   display: grid;
   place-content: center;
 }
 
-.image-darken {
+.` + randomHash + `image-darken {
   background: rgba(0,0,0,0.2);
   width: 100%;
   height: 100%;
@@ -41360,15 +41816,15 @@ const Modal = ({ trigger })=>{
     if (!stylesLoaded) return null;
     if (!open) return null;
     return /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "overlay",
+        className: randomHash + "-overlay",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 246,
+            lineNumber: 274,
             columnNumber: 5
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "modal",
+        className: randomHash + "-modal",
         style: {
             background: `url(${trigger?.data?.backgroundURL})`,
             backgroundPosition: "center",
@@ -41379,24 +41835,24 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 247,
+            lineNumber: 275,
             columnNumber: 7
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "image-darken",
+        className: randomHash + "-image-darken",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 258,
+            lineNumber: 286,
             columnNumber: 9
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("button", {
-        className: "close-button",
+        className: randomHash + "-close-button",
         onClick: closeModal,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 259,
+            lineNumber: 287,
             columnNumber: 11
         },
         __self: undefined
@@ -41407,7 +41863,7 @@ const Modal = ({ trigger })=>{
         viewBox: "0 0 16 16",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 260,
+            lineNumber: 288,
             columnNumber: 13
         },
         __self: undefined
@@ -41417,15 +41873,16 @@ const Modal = ({ trigger })=>{
         d: "M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 266,
+            lineNumber: 294,
             columnNumber: 15
         },
         __self: undefined
     }))), /*#__PURE__*/ (0, _reactDefault.default).createElement(CurlyText, {
         text: trigger?.data?.heading,
+        randomHash: randomHash,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 274,
+            lineNumber: 302,
             columnNumber: 11
         },
         __self: undefined
@@ -41433,10 +41890,10 @@ const Modal = ({ trigger })=>{
         style: {
             flex: 1
         },
-        className: "empty-div-spacer-whaaaaat-69696969",
+        className: randomHash + "--spacer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 276,
+            lineNumber: 304,
             columnNumber: 11
         },
         __self: undefined
@@ -41450,39 +41907,39 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 280,
+            lineNumber: 305,
             columnNumber: 11
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("span", {
-        className: "mainText",
+        className: randomHash + "-mainText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 289,
+            lineNumber: 314,
             columnNumber: 13
         },
         __self: undefined
     }, trigger?.data?.paragraph)), /*#__PURE__*/ (0, _reactDefault.default).createElement("div", {
-        className: "buttonContainer",
+        className: randomHash + "-buttonContainer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 291,
+            lineNumber: 318,
             columnNumber: 11
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("a", {
         href: trigger?.data?.buttonURL,
-        className: "cta",
+        className: randomHash + "-cta",
         onClick: (e)=>redirectUser(e),
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 292,
+            lineNumber: 319,
             columnNumber: 13
         },
         __self: undefined
     }, trigger?.data?.buttonText)))));
 };
-_s(Modal, "nSkcNtbMisLo1OxQvWyeaRTnQys=", false, function() {
+_s(Modal, "yqy7C0+jZZDiWKQ+JNlLOB+QCDY=", false, function() {
     return [
         (0, _useCollector.useCollector)
     ];
@@ -41493,7 +41950,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 307,
+            lineNumber: 334,
             columnNumber: 32
         },
         __self: undefined
@@ -41510,7 +41967,7 @@ $RefreshReg$(_c2, "TriggerModal");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollector":"2crq3"}],"2crq3":[function(require,module,exports) {
+},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollector":"2crq3","uuid":"ggZPL"}],"2crq3":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$064f = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;

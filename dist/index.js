@@ -586,13 +586,14 @@ var useCollector = function useCollector() {
 };
 
 var CurlyText = function CurlyText(_ref) {
-  var text = _ref.text;
+  var randomHash = _ref.randomHash,
+    text = _ref.text;
   return React__default.createElement("svg", {
     xmlns: 'http://www.w3.org/2000/svg',
     xmlnsXlink: 'http://www.w3.org/1999/xlink',
     version: '1.1',
     viewBox: '0 0 500 500',
-    className: 'curlyText'
+    className: randomHash + '-curlyText'
   }, React__default.createElement("defs", null, React__default.createElement("path", {
     id: 'textPath',
     d: 'M 0 500 A 175,100 0 0 1 500,500'
@@ -629,8 +630,11 @@ var Modal = function Modal(_ref2) {
     trackEvent('user_clicked_button', trigger);
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
+  var randomHash = React.useMemo(function () {
+    return uuid.v4().split('-')[0];
+  }, []);
   React.useEffect(function () {
-    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .modal {\n    width: 100vw;\n  }\n}\n\n\n.curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .curlyText {\n    margin-top: -200px;\n  }\n\n  .mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n}\n\n.cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n.button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n." + randomHash + "overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n." + randomHash + "modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n." + randomHash + "modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .modal {\n    width: 100vw;\n  }\n}\n\n\n." + randomHash + "curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n." + randomHash + "curlyText text {\n  font-size: 1.3rem;\n}\n\n\n." + randomHash + "mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .curlyText {\n    margin-top: -200px;\n  }\n\n  .mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .mainText {\n    font-size: 2.7rem;\n  }\n}\n\n." + randomHash + "cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n}\n\n." + randomHash + "cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n." + randomHash + "close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n." + randomHash + "button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n." + randomHash + "image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(css));
@@ -644,9 +648,9 @@ var Modal = function Modal(_ref2) {
     return null;
   }
   return React__default.createElement("div", {
-    className: 'overlay'
+    className: randomHash + '-overlay'
   }, React__default.createElement("div", {
-    className: 'modal',
+    className: randomHash + '-modal',
     style: {
       background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.backgroundURL) + ")",
       backgroundPosition: 'center',
@@ -656,9 +660,9 @@ var Modal = function Modal(_ref2) {
       height: 500
     }
   }, React__default.createElement("div", {
-    className: 'image-darken'
+    className: randomHash + '-image-darken'
   }, React__default.createElement("button", {
-    className: 'close-button',
+    className: randomHash + '-close-button',
     onClick: closeModal
   }, React__default.createElement("svg", {
     xmlns: 'http://www.w3.org/2000/svg',
@@ -670,12 +674,13 @@ var Modal = function Modal(_ref2) {
     fillRule: 'evenodd',
     d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
   }))), React__default.createElement(CurlyText, {
-    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading,
+    randomHash: randomHash
   }), React__default.createElement("div", {
     style: {
       flex: 1
     },
-    className: 'empty-div-spacer-whaaaaat-69696969'
+    className: randomHash + '--spacer'
   }), React__default.createElement("div", {
     style: {
       flex: 1,
@@ -685,12 +690,12 @@ var Modal = function Modal(_ref2) {
       letterSpacing: '2pt'
     }
   }, React__default.createElement("span", {
-    className: 'mainText'
+    className: randomHash + '-mainText'
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.paragraph)), React__default.createElement("div", {
-    className: 'buttonContainer'
+    className: randomHash + '-buttonContainer'
   }, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonURL,
-    className: 'cta',
+    className: randomHash + '-cta',
     onClick: function onClick(e) {
       return redirectUser(e);
     }
