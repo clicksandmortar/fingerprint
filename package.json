@@ -93,7 +93,7 @@
     "react-idle-timer": "^5.7.2",
     "use-exit-intent": "^1.0.7",
     "use-local-storage-state": "^18.3.3",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.1"
   },
   "@parcel/transformer-js": {
     "inlineEnvironment": [

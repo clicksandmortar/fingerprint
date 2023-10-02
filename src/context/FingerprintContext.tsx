@@ -1,13 +1,14 @@
-import React, { createContext, useEffect, useState } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { LoggingProvider } from './LoggingContext'
-import { CollectorProvider } from './CollectorContext'
-import { VisitorProvider } from './VisitorContext'
-import { PageView, Trigger } from '../client/types'
 import * as Sentry from '@sentry/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { MixpanelProvider } from './MixpanelContext'
 import { Handler, clientHandlers } from '../client/handler'
+import { PageView, Trigger } from '../client/types'
+import { CollectorProvider } from './CollectorContext'
+import FollowProvider from './FollowProvider'
+import { LoggingProvider } from './LoggingContext'
+import { MixpanelProvider } from './MixpanelContext'
+import { VisitorProvider } from './VisitorContext'
 
 Sentry.init({
   dsn: 'https://129339f9b28f958328e76d62fb3f0b2b@o1282674.ingest.sentry.io/4505641419014144',
@@ -27,13 +28,18 @@ export type FingerprintProviderProps = {
   appId?: string
   children?: React.ReactNode
   consent?: boolean
-  consentCallback?: () => boolean
-  debug?: boolean
-  defaultHandlers?: Handler[]
-  initialDelay?: number
-  exitIntentTriggers?: boolean
-  idleTriggers?: boolean
+  config: {
+    follow?: boolean
+    consentCallback?: () => boolean
+    debug?: boolean
+    defaultHandlers?: Handler[]
+    initialDelay?: number
+    exitIntentTriggers?: boolean
+    idleTriggers?: boolean
+  }
 }
+
+type WithFollow = {}
 
 // @todo split this into multiple providers, FingerprintProvider should
 // only bootstrap the app.
@@ -41,14 +47,15 @@ export const FingerprintProvider = ({
   appId,
   children,
   consent = false,
-  consentCallback,
-  debug,
-  defaultHandlers,
-  initialDelay = 0,
-  exitIntentTriggers = true,
-  idleTriggers = true
-}: // idleDelay = 0,
-FingerprintProviderProps) => {
+  config: {
+    consentCallback = undefined,
+    debug = false,
+    defaultHandlers = undefined,
+    initialDelay = 0,
+    exitIntentTriggers = true,
+    idleTriggers = true
+  }
+}: FingerprintProviderProps) => {
   const [consentGiven, setConsentGiven] = useState(consent)
   const [booted, setBooted] = useState(false)
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
@@ -150,16 +157,18 @@ FingerprintProviderProps) => {
             }}
           >
             <VisitorProvider>
-              <MixpanelProvider>
-                <CollectorProvider handlers={handlers}>
-                  <ErrorBoundary
-                    onError={(error, info) => console.error(error, info)}
-                    fallback={<div>An application error occurred.</div>}
-                  >
-                    {children}
-                  </ErrorBoundary>
-                </CollectorProvider>
-              </MixpanelProvider>
+              <FollowProvider enabled={follow && consentGiven}>
+                <MixpanelProvider>
+                  <CollectorProvider handlers={handlers}>
+                    <ErrorBoundary
+                      onError={(error, info) => console.error(error, info)}
+                      fallback={<div>An application error occurred.</div>}
+                    >
+                      {children}
+                    </ErrorBoundary>
+                  </CollectorProvider>
+                </MixpanelProvider>
+              </FollowProvider>
             </VisitorProvider>
           </FingerprintContext.Provider>
         </QueryClientProvider>

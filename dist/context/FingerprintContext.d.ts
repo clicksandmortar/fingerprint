@@ -1,18 +1,21 @@
 import React from 'react';
-import { PageView, Trigger } from '../client/types';
 import { Handler } from '../client/handler';
+import { PageView, Trigger } from '../client/types';
 export declare type FingerprintProviderProps = {
     appId?: string;
     children?: React.ReactNode;
     consent?: boolean;
-    consentCallback?: () => boolean;
-    debug?: boolean;
-    defaultHandlers?: Handler[];
-    initialDelay?: number;
-    exitIntentTriggers?: boolean;
-    idleTriggers?: boolean;
+    config: {
+        follow?: boolean;
+        consentCallback?: () => boolean;
+        debug?: boolean;
+        defaultHandlers?: Handler[];
+        initialDelay?: number;
+        exitIntentTriggers?: boolean;
+        idleTriggers?: boolean;
+    };
 };
-export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers }: FingerprintProviderProps) => {} | null | undefined;
+export declare const FingerprintProvider: ({ appId, children, consent, config: { follow, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers } }: FingerprintProviderProps) => {} | null | undefined;
 export interface FingerprintContextInterface {
     appId: string;
     booted: boolean;
