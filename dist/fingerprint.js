@@ -41648,7 +41648,7 @@ const Modal = ({ trigger })=>{
   font-family: "proxima-nova", sans-serif;
 }
 
-.` + randomHash + `overlay {
+.` + randomHash + `-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -41664,7 +41664,7 @@ const Modal = ({ trigger })=>{
   font-style: normal;
 }
 
-.` + randomHash + `modal {
+.` + randomHash + `-modal {
   width: 80%;
   max-width: 400px;
   height: 500px;
@@ -41684,7 +41684,7 @@ const Modal = ({ trigger })=>{
   }
 }
 
-.` + randomHash + `modalImage {
+.` + randomHash + `-modalImage {
   position: absolute;
   left: 0;
   right: 0;
@@ -41703,7 +41703,7 @@ const Modal = ({ trigger })=>{
 }
 
 
-.` + randomHash + `curlyText {
+.` + randomHash + `-curlyText {
   font-family: "proxima-nova", sans-serif;
   font-weight: 500;
   font-style: normal;
@@ -41718,12 +41718,12 @@ const Modal = ({ trigger })=>{
   margin-right: auto;
 }
 
-.` + randomHash + `curlyText text {
+.` + randomHash + `-curlyText text {
   font-size: 1.3rem;
 }
 
 
-.` + randomHash + `mainText {
+.` + randomHash + `-mainText {
   font-weight: 200;
   font-family: "proxima-nova", sans-serif;
   color: var(--secondary);
@@ -41757,7 +41757,7 @@ const Modal = ({ trigger })=>{
   }
 }
 
-.` + randomHash + `cta {
+.` + randomHash + `-cta {
   font-family: "proxima-nova", sans-serif;
   cursor: pointer;
   background-color: var(--secondary);
@@ -41773,12 +41773,12 @@ const Modal = ({ trigger })=>{
   text-decoration: none;
 }
 
-.` + randomHash + `cta:hover {
+.` + randomHash + `-cta:hover {
   transition: all 0.3s;
   filter: brightness(0.95);
 }
 
-.` + randomHash + `close-button {
+.` + randomHash + `-close-button {
   border-radius: 100%;
   background-color: var(--secondary);
   width: 2rem;
@@ -41793,13 +41793,13 @@ const Modal = ({ trigger })=>{
   cursor: pointer;
 }
 
-.` + randomHash + `button-container {
+.` + randomHash + `-button-container {
   flex: 1;
   display: grid;
   place-content: center;
 }
 
-.` + randomHash + `image-darken {
+.` + randomHash + `-image-darken {
   background: rgba(0,0,0,0.2);
   width: 100%;
   height: 100%;

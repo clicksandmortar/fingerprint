@@ -76,7 +76,7 @@ const Modal = ({ trigger }: Props) => {
 
 .` +
       randomHash +
-      `overlay {
+      `-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -94,7 +94,7 @@ const Modal = ({ trigger }: Props) => {
 
 .` +
       randomHash +
-      `modal {
+      `-modal {
   width: 80%;
   max-width: 400px;
   height: 500px;
@@ -116,7 +116,7 @@ const Modal = ({ trigger }: Props) => {
 
 .` +
       randomHash +
-      `modalImage {
+      `-modalImage {
   position: absolute;
   left: 0;
   right: 0;
@@ -137,7 +137,7 @@ const Modal = ({ trigger }: Props) => {
 
 .` +
       randomHash +
-      `curlyText {
+      `-curlyText {
   font-family: "proxima-nova", sans-serif;
   font-weight: 500;
   font-style: normal;
@@ -154,14 +154,14 @@ const Modal = ({ trigger }: Props) => {
 
 .` +
       randomHash +
-      `curlyText text {
+      `-curlyText text {
   font-size: 1.3rem;
 }
 
 
 .` +
       randomHash +
-      `mainText {
+      `-mainText {
   font-weight: 200;
   font-family: "proxima-nova", sans-serif;
   color: var(--secondary);
@@ -197,7 +197,7 @@ const Modal = ({ trigger }: Props) => {
 
 .` +
       randomHash +
-      `cta {
+      `-cta {
   font-family: "proxima-nova", sans-serif;
   cursor: pointer;
   background-color: var(--secondary);
@@ -215,14 +215,14 @@ const Modal = ({ trigger }: Props) => {
 
 .` +
       randomHash +
-      `cta:hover {
+      `-cta:hover {
   transition: all 0.3s;
   filter: brightness(0.95);
 }
 
 .` +
       randomHash +
-      `close-button {
+      `-close-button {
   border-radius: 100%;
   background-color: var(--secondary);
   width: 2rem;
@@ -239,7 +239,7 @@ const Modal = ({ trigger }: Props) => {
 
 .` +
       randomHash +
-      `button-container {
+      `-button-container {
   flex: 1;
   display: grid;
   place-content: center;
@@ -247,7 +247,7 @@ const Modal = ({ trigger }: Props) => {
 
 .` +
       randomHash +
-      `image-darken {
+      `-image-darken {
   background: rgba(0,0,0,0.2);
   width: 100%;
   height: 100%;
