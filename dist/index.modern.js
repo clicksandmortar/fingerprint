@@ -335,7 +335,6 @@ const CollectorProvider = ({
   const [displayTrigger, setDisplayTrigger] = useState(undefined);
   const [timeoutId, setTimeoutId] = useState(null);
   const [intently, setIntently] = useState(false);
-  console.log('current pageTrigger', pageTriggers);
   log('CollectorProvider: user is on mobile?', isMobile);
   useEffect(() => {
     if (intently) return;
@@ -375,11 +374,6 @@ const CollectorProvider = ({
       error('No invoke method found for handler', handler);
       return null;
     }
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour
-    });
     try {
       request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
         seenTriggerIDs: [trigger.id]
@@ -563,6 +557,14 @@ const Modal = ({
   };
   const randomHash = useMemo(() => {
     return v4().split('-')[0];
+  }, []);
+  useEffect(() => {
+    if (!open) return;
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.invocation,
+      triggerBehaviour: trigger.behaviour
+    });
   }, []);
   useEffect(() => {
     const css = `

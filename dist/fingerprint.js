@@ -30099,7 +30099,6 @@ const CollectorProvider = ({ children, handlers })=>{
     const [displayTrigger, setDisplayTrigger] = (0, _react.useState)(undefined);
     const [timeoutId, setTimeoutId] = (0, _react.useState)(null);
     const [intently, setIntently] = (0, _react.useState)(false);
-    console.log("current pageTrigger", pageTriggers);
     log("CollectorProvider: user is on mobile?", (0, _reactDeviceDetect.isMobile));
     // Removes the intently overlay, if intently is false
     (0, _react.useEffect)(()=>{
@@ -30144,12 +30143,6 @@ const CollectorProvider = ({ children, handlers })=>{
             error("No invoke method found for handler", handler);
             return null;
         }
-        // might be worth combining tracking at some point
-        trackEvent("trigger_displayed", {
-            triggerId: trigger.id,
-            triggerType: trigger.invocation,
-            triggerBehaviour: trigger.behaviour
-        });
         try {
             (0, _http.request).put(`${(0, _http.hostname)}/triggers/${appId}/${visitor.id}/seen`, {
                 seenTriggerIDs: [
@@ -30304,7 +30297,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 295,
+            lineNumber: 286,
             columnNumber: 5
         },
         __self: undefined
@@ -30316,7 +30309,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 308,
+            lineNumber: 299,
             columnNumber: 7
         },
         __self: undefined
@@ -41626,6 +41619,14 @@ const Modal = ({ trigger })=>{
         return (0, _uuid.v4)().split("-")[0];
     }, []);
     (0, _react.useEffect)(()=>{
+        if (!open) return;
+        trackEvent("trigger_displayed", {
+            triggerId: trigger.id,
+            triggerType: trigger.invocation,
+            triggerBehaviour: trigger.behaviour
+        });
+    }, []);
+    (0, _react.useEffect)(()=>{
         const css = `
       @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");
 
@@ -41820,7 +41821,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-overlay",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 275,
+            lineNumber: 285,
             columnNumber: 5
         },
         __self: undefined
@@ -41836,7 +41837,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 276,
+            lineNumber: 286,
             columnNumber: 7
         },
         __self: undefined
@@ -41844,7 +41845,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-image-darken",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 287,
+            lineNumber: 297,
             columnNumber: 9
         },
         __self: undefined
@@ -41853,7 +41854,7 @@ const Modal = ({ trigger })=>{
         onClick: closeModal,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 288,
+            lineNumber: 298,
             columnNumber: 11
         },
         __self: undefined
@@ -41864,7 +41865,7 @@ const Modal = ({ trigger })=>{
         viewBox: "0 0 16 16",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 289,
+            lineNumber: 299,
             columnNumber: 13
         },
         __self: undefined
@@ -41874,7 +41875,7 @@ const Modal = ({ trigger })=>{
         d: "M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 295,
+            lineNumber: 305,
             columnNumber: 15
         },
         __self: undefined
@@ -41883,7 +41884,7 @@ const Modal = ({ trigger })=>{
         randomHash: randomHash,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 303,
+            lineNumber: 313,
             columnNumber: 11
         },
         __self: undefined
@@ -41894,7 +41895,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "--spacer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 305,
+            lineNumber: 315,
             columnNumber: 11
         },
         __self: undefined
@@ -41908,7 +41909,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 306,
+            lineNumber: 316,
             columnNumber: 11
         },
         __self: undefined
@@ -41916,7 +41917,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-mainText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 315,
+            lineNumber: 325,
             columnNumber: 13
         },
         __self: undefined
@@ -41924,7 +41925,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-buttonContainer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 319,
+            lineNumber: 329,
             columnNumber: 11
         },
         __self: undefined
@@ -41934,13 +41935,13 @@ const Modal = ({ trigger })=>{
         onClick: (e)=>redirectUser(e),
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 320,
+            lineNumber: 330,
             columnNumber: 13
         },
         __self: undefined
     }, trigger?.data?.buttonText)))));
 };
-_s(Modal, "yqy7C0+jZZDiWKQ+JNlLOB+QCDY=", false, function() {
+_s(Modal, "wxQeOV13qfgu67513s2fuBehDyI=", false, function() {
     return [
         (0, _useCollector.useCollector)
     ];
@@ -41951,7 +41952,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 335,
+            lineNumber: 345,
             columnNumber: 32
         },
         __self: undefined

@@ -51,6 +51,16 @@ const Modal = ({ trigger }: Props) => {
   }, [])
 
   useEffect(() => {
+    if (!open) return
+
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.invocation,
+      triggerBehaviour: trigger.behaviour
+    })
+  }, [])
+
+  useEffect(() => {
     const css =
       `
       @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");

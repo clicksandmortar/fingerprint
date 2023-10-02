@@ -49,8 +49,6 @@ export const CollectorProvider = ({
   const [timeoutId, setTimeoutId] = useState<null | NodeJS.Timeout>(null)
   const [intently, setIntently] = useState<boolean>(false)
 
-  console.log('current pageTrigger', pageTriggers)
-
   log('CollectorProvider: user is on mobile?', isMobile)
 
   // Removes the intently overlay, if intently is false
@@ -120,13 +118,6 @@ export const CollectorProvider = ({
       error('No invoke method found for handler', handler)
       return null
     }
-
-    // might be worth combining tracking at some point
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour
-    })
 
     try {
       request
