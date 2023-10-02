@@ -1,7 +1,7 @@
-import { init as init$1, BrowserTracing, ErrorBoundary } from '@sentry/react';
+import { init as init$1, BrowserTracing } from '@sentry/react';
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React__default, { createContext, useContext, useState, useEffect, useCallback, createElement } from 'react';
-import { ErrorBoundary as ErrorBoundary$1 } from 'react-error-boundary';
+import { ErrorBoundary } from 'react-error-boundary';
 import ReactDOM from 'react-dom';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
@@ -495,16 +495,16 @@ const useCollector = () => {
 const Modal = ({
   trigger
 }) => {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data7;
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data6;
   const {
     resetDisplayTrigger
   } = useCollector();
   const [open, setOpen] = useState(true);
+  const [stylesLoaded, setStylesLoaded] = useState(false);
   const closeModal = () => {
     resetDisplayTrigger();
     setOpen(false);
   };
-  console.log('trigger', trigger, trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL);
   useEffect(() => {
     const css = `
   @charset "UTF-8";
@@ -2439,8 +2439,12 @@ const Modal = ({
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(css));
     document.head.appendChild(styles);
+    setStylesLoaded(true);
   });
   if (!open) {
+    return null;
+  }
+  if (!stylesLoaded) {
     return null;
   }
   return React__default.createElement("div", {
@@ -2473,7 +2477,7 @@ const Modal = ({
     "data-changes": 'variant-overlay-inner|width,background-image,background-color',
     "data-edits": 'content6',
     style: {
-      backgroundImage: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.backgroundURL})`,
+      backgroundImage: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
       backgroundColor: '#f1f1f1'
     }
   }, React__default.createElement("div", {
@@ -2505,7 +2509,7 @@ const Modal = ({
       marginTop: 40,
       textShadow: '0 1px 4px #000'
     }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading), React__default.createElement("div", {
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("div", {
     className: 'variant-text variant-text2 variant-animated variant-bounceInRight variant-animDelay6',
     "data-edits": 'text2',
     "data-changes": '.variant-text2|font-size,color,margin-top,margin-bottom',
@@ -2514,7 +2518,7 @@ const Modal = ({
       textShadow: '0 1px 4px #000',
       fontSize: 45
     }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph), React__default.createElement("div", {
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph), React__default.createElement("div", {
     className: 'variant-text variant-text3 variant-animated variant-bounceInLeft variant-animDelay8',
     "data-edits": 'text3',
     "data-changes": '.variant-text3|font-size,color,margin-top,margin-bottom'
@@ -2525,9 +2529,9 @@ const Modal = ({
   })), React__default.createElement("div", {
     className: 'variant-option variant-clickRedirect',
     onClick: e => {
-      var _trigger$data5, _trigger$data6;
+      var _trigger$data4, _trigger$data5;
       e.preventDefault();
-      trigger !== null && trigger !== void 0 && (_trigger$data5 = trigger.data) !== null && _trigger$data5 !== void 0 && _trigger$data5.buttonURL ? window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonURL) : closeModal();
+      trigger !== null && trigger !== void 0 && (_trigger$data4 = trigger.data) !== null && _trigger$data4 !== void 0 && _trigger$data4.buttonURL ? window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonURL) : closeModal();
     }
   }, React__default.createElement("div", {
     className: 'variant-input-group'
@@ -2535,7 +2539,7 @@ const Modal = ({
     className: 'variant-button variant-animated variant-fadeInRight variant-animDelay10',
     "data-edits": 'text10',
     "data-changes": '.variant-button|font-size,background-color,color'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonText))), React__default.createElement("div", {
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonText))), React__default.createElement("div", {
     className: 'variant-long-close variant-animated variant-fadeInUp variant-animDelay14',
     "data-engage-class": 'variant-engaged'
   }, React__default.createElement("a", {
@@ -2939,10 +2943,7 @@ const FingerprintProvider = ({
   if (!consentGiven) {
     return children;
   }
-  return React__default.createElement(ErrorBoundary, {
-    fallback: React__default.createElement("p", null, "An error with Fingerprint has occurred."),
-    onError: (error, info) => console.error(error, info)
-  }, React__default.createElement(LoggingProvider, {
+  return React__default.createElement(LoggingProvider, {
     debug: debug
   }, React__default.createElement(QueryClientProvider, {
     client: queryClient
@@ -2967,10 +2968,10 @@ const FingerprintProvider = ({
     }
   }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
-  }, React__default.createElement(ErrorBoundary$1, {
+  }, React__default.createElement(ErrorBoundary, {
     onError: (error, info) => console.error(error, info),
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children))))))));
+  }, children)))))));
 };
 const defaultFingerprintState = {
   appId: '',

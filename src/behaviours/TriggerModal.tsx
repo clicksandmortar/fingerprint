@@ -10,13 +10,12 @@ type Props = {
 const Modal = ({ trigger }: Props) => {
   const { resetDisplayTrigger } = useCollector()
   const [open, setOpen] = useState(true)
+  const [stylesLoaded, setStylesLoaded] = useState(false)
 
   const closeModal = () => {
     resetDisplayTrigger()
     setOpen(false)
   }
-
-  console.log('trigger', trigger, trigger?.data?.buttonURL)
 
   useEffect(() => {
     const css = `
@@ -1952,9 +1951,14 @@ const Modal = ({ trigger }: Props) => {
     styles.type = 'text/css'
     styles.appendChild(document.createTextNode(css))
     document.head.appendChild(styles)
+    setStylesLoaded(true)
   })
 
   if (!open) {
+    return null
+  }
+
+  if (!stylesLoaded) {
     return null
   }
 

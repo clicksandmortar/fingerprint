@@ -1,1 +1,0 @@
-{"mappings":"AAEA","sources":["src/styles.module.css"],"sourcesContent":["/* add css module styles here (optional) */\n\n.test {\n  margin: 2em;\n  padding: 0.5em;\n  border: 2px solid #000;\n  font-size: 2em;\n  text-align: center;\n}\n"],"names":[],"version":3,"file":"fingerprint.css.map","sourceRoot":"../"}

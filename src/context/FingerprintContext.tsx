@@ -123,49 +123,43 @@ FingerprintProviderProps) => {
   }
 
   return (
-    // @ts-ignore
-    <Sentry.ErrorBoundary
-      fallback={<p>An error with Fingerprint has occurred.</p>}
-      onError={(error, info) => console.error(error, info)}
-    >
-      <LoggingProvider debug={debug}>
-        <QueryClientProvider client={queryClient}>
-          <FingerprintContext.Provider
-            value={{
-              appId,
-              booted,
-              currentTrigger: {},
-              registerHandler,
-              trackEvent: () => {
-                alert('trackEvent not implemented')
-              },
-              trackPageView: () => {
-                alert('trackPageView not implemented')
-              },
-              unregisterHandler: () => {
-                alert('unregisterHandler not implemented')
-              },
-              initialDelay,
-              idleTriggers,
-              exitIntentTriggers
-            }}
-          >
-            <VisitorProvider>
-              <MixpanelProvider>
-                <CollectorProvider handlers={handlers}>
-                  <ErrorBoundary
-                    onError={(error, info) => console.error(error, info)}
-                    fallback={<div>An application error occurred.</div>}
-                  >
-                    {children}
-                  </ErrorBoundary>
-                </CollectorProvider>
-              </MixpanelProvider>
-            </VisitorProvider>
-          </FingerprintContext.Provider>
-        </QueryClientProvider>
-      </LoggingProvider>
-    </Sentry.ErrorBoundary>
+    <LoggingProvider debug={debug}>
+      <QueryClientProvider client={queryClient}>
+        <FingerprintContext.Provider
+          value={{
+            appId,
+            booted,
+            currentTrigger: {},
+            registerHandler,
+            trackEvent: () => {
+              alert('trackEvent not implemented')
+            },
+            trackPageView: () => {
+              alert('trackPageView not implemented')
+            },
+            unregisterHandler: () => {
+              alert('unregisterHandler not implemented')
+            },
+            initialDelay,
+            idleTriggers,
+            exitIntentTriggers
+          }}
+        >
+          <VisitorProvider>
+            <MixpanelProvider>
+              <CollectorProvider handlers={handlers}>
+                <ErrorBoundary
+                  onError={(error, info) => console.error(error, info)}
+                  fallback={<div>An application error occurred.</div>}
+                >
+                  {children}
+                </ErrorBoundary>
+              </CollectorProvider>
+            </MixpanelProvider>
+          </VisitorProvider>
+        </FingerprintContext.Provider>
+      </QueryClientProvider>
+    </LoggingProvider>
   )
 }
 
