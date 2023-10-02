@@ -6,7 +6,6 @@ import { Handler } from '../client/handler'
 import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
-import { hostname, request } from '../utils/http'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
@@ -117,16 +116,6 @@ export const CollectorProvider = ({
     if (!handler.invoke) {
       error('No invoke method found for handler', handler)
       return null
-    }
-
-    try {
-      request
-        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
-          seenTriggerIDs: [trigger.id]
-        })
-        .then(log)
-    } catch (e) {
-      error(e)
     }
 
     return handler.invoke(trigger)

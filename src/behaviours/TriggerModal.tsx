@@ -3,6 +3,10 @@ import { Trigger } from '../client/types'
 import ReactDOM from 'react-dom'
 import { useCollector } from '../hooks/useCollector'
 import { v4 as uuidv4 } from 'uuid'
+import { hostname, request } from '../utils/http'
+import { useFingerprint } from '../hooks/useFingerprint'
+import { useVisitor } from '../context/VisitorContext'
+import { useLogging } from '../context/LoggingContext'
 
 type Props = {
   trigger: Trigger
@@ -30,7 +34,10 @@ const CurlyText = ({ randomHash, text }: { randomHash: string; text: any }) => {
 }
 
 const Modal = ({ trigger }: Props) => {
+  const { log, error } = useLogging()
   const { resetDisplayTrigger, trackEvent } = useCollector()
+  const { appId } = useFingerprint()
+  const { visitor } = useVisitor()
   const [open, setOpen] = useState(true)
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
@@ -52,6 +59,16 @@ const Modal = ({ trigger }: Props) => {
 
   useEffect(() => {
     if (!open) return
+
+    try {
+      request
+        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+          seenTriggerIDs: [trigger.id]
+        })
+        .then(log)
+    } catch (e) {
+      error(e)
+    }
 
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,

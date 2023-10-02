@@ -30073,7 +30073,6 @@ var _reactIdleTimer = require("react-idle-timer");
 var _useExitIntent = require("use-exit-intent");
 var _useCollectorMutation = require("../hooks/useCollectorMutation");
 var _useFingerprint = require("../hooks/useFingerprint");
-var _http = require("../utils/http");
 var _loggingContext = require("./LoggingContext");
 var _mixpanelContext = require("./MixpanelContext");
 var _visitorContext = require("./VisitorContext");
@@ -30142,15 +30141,6 @@ const CollectorProvider = ({ children, handlers })=>{
         if (!handler.invoke) {
             error("No invoke method found for handler", handler);
             return null;
-        }
-        try {
-            (0, _http.request).put(`${(0, _http.hostname)}/triggers/${appId}/${visitor.id}/seen`, {
-                seenTriggerIDs: [
-                    trigger.id
-                ]
-            }).then(log);
-        } catch (e) {
-            error(e);
         }
         return handler.invoke(trigger);
     };
@@ -30297,7 +30287,7 @@ const CollectorProvider = ({ children, handlers })=>{
         onIdle: fireIdleTrigger,
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 286,
+            lineNumber: 275,
             columnNumber: 5
         },
         __self: undefined
@@ -30309,7 +30299,7 @@ const CollectorProvider = ({ children, handlers })=>{
         },
         __source: {
             fileName: "src/context/CollectorContext.tsx",
-            lineNumber: 299,
+            lineNumber: 288,
             columnNumber: 7
         },
         __self: undefined
@@ -30339,7 +30329,7 @@ $RefreshReg$(_c, "CollectorProvider");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react":"9sfFD","./LoggingContext":"8R5Tl","./VisitorContext":"dTu2f","../hooks/useFingerprint":"5jzRW","use-exit-intent":"dGlfY","react-idle-timer":"jyWNL","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollectorMutation":"cZ6dB","./MixpanelContext":"isrpc","react-device-detect":"bAAm2","../utils/http":"8irnm"}],"dTu2f":[function(require,module,exports) {
+},{"react":"9sfFD","./LoggingContext":"8R5Tl","./VisitorContext":"dTu2f","../hooks/useFingerprint":"5jzRW","use-exit-intent":"dGlfY","react-idle-timer":"jyWNL","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollectorMutation":"cZ6dB","./MixpanelContext":"isrpc","react-device-detect":"bAAm2"}],"dTu2f":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$05a4 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -41547,6 +41537,10 @@ var _reactDom = require("react-dom");
 var _reactDomDefault = parcelHelpers.interopDefault(_reactDom);
 var _useCollector = require("../hooks/useCollector");
 var _uuid = require("uuid");
+var _http = require("../utils/http");
+var _useFingerprint = require("../hooks/useFingerprint");
+var _visitorContext = require("../context/VisitorContext");
+var _loggingContext = require("../context/LoggingContext");
 var _s = $RefreshSig$();
 const CurlyText = ({ randomHash, text })=>{
     return /*#__PURE__*/ (0, _reactDefault.default).createElement("svg", {
@@ -41557,14 +41551,14 @@ const CurlyText = ({ randomHash, text })=>{
         className: randomHash + "-curlyText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 13,
+            lineNumber: 17,
             columnNumber: 5
         },
         __self: undefined
     }, /*#__PURE__*/ (0, _reactDefault.default).createElement("defs", {
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 20,
+            lineNumber: 24,
             columnNumber: 7
         },
         __self: undefined
@@ -41573,7 +41567,7 @@ const CurlyText = ({ randomHash, text })=>{
         d: "M 0 500 A 175,100 0 0 1 500,500",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 21,
+            lineNumber: 25,
             columnNumber: 9
         },
         __self: undefined
@@ -41583,7 +41577,7 @@ const CurlyText = ({ randomHash, text })=>{
         textAnchor: "middle",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 23,
+            lineNumber: 27,
             columnNumber: 7
         },
         __self: undefined
@@ -41593,7 +41587,7 @@ const CurlyText = ({ randomHash, text })=>{
         startOffset: "50%",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 24,
+            lineNumber: 28,
             columnNumber: 9
         },
         __self: undefined
@@ -41602,7 +41596,10 @@ const CurlyText = ({ randomHash, text })=>{
 _c = CurlyText;
 const Modal = ({ trigger })=>{
     _s();
+    const { log, error } = (0, _loggingContext.useLogging)();
     const { resetDisplayTrigger, trackEvent } = (0, _useCollector.useCollector)();
+    const { appId } = (0, _useFingerprint.useFingerprint)();
+    const { visitor } = (0, _visitorContext.useVisitor)();
     const [open, setOpen] = (0, _react.useState)(true);
     const [stylesLoaded, setStylesLoaded] = (0, _react.useState)(false);
     const closeModal = ()=>{
@@ -41620,6 +41617,15 @@ const Modal = ({ trigger })=>{
     }, []);
     (0, _react.useEffect)(()=>{
         if (!open) return;
+        try {
+            (0, _http.request).put(`${(0, _http.hostname)}/triggers/${appId}/${visitor.id}/seen`, {
+                seenTriggerIDs: [
+                    trigger.id
+                ]
+            }).then(log);
+        } catch (e) {
+            error(e);
+        }
         trackEvent("trigger_displayed", {
             triggerId: trigger.id,
             triggerType: trigger.invocation,
@@ -41821,7 +41827,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-overlay",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 285,
+            lineNumber: 302,
             columnNumber: 5
         },
         __self: undefined
@@ -41837,7 +41843,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 286,
+            lineNumber: 303,
             columnNumber: 7
         },
         __self: undefined
@@ -41845,7 +41851,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-image-darken",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 297,
+            lineNumber: 314,
             columnNumber: 9
         },
         __self: undefined
@@ -41854,7 +41860,7 @@ const Modal = ({ trigger })=>{
         onClick: closeModal,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 298,
+            lineNumber: 315,
             columnNumber: 11
         },
         __self: undefined
@@ -41865,7 +41871,7 @@ const Modal = ({ trigger })=>{
         viewBox: "0 0 16 16",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 299,
+            lineNumber: 316,
             columnNumber: 13
         },
         __self: undefined
@@ -41875,7 +41881,7 @@ const Modal = ({ trigger })=>{
         d: "M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 305,
+            lineNumber: 322,
             columnNumber: 15
         },
         __self: undefined
@@ -41884,7 +41890,7 @@ const Modal = ({ trigger })=>{
         randomHash: randomHash,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 313,
+            lineNumber: 330,
             columnNumber: 11
         },
         __self: undefined
@@ -41895,7 +41901,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "--spacer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 315,
+            lineNumber: 332,
             columnNumber: 11
         },
         __self: undefined
@@ -41909,7 +41915,7 @@ const Modal = ({ trigger })=>{
         },
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 316,
+            lineNumber: 333,
             columnNumber: 11
         },
         __self: undefined
@@ -41917,7 +41923,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-mainText",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 325,
+            lineNumber: 342,
             columnNumber: 13
         },
         __self: undefined
@@ -41925,7 +41931,7 @@ const Modal = ({ trigger })=>{
         className: randomHash + "-buttonContainer",
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 329,
+            lineNumber: 346,
             columnNumber: 11
         },
         __self: undefined
@@ -41935,15 +41941,18 @@ const Modal = ({ trigger })=>{
         onClick: (e)=>redirectUser(e),
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 330,
+            lineNumber: 347,
             columnNumber: 13
         },
         __self: undefined
     }, trigger?.data?.buttonText)))));
 };
-_s(Modal, "wxQeOV13qfgu67513s2fuBehDyI=", false, function() {
+_s(Modal, "P3YtbGODyU7EjhsRRg3tmg52I0k=", false, function() {
     return [
-        (0, _useCollector.useCollector)
+        (0, _loggingContext.useLogging),
+        (0, _useCollector.useCollector),
+        (0, _useFingerprint.useFingerprint),
+        (0, _visitorContext.useVisitor)
     ];
 });
 _c1 = Modal;
@@ -41952,7 +41961,7 @@ const TriggerModal = ({ trigger })=>{
         trigger: trigger,
         __source: {
             fileName: "src/behaviours/TriggerModal.tsx",
-            lineNumber: 345,
+            lineNumber: 362,
             columnNumber: 32
         },
         __self: undefined
@@ -41969,7 +41978,7 @@ $RefreshReg$(_c2, "TriggerModal");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollector":"2crq3","uuid":"ggZPL"}],"2crq3":[function(require,module,exports) {
+},{"react":"9sfFD","react-dom":"1byDl","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"ftrPk","../hooks/useCollector":"2crq3","uuid":"ggZPL","../utils/http":"8irnm","../hooks/useFingerprint":"5jzRW","../context/VisitorContext":"dTu2f","../context/LoggingContext":"8R5Tl"}],"2crq3":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$064f = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;

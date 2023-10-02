@@ -429,13 +429,6 @@ var CollectorProvider = function CollectorProvider(_ref) {
       error('No invoke method found for handler', handler);
       return null;
     }
-    try {
-      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
-        seenTriggerIDs: [trigger.id]
-      }).then(log);
-    } catch (e) {
-      error(e);
-    }
     return handler.invoke(trigger);
   };
   var fireIdleTrigger = React.useCallback(function () {
@@ -602,9 +595,16 @@ var CurlyText = function CurlyText(_ref) {
 var Modal = function Modal(_ref2) {
   var _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6, _trigger$data7;
   var trigger = _ref2.trigger;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
   var _useCollector = useCollector(),
     resetDisplayTrigger = _useCollector.resetDisplayTrigger,
     trackEvent = _useCollector.trackEvent;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
@@ -627,6 +627,13 @@ var Modal = function Modal(_ref2) {
   }, []);
   React.useEffect(function () {
     if (!open) return;
+    try {
+      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+        seenTriggerIDs: [trigger.id]
+      }).then(log);
+    } catch (e) {
+      error(e);
+    }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
