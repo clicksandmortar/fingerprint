@@ -18,7 +18,6 @@ export type Handler = {
     | 'INVOCATION_EXIT_INTENT'
     | 'INVOCATION_PAGE_LOAD'
   behaviour?: string
-  delay?: number
   invoke?: TriggerCallback
 }
 
