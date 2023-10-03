@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useContext, useEffect } from 'react'
 
 export type LoggingProviderProps = {
   debug?: boolean
@@ -40,6 +40,12 @@ export const LoggingProvider = ({ debug, children }: LoggingProviderProps) => {
       console.info(...message)
     }
   }
+
+  useEffect(() => {
+    if (!debug) return
+
+    log('LoggingProvider: In Debug Mode')
+  })
 
   return (
     <LoggingContext.Provider
