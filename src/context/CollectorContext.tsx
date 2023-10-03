@@ -48,8 +48,6 @@ export const CollectorProvider = ({
   const [timeoutId, setTimeoutId] = useState<null | NodeJS.Timeout>(null)
   const [intently, setIntently] = useState<boolean>(false)
 
-  console.log('current pageTrigger', pageTriggers)
-
   log('CollectorProvider: user is on mobile?', isMobile)
 
   // Removes the intently overlay, if intently is false
@@ -109,8 +107,6 @@ export const CollectorProvider = ({
     )
 
     log('CollectorProvider: attempting to show trigger', trigger, handler)
-
-    log('CollectorProvider: showTrigger', trigger, handler)
 
     if (!handler) {
       error('No handler found for trigger', trigger)
@@ -257,10 +253,16 @@ export const CollectorProvider = ({
             // remove intently overlay here
             log('CollectorProvider: user is in Fingerprint cohort')
             setIntently(false)
+            trackEvent('user_cohort', {
+              cohort: 'fingerprint'
+            })
           } else {
             // show intently overlay here
             log('CollectorProvider: user is in Intently cohort')
             setIntently(true)
+            trackEvent('user_cohort', {
+              cohort: 'intently'
+            })
           }
         })
         .catch((err) => {
@@ -308,7 +310,8 @@ export const CollectorProvider = ({
       <CollectorContext.Provider
         value={{
           resetDisplayTrigger,
-          setTrigger
+          setTrigger,
+          trackEvent
         }}
       >
         {children}
@@ -321,9 +324,11 @@ export const CollectorProvider = ({
 export type CollectorContextInterface = {
   resetDisplayTrigger: () => void
   setTrigger: (trigger: Trigger) => void
+  trackEvent: (event: string, properties?: any) => void
 }
 
 export const CollectorContext = createContext<CollectorContextInterface>({
   resetDisplayTrigger: () => {},
-  setTrigger: () => {}
+  setTrigger: () => {},
+  trackEvent: () => {}
 })

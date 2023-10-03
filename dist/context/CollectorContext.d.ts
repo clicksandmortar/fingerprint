@@ -9,5 +9,6 @@ export declare const CollectorProvider: ({ children, handlers }: CollectorProvid
 export declare type CollectorContextInterface = {
     resetDisplayTrigger: () => void;
     setTrigger: (trigger: Trigger) => void;
+    trackEvent: (event: string, properties?: any) => void;
 };
 export declare const CollectorContext: React.Context<CollectorContextInterface>;

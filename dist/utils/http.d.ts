@@ -1,4 +1,4 @@
-export declare const hostname = "https://target-engine-api.starship-staging.com";
+export declare const hostname: string;
 export declare const request: {
     get: (url: string, params: any) => Promise<Response>;
     post: (url: string, body: any) => Promise<Response>;

@@ -42,7 +42,6 @@ export type CollectorResponse = {
 
 export type Trigger = {
   id?: string
-
   invocation?:
     | 'INVOCATION_UNSPECIFIED'
     | 'INVOCATION_IDLE_TIME'

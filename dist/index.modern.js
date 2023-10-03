@@ -1,13 +1,13 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useState, createElement, createContext, useContext, useEffect, useCallback } from 'react';
+import React__default, { useState, createElement, createContext, useContext, useEffect, useCallback, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
+import { validate, version, v4 } from 'uuid';
+import Cookies from 'js-cookie';
 import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
-import Cookies from 'js-cookie';
-import { validate, version, v4 } from 'uuid';
 import mixpanel from 'mixpanel-browser';
 
 function _extends() {
@@ -252,66 +252,6 @@ var TriggerInverse = function TriggerInverse(_ref3) {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
-var headers = {
-  'Content-Type': 'application/json'
-};
-var hostname = 'https://target-engine-api.starship-staging.com';
-var request = {
-  get: function (url, params) {
-    try {
-      return Promise.resolve(fetch(url + '?' + new URLSearchParams(params), {
-        method: 'GET',
-        headers: headers
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  post: function (url, body) {
-    try {
-      return Promise.resolve(fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(body)
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  patch: function (url, body) {
-    try {
-      return Promise.resolve(fetch(url, {
-        method: 'PATCH',
-        headers: headers,
-        body: JSON.stringify(body)
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  put: function (url, body) {
-    try {
-      return Promise.resolve(fetch(url, {
-        method: 'PUT',
-        headers: headers,
-        body: JSON.stringify(body)
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  "delete": function (url) {
-    try {
-      return Promise.resolve(fetch(url, {
-        method: 'DELETE',
-        headers: headers
-      }));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  }
-};
-
 var LoggingProvider = function LoggingProvider(_ref) {
   var debug = _ref.debug,
     children = _ref.children;
@@ -356,28 +296,6 @@ var LoggingContext = createContext({
 });
 var useLogging = function useLogging() {
   return useContext(LoggingContext);
-};
-
-var useCollectorMutation = function useCollectorMutation() {
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
-  return useMutation(function (data) {
-    var _data$visitor;
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(function (response) {
-      log('Collector API response', response);
-      return response;
-    })["catch"](function (err) {
-      error('Collector API error', err);
-      return err;
-    });
-  }, {
-    onSuccess: function onSuccess() {}
-  });
-};
-
-var useFingerprint = function useFingerprint() {
-  return useContext(FingerprintContext);
 };
 
 var setCookie = function setCookie(name, value, expires) {
@@ -452,6 +370,10 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
   }
 };
 
+var useFingerprint = function useFingerprint() {
+  return useContext(FingerprintContext);
+};
+
 var VisitorProvider = function VisitorProvider(_ref) {
   var children = _ref.children;
   var _useFingerprint = useFingerprint(),
@@ -503,9 +425,105 @@ var useVisitor = function useVisitor() {
   return useContext(VisitorContext);
 };
 
-var MIXPANEL_TOKEN = 'd122fa924e1ea97d6b98569440c65a95';
+function getEnvVars() {
+  var isDev = false;
+  if (typeof window === 'undefined') {
+    isDev = true;
+  } else {
+    var _window, _window$location, _window$location$host, _window2, _window2$location;
+    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
+    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === "stage65-az.harvester.co.uk") isDev = true;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
+
+var headers = {
+  'Content-Type': 'application/json'
+};
+var hostname = getEnvVars().FINGERPRINT_API_HOSTNAME;
+var request = {
+  get: function (url, params) {
+    try {
+      return Promise.resolve(fetch(url + '?' + new URLSearchParams(params), {
+        method: 'GET',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  post: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  patch: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PATCH',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  put: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  "delete": function (url) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'DELETE',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+};
+
+var useCollectorMutation = function useCollectorMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  return useMutation(function (data) {
+    var _data$visitor;
+    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(function (response) {
+      log('Collector API response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Collector API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: function onSuccess() {}
+  });
+};
+
 var init = function init(cfg) {
-  mixpanel.init(MIXPANEL_TOKEN, {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
     debug: cfg.debug,
     track_pageview: true,
     persistence: 'localStorage'
@@ -587,7 +605,6 @@ var CollectorProvider = function CollectorProvider(_ref) {
   var _useState5 = useState(false),
     intently = _useState5[0],
     setIntently = _useState5[1];
-  console.log('current pageTrigger', pageTriggers);
   log('CollectorProvider: user is on mobile?', isMobile);
   useEffect(function () {
     if (intently) return;
@@ -625,7 +642,6 @@ var CollectorProvider = function CollectorProvider(_ref) {
       return handler.behaviour === trigger.behaviour;
     });
     log('CollectorProvider: attempting to show trigger', trigger, handler);
-    log('CollectorProvider: showTrigger', trigger, handler);
     if (!handler) {
       error('No handler found for trigger', trigger);
       return null;
@@ -639,6 +655,18 @@ var CollectorProvider = function CollectorProvider(_ref) {
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     });
+    if (!handler.invoke) {
+      error('No invoke method found for handler', handler);
+      return null;
+    }
+    if (handler.delay) {
+      var tId = setTimeout(function () {
+        var _handler$invoke;
+        return (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
+      }, handler.delay);
+      setTimeoutId(tId);
+      return null;
+    }
     return handler.invoke(trigger);
   };
   var fireIdleTrigger = useCallback(function () {
@@ -715,9 +743,15 @@ var CollectorProvider = function CollectorProvider(_ref) {
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
               setIntently(false);
+              trackEvent('user_cohort', {
+                cohort: 'fingerprint'
+              });
             } else {
               log('CollectorProvider: user is in Intently cohort');
               setIntently(true);
+              trackEvent('user_cohort', {
+                cohort: 'intently'
+              });
             }
           });
         } catch (e) {
@@ -759,24 +793,56 @@ var CollectorProvider = function CollectorProvider(_ref) {
   }, React__default.createElement(CollectorContext.Provider, {
     value: {
       resetDisplayTrigger: resetDisplayTrigger,
-      setTrigger: setTrigger
+      setTrigger: setTrigger,
+      trackEvent: trackEvent
     }
   }, children, renderedTrigger));
 };
 var CollectorContext = createContext({
   resetDisplayTrigger: function resetDisplayTrigger() {},
-  setTrigger: function setTrigger() {}
+  setTrigger: function setTrigger() {},
+  trackEvent: function trackEvent() {}
 });
 
 var useCollector = function useCollector() {
   return useContext(CollectorContext);
 };
 
-var Modal = function Modal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data6;
-  var trigger = _ref.trigger;
+var CurlyText = function CurlyText(_ref) {
+  var randomHash = _ref.randomHash,
+    text = _ref.text;
+  return React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    xmlnsXlink: 'http://www.w3.org/1999/xlink',
+    version: '1.1',
+    viewBox: '0 0 500 500',
+    className: 'f' + randomHash + '-curlyText'
+  }, React__default.createElement("defs", null, React__default.createElement("path", {
+    id: 'textPath',
+    d: 'M 0 500 A 175,100 0 0 1 500,500'
+  })), React__default.createElement("text", {
+    x: '0',
+    y: '0',
+    textAnchor: 'middle'
+  }, React__default.createElement("textPath", {
+    xlinkHref: '#textPath',
+    fill: 'white',
+    startOffset: '50%'
+  }, text)));
+};
+var Modal = function Modal(_ref2) {
+  var _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6, _trigger$data7;
+  var trigger = _ref2.trigger;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
   var _useCollector = useCollector(),
-    resetDisplayTrigger = _useCollector.resetDisplayTrigger;
+    resetDisplayTrigger = _useCollector.resetDisplayTrigger,
+    trackEvent = _useCollector.trackEvent;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
   var _useState = useState(true),
     open = _useState[0],
     setOpen = _useState[1];
@@ -784,17 +850,45 @@ var Modal = function Modal(_ref) {
     stylesLoaded = _useState2[0],
     setStylesLoaded = _useState2[1];
   var closeModal = function closeModal() {
+    trackEvent('user_closed_trigger', trigger);
     resetDisplayTrigger();
     setOpen(false);
   };
+  var redirectUser = function redirectUser(e) {
+    var _trigger$data, _trigger$data2;
+    e.preventDefault();
+    trackEvent('user_clicked_button', trigger);
+    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
+  };
+  var randomHash = useMemo(function () {
+    return v4().split('-')[0];
+  }, []);
   useEffect(function () {
-    var css = "\n  @charset \"UTF-8\";\n  @import \"https://fonts.smct.co/Din/font.css\";\n  .variant-bg,\n  .variant-overlay-outer,\n  .variant-bar,\n  .variant-final-message,\n  .variant-success-message {\n    display: none;\n    font-family: Gotham, \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n  }\n  .variant-bg,\n  .variant-bar {\n    z-index: 99999999999;\n  }\n  .variant-bar,\n  .variant-handle,\n  .variant-final-message,\n  .variant-success-message-inner,\n  .variant-overlay-inner {\n    background-color: rgba(0, 0, 0, 1);\n  }\n  .variant-bar,\n  .variant-option,\n  .variant-handle,\n  .variant-final-message,\n  .variant-text-outer > .variant-text,\n  a.variant-link {\n    color: #fff;\n  }\n  .variant-bg,\n  .variant-bg * {\n    -moz-box-sizing: border-box;\n    -webkit-box-sizing: border-box;\n    box-sizing: border-box;\n  }\n  .variant-bg * {\n    line-height: 100%;\n  }\n  .variant-overlay-inner,\n  .variant-input,\n  .variant-text,\n  .variant-text-outer,\n  .variant-item,\n  .variant-progress,\n  .variant-panel .variant-bg,\n  .variant-handle > span,\n  .variant-loader,\n  .variant-loader-single,\n  .variant-loader-double,\n  .variant-option,\n  .variant-long-close {\n    display: block;\n  }\n  .variant-text-outer,\n  .variant-option {\n    width: 50%;\n    min-width: 280px;\n    margin: auto;\n  }\n  .variant-input {\n    background-color: rgba(255, 255, 255, 0.8);\n  }\n  .variant-bg {\n    background-color: rgba(0, 0, 0, 0.6);\n    width: 100%;\n    height: 100%;\n    position: fixed;\n    top: 0;\n    left: 0;\n    right: 0;\n    bottom: 0;\n    overflow-y: scroll;\n  }\n  .variant-overlay-outer {\n    position: relative;\n    transition: height 0.2s ease;\n  }\n  .variant-overlay-inner {\n    width: 700px;\n    min-height: 400px;\n    position: relative;\n    margin: 10% auto;\n    transition: all 0.2s ease;\n    padding: 10px 10px 30px;\n    min-width: 300px;\n  }\n  .variant-close {\n    border-radius: 50%;\n    color: #333;\n    cursor: pointer;\n    display: block;\n    font-size: 20px;\n    font-weight: 700;\n    height: 30px;\n    line-height: 30px;\n    position: absolute;\n    right: 10px;\n    text-align: center;\n    top: 10px;\n    width: 30px;\n    z-index: 100;\n  }\n  .variant-close a {\n    font-family: Gotham, \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n  }\n  .variant-close:hover {\n    background-color: rgba(255, 255, 255, 0.3);\n  }\n  .variant-close-safe {\n    text-shadow: 1px 1px 1px #000;\n    color: #fff;\n    width: 100%;\n    text-align: center;\n    cursor: pointer;\n    display: none;\n    position: fixed;\n    bottom: 30px;\n    left: 0;\n  }\n  .variant-close-safe a {\n    color: #fff !important;\n  }\n  .variant-closer {\n    cursor: pointer;\n  }\n  .variant-long-close {\n    font-size: 14px;\n    position: absolute;\n    bottom: 10px;\n    width: 100%;\n    left: 0;\n    text-align: center;\n  }\n  .variant-long-close a.variant-link {\n    width: auto;\n  }\n  a.variant-link {\n    display: inline-block;\n    text-decoration: none;\n    height: 100%;\n    width: 100%;\n  }\n  .variant-input,\n  .variant-button,\n  .variant-reveal {\n    width: 100%;\n  }\n  .variant-button,\n  .variant-cover {\n    background: #333;\n    -moz-user-select: none;\n    -webkit-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n  }\n  .variant-input {\n    color: #000;\n    text-align: center;\n    border: 1px solid #333;\n    margin: 10px auto;\n    padding: 10px;\n  }\n  .variant-input::-webkit-input-placeholder,\n  .variant-input:-moz-placeholder,\n  .variant-input::-moz-placeholder,\n  .variant-input:-ms-input-placeholder {\n    color: #ccc;\n    text-transform: uppercase;\n  }\n  .variant-input:focus {\n    outline: none;\n  }\n  .variant-button {\n    border: medium none;\n    color: #fff;\n    outline: medium none;\n    display: block;\n    margin: 10px auto;\n    font-size: 20px;\n    padding: 10px;\n    cursor: pointer;\n  }\n  .variant-reveal {\n    display: block;\n    margin: 10px auto;\n    position: relative;\n    text-align: center;\n  }\n  .variant-cover,\n  .variant-code {\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 100%;\n    padding: 10px;\n    font-size: 20px;\n  }\n  .variant-cover {\n    z-index: 2;\n    color: #fff;\n    padding: 11px;\n    cursor: pointer;\n  }\n  .variant-button:hover,\n  .variant-cover:hover {\n    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);\n  }\n  .variant-code {\n    z-index: 1;\n    border: 1px solid #333;\n    background: rgba(255, 255, 255, 0.8);\n    color: #333;\n    font-weight: 700;\n    -moz-user-select: text;\n    -webkit-user-select: text;\n    -ms-user-select: text;\n    user-select: text;\n  }\n  .variant-text {\n    text-align: center;\n    font-size: 20px;\n  }\n  .variant-text2 {\n    font-size: 40px;\n    font-weight: 700;\n  }\n  .variant-img-outer {\n    position: relative;\n    width: 100%;\n    display: block;\n  }\n  .variant-img {\n    display: block;\n    width: 100%;\n  }\n  .variant-img img {\n    border: medium none;\n    display: block;\n    margin: auto;\n    outline: medium none;\n    max-width: 100%;\n  }\n  .variant-clearfix:after {\n    visibility: hidden;\n    display: block;\n    font-size: 0;\n    content: \" \";\n    clear: both;\n    height: 0;\n  }\n  .variant-clearfix {\n    display: inline-block;\n    height: 1%;\n    display: block;\n  }\n  .variant-item {\n    height: 80px;\n    padding: 10px;\n    border-bottom: 1px dashed #ccc;\n  }\n  .variant-item .variant-item-img {\n    display: inline-block;\n    text-align: center;\n  }\n  .variant-item .variant-item-img img {\n    max-width: 60px;\n    max-height: 60px;\n  }\n  .variant-item .variant-title {\n    font-weight: 700;\n    display: inline-block;\n  }\n  .variant-item .variant-price {\n    display: inline-block;\n  }\n  .variant-item .variant-qty {\n    display: inline-block;\n  }\n  .variant-progress {\n    background-color: rgba(0, 0, 0, 0.1);\n    border-radius: 0;\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;\n    height: 21px;\n    margin-bottom: 21px;\n    overflow: hidden;\n    width: 100%;\n  }\n  .variant-progress-bar {\n    background-color: #007932;\n    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15) inset;\n    color: #fff;\n    float: left;\n    font-size: 12px;\n    height: 100%;\n    line-height: 21px;\n    text-align: center;\n    transition: width 0.6s ease 0s;\n    width: 0;\n  }\n  .variant-progress .variant-progress-bar {\n    background-image: linear-gradient(\n      45deg,\n      rgba(255, 255, 255, 0.15) 25%,\n      transparent 25%,\n      transparent 50%,\n      rgba(255, 255, 255, 0.15) 50%,\n      rgba(255, 255, 255, 0.15) 75%,\n      transparent 75%,\n      transparent\n    );\n    background-size: 40px 40px;\n    animation: 0.5s linear 0s normal none infinite running\n      .variant-progress-bar-stripes;\n  }\n  @-webkit-keyframes .variant-progress-bar-stripes {\n    from {\n      background-position: 40px 0;\n    }\n    to {\n      background-position: 0 0;\n    }\n  }\n  @-o-keyframes .variant-progress-bar-stripes {\n    from {\n      background-position: 40px 0;\n    }\n    to {\n      background-position: 0 0;\n    }\n  }\n  @keyframes .variant-progress-bar-stripes {\n    from {\n      background-position: 40px 0;\n    }\n    to {\n      background-position: 0 0;\n    }\n  }\n  .variant-overlay {\n    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;\n  }\n  .variant-overlay:before,\n  .variant-overlay:after {\n    content: \"\";\n    position: absolute;\n    z-index: -1;\n    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);\n    top: 0;\n    bottom: 0;\n    left: 10px;\n    right: 10px;\n    border-radius: 100px / 10px;\n  }\n  .variant-overlay:after {\n    right: 10px;\n    left: auto;\n    transform: skew(8deg) rotate(3deg);\n  }\n  .variant-panel .variant-bg {\n    width: 0;\n    height: 100%;\n    position: fixed;\n    z-index: 1001;\n    top: 0;\n    background-color: #111;\n    padding: 0;\n    left: 0;\n    bottom: 0;\n    right: 0;\n    color: #fff;\n    overflow-x: hidden;\n    overflow-y: scroll;\n    transition: width 0.5s;\n  }\n  .variant-panel-body-cover {\n    position: fixed;\n    z-index: 1000;\n    background-color: rgba(0, 0, 0, 0.5);\n    left: 0;\n    right: 0;\n    top: 0;\n    bottom: 0;\n    width: 100%;\n    height: 100%;\n    display: none;\n  }\n  .variant-panel.variant-panel-left .variant-bg {\n    right: auto;\n  }\n  .variant-panel.variant-panel-right .variant-bg {\n    left: auto;\n  }\n  .variant-panel .variant-overlay-inner {\n    width: 90%;\n  }\n  .variant-input-group {\n    display: block;\n    text-align: center;\n  }\n  .variant-input-group input[type=\"checkbox\"],\n  .variant-input-group input[type=\"radio\"] {\n    margin-right: 3px;\n    margin-left: 10px;\n  }\n  .variant-input-error ::-webkit-input-placeholder,\n  .variant-input-error :-moz-placeholder,\n  .variant-input-error ::-moz-placeholder,\n  .variant-input-error :-ms-input-placeholder {\n    color: #d30003;\n  }\n  .variant-input-error label {\n    color: #d30003;\n  }\n  .variant-input-error input,\n  .variant-input-error select,\n  .variant-input-error textarea {\n    border-color: #d30003;\n  }\n  .variant-bar,\n  .variant-handle {\n    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.3);\n    border-bottom-left-radius: 3px;\n    border-bottom-right-radius: 3px;\n  }\n  .variant-bar {\n    display: none;\n    position: fixed;\n    top: 0;\n    left: 25%;\n    right: 25%;\n    width: 50%;\n    font-weight: 700;\n    font-size: 16px;\n    text-shadow: none;\n    text-align: center;\n    height: 30px;\n    line-height: 30px;\n    padding: 0 20px;\n  }\n  @media (max-width: 500px) {\n    .variant-bar {\n      width: 80%;\n      left: 10%;\n    }\n  }\n  .variant-bar-close {\n    cursor: pointer;\n    height: 10px;\n    line-height: 10px;\n    position: absolute;\n    right: 10px;\n    top: 10px;\n    width: 10px;\n  }\n  .variant-handle {\n    position: absolute;\n    width: 50px;\n    margin-left: -25px;\n    height: 20px;\n    left: 50%;\n    bottom: -20px;\n    cursor: pointer;\n    line-height: 12px;\n    letter-spacing: -2px;\n  }\n  .variant-handle > span {\n    position: absolute;\n    width: 60%;\n    left: 20%;\n    height: 2px;\n    background: #fff;\n  }\n  .variant-bar1 {\n    top: 20%;\n  }\n  .variant-bar2 {\n    top: 40%;\n  }\n  .variant-bar3 {\n    top: 60%;\n  }\n  .variant-arrow-up {\n    width: 0;\n    height: 0;\n    border-left: 5px solid transparent;\n    border-right: 5px solid transparent;\n    border-bottom: 5px solid #000;\n  }\n  .variant-arrow-down {\n    width: 0;\n    height: 0;\n    border-left: 5px solid transparent;\n    border-right: 5px solid transparent;\n    border-top: 5px solid #000;\n  }\n  .variant-arrow-right {\n    width: 0;\n    height: 0;\n    border-top: 5px solid transparent;\n    border-bottom: 5px solid transparent;\n    border-left: 5px solid #000;\n  }\n  .variant-arrow-left {\n    width: 0;\n    height: 0;\n    border-top: 5px solid transparent;\n    border-bottom: 5px solid transparent;\n    border-right: 5px solid #000;\n  }\n  .variant-preview {\n    position: fixed;\n    top: 20px;\n    left: 50%;\n    margin-left: -160px;\n    width: 320px;\n    padding: 5px 10px;\n    background: #ff0;\n    color: #000;\n    font-family: Gotham, \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n    font-size: 12px;\n    text-align: center;\n    border-radius: 5px;\n    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);\n    cursor: pointer;\n  }\n  .variant-preview-close {\n    font-size: 7px;\n    height: 3px;\n    position: absolute;\n    right: 4px;\n    top: 0;\n    width: 3px;\n  }\n  .variant-preview .variant-arrow-up {\n    position: absolute;\n    top: -20px;\n    left: 50%;\n    margin-left: -10px;\n    border-left: 20px solid transparent;\n    border-right: 20px solid transparent;\n    border-bottom: 20px solid #ff0;\n  }\n  .variant-notices {\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 100%;\n    transition: height 0.3s ease;\n  }\n  .variant-notice-box {\n    padding: 5px 10px;\n    background: #ec6952;\n    font-size: 12px;\n    text-align: left;\n    border-radius: 5px;\n    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);\n    cursor: pointer;\n    min-height: 30px;\n    min-width: 100px;\n    max-width: 500px;\n    width: auto;\n    margin-bottom: 5px;\n    color: #fff;\n    float: right;\n    clear: both;\n    z-index: 100;\n    transition: all 0.5s ease;\n    overflow: hidden;\n  }\n  .variant-notice-box.success {\n    background: #24a233;\n  }\n  .variant-notice-box.warning {\n    background: #cf9d0f;\n  }\n  .variant-notice-box.danger {\n    background: #d30003;\n  }\n  @media screen {\n    .variant-preloader {\n      position: fixed;\n      left: -9999px;\n      top: -9999px;\n    }\n    .variant-preloader img {\n      display: block;\n    }\n  }\n  @media print {\n    .variant-preloader,\n    .variant-preloader img {\n      visibility: hidden;\n      display: none;\n    }\n  }\n  .variant-final-message {\n    border-radius: 2px;\n    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);\n    bottom: 10px;\n    font-size: 16px;\n    padding: 10px 20px;\n    position: fixed;\n    right: 10px;\n    z-index: 1e15;\n  }\n  .variant-final-message-close {\n    position: absolute;\n    top: 3px;\n    right: 1px;\n    width: 10px;\n    height: 10px;\n    cursor: pointer;\n    font-size: 10px;\n    opacity: 0.5;\n  }\n  .variant-final-message .variant-select {\n    font-weight: 700;\n  }\n  .variant-final-message:hover .variant-final-message-close {\n    opacity: 1;\n  }\n  .variant-success-message {\n    position: absolute;\n    width: 100%;\n    background: rgba(0, 0, 0, 0.5);\n    height: 100%;\n    top: 0;\n    left: 0;\n    right: 0;\n    bottom: 0;\n    text-align: center;\n  }\n  .variant-success-message-inner {\n    background: #08ad00 none repeat scroll 0 0;\n    border-radius: 5px;\n    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);\n    color: #fff;\n    display: inline-block;\n    font-size: 30px;\n    margin: 20% auto auto;\n    padding: 10px 30px;\n    position: relative;\n  }\n  .variant-success-close {\n    position: absolute;\n    top: 5px;\n    right: 5px;\n    cursor: pointer;\n    font-size: 12px;\n  }\n  @-webkit-keyframes .variant-spin {\n    0% {\n      -webkit-transform: rotate(0deg);\n      transform: rotate(0deg);\n    }\n    100% {\n      -webkit-transform: rotate(360deg);\n      transform: rotate(360deg);\n    }\n  }\n  @keyframes .variant-spin {\n    0% {\n      -webkit-transform: rotate(0deg);\n      transform: rotate(0deg);\n    }\n    100% {\n      -webkit-transform: rotate(360deg);\n      transform: rotate(360deg);\n    }\n  }\n  @-webkit-keyframes .variant-pulse {\n    50% {\n      background: #fff;\n    }\n  }\n  @keyframes .variant-pulse {\n    50% {\n      background: #fff;\n    }\n  }\n  .variant-loader-bg,\n  .variant-dc-placeholder {\n    position: absolute;\n    top: 10%;\n    left: 50%;\n    background: rgba(0, 0, 0, 0.8);\n    width: 60px;\n    margin-left: -30px;\n    height: 60px;\n    z-index: 10;\n    border-radius: 10px;\n    display: none;\n  }\n  .variant-loader,\n  .variant-loader-single,\n  .variant-loader-double {\n    border-radius: 50%;\n    width: 50px;\n    height: 50px;\n    margin: 5px;\n    border: 0.25rem solid rgba(255, 255, 255, 0.2);\n    border-top-color: #fff;\n    -webkit-animation: variant-spin 1s infinite linear;\n    animation: variant-spin 1s infinite linear;\n  }\n  .variant-loader-double {\n    border-style: double;\n    border-width: 0.5rem;\n  }\n  .variant-loader-pulse {\n    -webkit-animation: variant-pulse 750ms infinite;\n    animation: variant-pulse 750ms infinite;\n    -webkit-animation-delay: 250ms;\n    animation-delay: 250ms;\n    height: 30px;\n    left: 25px;\n    position: absolute;\n    top: 14px;\n    width: 10px;\n  }\n  .variant-loader-pulse:before,\n  .variant-loader-pulse:after {\n    content: \"\";\n    position: absolute;\n    display: block;\n    height: 16px;\n    width: 6px;\n    top: 50%;\n    background: rgba(255, 255, 255, 0.2);\n    -webkit-transform: translateY(-50%);\n    transform: translateY(-50%);\n    -webkit-animation: variant-pulse 750ms infinite;\n    animation: variant-pulse 750ms infinite;\n  }\n  .variant-loader-pulse:before {\n    left: -12px;\n  }\n  .variant-loader-pulse:after {\n    left: 16px;\n    -webkit-animation-delay: 500ms;\n    animation-delay: 500ms;\n  }\n  .variant-loader-bg[data-theme=\"white\"],\n  .variant-dc-placeholder {\n    background: rgba(255, 255, 255, 0.8);\n  }\n  .variant-loader-bg[data-theme=\"white\"] .variant-loader-single,\n  .variant-dc-placeholder .variant-loader-single,\n  .variant-loader-bg[data-theme=\"white\"] .variant-loader-double,\n  .variant-dc-placeholder .variant-loader-double,\n  .variant-loader-bg[data-theme=\"white\"] .variant-loader-pulse,\n  .variant-dc-placeholder .variant-loader-pulse {\n    border-color: rgba(0, 0, 0, 0.2);\n    border-top-color: #000;\n  }\n  .variant-terms {\n    background-color: #fff;\n    border: 1px solid #333;\n    border-radius: 3px;\n    bottom: 5%;\n    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.4);\n    left: 5%;\n    padding: 10px;\n    position: absolute;\n    right: 5%;\n    top: 5%;\n    z-index: 101;\n    display: none;\n  }\n  .variant-terms-header,\n  .variant-terms-para,\n  .variant-terms-close,\n  .variant-terms-close-x {\n    color: #333;\n    display: block;\n  }\n  .variant-terms-scroller {\n    position: absolute;\n    top: 10px;\n    left: 10px;\n    right: 10px;\n    bottom: 30px;\n    overflow: auto;\n  }\n  .variant-terms-header {\n    font-size: 20px;\n    font-weight: 700;\n    margin: 5px 0;\n    text-align: center;\n  }\n  .variant-terms-para {\n    margin: 5px 0;\n    font-size: 12px;\n  }\n  .variant-terms-close {\n    bottom: 10px;\n    cursor: pointer;\n    left: 10px;\n    position: absolute;\n    right: 10px;\n    text-align: center;\n  }\n  .variant-show-terms,\n  .variant-show-terms {\n    text-decoration: underline;\n    cursor: pointer;\n  }\n  .variant-terms[data-theme=\"dark\"] {\n    background-color: #333;\n  }\n  .variant-terms[data-theme=\"dark\"] .variant-terms-header,\n  .variant-terms[data-theme=\"dark\"] .variant-terms-para,\n  .variant-terms[data-theme=\"dark\"] .variant-terms-close,\n  .variant-terms[data-theme=\"dark\"] .variant-terms-close-x {\n    color: #fff;\n  }\n  .variant-terms-close-x {\n    position: absolute;\n    top: 5px;\n    right: 5px;\n    cursor: pointer;\n    opacity: 0.7;\n    -webkit-transition: all 0.25s ease-in-out;\n    -ms-transition: all 0.25s ease-in-out;\n    -o-transition: all 0.25s ease-in-out;\n    -moz-transition: all 0.25s ease-in-out;\n    transition: transform all 0.25s ease-in-out;\n  }\n  .variant-terms-close-x:hover {\n    opacity: 1;\n    -webkit-transform: rotate(180deg) scale(1.3);\n    -ms-transform: rotate(180deg) scale(1.3);\n    -o-transform: rotate(180deg) scale(1.3);\n    -moz-transform: rotate(180deg) scale(1.3);\n    transform: rotate(180deg) scale(1.3);\n  }\n  .variant-cp {\n    -youbkit-touch-callout: none;\n    -youbkit-user-select: none;\n    -webkit-user-select: none;\n    -moz-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n  }\n  .variant-cp,\n  .variant-cp-msg {\n    display: none;\n  }\n  .variant-hidden-consents {\n    opacity: 0;\n    position: fixed;\n    bottom: 0;\n    left: 0;\n    width: 1px;\n    height: 1px;\n    visibility: hidden;\n  }\n  .variant-requestNotifications .variant-agree-yes,\n  .variant-requestNotifications .variant-agree-no {\n    display: none;\n  }\n  .variant-notices {\n    padding: 10px;\n    right: 20px;\n    left: auto;\n    max-width: 300px;\n    z-index: 100;\n  }\n  .variant-dc-placeholder {\n    display: block;\n    height: 30px;\n    width: 30px;\n    top: 3px;\n  }\n  .variant-dc-placeholder > * {\n    height: 20px;\n    width: 20px;\n  }\n  .variant-shake-msg {\n    display: none;\n  }\n  .variant-animated {\n    -webkit-animation-duration: 1s;\n    animation-duration: 1s;\n    -webkit-animation-fill-mode: both;\n    animation-fill-mode: both;\n  }\n  .variant-animated.variant-infinite {\n    -webkit-animation-iteration-count: infinite;\n    animation-iteration-count: infinite;\n  }\n  .variant-animated.variant-hinge {\n    -webkit-animation-duration: 2s;\n    animation-duration: 2s;\n  }\n  .variant-animated.variant-bounceIn,\n  .variant-animated.variant-bounceOut,\n  .variant-animated.variant-flipOutX,\n  .variant-animated.variant-flipOutY {\n    -webkit-animation-duration: 0.75s;\n    animation-duration: 0.75s;\n  }\n  @-webkit-keyframes .variant-fadeIn {\n    0% {\n      opacity: 0;\n    }\n    to {\n      opacity: 1;\n    }\n  }\n  @keyframes .variant-fadeIn {\n    0% {\n      opacity: 0;\n    }\n    to {\n      opacity: 1;\n    }\n  }\n  .variant-fadeIn {\n    -webkit-animation-name: variant-fadeIn;\n    animation-name: variant-fadeIn;\n  }\n  @-webkit-keyframes .variant-bounceInDown {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -3000px, 0);\n      transform: translate3d(0, -3000px, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, 25px, 0);\n      transform: translate3d(0, 25px, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(0, -10px, 0);\n      transform: translate3d(0, -10px, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(0, 5px, 0);\n      transform: translate3d(0, 5px, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-bounceInDown {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -3000px, 0);\n      transform: translate3d(0, -3000px, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, 25px, 0);\n      transform: translate3d(0, 25px, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(0, -10px, 0);\n      transform: translate3d(0, -10px, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(0, 5px, 0);\n      transform: translate3d(0, 5px, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-bounceInDown {\n    -webkit-animation-name: variant-bounceInDown;\n    animation-name: variant-bounceInDown;\n  }\n  .variant-animDelay2 {\n    -webkit-animation-delay: 0.2s !important;\n    -moz-animation-delay: 0.2s !important;\n    -ms-animation-delay: 0.2s !important;\n    -o-animation-delay: 0.2s !important;\n    animation-delay: 0.2s !important;\n  }\n  .variant-animDelay6 {\n    -webkit-animation-delay: 0.6s !important;\n    -moz-animation-delay: 0.6s !important;\n    -ms-animation-delay: 0.6s !important;\n    -o-animation-delay: 0.6s !important;\n    animation-delay: 0.6s !important;\n  }\n  @-webkit-keyframes .variant-bounceInRight {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(3000px, 0, 0);\n      transform: translate3d(3000px, 0, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(-25px, 0, 0);\n      transform: translate3d(-25px, 0, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(10px, 0, 0);\n      transform: translate3d(10px, 0, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(-5px, 0, 0);\n      transform: translate3d(-5px, 0, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-bounceInRight {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(3000px, 0, 0);\n      transform: translate3d(3000px, 0, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(-25px, 0, 0);\n      transform: translate3d(-25px, 0, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(10px, 0, 0);\n      transform: translate3d(10px, 0, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(-5px, 0, 0);\n      transform: translate3d(-5px, 0, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-bounceInRight {\n    -webkit-animation-name: variant-bounceInRight;\n    animation-name: variant-bounceInRight;\n  }\n  .variant-animDelay8 {\n    -webkit-animation-delay: 0.8s !important;\n    -moz-animation-delay: 0.8s !important;\n    -ms-animation-delay: 0.8s !important;\n    -o-animation-delay: 0.8s !important;\n    animation-delay: 0.8s !important;\n  }\n  .variant-animDelay10 {\n    -webkit-animation-delay: 1s !important;\n    -moz-animation-delay: 1s !important;\n    -ms-animation-delay: 1s !important;\n    -o-animation-delay: 1s !important;\n    animation-delay: 1s !important;\n  }\n  .variant-animDelay12 {\n    -webkit-animation-delay: 1.2s !important;\n    -moz-animation-delay: 1.2s !important;\n    -ms-animation-delay: 1.2s !important;\n    -o-animation-delay: 1.2s !important;\n    animation-delay: 1.2s !important;\n  }\n  .variant-animDelay4 {\n    -webkit-animation-delay: 0.4s !important;\n    -moz-animation-delay: 0.4s !important;\n    -ms-animation-delay: 0.4s !important;\n    -o-animation-delay: 0.4s !important;\n    animation-delay: 0.4s !important;\n  }\n  @-webkit-keyframes .variant-bounceInLeft {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(-3000px, 0, 0);\n      transform: translate3d(-3000px, 0, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(25px, 0, 0);\n      transform: translate3d(25px, 0, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(-10px, 0, 0);\n      transform: translate3d(-10px, 0, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(5px, 0, 0);\n      transform: translate3d(5px, 0, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-bounceInLeft {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(-3000px, 0, 0);\n      transform: translate3d(-3000px, 0, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(25px, 0, 0);\n      transform: translate3d(25px, 0, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(-10px, 0, 0);\n      transform: translate3d(-10px, 0, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(5px, 0, 0);\n      transform: translate3d(5px, 0, 0);\n    }\n    to {\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-bounceInLeft {\n    -webkit-animation-name: variant-bounceInLeft;\n    animation-name: variant-bounceInLeft;\n  }\n  @-webkit-keyframes .variant-fadeInLeft {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(-100%, 0, 0);\n      transform: translate3d(-100%, 0, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-fadeInLeft {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(-100%, 0, 0);\n      transform: translate3d(-100%, 0, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-fadeInLeft {\n    -webkit-animation-name: variant-fadeInLeft;\n    animation-name: variant-fadeInLeft;\n  }\n  @-webkit-keyframes .variant-fadeInRight {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(100%, 0, 0);\n      transform: translate3d(100%, 0, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-fadeInRight {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(100%, 0, 0);\n      transform: translate3d(100%, 0, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-fadeInRight {\n    -webkit-animation-name: variant-fadeInRight;\n    animation-name: variant-fadeInRight;\n  }\n  @-webkit-keyframes .variant-bounceInUp {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 3000px, 0);\n      transform: translate3d(0, 3000px, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, -20px, 0);\n      transform: translate3d(0, -20px, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(0, 10px, 0);\n      transform: translate3d(0, 10px, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(0, -5px, 0);\n      transform: translate3d(0, -5px, 0);\n    }\n    to {\n      -webkit-transform: translateZ(0);\n      transform: translateZ(0);\n    }\n  }\n  @keyframes .variant-bounceInUp {\n    0%,\n    60%,\n    75%,\n    90%,\n    to {\n      -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n      animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);\n    }\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 3000px, 0);\n      transform: translate3d(0, 3000px, 0);\n    }\n    60% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, -20px, 0);\n      transform: translate3d(0, -20px, 0);\n    }\n    75% {\n      -webkit-transform: translate3d(0, 10px, 0);\n      transform: translate3d(0, 10px, 0);\n    }\n    90% {\n      -webkit-transform: translate3d(0, -5px, 0);\n      transform: translate3d(0, -5px, 0);\n    }\n    to {\n      -webkit-transform: translateZ(0);\n      transform: translateZ(0);\n    }\n  }\n  .variant-bounceInUp {\n    -webkit-animation-name: variant-bounceInUp;\n    animation-name: variant-bounceInUp;\n  }\n  .variant-animDelay7 {\n    -webkit-animation-delay: 0.7s !important;\n    -moz-animation-delay: 0.7s !important;\n    -ms-animation-delay: 0.7s !important;\n    -o-animation-delay: 0.7s !important;\n    animation-delay: 0.7s !important;\n  }\n  .variant-animDelay9 {\n    -webkit-animation-delay: 0.9s !important;\n    -moz-animation-delay: 0.9s !important;\n    -ms-animation-delay: 0.9s !important;\n    -o-animation-delay: 0.9s !important;\n    animation-delay: 0.9s !important;\n  }\n  @-webkit-keyframes .variant-fadeInUp {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 100%, 0);\n      transform: translate3d(0, 100%, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-fadeInUp {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 100%, 0);\n      transform: translate3d(0, 100%, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-fadeInUp {\n    -webkit-animation-name: variant-fadeInUp;\n    animation-name: variant-fadeInUp;\n  }\n  .variant-animDelay14 {\n    -webkit-animation-delay: 1.4s !important;\n    -moz-animation-delay: 1.4s !important;\n    -ms-animation-delay: 1.4s !important;\n    -o-animation-delay: 1.4s !important;\n    animation-delay: 1.4s !important;\n  }\n  .variant-animDelay1 {\n    -webkit-animation-delay: 0.1s !important;\n    -moz-animation-delay: 0.1s !important;\n    -ms-animation-delay: 0.1s !important;\n    -o-animation-delay: 0.1s !important;\n    animation-delay: 0.1s !important;\n  }\n  @-webkit-keyframes .variant-fadeInDown {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -100%, 0);\n      transform: translate3d(0, -100%, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  @keyframes .variant-fadeInDown {\n    0% {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -100%, 0);\n      transform: translate3d(0, -100%, 0);\n    }\n    to {\n      opacity: 1;\n      -webkit-transform: none;\n      transform: none;\n    }\n  }\n  .variant-fadeInDown {\n    -webkit-animation-name: variant-fadeInDown;\n    animation-name: variant-fadeInDown;\n  }\n  @-webkit-keyframes .variant-fadeOutUp {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -100%, 0);\n      transform: translate3d(0, -100%, 0);\n    }\n  }\n  @keyframes .variant-fadeOutUp {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -100%, 0);\n      transform: translate3d(0, -100%, 0);\n    }\n  }\n  .variant-fadeOutUp {\n    -webkit-animation-name: variant-fadeOutUp;\n    animation-name: variant-fadeOutUp;\n  }\n  @-webkit-keyframes .variant-fadeOutDown {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 100%, 0);\n      transform: translate3d(0, 100%, 0);\n    }\n  }\n  @keyframes .variant-fadeOutDown {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 100%, 0);\n      transform: translate3d(0, 100%, 0);\n    }\n  }\n  .variant-fadeOutDown {\n    -webkit-animation-name: variant-fadeOutDown;\n    animation-name: variant-fadeOutDown;\n  }\n  @-webkit-keyframes .variant-fadeOut {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n    }\n  }\n  @keyframes .variant-fadeOut {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n    }\n  }\n  .variant-fadeOut {\n    -webkit-animation-name: variant-fadeOut;\n    animation-name: variant-fadeOut;\n  }\n  @-webkit-keyframes .variant-bounceOutUp {\n    20% {\n      -webkit-transform: translate3d(0, -10px, 0);\n      transform: translate3d(0, -10px, 0);\n    }\n    40%,\n    45% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, 20px, 0);\n      transform: translate3d(0, 20px, 0);\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -2000px, 0);\n      transform: translate3d(0, -2000px, 0);\n    }\n  }\n  @keyframes .variant-bounceOutUp {\n    20% {\n      -webkit-transform: translate3d(0, -10px, 0);\n      transform: translate3d(0, -10px, 0);\n    }\n    40%,\n    45% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, 20px, 0);\n      transform: translate3d(0, 20px, 0);\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, -2000px, 0);\n      transform: translate3d(0, -2000px, 0);\n    }\n  }\n  .variant-bounceOutUp {\n    -webkit-animation-name: variant-bounceOutUp;\n    animation-name: variant-bounceOutUp;\n  }\n  @-webkit-keyframes .variant-bounceOutDown {\n    20% {\n      -webkit-transform: translate3d(0, 10px, 0);\n      transform: translate3d(0, 10px, 0);\n    }\n    40%,\n    45% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, -20px, 0);\n      transform: translate3d(0, -20px, 0);\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 2000px, 0);\n      transform: translate3d(0, 2000px, 0);\n    }\n  }\n  @keyframes .variant-bounceOutDown {\n    20% {\n      -webkit-transform: translate3d(0, 10px, 0);\n      transform: translate3d(0, 10px, 0);\n    }\n    40%,\n    45% {\n      opacity: 1;\n      -webkit-transform: translate3d(0, -20px, 0);\n      transform: translate3d(0, -20px, 0);\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(0, 2000px, 0);\n      transform: translate3d(0, 2000px, 0);\n    }\n  }\n  .variant-bounceOutDown {\n    -webkit-animation-name: variant-bounceOutDown;\n    animation-name: variant-bounceOutDown;\n  }\n  @-webkit-keyframes .variant-rubberBand {\n    0% {\n      -webkit-transform: scaleX(1);\n      transform: scaleX(1);\n    }\n    30% {\n      -webkit-transform: scale3d(1.25, 0.75, 1);\n      transform: scale3d(1.25, 0.75, 1);\n    }\n    40% {\n      -webkit-transform: scale3d(0.75, 1.25, 1);\n      transform: scale3d(0.75, 1.25, 1);\n    }\n    50% {\n      -webkit-transform: scale3d(1.15, 0.85, 1);\n      transform: scale3d(1.15, 0.85, 1);\n    }\n    65% {\n      -webkit-transform: scale3d(0.95, 1.05, 1);\n      transform: scale3d(0.95, 1.05, 1);\n    }\n    75% {\n      -webkit-transform: scale3d(1.05, 0.95, 1);\n      transform: scale3d(1.05, 0.95, 1);\n    }\n    to {\n      -webkit-transform: scaleX(1);\n      transform: scaleX(1);\n    }\n  }\n  @keyframes .variant-rubberBand {\n    0% {\n      -webkit-transform: scaleX(1);\n      transform: scaleX(1);\n    }\n    30% {\n      -webkit-transform: scale3d(1.25, 0.75, 1);\n      transform: scale3d(1.25, 0.75, 1);\n    }\n    40% {\n      -webkit-transform: scale3d(0.75, 1.25, 1);\n      transform: scale3d(0.75, 1.25, 1);\n    }\n    50% {\n      -webkit-transform: scale3d(1.15, 0.85, 1);\n      transform: scale3d(1.15, 0.85, 1);\n    }\n    65% {\n      -webkit-transform: scale3d(0.95, 1.05, 1);\n      transform: scale3d(0.95, 1.05, 1);\n    }\n    75% {\n      -webkit-transform: scale3d(1.05, 0.95, 1);\n      transform: scale3d(1.05, 0.95, 1);\n    }\n    to {\n      -webkit-transform: scaleX(1);\n      transform: scaleX(1);\n    }\n  }\n  .variant-rubberBand {\n    -webkit-animation-name: variant-rubberBand;\n    animation-name: variant-rubberBand;\n  }\n  @-webkit-keyframes .variant-shake {\n    0%,\n    to {\n      -webkit-transform: translateZ(0);\n      transform: translateZ(0);\n    }\n    10%,\n    30%,\n    50%,\n    70%,\n    90% {\n      -webkit-transform: translate3d(-10px, 0, 0);\n      transform: translate3d(-10px, 0, 0);\n    }\n    20%,\n    40%,\n    60%,\n    80% {\n      -webkit-transform: translate3d(10px, 0, 0);\n      transform: translate3d(10px, 0, 0);\n    }\n  }\n  @keyframes .variant-shake {\n    0%,\n    to {\n      -webkit-transform: translateZ(0);\n      transform: translateZ(0);\n    }\n    10%,\n    30%,\n    50%,\n    70%,\n    90% {\n      -webkit-transform: translate3d(-10px, 0, 0);\n      transform: translate3d(-10px, 0, 0);\n    }\n    20%,\n    40%,\n    60%,\n    80% {\n      -webkit-transform: translate3d(10px, 0, 0);\n      transform: translate3d(10px, 0, 0);\n    }\n  }\n  .variant-shake {\n    -webkit-animation-name: variant-shake;\n    animation-name: variant-shake;\n  }\n  @-webkit-keyframes .variant-rollOut {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(100%, 0, 0) rotate(120deg);\n      transform: translate3d(100%, 0, 0) rotate(120deg);\n    }\n  }\n  @keyframes .variant-rollOut {\n    0% {\n      opacity: 1;\n    }\n    to {\n      opacity: 0;\n      -webkit-transform: translate3d(100%, 0, 0) rotate(120deg);\n      transform: translate3d(100%, 0, 0) rotate(120deg);\n    }\n  }\n  .variant-rollOut {\n    -webkit-animation-name: variant-rollOut;\n    animation-name: variant-rollOut;\n  }\n  .variant-bg * {\n    font-family: \"DINCompPro-CondMedium\";\n  }\n  .variant-overlay-inner {\n    background-size: cover;\n    width: 420px;\n    min-height: 520px;\n    border-radius: 5px;\n    padding-bottom: 0;\n    border: 2px solid #fff;\n  }\n  .variant-text-outer,\n  .variant-option {\n    width: 380px;\n    margin: auto;\n  }\n  .variant-text1,\n  .variant-text2 {\n    font-size: 26px;\n    font-weight: 400;\n    margin: 15px auto;\n    text-align: center;\n    color: #4e5255;\n    text-transform: uppercase;\n  }\n  .variant-text1 {\n    font-size: 34px;\n    font-weight: 600;\n    margin: 25px auto 15px;\n    color: #016543;\n  }\n  .variant-button {\n    font-size: 24px;\n    padding: 10px;\n    text-transform: uppercase;\n    margin: 300px auto auto;\n    color: #fff;\n    width: 340px;\n    transition: all 0.5s ease !important;\n  }\n  .variant-button:hover {\n    background-color: #016543;\n  }\n  .variant-close {\n    font-size: 14px;\n    background-color: #fff;\n    top: -10px;\n    right: -10px;\n  }\n  .variant-close a.variant-link {\n    color: #000;\n  }\n  @media screen and (max-width: 420px) {\n    .variant-close-safe {\n      display: block;\n    }\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.95);\n      transform-origin: 5% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 420px;\n    }\n  }\n  @media screen and (max-width: 412px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.93);\n      transform-origin: 4.9% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 412px;\n    }\n  }\n  @media screen and (max-width: 403px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.91);\n      transform-origin: 4.8% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 403px;\n    }\n  }\n  @media screen and (max-width: 395px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.89);\n      transform-origin: 4.7% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 395px;\n    }\n  }\n  @media screen and (max-width: 386px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.87);\n      transform-origin: 4.6% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 386px;\n    }\n  }\n  @media screen and (max-width: 378px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.85);\n      transform-origin: 4.5% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 378px;\n    }\n  }\n  @media screen and (max-width: 370px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.84);\n      transform-origin: 4.4% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 370px;\n    }\n  }\n  @media screen and (max-width: 361px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.82);\n      transform-origin: 4.3% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 361px;\n    }\n  }\n  @media screen and (max-width: 353px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.8);\n      transform-origin: 4.2% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 353px;\n    }\n  }\n  @media screen and (max-width: 344px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.78);\n      transform-origin: 4.1% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 344px;\n    }\n  }\n  @media screen and (max-width: 336px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.76);\n      transform-origin: 4% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 336px;\n    }\n  }\n  @media screen and (max-width: 328px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.74);\n      transform-origin: 3.9% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 328px;\n    }\n  }\n  @media screen and (max-width: 319px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.72);\n      transform-origin: 3.8% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 319px;\n    }\n  }\n  @media screen and (max-width: 311px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.7);\n      transform-origin: 3.7% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 311px;\n    }\n  }\n  @media screen and (max-width: 302px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.68);\n      transform-origin: 3.6% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 302px;\n    }\n  }\n  @media screen and (max-width: 294px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.66);\n      transform-origin: 3.5% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 294px;\n    }\n  }\n  @media screen and (max-width: 286px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.65);\n      transform-origin: 3.4% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 286px;\n    }\n  }\n  @media screen and (max-width: 277px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.63);\n      transform-origin: 3.3% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 277px;\n    }\n  }\n  @media screen and (max-width: 269px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.61);\n      transform-origin: 3.2% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 269px;\n    }\n  }\n  @media screen and (max-width: 260px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.59);\n      transform-origin: 3.1% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 260px;\n    }\n  }\n  @media screen and (max-width: 252px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.57);\n      transform-origin: 3% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 252px;\n    }\n  }\n  @media screen and (max-width: 244px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.55);\n      transform-origin: 2.9% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 244px;\n    }\n  }\n  @media screen and (max-width: 235px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.53);\n      transform-origin: 2.8% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 235px;\n    }\n  }\n  @media screen and (max-width: 227px) {\n    div:not(#smct-overlay-mini-preview) .variant-overlay-inner {\n      transform: scale(0.51);\n      transform-origin: 2.7% 0 0;\n    }\n    .variant-overlay-outer {\n      height: 227px;\n    }\n  }\n";
+    if (!open) return;
+    try {
+      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+        seenTriggerIDs: [trigger.id]
+      }).then(log);
+    } catch (e) {
+      error(e);
+    }
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.invocation,
+      triggerBehaviour: trigger.behaviour
+    });
+  }, []);
+  useEffect(function () {
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(css));
     document.head.appendChild(styles);
     setStylesLoaded(true);
   });
+  if (!stylesLoaded) {
+    return null;
+  }
   if (!open) {
     return null;
   }
@@ -802,135 +896,61 @@ var Modal = function Modal(_ref) {
     return null;
   }
   return React__default.createElement("div", {
+    className: 'f' + randomHash + '-overlay'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-modal',
     style: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 9999
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative',
+      height: 500
     }
   }, React__default.createElement("div", {
-    id: 'variant-overlay-106412',
-    "data-browser": 'firefox',
-    "data-device": 'desktop'
-  }, React__default.createElement("div", {
-    className: 'variant-bg variant-animated variant-fadeIn',
-    style: {
-      display: 'block'
-    }
-  }, React__default.createElement("div", {
-    className: 'variant-overlay-outer variant-animated variant-bounceInDown variant-animDelay2',
-    style: {
-      display: 'block'
-    }
-  }, React__default.createElement("div", {
-    className: 'variant-overlay-inner smc_clearfix',
-    "data-bgtheme": 'dark',
-    "data-changes": 'variant-overlay-inner|width,background-image,background-color',
-    "data-edits": 'content6',
-    style: {
-      backgroundImage: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundColor: '#f1f1f1'
-    }
-  }, React__default.createElement("div", {
-    className: 'variant-img-outer'
-  }, React__default.createElement("div", {
-    className: 'variant-img variant-img1 variant-animated variant-bounceInDown variant-animDelay6',
-    "data-changes": '.variant-img1|margin-top,margin-bottom,image-upload',
-    "data-edits": 'content1'
+    className: 'f' + randomHash + '-image-darken'
+  }, React__default.createElement("button", {
+    className: 'f' + randomHash + '-close-button',
+    onClick: closeModal
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '16',
+    height: '16',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: '#000',
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  }))), React__default.createElement(CurlyText, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading,
+    randomHash: randomHash
   }), React__default.createElement("div", {
-    className: 'variant-img variant-img2 variant-animated variant-bounceInRight variant-animDelay8',
-    "data-changes": '.variant-img2|margin-top,margin-bottom,image-upload',
-    "data-edits": 'content2'
-  }), React__default.createElement("div", {
-    className: 'variant-img variant-img3 variant-animated variant-bounceInRight variant-animDelay10',
-    "data-changes": '.variant-img3|margin-top,margin-bottom,image-upload',
-    "data-edits": 'content3'
-  }), React__default.createElement("div", {
-    className: 'variant-img variant-img4 variant-animated variant-bounceInRight variant-animDelay12',
-    "data-changes": '.variant-img4|margin-top,margin-bottom,image-upload',
-    "data-edits": 'content4'
-  })), React__default.createElement("div", {
-    className: 'variant-text-outer'
-  }, React__default.createElement("div", {
-    className: 'variant-text variant-text1 variant-animated variant-bounceInDown variant-animDelay4',
-    "data-edits": 'text1',
-    "data-changes": '.variant-text1|font-size,color,margin-top,margin-bottom',
     style: {
-      color: 'white',
-      marginTop: 40,
-      textShadow: '0 1px 4px #000'
-    }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("div", {
-    className: 'variant-text variant-text2 variant-animated variant-bounceInRight variant-animDelay6',
-    "data-edits": 'text2',
-    "data-changes": '.variant-text2|font-size,color,margin-top,margin-bottom',
-    style: {
-      color: 'white',
-      textShadow: '0 1px 4px #000',
-      fontSize: 45
-    }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph), React__default.createElement("div", {
-    className: 'variant-text variant-text3 variant-animated variant-bounceInLeft variant-animDelay8',
-    "data-edits": 'text3',
-    "data-changes": '.variant-text3|font-size,color,margin-top,margin-bottom'
+      flex: 1
+    },
+    className: 'f' + randomHash + '--spacer'
   }), React__default.createElement("div", {
-    className: 'variant-text variant-text4 variant-animated variant-bounceInRight variant-animDelay10',
-    "data-edits": 'text4',
-    "data-changes": '.variant-text4|font-size,color,margin-top,margin-bottom'
-  })), React__default.createElement("div", {
-    className: 'variant-option variant-clickRedirect',
-    onClick: function onClick(e) {
-      var _trigger$data4, _trigger$data5;
-      e.preventDefault();
-      trigger !== null && trigger !== void 0 && (_trigger$data4 = trigger.data) !== null && _trigger$data4 !== void 0 && _trigger$data4.buttonURL ? window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonURL) : closeModal();
+    style: {
+      flex: 1,
+      marginTop: -150,
+      textTransform: 'uppercase',
+      textAlign: 'center',
+      letterSpacing: '2pt'
     }
-  }, React__default.createElement("div", {
-    className: 'variant-input-group'
   }, React__default.createElement("span", {
-    className: 'variant-button variant-animated variant-fadeInRight variant-animDelay10',
-    "data-edits": 'text10',
-    "data-changes": '.variant-button|font-size,background-color,color'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonText))), React__default.createElement("div", {
-    className: 'variant-long-close variant-animated variant-fadeInUp variant-animDelay14',
-    "data-engage-class": 'variant-engaged'
+    className: 'f' + randomHash + '-mainText'
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.paragraph)), React__default.createElement("div", {
+    className: 'f' + randomHash + '-buttonContainer'
   }, React__default.createElement("a", {
-    "data-close-type": 'long_close',
-    className: 'variant-link variant-closer',
-    href: '#rdl',
-    "data-engage-text": '',
-    "data-edits": 'text7,text11',
-    "data-changes": 'variant-long-close a.variant-link|font-size,color,margin-top,margin-bottom',
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonURL,
+    className: 'f' + randomHash + '-cta',
     onClick: function onClick(e) {
-      e.preventDefault();
-      closeModal();
+      return redirectUser(e);
     }
-  })), React__default.createElement("div", {
-    className: 'variant-close variant-animated variant-fadeInRight variant-animDelay4 variant-closer'
-  }, React__default.createElement("a", {
-    "data-close-type": 'x_close',
-    className: 'variant-link',
-    href: '#rdl',
-    onClick: function onClick(e) {
-      e.preventDefault();
-      closeModal();
-    }
-  }, "\u2715")))), React__default.createElement("div", {
-    className: 'variant-close-safe variant-closer'
-  }, React__default.createElement("a", {
-    "data-close-type": 'x_close',
-    className: 'variant-link',
-    href: '#rdl',
-    onClick: function onClick(e) {
-      e.preventDefault();
-      closeModal();
-    }
-  }, "[close]")))));
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonText)))));
 };
-var TriggerModal = function TriggerModal(_ref2) {
-  var trigger = _ref2.trigger;
+var TriggerModal = function TriggerModal(_ref3) {
+  var trigger = _ref3.trigger;
   return ReactDOM.createPortal(React__default.createElement(Modal, {
     trigger: trigger
   }), document.body);
