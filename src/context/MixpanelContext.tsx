@@ -1,13 +1,12 @@
-import React, { createContext, useContext, useEffect } from 'react'
-import { useLogging } from './LoggingContext'
-import { useFingerprint } from '../hooks/useFingerprint'
-import { useVisitor } from './VisitorContext'
 import mixpanel, { Callback, Config } from 'mixpanel-browser'
-
-const MIXPANEL_TOKEN = 'd122fa924e1ea97d6b98569440c65a95'
+import React, { createContext, useContext, useEffect } from 'react'
+import { useFingerprint } from '../hooks/useFingerprint'
+import { getEnvVars } from '../utils/getEnvVars'
+import { useLogging } from './LoggingContext'
+import { useVisitor } from './VisitorContext'
 
 const init = (cfg: Partial<Config>) => {
-  mixpanel.init(MIXPANEL_TOKEN, {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
     debug: cfg.debug,
     track_pageview: true,
     persistence: 'localStorage'

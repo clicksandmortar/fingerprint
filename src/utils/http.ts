@@ -1,7 +1,7 @@
+import { getEnvVars } from './getEnvVars'
 const headers = { 'Content-Type': 'application/json' }
 
-export const hostname = 'https://target-engine-api.starship-staging.com'
-// process.env.FINGERPRINT_API_HOSTNAME || 'http://localhost'
+export const hostname = getEnvVars().FINGERPRINT_API_HOSTNAME
 
 export const request = {
   get: async (url: string, params: any) => {
