@@ -97,6 +97,7 @@ export const CollectorProvider = ({
     if (!trigger) return null
     if (!handler?.invoke) return null
 
+
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
