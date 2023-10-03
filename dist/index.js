@@ -282,6 +282,10 @@ var LoggingProvider = function LoggingProvider(_ref) {
       (_console4 = console).info.apply(_console4, arguments);
     }
   };
+  React.useEffect(function () {
+    if (!debug) return;
+    log('LoggingProvider: In Debug Mode');
+  });
   return React__default.createElement(LoggingContext.Provider, {
     value: {
       log: log,
@@ -613,7 +617,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
     var runningInterval = setInterval(function () {
-      var children = document.querySelectorAll('div[id=smc-v5-overlay-106412]');
+      var children = document.querySelectorAll('div[id^=smc-v5-overlay-]');
       Array.prototype.forEach.call(children, function (node) {
         node.parentNode.removeChild(node);
         log('CollectorProvider: successfully removed intently overlay');
@@ -1091,6 +1095,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       setConsentGiven(consent);
       return;
     }
+    console.log('Fingerprint Widget Consent: ', consent);
     if (!consentCallback) return;
     var consentGivenViaCallback = consentCallback();
     var interval = setInterval(function () {
