@@ -61,6 +61,8 @@ FingerprintProviderProps) => {
       return
     }
 
+    console.log('Fingerprint Widget Consent: ', consent)
+
     if (!consentCallback) return
     const consentGivenViaCallback = consentCallback()
 
