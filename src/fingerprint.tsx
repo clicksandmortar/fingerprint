@@ -24,9 +24,7 @@ ReactDOM.render(
   <React.StrictMode>
     <Widget
       appId={document?.currentScript?.getAttribute('id') || ''}
-      consent={
-        document?.currentScript?.getAttribute('data-consent') === 'false'
-      }
+      consent={document?.currentScript?.getAttribute('data-consent') === 'true'}
       // @todo Revert this from 'false' to 'true'
       debug={document?.currentScript?.getAttribute('data-debug') === 'true'}
     />
