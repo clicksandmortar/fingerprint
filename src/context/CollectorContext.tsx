@@ -17,7 +17,7 @@ export type CollectorProviderProps = {
   handlers?: Handler[]
 }
 
-type DisplayTrigger =
+type DisplayTriggerType =
   | 'INVOCATION_UNSPECIFIED'
   | 'INVOCATION_IDLE_TIME'
   | 'INVOCATION_EXIT_INTENT'
@@ -42,10 +42,8 @@ export const CollectorProvider = ({
     idleStatusAfterMs
   )
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
-  const [displayTrigger, setDisplayTrigger] = useState<
-    DisplayTrigger | undefined
-  >(undefined)
-  const [timeoutId, setTimeoutId] = useState<null | NodeJS.Timeout>(null)
+  const [currentlyVisibleTriggerType, setCurrentlyVisibleTriggerType] =
+    useState<DisplayTriggerType | undefined>(undefined)
   const [intently, setIntently] = useState<boolean>(false)
 
   log('CollectorProvider: user is on mobile?', isMobile)
@@ -72,76 +70,43 @@ export const CollectorProvider = ({
     }
   }, [intently])
 
-  const showTrigger = (displayTrigger: DisplayTrigger | undefined) => {
-    if (!displayTrigger) {
-      return null
-    }
+  const trigger = React.useMemo(() => {
+    if (!currentlyVisibleTriggerType) return null
 
-    // Check if the server has provided a trigger for:
-    // - the type of trigger we want to display (idle, exit, default, etc.)
-    // - the behaviour of the trigger we want to display (modal, youtube, inverse, etc.)
-    const trigger = pageTriggers.find(
+    const locatedTrigger = pageTriggers.find(
       (trigger) =>
-        trigger.invocation === displayTrigger &&
+        trigger.invocation === currentlyVisibleTriggerType &&
         handlers?.find((handler) => handler.behaviour === trigger.behaviour)
     )
+    if (!locatedTrigger) return null
+    if (!handlers?.length) return null
 
-    log('CollectorProvider: available triggers include: ', pageTriggers)
-    log(
-      'CollectorProvider: attempting to show displayTrigger',
-      displayTrigger,
-      trigger
+    return locatedTrigger
+  }, [pageTriggers, currentlyVisibleTriggerType, handlers])
+
+  const handler = React.useMemo(() => {
+    if (!trigger) return null
+
+    return (
+      handlers?.find((handler) => handler.behaviour === trigger.behaviour) ||
+      null
     )
+  }, [handlers, trigger])
 
-    if (!trigger) {
-      error('No trigger found for displayTrigger', displayTrigger)
-      return null
-    }
+  const TriggerComponent = React.useCallback(() => {
+    if (!trigger) return null
+    if (!handler?.invoke) return null
 
-    log('CollectorProvider: available handlers include: ', handlers)
-    log('CollectorProvider: trigger to match is: ', trigger)
-
-    // Now grab the handler for the trigger (this could be optimised with a map)
-    const handler = handlers?.find(
-      (handler) => handler.behaviour === trigger.behaviour
-    )
-
-    log('CollectorProvider: attempting to show trigger', trigger, handler)
-
-    if (!handler) {
-      error('No handler found for trigger', trigger)
-      return null
-    }
-
-    if (!handler.invoke) {
-      error('No invoke method found for handler', handler)
-
-      return null
-    }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     })
 
-    if (!handler.invoke) {
-      error('No invoke method found for handler', handler)
+    const component = handler.invoke(trigger)
 
-      return null
-    }
-
-    if (handler.delay) {
-      const tId = setTimeout(() => {
-        return handler.invoke?.(trigger)
-      }, handler.delay)
-
-      setTimeoutId(tId)
-
-      return null
-    }
-
-    return handler.invoke(trigger)
-  }
+    return component || null
+  }, [trigger, handler])
 
   // const fireDefaultTrigger = useCallback(() => {
   //   if (displayTrigger) return
@@ -151,16 +116,16 @@ export const CollectorProvider = ({
   // }, [])
 
   const fireIdleTrigger = useCallback(() => {
-    if (displayTrigger) return
+    if (currentlyVisibleTriggerType) return
     if (!idleTriggers) return
 
     log('CollectorProvider: attempting to fire idle trigger')
-    setDisplayTrigger('INVOCATION_IDLE_TIME')
-  }, [pageTriggers, displayTrigger])
+    setCurrentlyVisibleTriggerType('INVOCATION_IDLE_TIME')
+  }, [pageTriggers, currentlyVisibleTriggerType])
 
   const fireExitTrigger = useCallback(() => {
     log('CollectorProvider: attempting to fire exit trigger')
-    setDisplayTrigger('INVOCATION_EXIT_INTENT')
+    setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT')
   }, [])
 
   useEffect(() => {
@@ -177,11 +142,13 @@ export const CollectorProvider = ({
 
   const resetDisplayTrigger = useCallback(() => {
     log('CollectorProvider: resetting displayTrigger')
-    setDisplayTrigger(undefined)
+
+    setCurrentlyVisibleTriggerType(undefined)
   }, [])
 
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
+  // THIS FETCHES OUR CONFIG. DO NOT REMOVE ED
   useEffect(() => {
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot')
@@ -282,32 +249,17 @@ export const CollectorProvider = ({
     }
   }, [booted, visitor])
 
-  useEffect(() => {
-    if (!timeoutId) return
-
-    return () => clearTimeout(timeoutId)
-  }, [timeoutId])
-
-  const renderedTrigger = React.useMemo(() => {
-    return showTrigger(displayTrigger)
-  }, [showTrigger, displayTrigger])
-
   const setTrigger = (trigger: Trigger) => {
     log('CollectorProvider: manually setting trigger', trigger)
+
     setPageTriggers([...pageTriggers, trigger])
-    setDisplayTrigger(trigger.invocation)
+    setCurrentlyVisibleTriggerType(trigger.invocation)
   }
 
   return (
     <IdleTimerProvider
       timeout={idleTimeout}
       onPresenceChange={(presence: PresenceType) => {
-        if (presence.type === 'active') {
-          // clear interval regardless a value is present or not.
-          // @ts-ignore
-          clearTimeout(timeoutId)
-          setTimeoutId(null)
-        }
         log('presence changed', presence)
       }}
       onIdle={fireIdleTrigger}
@@ -320,8 +272,8 @@ export const CollectorProvider = ({
         }}
       >
         {children}
-        {renderedTrigger}
       </CollectorContext.Provider>
+      <TriggerComponent />
     </IdleTimerProvider>
   )
 }
