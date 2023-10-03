@@ -28,7 +28,7 @@ ReactDOM.render(
         document?.currentScript?.getAttribute('data-consent') === 'false'
       }
       // @todo Revert this from 'false' to 'true'
-      debug={document?.currentScript?.getAttribute('data-debug') === 'false'}
+      debug={document?.currentScript?.getAttribute('data-debug') === 'true'}
     />
   </React.StrictMode>,
   document.getElementById('fingerprint-widget')
