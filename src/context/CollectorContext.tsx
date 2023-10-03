@@ -118,11 +118,6 @@ export const CollectorProvider = ({
 
       return null
     }
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour
-    })
 
     if (!handler.invoke) {
       error('No invoke method found for handler', handler)
