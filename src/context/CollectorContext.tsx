@@ -127,6 +127,10 @@ export const CollectorProvider = ({
 
     if (handler.delay) {
       const tId = setTimeout(() => {
+        log('CollectorProvider: invoking delayed handler', handler)
+
+        setPageTriggers(pageTriggers.filter((t) => t.id !== trigger.id))
+
         return handler.invoke?.(trigger)
       }, handler.delay)
 
@@ -134,6 +138,10 @@ export const CollectorProvider = ({
 
       return null
     }
+
+    log('CollectorProvider: invoking handler', handler)
+
+    setPageTriggers(pageTriggers.filter((t) => t.id !== trigger.id))
 
     return handler.invoke(trigger)
   }
