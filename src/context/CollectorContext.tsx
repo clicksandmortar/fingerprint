@@ -233,6 +233,11 @@ export const CollectorProvider = ({
         }
       })
         .then(async (response: Response) => {
+          if (response.status === 204) {
+            setIntently(true)
+            return
+          }
+
           const payload: CollectorResponse = await response.json()
 
           log('Sent collector data, retrieved:', payload)
