@@ -170,6 +170,7 @@ export const CollectorProvider = ({
       collect({
         appId,
         visitor,
+        sessionId: '',
         page: {
           url: window.location.href,
           path: window.location.pathname,

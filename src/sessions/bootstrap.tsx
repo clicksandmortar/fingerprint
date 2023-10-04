@@ -1,5 +1,7 @@
 import { Session } from './types'
 import { getCookie, setCookie } from '../utils/cookies'
+import { v4 as uuidv4 } from 'uuid'
+
 
 export const bootstrapSession = ({
   appId,
@@ -9,7 +11,8 @@ export const bootstrapSession = ({
   setSession: (session: Session) => void
 }) => {
   const session: Session = {
-    firstVisit: undefined
+    firstVisit: undefined,
+    id: uuidv4()
   }
 
   if (!getCookie('_cm') || getCookie('_cm') !== appId) {
