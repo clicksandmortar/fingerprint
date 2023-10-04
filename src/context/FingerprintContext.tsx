@@ -56,6 +56,9 @@ export type FingerprintProviderProps = {
   initialDelay?: number
   exitIntentTriggers?: boolean
   idleTriggers?: boolean
+  config?: {
+    idleDelay?: number
+  }
 }
 
 // @todo split this into multiple providers, FingerprintProvider should
@@ -69,9 +72,9 @@ export const FingerprintProvider = ({
   defaultHandlers,
   initialDelay = 0,
   exitIntentTriggers = true,
-  idleTriggers = true
-}: // idleDelay = 0,
-FingerprintProviderProps) => {
+  idleTriggers = true,
+  config
+}: FingerprintProviderProps) => {
   const [booted, setBooted] = useState(false)
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
 
@@ -137,7 +140,10 @@ FingerprintProviderProps) => {
         >
           <VisitorProvider>
             <MixpanelProvider>
-              <CollectorProvider handlers={handlers}>
+              <CollectorProvider
+                handlers={handlers}
+                idleDelay={config?.idleDelay}
+              >
                 <ErrorBoundary
                   onError={(error, info) => console.error(error, info)}
                   fallback={<div>An application error occurred.</div>}

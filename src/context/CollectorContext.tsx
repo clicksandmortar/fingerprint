@@ -10,11 +10,12 @@ import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
 
-const idleStatusAfterMs = 5 * 1000
+const defaultIdleStatusDelay = 5 * 1000
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
   handlers?: Handler[]
+  idleDelay?: number
 }
 
 type DisplayTriggerType =
@@ -25,7 +26,8 @@ type DisplayTriggerType =
 
 export const CollectorProvider = ({
   children,
-  handlers
+  handlers,
+  idleDelay = defaultIdleStatusDelay
 }: CollectorProviderProps) => {
   const { log, error } = useLogging()
   const { appId, booted, initialDelay, exitIntentTriggers, idleTriggers } =
@@ -38,9 +40,7 @@ export const CollectorProvider = ({
   const { registerHandler } = useExitIntent({
     cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
-  const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
-    idleStatusAfterMs
-  )
+  const [idleTimeout, setIdleTimeout] = useState<number | undefined>(idleDelay)
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
   const [currentlyVisibleTriggerType, setCurrentlyVisibleTriggerType] =
     useState<DisplayTriggerType | undefined>(undefined)
@@ -205,7 +205,7 @@ export const CollectorProvider = ({
 
           // Set IdleTimer
           // @todo turn this into the dynamic value
-          setIdleTimeout(idleStatusAfterMs)
+          setIdleTimeout(idleDelay)
 
           setPageTriggers(
             payload?.pageTriggers?.filter(

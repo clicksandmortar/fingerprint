@@ -4,8 +4,9 @@ import { Trigger } from '../client/types';
 export declare type CollectorProviderProps = {
     children?: React.ReactNode;
     handlers?: Handler[];
+    idleDelay?: number;
 };
-export declare const CollectorProvider: ({ children, handlers }: CollectorProviderProps) => React.JSX.Element;
+export declare const CollectorProvider: ({ children, handlers, idleDelay }: CollectorProviderProps) => React.JSX.Element;
 export declare type CollectorContextInterface = {
     resetDisplayTrigger: () => void;
     setTrigger: (trigger: Trigger) => void;

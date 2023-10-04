@@ -182,6 +182,8 @@ export default App
 | consentCallback    | `function` | `undefined` | A callback function that will be invoked every second to check the consent status. The return value of this function will be used to determine the consent status.    |
 | exitIntentTriggers | `boolean`  | `false`     | Whether or not to use exit intent to trigger behaviours.                                                                                                              |
 | idleTriggers       | `boolean`  | `false`     | Whether or not to use idle time to trigger behaviours.                                                                                                                |
+| config             | `object`   | `undefined` | Config params where future optional parameters can be nested                                                                                                          |
+| config.idleDelay   | `number`   | `undefined` | time (ms) before the user is considered idle                                                                                                                          |
 
 ### useFingerprint
 

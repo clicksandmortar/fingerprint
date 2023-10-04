@@ -568,10 +568,12 @@ var useMixpanel = function useMixpanel() {
   return useContext(MixpanelContext);
 };
 
-var idleStatusAfterMs = 5 * 1000;
+var defaultIdleStatusDelay = 5 * 1000;
 var CollectorProvider = function CollectorProvider(_ref) {
   var children = _ref.children,
-    handlers = _ref.handlers;
+    handlers = _ref.handlers,
+    _ref$idleDelay = _ref.idleDelay,
+    idleDelay = _ref$idleDelay === void 0 ? defaultIdleStatusDelay : _ref$idleDelay;
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
@@ -594,7 +596,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
       }
     }),
     registerHandler = _useExitIntent.registerHandler;
-  var _useState = useState(idleStatusAfterMs),
+  var _useState = useState(idleDelay),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
   var _useState2 = useState([]),
@@ -642,11 +644,6 @@ var CollectorProvider = function CollectorProvider(_ref) {
   var TriggerComponent = React__default.useCallback(function () {
     if (!trigger) return null;
     if (!(handler !== null && handler !== void 0 && handler.invoke)) return null;
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour
-    });
     var component = handler.invoke(trigger);
     return component || null;
   }, [trigger, handler]);
@@ -721,7 +718,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
           return Promise.resolve(response.json()).then(function (payload) {
             var _payload$pageTriggers;
             log('Sent collector data, retrieved:', payload);
-            setIdleTimeout(idleStatusAfterMs);
+            setIdleTimeout(idleDelay);
             setPageTriggers((payload === null || payload === void 0 ? void 0 : (_payload$pageTriggers = payload.pageTriggers) === null || _payload$pageTriggers === void 0 ? void 0 : _payload$pageTriggers.filter(function (trigger) {
               return isMobile && trigger.invocation === 'INVOCATION_IDLE_TIME' || !isMobile && trigger.invocation === 'INVOCATION_EXIT_INTENT';
             })) || []);
@@ -1064,7 +1061,8 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     _ref$exitIntentTrigge = _ref.exitIntentTriggers,
     exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
     _ref$idleTriggers = _ref.idleTriggers,
-    idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers;
+    idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers,
+    config = _ref.config;
   var _useState2 = useState(false),
     booted = _useState2[0],
     setBooted = _useState2[1];
@@ -1121,7 +1119,8 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       exitIntentTriggers: exitIntentTriggers
     }
   }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
-    handlers: handlers
+    handlers: handlers,
+    idleDelay: config === null || config === void 0 ? void 0 : config.idleDelay
   }, React__default.createElement(ErrorBoundary, {
     onError: function onError(error, info) {
       return console.error(error, info);

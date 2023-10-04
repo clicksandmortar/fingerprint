@@ -11,8 +11,11 @@ export declare type FingerprintProviderProps = {
     initialDelay?: number;
     exitIntentTriggers?: boolean;
     idleTriggers?: boolean;
+    config?: {
+        idleDelay?: number;
+    };
 };
-export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers }: FingerprintProviderProps) => {} | null | undefined;
+export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, config }: FingerprintProviderProps) => {} | null | undefined;
 export interface FingerprintContextInterface {
     appId: string;
     booted: boolean;
