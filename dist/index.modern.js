@@ -4,12 +4,12 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
 import { validate, version, v4 } from 'uuid';
+import Cookies from 'js-cookie';
 import unique from 'lodash.uniqby';
 import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 import mixpanel from 'mixpanel-browser';
-import Cookies from 'js-cookie';
 
 const baseUrl = 'https://bookings-bff.starship-staging.com';
 const makeFullUrl = (resource, params = {}) => {
@@ -263,6 +263,126 @@ const useLogging = () => {
   return useContext(LoggingContext);
 };
 
+const setCookie = (name, value, expires) => {
+  return Cookies.set(name, value, {
+    expires: expires || 365,
+    sameSite: 'strict'
+  });
+};
+const getCookie = name => {
+  return Cookies.get(name);
+};
+const onCookieChanged = (callback, interval = 1000) => {
+  let lastCookie = document.cookie;
+  setInterval(() => {
+    const cookie = document.cookie;
+    if (cookie !== lastCookie) {
+      try {
+        callback({
+          oldValue: lastCookie,
+          newValue: cookie
+        });
+      } finally {
+        lastCookie = cookie;
+      }
+    }
+  }, interval);
+};
+
+const bootstrapSession = ({
+  appId,
+  setSession
+}) => {
+  const session = {
+    firstVisit: undefined
+  };
+  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
+    setCookie('_cm', appId, 365);
+    setSession(session);
+    return;
+  }
+  if (getCookie('_cm') && getCookie('_cm') === appId) {
+    session.firstVisit = false;
+    setSession(session);
+  }
+};
+
+const uuidValidateV4 = uuid => {
+  return validate(uuid) && version(uuid) === 4;
+};
+
+const validVisitorId = id => {
+  return uuidValidateV4(id);
+};
+
+const bootstrapVisitor = ({
+  setVisitor
+}) => {
+  const visitor = {
+    id: undefined
+  };
+  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
+    const visitorId = v4();
+    setCookie('_cm_id', visitorId, 365);
+    visitor.id = visitorId;
+    setVisitor(visitor);
+    return;
+  }
+  if (getCookie('_cm_id')) {
+    visitor.id = getCookie('_cm_id');
+    setVisitor(visitor);
+  }
+};
+
+const useFingerprint = () => {
+  return useContext(FingerprintContext);
+};
+
+const VisitorProvider = ({
+  children
+}) => {
+  const {
+    appId,
+    booted
+  } = useFingerprint();
+  const {
+    log
+  } = useLogging();
+  const [session, setSession] = useState({});
+  const [visitor, setVisitor] = useState({});
+  useEffect(() => {
+    if (!booted) {
+      log('VisitorProvider: not booted');
+      return;
+    }
+    log('VisitorProvider: booting');
+    const boot = async () => {
+      await bootstrapSession({
+        appId,
+        setSession
+      });
+      await bootstrapVisitor({
+        setVisitor
+      });
+    };
+    boot();
+    log('VisitorProvider: booted', session, visitor);
+  }, [appId, booted]);
+  return React__default.createElement(VisitorContext.Provider, {
+    value: {
+      session,
+      visitor
+    }
+  }, children);
+};
+const VisitorContext = createContext({
+  session: {},
+  visitor: {}
+});
+const useVisitor = () => {
+  return useContext(VisitorContext);
+};
+
 function getEnvVars() {
   let isDev = false;
   if (typeof window === 'undefined') {
@@ -339,126 +459,6 @@ const useCollectorMutation = () => {
   }, {
     onSuccess: () => {}
   });
-};
-
-const useFingerprint = () => {
-  return useContext(FingerprintContext);
-};
-
-const setCookie = (name, value, expires) => {
-  return Cookies.set(name, value, {
-    expires: expires || 365,
-    sameSite: 'strict'
-  });
-};
-const getCookie = name => {
-  return Cookies.get(name);
-};
-const onCookieChanged = (callback, interval = 1000) => {
-  let lastCookie = document.cookie;
-  setInterval(() => {
-    const cookie = document.cookie;
-    if (cookie !== lastCookie) {
-      try {
-        callback({
-          oldValue: lastCookie,
-          newValue: cookie
-        });
-      } finally {
-        lastCookie = cookie;
-      }
-    }
-  }, interval);
-};
-
-const bootstrapSession = ({
-  appId,
-  setSession
-}) => {
-  const session = {
-    firstVisit: undefined
-  };
-  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
-    setCookie('_cm', appId, 365);
-    setSession(session);
-    return;
-  }
-  if (getCookie('_cm') && getCookie('_cm') === appId) {
-    session.firstVisit = false;
-    setSession(session);
-  }
-};
-
-const uuidValidateV4 = uuid => {
-  return validate(uuid) && version(uuid) === 4;
-};
-
-const validVisitorId = id => {
-  return uuidValidateV4(id);
-};
-
-const bootstrapVisitor = ({
-  setVisitor
-}) => {
-  const visitor = {
-    id: undefined
-  };
-  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
-    const visitorId = v4();
-    setCookie('_cm_id', visitorId, 365);
-    visitor.id = visitorId;
-    setVisitor(visitor);
-    return;
-  }
-  if (getCookie('_cm_id')) {
-    visitor.id = getCookie('_cm_id');
-    setVisitor(visitor);
-  }
-};
-
-const VisitorProvider = ({
-  children
-}) => {
-  const {
-    appId,
-    booted
-  } = useFingerprint();
-  const {
-    log
-  } = useLogging();
-  const [session, setSession] = useState({});
-  const [visitor, setVisitor] = useState({});
-  useEffect(() => {
-    if (!booted) {
-      log('VisitorProvider: not booted');
-      return;
-    }
-    log('VisitorProvider: booting');
-    const boot = async () => {
-      await bootstrapSession({
-        appId,
-        setSession
-      });
-      await bootstrapVisitor({
-        setVisitor
-      });
-    };
-    boot();
-    log('VisitorProvider: booted', session, visitor);
-  }, [appId, booted]);
-  return React__default.createElement(VisitorContext.Provider, {
-    value: {
-      session,
-      visitor
-    }
-  }, children);
-};
-const VisitorContext = createContext({
-  session: {},
-  visitor: {}
-});
-const useVisitor = () => {
-  return useContext(VisitorContext);
 };
 
 const init = cfg => {
@@ -725,12 +725,19 @@ const Modal = ({
 }) => {
   var _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6, _trigger$data7;
   const {
+    log,
     error
   } = useLogging();
   const {
     resetDisplayTrigger,
     trackEvent
   } = useCollector();
+  const {
+    appId
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
   const [open, setOpen] = useState(true);
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const closeModal = () => {
@@ -749,6 +756,13 @@ const Modal = ({
   }, []);
   useEffect(() => {
     if (!open) return;
+    try {
+      request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+        seenTriggerIDs: [trigger.id]
+      }).then(log);
+    } catch (e) {
+      error(e);
+    }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation
