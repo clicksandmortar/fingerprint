@@ -47,10 +47,7 @@ export type Trigger = {
     | 'INVOCATION_IDLE_TIME'
     | 'INVOCATION_EXIT_INTENT'
     | 'INVOCATION_PAGE_LOAD'
-  behaviour?: 'BEHAVIOUR_MODAL'
-  // delay?: number
-  // invoke:(trigger: Trigger) => void;
-  // @todo: commented out, out of date?
+  invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode
   data?: {
     [key: string]: string
   }

@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Handler, clientHandlers } from '../client/handler'
+import { clientHandlers } from '../client/handler'
 import { PageView, Trigger } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
 import { LoggingProvider } from './LoggingContext'
@@ -52,12 +52,14 @@ export type FingerprintProviderProps = {
   consent?: boolean
   consentCallback?: () => boolean
   debug?: boolean
-  defaultHandlers?: Handler[]
+  defaultHandlers?: Trigger[]
   initialDelay?: number
   exitIntentTriggers?: boolean
+
   idleTriggers?: boolean
   config?: {
     idleDelay?: number
+    trackIdleOnDesktop?: boolean
   }
 }
 
@@ -135,15 +137,13 @@ export const FingerprintProvider = ({
             },
             initialDelay,
             idleTriggers,
-            exitIntentTriggers
+            exitIntentTriggers,
+            config
           }}
         >
           <VisitorProvider>
             <MixpanelProvider>
-              <CollectorProvider
-                handlers={handlers}
-                idleDelay={config?.idleDelay}
-              >
+              <CollectorProvider handlers={handlers}>
                 <ErrorBoundary
                   onError={(error, info) => console.error(error, info)}
                   fallback={<div>An application error occurred.</div>}
@@ -171,6 +171,7 @@ export interface FingerprintContextInterface {
   trackEvent: (event: Event) => void
   trackPageView: (pageView: PageView) => void
   unregisterHandler: (trigger: Trigger) => void
+  config: FingerprintProviderProps['config']
 }
 
 const defaultFingerprintState: FingerprintContextInterface = {
@@ -184,7 +185,11 @@ const defaultFingerprintState: FingerprintContextInterface = {
   registerHandler: () => {},
   trackEvent: () => {},
   trackPageView: () => {},
-  unregisterHandler: () => {}
+  unregisterHandler: () => {},
+  config: {
+    idleDelay: undefined,
+    trackIdleOnDesktop: false
+  }
 }
 
 export const FingerprintContext = createContext<FingerprintContextInterface>({
