@@ -3,7 +3,7 @@ import { Visitor } from '../visitors/types'
 export type CollectorUpdate = {
   appId: string
   visitor: Visitor
-  sessionId: string
+  sessionId: string | undefined
   page: Page
   referrer: Referrer
 }
