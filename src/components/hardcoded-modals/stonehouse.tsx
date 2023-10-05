@@ -1,5 +1,5 @@
 // @todo: Kill this with fire 🔥
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../../client/types'
 
@@ -9,18 +9,16 @@ type Props = {
   handleCloseModal: (e: any) => void
 }
 
+const randomHash = 'f' + uuidv4().split('-')[0]
+
+const prependClass = (className: string) => `f${randomHash}-${className}`
+
 const StonehouseModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }: Props) => {
   const [stylesLoaded, setStylesLoaded] = useState(false)
-
-  const randomHash = useMemo(() => {
-    return 'f' + uuidv4().split('-')[0]
-  }, [])
-
-  const prependClass = (className: string) => `f${randomHash}-${className}`
 
   useEffect(() => {
     // just a formatter
@@ -29,7 +27,7 @@ const StonehouseModal = ({
 
       @font-face {
         font-family: 'Gotham Bold';
-        src: url(/GothamBold.otf);
+        src: url(./assets/GothamBold.otf}) format('opentype');
       }
 
       :root {
@@ -187,6 +185,7 @@ const StonehouseModal = ({
     styles.type = 'text/css'
     styles.appendChild(document.createTextNode(cssToApply))
     document.head.appendChild(styles)
+
     setStylesLoaded(true)
   }, [randomHash])
 

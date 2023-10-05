@@ -41,6 +41,10 @@ const Modal = ({ trigger }: Props) => {
     })
   }, [])
 
+  const brand = React.useMemo(() => {
+    return getBrand()
+  }, [])
+
   if (!open) {
     return null
   }
@@ -56,10 +60,6 @@ const Modal = ({ trigger }: Props) => {
     resetDisplayTrigger()
     setOpen(false)
   }
-
-  const brand = React.useMemo(() => {
-    return getBrand()
-  }, [])
 
   if (brand === 'Stonehouse')
     return (
