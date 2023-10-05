@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import { Visitor } from '../visitors/types';
 export declare type CollectorUpdate = {
     appId: string;
@@ -37,7 +38,7 @@ export declare type CollectorResponse = {
 export declare type Trigger = {
     id?: string;
     invocation?: 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
-    behaviour?: 'BEHAVIOUR_MODAL';
+    invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode;
     data?: {
         [key: string]: string;
     };

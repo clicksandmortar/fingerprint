@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Handler, clientHandlers } from '../client/handler'
+import { clientHandlers } from '../client/handler'
 import { PageView, Trigger } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
 import { LoggingProvider } from './LoggingContext'
@@ -52,10 +52,15 @@ export type FingerprintProviderProps = {
   consent?: boolean
   consentCallback?: () => boolean
   debug?: boolean
-  defaultHandlers?: Handler[]
+  defaultHandlers?: Trigger[]
   initialDelay?: number
   exitIntentTriggers?: boolean
+
   idleTriggers?: boolean
+  config?: {
+    idleDelay?: number
+    trackIdleOnDesktop?: boolean
+  }
 }
 
 // @todo split this into multiple providers, FingerprintProvider should
@@ -69,9 +74,9 @@ export const FingerprintProvider = ({
   defaultHandlers,
   initialDelay = 0,
   exitIntentTriggers = true,
-  idleTriggers = true
-}: // idleDelay = 0,
-FingerprintProviderProps) => {
+  idleTriggers = true,
+  config
+}: FingerprintProviderProps) => {
   const [booted, setBooted] = useState(false)
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
 
@@ -132,7 +137,8 @@ FingerprintProviderProps) => {
             },
             initialDelay,
             idleTriggers,
-            exitIntentTriggers
+            exitIntentTriggers,
+            config
           }}
         >
           <VisitorProvider>
@@ -165,6 +171,7 @@ export interface FingerprintContextInterface {
   trackEvent: (event: Event) => void
   trackPageView: (pageView: PageView) => void
   unregisterHandler: (trigger: Trigger) => void
+  config: FingerprintProviderProps['config']
 }
 
 const defaultFingerprintState: FingerprintContextInterface = {
@@ -178,7 +185,11 @@ const defaultFingerprintState: FingerprintContextInterface = {
   registerHandler: () => {},
   trackEvent: () => {},
   trackPageView: () => {},
-  unregisterHandler: () => {}
+  unregisterHandler: () => {},
+  config: {
+    idleDelay: undefined,
+    trackIdleOnDesktop: false
+  }
 }
 
 export const FingerprintContext = createContext<FingerprintContextInterface>({

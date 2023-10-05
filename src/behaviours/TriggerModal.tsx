@@ -72,8 +72,7 @@ const Modal = ({ trigger }: Props) => {
 
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour
+      triggerType: trigger.invocation
     })
   }, [])
 

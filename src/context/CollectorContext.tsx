@@ -1,8 +1,8 @@
+import unique from 'lodash.uniqby'
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { Handler } from '../client/handler'
 import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -10,43 +10,55 @@ import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
 
-const idleStatusAfterMs = 5 * 1000
+const defaultIdleStatusDelay = 5 * 1000
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
-  handlers?: Handler[]
+  handlers?: Trigger[]
 }
 
-type DisplayTriggerType =
-  | 'INVOCATION_UNSPECIFIED'
-  | 'INVOCATION_IDLE_TIME'
-  | 'INVOCATION_EXIT_INTENT'
-  | 'INVOCATION_PAGE_LOAD'
-
-export const CollectorProvider = ({
+export function CollectorProvider({
   children,
-  handlers
-}: CollectorProviderProps) => {
+  handlers = []
+}: CollectorProviderProps) {
   const { log, error } = useLogging()
-  const { appId, booted, initialDelay, exitIntentTriggers, idleTriggers } =
-    useFingerprint()
+  const {
+    appId,
+    booted,
+    initialDelay,
+    exitIntentTriggers,
+    idleTriggers,
+    config
+  } = useFingerprint()
   const { visitor, session } = useVisitor()
+
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
+
   // @todo remove this for our own exit intent implementation, for instance:
   // https://fullstackheroes.com/tutorials/react/exit-intent-react/
   const { registerHandler } = useExitIntent({
     cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
-    idleStatusAfterMs
+    config?.idleDelay || defaultIdleStatusDelay
   )
-  const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
+  const [pageTriggers, setPageTriggers] = useState<Trigger[]>(handlers || [])
   const [currentlyVisibleTriggerType, setCurrentlyVisibleTriggerType] =
-    useState<DisplayTriggerType | undefined>(undefined)
+    useState<Trigger['invocation'] | undefined>(undefined)
   const [intently, setIntently] = useState<boolean>(false)
 
+  const addPageTriggers = (triggers: Trigger[]) => {
+    setPageTriggers((prev) => unique<Trigger>([...prev, ...triggers], 'id'))
+  }
+
+  useEffect(() => {
+    addPageTriggers(handlers)
+  }, [handlers])
+
   log('CollectorProvider: user is on mobile?', isMobile)
+
+  const shouldLaunchIdleTriggers = isMobile || config?.trackIdleOnDesktop
 
   // Removes the intently overlay, if intently is false
   useEffect(() => {
@@ -54,9 +66,12 @@ export const CollectorProvider = ({
 
     log('CollectorProvider: removing intently overlay')
 
-    const runningInterval = setInterval(function () {
-      var children = document.querySelectorAll('div[id^=smc-v5-overlay-]')
-      Array.prototype.forEach.call(children, function (node: any) {
+    const runningInterval = setInterval(() => {
+      const locatedIntentlyScript = document.querySelectorAll(
+        'div[id^=smc-v5-overlay-]'
+      )
+
+      Array.prototype.forEach.call(locatedIntentlyScript, (node: any) => {
         node.parentNode.removeChild(node)
 
         log('CollectorProvider: successfully removed intently overlay')
@@ -68,63 +83,39 @@ export const CollectorProvider = ({
     return () => {
       clearInterval(runningInterval)
     }
-  }, [intently])
+  }, [intently, log])
 
-  const trigger = React.useMemo(() => {
+  const TriggerComponent = React.useCallback(() => {
     if (!currentlyVisibleTriggerType) return null
 
     const locatedTrigger = pageTriggers.find(
-      (trigger) =>
-        trigger.invocation === currentlyVisibleTriggerType &&
-        handlers?.find((handler) => handler.behaviour === trigger.behaviour)
+      (trigger) => trigger.invocation === currentlyVisibleTriggerType
     )
-    if (!locatedTrigger) return null
-    if (!handlers?.length) return null
 
-    return locatedTrigger
-  }, [pageTriggers, currentlyVisibleTriggerType, handlers])
+    if (!locatedTrigger?.invoke) return null
 
-  const handler = React.useMemo(() => {
-    if (!trigger) return null
+    const component = locatedTrigger.invoke(locatedTrigger)
 
-    return (
-      handlers?.find((handler) => handler.behaviour === trigger.behaviour) ||
-      null
-    )
-  }, [handlers, trigger])
+    if (component && React.isValidElement(component)) return component || null
 
-  const TriggerComponent = React.useCallback(() => {
-    if (!trigger) return null
-    if (!handler?.invoke) return null
-
-    const component = handler.invoke(trigger)
-
-    return component || null
-  }, [trigger, handler])
-
-  // const fireDefaultTrigger = useCallback(() => {
-  //   if (displayTrigger) return
-
-  //   log('CollectorProvider: attempting to fire default trigger', displayTrigger)
-  //   setDisplayTrigger('default')
-  // }, [])
+    return null
+  }, [currentlyVisibleTriggerType, pageTriggers, handlers])
 
   const fireIdleTrigger = useCallback(() => {
-    if (currentlyVisibleTriggerType) return
     if (!idleTriggers) return
+    if (!shouldLaunchIdleTriggers) return
 
     log('CollectorProvider: attempting to fire idle trigger')
     setCurrentlyVisibleTriggerType('INVOCATION_IDLE_TIME')
-  }, [pageTriggers, currentlyVisibleTriggerType])
+  }, [idleTriggers, log, shouldLaunchIdleTriggers])
 
   const fireExitTrigger = useCallback(() => {
     log('CollectorProvider: attempting to fire exit trigger')
     setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT')
-  }, [])
+  }, [log])
 
   useEffect(() => {
     if (!exitIntentTriggers) return
-    if (isMobile) return
 
     log('CollectorProvider: attempting to register exit trigger')
 
@@ -132,13 +123,13 @@ export const CollectorProvider = ({
       id: 'clientTrigger',
       handler: fireExitTrigger
     })
-  }, [])
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
 
   const resetDisplayTrigger = useCallback(() => {
     log('CollectorProvider: resetting displayTrigger')
 
     setCurrentlyVisibleTriggerType(undefined)
-  }, [])
+  }, [log])
 
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
@@ -206,13 +197,13 @@ export const CollectorProvider = ({
 
           // Set IdleTimer
           // @todo turn this into the dynamic value
-          setIdleTimeout(idleStatusAfterMs)
+          setIdleTimeout(config?.idleDelay || defaultIdleStatusDelay)
 
-          setPageTriggers(
+          addPageTriggers(
             payload?.pageTriggers?.filter(
               (trigger) =>
-                (isMobile && trigger.invocation === 'INVOCATION_IDLE_TIME') ||
-                (!isMobile && trigger.invocation === 'INVOCATION_EXIT_INTENT')
+                trigger.invocation === 'INVOCATION_IDLE_TIME' ||
+                trigger.invocation === 'INVOCATION_EXIT_INTENT'
             ) || []
           )
 
@@ -242,14 +233,37 @@ export const CollectorProvider = ({
     return () => {
       clearTimeout(delay)
     }
-  }, [booted, visitor])
+  }, [
+    appId,
+    booted,
+    collect,
+    error,
+    handlers,
+    config?.idleDelay,
+    initialDelay,
+    log,
+    trackEvent,
+    visitor
+  ])
 
-  const setTrigger = (trigger: Trigger) => {
-    log('CollectorProvider: manually setting trigger', trigger)
+  const setTrigger = React.useCallback(
+    (trigger: Trigger) => {
+      log('CollectorProvider: manually setting trigger', trigger)
 
-    setPageTriggers([...pageTriggers, trigger])
-    setCurrentlyVisibleTriggerType(trigger.invocation)
-  }
+      setPageTriggers([...pageTriggers, trigger])
+      setCurrentlyVisibleTriggerType(trigger.invocation)
+    },
+    [log, pageTriggers]
+  )
+
+  const collectorContextVal = React.useMemo(
+    () => ({
+      resetDisplayTrigger,
+      setTrigger,
+      trackEvent
+    }),
+    [resetDisplayTrigger, setTrigger, trackEvent]
+  )
 
   return (
     <IdleTimerProvider
@@ -259,13 +273,7 @@ export const CollectorProvider = ({
       }}
       onIdle={fireIdleTrigger}
     >
-      <CollectorContext.Provider
-        value={{
-          resetDisplayTrigger,
-          setTrigger,
-          trackEvent
-        }}
-      >
+      <CollectorContext.Provider value={collectorContextVal}>
         {children}
       </CollectorContext.Provider>
       <TriggerComponent />
