@@ -10,6 +10,8 @@ import { VisitorProvider } from './VisitorContext'
 
 const queryClient = new QueryClient()
 
+export const cookieAccountJWT = 'b2c_token'
+
 /** * @todo - extract */
 const useConsentCheck = (consent: boolean, consentCallback: any) => {
   const [consentGiven, setConsentGiven] = useState(consent)
@@ -60,7 +62,6 @@ export type FingerprintProviderProps = {
   config?: {
     idleDelay?: number
     trackIdleOnDesktop?: boolean
-    accountCookieId?: string
   }
 }
 
@@ -189,8 +190,7 @@ const defaultFingerprintState: FingerprintContextInterface = {
   unregisterHandler: () => {},
   config: {
     idleDelay: undefined,
-    trackIdleOnDesktop: false,
-    accountCookieId: undefined
+    trackIdleOnDesktop: false
   }
 }
 
