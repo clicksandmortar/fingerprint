@@ -43,7 +43,7 @@ const StonehouseModal = ({
         --secondary: #e0aa00;
         --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
       }
-      p, h1, h2, h3, h4, h5, h6, a {
+      p, h1, h2, h3, h4, h5, h6 {
         line-height: 1.2;
       }
 
