@@ -40,7 +40,7 @@ export const bootstrapSession = ({
 }
 const hasCookieValueExpired = (cookieData: string | undefined): Boolean => {
   if (!cookieData) return true;
-  const [_, timestampString] = cookieData.split('-');
+  const [, timestampString] = cookieData.split('-');
   const expiryTimeEpoch = Date.parse(timestampString);
   const expiryTime = new Date()
   expiryTime.setTime(expiryTimeEpoch)
