@@ -3,4 +3,5 @@ export type Session = {
   lastVisit?: Date
   visits?: number
   id?: string
+  endTime?: Date
 }

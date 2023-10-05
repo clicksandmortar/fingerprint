@@ -12,8 +12,17 @@ export const bootstrapSession = ({
 }) => {
   const session: Session = {
     firstVisit: undefined,
-    id: uuidv4()
   }
+  const t = new Date()
+  t.setMinutes(t.getMinutes() + 30)
+
+  // Handle session cookie pices
+  if (!getCookie('_cm_session') || hasCookieValueExpired(getCookie('_cm_session'))) {
+    session.id = uuidv4()
+  }
+
+  session.endTime = t
+  setCookie('_cm_session', `${session.id}-${session.endTime.toISOString()}`, undefined)
 
   if (!getCookie('_cm') || getCookie('_cm') !== appId) {
     setCookie('_cm', appId, 365)
@@ -28,4 +37,16 @@ export const bootstrapSession = ({
 
     setSession(session)
   }
+}
+const hasCookieValueExpired = (cookieData: string | undefined): Boolean => {
+  if (!cookieData) return true;
+  const [_, timestampString] = cookieData.split('-');
+  const expiryTimeEpoch = Date.parse(timestampString);
+  const expiryTime = new Date()
+  expiryTime.setTime(expiryTimeEpoch)
+  const n = new Date()
+  if (n > expiryTime) {
+    return true
+  }
+  return false
 }
