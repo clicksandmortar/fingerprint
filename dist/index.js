@@ -282,6 +282,10 @@ var LoggingProvider = function LoggingProvider(_ref) {
       (_console4 = console).info.apply(_console4, arguments);
     }
   };
+  React.useEffect(function () {
+    if (!debug) return;
+    log('LoggingProvider: In Debug Mode');
+  });
   return React__default.createElement(LoggingContext.Provider, {
     value: {
       log: log,
@@ -600,20 +604,17 @@ var CollectorProvider = function CollectorProvider(_ref) {
     pageTriggers = _useState2[0],
     setPageTriggers = _useState2[1];
   var _useState3 = React.useState(undefined),
-    displayTrigger = _useState3[0],
-    setDisplayTrigger = _useState3[1];
-  var _useState4 = React.useState(null),
-    timeoutId = _useState4[0],
-    setTimeoutId = _useState4[1];
-  var _useState5 = React.useState(false),
-    intently = _useState5[0],
-    setIntently = _useState5[1];
+    currentlyVisibleTriggerType = _useState3[0],
+    setCurrentlyVisibleTriggerType = _useState3[1];
+  var _useState4 = React.useState(false),
+    intently = _useState4[0],
+    setIntently = _useState4[1];
   log('CollectorProvider: user is on mobile?', reactDeviceDetect.isMobile);
   React.useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
     var runningInterval = setInterval(function () {
-      var children = document.querySelectorAll('div[id=smc-v5-overlay-106412]');
+      var children = document.querySelectorAll('div[id^=smc-v5-overlay-]');
       Array.prototype.forEach.call(children, function (node) {
         node.parentNode.removeChild(node);
         log('CollectorProvider: successfully removed intently overlay');
@@ -624,63 +625,43 @@ var CollectorProvider = function CollectorProvider(_ref) {
       clearInterval(runningInterval);
     };
   }, [intently]);
-  var showTrigger = function showTrigger(displayTrigger) {
-    if (!displayTrigger) {
-      return null;
-    }
-    var trigger = pageTriggers.find(function (trigger) {
-      return trigger.invocation === displayTrigger && (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+  var trigger = React__default.useMemo(function () {
+    if (!currentlyVisibleTriggerType) return null;
+    var locatedTrigger = pageTriggers.find(function (trigger) {
+      return trigger.invocation === currentlyVisibleTriggerType && (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
         return handler.behaviour === trigger.behaviour;
       }));
     });
-    log('CollectorProvider: available triggers include: ', pageTriggers);
-    log('CollectorProvider: attempting to show displayTrigger', displayTrigger, trigger);
-    if (!trigger) {
-      error('No trigger found for displayTrigger', displayTrigger);
-      return null;
-    }
-    log('CollectorProvider: available handlers include: ', handlers);
-    log('CollectorProvider: trigger to match is: ', trigger);
-    var handler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+    if (!locatedTrigger) return null;
+    if (!(handlers !== null && handlers !== void 0 && handlers.length)) return null;
+    return locatedTrigger;
+  }, [pageTriggers, currentlyVisibleTriggerType, handlers]);
+  var handler = React__default.useMemo(function () {
+    if (!trigger) return null;
+    return (handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
       return handler.behaviour === trigger.behaviour;
-    });
-    log('CollectorProvider: attempting to show trigger', trigger, handler);
-    if (!handler) {
-      error('No handler found for trigger', trigger);
-      return null;
-    }
-    if (!handler.invoke) {
-      error('No invoke method found for handler', handler);
-      return null;
-    }
+    })) || null;
+  }, [handlers, trigger]);
+  var TriggerComponent = React__default.useCallback(function () {
+    if (!trigger) return null;
+    if (!(handler !== null && handler !== void 0 && handler.invoke)) return null;
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour
     });
-    if (!handler.invoke) {
-      error('No invoke method found for handler', handler);
-      return null;
-    }
-    if (handler.delay) {
-      var tId = setTimeout(function () {
-        var _handler$invoke;
-        return (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
-      }, handler.delay);
-      setTimeoutId(tId);
-      return null;
-    }
-    return handler.invoke(trigger);
-  };
+    var component = handler.invoke(trigger);
+    return component || null;
+  }, [trigger, handler]);
   var fireIdleTrigger = React.useCallback(function () {
-    if (displayTrigger) return;
+    if (currentlyVisibleTriggerType) return;
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle trigger');
-    setDisplayTrigger('INVOCATION_IDLE_TIME');
-  }, [pageTriggers, displayTrigger]);
+    setCurrentlyVisibleTriggerType('INVOCATION_IDLE_TIME');
+  }, [pageTriggers, currentlyVisibleTriggerType]);
   var fireExitTrigger = React.useCallback(function () {
     log('CollectorProvider: attempting to fire exit trigger');
-    setDisplayTrigger('INVOCATION_EXIT_INTENT');
+    setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT');
   }, []);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
@@ -693,7 +674,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
   }, []);
   var resetDisplayTrigger = React.useCallback(function () {
     log('CollectorProvider: resetting displayTrigger');
-    setDisplayTrigger(undefined);
+    setCurrentlyVisibleTriggerType(undefined);
   }, []);
   React.useEffect(function () {
     if (!booted) {
@@ -736,6 +717,10 @@ var CollectorProvider = function CollectorProvider(_ref) {
         }
       }).then(function (response) {
         try {
+          if (response.status === 204) {
+            setIntently(true);
+            return Promise.resolve();
+          }
           return Promise.resolve(response.json()).then(function (payload) {
             var _payload$pageTriggers;
             log('Sent collector data, retrieved:', payload);
@@ -769,27 +754,14 @@ var CollectorProvider = function CollectorProvider(_ref) {
       clearTimeout(delay);
     };
   }, [booted, visitor]);
-  React.useEffect(function () {
-    if (!timeoutId) return;
-    return function () {
-      return clearTimeout(timeoutId);
-    };
-  }, [timeoutId]);
-  var renderedTrigger = React__default.useMemo(function () {
-    return showTrigger(displayTrigger);
-  }, [showTrigger, displayTrigger]);
   var setTrigger = function setTrigger(trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
     setPageTriggers([].concat(pageTriggers, [trigger]));
-    setDisplayTrigger(trigger.invocation);
+    setCurrentlyVisibleTriggerType(trigger.invocation);
   };
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
     timeout: idleTimeout,
     onPresenceChange: function onPresenceChange(presence) {
-      if (presence.type === 'active') {
-        clearTimeout(timeoutId);
-        setTimeoutId(null);
-      }
       log('presence changed', presence);
     },
     onIdle: fireIdleTrigger
@@ -799,7 +771,7 @@ var CollectorProvider = function CollectorProvider(_ref) {
       setTrigger: setTrigger,
       trackEvent: trackEvent
     }
-  }, children, renderedTrigger));
+  }, children), React__default.createElement(TriggerComponent, null));
 };
 var CollectorContext = React.createContext({
   resetDisplayTrigger: function resetDisplayTrigger() {},
@@ -1058,6 +1030,30 @@ var clientHandlers = [{
 }];
 
 var queryClient = new reactQuery.QueryClient();
+var useConsentCheck = function useConsentCheck(consent, consentCallback) {
+  var _useState = React.useState(consent),
+    consentGiven = _useState[0],
+    setConsentGiven = _useState[1];
+  React.useEffect(function () {
+    if (consent) {
+      setConsentGiven(consent);
+      return;
+    }
+    console.log('Fingerprint Widget Consent: ', consent);
+    if (!consentCallback) return;
+    var consentGivenViaCallback = consentCallback();
+    var interval = setInterval(function () {
+      setConsentGiven(consent);
+    }, 1000);
+    if (consentGivenViaCallback) {
+      clearInterval(interval);
+    }
+    return function () {
+      return clearInterval(interval);
+    };
+  }, [consentCallback, consent]);
+  return consentGiven;
+};
 var FingerprintProvider = function FingerprintProvider(_ref) {
   var appId = _ref.appId,
     children = _ref.children,
@@ -1072,47 +1068,22 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
     _ref$idleTriggers = _ref.idleTriggers,
     idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers;
-  var _useState = React.useState(consent),
-    consentGiven = _useState[0],
-    setConsentGiven = _useState[1];
   var _useState2 = React.useState(false),
     booted = _useState2[0],
     setBooted = _useState2[1];
   var _useState3 = React.useState(defaultHandlers || clientHandlers),
     handlers = _useState3[0],
     setHandlers = _useState3[1];
-  var registerHandler = React__default.useCallback(function (trigger) {
+  var consentGiven = useConsentCheck(consent, consentCallback);
+  var addAnotherHandler = React__default.useCallback(function (trigger) {
     setHandlers(function (handlers) {
       return [].concat(handlers, [trigger]);
     });
   }, [setHandlers]);
   React.useEffect(function () {
-    if (consent) {
-      setConsentGiven(consent);
-      return;
-    }
-    if (!consentCallback) return;
-    var consentGivenViaCallback = consentCallback();
-    var interval = setInterval(function () {
-      setConsentGiven(consent);
-    }, 1000);
-    if (consentGivenViaCallback) {
-      clearInterval(interval);
-    }
-    return function () {
-      return clearInterval(interval);
-    };
-  }, [consentCallback, consent]);
-  React.useEffect(function () {
-    if (!appId) {
-      throw new Error('C&M Fingerprint: appId is required');
-    }
-    if (booted) {
-      return;
-    }
-    if (!consentGiven) {
-      return;
-    }
+    if (!appId) throw new Error('C&M Fingerprint: appId is required');
+    if (booted) return;
+    if (!consentGiven) return;
     var performBoot = function performBoot() {
       try {
         setBooted(true);
@@ -1138,7 +1109,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       appId: appId,
       booted: booted,
       currentTrigger: {},
-      registerHandler: registerHandler,
+      registerHandler: addAnotherHandler,
       trackEvent: function trackEvent() {
         alert('trackEvent not implemented');
       },
