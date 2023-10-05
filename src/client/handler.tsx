@@ -4,25 +4,7 @@ import { TriggerModal } from '../behaviours/TriggerModal'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'
 import { Trigger } from './types'
 
-// @todo refactor where this lives
-type TriggerCallback = (
-  trigger: Trigger
-) => void | JSX.Element | React.ReactPortal
-
-// @todo refactor where this lives
-export type Handler = {
-  id?: string
-  invocation?:
-    | 'INVOCATION_UNSPECIFIED'
-    | 'INVOCATION_IDLE_TIME'
-    | 'INVOCATION_EXIT_INTENT'
-    | 'INVOCATION_PAGE_LOAD'
-  behaviour?: string
-  delay?: number
-  invoke?: TriggerCallback
-}
-
-export const clientHandlers: Handler[] = [
+export const clientHandlers: Trigger[] = [
   {
     id: 'modal_v1',
     behaviour: 'BEHAVIOUR_MODAL',

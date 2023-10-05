@@ -23,12 +23,18 @@ const StonehouseModal = ({
   useEffect(() => {
     // just a formatter
     const cssToApply = `
-      @import url('https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css');
-
-      @font-face {
-        font-family: 'Gotham Bold';
-        src: url(./assets/GothamBold.otf}) format('opentype');
-      }
+      @font-face{
+        font-family: "Gotham Bold";
+        src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix")format("embedded-opentype"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff")format("woff"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2")format("woff2"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf")format("truetype"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold")format("svg");
+        font-weight:normal;
+        font-style:normal;
+        font-display:swap;
+    }
+     
 
       :root {
         --primary: white;
