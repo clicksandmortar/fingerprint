@@ -10,6 +10,8 @@ import { VisitorProvider } from './VisitorContext'
 
 const queryClient = new QueryClient()
 
+export const cookieAccountJWT = 'b2c_token'
+
 /** * @todo - extract */
 const useConsentCheck = (consent: boolean, consentCallback: any) => {
   const [consentGiven, setConsentGiven] = useState(consent)
