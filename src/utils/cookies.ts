@@ -6,7 +6,7 @@ export const setCookie = (
   expires: number | undefined
 ) => {
   return Cookies.set(name, value, {
-    expires: expires || 365,
+    expires: expires,
     sameSite: 'strict'
   })
 }

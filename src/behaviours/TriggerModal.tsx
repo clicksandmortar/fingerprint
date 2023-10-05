@@ -36,8 +36,7 @@ const Modal = ({ trigger }: Props) => {
 
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour
+      triggerType: trigger.invocation
     })
   }, [])
 
@@ -45,6 +44,7 @@ const Modal = ({ trigger }: Props) => {
     return getBrand()
   }, [])
 
+  console.log({ brand })
   if (!open) {
     return null
   }

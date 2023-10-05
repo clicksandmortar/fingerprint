@@ -3,6 +3,7 @@ import { Visitor } from '../visitors/types'
 export type CollectorUpdate = {
   appId: string
   visitor: Visitor
+  sessionId: string | undefined
   page: Page
   referrer: Referrer
 }
@@ -47,10 +48,8 @@ export type Trigger = {
     | 'INVOCATION_IDLE_TIME'
     | 'INVOCATION_EXIT_INTENT'
     | 'INVOCATION_PAGE_LOAD'
-  behaviour?: 'BEHAVIOUR_MODAL'
-  // delay?: number
-  // invoke:(trigger: Trigger) => void;
-  // @todo: commented out, out of date?
+  behaviour: 'BEHAVIOUR_MODAL' | string // @todo: make typesafe again
+  invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode
   data?: {
     [key: string]: string
   }
