@@ -122,7 +122,7 @@ export function CollectorProvider({
 
   const fireExitTrigger = useCallback(() => {
     log('CollectorProvider: attempting to fire exit trigger')
-    setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT')
+    // setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT')
   }, [log])
 
   useEffect(() => {

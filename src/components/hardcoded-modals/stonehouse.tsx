@@ -30,9 +30,11 @@ const StonehouseModal = ({
             url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2")format("woff2"),
             url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf")format("truetype"),
             url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold")format("svg");
-        font-weight:normal;
-        font-style:normal;
-        font-display:swap;
+            font-display: auto;
+            line-height: 1rem;
+            font-style: normal;
+            font-weight: 500;
+            font-stretch: normal;
     }
      
 
@@ -40,6 +42,9 @@ const StonehouseModal = ({
         --primary: white;
         --secondary: #e0aa00;
         --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      }
+      p, h1, h2, h3, h4, h5, h6, a {
+        line-height: 1.2;
       }
 
       .${prependClass('overlay')} {
@@ -191,8 +196,9 @@ const StonehouseModal = ({
     styles.type = 'text/css'
     styles.appendChild(document.createTextNode(cssToApply))
     document.head.appendChild(styles)
-
-    setStylesLoaded(true)
+    setTimeout(() => {
+      setStylesLoaded(true)
+    }, 500)
   }, [randomHash])
 
   if (!stylesLoaded) {
