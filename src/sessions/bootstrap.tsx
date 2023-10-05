@@ -21,12 +21,12 @@ export const bootstrapSession = ({
     session.id = uuidv4()
   } else {
     const c = getCookie('_cm_session') as string;
-    const [sessionId] = c.split('-')
+    const [sessionId] = c.split('|')
     session.id = sessionId;
   }
 
   session.endTime = t
-  setCookie('_cm_session', `${session.id}-${session.endTime.toISOString()}`, undefined)
+  setCookie('_cm_session', `${session.id}|${session.endTime.toISOString()}`, undefined)
 
   if (!getCookie('_cm') || getCookie('_cm') !== appId) {
     setCookie('_cm', appId, 365)
@@ -44,7 +44,7 @@ export const bootstrapSession = ({
 }
 const hasCookieValueExpired = (cookieData: string | undefined): Boolean => {
   if (!cookieData) return true;
-  const [, timestampString] = cookieData.split('-');
+  const [, timestampString] = cookieData.split('|');
   const expiryTimeEpoch = Date.parse(timestampString);
   const expiryTime = new Date()
   expiryTime.setTime(expiryTimeEpoch)
