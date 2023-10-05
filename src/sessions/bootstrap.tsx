@@ -19,6 +19,10 @@ export const bootstrapSession = ({
   // Handle session cookie pices
   if (!getCookie('_cm_session') || hasCookieValueExpired(getCookie('_cm_session'))) {
     session.id = uuidv4()
+  } else {
+    const c = getCookie('_cm_session') as string;
+    const [sessionId] = c.split('-')
+    session.id = sessionId;
   }
 
   session.endTime = t
