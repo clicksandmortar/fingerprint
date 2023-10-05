@@ -30,7 +30,8 @@ export function CollectorProvider({
     idleTriggers,
     config
   } = useFingerprint()
-  const { visitor } = useVisitor()
+  const { visitor, session } = useVisitor()
+
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
 
@@ -160,6 +161,7 @@ export function CollectorProvider({
       collect({
         appId,
         visitor,
+        sessionId: session?.id,
         page: {
           url: window.location.href,
           path: window.location.pathname,
