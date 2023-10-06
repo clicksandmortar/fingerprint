@@ -43,7 +43,9 @@ export function CollectorProvider({
   const [intently, setIntently] = useState<boolean>(false)
 
   const addPageTriggers = (triggers: Trigger[]) => {
-    setPageTriggers((prev) => uniqueBy<Trigger>([...prev, ...triggers], 'id'))
+    setPageTriggers((prev) =>
+      uniqueBy<Trigger>([...prev, ...(triggers || [])], 'id')
+    )
   }
 
   log('CollectorProvider: user is on mobile?', isMobile)
