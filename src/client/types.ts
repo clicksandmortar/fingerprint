@@ -40,14 +40,15 @@ export type CollectorResponse = {
   // @todo remove this temp hack once split testing with Intently is complete
   intently: boolean
 }
+export type Invocation =
+  | 'INVOCATION_UNSPECIFIED'
+  | 'INVOCATION_IDLE_TIME'
+  | 'INVOCATION_EXIT_INTENT'
+  | 'INVOCATION_PAGE_LOAD'
 
 type MutualTriggerProps = {
   id?: string
-  invocation?:
-    | 'INVOCATION_UNSPECIFIED'
-    | 'INVOCATION_IDLE_TIME'
-    | 'INVOCATION_EXIT_INTENT'
-    | 'INVOCATION_PAGE_LOAD'
+  invocation?: Invocation
   data?: {
     [key: string]: string
   }
