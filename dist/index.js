@@ -8,7 +8,7 @@ var reactHookForm = require('react-hook-form');
 var ReactDOM = _interopDefault(require('react-dom'));
 var uuid = require('uuid');
 var Cookies = _interopDefault(require('js-cookie'));
-var unique = _interopDefault(require('lodash.uniqby'));
+var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
@@ -308,7 +308,7 @@ var useLogging = function useLogging() {
 
 var setCookie = function setCookie(name, value, expires) {
   return Cookies.set(name, value, {
-    expires: expires || 365,
+    expires: expires,
     sameSite: 'strict'
   });
 };
@@ -341,6 +341,18 @@ var bootstrapSession = function bootstrapSession(_ref) {
   var session = {
     firstVisit: undefined
   };
+  var t = new Date();
+  t.setMinutes(t.getMinutes() + 30);
+  if (!getCookie('_cm_session') || hasCookieValueExpired(getCookie('_cm_session'))) {
+    session.id = uuid.v4();
+  } else {
+    var c = getCookie('_cm_session');
+    var _c$split = c.split('|'),
+      sessionId = _c$split[0];
+    session.id = sessionId;
+  }
+  session.endTime = t;
+  setCookie('_cm_session', session.id + "|" + session.endTime.toISOString(), undefined);
   if (!getCookie('_cm') || getCookie('_cm') !== appId) {
     setCookie('_cm', appId, 365);
     setSession(session);
@@ -350,6 +362,19 @@ var bootstrapSession = function bootstrapSession(_ref) {
     session.firstVisit = false;
     setSession(session);
   }
+};
+var hasCookieValueExpired = function hasCookieValueExpired(cookieData) {
+  if (!cookieData) return true;
+  var _cookieData$split = cookieData.split('|'),
+    timestampString = _cookieData$split[1];
+  var expiryTimeEpoch = Date.parse(timestampString);
+  var expiryTime = new Date();
+  expiryTime.setTime(expiryTimeEpoch);
+  var n = new Date();
+  if (n > expiryTime) {
+    return true;
+  }
+  return false;
 };
 
 var uuidValidateV4 = function uuidValidateV4(uuid$1) {
@@ -365,6 +390,9 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
   var visitor = {
     id: undefined
   };
+  if (getCookie(cookieAccountJWT)) {
+    visitor.jwt = getCookie(cookieAccountJWT);
+  }
   if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
     var visitorId = uuid.v4();
     setCookie('_cm_id', visitorId, 365);
@@ -588,7 +616,8 @@ function CollectorProvider(_ref) {
     idleTriggers = _useFingerprint.idleTriggers,
     config = _useFingerprint.config;
   var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
+    visitor = _useVisitor.visitor,
+    session = _useVisitor.session;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
   var _useCollectorMutation = useCollectorMutation(),
@@ -603,25 +632,22 @@ function CollectorProvider(_ref) {
   var _useState = React.useState((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
-  var _useState2 = React.useState(handlers || []),
+  var _useState2 = React.useState([]),
     pageTriggers = _useState2[0],
     setPageTriggers = _useState2[1];
   var _useState3 = React.useState(undefined),
-    currentlyVisibleTriggerType = _useState3[0],
-    setCurrentlyVisibleTriggerType = _useState3[1];
+    displayTrigger = _useState3[0],
+    setDisplayTrigger = _useState3[1];
   var _useState4 = React.useState(false),
     intently = _useState4[0],
     setIntently = _useState4[1];
   var addPageTriggers = function addPageTriggers(triggers) {
     setPageTriggers(function (prev) {
-      return unique([].concat(prev, triggers), 'id');
+      return uniqueBy([].concat(prev, triggers), 'id');
     });
   };
-  React.useEffect(function () {
-    addPageTriggers(handlers);
-  }, [handlers]);
   log('CollectorProvider: user is on mobile?', reactDeviceDetect.isMobile);
-  var shouldLaunchIdleTriggers = reactDeviceDetect.isMobile || (config === null || config === void 0 ? void 0 : config.trackIdleOnDesktop);
+  var shouldLaunchIdleTriggers = reactDeviceDetect.isMobile;
   React.useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
@@ -638,25 +664,49 @@ function CollectorProvider(_ref) {
     };
   }, [intently, log]);
   var TriggerComponent = React__default.useCallback(function () {
-    if (!currentlyVisibleTriggerType) return null;
-    var locatedTrigger = pageTriggers.find(function (trigger) {
-      return trigger.invocation === currentlyVisibleTriggerType;
+    var _handler$invoke, _handler;
+    if (!displayTrigger) return null;
+    var handler;
+    var trigger = pageTriggers.find(function (_trigger) {
+      var _ref2;
+      var potentialTrigger = _trigger.invocation === displayTrigger;
+      var potentialHandler = (_ref2 = [].concat(handlers, clientHandlers)) === null || _ref2 === void 0 ? void 0 : _ref2.find(function (handler) {
+        return handler.behaviour === _trigger.behaviour;
+      });
+      handler = potentialHandler;
+      return potentialTrigger && potentialHandler;
     });
-    if (!(locatedTrigger !== null && locatedTrigger !== void 0 && locatedTrigger.invoke)) return null;
-    var component = locatedTrigger.invoke(locatedTrigger);
-    if (component && React__default.isValidElement(component)) return component || null;
+    if (!trigger) {
+      error("No trigger found for displayTrigger", displayTrigger);
+      return null;
+    }
+    log('CollectorProvider: attempting to show trigger', trigger, handler);
+    if (!handler) {
+      log('No handler found for trigger', trigger);
+      return null;
+    }
+    if (!handler.invoke) {
+      log('No invoke method found for handler', handler);
+      return null;
+    }
+    if (!handler.invoke) {
+      log('No invoke method found for handler', handler);
+      return null;
+    }
+    var potentialComponent = (_handler$invoke = (_handler = handler).invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(_handler, trigger);
+    if (potentialComponent && React__default.isValidElement(potentialComponent)) return potentialComponent;
     return null;
-  }, [currentlyVisibleTriggerType, pageTriggers, handlers]);
+  }, [displayTrigger, error, handlers, log, pageTriggers, handlers]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     if (!shouldLaunchIdleTriggers) return;
     log('CollectorProvider: attempting to fire idle trigger');
-    setCurrentlyVisibleTriggerType('INVOCATION_IDLE_TIME');
+    setDisplayTrigger('INVOCATION_IDLE_TIME');
   }, [idleTriggers, log, shouldLaunchIdleTriggers]);
   var fireExitTrigger = React.useCallback(function () {
     log('CollectorProvider: attempting to fire exit trigger');
-    setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT');
-  }, [log]);
+    setDisplayTrigger('INVOCATION_EXIT_INTENT');
+  }, [log, exitIntentTriggers, setDisplayTrigger]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -667,7 +717,7 @@ function CollectorProvider(_ref) {
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
   var resetDisplayTrigger = React.useCallback(function () {
     log('CollectorProvider: resetting displayTrigger');
-    setCurrentlyVisibleTriggerType(undefined);
+    setDisplayTrigger(undefined);
   }, [log]);
   React.useEffect(function () {
     if (!booted) {
@@ -691,6 +741,7 @@ function CollectorProvider(_ref) {
       collect({
         appId: appId,
         visitor: visitor,
+        sessionId: session === null || session === void 0 ? void 0 : session.id,
         page: {
           url: window.location.href,
           path: window.location.pathname,
@@ -715,12 +766,9 @@ function CollectorProvider(_ref) {
             return Promise.resolve();
           }
           return Promise.resolve(response.json()).then(function (payload) {
-            var _payload$pageTriggers;
             log('Sent collector data, retrieved:', payload);
             setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay);
-            addPageTriggers((payload === null || payload === void 0 ? void 0 : (_payload$pageTriggers = payload.pageTriggers) === null || _payload$pageTriggers === void 0 ? void 0 : _payload$pageTriggers.filter(function (trigger) {
-              return trigger.invocation === 'INVOCATION_IDLE_TIME' || trigger.invocation === 'INVOCATION_EXIT_INTENT';
-            })) || []);
+            addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
               setIntently(false);
@@ -746,12 +794,12 @@ function CollectorProvider(_ref) {
     return function () {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, handlers, config === null || config === void 0 ? void 0 : config.idleDelay, initialDelay, log, trackEvent, visitor]);
+  }, [appId, booted, collect, error, handlers, initialDelay, log, trackEvent, visitor]);
   var setTrigger = React__default.useCallback(function (trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
-    setPageTriggers([].concat(pageTriggers, [trigger]));
-    setCurrentlyVisibleTriggerType(trigger.invocation);
-  }, [log, pageTriggers]);
+    addPageTriggers([trigger]);
+    setDisplayTrigger(trigger.invocation);
+  }, [log, pageTriggers, setDisplayTrigger, addPageTriggers]);
   var collectorContextVal = React__default.useMemo(function () {
     return {
       resetDisplayTrigger: resetDisplayTrigger,
@@ -1000,6 +1048,7 @@ var TriggerYoutube = function TriggerYoutube(_ref2) {
 
 var clientHandlers = [{
   id: 'modal_v1',
+  behaviour: 'BEHAVIOUR_MODAL',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerModal, {
       trigger: trigger
@@ -1007,6 +1056,7 @@ var clientHandlers = [{
   }
 }, {
   id: 'youtube_v1',
+  behaviour: 'BEHAVIOUR_YOUTUBE',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerYoutube, {
       trigger: trigger
@@ -1014,6 +1064,7 @@ var clientHandlers = [{
   }
 }, {
   id: 'inverse_v1',
+  behaviour: 'BEHAVIOUR_INVERSE_FLOW',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerInverse, {
       trigger: trigger
@@ -1022,6 +1073,7 @@ var clientHandlers = [{
 }];
 
 var queryClient = new reactQuery.QueryClient();
+var cookieAccountJWT = 'b2c_token';
 var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   var _useState = React.useState(consent),
     consentGiven = _useState[0],
