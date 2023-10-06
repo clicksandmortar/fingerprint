@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { Visitor } from '../visitors/types';
 export declare type CollectorUpdate = {
     appId: string;
@@ -37,7 +36,7 @@ export declare type CollectorResponse = {
     intently: boolean;
 };
 export declare type Invocation = 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
-declare type MutualTriggerProps = {
+export declare type Trigger = {
     id?: string;
     invocation?: Invocation;
     data?: {
@@ -46,16 +45,8 @@ declare type MutualTriggerProps = {
     behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW';
     brand?: any;
 };
-export declare type Handler = MutualTriggerProps & {
-    invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode;
-};
-export declare type APITrigger = MutualTriggerProps & {
-    behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW';
-};
-export declare type Trigger = APITrigger | Handler;
 export declare type PageView = {
     page: Page;
     referrer: Referrer;
     viewedAt: Date;
 };
-export {};

@@ -122,22 +122,6 @@ A behaviour handler is a function that can either:
 
 When a behaviour handler is registered, it will be invoked whenever the behaviour is triggered.
 
-#### Implementation
-
-From a functionality perspective Triggers and Handlers are the same, but use different methods of invoking a behaviour.
-
-an `APITrigger` is a behaviour controlled by the backend. When we receive a supported string for that (e.g. `'BEHAVIOUR_MODAL'`), we need to search through `clientTriggers` to find one that matches, then invoke the attached `invoke` method.
-
-a `Handler` is custom behaviour handled by the DiFi-provider wrapped app, and is controlled directly via `invoke`
-
-TLDR in pseudo:
-```ts
-type APITrigger = { ...mutual,  behaviour: 'Supported behaviour' }
-type Handler = { ...mutual, behaviour: () => Component | void }
-
-type Trigger = APITrigger | Handler;
-```
-
 ### Cookie Consent
 
 The Fingerprint will not start tracking data until the user has consented to the use of cookies. This is to ensure that the Fingerprint is GDPR compliant.

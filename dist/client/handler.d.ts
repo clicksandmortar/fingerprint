@@ -1,3 +1,6 @@
-import { APITrigger, Handler } from './types';
-export declare type ClientTrigger = Pick<Handler, 'id' | 'invoke'> & Pick<APITrigger, 'behaviour'>;
-export declare const clientHandlers: ClientTrigger[];
+import React from 'react';
+import { Trigger } from './types';
+export declare type BehaviourHandler = Pick<Trigger, 'id' | 'behaviour'> & {
+    invoke: (trigger: Trigger) => void | JSX.Element | React.ReactPortal;
+};
+export declare const clientHandlers: BehaviourHandler[];

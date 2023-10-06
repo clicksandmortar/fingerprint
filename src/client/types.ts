@@ -46,7 +46,7 @@ export type Invocation =
   | 'INVOCATION_EXIT_INTENT'
   | 'INVOCATION_PAGE_LOAD'
 
-type MutualTriggerProps = {
+export type Trigger = {
   id?: string
   invocation?: Invocation
   data?: {
@@ -55,16 +55,6 @@ type MutualTriggerProps = {
   behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW'
   brand?: any
 }
-
-export type Handler = MutualTriggerProps & {
-  invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode
-}
-
-export type APITrigger = MutualTriggerProps & {
-  behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW'
-}
-
-export type Trigger = APITrigger | Handler
 
 export type PageView = {
   page: Page

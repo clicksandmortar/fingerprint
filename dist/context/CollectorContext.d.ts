@@ -1,8 +1,9 @@
 import React from 'react';
-import { Handler, Trigger } from '../client/types';
+import { BehaviourHandler } from '../client/handler';
+import { Trigger } from '../client/types';
 export declare type CollectorProviderProps = {
     children?: React.ReactNode;
-    handlers?: Handler[];
+    handlers?: BehaviourHandler[];
 };
 export declare function CollectorProvider({ children, handlers }: CollectorProviderProps): React.JSX.Element;
 export declare type CollectorContextInterface = {

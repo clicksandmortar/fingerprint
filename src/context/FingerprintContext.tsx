@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { clientHandlers } from '../client/handler'
+import { BehaviourHandler, clientHandlers } from '../client/handler'
 import { PageView, Trigger } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
 import { LoggingProvider, useLogging } from './LoggingContext'
@@ -54,7 +54,7 @@ export type FingerprintProviderProps = {
   consent?: boolean
   consentCallback?: () => boolean
   debug?: boolean
-  defaultHandlers?: Trigger[]
+  defaultHandlers?: BehaviourHandler[]
   initialDelay?: number
   exitIntentTriggers?: boolean
 
@@ -86,7 +86,7 @@ export const FingerprintProvider = ({
 
   // @todo Move this to a Handlers Context and add logging.
   const addAnotherHandler = React.useCallback(
-    (trigger: Trigger) => {
+    (trigger: BehaviourHandler) => {
       setHandlers((handlers) => {
         return [...handlers, trigger]
       })

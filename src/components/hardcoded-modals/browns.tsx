@@ -1,10 +1,10 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { APITrigger } from '../../client/types'
+import { Trigger } from '../../client/types'
 
 type Props = {
-  trigger: APITrigger
+  trigger: Trigger
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
 }

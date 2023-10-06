@@ -2,12 +2,13 @@ import React from 'react'
 import TriggerInverse from '../behaviours/TriggerInverse'
 import { TriggerModal } from '../behaviours/TriggerModal'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'
-import { APITrigger, Handler, Trigger } from './types'
+import { Trigger } from './types'
 
-export type ClientTrigger = Pick<Handler, 'id' | 'invoke'> &
-  Pick<APITrigger, 'behaviour'>
+export type BehaviourHandler = Pick<Trigger, 'id' | 'behaviour'> & {
+  invoke: (trigger: Trigger) => void | JSX.Element | React.ReactPortal
+}
 
-export const clientHandlers: ClientTrigger[] = [
+export const clientHandlers: BehaviourHandler[] = [
   {
     id: 'modal_v1',
     behaviour: 'BEHAVIOUR_MODAL',
