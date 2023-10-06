@@ -29,7 +29,7 @@ export const bootstrapVisitor = ({
 
     setCookie(
       '_cm_id',
-      `${visitorId}|${sessionId}|${endTime.toISOString}.`,
+      `${visitorId}|${sessionId}|${endTime.toISOString()}.`,
       365
     )
 
@@ -50,7 +50,7 @@ export const bootstrapVisitor = ({
 
     setCookie(
       '_cm_id',
-      `${visitorId}|${sessionId}|${endTime.toISOString}.`,
+      `${visitorId}|${sessionId}|${endTime.toISOString()}.`,
       365
     )
 
