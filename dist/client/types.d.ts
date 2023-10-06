@@ -36,16 +36,21 @@ export declare type CollectorResponse = {
     pageTriggers: Trigger[];
     intently: boolean;
 };
-export declare type Trigger = {
+export declare type MutualTriggerProps = {
     id?: string;
     invocation?: 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
-    behaviour?: 'BEHAVIOUR_MODAL' | string;
-    invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode;
     data?: {
         [key: string]: string;
     };
     brand?: any;
 };
+export declare type Handler = MutualTriggerProps & {
+    invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode;
+};
+export declare type APITrigger = MutualTriggerProps & {
+    behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW';
+};
+export declare type Trigger = APITrigger | Handler;
 export declare type PageView = {
     page: Page;
     referrer: Referrer;

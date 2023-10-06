@@ -3,8 +3,8 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { clientHandlers } from '../client/handler'
-import { CollectorResponse, Trigger } from '../client/types'
+import { ClientTrigger, clientHandlers } from '../client/handler'
+import { APITrigger, CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { useLogging } from './LoggingContext'
@@ -86,6 +86,29 @@ export function CollectorProvider({
     }
   }, [intently, log])
 
+  const invokeAPITrigger = (locatedTrigger: APITrigger) => {
+    const handler = clientHandlers.find(
+      (h) => h.behaviour === locatedTrigger.behaviour
+    )
+
+    if (!handler) return null
+    if (!handler?.invoke) return null
+    const potentialComponent = handler.invoke(locatedTrigger)
+
+    if (potentialComponent && React.isValidElement(potentialComponent))
+      return potentialComponent
+
+    return null
+  }
+  const invokeCustomTrigger = (trigger: ClientTrigger) => {
+    const potentialComponent = trigger.invoke?.(trigger)
+
+    if (potentialComponent && React.isValidElement(potentialComponent))
+      return potentialComponent
+
+    return null
+  }
+
   const TriggerComponent = React.useCallback(() => {
     if (!currentlyVisibleTriggerType) return null
 
@@ -95,21 +118,15 @@ export function CollectorProvider({
 
     if (!locatedTrigger) return null
 
-    let invoke = () => locatedTrigger.invoke?.(locatedTrigger)
+    // by default, invoke the behaviour from the trigger
 
-    if (locatedTrigger.behaviour) {
-      const handler = clientHandlers.find(
-        (h) => h.behaviour === locatedTrigger.behaviour
-      )
+    // if the trigger is passed from the API, it will have the behaviour instead.
+    // in which case, we need to get the invoker from the clientHandlers map.
+    const isApiControlledTrigger = 'behaviour' in locatedTrigger
 
-      if (handler?.invoke) invoke = () => handler.invoke?.(locatedTrigger)
-    }
+    if (isApiControlledTrigger) return invokeAPITrigger(locatedTrigger)
 
-    const component = invoke()
-
-    if (component && React.isValidElement(component)) return component || null
-
-    return null
+    return invokeCustomTrigger(locatedTrigger)
   }, [currentlyVisibleTriggerType, pageTriggers, handlers])
 
   const fireIdleTrigger = useCallback(() => {
@@ -122,7 +139,7 @@ export function CollectorProvider({
 
   const fireExitTrigger = useCallback(() => {
     log('CollectorProvider: attempting to fire exit trigger')
-    // setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT')
+    setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT')
   }, [log])
 
   useEffect(() => {

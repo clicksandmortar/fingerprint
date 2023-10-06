@@ -1,7 +1,7 @@
 import React from 'react';
-import { Trigger } from '../../client/types';
+import { APITrigger } from '../../client/types';
 declare type Props = {
-    trigger: Trigger;
+    trigger: APITrigger;
     handleClickCallToAction: (e: any) => void;
     handleCloseModal: (e: any) => void;
 };

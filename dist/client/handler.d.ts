@@ -1,2 +1,3 @@
-import { Trigger } from './types';
-export declare const clientHandlers: Trigger[];
+import { APITrigger, Handler } from './types';
+export declare type ClientTrigger = Pick<Handler, 'id' | 'invoke'> & Pick<APITrigger, 'behaviour'>;
+export declare const clientHandlers: ClientTrigger[];

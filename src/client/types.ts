@@ -41,20 +41,28 @@ export type CollectorResponse = {
   intently: boolean
 }
 
-export type Trigger = {
+export type MutualTriggerProps = {
   id?: string
   invocation?:
     | 'INVOCATION_UNSPECIFIED'
     | 'INVOCATION_IDLE_TIME'
     | 'INVOCATION_EXIT_INTENT'
     | 'INVOCATION_PAGE_LOAD'
-  behaviour?: 'BEHAVIOUR_MODAL' | string // @todo: make typesafe again
-  invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode
   data?: {
     [key: string]: string
   }
   brand?: any
 }
+
+export type Handler = MutualTriggerProps & {
+  invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode
+}
+
+export type APITrigger = MutualTriggerProps & {
+  behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW'
+}
+
+export type Trigger = APITrigger | Handler
 
 export type PageView = {
   page: Page

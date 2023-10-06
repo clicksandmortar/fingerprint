@@ -507,13 +507,12 @@ const StonehouseModal = ({
     const cssToApply = `
       @font-face{
         font-family: "Gotham Bold";
-        src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix")format("embedded-opentype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff")format("woff"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2")format("woff2"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf")format("truetype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold")format("svg");
+        src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix") format("embedded-opentype"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff") format("woff"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2") format("woff2"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf") format("truetype"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold") format("svg");
             font-display: auto;
-            line-height: 1rem;
             font-style: normal;
             font-weight: 500;
             font-stretch: normal;
@@ -525,7 +524,7 @@ const StonehouseModal = ({
         --secondary: #e0aa00;
         --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
       }
-      p, h1, h2, h3, h4, h5, h6 {
+      h1, h2, h3, h4, h5, h6, p, a, span {
         line-height: 1.2;
       }
 
@@ -540,7 +539,7 @@ const StonehouseModal = ({
         display: flex;
         justify-content: center;
         align-items: center;
-        font-family: 'Gotham-bold';
+        font-family: 'Gotham Bold';
         font-weight: 500;
         font-style: normal;
       }
@@ -594,6 +593,7 @@ const StonehouseModal = ({
         max-width: 400px;
         margin-left: auto;
         margin-right: auto;
+        margin-bottom: -10px;
       }
 
       .${prependClass('text-container')} {
@@ -619,7 +619,7 @@ const StonehouseModal = ({
         font-family: 'Gotham Bold';
         cursor: pointer;
         background-color: var(--secondary);
-        padding: 0.75rem 1rem;
+        padding: 0.75rem 1rem 0 1rem;
         border-radius: 2px;
         display: block;
         font-size: 1.3rem;
@@ -706,7 +706,8 @@ const StonehouseModal = ({
   }, "2 for"), React__default.createElement("h1", {
     className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`,
     style: {
-      marginLeft: 15
+      marginLeft: 15,
+      marginBottom: -10
     }
   }, "10*"), React__default.createElement("h6", {
     className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`
@@ -1130,24 +1131,27 @@ function CollectorProvider({
       clearInterval(runningInterval);
     };
   }, [intently, log]);
+  const invokeAPITrigger = locatedTrigger => {
+    const handler = clientHandlers.find(h => h.behaviour === locatedTrigger.behaviour);
+    if (!handler) return null;
+    if (!(handler !== null && handler !== void 0 && handler.invoke)) return null;
+    const potentialComponent = handler.invoke(locatedTrigger);
+    if (potentialComponent && React__default.isValidElement(potentialComponent)) return potentialComponent;
+    return null;
+  };
+  const invokeCustomTrigger = trigger => {
+    var _trigger$invoke;
+    const potentialComponent = (_trigger$invoke = trigger.invoke) === null || _trigger$invoke === void 0 ? void 0 : _trigger$invoke.call(trigger, trigger);
+    if (potentialComponent && React__default.isValidElement(potentialComponent)) return potentialComponent;
+    return null;
+  };
   const TriggerComponent = React__default.useCallback(() => {
     if (!currentlyVisibleTriggerType) return null;
     const locatedTrigger = pageTriggers.find(trigger => trigger.invocation === currentlyVisibleTriggerType);
     if (!locatedTrigger) return null;
-    let invoke = () => {
-      var _locatedTrigger$invok;
-      return (_locatedTrigger$invok = locatedTrigger.invoke) === null || _locatedTrigger$invok === void 0 ? void 0 : _locatedTrigger$invok.call(locatedTrigger, locatedTrigger);
-    };
-    if (locatedTrigger.behaviour) {
-      const handler = clientHandlers.find(h => h.behaviour === locatedTrigger.behaviour);
-      if (handler !== null && handler !== void 0 && handler.invoke) invoke = () => {
-        var _handler$invoke;
-        return (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, locatedTrigger);
-      };
-    }
-    const component = invoke();
-    if (component && React__default.isValidElement(component)) return component || null;
-    return null;
+    const isApiControlledTrigger = ('behaviour' in locatedTrigger);
+    if (isApiControlledTrigger) return invokeAPITrigger(locatedTrigger);
+    return invokeCustomTrigger(locatedTrigger);
   }, [currentlyVisibleTriggerType, pageTriggers, handlers]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
@@ -1157,6 +1161,7 @@ function CollectorProvider({
   }, [idleTriggers, log, shouldLaunchIdleTriggers]);
   const fireExitTrigger = useCallback(() => {
     log('CollectorProvider: attempting to fire exit trigger');
+    setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT');
   }, [log]);
   useEffect(() => {
     if (!exitIntentTriggers) return;
@@ -1429,13 +1434,13 @@ const clientHandlers = [{
   })
 }, {
   id: 'youtube_v1',
-  behaviour: 'youtube',
+  behaviour: 'BEHAVIOUR_YOUTUBE',
   invoke: trigger => React__default.createElement(TriggerYoutube, {
     trigger: trigger
   })
 }, {
   id: 'inverse_v1',
-  behaviour: 'inverse_flow',
+  behaviour: 'BEHAVIOUR_INVERSE_FLOW',
   invoke: trigger => React__default.createElement(TriggerInverse, {
     trigger: trigger
   })

@@ -366,7 +366,7 @@ var StonehouseModal = function StonehouseModal(_ref) {
     stylesLoaded = _useState[0],
     setStylesLoaded = _useState[1];
   React.useEffect(function () {
-    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\")format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\")format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\")format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\")format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\")format(\"svg\");\n            font-display: auto;\n            line-height: 1rem;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      p, h1, h2, h3, h4, h5, h6 {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham-bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        border-radius: 100%;\n        background-color: white;\n        width: 2rem;\n        border: none;\n        height: 2rem;\n        position: absolute;\n        margin: 10px;\n        top: 0px;\n        right: 0px;\n        color: black;\n        font-size: 1.2rem;\n        font-weight: 300;\n        cursor: pointer;\n        display: grid;\n        place-content: center;\n      }\n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      h1, h2, h3, h4, h5, h6, p, a, span {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem 0 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        border-radius: 100%;\n        background-color: white;\n        width: 2rem;\n        border: none;\n        height: 2rem;\n        position: absolute;\n        margin: 10px;\n        top: 0px;\n        right: 0px;\n        color: black;\n        font-size: 1.2rem;\n        font-weight: 300;\n        cursor: pointer;\n        display: grid;\n        place-content: center;\n      }\n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
@@ -401,7 +401,8 @@ var StonehouseModal = function StonehouseModal(_ref) {
     }, "2 for"), React__default.createElement("h1", {
       className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow'),
       style: {
-        marginLeft: 15
+        marginLeft: 15,
+        marginBottom: -10
       }
     }, "10*"), React__default.createElement("h6", {
       className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
@@ -857,28 +858,31 @@ function CollectorProvider(_ref) {
       clearInterval(runningInterval);
     };
   }, [intently, log]);
+  var invokeAPITrigger = function invokeAPITrigger(locatedTrigger) {
+    var handler = clientHandlers.find(function (h) {
+      return h.behaviour === locatedTrigger.behaviour;
+    });
+    if (!handler) return null;
+    if (!(handler !== null && handler !== void 0 && handler.invoke)) return null;
+    var potentialComponent = handler.invoke(locatedTrigger);
+    if (potentialComponent && React__default.isValidElement(potentialComponent)) return potentialComponent;
+    return null;
+  };
+  var invokeCustomTrigger = function invokeCustomTrigger(trigger) {
+    var _trigger$invoke;
+    var potentialComponent = (_trigger$invoke = trigger.invoke) === null || _trigger$invoke === void 0 ? void 0 : _trigger$invoke.call(trigger, trigger);
+    if (potentialComponent && React__default.isValidElement(potentialComponent)) return potentialComponent;
+    return null;
+  };
   var TriggerComponent = React__default.useCallback(function () {
     if (!currentlyVisibleTriggerType) return null;
     var locatedTrigger = pageTriggers.find(function (trigger) {
       return trigger.invocation === currentlyVisibleTriggerType;
     });
     if (!locatedTrigger) return null;
-    var invoke = function invoke() {
-      var _locatedTrigger$invok;
-      return (_locatedTrigger$invok = locatedTrigger.invoke) === null || _locatedTrigger$invok === void 0 ? void 0 : _locatedTrigger$invok.call(locatedTrigger, locatedTrigger);
-    };
-    if (locatedTrigger.behaviour) {
-      var handler = clientHandlers.find(function (h) {
-        return h.behaviour === locatedTrigger.behaviour;
-      });
-      if (handler !== null && handler !== void 0 && handler.invoke) invoke = function invoke() {
-        var _handler$invoke;
-        return (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, locatedTrigger);
-      };
-    }
-    var component = invoke();
-    if (component && React__default.isValidElement(component)) return component || null;
-    return null;
+    var isApiControlledTrigger = ('behaviour' in locatedTrigger);
+    if (isApiControlledTrigger) return invokeAPITrigger(locatedTrigger);
+    return invokeCustomTrigger(locatedTrigger);
   }, [currentlyVisibleTriggerType, pageTriggers, handlers]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
@@ -888,6 +892,7 @@ function CollectorProvider(_ref) {
   }, [idleTriggers, log, shouldLaunchIdleTriggers]);
   var fireExitTrigger = React.useCallback(function () {
     log('CollectorProvider: attempting to fire exit trigger');
+    setCurrentlyVisibleTriggerType('INVOCATION_EXIT_INTENT');
   }, [log]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
@@ -1169,7 +1174,7 @@ var clientHandlers = [{
   }
 }, {
   id: 'youtube_v1',
-  behaviour: 'youtube',
+  behaviour: 'BEHAVIOUR_YOUTUBE',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerYoutube, {
       trigger: trigger
@@ -1177,7 +1182,7 @@ var clientHandlers = [{
   }
 }, {
   id: 'inverse_v1',
-  behaviour: 'inverse_flow',
+  behaviour: 'BEHAVIOUR_INVERSE_FLOW',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerInverse, {
       trigger: trigger
