@@ -636,20 +636,8 @@ function CollectorProvider(_ref) {
   var TriggerComponent = React__default.useCallback(function () {
     var _handler$invoke, _handler;
     if (!displayTrigger) return null;
-    var fakey = {
-      id: 'f76e1b0e-480e-4211-8209-db5cb8eb0753',
-      invocation: 'INVOCATION_EXIT_INTENT',
-      behaviour: 'BEHAVIOUR_MODAL',
-      data: {
-        backgroundURL: 'https://cdn.fingerprint-staging.host/browns-lamb-shank-800.jpg',
-        buttonText: 'Book now',
-        buttonURL: 'https://www.browns-restaurants.co.uk/tablebooking#/',
-        heading: 'Thought About Christmas?',
-        paragraph: 'Celebrate at Browns'
-      }
-    };
     var handler;
-    var trigger = [].concat(pageTriggers, [fakey]).find(function (_trigger) {
+    var trigger = pageTriggers.find(function (_trigger) {
       var potentialTrigger = _trigger.invocation === displayTrigger;
       var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
         return handler.behaviour === _trigger.behaviour;
@@ -699,7 +687,7 @@ function CollectorProvider(_ref) {
       id: 'clientTrigger',
       handler: fireExitTrigger
     });
-  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler, shouldLaunchIdleTriggers]);
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
   var resetDisplayTrigger = React.useCallback(function () {
     log('CollectorProvider: resetting displayTrigger');
     setDisplayTrigger(undefined);

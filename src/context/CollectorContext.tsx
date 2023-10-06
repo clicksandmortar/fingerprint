@@ -77,19 +77,20 @@ export function CollectorProvider({
 
   const TriggerComponent = React.useCallback(() => {
     if (!displayTrigger) return null
-    
-    const trigger = pageTriggers.find(
-      (_trigger) => {
-        const potentialTrigger = _trigger.invocation === displayTrigger
 
-        const potentialHandler = handlers?.find(
-          (handler) => handler.behaviour === _trigger.behaviour
-        )
+    let handler: Handler | undefined
 
-        handler = potentialHandler
-        return potentialTrigger && potentialHandler
-      }
-    )
+    // TODO: UNDO
+    const trigger = pageTriggers.find((_trigger) => {
+      const potentialTrigger = _trigger.invocation === displayTrigger
+
+      const potentialHandler = handlers?.find(
+        (handler) => handler.behaviour === _trigger.behaviour
+      )
+
+      handler = potentialHandler
+      return potentialTrigger && potentialHandler
+    })
 
     log('CollectorProvider: available triggers include: ', pageTriggers)
     log(
@@ -155,13 +156,7 @@ export function CollectorProvider({
       id: 'clientTrigger',
       handler: fireExitTrigger
     })
-  }, [
-    exitIntentTriggers,
-    fireExitTrigger,
-    log,
-    registerHandler,
-    shouldLaunchIdleTriggers
-  ])
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
 
   const resetDisplayTrigger = useCallback(() => {
     log('CollectorProvider: resetting displayTrigger')
