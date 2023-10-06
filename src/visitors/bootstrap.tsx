@@ -71,7 +71,7 @@ const getSessionIdAndEndTime = (
     sessionId = uuidv4()
   } else {
     const c = cookieData as string
-    const [sessId] = c.split('|')
+    const [, sessId] = c.split('|')
     sessionId = sessId
   }
 
