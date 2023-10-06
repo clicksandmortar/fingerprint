@@ -1,6 +1,7 @@
 import { Visitor } from './types'
 import { validVisitorId } from './utils'
 import { getCookie, setCookie } from '../utils/cookies'
+import { hostname } from '../utils/http'
 
 export const bootstrapVisitor = ({
   setVisitor
@@ -13,7 +14,7 @@ export const bootstrapVisitor = ({
 
   if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id') as string)) {
     // make a call to the /collector endpoint to get a new visitor id
-    fetch('https://af.eu.ngrok.io/collector/', {
+    fetch(hostname + '/collector/', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
