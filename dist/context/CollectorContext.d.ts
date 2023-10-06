@@ -5,7 +5,7 @@ export declare type CollectorProviderProps = {
     children?: React.ReactNode;
     handlers?: Handler[];
 };
-export declare const CollectorProvider: ({ children, handlers }: CollectorProviderProps) => React.JSX.Element;
+export declare function CollectorProvider({ children, handlers }: CollectorProviderProps): React.JSX.Element;
 export declare type CollectorContextInterface = {
     resetDisplayTrigger: () => void;
     setTrigger: (trigger: Trigger) => void;
