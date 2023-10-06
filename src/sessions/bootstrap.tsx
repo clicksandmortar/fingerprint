@@ -1,6 +1,5 @@
 import { Session } from './types'
 import { getCookie, setCookie } from '../utils/cookies'
-import { v4 as uuidv4 } from 'uuid'
 
 export const bootstrapSession = ({
   appId,
