@@ -77,26 +77,8 @@ export function CollectorProvider({
 
   const TriggerComponent = React.useCallback(() => {
     if (!displayTrigger) return null
-
-    // TODO: UNDO
-    const fakey: Trigger = {
-      id: 'f76e1b0e-480e-4211-8209-db5cb8eb0753',
-      invocation: 'INVOCATION_EXIT_INTENT',
-      behaviour: 'BEHAVIOUR_MODAL',
-      data: {
-        backgroundURL:
-          'https://cdn.fingerprint-staging.host/browns-lamb-shank-800.jpg',
-        buttonText: 'Book now',
-        buttonURL: 'https://www.browns-restaurants.co.uk/tablebooking#/',
-        heading: 'Thought About Christmas?',
-        paragraph: 'Celebrate at Browns'
-      }
-    }
-    let handler: Handler | undefined
-
-    // TODO: UNDO
-    const trigger = [...pageTriggers, fakey].find(
-      // const trigger = pageTriggers.find(
+    
+    const trigger = pageTriggers.find(
       (_trigger) => {
         const potentialTrigger = _trigger.invocation === displayTrigger
 
