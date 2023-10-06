@@ -1,4 +1,4 @@
-import unique from 'lodash/uniqBy'
+import unique from 'lodash/uniqby'
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
