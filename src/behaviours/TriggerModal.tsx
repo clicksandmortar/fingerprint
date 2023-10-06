@@ -74,7 +74,7 @@ const Modal = ({ trigger }: Props) => {
       triggerId: trigger.id,
       triggerType: trigger.invocation
     })
-  }, [])
+  }, [open])
 
   useEffect(() => {
     const css =
