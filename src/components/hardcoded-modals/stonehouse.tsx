@@ -21,17 +21,18 @@ const StonehouseModal = ({
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
   useEffect(() => {
-    // just a formatter
+    // @todo: note that because of the font being screwed up a bit on all of these host urls,
+    // I had to apply some negative margins to make it look passable. Apologies if you have to maintain it.
+    // The other alternatives were either CORS-blocked, or would require a diff packager (in case of local file)
     const cssToApply = `
       @font-face{
         font-family: "Gotham Bold";
-        src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix")format("embedded-opentype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff")format("woff"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2")format("woff2"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf")format("truetype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold")format("svg");
+        src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix") format("embedded-opentype"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff") format("woff"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2") format("woff2"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf") format("truetype"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold") format("svg");
             font-display: auto;
-            line-height: 1rem;
             font-style: normal;
             font-weight: 500;
             font-stretch: normal;
@@ -43,7 +44,7 @@ const StonehouseModal = ({
         --secondary: #e0aa00;
         --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
       }
-      p, h1, h2, h3, h4, h5, h6 {
+      h1, h2, h3, h4, h5, h6, p, a, span {
         line-height: 1.2;
       }
 
@@ -58,7 +59,7 @@ const StonehouseModal = ({
         display: flex;
         justify-content: center;
         align-items: center;
-        font-family: 'Gotham-bold';
+        font-family: 'Gotham Bold';
         font-weight: 500;
         font-style: normal;
       }
@@ -112,6 +113,7 @@ const StonehouseModal = ({
         max-width: 400px;
         margin-left: auto;
         margin-right: auto;
+        margin-bottom: -10px;
       }
 
       .${prependClass('text-container')} {
@@ -137,7 +139,7 @@ const StonehouseModal = ({
         font-family: 'Gotham Bold';
         cursor: pointer;
         background-color: var(--secondary);
-        padding: 0.75rem 1rem;
+        padding: 0.75rem 1rem 0 1rem;
         border-radius: 2px;
         display: block;
         font-size: 1.3rem;
@@ -230,7 +232,7 @@ const StonehouseModal = ({
           className={`${prependClass('gotham-bold')} ${prependClass(
             'text-center'
           )} ${prependClass('text-shadow')}`}
-          style={{ marginLeft: 15 }}
+          style={{ marginLeft: 15, marginBottom: -10 }}
         >
           10*
         </h1>
