@@ -118,12 +118,6 @@ export function CollectorProvider({
       return null
     }
 
-    if (!handler.invoke) {
-      log('No invoke method found for handler', handler)
-
-      return null
-    }
-
     const potentialComponent = handler.invoke?.(trigger)
 
     if (potentialComponent && React.isValidElement(potentialComponent))
