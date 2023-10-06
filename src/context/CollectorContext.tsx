@@ -1,4 +1,4 @@
-import unique from 'lodash.uniqby'
+import unique from 'lodash/uniqBy'
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
@@ -7,6 +7,7 @@ import { ClientTrigger, clientHandlers } from '../client/handler'
 import { APITrigger, CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
+import { isTriggerAnApiTrigger } from '../utils/typeHelpers'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
@@ -120,7 +121,7 @@ export function CollectorProvider({
 
     // if the trigger is passed from the API, it will have the `behaviour`
     // in which case, we need to get the invoker from the clientHandlers map.
-    const isApiControlledTrigger = 'behaviour' in locatedTrigger
+    const isApiControlledTrigger = isTriggerAnApiTrigger(locatedTrigger)
 
     // in both cases, invoke can be either be a  void function, or return a component.
     // if its a component, it should be returned here to be mounted in the JSX.

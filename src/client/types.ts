@@ -41,7 +41,7 @@ export type CollectorResponse = {
   intently: boolean
 }
 
-export type MutualTriggerProps = {
+type MutualTriggerProps = {
   id?: string
   invocation?:
     | 'INVOCATION_UNSPECIFIED'
