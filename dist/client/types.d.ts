@@ -36,12 +36,14 @@ export declare type CollectorResponse = {
     pageTriggers: Trigger[];
     intently: boolean;
 };
-export declare type MutualTriggerProps = {
+export declare type Invocation = 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
+declare type MutualTriggerProps = {
     id?: string;
-    invocation?: 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
+    invocation?: Invocation;
     data?: {
         [key: string]: string;
     };
+    behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW';
     brand?: any;
 };
 export declare type Handler = MutualTriggerProps & {
@@ -56,3 +58,4 @@ export declare type PageView = {
     referrer: Referrer;
     viewedAt: Date;
 };
+export {};

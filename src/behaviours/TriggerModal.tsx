@@ -43,7 +43,7 @@ const Modal = ({ trigger }: Props) => {
       triggerType: trigger.invocation,
       brand
     })
-  }, [])
+  }, [open])
 
   if (!open) {
     return null

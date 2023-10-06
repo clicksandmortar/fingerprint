@@ -52,6 +52,7 @@ type MutualTriggerProps = {
   data?: {
     [key: string]: string
   }
+  behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW'
   brand?: any
 }
 
