@@ -118,12 +118,13 @@ export function CollectorProvider({
 
     if (!locatedTrigger) return null
 
-    // by default, invoke the behaviour from the trigger
-
-    // if the trigger is passed from the API, it will have the behaviour instead.
+    // if the trigger is passed from the API, it will have the `behaviour`
     // in which case, we need to get the invoker from the clientHandlers map.
     const isApiControlledTrigger = 'behaviour' in locatedTrigger
 
+    // in both cases, invoke can be either be a  void function, or return a component.
+    // if its a component, it should be returned here to be mounted in the JSX.
+    // else - return null;
     if (isApiControlledTrigger) return invokeAPITrigger(locatedTrigger)
 
     return invokeCustomTrigger(locatedTrigger)

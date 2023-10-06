@@ -1020,6 +1020,7 @@ var useCollector = function useCollector() {
 var getBrand = function getBrand() {
   if (typeof window === 'undefined') return null;
   if (window.location.host === 'localhost:3000') return 'Stonehouse';
+  if (window.location.host === 'www.stonehouserestaurants.co.uk') return 'Stonehouse';
   if (window.location.host === 'www.browns-restaurants.co.uk') return 'Browns';
   return null;
 };
