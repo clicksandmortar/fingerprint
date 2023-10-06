@@ -10,6 +10,7 @@ export function getEnvVars(): EnvVars {
   if (typeof window === 'undefined') {
     isDev = true
   } else {
+    if (window?.location?.host?.includes('fingerprint-')) isDev = true
     if (window?.location?.host?.includes('localhost')) isDev = true
     if (window?.location?.host === `stage65-az.harvester.co.uk`) isDev = true
   }
