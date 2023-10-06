@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../client/types'
 import { useLogging } from '../context/LoggingContext'
+import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { useCollector } from '../hooks/useCollector'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -35,7 +36,8 @@ const CurlyText = ({ randomHash, text }: { randomHash: string; text: any }) => {
 
 const Modal = ({ trigger }: Props) => {
   const { log, error } = useLogging()
-  const { resetDisplayTrigger, trackEvent } = useCollector()
+  const { resetDisplayTrigger } = useCollector()
+  const { trackEvent } = useMixpanel()
   const { appId } = useFingerprint()
   const { visitor } = useVisitor()
   const [open, setOpen] = useState(true)

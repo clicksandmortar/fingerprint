@@ -4,12 +4,12 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
 import { validate, version, v4 } from 'uuid';
+import mixpanel from 'mixpanel-browser';
 import Cookies from 'js-cookie';
 import uniqueBy from 'lodash.uniqby';
 import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
-import mixpanel from 'mixpanel-browser';
 
 const baseUrl = 'https://bookings-bff.starship-staging.com';
 const makeFullUrl = (resource, params = {}) => {
@@ -263,6 +263,29 @@ const useLogging = () => {
   return useContext(LoggingContext);
 };
 
+const useFingerprint = () => {
+  return useContext(FingerprintContext);
+};
+
+function getEnvVars() {
+  let isDev = false;
+  if (typeof window === 'undefined') {
+    isDev = true;
+  } else {
+    var _window, _window$location, _window$location$host, _window2, _window2$location;
+    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
+    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === `stage65-az.harvester.co.uk`) isDev = true;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
+
 const setCookie = (name, value, expires) => {
   return Cookies.set(name, value, {
     expires: expires || 365,
@@ -334,10 +357,6 @@ const bootstrapVisitor = ({
   }
 };
 
-const useFingerprint = () => {
-  return useContext(FingerprintContext);
-};
-
 const VisitorProvider = ({
   children
 }) => {
@@ -383,24 +402,51 @@ const useVisitor = () => {
   return useContext(VisitorContext);
 };
 
-function getEnvVars() {
-  let isDev = false;
-  if (typeof window === 'undefined') {
-    isDev = true;
-  } else {
-    var _window, _window$location, _window$location$host, _window2, _window2$location;
-    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
-    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === `stage65-az.harvester.co.uk`) isDev = true;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
+const init = cfg => {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+const trackEvent = (event, props, callback) => {
+  return mixpanel.track(event, props, callback);
+};
+const MixpanelProvider = ({
+  children
+}) => {
+  const {
+    appId
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  useEffect(() => {
+    if (!appId || !visitor.id) {
+      return;
+    }
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  return React__default.createElement(MixpanelContext.Provider, {
+    value: {
+      trackEvent
+    }
+  }, children);
+};
+const MixpanelContext = createContext({
+  trackEvent: () => {}
+});
+const useMixpanel = () => {
+  return useContext(MixpanelContext);
+};
 
 const headers = {
   'Content-Type': 'application/json'
@@ -459,52 +505,6 @@ const useCollectorMutation = () => {
   }, {
     onSuccess: () => {}
   });
-};
-
-const init = cfg => {
-  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
-};
-const trackEvent = (event, props, callback) => {
-  return mixpanel.track(event, props, callback);
-};
-const MixpanelProvider = ({
-  children
-}) => {
-  const {
-    appId
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    log
-  } = useLogging();
-  useEffect(() => {
-    if (!appId || !visitor.id) {
-      return;
-    }
-    log('MixpanelProvider: booting');
-    init({
-      debug: true
-    });
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
-    mixpanel.identify(visitor.id);
-  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
-  return React__default.createElement(MixpanelContext.Provider, {
-    value: {
-      trackEvent
-    }
-  }, children);
-};
-const MixpanelContext = createContext({
-  trackEvent: () => {}
-});
-const useMixpanel = () => {
-  return useContext(MixpanelContext);
 };
 
 const idleStatusAfterMs = 5 * 1000;
@@ -751,9 +751,11 @@ const Modal = ({
     error
   } = useLogging();
   const {
-    resetDisplayTrigger,
-    trackEvent
+    resetDisplayTrigger
   } = useCollector();
+  const {
+    trackEvent
+  } = useMixpanel();
   const {
     appId
   } = useFingerprint();
