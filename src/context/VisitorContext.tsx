@@ -31,7 +31,9 @@ export const VisitorProvider = ({ children }: VisitorProviderProps) => {
       })
 
       await bootstrapVisitor({
-        setVisitor
+        setVisitor,
+        session,
+        setSession
       })
     }
 
