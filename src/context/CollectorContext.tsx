@@ -153,10 +153,11 @@ export function CollectorProvider({
 
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return
+    if (!shouldLaunchIdleTriggers) return
 
     log('CollectorProvider: attempting to fire idle trigger')
     setDisplayTrigger('INVOCATION_IDLE_TIME')
-  }, [idleTriggers, log])
+  }, [idleTriggers, log, shouldLaunchIdleTriggers])
 
   const fireExitTrigger = useCallback(() => {
     log('CollectorProvider: attempting to fire exit trigger')
@@ -165,7 +166,6 @@ export function CollectorProvider({
 
   useEffect(() => {
     if (!exitIntentTriggers) return
-    if (!shouldLaunchIdleTriggers) return
 
     log('CollectorProvider: attempting to register exit trigger')
 
