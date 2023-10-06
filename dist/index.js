@@ -7,12 +7,12 @@ var reactErrorBoundary = require('react-error-boundary');
 var reactHookForm = require('react-hook-form');
 var ReactDOM = _interopDefault(require('react-dom'));
 var uuid = require('uuid');
+var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
-var mixpanel = _interopDefault(require('mixpanel-browser'));
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -306,6 +306,29 @@ var useLogging = function useLogging() {
   return React.useContext(LoggingContext);
 };
 
+var useFingerprint = function useFingerprint() {
+  return React.useContext(FingerprintContext);
+};
+
+function getEnvVars() {
+  var isDev = false;
+  if (typeof window === 'undefined') {
+    isDev = true;
+  } else {
+    var _window, _window$location, _window$location$host, _window2, _window2$location;
+    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
+    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === "stage65-az.harvester.co.uk") isDev = true;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
+
 var setCookie = function setCookie(name, value, expires) {
   return Cookies.set(name, value, {
     expires: expires || 365,
@@ -378,10 +401,6 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
   }
 };
 
-var useFingerprint = function useFingerprint() {
-  return React.useContext(FingerprintContext);
-};
-
 var VisitorProvider = function VisitorProvider(_ref) {
   var children = _ref.children;
   var _useFingerprint = useFingerprint(),
@@ -433,24 +452,47 @@ var useVisitor = function useVisitor() {
   return React.useContext(VisitorContext);
 };
 
-function getEnvVars() {
-  var isDev = false;
-  if (typeof window === 'undefined') {
-    isDev = true;
-  } else {
-    var _window, _window$location, _window$location$host, _window2, _window2$location;
-    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
-    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === "stage65-az.harvester.co.uk") isDev = true;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
+var init = function init(cfg) {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+var trackEvent = function trackEvent(event, props, callback) {
+  return mixpanel.track(event, props, callback);
+};
+var MixpanelProvider = function MixpanelProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  React.useEffect(function () {
+    if (!appId || !visitor.id) {
+      return;
+    }
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  return React__default.createElement(MixpanelContext.Provider, {
+    value: {
+      trackEvent: trackEvent
+    }
+  }, children);
+};
+var MixpanelContext = React.createContext({
+  trackEvent: function trackEvent() {}
+});
+var useMixpanel = function useMixpanel() {
+  return React.useContext(MixpanelContext);
+};
 
 var headers = {
   'Content-Type': 'application/json'
@@ -528,48 +570,6 @@ var useCollectorMutation = function useCollectorMutation() {
   }, {
     onSuccess: function onSuccess() {}
   });
-};
-
-var init = function init(cfg) {
-  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
-};
-var trackEvent = function trackEvent(event, props, callback) {
-  return mixpanel.track(event, props, callback);
-};
-var MixpanelProvider = function MixpanelProvider(_ref) {
-  var children = _ref.children;
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  React.useEffect(function () {
-    if (!appId || !visitor.id) {
-      return;
-    }
-    log('MixpanelProvider: booting');
-    init({
-      debug: true
-    });
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
-    mixpanel.identify(visitor.id);
-  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
-  return React__default.createElement(MixpanelContext.Provider, {
-    value: {
-      trackEvent: trackEvent
-    }
-  }, children);
-};
-var MixpanelContext = React.createContext({
-  trackEvent: function trackEvent() {}
-});
-var useMixpanel = function useMixpanel() {
-  return React.useContext(MixpanelContext);
 };
 
 var idleStatusAfterMs = 5 * 1000;
@@ -828,8 +828,9 @@ var Modal = function Modal(_ref2) {
     log = _useLogging.log,
     error = _useLogging.error;
   var _useCollector = useCollector(),
-    resetDisplayTrigger = _useCollector.resetDisplayTrigger,
-    trackEvent = _useCollector.trackEvent;
+    resetDisplayTrigger = _useCollector.resetDisplayTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
   var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
   var _useVisitor = useVisitor(),

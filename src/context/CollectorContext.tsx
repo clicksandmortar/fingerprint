@@ -267,7 +267,7 @@ export function CollectorProvider({
     handlers,
     initialDelay,
     log,
-    trackEvent,
+    trackEvent, // to figure out later, do we need this? probs can be removed
     visitor
   ])
 
