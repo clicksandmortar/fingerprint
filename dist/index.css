@@ -1,0 +1,176 @@
+@font-face {
+  font-family: "Gotham Bold";
+  src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix") format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff") format("woff"),
+    url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2") format("woff2"),
+    url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf") format("truetype"),
+    url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold") format("svg");
+  font-display: auto;
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: normal;
+}
+
+
+:root {
+  --primary: white;
+  --secondary: #e0aa00;
+  --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+span {
+  line-height: 1.2;
+}
+
+._stonehouse-module__overlay__1RGzF {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Gotham Bold';
+  font-weight: 500;
+  font-style: normal;
+}
+
+._stonehouse-module__modal__2ocVQ {
+  width: 80%;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--text-shadow);
+}
+
+._stonehouse-module__gotham-bold__1PCnD {
+  font-family: 'Gotham Bold';
+}
+
+._stonehouse-module__text-center__2tUn7 {
+  text-align: center;
+}
+
+@media screen and (min-width: 768px) {
+  ._stonehouse-module__modal__2ocVQ {
+    max-width: 600px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  ._stonehouse-module__modal__2ocVQ {
+    width: 95vw;
+    max-width: 600px;
+  }
+}
+
+._stonehouse-module__main-text__-irGw {
+  flex: 1;
+  font-family: 'Gotham Bold';
+  font-weight: 500;
+  font-size: 3rem;
+  font-style: normal;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 2pt;
+  fill: var(--secondary);
+  text-shadow: var(--text-shadow);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: -10px;
+}
+
+._stonehouse-module__text-container__1u1cZ {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  text-shadow: var(--text-shadow);
+}
+
+._stonehouse-module__sub-text__3G1Jh {
+  margin: auto;
+  font-weight: 600;
+  font-family: 'Gotham Bold';
+  font-size: 0.6rem;
+  letter-spacing: 2pt;
+
+  display: inline-block;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+._stonehouse-module__cta__2rnyJ {
+  font-family: 'Gotham Bold';
+  cursor: pointer;
+  background-color: var(--secondary);
+  padding: 0.75rem 1rem 0 1rem;
+  border-radius: 2px;
+  display: block;
+  font-size: 1.3rem;
+  color: var(--primary);
+  text-align: center;
+  text-transform: uppercase;
+  max-width: 400px;
+  margin: 0 auto;
+  text-decoration: none;
+  box-shadow: 0.3rem 0.3rem white;
+}
+
+._stonehouse-module__cta__2rnyJ:hover {
+  transition: all 0.3s;
+  filter: brightness(0.95);
+}
+
+._stonehouse-module__close-button__28M40 {
+  border-radius: 100%;
+  background-color: white;
+  width: 2rem;
+  border: none;
+  height: 2rem;
+  position: absolute;
+  margin: 10px;
+  top: 0px;
+  right: 0px;
+  color: black;
+  font-size: 1.2rem;
+  font-weight: 300;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+}
+
+._stonehouse-module__image-darken__1_Dey {
+  background: rgba(0, 0, 0, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+}
+
+._stonehouse-module__text-shadow__MvAVM {
+  text-shadow: var(--text-shadow);
+}
+
+._stonehouse-module__box-shadow__3PrAp {
+  box-shadow: var(--text-shadow);
+}

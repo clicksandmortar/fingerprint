@@ -21,6 +21,10 @@ const Modal = ({ trigger }: Props) => {
   const { visitor } = useVisitor()
   const [open, setOpen] = useState(true)
 
+  const brand = React.useMemo(() => {
+    return getBrand()
+  }, [])
+
   useEffect(() => {
     if (!open) return
 
@@ -36,15 +40,11 @@ const Modal = ({ trigger }: Props) => {
 
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
-      triggerType: trigger.invocation
+      triggerType: trigger.invocation,
+      brand
     })
   }, [])
 
-  const brand = React.useMemo(() => {
-    return getBrand()
-  }, [])
-
-  console.log({ brand })
   if (!open) {
     return null
   }

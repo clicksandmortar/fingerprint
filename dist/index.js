@@ -4161,6 +4161,9 @@ var Modal = function Modal(_ref) {
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
+  var brand = React__default.useMemo(function () {
+    return getBrand();
+  }, []);
   React.useEffect(function () {
     if (!open) return;
     try {
@@ -4172,15 +4175,10 @@ var Modal = function Modal(_ref) {
     }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
-      triggerType: trigger.invocation
+      triggerType: trigger.invocation,
+      brand: brand
     });
   }, []);
-  var brand = React__default.useMemo(function () {
-    return getBrand();
-  }, []);
-  console.log({
-    brand: brand
-  });
   if (!open) {
     return null;
   }
