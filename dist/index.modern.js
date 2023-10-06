@@ -1,5 +1,5 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useState, createElement, useMemo, useEffect, createContext, useContext, useCallback } from 'react';
+import React__default, { createContext, useContext, useEffect, useState, createElement, useMemo, useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
@@ -9,6 +9,53 @@ import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 import mixpanel from 'mixpanel-browser';
+
+const LoggingProvider = ({
+  debug,
+  children
+}) => {
+  const log = (...message) => {
+    if (debug) {
+      console.log(...message);
+    }
+  };
+  const warn = (...message) => {
+    if (debug) {
+      console.warn(...message);
+    }
+  };
+  const error = (...message) => {
+    if (debug) {
+      console.error(...message);
+    }
+  };
+  const info = (...message) => {
+    if (debug) {
+      console.info(...message);
+    }
+  };
+  useEffect(() => {
+    if (!debug) return;
+    log('LoggingProvider: In Debug Mode');
+  });
+  return React__default.createElement(LoggingContext.Provider, {
+    value: {
+      log,
+      warn,
+      error,
+      info
+    }
+  }, children);
+};
+const LoggingContext = createContext({
+  log: () => {},
+  warn: () => {},
+  error: () => {},
+  info: () => {}
+});
+const useLogging = () => {
+  return useContext(LoggingContext);
+};
 
 const baseUrl = 'https://bookings-bff.starship-staging.com';
 const makeFullUrl = (resource, params = {}) => {
@@ -50,6 +97,9 @@ const TriggerInverse = ({}) => {
   const form = {};
   const location = {};
   const [open, setOpen] = useState(true);
+  const {
+    log
+  } = useLogging();
   if (!open) {
     return null;
   }
@@ -108,7 +158,7 @@ const TriggerInverse = ({}) => {
             item_name: landingPage === null || landingPage === void 0 ? void 0 : landingPage.name,
             affiliation: 'Booking Flow'
           };
-          console.log(eventData);
+          log(eventData);
         });
       }
     } catch (e) {}
@@ -752,53 +802,6 @@ const StonehouseModal = ({
     className: prependClass('cta'),
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-
-const LoggingProvider = ({
-  debug,
-  children
-}) => {
-  const log = (...message) => {
-    if (debug) {
-      console.log(...message);
-    }
-  };
-  const warn = (...message) => {
-    if (debug) {
-      console.warn(...message);
-    }
-  };
-  const error = (...message) => {
-    if (debug) {
-      console.error(...message);
-    }
-  };
-  const info = (...message) => {
-    if (debug) {
-      console.info(...message);
-    }
-  };
-  useEffect(() => {
-    if (!debug) return;
-    log('LoggingProvider: In Debug Mode');
-  });
-  return React__default.createElement(LoggingContext.Provider, {
-    value: {
-      log,
-      warn,
-      error,
-      info
-    }
-  }, children);
-};
-const LoggingContext = createContext({
-  log: () => {},
-  warn: () => {},
-  error: () => {},
-  info: () => {}
-});
-const useLogging = () => {
-  return useContext(LoggingContext);
 };
 
 const setCookie = (name, value, expires) => {
@@ -4569,12 +4572,15 @@ const clientHandlers = [{
 const queryClient = new QueryClient();
 const useConsentCheck = (consent, consentCallback) => {
   const [consentGiven, setConsentGiven] = useState(consent);
+  const {
+    log
+  } = useLogging();
   useEffect(() => {
     if (consent) {
       setConsentGiven(consent);
       return;
     }
-    console.log('Fingerprint Widget Consent: ', consent);
+    log('Fingerprint Widget Consent: ', consent);
     if (!consentCallback) return;
     const consentGivenViaCallback = consentCallback();
     const interval = setInterval(() => {
@@ -4622,7 +4628,6 @@ const FingerprintProvider = ({
   if (!consentGiven) {
     return children;
   }
-  console.log('SHOULD LOAD YAY', _idleTriggers, _exitIntentTriggers);
   return React__default.createElement(LoggingProvider, {
     debug: debug
   }, React__default.createElement(QueryClientProvider, {

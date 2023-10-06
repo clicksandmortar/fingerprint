@@ -31,6 +31,56 @@ function _objectDestructuringEmpty(obj) {
   if (obj == null) throw new TypeError("Cannot destructure " + obj);
 }
 
+var LoggingProvider = function LoggingProvider(_ref) {
+  var debug = _ref.debug,
+    children = _ref.children;
+  var log = function log() {
+    if (debug) {
+      var _console;
+      (_console = console).log.apply(_console, arguments);
+    }
+  };
+  var warn = function warn() {
+    if (debug) {
+      var _console2;
+      (_console2 = console).warn.apply(_console2, arguments);
+    }
+  };
+  var error = function error() {
+    if (debug) {
+      var _console3;
+      (_console3 = console).error.apply(_console3, arguments);
+    }
+  };
+  var info = function info() {
+    if (debug) {
+      var _console4;
+      (_console4 = console).info.apply(_console4, arguments);
+    }
+  };
+  React.useEffect(function () {
+    if (!debug) return;
+    log('LoggingProvider: In Debug Mode');
+  });
+  return React__default.createElement(LoggingContext.Provider, {
+    value: {
+      log: log,
+      warn: warn,
+      error: error,
+      info: info
+    }
+  }, children);
+};
+var LoggingContext = React.createContext({
+  log: function log() {},
+  warn: function warn() {},
+  error: function error() {},
+  info: function info() {}
+});
+var useLogging = function useLogging() {
+  return React.useContext(LoggingContext);
+};
+
 var baseUrl = 'https://bookings-bff.starship-staging.com';
 var makeFullUrl = function makeFullUrl(resource, params) {
   if (params === void 0) {
@@ -81,7 +131,7 @@ var TriggerInverse = function TriggerInverse(_ref3) {
               item_name: landingPage === null || landingPage === void 0 ? void 0 : landingPage.name,
               affiliation: 'Booking Flow'
             };
-            console.log(eventData);
+            log(eventData);
           });
         }
       } catch (e) {}
@@ -130,6 +180,8 @@ var TriggerInverse = function TriggerInverse(_ref3) {
   var _React$useState = React.useState(true),
     open = _React$useState[0],
     setOpen = _React$useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
   if (!open) {
     return null;
   }
@@ -448,56 +500,6 @@ var StonehouseModal = function StonehouseModal(_ref) {
     className: prependClass('cta'),
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-
-var LoggingProvider = function LoggingProvider(_ref) {
-  var debug = _ref.debug,
-    children = _ref.children;
-  var log = function log() {
-    if (debug) {
-      var _console;
-      (_console = console).log.apply(_console, arguments);
-    }
-  };
-  var warn = function warn() {
-    if (debug) {
-      var _console2;
-      (_console2 = console).warn.apply(_console2, arguments);
-    }
-  };
-  var error = function error() {
-    if (debug) {
-      var _console3;
-      (_console3 = console).error.apply(_console3, arguments);
-    }
-  };
-  var info = function info() {
-    if (debug) {
-      var _console4;
-      (_console4 = console).info.apply(_console4, arguments);
-    }
-  };
-  React.useEffect(function () {
-    if (!debug) return;
-    log('LoggingProvider: In Debug Mode');
-  });
-  return React__default.createElement(LoggingContext.Provider, {
-    value: {
-      log: log,
-      warn: warn,
-      error: error,
-      info: info
-    }
-  }, children);
-};
-var LoggingContext = React.createContext({
-  log: function log() {},
-  warn: function warn() {},
-  error: function error() {},
-  info: function info() {}
-});
-var useLogging = function useLogging() {
-  return React.useContext(LoggingContext);
 };
 
 var setCookie = function setCookie(name, value, expires) {
@@ -4315,12 +4317,14 @@ var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   var _useState = React.useState(consent),
     consentGiven = _useState[0],
     setConsentGiven = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
   React.useEffect(function () {
     if (consent) {
       setConsentGiven(consent);
       return;
     }
-    console.log('Fingerprint Widget Consent: ', consent);
+    log('Fingerprint Widget Consent: ', consent);
     if (!consentCallback) return;
     var consentGivenViaCallback = consentCallback();
     var interval = setInterval(function () {
@@ -4382,7 +4386,6 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
   if (!consentGiven) {
     return children;
   }
-  console.log('SHOULD LOAD YAY', idleTriggers, exitIntentTriggers);
   return React__default.createElement(LoggingProvider, {
     debug: debug
   }, React__default.createElement(reactQuery.QueryClientProvider, {

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
+import { useLogging } from '../context/LoggingContext'
 
 const baseUrl = 'https://bookings-bff.starship-staging.com'
 
@@ -57,6 +58,8 @@ const TriggerInverse = ({}: any) => {
   const form: any = {}
   const location: any = {}
   const [open, setOpen] = React.useState(true)
+
+  const { log } = useLogging()
 
   if (!open) {
     return null
@@ -125,7 +128,7 @@ const TriggerInverse = ({}: any) => {
             item_name: landingPage?.name,
             affiliation: 'Booking Flow'
           }
-          console.log(eventData)
+          log(eventData)
           // navigate(`/${landingPage?.slug}`)
         })
       }

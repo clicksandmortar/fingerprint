@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { clientHandlers } from '../client/handler'
 import { PageView, Trigger } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
-import { LoggingProvider } from './LoggingContext'
+import { LoggingProvider, useLogging } from './LoggingContext'
 import { MixpanelProvider } from './MixpanelContext'
 import { VisitorProvider } from './VisitorContext'
 
@@ -13,7 +13,7 @@ const queryClient = new QueryClient()
 /** * @todo - extract */
 const useConsentCheck = (consent: boolean, consentCallback: any) => {
   const [consentGiven, setConsentGiven] = useState(consent)
-
+  const { log } = useLogging()
   /**
    * Effect checks for user consent either via direct variable or a callback.
    * in any case, once one of the conditions is met, the single state gets set to true, allowing the logic to flow.
@@ -25,7 +25,7 @@ const useConsentCheck = (consent: boolean, consentCallback: any) => {
       return
     }
 
-    console.log('Fingerprint Widget Consent: ', consent)
+    log('Fingerprint Widget Consent: ', consent)
 
     if (!consentCallback) return
     const consentGivenViaCallback = consentCallback()
@@ -117,7 +117,6 @@ export const FingerprintProvider = ({
     return children
   }
 
-  console.log('SHOULD LOAD YAY', idleTriggers, exitIntentTriggers)
   return (
     <LoggingProvider debug={debug}>
       <QueryClientProvider client={queryClient}>
