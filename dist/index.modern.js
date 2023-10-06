@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
 import { validate, version, v4 } from 'uuid';
 import Cookies from 'js-cookie';
-import unique from 'lodash/uniqby';
+import uniqueBy from 'lodash.uniqby';
 import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
@@ -610,7 +610,7 @@ function CollectorProvider(_ref) {
     setIntently = _useState4[1];
   var addPageTriggers = function addPageTriggers(triggers) {
     setPageTriggers(function (prev) {
-      return unique([].concat(prev, triggers), 'id');
+      return uniqueBy([].concat(prev, triggers), 'id');
     });
   };
   log('CollectorProvider: user is on mobile?', isMobile);

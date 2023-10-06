@@ -1,4 +1,4 @@
-import unique from 'lodash/uniqby'
+import uniqueBy from 'lodash.uniqby'
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
@@ -43,7 +43,7 @@ export function CollectorProvider({
   const [intently, setIntently] = useState<boolean>(false)
 
   const addPageTriggers = (triggers: Trigger[]) => {
-    setPageTriggers((prev) => unique<Trigger>([...prev, ...triggers], 'id'))
+    setPageTriggers((prev) => uniqueBy<Trigger>([...prev, ...triggers], 'id'))
   }
 
   log('CollectorProvider: user is on mobile?', isMobile)

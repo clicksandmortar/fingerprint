@@ -8,7 +8,7 @@ var reactHookForm = require('react-hook-form');
 var ReactDOM = _interopDefault(require('react-dom'));
 var uuid = require('uuid');
 var Cookies = _interopDefault(require('js-cookie'));
-var unique = _interopDefault(require('lodash/uniqby'));
+var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
@@ -613,7 +613,7 @@ function CollectorProvider(_ref) {
     setIntently = _useState4[1];
   var addPageTriggers = function addPageTriggers(triggers) {
     setPageTriggers(function (prev) {
-      return unique([].concat(prev, triggers), 'id');
+      return uniqueBy([].concat(prev, triggers), 'id');
     });
   };
   log('CollectorProvider: user is on mobile?', reactDeviceDetect.isMobile);
