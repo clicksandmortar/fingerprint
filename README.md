@@ -112,6 +112,7 @@ Additionally, an appropriate minimum delay time between triggers should be confi
 
 ### Handlers
 
+
 When a behaviour is triggered, the Fingerprint will invoke a handler that has been registered for that behaviour.
 
 A behaviour handler is a function that can either:
@@ -120,6 +121,22 @@ A behaviour handler is a function that can either:
 - invokes change within the current component, for instance opening a modal or changing the state of a component
 
 When a behaviour handler is registered, it will be invoked whenever the behaviour is triggered.
+
+#### Implementation
+
+From a functionality perspective Triggers and Handlers are the same, but use different methods of invoking a behaviour.
+
+an `APITrigger` is a behaviour controlled by the backend. When we receive a supported string for that (e.g. `'BEHAVIOUR_MODAL'`), we need to search through `clientTriggers` to find one that matches, then invoke the attached `invoke` method.
+
+a `Handler` is custom behaviour handled by the DiFi-provider wrapped app, and is controlled directly via `invoke`
+
+TLDR in pseudo:
+```ts
+type APITrigger = { ...mutual,  behaviour: 'Supported behaviour' }
+type Handler = { ...mutual, behaviour: () => Component | void }
+
+type Trigger = APITrigger | Handler;
+```
 
 ### Cookie Consent
 
