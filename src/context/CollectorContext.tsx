@@ -272,11 +272,9 @@ export function CollectorProvider({
       const inputs = document.querySelectorAll(configuredSelector)
 
       inputs.forEach(function (element) {
-        console.log(element.textContent, configuredSearch)
         if (element.textContent === configuredSearch) {
           // inform the UI that the element is found
-          // trackEvent('booking_complete', {})
-          alert('bob')
+          trackEvent('booking_complete', {})
 
           // unregister the watcher when the element is found
           clearInterval(intervalId)
