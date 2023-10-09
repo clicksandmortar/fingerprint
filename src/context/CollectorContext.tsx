@@ -269,10 +269,10 @@ export function CollectorProvider({
   ) => {
     console.log('registering watcher')
     const intervalId = setInterval(() => {
-      console.log('registered')
       const inputs = document.querySelectorAll(configuredSelector)
 
       inputs.forEach(function (element) {
+        console.log(element.textContent, configuredSearch)
         if (element.textContent === configuredSearch) {
           // inform the UI that the element is found
           // trackEvent('booking_complete', {})
@@ -288,7 +288,6 @@ export function CollectorProvider({
   }
 
   useEffect(() => {
-    console.log('in the collector useeffect')
     const intervalIds = [
       registerWatcher(
         '.spbooking--confirmation-box h2',
