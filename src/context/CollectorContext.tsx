@@ -271,6 +271,42 @@ export function CollectorProvider({
     visitor
   ])
 
+  const registerWatcher = (
+    configuredSelector: string,
+    configuredSearch: string
+  ) => {
+    console.log('registering watcher')
+    const intervalId = setInterval(() => {
+      const inputs = document.querySelectorAll(configuredSelector)
+
+      inputs.forEach(function (element) {
+        if (element.textContent === configuredSearch) {
+          // inform the UI that the element is found
+          trackEvent('booking_complete', {})
+
+          // unregister the watcher when the element is found
+          clearInterval(intervalId)
+        }
+      })
+    }, 1000)
+
+    return intervalId
+  }
+
+  useEffect(() => {
+    const intervalIds = [
+      registerWatcher(
+        '.spbooking--confirmation-box h2',
+        'Your reservation is complete'
+      )
+    ]
+
+    // Cleanup all the watchers
+    return () => {
+      intervalIds.forEach((intervalId) => clearInterval(intervalId))
+    }
+  }, [])
+
   const setTrigger = React.useCallback(
     (trigger: Trigger) => {
       log('CollectorProvider: manually setting trigger', trigger)
