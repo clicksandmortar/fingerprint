@@ -7,12 +7,12 @@ var reactErrorBoundary = require('react-error-boundary');
 var reactHookForm = require('react-hook-form');
 var ReactDOM = _interopDefault(require('react-dom'));
 var uuid = require('uuid');
+var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
-var mixpanel = _interopDefault(require('mixpanel-browser'));
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -306,6 +306,29 @@ var useLogging = function useLogging() {
   return React.useContext(LoggingContext);
 };
 
+var useFingerprint = function useFingerprint() {
+  return React.useContext(FingerprintContext);
+};
+
+function getEnvVars() {
+  var isDev = false;
+  if (typeof window === 'undefined') {
+    isDev = true;
+  } else {
+    var _window, _window$location, _window$location$host, _window2, _window2$location;
+    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
+    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === "stage65-az.harvester.co.uk") isDev = true;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
+
 var setCookie = function setCookie(name, value, expires) {
   return Cookies.set(name, value, {
     expires: expires,
@@ -406,10 +429,6 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
   }
 };
 
-var useFingerprint = function useFingerprint() {
-  return React.useContext(FingerprintContext);
-};
-
 var VisitorProvider = function VisitorProvider(_ref) {
   var children = _ref.children;
   var _useFingerprint = useFingerprint(),
@@ -461,24 +480,47 @@ var useVisitor = function useVisitor() {
   return React.useContext(VisitorContext);
 };
 
-function getEnvVars() {
-  var isDev = false;
-  if (typeof window === 'undefined') {
-    isDev = true;
-  } else {
-    var _window, _window$location, _window$location$host, _window2, _window2$location;
-    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
-    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === "stage65-az.harvester.co.uk") isDev = true;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
+var init = function init(cfg) {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+var trackEvent = function trackEvent(event, props, callback) {
+  return mixpanel.track(event, props, callback);
+};
+var MixpanelProvider = function MixpanelProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  React.useEffect(function () {
+    if (!appId || !visitor.id) {
+      return;
+    }
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  return React__default.createElement(MixpanelContext.Provider, {
+    value: {
+      trackEvent: trackEvent
+    }
+  }, children);
+};
+var MixpanelContext = React.createContext({
+  trackEvent: function trackEvent() {}
+});
+var useMixpanel = function useMixpanel() {
+  return React.useContext(MixpanelContext);
+};
 
 var headers = {
   'Content-Type': 'application/json'
@@ -558,49 +600,7 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
-var init = function init(cfg) {
-  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
-};
-var trackEvent = function trackEvent(event, props, callback) {
-  return mixpanel.track(event, props, callback);
-};
-var MixpanelProvider = function MixpanelProvider(_ref) {
-  var children = _ref.children;
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  React.useEffect(function () {
-    if (!appId || !visitor.id) {
-      return;
-    }
-    log('MixpanelProvider: booting');
-    init({
-      debug: true
-    });
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
-    mixpanel.identify(visitor.id);
-  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
-  return React__default.createElement(MixpanelContext.Provider, {
-    value: {
-      trackEvent: trackEvent
-    }
-  }, children);
-};
-var MixpanelContext = React.createContext({
-  trackEvent: function trackEvent() {}
-});
-var useMixpanel = function useMixpanel() {
-  return React.useContext(MixpanelContext);
-};
-
-var defaultIdleStatusDelay = 5 * 1000;
+var idleStatusAfterMs = 5 * 1000;
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -643,7 +643,7 @@ function CollectorProvider(_ref) {
     setIntently = _useState4[1];
   var addPageTriggers = function addPageTriggers(triggers) {
     setPageTriggers(function (prev) {
-      return uniqueBy([].concat(prev, triggers), 'id');
+      return uniqueBy([].concat(prev, triggers || []), 'id');
     });
   };
   log('CollectorProvider: user is on mobile?', reactDeviceDetect.isMobile);
@@ -668,9 +668,8 @@ function CollectorProvider(_ref) {
     if (!displayTrigger) return null;
     var handler;
     var trigger = pageTriggers.find(function (_trigger) {
-      var _ref2;
       var potentialTrigger = _trigger.invocation === displayTrigger;
-      var potentialHandler = (_ref2 = [].concat(handlers, clientHandlers)) === null || _ref2 === void 0 ? void 0 : _ref2.find(function (handler) {
+      var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
         return handler.behaviour === _trigger.behaviour;
       });
       handler = potentialHandler;
@@ -680,9 +679,15 @@ function CollectorProvider(_ref) {
       error("No trigger found for displayTrigger", displayTrigger);
       return null;
     }
+    log('CollectorProvider: available handlers include: ', handlers);
+    log('CollectorProvider: trigger to match is: ', trigger);
     log('CollectorProvider: attempting to show trigger', trigger, handler);
     if (!handler) {
       log('No handler found for trigger', trigger);
+      return null;
+    }
+    if (!handler.invoke) {
+      log('No invoke method found for handler', handler);
       return null;
     }
     if (!handler.invoke) {
@@ -763,7 +768,7 @@ function CollectorProvider(_ref) {
           }
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
-            setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay);
+            setIdleTimeout(idleStatusAfterMs);
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
@@ -852,8 +857,9 @@ var Modal = function Modal(_ref2) {
     log = _useLogging.log,
     error = _useLogging.error;
   var _useCollector = useCollector(),
-    resetDisplayTrigger = _useCollector.resetDisplayTrigger,
-    trackEvent = _useCollector.trackEvent;
+    resetDisplayTrigger = _useCollector.resetDisplayTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
   var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
   var _useVisitor = useVisitor(),
@@ -1122,9 +1128,33 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     });
   }, [setHandlers]);
   React.useEffect(function () {
-    if (!appId) throw new Error('C&M Fingerprint: appId is required');
-    if (booted) return;
-    if (!consentGiven) return;
+    if (consent) {
+      setConsentGiven(consent);
+      return;
+    }
+    console.log('Fingerprint Widget Consent: ', consent);
+    if (!consentCallback) return;
+    var consentGivenViaCallback = consentCallback();
+    var interval = setInterval(function () {
+      setConsentGiven(consent);
+    }, 1000);
+    if (consentGivenViaCallback) {
+      clearInterval(interval);
+    }
+    return function () {
+      return clearInterval(interval);
+    };
+  }, [consentCallback, consent]);
+  React.useEffect(function () {
+    if (!appId) {
+      throw new Error('C&M Fingerprint: appId is required');
+    }
+    if (booted) {
+      return;
+    }
+    if (!consentGiven) {
+      return;
+    }
     var performBoot = function performBoot() {
       try {
         setBooted(true);

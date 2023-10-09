@@ -51,7 +51,9 @@ export function CollectorProvider({
   const [intently, setIntently] = useState<boolean>(false)
 
   const addPageTriggers = (triggers: Trigger[]) => {
-    setPageTriggers((prev) => uniqueBy<Trigger>([...prev, ...triggers], 'id'))
+    setPageTriggers((prev) =>
+      uniqueBy<Trigger>([...prev, ...(triggers || [])], 'id')
+    )
   }
 
   log('CollectorProvider: user is on mobile?', isMobile)
@@ -86,7 +88,19 @@ export function CollectorProvider({
   const TriggerComponent = React.useCallback(() => {
     if (!displayTrigger) return null
 
-    let handler: Trigger | undefined
+    let handler: Handler | undefined
+
+    // TODO: UNDO
+    const trigger = pageTriggers.find((_trigger) => {
+      const potentialTrigger = _trigger.invocation === displayTrigger
+
+      const potentialHandler = handlers?.find(
+        (handler) => handler.behaviour === _trigger.behaviour
+      )
+
+      handler = potentialHandler
+      return potentialTrigger && potentialHandler
+    })
 
     // TODO: UNDO
     const trigger = pageTriggers.find((_trigger) => {
@@ -105,6 +119,9 @@ export function CollectorProvider({
       return null
     }
 
+    log('CollectorProvider: available handlers include: ', handlers)
+    log('CollectorProvider: trigger to match is: ', trigger)
+
     log('CollectorProvider: attempting to show trigger', trigger, handler)
 
     if (!handler) {
@@ -117,6 +134,12 @@ export function CollectorProvider({
 
       return null
     }
+
+    if (!handler.invoke) {
+      log('No invoke method found for handler', handler)
+
+    if (potentialComponent && React.isValidElement(potentialComponent))
+      return potentialComponent
 
     const potentialComponent = handler.invoke?.(trigger)
 
@@ -259,45 +282,9 @@ export function CollectorProvider({
     handlers,
     initialDelay,
     log,
-    trackEvent,
+    trackEvent, // to figure out later, do we need this? probs can be removed
     visitor
   ])
-
-  const registerWatcher = (
-    configuredSelector: string,
-    configuredSearch: string
-  ) => {
-    console.log('registering watcher')
-    const intervalId = setInterval(() => {
-      const inputs = document.querySelectorAll(configuredSelector)
-
-      inputs.forEach(function (element) {
-        if (element.textContent === configuredSearch) {
-          // inform the UI that the element is found
-          trackEvent('booking_complete', {})
-
-          // unregister the watcher when the element is found
-          clearInterval(intervalId)
-        }
-      })
-    }, 1000)
-
-    return intervalId
-  }
-
-  useEffect(() => {
-    const intervalIds = [
-      registerWatcher(
-        '.spbooking--confirmation-box h2',
-        'Your reservation is complete'
-      )
-    ]
-
-    // Cleanup all the watchers
-    return () => {
-      intervalIds.forEach((intervalId) => clearInterval(intervalId))
-    }
-  }, [])
 
   const setTrigger = React.useCallback(
     (trigger: Trigger) => {
