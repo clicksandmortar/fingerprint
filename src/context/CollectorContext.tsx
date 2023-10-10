@@ -281,8 +281,7 @@ export function CollectorProvider({
       inputs.forEach(function (element) {
         if (element.textContent === configuredSearch) {
           // inform the UI that the element is found
-          // trackEvent('booking_complete', {})
-          console.log('would send booking complete to mixpanel')
+          trackEvent('booking_complete', {})
 
           // unregister the watcher when the element is found
           clearInterval(intervalId)
