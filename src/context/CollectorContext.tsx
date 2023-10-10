@@ -278,27 +278,32 @@ export function CollectorProvider({
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector)
 
+      let found = false
       inputs.forEach(function (element) {
-        if (element.textContent === configuredSearch) {
+        if (
+          configuredSearch === '' &&
+          window.getComputedStyle(element).display !== 'none'
+        ) {
+          // This means we do not have specific text, so we're checking if the element does not have display=none
+          found = true
+        } else if (element.textContent === configuredSearch) {
           // inform the UI that the element is found
+          found = true
+        }
+        if (found) {
           trackEvent('booking_complete', {})
 
           // unregister the watcher when the element is found
           clearInterval(intervalId)
         }
       })
-    }, 1000)
+    }, 500)
 
     return intervalId
   }
 
   useEffect(() => {
-    const intervalIds = [
-      registerWatcher(
-        '.spbooking--confirmation-box h2',
-        'Your reservation is complete'
-      )
-    ]
+    const intervalIds = [registerWatcher('.stage-5', '')]
 
     // Cleanup all the watchers
     return () => {
