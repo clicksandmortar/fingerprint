@@ -3,7 +3,6 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { clientHandlers } from '../client/handler'
 import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -88,25 +87,13 @@ export function CollectorProvider({
   const TriggerComponent = React.useCallback(() => {
     if (!displayTrigger) return null
 
-    let handler: Handler | undefined
+    let handler: Trigger | undefined
 
     // TODO: UNDO
     const trigger = pageTriggers.find((_trigger) => {
       const potentialTrigger = _trigger.invocation === displayTrigger
 
       const potentialHandler = handlers?.find(
-        (handler) => handler.behaviour === _trigger.behaviour
-      )
-
-      handler = potentialHandler
-      return potentialTrigger && potentialHandler
-    })
-
-    // TODO: UNDO
-    const trigger = pageTriggers.find((_trigger) => {
-      const potentialTrigger = _trigger.invocation === displayTrigger
-
-      const potentialHandler = [...handlers, ...clientHandlers]?.find(
         (handler) => handler.behaviour === _trigger.behaviour
       )
 
@@ -137,12 +124,10 @@ export function CollectorProvider({
 
     if (!handler.invoke) {
       log('No invoke method found for handler', handler)
-
-    if (potentialComponent && React.isValidElement(potentialComponent))
-      return potentialComponent
+      return null
+    }
 
     const potentialComponent = handler.invoke?.(trigger)
-
     if (potentialComponent && React.isValidElement(potentialComponent))
       return potentialComponent
 
