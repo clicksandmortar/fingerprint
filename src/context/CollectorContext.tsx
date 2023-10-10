@@ -275,14 +275,14 @@ export function CollectorProvider({
     configuredSelector: string,
     configuredSearch: string
   ) => {
-    console.log('registering watcher')
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector)
 
       inputs.forEach(function (element) {
         if (element.textContent === configuredSearch) {
           // inform the UI that the element is found
-          trackEvent('booking_complete', {})
+          // trackEvent('booking_complete', {})
+          console.log('would send booking complete to mixpanel')
 
           // unregister the watcher when the element is found
           clearInterval(intervalId)
