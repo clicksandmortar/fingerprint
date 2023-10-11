@@ -41,6 +41,9 @@ export function CollectorProvider({
     Trigger['invocation'] | undefined
   >(undefined)
   const [intently, setIntently] = useState<boolean>(false)
+  const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
+    new Map()
+  )
 
   const addPageTriggers = (triggers: Trigger[]) => {
     setPageTriggers((prev) =>
@@ -290,8 +293,10 @@ export function CollectorProvider({
           // inform the UI that the element is found
           found = true
         }
-        if (found) {
+        if (found && !foundWatchers[configuredSelector]) {
           trackEvent('booking_complete', {})
+          foundWatchers[configuredSelector] = true
+          setFoundWatchers(foundWatchers)
 
           // unregister the watcher when the element is found
           clearInterval(intervalId)
