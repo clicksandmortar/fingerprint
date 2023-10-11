@@ -41,6 +41,9 @@ export function CollectorProvider({
     Trigger['invocation'] | undefined
   >(undefined)
   const [intently, setIntently] = useState<boolean>(false)
+  const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
+    new Map()
+  )
 
   const addPageTriggers = (triggers: Trigger[]) => {
     setPageTriggers((prev) =>
@@ -278,28 +281,34 @@ export function CollectorProvider({
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector)
 
+      let found = false
       inputs.forEach(function (element) {
-        if (element.textContent === configuredSearch) {
+        if (
+          configuredSearch === '' &&
+          window.getComputedStyle(element).display !== 'none'
+        ) {
+          // This means we do not have specific text, so we're checking if the element does not have display=none
+          found = true
+        } else if (element.textContent === configuredSearch) {
           // inform the UI that the element is found
-          // trackEvent('booking_complete', {})
-          console.log('would send booking complete to mixpanel')
+          found = true
+        }
+        if (found && !foundWatchers[configuredSelector]) {
+          trackEvent('booking_complete', {})
+          foundWatchers[configuredSelector] = true
+          setFoundWatchers(foundWatchers)
 
           // unregister the watcher when the element is found
           clearInterval(intervalId)
         }
       })
-    }, 1000)
+    }, 500)
 
     return intervalId
   }
 
   useEffect(() => {
-    const intervalIds = [
-      registerWatcher(
-        '.spbooking--confirmation-box h2',
-        'Your reservation is complete'
-      )
-    ]
+    const intervalIds = [registerWatcher('.stage-5', '')]
 
     // Cleanup all the watchers
     return () => {
