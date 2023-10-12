@@ -25,7 +25,7 @@ export function CollectorProvider({
   const { log, error } = useLogging()
   const { appId, booted, initialDelay, exitIntentTriggers, idleTriggers } =
     useFingerprint()
-  const { visitor } = useVisitor()
+  const { visitor, session } = useVisitor()
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
   // @todo remove this for our own exit intent implementation, for instance:
@@ -197,6 +197,7 @@ export function CollectorProvider({
       collect({
         appId,
         visitor,
+        sessionId: session?.id,
         page: {
           url: window.location.href,
           path: window.location.pathname,
