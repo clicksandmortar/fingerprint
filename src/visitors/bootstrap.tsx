@@ -50,11 +50,11 @@ export const bootstrapVisitor = ({
     )
 
     visitor.id = visitorId
-    setVisitor(visitor)
-
     session.id = sessionId
     session.endTime = endTime
+
     setSession(session)
+    setVisitor(visitor)
   }
 }
 
