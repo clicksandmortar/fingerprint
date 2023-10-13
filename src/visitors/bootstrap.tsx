@@ -3,6 +3,7 @@ import { Visitor } from './types'
 import { validVisitorId } from './utils'
 import { getCookie, setCookie } from '../utils/cookies'
 import { Session } from '../sessions/types'
+import { cookieAccountJWT } from '../context/FingerprintContext'
 
 export const bootstrapVisitor = ({
   setVisitor,
@@ -15,6 +16,10 @@ export const bootstrapVisitor = ({
 }) => {
   const visitor: Visitor = {
     id: undefined
+  }
+
+  if (getCookie(cookieAccountJWT)) {
+    visitor.jwt = getCookie(cookieAccountJWT)
   }
 
   if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id') as string)) {
