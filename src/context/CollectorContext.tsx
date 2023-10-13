@@ -332,13 +332,14 @@ export function CollectorProvider({
   }
 
   useEffect(() => {
+    if (!visitor.id) return
     const intervalIds = [registerWatcher('.stage-5', '')]
 
     // Cleanup all the watchers
     return () => {
       intervalIds.forEach((intervalId) => clearInterval(intervalId))
     }
-  }, [])
+  }, [visitor])
 
   const setTrigger = React.useCallback(
     (trigger: Trigger) => {
