@@ -298,7 +298,30 @@ export function CollectorProvider({
           trackEvent('booking_complete', {})
           foundWatchers[configuredSelector] = true
           setFoundWatchers(foundWatchers)
+          collect({
+            appId,
+            visitor,
+            sessionId: session?.id,
+            elements: [
+              {
+                path: window.location.pathname,
+                selector: configuredSelector
+              }
+            ]
+          })
+            .then(async (response: Response) => {
+              const payload: CollectorResponse = await response.json()
 
+              log('Sent collector data, retrieved:', payload)
+
+              // Set IdleTimer
+              // @todo turn this into the dynamic value
+              setIdleTimeout(idleStatusAfterMs)
+              addPageTriggers(payload?.pageTriggers)
+            })
+            .catch((err) => {
+              error('failed to store collected data', err)
+            })
           // unregister the watcher when the element is found
           clearInterval(intervalId)
         }
