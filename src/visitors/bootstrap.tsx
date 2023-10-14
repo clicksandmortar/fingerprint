@@ -2,8 +2,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { Visitor } from './types'
 import { validVisitorId } from './utils'
 import { getCookie, setCookie } from '../utils/cookies'
-import { cookieAccountJWT } from '../context/FingerprintContext'
 import { Session } from '../sessions/types'
+import { cookieAccountJWT } from '../context/FingerprintContext'
 
 export const bootstrapVisitor = ({
   setVisitor,
@@ -55,11 +55,11 @@ export const bootstrapVisitor = ({
     )
 
     visitor.id = visitorId
-    setVisitor(visitor)
-
     session.id = sessionId
     session.endTime = endTime
+
     setSession(session)
+    setVisitor(visitor)
   }
 }
 
@@ -76,7 +76,10 @@ const getSessionIdAndEndTime = (
     sessionId = uuidv4()
   } else {
     const c = cookieData as string
-    const [, sessId] = c.split('|')
+    let [, sessId] = c.split('|')
+    if (sessId === 'undefined' || sessId === undefined) {
+      sessId = uuidv4()
+    }
     sessionId = sessId
   }
 

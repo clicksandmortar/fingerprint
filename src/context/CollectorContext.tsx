@@ -48,6 +48,9 @@ export function CollectorProvider({
     Trigger['invocation'] | undefined
   >(undefined)
   const [intently, setIntently] = useState<boolean>(false)
+  const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
+    new Map()
+  )
 
   const addPageTriggers = (triggers: Trigger[]) => {
     setPageTriggers((prev) =>
@@ -290,9 +293,34 @@ export function CollectorProvider({
           // inform the UI that the element is found
           found = true
         }
-        if (found) {
+        if (found && !foundWatchers[configuredSelector]) {
           trackEvent('booking_complete', {})
+          foundWatchers[configuredSelector] = true
+          setFoundWatchers(foundWatchers)
+          collect({
+            appId,
+            visitor,
+            sessionId: session?.id,
+            elements: [
+              {
+                path: window.location.pathname,
+                selector: configuredSelector
+              }
+            ]
+          })
+            .then(async (response: Response) => {
+              const payload: CollectorResponse = await response.json()
 
+              log('Sent collector data, retrieved:', payload)
+
+              // Set IdleTimer
+              // @todo turn this into the dynamic value
+              setIdleTimeout(idleStatusAfterMs)
+              addPageTriggers(payload?.pageTriggers)
+            })
+            .catch((err) => {
+              error('failed to store collected data', err)
+            })
           // unregister the watcher when the element is found
           clearInterval(intervalId)
         }
@@ -303,13 +331,14 @@ export function CollectorProvider({
   }
 
   useEffect(() => {
+    if (!visitor.id) return
     const intervalIds = [registerWatcher('.stage-5', '')]
 
     // Cleanup all the watchers
     return () => {
       intervalIds.forEach((intervalId) => clearInterval(intervalId))
     }
-  }, [])
+  }, [visitor])
 
   const setTrigger = React.useCallback(
     (trigger: Trigger) => {
