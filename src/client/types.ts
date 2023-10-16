@@ -7,6 +7,11 @@ export type CollectorUpdate = {
   page?: Page | undefined
   referrer?: Referrer | undefined
   elements?: PageElement[] | undefined
+  account?: Account | undefined
+}
+
+export type Account = {
+  token: string
 }
 
 export type PageElement = {

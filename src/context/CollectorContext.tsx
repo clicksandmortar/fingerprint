@@ -207,6 +207,27 @@ export function CollectorProvider({
       if (hashParams.id_token) {
         log('CollectorProvider: user logged in event fired')
         trackEvent('user_logged_in', {})
+
+        collect({
+          appId,
+          visitor,
+          sessionId: session?.id,
+          account: {
+            token: hashParams.id_token
+          }
+        })
+          .then(async (response: Response) => {
+            const payload: CollectorResponse = await response.json()
+
+            log('Sent collector data, retrieved:', payload)
+
+            // Set IdleTimer
+            // @todo turn this into the dynamic value
+            setIdleTimeout(idleStatusAfterMs)
+          })
+          .catch((err) => {
+            error('failed to store collected data', err)
+          })
       }
 
       collect({
