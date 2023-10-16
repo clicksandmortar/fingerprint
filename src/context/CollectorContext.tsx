@@ -205,6 +205,7 @@ export function CollectorProvider({
         }, {})
 
       if (hashParams.id_token) {
+        log('CollectorProvider: user logged in event fired')
         trackEvent('user_logged_in', {})
       }
 
