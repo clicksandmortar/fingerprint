@@ -364,18 +364,6 @@ var bootstrapSession = function bootstrapSession(_ref) {
   var session = {
     firstVisit: undefined
   };
-  var t = new Date();
-  t.setMinutes(t.getMinutes() + 30);
-  if (!getCookie('_cm_session') || hasCookieValueExpired(getCookie('_cm_session'))) {
-    session.id = uuid.v4();
-  } else {
-    var c = getCookie('_cm_session');
-    var _c$split = c.split('|'),
-      sessionId = _c$split[0];
-    session.id = sessionId;
-  }
-  session.endTime = t;
-  setCookie('_cm_session', session.id + "|" + session.endTime.toISOString(), undefined);
   if (!getCookie('_cm') || getCookie('_cm') !== appId) {
     setCookie('_cm', appId, 365);
     setSession(session);
@@ -386,30 +374,20 @@ var bootstrapSession = function bootstrapSession(_ref) {
     setSession(session);
   }
 };
-var hasCookieValueExpired = function hasCookieValueExpired(cookieData) {
-  if (!cookieData) return true;
-  var _cookieData$split = cookieData.split('|'),
-    timestampString = _cookieData$split[1];
-  var expiryTimeEpoch = Date.parse(timestampString);
-  var expiryTime = new Date();
-  expiryTime.setTime(expiryTimeEpoch);
-  var n = new Date();
-  if (n > expiryTime) {
-    return true;
-  }
-  return false;
-};
 
 var uuidValidateV4 = function uuidValidateV4(uuid$1) {
   return uuid.validate(uuid$1) && uuid.version(uuid$1) === 4;
 };
 
 var validVisitorId = function validVisitorId(id) {
-  return uuidValidateV4(id);
+  var splitCookie = id.split('|');
+  return uuidValidateV4(splitCookie[0]);
 };
 
 var bootstrapVisitor = function bootstrapVisitor(_ref) {
-  var setVisitor = _ref.setVisitor;
+  var setVisitor = _ref.setVisitor,
+    session = _ref.session,
+    setSession = _ref.setSession;
   var visitor = {
     id: undefined
   };
@@ -418,15 +396,67 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
   }
   if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
     var visitorId = uuid.v4();
-    setCookie('_cm_id', visitorId, 365);
+    var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie('_cm_id')),
+      sessionId = _getSessionIdAndEndTi.sessionId,
+      endTime = _getSessionIdAndEndTi.endTime;
+    setCookie('_cm_id', visitorId + "|" + sessionId + "|" + endTime.toISOString(), 365);
     visitor.id = visitorId;
+    session.id = sessionId;
+    session.endTime = endTime;
+    setSession(session);
     setVisitor(visitor);
     return;
   }
   if (getCookie('_cm_id')) {
-    visitor.id = getCookie('_cm_id');
+    var c = getCookie('_cm_id');
+    var _c$split = c.split('|'),
+      _visitorId = _c$split[0];
+    var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie('_cm_id')),
+      _sessionId = _getSessionIdAndEndTi2.sessionId,
+      _endTime = _getSessionIdAndEndTi2.endTime;
+    setCookie('_cm_id', _visitorId + "|" + _sessionId + "|" + _endTime.toISOString(), 365);
+    visitor.id = _visitorId;
+    session.id = _sessionId;
+    session.endTime = _endTime;
+    setSession(session);
     setVisitor(visitor);
   }
+};
+var getSessionIdAndEndTime = function getSessionIdAndEndTime(cookieData) {
+  var t = new Date();
+  t.setMinutes(t.getMinutes() + 30);
+  var sessionId;
+  var endTime = t;
+  if (!cookieData || hasCookieValueExpired(cookieData)) {
+    sessionId = uuid.v4();
+  } else {
+    var c = cookieData;
+    var _c$split2 = c.split('|'),
+      sessId = _c$split2[1];
+    if (sessId === 'undefined' || sessId === undefined) {
+      sessId = uuid.v4();
+    }
+    sessionId = sessId;
+  }
+  return {
+    sessionId: sessionId,
+    endTime: endTime
+  };
+};
+var hasCookieValueExpired = function hasCookieValueExpired(cookieData) {
+  if (!cookieData) return true;
+  var cookieSplit = cookieData.split('|');
+  if (cookieSplit.length > 1) {
+    var timestampString = cookieSplit[cookieSplit.length - 1];
+    var expiryTimeEpoch = Date.parse(timestampString);
+    var expiryTime = new Date();
+    expiryTime.setTime(expiryTimeEpoch);
+    var n = new Date();
+    if (n > expiryTime) {
+      return true;
+    }
+  }
+  return false;
 };
 
 var VisitorProvider = function VisitorProvider(_ref) {
@@ -455,7 +485,9 @@ var VisitorProvider = function VisitorProvider(_ref) {
           setSession: setSession
         })).then(function () {
           return Promise.resolve(bootstrapVisitor({
-            setVisitor: setVisitor
+            setVisitor: setVisitor,
+            session: session,
+            setSession: setSession
           })).then(function () {});
         });
       } catch (e) {
@@ -600,7 +632,7 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
-var idleStatusAfterMs = 5 * 1000;
+var defaultIdleStatusDelay = 5 * 1000;
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -641,6 +673,9 @@ function CollectorProvider(_ref) {
   var _useState4 = React.useState(false),
     intently = _useState4[0],
     setIntently = _useState4[1];
+  var _useState5 = React.useState(new Map()),
+    foundWatchers = _useState5[0],
+    setFoundWatchers = _useState5[1];
   var addPageTriggers = function addPageTriggers(triggers) {
     setPageTriggers(function (prev) {
       return uniqueBy([].concat(prev, triggers || []), 'id');
@@ -684,10 +719,6 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to show trigger', trigger, handler);
     if (!handler) {
       log('No handler found for trigger', trigger);
-      return null;
-    }
-    if (!handler.invoke) {
-      log('No invoke method found for handler', handler);
       return null;
     }
     if (!handler.invoke) {
@@ -768,7 +799,7 @@ function CollectorProvider(_ref) {
           }
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
-            setIdleTimeout(idleStatusAfterMs);
+            setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay);
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
@@ -796,6 +827,56 @@ function CollectorProvider(_ref) {
       clearTimeout(delay);
     };
   }, [appId, booted, collect, error, handlers, initialDelay, log, trackEvent, visitor]);
+  var registerWatcher = function registerWatcher(configuredSelector, configuredSearch) {
+    var intervalId = setInterval(function () {
+      var inputs = document.querySelectorAll(configuredSelector);
+      var found = false;
+      inputs.forEach(function (element) {
+        if (configuredSearch === '' && window.getComputedStyle(element).display !== 'none') {
+          found = true;
+        } else if (element.textContent === configuredSearch) {
+          found = true;
+        }
+        if (found && !foundWatchers[configuredSelector]) {
+          trackEvent('booking_complete', {});
+          foundWatchers[configuredSelector] = true;
+          setFoundWatchers(foundWatchers);
+          collect({
+            appId: appId,
+            visitor: visitor,
+            sessionId: session === null || session === void 0 ? void 0 : session.id,
+            elements: [{
+              path: window.location.pathname,
+              selector: configuredSelector
+            }]
+          }).then(function (response) {
+            try {
+              return Promise.resolve(response.json()).then(function (payload) {
+                log('Sent collector data, retrieved:', payload);
+                setIdleTimeout(defaultIdleStatusDelay);
+                addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+              });
+            } catch (e) {
+              return Promise.reject(e);
+            }
+          })["catch"](function (err) {
+            error('failed to store collected data', err);
+          });
+          clearInterval(intervalId);
+        }
+      });
+    }, 500);
+    return intervalId;
+  };
+  React.useEffect(function () {
+    if (!visitor.id) return;
+    var intervalIds = [registerWatcher('.stage-5', '')];
+    return function () {
+      intervalIds.forEach(function (intervalId) {
+        return clearInterval(intervalId);
+      });
+    };
+  }, [visitor]);
   var setTrigger = React__default.useCallback(function (trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
     addPageTriggers([trigger]);
@@ -805,7 +886,8 @@ function CollectorProvider(_ref) {
     return {
       resetDisplayTrigger: resetDisplayTrigger,
       setTrigger: setTrigger,
-      trackEvent: trackEvent
+      trackEvent: trackEvent,
+      addPageTriggers: addPageTriggers
     };
   }, [resetDisplayTrigger, setTrigger, trackEvent]);
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
@@ -819,6 +901,7 @@ function CollectorProvider(_ref) {
   }, children), React__default.createElement(TriggerComponent, null));
 }
 var CollectorContext = React.createContext({
+  addPageTriggers: function addPageTriggers() {},
   resetDisplayTrigger: function resetDisplayTrigger() {},
   setTrigger: function setTrigger() {},
   trackEvent: function trackEvent() {}
@@ -1128,33 +1211,9 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     });
   }, [setHandlers]);
   React.useEffect(function () {
-    if (consent) {
-      setConsentGiven(consent);
-      return;
-    }
-    console.log('Fingerprint Widget Consent: ', consent);
-    if (!consentCallback) return;
-    var consentGivenViaCallback = consentCallback();
-    var interval = setInterval(function () {
-      setConsentGiven(consent);
-    }, 1000);
-    if (consentGivenViaCallback) {
-      clearInterval(interval);
-    }
-    return function () {
-      return clearInterval(interval);
-    };
-  }, [consentCallback, consent]);
-  React.useEffect(function () {
-    if (!appId) {
-      throw new Error('C&M Fingerprint: appId is required');
-    }
-    if (booted) {
-      return;
-    }
-    if (!consentGiven) {
-      return;
-    }
+    if (!appId) throw new Error('C&M Fingerprint: appId is required');
+    if (booted) return;
+    if (!consentGiven) return;
     var performBoot = function performBoot() {
       try {
         setBooted(true);
