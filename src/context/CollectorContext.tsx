@@ -121,12 +121,6 @@ export function CollectorProvider({
 
     if (!handler.invoke) {
       log('No invoke method found for handler', handler)
-
-      return null
-    }
-
-    if (!handler.invoke) {
-      log('No invoke method found for handler', handler)
       return null
     }
 
@@ -315,7 +309,7 @@ export function CollectorProvider({
 
               // Set IdleTimer
               // @todo turn this into the dynamic value
-              setIdleTimeout(idleStatusAfterMs)
+              setIdleTimeout(defaultIdleStatusDelay)
               addPageTriggers(payload?.pageTriggers)
             })
             .catch((err) => {
