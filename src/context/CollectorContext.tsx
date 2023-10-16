@@ -194,6 +194,20 @@ export function CollectorProvider({
           return acc
         }, {})
 
+      const hash: string = window.location.hash.substring(3)
+
+      var hashParams = hash
+        .split('&')
+        .reduce(function (result: any, item: any) {
+          var parts = item.split('=')
+          result[parts[0]] = parts[1]
+          return result
+        }, {})
+
+      if (hashParams.id_token) {
+        trackEvent('user_logged_in', {})
+      }
+
       collect({
         appId,
         visitor,
