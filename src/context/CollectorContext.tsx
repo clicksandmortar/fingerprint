@@ -219,11 +219,7 @@ export function CollectorProvider({
           .then(async (response: Response) => {
             const payload: CollectorResponse = await response.json()
 
-            log('Sent collector data, retrieved:', payload)
-
-            // Set IdleTimer
-            // @todo turn this into the dynamic value
-            setIdleTimeout(idleStatusAfterMs)
+            log('Sent login collector data, retrieved:', payload)
           })
           .catch((err) => {
             error('failed to store collected data', err)
