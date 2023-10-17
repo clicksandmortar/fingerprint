@@ -23,8 +23,14 @@ export function CollectorProvider({
   handlers = []
 }: CollectorProviderProps) {
   const { log, error } = useLogging()
-  const { appId, booted, initialDelay, exitIntentTriggers, idleTriggers } =
-    useFingerprint()
+  const {
+    appId,
+    booted,
+    initialDelay,
+    exitIntentTriggers,
+    idleTriggers,
+    config
+  } = useFingerprint()
   const { visitor, session } = useVisitor()
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
@@ -34,7 +40,7 @@ export function CollectorProvider({
     cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
-    idleStatusAfterMs
+    config?.idleDelay || idleStatusAfterMs
   )
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
   const [displayTrigger, setDisplayTrigger] = useState<
@@ -116,12 +122,6 @@ export function CollectorProvider({
 
     if (!handler) {
       log('No handler found for trigger', trigger)
-      return null
-    }
-
-    if (!handler.invoke) {
-      log('No invoke method found for handler', handler)
-
       return null
     }
 
@@ -265,7 +265,7 @@ export function CollectorProvider({
 
           // Set IdleTimer
           // @todo turn this into the dynamic value
-          setIdleTimeout(idleStatusAfterMs)
+          setIdleTimeout(config?.idleDelay || idleStatusAfterMs)
 
           addPageTriggers(payload?.pageTriggers)
 
@@ -348,7 +348,7 @@ export function CollectorProvider({
 
               // Set IdleTimer
               // @todo turn this into the dynamic value
-              setIdleTimeout(idleStatusAfterMs)
+              setIdleTimeout(config?.idleDelay || idleStatusAfterMs)
               addPageTriggers(payload?.pageTriggers)
             })
             .catch((err) => {
