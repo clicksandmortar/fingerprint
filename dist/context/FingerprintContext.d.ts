@@ -1,6 +1,7 @@
 import React from 'react';
 import { Handler } from '../client/handler';
 import { PageView, Trigger } from '../client/types';
+export declare const cookieAccountJWT = "b2c_token";
 export declare type FingerprintProviderProps = {
     appId?: string;
     children?: React.ReactNode;
@@ -11,8 +12,12 @@ export declare type FingerprintProviderProps = {
     initialDelay?: number;
     exitIntentTriggers?: boolean;
     idleTriggers?: boolean;
+    config?: {
+        idleDelay?: number;
+        trackIdleOnDesktop?: boolean;
+    };
 };
-export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers }: FingerprintProviderProps) => {} | null | undefined;
+export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, config }: FingerprintProviderProps) => {} | null | undefined;
 export interface FingerprintContextInterface {
     appId: string;
     booted: boolean;
@@ -25,5 +30,6 @@ export interface FingerprintContextInterface {
     trackEvent: (event: Event) => void;
     trackPageView: (pageView: PageView) => void;
     unregisterHandler: (trigger: Trigger) => void;
+    config: FingerprintProviderProps['config'];
 }
 export declare const FingerprintContext: React.Context<FingerprintContextInterface>;

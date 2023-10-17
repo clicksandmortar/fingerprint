@@ -384,6 +384,7 @@ export function CollectorProvider({
 
   const collectorContextVal = React.useMemo(
     () => ({
+      addPageTriggers,
       resetDisplayTrigger,
       setTrigger,
       trackEvent
@@ -408,11 +409,13 @@ export function CollectorProvider({
 }
 
 export type CollectorContextInterface = {
+  addPageTriggers: (triggers: Trigger[]) => void
   resetDisplayTrigger: () => void
   setTrigger: (trigger: Trigger) => void
   trackEvent: (event: string, properties?: any) => void
 }
 export const CollectorContext = createContext<CollectorContextInterface>({
+  addPageTriggers: () => {},
   resetDisplayTrigger: () => {},
   setTrigger: () => {},
   trackEvent: () => {}
