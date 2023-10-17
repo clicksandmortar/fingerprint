@@ -42,6 +42,7 @@ const Modal = ({ trigger }: Props) => {
   const { visitor } = useVisitor()
   const [open, setOpen] = useState(true)
   const [stylesLoaded, setStylesLoaded] = useState(false)
+  const [hasFired, setHasFired] = useState(false)
 
   const closeModal = () => {
     trackEvent('user_closed_trigger', trigger)
@@ -61,6 +62,7 @@ const Modal = ({ trigger }: Props) => {
 
   useEffect(() => {
     if (!open) return
+    if (hasFired) return
 
     try {
       request
