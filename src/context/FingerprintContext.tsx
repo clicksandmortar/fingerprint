@@ -9,6 +9,7 @@ import { MixpanelProvider } from './MixpanelContext'
 import { VisitorProvider } from './VisitorContext'
 
 const queryClient = new QueryClient()
+export const cookieAccountJWT = 'b2c_token'
 
 export const cookieAccountJWT = 'b2c_token'
 

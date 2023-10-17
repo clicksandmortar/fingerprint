@@ -9,7 +9,6 @@ import uniqueBy from 'lodash.uniqby';
 import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
-import mixpanel from 'mixpanel-browser';
 
 const baseUrl = 'https://bookings-bff.starship-staging.com';
 const makeFullUrl = (resource, params = {}) => {

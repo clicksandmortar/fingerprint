@@ -7,12 +7,12 @@ var reactErrorBoundary = require('react-error-boundary');
 var reactHookForm = require('react-hook-form');
 var ReactDOM = _interopDefault(require('react-dom'));
 var uuid = require('uuid');
+var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
-var mixpanel = _interopDefault(require('mixpanel-browser'));
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -501,6 +501,29 @@ var useLogging = function useLogging() {
   return React.useContext(LoggingContext);
 };
 
+var useFingerprint = function useFingerprint() {
+  return React.useContext(FingerprintContext);
+};
+
+function getEnvVars() {
+  var isDev = false;
+  if (typeof window === 'undefined') {
+    isDev = true;
+  } else {
+    var _window, _window$location, _window$location$host, _window2, _window2$location;
+    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
+    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === "stage65-az.harvester.co.uk") isDev = true;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
+
 var setCookie = function setCookie(name, value, expires) {
   return Cookies.set(name, value, {
     expires: expires,
@@ -601,10 +624,6 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
   }
 };
 
-var useFingerprint = function useFingerprint() {
-  return React.useContext(FingerprintContext);
-};
-
 var VisitorProvider = function VisitorProvider(_ref) {
   var children = _ref.children;
   var _useFingerprint = useFingerprint(),
@@ -656,24 +675,47 @@ var useVisitor = function useVisitor() {
   return React.useContext(VisitorContext);
 };
 
-function getEnvVars() {
-  var isDev = false;
-  if (typeof window === 'undefined') {
-    isDev = true;
-  } else {
-    var _window, _window$location, _window$location$host, _window2, _window2$location;
-    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
-    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === "stage65-az.harvester.co.uk") isDev = true;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
+var init = function init(cfg) {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+var trackEvent = function trackEvent(event, props, callback) {
+  return mixpanel.track(event, props, callback);
+};
+var MixpanelProvider = function MixpanelProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  React.useEffect(function () {
+    if (!appId || !visitor.id) {
+      return;
+    }
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  return React__default.createElement(MixpanelContext.Provider, {
+    value: {
+      trackEvent: trackEvent
+    }
+  }, children);
+};
+var MixpanelContext = React.createContext({
+  trackEvent: function trackEvent() {}
+});
+var useMixpanel = function useMixpanel() {
+  return React.useContext(MixpanelContext);
+};
 
 var headers = {
   'Content-Type': 'application/json'
@@ -753,6 +795,7 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
+<<<<<<< HEAD
 var init = function init(cfg) {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
     debug: cfg.debug,
@@ -796,6 +839,9 @@ var useMixpanel = function useMixpanel() {
 };
 
 var defaultIdleStatusDelay = 5 * 1000;
+=======
+var idleStatusAfterMs = 5 * 1000;
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -838,7 +884,11 @@ function CollectorProvider(_ref) {
     setIntently = _useState4[1];
   var addPageTriggers = function addPageTriggers(triggers) {
     setPageTriggers(function (prev) {
+<<<<<<< HEAD
       return uniqueBy([].concat(prev, triggers), 'id');
+=======
+      return uniqueBy([].concat(prev, triggers || []), 'id');
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
     });
   };
   log('CollectorProvider: user is on mobile?', reactDeviceDetect.isMobile);
@@ -863,9 +913,14 @@ function CollectorProvider(_ref) {
     if (!displayTrigger) return null;
     var handler;
     var trigger = pageTriggers.find(function (_trigger) {
+<<<<<<< HEAD
       var _ref2;
       var potentialTrigger = _trigger.invocation === displayTrigger;
       var potentialHandler = (_ref2 = [].concat(handlers, clientHandlers)) === null || _ref2 === void 0 ? void 0 : _ref2.find(function (handler) {
+=======
+      var potentialTrigger = _trigger.invocation === displayTrigger;
+      var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
         return handler.behaviour === _trigger.behaviour;
       });
       handler = potentialHandler;
@@ -875,6 +930,11 @@ function CollectorProvider(_ref) {
       error("No trigger found for displayTrigger", displayTrigger);
       return null;
     }
+<<<<<<< HEAD
+=======
+    log('CollectorProvider: available handlers include: ', handlers);
+    log('CollectorProvider: trigger to match is: ', trigger);
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
     log('CollectorProvider: attempting to show trigger', trigger, handler);
     if (!handler) {
       log('No handler found for trigger', trigger);
@@ -884,6 +944,13 @@ function CollectorProvider(_ref) {
       log('No invoke method found for handler', handler);
       return null;
     }
+<<<<<<< HEAD
+=======
+    if (!handler.invoke) {
+      log('No invoke method found for handler', handler);
+      return null;
+    }
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
     var potentialComponent = (_handler$invoke = (_handler = handler).invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(_handler, trigger);
     if (potentialComponent && React__default.isValidElement(potentialComponent)) return potentialComponent;
     return null;
@@ -958,7 +1025,11 @@ function CollectorProvider(_ref) {
           }
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
+<<<<<<< HEAD
             setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay);
+=======
+            setIdleTimeout(idleStatusAfterMs);
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
@@ -1032,8 +1103,9 @@ var Modal = function Modal(_ref) {
     log = _useLogging.log,
     error = _useLogging.error;
   var _useCollector = useCollector(),
-    resetDisplayTrigger = _useCollector.resetDisplayTrigger,
-    trackEvent = _useCollector.trackEvent;
+    resetDisplayTrigger = _useCollector.resetDisplayTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
   var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
   var _useVisitor = useVisitor(),
@@ -1059,6 +1131,20 @@ var Modal = function Modal(_ref) {
       brand: brand
     });
   }, [open]);
+<<<<<<< HEAD
+=======
+  React.useEffect(function () {
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(css));
+    document.head.appendChild(styles);
+    setStylesLoaded(true);
+  });
+  if (!stylesLoaded) {
+    return null;
+  }
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
   if (!open) {
     return null;
   }
@@ -1244,9 +1330,39 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     });
   }, [setHandlers]);
   React.useEffect(function () {
+<<<<<<< HEAD
     if (!appId) throw new Error('C&M Fingerprint: appId is required');
     if (booted) return;
     if (!consentGiven) return;
+=======
+    if (consent) {
+      setConsentGiven(consent);
+      return;
+    }
+    console.log('Fingerprint Widget Consent: ', consent);
+    if (!consentCallback) return;
+    var consentGivenViaCallback = consentCallback();
+    var interval = setInterval(function () {
+      setConsentGiven(consent);
+    }, 1000);
+    if (consentGivenViaCallback) {
+      clearInterval(interval);
+    }
+    return function () {
+      return clearInterval(interval);
+    };
+  }, [consentCallback, consent]);
+  React.useEffect(function () {
+    if (!appId) {
+      throw new Error('C&M Fingerprint: appId is required');
+    }
+    if (booted) {
+      return;
+    }
+    if (!consentGiven) {
+      return;
+    }
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
     var performBoot = function performBoot() {
       try {
         setBooted(true);

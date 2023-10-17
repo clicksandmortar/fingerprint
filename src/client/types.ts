@@ -4,8 +4,19 @@ export type CollectorUpdate = {
   appId: string
   visitor: Visitor
   sessionId: string | undefined
-  page: Page
-  referrer: Referrer
+  page?: Page | undefined
+  referrer?: Referrer | undefined
+  elements?: PageElement[] | undefined
+  account?: Account | undefined
+}
+
+export type Account = {
+  token: string
+}
+
+export type PageElement = {
+  selector: string
+  path: string
 }
 
 export type Page = {

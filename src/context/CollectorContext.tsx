@@ -23,6 +23,7 @@ export function CollectorProvider({
   handlers = []
 }: CollectorProviderProps) {
   const { log, error } = useLogging()
+<<<<<<< HEAD
   const {
     appId,
     booted,
@@ -33,6 +34,11 @@ export function CollectorProvider({
   } = useFingerprint()
   const { visitor, session } = useVisitor()
 
+=======
+  const { appId, booted, initialDelay, exitIntentTriggers, idleTriggers } =
+    useFingerprint()
+  const { visitor, session } = useVisitor()
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
 
@@ -49,6 +55,15 @@ export function CollectorProvider({
     Trigger['invocation'] | undefined
   >(undefined)
   const [intently, setIntently] = useState<boolean>(false)
+  const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
+    new Map()
+  )
+
+  const addPageTriggers = (triggers: Trigger[]) => {
+    setPageTriggers((prev) =>
+      uniqueBy<Trigger>([...prev, ...(triggers || [])], 'id')
+    )
+  }
 
   const addPageTriggers = (triggers: Trigger[]) => {
     setPageTriggers((prev) => uniqueBy<Trigger>([...prev, ...triggers], 'id'))
@@ -86,7 +101,23 @@ export function CollectorProvider({
   const TriggerComponent = React.useCallback(() => {
     if (!displayTrigger) return null
 
+<<<<<<< HEAD
     let handler: Trigger | undefined
+=======
+    let handler: Handler | undefined
+
+    // TODO: UNDO
+    const trigger = pageTriggers.find((_trigger) => {
+      const potentialTrigger = _trigger.invocation === displayTrigger
+
+      const potentialHandler = handlers?.find(
+        (handler) => handler.behaviour === _trigger.behaviour
+      )
+
+      handler = potentialHandler
+      return potentialTrigger && potentialHandler
+    })
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
 
     // TODO: UNDO
     const trigger = pageTriggers.find((_trigger) => {
@@ -105,6 +136,12 @@ export function CollectorProvider({
       return null
     }
 
+<<<<<<< HEAD
+=======
+    log('CollectorProvider: available handlers include: ', handlers)
+    log('CollectorProvider: trigger to match is: ', trigger)
+
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
     log('CollectorProvider: attempting to show trigger', trigger, handler)
 
     if (!handler) {
@@ -118,11 +155,24 @@ export function CollectorProvider({
       return null
     }
 
+<<<<<<< HEAD
+    const potentialComponent = handler.invoke?.(trigger)
+=======
+    if (!handler.invoke) {
+      log('No invoke method found for handler', handler)
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
+
+    if (potentialComponent && React.isValidElement(potentialComponent))
+      return potentialComponent
+
+<<<<<<< HEAD
+=======
     const potentialComponent = handler.invoke?.(trigger)
 
     if (potentialComponent && React.isValidElement(potentialComponent))
       return potentialComponent
 
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
     return null
   }, [displayTrigger, error, handlers, log, pageTriggers, handlers])
 
@@ -181,6 +231,38 @@ export function CollectorProvider({
           acc[key] = value
           return acc
         }, {})
+
+      const hash: string = window.location.hash.substring(3)
+
+      var hashParams = hash
+        .split('&')
+        .reduce(function (result: any, item: any) {
+          var parts = item.split('=')
+          result[parts[0]] = parts[1]
+          return result
+        }, {})
+
+      if (hashParams.id_token) {
+        log('CollectorProvider: user logged in event fired')
+        trackEvent('user_logged_in', {})
+
+        collect({
+          appId,
+          visitor,
+          sessionId: session?.id,
+          account: {
+            token: hashParams.id_token
+          }
+        })
+          .then(async (response: Response) => {
+            const payload: CollectorResponse = await response.json()
+
+            log('Sent login collector data, retrieved:', payload)
+          })
+          .catch((err) => {
+            error('failed to store collected data', err)
+          })
+      }
 
       collect({
         appId,
@@ -259,6 +341,7 @@ export function CollectorProvider({
     handlers,
     initialDelay,
     log,
+<<<<<<< HEAD
     trackEvent,
     visitor
   ])
@@ -272,6 +355,87 @@ export function CollectorProvider({
     [log, pageTriggers, setDisplayTrigger, addPageTriggers]
   )
 
+=======
+    trackEvent, // to figure out later, do we need this? probs can be removed
+    visitor
+  ])
+
+  const registerWatcher = (
+    configuredSelector: string,
+    configuredSearch: string
+  ) => {
+    const intervalId = setInterval(() => {
+      const inputs = document.querySelectorAll(configuredSelector)
+
+      let found = false
+      inputs.forEach(function (element) {
+        if (
+          configuredSearch === '' &&
+          window.getComputedStyle(element).display !== 'none'
+        ) {
+          // This means we do not have specific text, so we're checking if the element does not have display=none
+          found = true
+        } else if (element.textContent === configuredSearch) {
+          // inform the UI that the element is found
+          found = true
+        }
+        if (found && !foundWatchers[configuredSelector]) {
+          trackEvent('booking_complete', {})
+          foundWatchers[configuredSelector] = true
+          setFoundWatchers(foundWatchers)
+          collect({
+            appId,
+            visitor,
+            sessionId: session?.id,
+            elements: [
+              {
+                path: window.location.pathname,
+                selector: configuredSelector
+              }
+            ]
+          })
+            .then(async (response: Response) => {
+              const payload: CollectorResponse = await response.json()
+
+              log('Sent collector data, retrieved:', payload)
+
+              // Set IdleTimer
+              // @todo turn this into the dynamic value
+              setIdleTimeout(idleStatusAfterMs)
+              addPageTriggers(payload?.pageTriggers)
+            })
+            .catch((err) => {
+              error('failed to store collected data', err)
+            })
+          // unregister the watcher when the element is found
+          clearInterval(intervalId)
+        }
+      })
+    }, 500)
+
+    return intervalId
+  }
+
+  useEffect(() => {
+    if (!visitor.id) return
+    const intervalIds = [registerWatcher('.stage-5', '')]
+
+    // Cleanup all the watchers
+    return () => {
+      intervalIds.forEach((intervalId) => clearInterval(intervalId))
+    }
+  }, [visitor])
+
+  const setTrigger = React.useCallback(
+    (trigger: Trigger) => {
+      log('CollectorProvider: manually setting trigger', trigger)
+      addPageTriggers([trigger])
+      setDisplayTrigger(trigger.invocation)
+    },
+    [log, pageTriggers, setDisplayTrigger, addPageTriggers]
+  )
+
+>>>>>>> 1c64aca7a73c154137ddc8ef27afdb10992ab1f9
   const collectorContextVal = React.useMemo(
     () => ({
       resetDisplayTrigger,
