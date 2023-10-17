@@ -6,11 +6,11 @@ export const getBrand = (): SupportedBrand | null => {
   if (typeof window === 'undefined') return null
 
   //  keep for testing. for now.
-  if (window.location.host === 'localhost:3000') return 'Stonehouse'
+  if (window.location.host.startsWith('localhost')) return 'Stonehouse'
 
-  if (window.location.host === 'www.stonehouserestaurants.co.uk')
+  if (window.location.host.includes('stonehouserestaurants.co.uk'))
     return 'Stonehouse'
-  if (window.location.host === 'www.browns-restaurants.co.uk') return 'Browns'
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns'
 
   return null
 }
