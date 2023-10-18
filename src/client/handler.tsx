@@ -30,12 +30,12 @@ export const clientHandlers: Handler[] = [
   },
   {
     id: 'youtube_v1',
-    behaviour: 'youtube',
+    behaviour: 'BEHAVIOUR_YOUTUBE',
     invoke: (trigger: Trigger) => <TriggerYoutube trigger={trigger} />
   },
   {
     id: 'inverse_v1',
-    behaviour: 'inverse_flow',
+    behaviour: 'BEHAVIOUR_INVERSE_FLOW',
     invoke: (trigger: Trigger) => <TriggerInverse trigger={trigger} />
   }
 ]

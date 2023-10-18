@@ -21,6 +21,10 @@ export type FingerprintProviderProps = {
   initialDelay?: number
   exitIntentTriggers?: boolean
   idleTriggers?: boolean
+  config?: {
+    idleDelay?: number
+    trackIdleOnDesktop?: boolean
+  }
 }
 
 // @todo split this into multiple providers, FingerprintProvider should
@@ -34,7 +38,8 @@ export const FingerprintProvider = ({
   defaultHandlers,
   initialDelay = 0,
   exitIntentTriggers = true,
-  idleTriggers = true
+  idleTriggers = true,
+  config
 }: // idleDelay = 0,
 FingerprintProviderProps) => {
   const [consentGiven, setConsentGiven] = useState(consent)
@@ -131,7 +136,8 @@ FingerprintProviderProps) => {
             },
             initialDelay,
             idleTriggers,
-            exitIntentTriggers
+            exitIntentTriggers,
+            config
           }}
         >
           <VisitorProvider>
@@ -164,6 +170,7 @@ export interface FingerprintContextInterface {
   trackEvent: (event: Event) => void
   trackPageView: (pageView: PageView) => void
   unregisterHandler: (trigger: Trigger) => void
+  config: FingerprintProviderProps['config']
 }
 
 const defaultFingerprintState: FingerprintContextInterface = {
@@ -177,7 +184,11 @@ const defaultFingerprintState: FingerprintContextInterface = {
   registerHandler: () => {},
   trackEvent: () => {},
   trackPageView: () => {},
-  unregisterHandler: () => {}
+  unregisterHandler: () => {},
+  config: {
+    idleDelay: undefined,
+    trackIdleOnDesktop: false
+  }
 }
 
 export const FingerprintContext = createContext<FingerprintContextInterface>({

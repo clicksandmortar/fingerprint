@@ -8,30 +8,12 @@ import { useVisitor } from '../context/VisitorContext'
 import { useCollector } from '../hooks/useCollector'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { hostname, request } from '../utils/http'
+import { getBrand } from '../utils/brand'
+import StonehouseModal from '../components/modals/stonehouse'
+import { BrownsModal } from '../components/modals/browns'
 
 type Props = {
   trigger: Trigger
-}
-
-const CurlyText = ({ randomHash, text }: { randomHash: string; text: any }) => {
-  return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      xmlnsXlink='http://www.w3.org/1999/xlink'
-      version='1.1'
-      viewBox='0 0 500 500'
-      className={'f' + randomHash + '-curlyText'}
-    >
-      <defs>
-        <path id='textPath' d='M 0 500 A 175,100 0 0 1 500,500' />
-      </defs>
-      <text x='0' y='0' textAnchor='middle'>
-        <textPath xlinkHref='#textPath' fill='white' startOffset='50%'>
-          {text}
-        </textPath>
-      </text>
-    </svg>
-  )
 }
 
 const Modal = ({ trigger }: Props) => {
@@ -43,17 +25,9 @@ const Modal = ({ trigger }: Props) => {
   const [open, setOpen] = useState(true)
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
-  const closeModal = () => {
-    trackEvent('user_closed_trigger', trigger)
-    resetDisplayTrigger()
-    setOpen(false)
-  }
-
-  const redirectUser = (e: any) => {
-    e.preventDefault()
-    trackEvent('user_clicked_button', trigger)
-    trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
-  }
+  const brand = React.useMemo(() => {
+    return getBrand()
+  }, [])
 
   const randomHash = useMemo(() => {
     return uuidv4().split('-')[0]
@@ -75,7 +49,8 @@ const Modal = ({ trigger }: Props) => {
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour
+      triggerBehaviour: trigger.behaviour,
+      brand
     })
   }, [open])
 
@@ -312,71 +287,36 @@ const Modal = ({ trigger }: Props) => {
     return null
   }
 
-  if (!stylesLoaded) {
-    return null
+  const handleClickCallToAction = (e: any) => {
+    e.preventDefault()
+    trackEvent('user_clicked_button', trigger)
+    trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
   }
 
-  return (
-    <div className={'f' + randomHash + '-overlay'}>
-      <div
-        className={'f' + randomHash + '-modal'}
-        style={{
-          background: `url(${trigger?.data?.backgroundURL})`,
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'cover',
-          position: 'relative',
-          height: 500
-        }}
-      >
-        <div className={'f' + randomHash + '-image-darken'}>
-          <button
-            className={'f' + randomHash + '-close-button'}
-            onClick={closeModal}
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='16'
-              height='16'
-              viewBox='0 0 16 16'
-            >
-              <path
-                fill='#000'
-                fillRule='evenodd'
-                d='M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-              />
-            </svg>
-          </button>
+  const handleCloseModal = () => {
+    trackEvent('user_closed_trigger', trigger)
+    resetDisplayTrigger()
+    setOpen(false)
+  }
 
-          <CurlyText text={trigger?.data?.heading} randomHash={randomHash} />
+  if (brand === 'Stonehouse')
+    return (
+      <StonehouseModal
+        trigger={trigger}
+        handleClickCallToAction={handleClickCallToAction}
+        handleCloseModal={handleCloseModal}
+      />
+    )
+  if (brand === 'Browns')
+    return (
+      <BrownsModal
+        trigger={trigger}
+        handleClickCallToAction={handleClickCallToAction}
+        handleCloseModal={handleCloseModal}
+      />
+    )
 
-          <div style={{ flex: 1 }} className={'f' + randomHash + '--spacer'} />
-          <div
-            style={{
-              flex: 1,
-              marginTop: -150,
-              textTransform: 'uppercase',
-              textAlign: 'center',
-              letterSpacing: '2pt'
-            }}
-          >
-            <span className={'f' + randomHash + '-mainText'}>
-              {trigger?.data?.paragraph}
-            </span>
-          </div>
-          <div className={'f' + randomHash + '-buttonContainer'}>
-            <a
-              href={trigger?.data?.buttonURL}
-              className={'f' + randomHash + '-cta'}
-              onClick={(e) => redirectUser(e)}
-            >
-              {trigger?.data?.buttonText}
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+  return null
 }
 
 export const TriggerModal = ({ trigger }: Props) => {

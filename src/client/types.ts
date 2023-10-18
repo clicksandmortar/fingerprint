@@ -59,8 +59,7 @@ export type Trigger = {
     | 'INVOCATION_IDLE_TIME'
     | 'INVOCATION_EXIT_INTENT'
     | 'INVOCATION_PAGE_LOAD'
-  behaviour?: 'BEHAVIOUR_MODAL'
-  // delay?: number
+  behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW' // delay?: number
   // invoke:(trigger: Trigger) => void;
   // @todo: commented out, out of date?
   data?: {
