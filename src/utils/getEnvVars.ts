@@ -12,6 +12,8 @@ export function getEnvVars(): EnvVars {
   } else {
     if (window?.location?.host?.includes('localhost')) isDev = true
     if (window?.location?.host === `stage65-az.harvester.co.uk`) isDev = true
+    if (window?.location?.host.startsWith('stage65-az')) isDev = true
+    if (window?.location?.host.startsWith('test65-az')) isDev = true
   }
 
   if (isDev)
