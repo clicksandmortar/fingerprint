@@ -23,9 +23,9 @@ export const bootstrapVisitor = ({
   }
 
   if (typeof window !== 'undefined') {
-    // Check if `vid` is in the query parameters
+    // Check if `v_id` is in the query parameters
     const urlParams = new URLSearchParams(window.location.search)
-    const vid = urlParams.get('vid')
+    const vid = urlParams.get('v_id')
     if (vid) {
       visitor.id = vid
     }
