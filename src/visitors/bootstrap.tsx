@@ -22,45 +22,42 @@ export const bootstrapVisitor = ({
     visitor.jwt = getCookie(cookieAccountJWT)
   }
 
-  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id') as string)) {
-    const visitorId = uuidv4()
-
-    const { sessionId, endTime } = getSessionIdAndEndTime(getCookie('_cm_id'))
-
-    setCookie(
-      '_cm_id',
-      `${visitorId}|${sessionId}|${endTime.toISOString()}`,
-      365
-    )
-
-    visitor.id = visitorId
-    session.id = sessionId
-    session.endTime = endTime
-    setSession(session)
-
-    setVisitor(visitor)
-
-    return
+  if (typeof window !== 'undefined') {
+    // Check if `vid` is in the query parameters
+    const urlParams = new URLSearchParams(window.location.search)
+    const vid = urlParams.get('vid')
+    if (vid) {
+      visitor.id = vid
+    }
   }
 
-  if (getCookie('_cm_id')) {
+  if (
+    (!visitor.id && !getCookie('_cm_id')) ||
+    !validVisitorId(getCookie('_cm_id') as string)
+  ) {
+    const visitorId = uuidv4()
+    visitor.id = visitorId
+  }
+
+  if (!visitor.id && getCookie('_cm_id')) {
     const c = getCookie('_cm_id') as string
     const [visitorId] = c.split('|')
-    const { sessionId, endTime } = getSessionIdAndEndTime(getCookie('_cm_id'))
-
-    setCookie(
-      '_cm_id',
-      `${visitorId}|${sessionId}|${endTime.toISOString()}`,
-      365
-    )
-
     visitor.id = visitorId
-    session.id = sessionId
-    session.endTime = endTime
-
-    setSession(session)
-    setVisitor(visitor)
   }
+
+  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie('_cm_id'))
+
+  setCookie(
+    '_cm_id',
+    `${visitor.id}|${sessionId}|${endTime.toISOString()}`,
+    365
+  )
+
+  session.id = sessionId
+  session.endTime = endTime
+  setSession(session)
+
+  setVisitor(visitor)
 }
 
 const getSessionIdAndEndTime = (
