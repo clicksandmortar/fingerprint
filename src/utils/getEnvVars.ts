@@ -7,13 +7,16 @@ export function getEnvVars(): EnvVars {
   // TODO: temp hack for managing prod and dev env.
   let isDev = false
 
-  if (typeof window === 'undefined') {
-    isDev = true
-  } else {
-    if (window?.location?.host?.includes('localhost')) isDev = true
-    if (window?.location?.host === `stage65-az.harvester.co.uk`) isDev = true
-    if (window?.location?.host.startsWith('stage65-az')) isDev = true
-    if (window?.location?.host.startsWith('test65-az')) isDev = true
+  switch (true) {
+    case typeof window === 'undefined':
+    case window?.location?.host?.includes('localhost'):
+    case window?.location?.host?.includes('clicksandmortar.tech'):
+    case window?.location?.host.startsWith('stage65-az'):
+    case window?.location?.host.startsWith('test65-az'):
+      isDev = true
+      break
+    default:
+      isDev = false
   }
 
   if (isDev)
