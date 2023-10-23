@@ -24,6 +24,7 @@ const Modal = ({ trigger }: Props) => {
   const { visitor } = useVisitor()
   const [open, setOpen] = useState(true)
   const [stylesLoaded, setStylesLoaded] = useState(false)
+  const [hasFired, setHasFired] = useState(false)
 
   const brand = React.useMemo(() => {
     return getBrand()
@@ -35,6 +36,7 @@ const Modal = ({ trigger }: Props) => {
 
   useEffect(() => {
     if (!open) return
+    if (hasFired) return
 
     try {
       request
@@ -52,6 +54,7 @@ const Modal = ({ trigger }: Props) => {
       triggerBehaviour: trigger.behaviour,
       brand
     })
+    setHasFired(true)
   }, [open])
 
   useEffect(() => {
