@@ -341,7 +341,7 @@ export function CollectorProvider({
 
               // Set IdleTimer
               // @todo turn this into the dynamic value
-              setIdleTimeout(defaultIdleStatusDelay)
+              setIdleTimeout(config?.idleDelay || defaultIdleStatusDelay)
               addPageTriggers(payload?.pageTriggers)
             })
             .catch((err) => {
@@ -377,10 +377,10 @@ export function CollectorProvider({
 
   const collectorContextVal = React.useMemo(
     () => ({
+      addPageTriggers,
       resetDisplayTrigger,
       setTrigger,
-      trackEvent,
-      addPageTriggers
+      trackEvent
     }),
     [resetDisplayTrigger, setTrigger, trackEvent]
   )

@@ -47,7 +47,6 @@ const useConsentCheck = (consent: boolean, consentCallback: any) => {
 
   return consentGiven
 }
-
 export type FingerprintProviderProps = {
   appId?: string
   children?: React.ReactNode
@@ -57,7 +56,6 @@ export type FingerprintProviderProps = {
   defaultHandlers?: Trigger[]
   initialDelay?: number
   exitIntentTriggers?: boolean
-
   idleTriggers?: boolean
   config?: {
     idleDelay?: number
@@ -78,7 +76,8 @@ export const FingerprintProvider = ({
   exitIntentTriggers = true,
   idleTriggers = true,
   config
-}: FingerprintProviderProps) => {
+}: // idleDelay = 0,
+FingerprintProviderProps) => {
   const [booted, setBooted] = useState(false)
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
 

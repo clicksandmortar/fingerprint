@@ -7,6 +7,13 @@ export declare type CollectorUpdate = {
     page?: Page | undefined;
     referrer?: Referrer | undefined;
     elements?: PageElement[] | undefined;
+<<<<<<< HEAD
+=======
+    account?: Account | undefined;
+};
+export declare type Account = {
+    token: string;
+>>>>>>> main
 };
 export declare type PageElement = {
     selector: string;
@@ -44,7 +51,12 @@ export declare type CollectorResponse = {
 export declare type Invocation = 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
 export declare type Trigger = {
     id?: string;
+<<<<<<< HEAD
     invocation?: Invocation;
+=======
+    invocation?: 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
+    behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW';
+>>>>>>> main
     data?: {
         [key: string]: string;
     };
