@@ -7,6 +7,10 @@ export declare type CollectorUpdate = {
     page?: Page | undefined;
     referrer?: Referrer | undefined;
     elements?: PageElement[] | undefined;
+    account?: Account | undefined;
+};
+export declare type Account = {
+    token: string;
 };
 export declare type PageElement = {
     selector: string;

@@ -60,6 +60,8 @@ export type Invocation =
 export type Trigger = {
   id?: string
   invocation?: Invocation
+  // invoke:(trigger: Trigger) => void;
+  // @todo: commented out, out of date?
   data?: {
     [key: string]: string
   }
