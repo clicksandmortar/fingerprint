@@ -2,15 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../client/types'
+import { BrownsModal } from '../components/modals/browns'
+import StonehouseModal from '../components/modals/stonehouse'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { useCollector } from '../hooks/useCollector'
 import { useFingerprint } from '../hooks/useFingerprint'
-import { hostname, request } from '../utils/http'
 import { getBrand } from '../utils/brand'
-import StonehouseModal from '../components/modals/stonehouse'
-import { BrownsModal } from '../components/modals/browns'
+import { hostname, request } from '../utils/http'
 
 type Props = {
   trigger: Trigger

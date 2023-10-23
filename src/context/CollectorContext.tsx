@@ -3,7 +3,6 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { Handler } from '../client/handler'
 import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -12,11 +11,11 @@ import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 
-const idleStatusAfterMs = 5 * 1000
+const defaultIdleStatusDelay = 5 * 1000
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
-  handlers?: Handler[]
+  handlers?: Trigger[]
 }
 
 export function CollectorProvider({
@@ -33,15 +32,17 @@ export function CollectorProvider({
     config
   } = useFingerprint()
   const { visitor, session } = useVisitor()
+
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
+
   // @todo remove this for our own exit intent implementation, for instance:
   // https://fullstackheroes.com/tutorials/react/exit-intent-react/
   const { registerHandler } = useExitIntent({
     cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
-    config?.idleDelay || idleStatusAfterMs
+    config?.idleDelay || defaultIdleStatusDelay
   )
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
   const [displayTrigger, setDisplayTrigger] = useState<
@@ -90,7 +91,7 @@ export function CollectorProvider({
   const TriggerComponent = React.useCallback(() => {
     if (!displayTrigger) return null
 
-    let handler: Handler | undefined
+    let handler: Trigger | undefined
 
     // TODO: UNDO
     const trigger = pageTriggers.find((_trigger) => {
@@ -103,13 +104,6 @@ export function CollectorProvider({
       handler = potentialHandler
       return potentialTrigger && potentialHandler
     })
-
-    log('CollectorProvider: available triggers include: ', pageTriggers)
-    log(
-      'CollectorProvider: attempting to show displayTrigger',
-      displayTrigger,
-      trigger
-    )
 
     if (!trigger) {
       error(`No trigger found for displayTrigger`, displayTrigger)
@@ -128,12 +122,10 @@ export function CollectorProvider({
 
     if (!handler.invoke) {
       log('No invoke method found for handler', handler)
-
       return null
     }
 
     const potentialComponent = handler.invoke?.(trigger)
-
     if (potentialComponent && React.isValidElement(potentialComponent))
       return potentialComponent
 
@@ -171,6 +163,7 @@ export function CollectorProvider({
 
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
+  // THIS FETCHES OUR CONFIG. DO NOT REMOVE ED
   useEffect(() => {
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot')
@@ -272,7 +265,7 @@ export function CollectorProvider({
 
           // Set IdleTimer
           // @todo turn this into the dynamic value
-          setIdleTimeout(config?.idleDelay || idleStatusAfterMs)
+          setIdleTimeout(config?.idleDelay || defaultIdleStatusDelay)
 
           addPageTriggers(payload?.pageTriggers)
 
@@ -355,7 +348,7 @@ export function CollectorProvider({
 
               // Set IdleTimer
               // @todo turn this into the dynamic value
-              setIdleTimeout(config?.idleDelay || idleStatusAfterMs)
+              setIdleTimeout(config?.idleDelay || defaultIdleStatusDelay)
               addPageTriggers(payload?.pageTriggers)
             })
             .catch((err) => {

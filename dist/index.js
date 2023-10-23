@@ -256,6 +256,201 @@ var TriggerInverse = function TriggerInverse(_ref3) {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
+var CurlyText = function CurlyText(_ref) {
+  var randomHash = _ref.randomHash,
+    text = _ref.text;
+  return React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    xmlnsXlink: 'http://www.w3.org/1999/xlink',
+    version: '1.1',
+    viewBox: '0 0 500 500',
+    className: 'f' + randomHash + '-curlyText'
+  }, React__default.createElement("defs", null, React__default.createElement("path", {
+    id: 'textPath',
+    d: 'M 0 500 A 175,100 0 0 1 500,500'
+  })), React__default.createElement("text", {
+    x: '0',
+    y: '0',
+    textAnchor: 'middle'
+  }, React__default.createElement("textPath", {
+    xlinkHref: '#textPath',
+    fill: 'white',
+    startOffset: '50%'
+  }, text)));
+};
+var BrownsModal = function BrownsModal(_ref2) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref2.trigger,
+    handleClickCallToAction = _ref2.handleClickCallToAction,
+    handleCloseModal = _ref2.handleCloseModal;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var randomHash = React.useMemo(function () {
+    return uuid.v4().split('-')[0];
+  }, []);
+  React.useEffect(function () {
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(css));
+    document.head.appendChild(styles);
+    setStylesLoaded(true);
+  });
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: 'f' + randomHash + '-overlay'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-modal',
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative',
+      height: 500
+    }
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-image-darken'
+  }, React__default.createElement("button", {
+    className: 'f' + randomHash + '-close-button',
+    onClick: handleCloseModal
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '16',
+    height: '16',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: '#000',
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  }))), React__default.createElement(CurlyText, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
+    randomHash: randomHash
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1
+    },
+    className: 'f' + randomHash + '--spacer'
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1,
+      marginTop: -150,
+      textTransform: 'uppercase',
+      textAlign: 'center',
+      letterSpacing: '2pt'
+    }
+  }, React__default.createElement("span", {
+    className: 'f' + randomHash + '-mainText'
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    className: 'f' + randomHash + '-buttonContainer'
+  }, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: 'f' + randomHash + '-cta',
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
+};
+
+var randomHash = 'f' + uuid.v4().split('-')[0];
+var prependClass = function prependClass(className) {
+  return "f" + randomHash + "-" + className;
+};
+var StonehouseModal = function StonehouseModal(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  React.useEffect(function () {
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      h1, h2, h3, h4, h5, h6, p, a, span {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem 0 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        border-radius: 100%;\n        background-color: white;\n        width: 2rem;\n        border: none;\n        height: 2rem;\n        position: absolute;\n        margin: 10px;\n        top: 0px;\n        right: 0px;\n        color: black;\n        font-size: 1.2rem;\n        font-weight: 300;\n        cursor: pointer;\n        display: grid;\n        place-content: center;\n      }\n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+  }, [randomHash]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  var TwoForTenThing = function TwoForTenThing() {
+    return React__default.createElement("div", {
+      style: {
+        position: 'absolute',
+        left: '10%',
+        top: 250
+      }
+    }, React__default.createElement("div", {
+      className: prependClass("box-shadow"),
+      style: {
+        borderRadius: '100%',
+        height: 100,
+        width: 100,
+        border: '2px solid white',
+        display: 'grid',
+        placeContent: 'center',
+        transform: 'rotate(-10deg)'
+      }
+    }, React__default.createElement("h4", {
+      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
+    }, "2 for"), React__default.createElement("h1", {
+      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow'),
+      style: {
+        marginLeft: 15,
+        marginBottom: -10
+      }
+    }, "10*"), React__default.createElement("h6", {
+      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
+    }, "COCKTAILS")));
+  };
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("button", {
+    className: prependClass('close-button'),
+    onClick: handleCloseModal
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '20',
+    height: '20',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: '#000',
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  }))), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", null, React__default.createElement(TwoForTenThing, null)), React__default.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'flex-end'
+    }
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
 var LoggingProvider = function LoggingProvider(_ref) {
   var debug = _ref.debug,
     children = _ref.children;
@@ -311,13 +506,18 @@ var useFingerprint = function useFingerprint() {
 };
 
 function getEnvVars() {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location;
   var isDev = false;
-  if (typeof window === 'undefined') {
-    isDev = true;
-  } else {
-    var _window, _window$location, _window$location$host, _window2, _window2$location;
-    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
-    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === "stage65-az.harvester.co.uk") isDev = true;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
   }
   if (isDev) return {
     FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
@@ -640,7 +840,8 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
-var idleStatusAfterMs = 5 * 1000;
+var defaultIdleStatusDelay = 5 * 1000;
+
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -669,7 +870,7 @@ function CollectorProvider(_ref) {
       }
     }),
     registerHandler = _useExitIntent.registerHandler;
-  var _useState = React.useState((config === null || config === void 0 ? void 0 : config.idleDelay) || idleStatusAfterMs),
+  var _useState = React.useState((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
   var _useState2 = React.useState([]),
@@ -718,8 +919,6 @@ function CollectorProvider(_ref) {
       handler = potentialHandler;
       return potentialTrigger && potentialHandler;
     });
-    log('CollectorProvider: available triggers include: ', pageTriggers);
-    log('CollectorProvider: attempting to show displayTrigger', displayTrigger, trigger);
     if (!trigger) {
       error("No trigger found for displayTrigger", displayTrigger);
       return null;
@@ -842,7 +1041,7 @@ function CollectorProvider(_ref) {
           }
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
-            setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || idleStatusAfterMs);
+            setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay);
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
@@ -896,7 +1095,7 @@ function CollectorProvider(_ref) {
             try {
               return Promise.resolve(response.json()).then(function (payload) {
                 log('Sent collector data, retrieved:', payload);
-                setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || idleStatusAfterMs);
+                setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay);
                 addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
               });
             } catch (e) {
@@ -960,201 +1159,6 @@ var getBrand = function getBrand() {
   if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
   return null;
-};
-
-var randomHash = 'f' + uuid.v4().split('-')[0];
-var prependClass = function prependClass(className) {
-  return "f" + randomHash + "-" + className;
-};
-var StonehouseModal = function StonehouseModal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref.trigger,
-    handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  React.useEffect(function () {
-    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      h1, h2, h3, h4, h5, h6, p, a, span {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem 0 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        border-radius: 100%;\n        background-color: white;\n        width: 2rem;\n        border: none;\n        height: 2rem;\n        position: absolute;\n        margin: 10px;\n        top: 0px;\n        right: 0px;\n        color: black;\n        font-size: 1.2rem;\n        font-weight: 300;\n        cursor: pointer;\n        display: grid;\n        place-content: center;\n      }\n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-  }, [randomHash]);
-  if (!stylesLoaded) {
-    return null;
-  }
-  var TwoForTenThing = function TwoForTenThing() {
-    return React__default.createElement("div", {
-      style: {
-        position: 'absolute',
-        left: '10%',
-        top: 250
-      }
-    }, React__default.createElement("div", {
-      className: prependClass("box-shadow"),
-      style: {
-        borderRadius: '100%',
-        height: 100,
-        width: 100,
-        border: '2px solid white',
-        display: 'grid',
-        placeContent: 'center',
-        transform: 'rotate(-10deg)'
-      }
-    }, React__default.createElement("h4", {
-      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
-    }, "2 for"), React__default.createElement("h1", {
-      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow'),
-      style: {
-        marginLeft: 15,
-        marginBottom: -10
-      }
-    }, "10*"), React__default.createElement("h6", {
-      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
-    }, "COCKTAILS")));
-  };
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('image-darken')
-  }, React__default.createElement("button", {
-    className: prependClass('close-button'),
-    onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '20',
-    height: '20',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", null, React__default.createElement(TwoForTenThing, null)), React__default.createElement("div", {
-    style: {
-      display: 'flex',
-      justifyContent: 'flex-end'
-    }
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-
-var CurlyText = function CurlyText(_ref) {
-  var randomHash = _ref.randomHash,
-    text = _ref.text;
-  return React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    xmlnsXlink: 'http://www.w3.org/1999/xlink',
-    version: '1.1',
-    viewBox: '0 0 500 500',
-    className: 'f' + randomHash + '-curlyText'
-  }, React__default.createElement("defs", null, React__default.createElement("path", {
-    id: 'textPath',
-    d: 'M 0 500 A 175,100 0 0 1 500,500'
-  })), React__default.createElement("text", {
-    x: '0',
-    y: '0',
-    textAnchor: 'middle'
-  }, React__default.createElement("textPath", {
-    xlinkHref: '#textPath',
-    fill: 'white',
-    startOffset: '50%'
-  }, text)));
-};
-var BrownsModal = function BrownsModal(_ref2) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref2.trigger,
-    handleClickCallToAction = _ref2.handleClickCallToAction,
-    handleCloseModal = _ref2.handleCloseModal;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var randomHash = React.useMemo(function () {
-    return uuid.v4().split('-')[0];
-  }, []);
-  React.useEffect(function () {
-    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  });
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: 'f' + randomHash + '-overlay'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-modal',
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative',
-      height: 500
-    }
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-image-darken'
-  }, React__default.createElement("button", {
-    className: 'f' + randomHash + '-close-button',
-    onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '16',
-    height: '16',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement(CurlyText, {
-    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
-    randomHash: randomHash
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1
-    },
-    className: 'f' + randomHash + '--spacer'
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      marginTop: -150,
-      textTransform: 'uppercase',
-      textAlign: 'center',
-      letterSpacing: '2pt'
-    }
-  }, React__default.createElement("span", {
-    className: 'f' + randomHash + '-mainText'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    className: 'f' + randomHash + '-buttonContainer'
-  }, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: 'f' + randomHash + '-cta',
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
 
 var Modal = function Modal(_ref) {
@@ -1342,35 +1346,10 @@ var clientHandlers = [{
 
 var queryClient = new reactQuery.QueryClient();
 var cookieAccountJWT = 'b2c_token';
-var FingerprintProvider = function FingerprintProvider(_ref) {
-  var appId = _ref.appId,
-    children = _ref.children,
-    _ref$consent = _ref.consent,
-    consent = _ref$consent === void 0 ? false : _ref$consent,
-    consentCallback = _ref.consentCallback,
-    debug = _ref.debug,
-    defaultHandlers = _ref.defaultHandlers,
-    _ref$initialDelay = _ref.initialDelay,
-    initialDelay = _ref$initialDelay === void 0 ? 0 : _ref$initialDelay,
-    _ref$exitIntentTrigge = _ref.exitIntentTriggers,
-    exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
-    _ref$idleTriggers = _ref.idleTriggers,
-    idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers,
-    config = _ref.config;
+var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   var _useState = React.useState(consent),
     consentGiven = _useState[0],
     setConsentGiven = _useState[1];
-  var _useState2 = React.useState(false),
-    booted = _useState2[0],
-    setBooted = _useState2[1];
-  var _useState3 = React.useState(defaultHandlers || clientHandlers),
-    handlers = _useState3[0],
-    setHandlers = _useState3[1];
-  var registerHandler = React__default.useCallback(function (trigger) {
-    setHandlers(function (handlers) {
-      return [].concat(handlers, [trigger]);
-    });
-  }, [setHandlers]);
   React.useEffect(function () {
     if (consent) {
       setConsentGiven(consent);
@@ -1389,16 +1368,39 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       return clearInterval(interval);
     };
   }, [consentCallback, consent]);
+  return consentGiven;
+};
+var FingerprintProvider = function FingerprintProvider(_ref) {
+  var appId = _ref.appId,
+    children = _ref.children,
+    _ref$consent = _ref.consent,
+    consent = _ref$consent === void 0 ? false : _ref$consent,
+    consentCallback = _ref.consentCallback,
+    debug = _ref.debug,
+    defaultHandlers = _ref.defaultHandlers,
+    _ref$initialDelay = _ref.initialDelay,
+    initialDelay = _ref$initialDelay === void 0 ? 0 : _ref$initialDelay,
+    _ref$exitIntentTrigge = _ref.exitIntentTriggers,
+    exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
+    _ref$idleTriggers = _ref.idleTriggers,
+    idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers,
+    config = _ref.config;
+  var _useState2 = React.useState(false),
+    booted = _useState2[0],
+    setBooted = _useState2[1];
+  var _useState3 = React.useState(defaultHandlers || clientHandlers),
+    handlers = _useState3[0],
+    setHandlers = _useState3[1];
+  var consentGiven = useConsentCheck(consent, consentCallback);
+  var addAnotherHandler = React__default.useCallback(function (trigger) {
+    setHandlers(function (handlers) {
+      return [].concat(handlers, [trigger]);
+    });
+  }, [setHandlers]);
   React.useEffect(function () {
-    if (!appId) {
-      throw new Error('C&M Fingerprint: appId is required');
-    }
-    if (booted) {
-      return;
-    }
-    if (!consentGiven) {
-      return;
-    }
+    if (!appId) throw new Error('C&M Fingerprint: appId is required');
+    if (booted) return;
+    if (!consentGiven) return;
     var performBoot = function performBoot() {
       try {
         setBooted(true);
@@ -1424,7 +1426,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       appId: appId,
       booted: booted,
       currentTrigger: {},
-      registerHandler: registerHandler,
+      registerHandler: addAnotherHandler,
       trackEvent: function trackEvent() {
         alert('trackEvent not implemented');
       },

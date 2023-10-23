@@ -22,8 +22,8 @@
   "scripts": {
     "start": "microbundle-crl watch --no-compress --format modern,cjs",
     "build": "microbundle-crl --no-compress --format modern,cjs",
-    "build:fingerprint": "parcel build src/fingerprint.tsx --target legacy",
-    "watch:fingerprint": "parcel watch src/fingerprint.tsx --target legacy",
+    "build:fingerprint": "parcel build src/fingerprint.tsx --no-source-maps --target legacy",
+    "watch:fingerprint": "parcel watch src/fingerprint.tsx --no-source-maps --target legacy",
     "prepare": "run-s build",
     "test": "run-s test:unit test:lint test:build",
     "test:build": "run-s build",

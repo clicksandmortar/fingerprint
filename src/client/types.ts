@@ -51,20 +51,22 @@ export type CollectorResponse = {
   // @todo remove this temp hack once split testing with Intently is complete
   intently: boolean
 }
+export type Invocation =
+  | 'INVOCATION_UNSPECIFIED'
+  | 'INVOCATION_IDLE_TIME'
+  | 'INVOCATION_EXIT_INTENT'
+  | 'INVOCATION_PAGE_LOAD'
 
 export type Trigger = {
   id?: string
-  invocation?:
-    | 'INVOCATION_UNSPECIFIED'
-    | 'INVOCATION_IDLE_TIME'
-    | 'INVOCATION_EXIT_INTENT'
-    | 'INVOCATION_PAGE_LOAD'
-  behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW' // delay?: number
+  invocation?: Invocation
   // invoke:(trigger: Trigger) => void;
   // @todo: commented out, out of date?
   data?: {
     [key: string]: string
   }
+  invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode
+  behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW'
   brand?: any
 }
 
