@@ -394,33 +394,31 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
   if (getCookie(cookieAccountJWT)) {
     visitor.jwt = getCookie(cookieAccountJWT);
   }
-  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
-    var visitorId = uuid.v4();
-    var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie('_cm_id')),
-      sessionId = _getSessionIdAndEndTi.sessionId,
-      endTime = _getSessionIdAndEndTi.endTime;
-    setCookie('_cm_id', visitorId + "|" + sessionId + "|" + endTime.toISOString(), 365);
-    visitor.id = visitorId;
-    session.id = sessionId;
-    session.endTime = endTime;
-    setSession(session);
-    setVisitor(visitor);
-    return;
+  if (typeof window !== 'undefined') {
+    var urlParams = new URLSearchParams(window.location.search);
+    var vid = urlParams.get('v_id');
+    if (vid) {
+      visitor.id = vid;
+    }
   }
-  if (getCookie('_cm_id')) {
+  if (!visitor.id && !getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
+    var visitorId = uuid.v4();
+    visitor.id = visitorId;
+  }
+  if (!visitor.id && getCookie('_cm_id')) {
     var c = getCookie('_cm_id');
     var _c$split = c.split('|'),
       _visitorId = _c$split[0];
-    var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie('_cm_id')),
-      _sessionId = _getSessionIdAndEndTi2.sessionId,
-      _endTime = _getSessionIdAndEndTi2.endTime;
-    setCookie('_cm_id', _visitorId + "|" + _sessionId + "|" + _endTime.toISOString(), 365);
     visitor.id = _visitorId;
-    session.id = _sessionId;
-    session.endTime = _endTime;
-    setSession(session);
-    setVisitor(visitor);
   }
+  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie('_cm_id')),
+    sessionId = _getSessionIdAndEndTi.sessionId,
+    endTime = _getSessionIdAndEndTi.endTime;
+  setCookie('_cm_id', visitor.id + "|" + sessionId + "|" + endTime.toISOString(), 365);
+  session.id = sessionId;
+  session.endTime = endTime;
+  setSession(session);
+  setVisitor(visitor);
 };
 var getSessionIdAndEndTime = function getSessionIdAndEndTime(cookieData) {
   var t = new Date();
@@ -632,6 +630,16 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
+var getVisitorId = function getVisitorId() {
+  if (typeof window === 'undefined') return null;
+  var urlParams = new URLSearchParams(window.location.search);
+  var vid = urlParams.get('v_id');
+  return vid;
+};
+var hasVisitorIDInURL = function hasVisitorIDInURL() {
+  return getVisitorId() !== null;
+};
+
 var idleStatusAfterMs = 5 * 1000;
 function CollectorProvider(_ref) {
   var children = _ref.children,
@@ -764,6 +772,11 @@ function CollectorProvider(_ref) {
         return;
       }
       log('CollectorProvider: collecting data');
+      if (hasVisitorIDInURL()) {
+        trackEvent('abandoned_journey_landing', {
+          from_email: true
+        });
+      }
       var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
         var _cur$split = cur.split('='),
           key = _cur$split[0],
