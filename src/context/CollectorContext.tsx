@@ -9,6 +9,7 @@ import { useFingerprint } from '../hooks/useFingerprint'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
+import { hasVisitorIDInURL } from '../utils/visitor_id'
 
 const defaultIdleStatusDelay = 5 * 1000
 
@@ -176,6 +177,12 @@ export function CollectorProvider({
       }
 
       log('CollectorProvider: collecting data')
+
+      if (hasVisitorIDInURL()) {
+        trackEvent('abandoned_journey_landing', {
+          from_email: true
+        })
+      }
 
       const params: any = new URLSearchParams(window.location.search)
         .toString()

@@ -830,7 +830,18 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
+var getVisitorId = function getVisitorId() {
+  if (typeof window === 'undefined') return null;
+  var urlParams = new URLSearchParams(window.location.search);
+  var vid = urlParams.get('v_id');
+  return vid;
+};
+var hasVisitorIDInURL = function hasVisitorIDInURL() {
+  return getVisitorId() !== null;
+};
+
 var defaultIdleStatusDelay = 5 * 1000;
+
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -960,6 +971,11 @@ function CollectorProvider(_ref) {
         return;
       }
       log('CollectorProvider: collecting data');
+      if (hasVisitorIDInURL()) {
+        trackEvent('abandoned_journey_landing', {
+          from_email: true
+        });
+      }
       var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
         var _cur$split = cur.split('='),
           key = _cur$split[0],
