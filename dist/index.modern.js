@@ -7,7 +7,6 @@ import { v4, validate, version } from 'uuid';
 import mixpanel from 'mixpanel-browser';
 import Cookies from 'js-cookie';
 import uniqueBy from 'lodash.uniqby';
-import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 
@@ -1110,22 +1109,21 @@ const useCollectorMutation = () => {
 
 const defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
-  const [lastTrigerTimeStamp, setLastTrigerTimeStamp] = useState(null);
+  const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
   const startCooldown = React__default.useCallback(() => {
     const currentTimeStamp = Number(new Date());
-    setLastTrigerTimeStamp(currentTimeStamp);
-  }, [setLastTrigerTimeStamp]);
+    setLastTriggerTimeStamp(currentTimeStamp);
+  }, [setLastTriggerTimeStamp]);
   const getRemainingCooldownMs = React__default.useCallback(() => {
-    if (!lastTrigerTimeStamp) return 0;
+    if (!lastTriggerTimeStamp) return 0;
     const currentTime = Number(new Date());
-    const remainingMS = lastTrigerTimeStamp + cooldownMs - currentTime;
+    const remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
     return remainingMS;
-  }, [lastTrigerTimeStamp, cooldownMs]);
+  }, [lastTriggerTimeStamp, cooldownMs]);
   const canNextTriggerOccur = React__default.useCallback(() => {
     return getRemainingCooldownMs() <= 0;
   }, [getRemainingCooldownMs]);
   return {
-    lastTrigerTimeStamp,
     startCooldown,
     canNextTriggerOccur,
     getRemainingCooldownMs
@@ -1166,7 +1164,7 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
-const defaultIdleStatusDelay = 3 * 1000;
+const defaultIdleStatusDelay = 5 * 1000;
 function CollectorProvider({
   children,
   handlers = []
@@ -1209,11 +1207,11 @@ function CollectorProvider({
     }
   });
   const getIdleStatusDelay = React__default.useCallback(() => {
-    const stdDelay = configIdleDelay || defaultIdleStatusDelay;
+    const idleDelay = configIdleDelay || defaultIdleStatusDelay;
     const cooldownDelay = getRemainingCooldownMs();
-    const recalcedIdleStatusDelay = stdDelay + cooldownDelay;
-    log(`Setting idle delay at ${recalcedIdleStatusDelay}ms (cooldown ${cooldownDelay}ms + config.delay ${configIdleDelay}ms)`);
-    return recalcedIdleStatusDelay;
+    const delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log(`Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + config.delay ${idleDelay}ms)`);
+    return delayAdjustedForCooldown;
   }, [getRemainingCooldownMs, configIdleDelay]);
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
   const [pageTriggers, setPageTriggers] = useState([]);
@@ -1223,8 +1221,6 @@ function CollectorProvider({
   const addPageTriggers = triggers => {
     setPageTriggers(prev => uniqueBy([...prev, ...(triggers || [])], 'id'));
   };
-  log('CollectorProvider: user is on mobile?', isMobile);
-  const shouldLaunchIdleTriggers = true;
   useEffect(() => {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
@@ -1280,21 +1276,19 @@ function CollectorProvider({
     log('CollectorProvider: attempting to fire idle trigger');
     setDisplayTrigger('INVOCATION_IDLE_TIME');
     startCooldown();
-  }, [idleTriggers, log, shouldLaunchIdleTriggers, canNextTriggerOccur, getRemainingCooldownMs]);
-  const fireExitTrigger = useCallback(() => {
-    log('CollectorProvider: attempting to fire exit trigger');
-    setDisplayTrigger('INVOCATION_EXIT_INTENT');
-    startCooldown();
-  }, [log, setDisplayTrigger, canNextTriggerOccur, getRemainingCooldownMs]);
+  }, [idleTriggers, log, setDisplayTrigger, startCooldown]);
   const launchExitTrigger = React__default.useCallback(() => {
     if (!canNextTriggerOccur()) {
-      log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. Will attempt again when the same signal occurs after this passes.`);
-      log('Re-registering handler...');
+      log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
+        I will attempt again when the same signal occurs after this passes.`);
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
-    fireExitTrigger();
-  }, [log, canNextTriggerOccur, fireExitTrigger, getRemainingCooldownMs, registerHandler, reRegisterExitIntent]);
+    log('CollectorProvider: attempting to fire exit trigger');
+    setDisplayTrigger('INVOCATION_EXIT_INTENT');
+    startCooldown();
+  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent]);
   useEffect(() => {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -1487,6 +1481,7 @@ const Modal = ({
   trigger
 }) => {
   const {
+    log,
     error
   } = useLogging();
   const {
@@ -1495,8 +1490,15 @@ const Modal = ({
   const {
     trackEvent
   } = useMixpanel();
+  const {
+    appId
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
   const [open, setOpen] = useState(true);
   const [stylesLoaded, setStylesLoaded] = useState(false);
+  const [hasFired, setHasFired] = useState(false);
   const brand = React__default.useMemo(() => {
     return getBrand();
   }, []);
@@ -1505,12 +1507,21 @@ const Modal = ({
   }, []);
   useEffect(() => {
     if (!open) return;
+    if (hasFired) return;
+    try {
+      request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+        seenTriggerIDs: [trigger.id]
+      }).then(log);
+    } catch (e) {
+      error(e);
+    }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
       brand
     });
+    setHasFired(true);
   }, [open]);
   useEffect(() => {
     const css = `

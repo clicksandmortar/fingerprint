@@ -10,7 +10,6 @@ var uuid = require('uuid');
 var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
-var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
 
@@ -836,23 +835,22 @@ function useTriggerDelay(cooldownMs) {
     cooldownMs = defaultTriggerCooldown;
   }
   var _useState = React.useState(null),
-    lastTrigerTimeStamp = _useState[0],
-    setLastTrigerTimeStamp = _useState[1];
+    lastTriggerTimeStamp = _useState[0],
+    setLastTriggerTimeStamp = _useState[1];
   var startCooldown = React__default.useCallback(function () {
     var currentTimeStamp = Number(new Date());
-    setLastTrigerTimeStamp(currentTimeStamp);
-  }, [setLastTrigerTimeStamp]);
+    setLastTriggerTimeStamp(currentTimeStamp);
+  }, [setLastTriggerTimeStamp]);
   var getRemainingCooldownMs = React__default.useCallback(function () {
-    if (!lastTrigerTimeStamp) return 0;
+    if (!lastTriggerTimeStamp) return 0;
     var currentTime = Number(new Date());
-    var remainingMS = lastTrigerTimeStamp + cooldownMs - currentTime;
+    var remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
     return remainingMS;
-  }, [lastTrigerTimeStamp, cooldownMs]);
+  }, [lastTriggerTimeStamp, cooldownMs]);
   var canNextTriggerOccur = React__default.useCallback(function () {
     return getRemainingCooldownMs() <= 0;
   }, [getRemainingCooldownMs]);
   return {
-    lastTrigerTimeStamp: lastTrigerTimeStamp,
     startCooldown: startCooldown,
     canNextTriggerOccur: canNextTriggerOccur,
     getRemainingCooldownMs: getRemainingCooldownMs
@@ -893,7 +891,7 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
-var defaultIdleStatusDelay = 3 * 1000;
+var defaultIdleStatusDelay = 5 * 1000;
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -929,11 +927,11 @@ function CollectorProvider(_ref) {
     registerHandler = _useExitIntent.registerHandler,
     reRegisterExitIntent = _useExitIntent.resetState;
   var getIdleStatusDelay = React__default.useCallback(function () {
-    var stdDelay = configIdleDelay || defaultIdleStatusDelay;
+    var idleDelay = configIdleDelay || defaultIdleStatusDelay;
     var cooldownDelay = getRemainingCooldownMs();
-    var recalcedIdleStatusDelay = stdDelay + cooldownDelay;
-    log("Setting idle delay at " + recalcedIdleStatusDelay + "ms (cooldown " + cooldownDelay + "ms + config.delay " + configIdleDelay + "ms)");
-    return recalcedIdleStatusDelay;
+    var delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log("Setting idle delay at " + delayAdjustedForCooldown + "ms (cooldown " + cooldownDelay + "ms + config.delay " + idleDelay + "ms)");
+    return delayAdjustedForCooldown;
   }, [getRemainingCooldownMs, configIdleDelay]);
   var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
@@ -955,8 +953,6 @@ function CollectorProvider(_ref) {
       return uniqueBy([].concat(prev, triggers || []), 'id');
     });
   };
-  log('CollectorProvider: user is on mobile?', reactDeviceDetect.isMobile);
-  var shouldLaunchIdleTriggers = true;
   React.useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
@@ -1014,21 +1010,18 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire idle trigger');
     setDisplayTrigger('INVOCATION_IDLE_TIME');
     startCooldown();
-  }, [idleTriggers, log, shouldLaunchIdleTriggers, canNextTriggerOccur, getRemainingCooldownMs]);
-  var fireExitTrigger = React.useCallback(function () {
-    log('CollectorProvider: attempting to fire exit trigger');
-    setDisplayTrigger('INVOCATION_EXIT_INTENT');
-    startCooldown();
-  }, [log, setDisplayTrigger, canNextTriggerOccur, getRemainingCooldownMs]);
+  }, [idleTriggers, log, setDisplayTrigger, startCooldown]);
   var launchExitTrigger = React__default.useCallback(function () {
     if (!canNextTriggerOccur()) {
-      log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. Will attempt again when the same signal occurs after this passes.");
-      log('Re-registering handler...');
+      log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. \n        I will attempt again when the same signal occurs after this passes.");
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
-    fireExitTrigger();
-  }, [log, canNextTriggerOccur, fireExitTrigger, getRemainingCooldownMs, registerHandler, reRegisterExitIntent]);
+    log('CollectorProvider: attempting to fire exit trigger');
+    setDisplayTrigger('INVOCATION_EXIT_INTENT');
+    startCooldown();
+  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -1240,17 +1233,26 @@ var getBrand = function getBrand() {
 
 var Modal = function Modal(_ref) {
   var trigger = _ref.trigger;
-  var _useLogging = useLogging();
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
   var _useCollector = useCollector(),
     resetDisplayTrigger = _useCollector.resetDisplayTrigger;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
   var _useState2 = React.useState(false),
     stylesLoaded = _useState2[0],
     setStylesLoaded = _useState2[1];
+  var _useState3 = React.useState(false),
+    hasFired = _useState3[0],
+    setHasFired = _useState3[1];
   var brand = React__default.useMemo(function () {
     return getBrand();
   }, []);
@@ -1259,12 +1261,21 @@ var Modal = function Modal(_ref) {
   }, []);
   React.useEffect(function () {
     if (!open) return;
+    if (hasFired) return;
+    try {
+      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+        seenTriggerIDs: [trigger.id]
+      }).then(log);
+    } catch (e) {
+      error(e);
+    }
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
       brand: brand
     });
+    setHasFired(true);
   }, [open]);
   React.useEffect(function () {
     var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";

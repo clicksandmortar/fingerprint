@@ -1,8 +1,6 @@
-/* eslint-disable max-lines */
-/* eslint-disable require-jsdoc */
 import uniqueBy from 'lodash.uniqby'
 import React, { createContext, useCallback, useEffect, useState } from 'react'
-import { isMobile } from 'react-device-detect'
+// import { isMobile } from 'react-device-detect' <= reminder where isMobile came from
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
 import { CollectorResponse, Trigger } from '../client/types'
@@ -15,7 +13,7 @@ import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
 
-const defaultIdleStatusDelay = 3 * 1000
+const defaultIdleStatusDelay = 5 * 1000
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
@@ -53,16 +51,16 @@ export function CollectorProvider({
    * Recalculate the idle delay based on config / defaul val and cooldown.
    */
   const getIdleStatusDelay = React.useCallback((): number => {
-    const stdDelay = configIdleDelay || defaultIdleStatusDelay
+    const idleDelay = configIdleDelay || defaultIdleStatusDelay
     const cooldownDelay = getRemainingCooldownMs()
 
-    const recalcedIdleStatusDelay = stdDelay + cooldownDelay
+    const delayAdjustedForCooldown = idleDelay + cooldownDelay
 
     log(
-      `Setting idle delay at ${recalcedIdleStatusDelay}ms (cooldown ${cooldownDelay}ms + config.delay ${configIdleDelay}ms)`
+      `Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + config.delay ${idleDelay}ms)`
     )
 
-    return recalcedIdleStatusDelay
+    return delayAdjustedForCooldown
   }, [getRemainingCooldownMs, configIdleDelay])
 
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
@@ -77,16 +75,14 @@ export function CollectorProvider({
     new Map()
   )
 
+  /**
+   * add triggers to existing ones, keep unique to prevent multi-firing
+   */
   const addPageTriggers = (triggers: Trigger[]) => {
     setPageTriggers((prev) =>
       uniqueBy<Trigger>([...prev, ...(triggers || [])], 'id')
     )
   }
-
-  log('CollectorProvider: user is on mobile?', isMobile)
-
-  // const shouldLaunchIdleTriggers = isMobile
-  const shouldLaunchIdleTriggers = true
 
   // Removes the intently overlay, if intently is false
   useEffect(() => {
@@ -175,48 +171,36 @@ export function CollectorProvider({
 
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return
-    if (!shouldLaunchIdleTriggers) return
-    /**
-     * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets recalculated on
-     * trigger fire.
-     */
 
+    /**
+     * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
+     * the diff elsewhere
+     */
     log('CollectorProvider: attempting to fire idle trigger')
     setDisplayTrigger('INVOCATION_IDLE_TIME')
     startCooldown()
-  }, [
-    idleTriggers,
-    log,
-    shouldLaunchIdleTriggers,
-    canNextTriggerOccur,
-    getRemainingCooldownMs
-  ])
-
-  const fireExitTrigger = useCallback(() => {
-    log('CollectorProvider: attempting to fire exit trigger')
-    setDisplayTrigger('INVOCATION_EXIT_INTENT')
-    startCooldown()
-  }, [log, setDisplayTrigger, canNextTriggerOccur, getRemainingCooldownMs])
+  }, [idleTriggers, log, setDisplayTrigger, startCooldown])
 
   const launchExitTrigger = React.useCallback(() => {
     if (!canNextTriggerOccur()) {
       log(
-        `Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. Will attempt again when the same signal occurs after this passes.`
+        `Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
+        I will attempt again when the same signal occurs after this passes.`
       )
-      log('Re-registering handler...')
+
+      log('Re-registering handler')
       reRegisterExitIntent()
       return
     }
-    fireExitTrigger()
-  }, [
-    log,
-    canNextTriggerOccur,
-    fireExitTrigger,
-    getRemainingCooldownMs,
-    registerHandler,
-    reRegisterExitIntent
-  ])
 
+    log('CollectorProvider: attempting to fire exit trigger')
+    setDisplayTrigger('INVOCATION_EXIT_INTENT')
+    startCooldown()
+  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent])
+
+  /**
+   * Register exit intent triggers
+   */
   useEffect(() => {
     if (!exitIntentTriggers) return
 
