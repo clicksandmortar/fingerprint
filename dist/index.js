@@ -927,7 +927,7 @@ function CollectorProvider(_ref) {
       }
     }),
     registerHandler = _useExitIntent.registerHandler,
-    resetState = _useExitIntent.resetState;
+    reRegisterExitIntent = _useExitIntent.resetState;
   var getIdleStatusDelay = React__default.useCallback(function () {
     var stdDelay = configIdleDelay || defaultIdleStatusDelay;
     var cooldownDelay = getRemainingCooldownMs();
@@ -1020,18 +1020,15 @@ function CollectorProvider(_ref) {
     setDisplayTrigger('INVOCATION_EXIT_INTENT');
     startCooldown();
   }, [log, setDisplayTrigger, canNextTriggerOccur, getRemainingCooldownMs]);
-  var reregister = function reregister() {
-    resetState();
-  };
   var launchExitTrigger = React__default.useCallback(function () {
     if (!canNextTriggerOccur()) {
       log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. Will attempt again when the same signal occurs after this passes.");
       log('Re-registering handler...');
-      reregister();
+      reRegisterExitIntent();
       return;
     }
     fireExitTrigger();
-  }, [log, canNextTriggerOccur, fireExitTrigger, getRemainingCooldownMs, registerHandler, reregister]);
+  }, [log, canNextTriggerOccur, fireExitTrigger, getRemainingCooldownMs, registerHandler, reRegisterExitIntent]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');

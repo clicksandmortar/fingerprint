@@ -1201,7 +1201,7 @@ function CollectorProvider({
   } = useCollectorMutation();
   const {
     registerHandler,
-    resetState
+    resetState: reRegisterExitIntent
   } = useExitIntent({
     cookie: {
       key: '_cm_exit',
@@ -1286,18 +1286,15 @@ function CollectorProvider({
     setDisplayTrigger('INVOCATION_EXIT_INTENT');
     startCooldown();
   }, [log, setDisplayTrigger, canNextTriggerOccur, getRemainingCooldownMs]);
-  const reregister = () => {
-    resetState();
-  };
   const launchExitTrigger = React__default.useCallback(() => {
     if (!canNextTriggerOccur()) {
       log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. Will attempt again when the same signal occurs after this passes.`);
       log('Re-registering handler...');
-      reregister();
+      reRegisterExitIntent();
       return;
     }
     fireExitTrigger();
-  }, [log, canNextTriggerOccur, fireExitTrigger, getRemainingCooldownMs, registerHandler, reregister]);
+  }, [log, canNextTriggerOccur, fireExitTrigger, getRemainingCooldownMs, registerHandler, reRegisterExitIntent]);
   useEffect(() => {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');

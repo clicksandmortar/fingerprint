@@ -45,7 +45,7 @@ export function CollectorProvider({
 
   // @todo remove this for our own exit intent implementation, for instance:
   // https://fullstackheroes.com/tutorials/react/exit-intent-react/
-  const { registerHandler, resetState } = useExitIntent({
+  const { registerHandler, resetState: reRegisterExitIntent } = useExitIntent({
     cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
 
@@ -198,17 +198,13 @@ export function CollectorProvider({
     startCooldown()
   }, [log, setDisplayTrigger, canNextTriggerOccur, getRemainingCooldownMs])
 
-  const reregister = () => {
-    resetState()
-  }
-
   const launchExitTrigger = React.useCallback(() => {
     if (!canNextTriggerOccur()) {
       log(
         `Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. Will attempt again when the same signal occurs after this passes.`
       )
       log('Re-registering handler...')
-      reregister()
+      reRegisterExitIntent()
       return
     }
     fireExitTrigger()
@@ -218,7 +214,7 @@ export function CollectorProvider({
     fireExitTrigger,
     getRemainingCooldownMs,
     registerHandler,
-    reregister
+    reRegisterExitIntent
   ])
 
   useEffect(() => {
