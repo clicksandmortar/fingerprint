@@ -10,7 +10,6 @@ var uuid = require('uuid');
 var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
-var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
 
@@ -830,6 +829,34 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
+var defaultTriggerCooldown = 60 * 1000;
+function useTriggerDelay(cooldownMs) {
+  if (cooldownMs === void 0) {
+    cooldownMs = defaultTriggerCooldown;
+  }
+  var _useState = React.useState(null),
+    lastTriggerTimeStamp = _useState[0],
+    setLastTriggerTimeStamp = _useState[1];
+  var startCooldown = React__default.useCallback(function () {
+    var currentTimeStamp = Number(new Date());
+    setLastTriggerTimeStamp(currentTimeStamp);
+  }, [setLastTriggerTimeStamp]);
+  var getRemainingCooldownMs = React__default.useCallback(function () {
+    if (!lastTriggerTimeStamp) return 0;
+    var currentTime = Number(new Date());
+    var remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
+    return remainingMS;
+  }, [lastTriggerTimeStamp, cooldownMs]);
+  var canNextTriggerOccur = React__default.useCallback(function () {
+    return getRemainingCooldownMs() <= 0;
+  }, [getRemainingCooldownMs]);
+  return {
+    startCooldown: startCooldown,
+    canNextTriggerOccur: canNextTriggerOccur,
+    getRemainingCooldownMs: getRemainingCooldownMs
+  };
+}
+
 var getVisitorId = function getVisitorId() {
   if (typeof window === 'undefined') return null;
   var urlParams = new URLSearchParams(window.location.search);
@@ -841,7 +868,6 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
 };
 
 var defaultIdleStatusDelay = 5 * 1000;
-
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -856,9 +882,14 @@ function CollectorProvider(_ref) {
     exitIntentTriggers = _useFingerprint.exitIntentTriggers,
     idleTriggers = _useFingerprint.idleTriggers,
     config = _useFingerprint.config;
+  var configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
     session = _useVisitor.session;
+  var _useTriggerDelay = useTriggerDelay(config === null || config === void 0 ? void 0 : config.triggerCooldown),
+    canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
+    startCooldown = _useTriggerDelay.startCooldown,
+    getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
   var _useCollectorMutation = useCollectorMutation(),
@@ -869,8 +900,16 @@ function CollectorProvider(_ref) {
         daysToExpire: 0
       }
     }),
-    registerHandler = _useExitIntent.registerHandler;
-  var _useState = React.useState((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay),
+    registerHandler = _useExitIntent.registerHandler,
+    reRegisterExitIntent = _useExitIntent.resetState;
+  var getIdleStatusDelay = React__default.useCallback(function () {
+    var idleDelay = configIdleDelay || defaultIdleStatusDelay;
+    var cooldownDelay = getRemainingCooldownMs();
+    var delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log("Setting idle delay at " + delayAdjustedForCooldown + "ms (cooldown " + cooldownDelay + "ms + config.delay " + idleDelay + "ms)");
+    return delayAdjustedForCooldown;
+  }, [getRemainingCooldownMs, configIdleDelay]);
+  var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
   var _useState2 = React.useState([]),
@@ -890,8 +929,6 @@ function CollectorProvider(_ref) {
       return uniqueBy([].concat(prev, triggers || []), 'id');
     });
   };
-  log('CollectorProvider: user is on mobile?', reactDeviceDetect.isMobile);
-  var shouldLaunchIdleTriggers = reactDeviceDetect.isMobile;
   React.useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
@@ -907,6 +944,10 @@ function CollectorProvider(_ref) {
       clearInterval(runningInterval);
     };
   }, [intently, log]);
+  var resetDisplayTrigger = React.useCallback(function () {
+    log('CollectorProvider: resetting displayTrigger');
+    setDisplayTrigger(undefined);
+  }, [log]);
   var TriggerComponent = React__default.useCallback(function () {
     var _handler$invoke, _handler;
     if (!displayTrigger) return null;
@@ -935,31 +976,36 @@ function CollectorProvider(_ref) {
       return null;
     }
     var potentialComponent = (_handler$invoke = (_handler = handler).invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(_handler, trigger);
-    if (potentialComponent && React__default.isValidElement(potentialComponent)) return potentialComponent;
+    if (potentialComponent && React__default.isValidElement(potentialComponent)) {
+      return potentialComponent;
+    }
     return null;
-  }, [displayTrigger, error, handlers, log, pageTriggers, handlers]);
+  }, [log, displayTrigger, pageTriggers, handlers, getRemainingCooldownMs, error, startCooldown, resetDisplayTrigger]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
-    if (!shouldLaunchIdleTriggers) return;
     log('CollectorProvider: attempting to fire idle trigger');
     setDisplayTrigger('INVOCATION_IDLE_TIME');
-  }, [idleTriggers, log, shouldLaunchIdleTriggers]);
-  var fireExitTrigger = React.useCallback(function () {
+    startCooldown();
+  }, [idleTriggers, log, setDisplayTrigger, startCooldown]);
+  var launchExitTrigger = React__default.useCallback(function () {
+    if (!canNextTriggerOccur()) {
+      log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. \n        I will attempt again when the same signal occurs after this passes.");
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
     log('CollectorProvider: attempting to fire exit trigger');
     setDisplayTrigger('INVOCATION_EXIT_INTENT');
-  }, [log, exitIntentTriggers, setDisplayTrigger]);
+    startCooldown();
+  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
     registerHandler({
       id: 'clientTrigger',
-      handler: fireExitTrigger
+      handler: launchExitTrigger
     });
-  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
-  var resetDisplayTrigger = React.useCallback(function () {
-    log('CollectorProvider: resetting displayTrigger');
-    setDisplayTrigger(undefined);
-  }, [log]);
+  }, [exitIntentTriggers, launchExitTrigger, log, registerHandler]);
   React.useEffect(function () {
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot');
@@ -1041,7 +1087,7 @@ function CollectorProvider(_ref) {
           }
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
-            setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay);
+            setIdleTimeout(getIdleStatusDelay());
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
@@ -1068,8 +1114,8 @@ function CollectorProvider(_ref) {
     return function () {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, handlers, initialDelay, log, trackEvent, visitor]);
-  var registerWatcher = function registerWatcher(configuredSelector, configuredSearch) {
+  }, [appId, booted, collect, error, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
+  var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
       var found = false;
@@ -1095,7 +1141,7 @@ function CollectorProvider(_ref) {
             try {
               return Promise.resolve(response.json()).then(function (payload) {
                 log('Sent collector data, retrieved:', payload);
-                setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || defaultIdleStatusDelay);
+                setIdleTimeout(getIdleStatusDelay());
                 addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
               });
             } catch (e) {
@@ -1109,7 +1155,7 @@ function CollectorProvider(_ref) {
       });
     }, 500);
     return intervalId;
-  };
+  }, [appId, collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
   React.useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];
@@ -1118,12 +1164,12 @@ function CollectorProvider(_ref) {
         return clearInterval(intervalId);
       });
     };
-  }, [visitor]);
+  }, [registerWatcher, visitor]);
   var setTrigger = React__default.useCallback(function (trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
     addPageTriggers([trigger]);
     setDisplayTrigger(trigger.invocation);
-  }, [log, pageTriggers, setDisplayTrigger, addPageTriggers]);
+  }, [log, setDisplayTrigger, addPageTriggers]);
   var collectorContextVal = React__default.useMemo(function () {
     return {
       addPageTriggers: addPageTriggers,
@@ -1180,6 +1226,9 @@ var Modal = function Modal(_ref) {
   var _useState2 = React.useState(false),
     stylesLoaded = _useState2[0],
     setStylesLoaded = _useState2[1];
+  var _useState3 = React.useState(false),
+    hasFired = _useState3[0],
+    setHasFired = _useState3[1];
   var brand = React__default.useMemo(function () {
     return getBrand();
   }, []);
@@ -1188,6 +1237,7 @@ var Modal = function Modal(_ref) {
   }, []);
   React.useEffect(function () {
     if (!open) return;
+    if (hasFired) return;
     try {
       request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
         seenTriggerIDs: [trigger.id]
@@ -1199,8 +1249,10 @@ var Modal = function Modal(_ref) {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
       brand: brand
     });
+    setHasFired(true);
   }, [open]);
   React.useEffect(function () {
     var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
@@ -1350,12 +1402,14 @@ var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   var _useState = React.useState(consent),
     consentGiven = _useState[0],
     setConsentGiven = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
   React.useEffect(function () {
     if (consent) {
       setConsentGiven(consent);
       return;
     }
-    console.log('Fingerprint Widget Consent: ', consent);
+    log('Fingerprint Widget Consent: ', consent);
     if (!consentCallback) return;
     var consentGivenViaCallback = consentCallback();
     var interval = setInterval(function () {
@@ -1464,7 +1518,7 @@ var defaultFingerprintState = {
   unregisterHandler: function unregisterHandler() {},
   config: {
     idleDelay: undefined,
-    trackIdleOnDesktop: false
+    triggerCooldown: 60 * 1000
   }
 };
 var FingerprintContext = React.createContext(_extends({}, defaultFingerprintState));

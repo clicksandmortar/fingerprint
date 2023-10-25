@@ -13,7 +13,7 @@ export declare type FingerprintProviderProps = {
     idleTriggers?: boolean;
     config?: {
         idleDelay?: number;
-        trackIdleOnDesktop?: boolean;
+        triggerCooldown?: number;
     };
 };
 export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, config }: FingerprintProviderProps) => {} | null | undefined;
