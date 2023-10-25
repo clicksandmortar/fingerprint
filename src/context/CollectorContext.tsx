@@ -52,6 +52,7 @@ export function CollectorProvider({
    */
   const getIdleStatusDelay = React.useCallback((): number => {
     const idleDelay = configIdleDelay || defaultIdleStatusDelay
+
     const cooldownDelay = getRemainingCooldownMs()
 
     const delayAdjustedForCooldown = idleDelay + cooldownDelay

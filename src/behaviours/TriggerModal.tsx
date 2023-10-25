@@ -18,7 +18,6 @@ type Props = {
 
 const Modal = ({ trigger }: Props) => {
   const { log, error } = useLogging()
-
   const { resetDisplayTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const { appId } = useFingerprint()
