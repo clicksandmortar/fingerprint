@@ -1495,6 +1495,7 @@ const Modal = ({
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
       brand
     });
     setHasFired(true);

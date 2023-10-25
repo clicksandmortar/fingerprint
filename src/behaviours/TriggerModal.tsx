@@ -52,6 +52,7 @@ const Modal = ({ trigger }: Props) => {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
       brand
     })
     setHasFired(true)

@@ -1249,6 +1249,7 @@ var Modal = function Modal(_ref) {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
       brand: brand
     });
     setHasFired(true);
