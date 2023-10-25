@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+/* eslint-disable require-jsdoc */
 import uniqueBy from 'lodash.uniqby'
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
@@ -6,12 +8,80 @@ import { useExitIntent } from 'use-exit-intent'
 import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
+import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
-import { hasVisitorIDInURL } from '../utils/visitor_id'
 
-const defaultIdleStatusDelay = 5 * 1000
+const fakeTriggers: Trigger[] = [
+  {
+    id: '047e81d5-cb12-4496-af68-9e87e4dc5e5b',
+    invocation: 'INVOCATION_EXIT_INTENT',
+    behaviour: 'BEHAVIOUR_MODAL',
+    data: {
+      backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+      buttonText: 'Find Out More',
+      buttonURL: 'https://browns-restaurants.co.uk/christmas#/',
+      heading: 'Thought about Christmas?',
+      paragraph: 'Celebrate at Browns.'
+    }
+  },
+  {
+    id: 'e1059791-2b06-4e53-b22b-56fc6213a1c4',
+    invocation: 'INVOCATION_IDLE_TIME',
+    behaviour: 'BEHAVIOUR_MODAL',
+    data: {
+      backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+      buttonText: 'Find Out More',
+      buttonURL: 'https://browns-restaurants.co.uk/christmas#/',
+      heading: 'Thought about Christmas?',
+      paragraph: 'Celebrate at Browns.'
+    }
+  }
+]
+
+const defaultIdleStatusDelay = 3 * 1000
+// TODO: UNDO
+// const defaultTriggerCooldown = 60 * 1000
+const defaultTriggerCooldown = 7 * 1000
+
+function useTriggerDelay(cooldownMs: number = defaultTriggerCooldown) {
+  const [lastTrigerTimeStamp, setLastTrigerTimeStamp] = useState<number | null>(
+    null
+  )
+
+  const startCooldown = React.useCallback(() => {
+    const currentTimeStamp = Number(new Date())
+
+    setLastTrigerTimeStamp(currentTimeStamp)
+  }, [setLastTrigerTimeStamp])
+
+  const getRemainingCooldownMs = React.useCallback(() => {
+    if (!lastTrigerTimeStamp) return 0
+
+    const currentTime = Number(new Date())
+    const remainingMS = lastTrigerTimeStamp + cooldownMs - currentTime
+
+    return remainingMS
+  }, [lastTrigerTimeStamp])
+
+  const canNextTriggerOccur = React.useCallback(() => {
+    const remainingMS = getRemainingCooldownMs()
+
+    console.log({ remainingMS, shouldLaunch: remainingMS <= 0 })
+
+    if (remainingMS <= 0) return true
+
+    return false
+  }, [cooldownMs, getRemainingCooldownMs])
+
+  return {
+    lastTrigerTimeStamp,
+    startCooldown,
+    canNextTriggerOccur,
+    getRemainingCooldownMs
+  }
+}
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
@@ -31,18 +101,31 @@ export function CollectorProvider({
     idleTriggers,
     config
   } = useFingerprint()
-  const { visitor, session } = useVisitor()
 
+  const configIdleDelay = config?.idleDelay
+  const { visitor, session } = useVisitor()
+  const { canNextTriggerOccur, startCooldown, getRemainingCooldownMs } =
+    useTriggerDelay(defaultTriggerCooldown)
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
 
+  // const canNextTriggerOccur = getRemainingCooldownMs() <= 0
+
   // @todo remove this for our own exit intent implementation, for instance:
   // https://fullstackheroes.com/tutorials/react/exit-intent-react/
-  const { registerHandler } = useExitIntent({
+  const { registerHandler, resetState } = useExitIntent({
     cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
+
+  const idleStatusDelay = React.useMemo<number>(() => {
+    const stdDelay = configIdleDelay || defaultIdleStatusDelay
+    const cooldownDelay = getRemainingCooldownMs()
+
+    return stdDelay + cooldownDelay
+  }, [getRemainingCooldownMs, configIdleDelay])
+
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
-    config?.idleDelay || defaultIdleStatusDelay
+    idleStatusDelay
   )
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
   const [displayTrigger, setDisplayTrigger] = useState<
@@ -61,8 +144,10 @@ export function CollectorProvider({
 
   log('CollectorProvider: user is on mobile?', isMobile)
 
-  const shouldLaunchIdleTriggers = isMobile
+  // const shouldLaunchIdleTriggers = isMobile
+  const shouldLaunchIdleTriggers = true
 
+  console.log({ pageTriggers })
   // Removes the intently overlay, if intently is false
   useEffect(() => {
     if (intently) return
@@ -87,6 +172,11 @@ export function CollectorProvider({
       clearInterval(runningInterval)
     }
   }, [intently, log])
+
+  const resetDisplayTrigger = useCallback(() => {
+    log('CollectorProvider: resetting displayTrigger')
+    setDisplayTrigger(undefined)
+  }, [log])
 
   const TriggerComponent = React.useCallback(() => {
     if (!displayTrigger) return null
@@ -126,24 +216,77 @@ export function CollectorProvider({
     }
 
     const potentialComponent = handler.invoke?.(trigger)
-    if (potentialComponent && React.isValidElement(potentialComponent))
+    if (potentialComponent && React.isValidElement(potentialComponent)) {
+      // startCooldown()
       return potentialComponent
+    }
 
     return null
-  }, [displayTrigger, error, handlers, log, pageTriggers, handlers])
+  }, [
+    log,
+    displayTrigger,
+    pageTriggers,
+    handlers,
+    getRemainingCooldownMs,
+    error,
+    startCooldown,
+    resetDisplayTrigger
+  ])
 
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return
     if (!shouldLaunchIdleTriggers) return
+    log(
+      'comparing',
+      getRemainingCooldownMs() <= 0,
+      '< if true, trigger should launch :shrug:'
+    )
+    if (!canNextTriggerOccur()) {
+      log(
+        `Tried to launch IDLE trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. Will attempt again when the same signal occurs after this passes.`
+      )
+      return
+    }
 
     log('CollectorProvider: attempting to fire idle trigger')
     setDisplayTrigger('INVOCATION_IDLE_TIME')
-  }, [idleTriggers, log, shouldLaunchIdleTriggers])
+    startCooldown()
+  }, [
+    idleTriggers,
+    log,
+    shouldLaunchIdleTriggers,
+    canNextTriggerOccur,
+    getRemainingCooldownMs
+  ])
 
   const fireExitTrigger = useCallback(() => {
     log('CollectorProvider: attempting to fire exit trigger')
     setDisplayTrigger('INVOCATION_EXIT_INTENT')
-  }, [log, exitIntentTriggers, setDisplayTrigger])
+    startCooldown()
+  }, [log, setDisplayTrigger, canNextTriggerOccur, getRemainingCooldownMs])
+
+  const reregister = () => {
+    resetState()
+  }
+
+  const launchExitTrigger = React.useCallback(() => {
+    if (!canNextTriggerOccur()) {
+      log(
+        `Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. Will attempt again when the same signal occurs after this passes.`
+      )
+      log('Re-registering handler...')
+      reregister()
+      return
+    }
+    fireExitTrigger()
+  }, [
+    log,
+    canNextTriggerOccur,
+    fireExitTrigger,
+    getRemainingCooldownMs,
+    registerHandler,
+    reregister
+  ])
 
   useEffect(() => {
     if (!exitIntentTriggers) return
@@ -152,14 +295,9 @@ export function CollectorProvider({
 
     registerHandler({
       id: 'clientTrigger',
-      handler: fireExitTrigger
+      handler: launchExitTrigger
     })
-  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
-
-  const resetDisplayTrigger = useCallback(() => {
-    log('CollectorProvider: resetting displayTrigger')
-    setDisplayTrigger(undefined)
-  }, [log])
+  }, [exitIntentTriggers, launchExitTrigger, log, registerHandler])
 
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
@@ -196,13 +334,11 @@ export function CollectorProvider({
 
       const hash: string = window.location.hash.substring(3)
 
-      var hashParams = hash
-        .split('&')
-        .reduce(function (result: any, item: any) {
-          var parts = item.split('=')
-          result[parts[0]] = parts[1]
-          return result
-        }, {})
+      const hashParams = hash.split('&').reduce((result: any, item: any) => {
+        const parts = item.split('=')
+        result[parts[0]] = parts[1]
+        return result
+      }, {})
 
       if (hashParams.id_token) {
         log('CollectorProvider: user logged in event fired')
@@ -265,9 +401,10 @@ export function CollectorProvider({
 
           // Set IdleTimer
           // @todo turn this into the dynamic value
-          setIdleTimeout(config?.idleDelay || defaultIdleStatusDelay)
+          setIdleTimeout(idleStatusDelay)
 
-          addPageTriggers(payload?.pageTriggers)
+          // addPageTriggers(payload?.pageTriggers)
+          addPageTriggers(fakeTriggers)
 
           if (!payload.intently) {
             // remove intently overlay here
@@ -302,66 +439,78 @@ export function CollectorProvider({
     error,
     handlers,
     initialDelay,
+    idleStatusDelay,
     log,
-    trackEvent, // to figure out later, do we need this? probs can be removed
-    visitor
+    trackEvent,
+    visitor,
+    session?.id
   ])
 
-  const registerWatcher = (
-    configuredSelector: string,
-    configuredSearch: string
-  ) => {
-    const intervalId = setInterval(() => {
-      const inputs = document.querySelectorAll(configuredSelector)
+  const registerWatcher = React.useCallback(
+    (configuredSelector: string, configuredSearch: string) => {
+      const intervalId = setInterval(() => {
+        const inputs = document.querySelectorAll(configuredSelector)
 
-      let found = false
-      inputs.forEach(function (element) {
-        if (
-          configuredSearch === '' &&
-          window.getComputedStyle(element).display !== 'none'
-        ) {
-          // This means we do not have specific text, so we're checking if the element does not have display=none
-          found = true
-        } else if (element.textContent === configuredSearch) {
-          // inform the UI that the element is found
-          found = true
-        }
-        if (found && !foundWatchers[configuredSelector]) {
-          trackEvent('booking_complete', {})
-          foundWatchers[configuredSelector] = true
-          setFoundWatchers(foundWatchers)
-          collect({
-            appId,
-            visitor,
-            sessionId: session?.id,
-            elements: [
-              {
-                path: window.location.pathname,
-                selector: configuredSelector
-              }
-            ]
-          })
-            .then(async (response: Response) => {
-              const payload: CollectorResponse = await response.json()
-
-              log('Sent collector data, retrieved:', payload)
-
-              // Set IdleTimer
-              // @todo turn this into the dynamic value
-              setIdleTimeout(config?.idleDelay || defaultIdleStatusDelay)
-              addPageTriggers(payload?.pageTriggers)
+        let found = false
+        inputs.forEach((element) => {
+          if (
+            configuredSearch === '' &&
+            window.getComputedStyle(element).display !== 'none'
+          ) {
+            // This means we do not have specific text, so we're checking if the element does not have display=none
+            found = true
+          } else if (element.textContent === configuredSearch) {
+            // inform the UI that the element is found
+            found = true
+          }
+          if (found && !foundWatchers[configuredSelector]) {
+            trackEvent('booking_complete', {})
+            foundWatchers[configuredSelector] = true
+            setFoundWatchers(foundWatchers)
+            collect({
+              appId,
+              visitor,
+              sessionId: session?.id,
+              elements: [
+                {
+                  path: window.location.pathname,
+                  selector: configuredSelector
+                }
+              ]
             })
-            .catch((err) => {
-              error('failed to store collected data', err)
-            })
-          // unregister the watcher when the element is found
-          clearInterval(intervalId)
-        }
-      })
-    }, 500)
+              .then(async (response: Response) => {
+                const payload: CollectorResponse = await response.json()
 
-    return intervalId
-  }
+                log('Sent collector data, retrieved:', payload)
+
+                // Set IdleTimer
+                // @todo turn this into the dynamic value
+                setIdleTimeout(idleStatusDelay)
+                addPageTriggers(payload?.pageTriggers)
+              })
+              .catch((err) => {
+                error('failed to store collected data', err)
+              })
+            // unregister the watcher when the element is found
+            clearInterval(intervalId)
+          }
+        })
+      }, 500)
+
+      return intervalId
+    },
+    [
+      appId,
+      collect,
+      error,
+      foundWatchers,
+      idleStatusDelay,
+      log,
+      session?.id,
+      trackEvent,
+      visitor
+    ]
+  )
 
   useEffect(() => {
     if (!visitor.id) return
@@ -371,7 +520,7 @@ export function CollectorProvider({
     return () => {
       intervalIds.forEach((intervalId) => clearInterval(intervalId))
     }
-  }, [visitor])
+  }, [registerWatcher, visitor])
 
   const setTrigger = React.useCallback(
     (trigger: Trigger) => {
@@ -379,7 +528,7 @@ export function CollectorProvider({
       addPageTriggers([trigger])
       setDisplayTrigger(trigger.invocation)
     },
-    [log, pageTriggers, setDisplayTrigger, addPageTriggers]
+    [log, setDisplayTrigger, addPageTriggers]
   )
 
   const collectorContextVal = React.useMemo(

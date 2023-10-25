@@ -13,6 +13,7 @@ export declare type FingerprintProviderProps = {
     idleTriggers?: boolean;
     config?: {
         idleDelay?: number;
+        triggerCooldown?: number;
         trackIdleOnDesktop?: boolean;
     };
 };

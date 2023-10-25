@@ -6,25 +6,26 @@ import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
-import { useVisitor } from '../context/VisitorContext'
+// import { useVisitor } from '../context/VisitorContext'
 import { useCollector } from '../hooks/useCollector'
-import { useFingerprint } from '../hooks/useFingerprint'
+// import { useFingerprint } from '../hooks/useFingerprint'
 import { getBrand } from '../utils/brand'
-import { hostname, request } from '../utils/http'
+// import { hostname, request } from '../utils/http'
 
 type Props = {
   trigger: Trigger
 }
 
 const Modal = ({ trigger }: Props) => {
-  const { log, error } = useLogging()
+  // const { log, error } = useLogging()
+  const { error } = useLogging()
   const { resetDisplayTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
-  const { appId } = useFingerprint()
-  const { visitor } = useVisitor()
+  // const { appId } = useFingerprint()
+  // const { visitor } = useVisitor()
   const [open, setOpen] = useState(true)
   const [stylesLoaded, setStylesLoaded] = useState(false)
-  const [hasFired, setHasFired] = useState(false)
+  // const [hasFired, setHasFired] = useState(false)
 
   const brand = React.useMemo(() => {
     return getBrand()
@@ -36,14 +37,14 @@ const Modal = ({ trigger }: Props) => {
 
   useEffect(() => {
     if (!open) return
-    if (hasFired) return
+    // if (hasFired) return
 
     try {
-      request
-        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
-          seenTriggerIDs: [trigger.id]
-        })
-        .then(log)
+      // request
+      //   .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+      //     seenTriggerIDs: [trigger.id]
+      //   })
+      //   .then(log)
     } catch (e) {
       error(e)
     }
@@ -54,7 +55,7 @@ const Modal = ({ trigger }: Props) => {
       triggerBehaviour: trigger.behaviour,
       brand
     })
-    setHasFired(true)
+    // setHasFired(true)
   }, [open])
 
   useEffect(() => {
