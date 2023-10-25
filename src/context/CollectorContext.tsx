@@ -8,80 +8,14 @@ import { useExitIntent } from 'use-exit-intent'
 import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
+import { useTriggerDelay } from '../hooks/useTriggerDelay'
+import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
 
-const fakeTriggers: Trigger[] = [
-  {
-    id: '047e81d5-cb12-4496-af68-9e87e4dc5e5b',
-    invocation: 'INVOCATION_EXIT_INTENT',
-    behaviour: 'BEHAVIOUR_MODAL',
-    data: {
-      backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-      buttonText: 'Find Out More',
-      buttonURL: 'https://browns-restaurants.co.uk/christmas#/',
-      heading: 'Thought about Christmas?',
-      paragraph: 'Celebrate at Browns.'
-    }
-  },
-  {
-    id: 'e1059791-2b06-4e53-b22b-56fc6213a1c4',
-    invocation: 'INVOCATION_IDLE_TIME',
-    behaviour: 'BEHAVIOUR_MODAL',
-    data: {
-      backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-      buttonText: 'Find Out More',
-      buttonURL: 'https://browns-restaurants.co.uk/christmas#/',
-      heading: 'Thought about Christmas?',
-      paragraph: 'Celebrate at Browns.'
-    }
-  }
-]
-
 const defaultIdleStatusDelay = 3 * 1000
-// TODO: UNDO
-// const defaultTriggerCooldown = 60 * 1000
-const defaultTriggerCooldown = 7 * 1000
-
-function useTriggerDelay(cooldownMs: number = defaultTriggerCooldown) {
-  const [lastTrigerTimeStamp, setLastTrigerTimeStamp] = useState<number | null>(
-    null
-  )
-
-  const startCooldown = React.useCallback(() => {
-    const currentTimeStamp = Number(new Date())
-
-    setLastTrigerTimeStamp(currentTimeStamp)
-  }, [setLastTrigerTimeStamp])
-
-  const getRemainingCooldownMs = React.useCallback(() => {
-    if (!lastTrigerTimeStamp) return 0
-
-    const currentTime = Number(new Date())
-    const remainingMS = lastTrigerTimeStamp + cooldownMs - currentTime
-
-    return remainingMS
-  }, [lastTrigerTimeStamp])
-
-  const canNextTriggerOccur = React.useCallback(() => {
-    const remainingMS = getRemainingCooldownMs()
-
-    console.log({ remainingMS, shouldLaunch: remainingMS <= 0 })
-
-    if (remainingMS <= 0) return true
-
-    return false
-  }, [cooldownMs, getRemainingCooldownMs])
-
-  return {
-    lastTrigerTimeStamp,
-    startCooldown,
-    canNextTriggerOccur,
-    getRemainingCooldownMs
-  }
-}
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
@@ -105,11 +39,9 @@ export function CollectorProvider({
   const configIdleDelay = config?.idleDelay
   const { visitor, session } = useVisitor()
   const { canNextTriggerOccur, startCooldown, getRemainingCooldownMs } =
-    useTriggerDelay(defaultTriggerCooldown)
+    useTriggerDelay(config?.triggerCooldown)
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
-
-  // const canNextTriggerOccur = getRemainingCooldownMs() <= 0
 
   // @todo remove this for our own exit intent implementation, for instance:
   // https://fullstackheroes.com/tutorials/react/exit-intent-react/
@@ -117,15 +49,24 @@ export function CollectorProvider({
     cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
 
-  const idleStatusDelay = React.useMemo<number>(() => {
+  /**
+   * Recalculate the idle delay based on config / defaul val and cooldown.
+   */
+  const getIdleStatusDelay = React.useCallback((): number => {
     const stdDelay = configIdleDelay || defaultIdleStatusDelay
     const cooldownDelay = getRemainingCooldownMs()
 
-    return stdDelay + cooldownDelay
+    const recalcedIdleStatusDelay = stdDelay + cooldownDelay
+
+    log(
+      `Setting idle delay at ${recalcedIdleStatusDelay}ms (cooldown ${cooldownDelay}ms + config.delay ${configIdleDelay}ms)`
+    )
+
+    return recalcedIdleStatusDelay
   }, [getRemainingCooldownMs, configIdleDelay])
 
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
-    idleStatusDelay
+    getIdleStatusDelay()
   )
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
   const [displayTrigger, setDisplayTrigger] = useState<
@@ -147,7 +88,6 @@ export function CollectorProvider({
   // const shouldLaunchIdleTriggers = isMobile
   const shouldLaunchIdleTriggers = true
 
-  console.log({ pageTriggers })
   // Removes the intently overlay, if intently is false
   useEffect(() => {
     if (intently) return
@@ -236,17 +176,10 @@ export function CollectorProvider({
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return
     if (!shouldLaunchIdleTriggers) return
-    log(
-      'comparing',
-      getRemainingCooldownMs() <= 0,
-      '< if true, trigger should launch :shrug:'
-    )
-    if (!canNextTriggerOccur()) {
-      log(
-        `Tried to launch IDLE trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. Will attempt again when the same signal occurs after this passes.`
-      )
-      return
-    }
+    /**
+     * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets recalculated on
+     * trigger fire.
+     */
 
     log('CollectorProvider: attempting to fire idle trigger')
     setDisplayTrigger('INVOCATION_IDLE_TIME')
@@ -401,7 +334,7 @@ export function CollectorProvider({
 
           // Set IdleTimer
           // @todo turn this into the dynamic value
-          setIdleTimeout(idleStatusDelay)
+          setIdleTimeout(getIdleStatusDelay())
 
           // addPageTriggers(payload?.pageTriggers)
           addPageTriggers(fakeTriggers)
@@ -439,7 +372,8 @@ export function CollectorProvider({
     error,
     handlers,
     initialDelay,
-    idleStatusDelay,
+    getIdleStatusDelay,
+    setIdleTimeout,
     log,
     trackEvent,
     visitor,
@@ -485,7 +419,8 @@ export function CollectorProvider({
 
                 // Set IdleTimer
                 // @todo turn this into the dynamic value
-                setIdleTimeout(idleStatusDelay)
+                setIdleTimeout(getIdleStatusDelay())
+
                 addPageTriggers(payload?.pageTriggers)
               })
               .catch((err) => {
@@ -504,9 +439,10 @@ export function CollectorProvider({
       collect,
       error,
       foundWatchers,
-      idleStatusDelay,
+      getIdleStatusDelay,
       log,
-      session?.id,
+      session,
+      setIdleTimeout,
       trackEvent,
       visitor
     ]

@@ -830,41 +830,7 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
-var getVisitorId = function getVisitorId() {
-  if (typeof window === 'undefined') return null;
-  var urlParams = new URLSearchParams(window.location.search);
-  var vid = urlParams.get('v_id');
-  return vid;
-};
-var hasVisitorIDInURL = function hasVisitorIDInURL() {
-  return getVisitorId() !== null;
-};
-
-var fakeTriggers = [{
-  id: '047e81d5-cb12-4496-af68-9e87e4dc5e5b',
-  invocation: 'INVOCATION_EXIT_INTENT',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Find Out More',
-    buttonURL: 'https://browns-restaurants.co.uk/christmas#/',
-    heading: 'Thought about Christmas?',
-    paragraph: 'Celebrate at Browns.'
-  }
-}, {
-  id: 'e1059791-2b06-4e53-b22b-56fc6213a1c4',
-  invocation: 'INVOCATION_IDLE_TIME',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-    buttonText: 'Find Out More',
-    buttonURL: 'https://browns-restaurants.co.uk/christmas#/',
-    heading: 'Thought about Christmas?',
-    paragraph: 'Celebrate at Browns.'
-  }
-}];
-var defaultIdleStatusDelay = 3 * 1000;
-var defaultTriggerCooldown = 7 * 1000;
+var defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs) {
   if (cooldownMs === void 0) {
     cooldownMs = defaultTriggerCooldown;
@@ -881,16 +847,10 @@ function useTriggerDelay(cooldownMs) {
     var currentTime = Number(new Date());
     var remainingMS = lastTrigerTimeStamp + cooldownMs - currentTime;
     return remainingMS;
-  }, [lastTrigerTimeStamp]);
+  }, [lastTrigerTimeStamp, cooldownMs]);
   var canNextTriggerOccur = React__default.useCallback(function () {
-    var remainingMS = getRemainingCooldownMs();
-    console.log({
-      remainingMS: remainingMS,
-      shouldLaunch: remainingMS <= 0
-    });
-    if (remainingMS <= 0) return true;
-    return false;
-  }, [cooldownMs, getRemainingCooldownMs]);
+    return getRemainingCooldownMs() <= 0;
+  }, [getRemainingCooldownMs]);
   return {
     lastTrigerTimeStamp: lastTrigerTimeStamp,
     startCooldown: startCooldown,
@@ -898,6 +858,42 @@ function useTriggerDelay(cooldownMs) {
     getRemainingCooldownMs: getRemainingCooldownMs
   };
 }
+
+var fakeTriggers = [{
+  id: 'sample_id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is a test',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: 'sample_id_2',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is a test',
+    paragraph: 'And so is this'
+  }
+}];
+
+var getVisitorId = function getVisitorId() {
+  if (typeof window === 'undefined') return null;
+  var urlParams = new URLSearchParams(window.location.search);
+  var vid = urlParams.get('v_id');
+  return vid;
+};
+var hasVisitorIDInURL = function hasVisitorIDInURL() {
+  return getVisitorId() !== null;
+};
+
+var defaultIdleStatusDelay = 3 * 1000;
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -916,7 +912,7 @@ function CollectorProvider(_ref) {
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
     session = _useVisitor.session;
-  var _useTriggerDelay = useTriggerDelay(defaultTriggerCooldown),
+  var _useTriggerDelay = useTriggerDelay(config === null || config === void 0 ? void 0 : config.triggerCooldown),
     canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
     startCooldown = _useTriggerDelay.startCooldown,
     getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs;
@@ -932,26 +928,28 @@ function CollectorProvider(_ref) {
     }),
     registerHandler = _useExitIntent.registerHandler,
     resetState = _useExitIntent.resetState;
-  var idleStatusDelay = React__default.useMemo(function () {
+  var getIdleStatusDelay = React__default.useCallback(function () {
     var stdDelay = configIdleDelay || defaultIdleStatusDelay;
     var cooldownDelay = getRemainingCooldownMs();
-    return stdDelay + cooldownDelay;
+    var recalcedIdleStatusDelay = stdDelay + cooldownDelay;
+    log("Setting idle delay at " + recalcedIdleStatusDelay + "ms (cooldown " + cooldownDelay + "ms + config.delay " + configIdleDelay + "ms)");
+    return recalcedIdleStatusDelay;
   }, [getRemainingCooldownMs, configIdleDelay]);
-  var _useState2 = React.useState(idleStatusDelay),
-    idleTimeout = _useState2[0],
-    setIdleTimeout = _useState2[1];
-  var _useState3 = React.useState([]),
-    pageTriggers = _useState3[0],
-    setPageTriggers = _useState3[1];
-  var _useState4 = React.useState(undefined),
-    displayTrigger = _useState4[0],
-    setDisplayTrigger = _useState4[1];
-  var _useState5 = React.useState(false),
-    intently = _useState5[0],
-    setIntently = _useState5[1];
-  var _useState6 = React.useState(new Map()),
-    foundWatchers = _useState6[0],
-    setFoundWatchers = _useState6[1];
+  var _useState = React.useState(getIdleStatusDelay()),
+    idleTimeout = _useState[0],
+    setIdleTimeout = _useState[1];
+  var _useState2 = React.useState([]),
+    pageTriggers = _useState2[0],
+    setPageTriggers = _useState2[1];
+  var _useState3 = React.useState(undefined),
+    displayTrigger = _useState3[0],
+    setDisplayTrigger = _useState3[1];
+  var _useState4 = React.useState(false),
+    intently = _useState4[0],
+    setIntently = _useState4[1];
+  var _useState5 = React.useState(new Map()),
+    foundWatchers = _useState5[0],
+    setFoundWatchers = _useState5[1];
   var addPageTriggers = function addPageTriggers(triggers) {
     setPageTriggers(function (prev) {
       return uniqueBy([].concat(prev, triggers || []), 'id');
@@ -959,9 +957,6 @@ function CollectorProvider(_ref) {
   };
   log('CollectorProvider: user is on mobile?', reactDeviceDetect.isMobile);
   var shouldLaunchIdleTriggers = true;
-  console.log({
-    pageTriggers: pageTriggers
-  });
   React.useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
@@ -1016,11 +1011,6 @@ function CollectorProvider(_ref) {
   }, [log, displayTrigger, pageTriggers, handlers, getRemainingCooldownMs, error, startCooldown, resetDisplayTrigger]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
-    log('comparing', getRemainingCooldownMs() <= 0, '< if true, trigger should launch :shrug:');
-    if (!canNextTriggerOccur()) {
-      log("Tried to launch IDLE trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. Will attempt again when the same signal occurs after this passes.");
-      return;
-    }
     log('CollectorProvider: attempting to fire idle trigger');
     setDisplayTrigger('INVOCATION_IDLE_TIME');
     startCooldown();
@@ -1131,7 +1121,7 @@ function CollectorProvider(_ref) {
           }
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
-            setIdleTimeout(idleStatusDelay);
+            setIdleTimeout(getIdleStatusDelay());
             addPageTriggers(fakeTriggers);
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
@@ -1158,7 +1148,7 @@ function CollectorProvider(_ref) {
     return function () {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, handlers, initialDelay, idleStatusDelay, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
+  }, [appId, booted, collect, error, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -1185,7 +1175,7 @@ function CollectorProvider(_ref) {
             try {
               return Promise.resolve(response.json()).then(function (payload) {
                 log('Sent collector data, retrieved:', payload);
-                setIdleTimeout(idleStatusDelay);
+                setIdleTimeout(getIdleStatusDelay());
                 addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
               });
             } catch (e) {
@@ -1199,7 +1189,7 @@ function CollectorProvider(_ref) {
       });
     }, 500);
     return intervalId;
-  }, [appId, collect, error, foundWatchers, idleStatusDelay, log, session === null || session === void 0 ? void 0 : session.id, trackEvent, visitor]);
+  }, [appId, collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
   React.useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];
