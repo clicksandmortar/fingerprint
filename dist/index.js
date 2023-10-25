@@ -857,30 +857,6 @@ function useTriggerDelay(cooldownMs) {
   };
 }
 
-var fakeTriggers = [{
-  id: 'sample_id',
-  invocation: 'INVOCATION_EXIT_INTENT',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is a test',
-    paragraph: 'And so is this'
-  }
-}, {
-  id: 'sample_id_2',
-  invocation: 'INVOCATION_IDLE_TIME',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is a test',
-    paragraph: 'And so is this'
-  }
-}];
-
 var getVisitorId = function getVisitorId() {
   if (typeof window === 'undefined') return null;
   var urlParams = new URLSearchParams(window.location.search);
@@ -1112,7 +1088,7 @@ function CollectorProvider(_ref) {
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
             setIdleTimeout(getIdleStatusDelay());
-            addPageTriggers(fakeTriggers);
+            addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
               setIntently(false);
@@ -1541,7 +1517,6 @@ var defaultFingerprintState = {
   unregisterHandler: function unregisterHandler() {},
   config: {
     idleDelay: undefined,
-    trackIdleOnDesktop: false,
     triggerCooldown: 60 * 1000
   }
 };

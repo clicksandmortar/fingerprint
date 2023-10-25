@@ -7,7 +7,6 @@ import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
-import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -48,7 +47,7 @@ export function CollectorProvider({
   })
 
   /**
-   * Recalculate the idle delay based on config / defaul val and cooldown.
+   * Recalculate the idle delay based on config / default val and cooldown.
    */
   const getIdleStatusDelay = React.useCallback((): number => {
     const idleDelay = configIdleDelay || defaultIdleStatusDelay
@@ -154,7 +153,6 @@ export function CollectorProvider({
 
     const potentialComponent = handler.invoke?.(trigger)
     if (potentialComponent && React.isValidElement(potentialComponent)) {
-      // startCooldown()
       return potentialComponent
     }
 
@@ -316,8 +314,7 @@ export function CollectorProvider({
           // @todo turn this into the dynamic value
           setIdleTimeout(getIdleStatusDelay())
 
-          // addPageTriggers(payload?.pageTriggers)
-          addPageTriggers(fakeTriggers)
+          addPageTriggers(payload?.pageTriggers)
 
           if (!payload.intently) {
             // remove intently overlay here

@@ -184,7 +184,6 @@ export default App
 | idleTriggers             | `boolean`  | `false`     | Whether or not to use idle time to trigger behaviours.                                                                                                                |
 | config                   | `object`   | `undefined` | Config params where future optional parameters can be nested                                                                                                          |
 | config.idleDelay         | `number`   | `undefined` | time (ms) before the user is considered idle                                                                                                                          |
-| config.trackIdleOnDesktop| `boolean`  | false       | if false, user idle events are only tracked on mobile; desktop+mobile if true                                                                                         |
 
 ### useFingerprint
 

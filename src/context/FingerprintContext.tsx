@@ -60,7 +60,6 @@ export type FingerprintProviderProps = {
   config?: {
     idleDelay?: number
     triggerCooldown?: number
-    trackIdleOnDesktop?: boolean
   }
 }
 
@@ -189,7 +188,6 @@ const defaultFingerprintState: FingerprintContextInterface = {
   unregisterHandler: () => {},
   config: {
     idleDelay: undefined,
-    trackIdleOnDesktop: false,
     triggerCooldown: 60 * 1000
   }
 }
