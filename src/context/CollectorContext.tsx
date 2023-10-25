@@ -234,7 +234,6 @@ export function CollectorProvider({
 
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
-  // THIS FETCHES OUR CONFIG. DO NOT REMOVE ED
   useEffect(() => {
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot')
