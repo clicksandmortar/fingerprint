@@ -12,6 +12,7 @@ export declare type FingerprintProviderProps = {
     exitIntentTriggers?: boolean;
     idleTriggers?: boolean;
     config?: {
+        exitIntentDelay?: number;
         idleDelay?: number;
         triggerCooldown?: number;
     };

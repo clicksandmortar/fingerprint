@@ -1107,6 +1107,23 @@ const useCollectorMutation = () => {
   });
 };
 
+const useExitIntentDelay = (delay = 0) => {
+  const {
+    log
+  } = useLogging();
+  const [hasDelayPassed, setHasDelayPassed] = useState(false);
+  useEffect(() => {
+    log(`Exit intents are suspended because of initiation delay of ${delay}ms`);
+    setTimeout(() => {
+      setHasDelayPassed(true);
+      log('Exit intents can be issued again.');
+    }, delay);
+  }, [delay]);
+  return {
+    hasDelayPassed
+  };
+};
+
 const defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
@@ -1253,7 +1270,16 @@ function CollectorProvider({
     setDisplayTrigger('INVOCATION_IDLE_TIME');
     startCooldown();
   }, [idleTriggers, log, setDisplayTrigger, startCooldown]);
+  const {
+    hasDelayPassed
+  } = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay);
   const launchExitTrigger = React__default.useCallback(() => {
+    if (!hasDelayPassed) {
+      log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
     if (!canNextTriggerOccur()) {
       log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
         I will attempt again when the same signal occurs after this passes.`);
@@ -1264,7 +1290,7 @@ function CollectorProvider({
     log('CollectorProvider: attempting to fire exit trigger');
     setDisplayTrigger('INVOCATION_EXIT_INTENT');
     startCooldown();
-  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent]);
+  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent, hasDelayPassed]);
   useEffect(() => {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -1923,7 +1949,8 @@ const defaultFingerprintState = {
   unregisterHandler: () => {},
   config: {
     idleDelay: undefined,
-    triggerCooldown: 60 * 1000
+    triggerCooldown: 60 * 1000,
+    exitIntentDelay: 0
   }
 };
 const FingerprintContext = createContext({
