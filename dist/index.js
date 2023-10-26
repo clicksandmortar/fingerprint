@@ -829,6 +829,27 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
+var useExitIntentDelay = function useExitIntentDelay(delay) {
+  if (delay === void 0) {
+    delay = 0;
+  }
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = React.useState(false),
+    hasDelayPassed = _useState[0],
+    setHasDelayPassed = _useState[1];
+  React.useEffect(function () {
+    log("Exit intents are suspended because of initiation delay of " + delay + "ms");
+    setTimeout(function () {
+      setHasDelayPassed(true);
+      log();
+    }, delay);
+  }, [delay]);
+  return {
+    hasDelayPassed: hasDelayPassed
+  };
+};
+
 var defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs) {
   if (cooldownMs === void 0) {
@@ -1011,19 +1032,11 @@ function CollectorProvider(_ref) {
     setDisplayTrigger('INVOCATION_IDLE_TIME');
     startCooldown();
   }, [idleTriggers, log, setDisplayTrigger, startCooldown]);
-  var _useState6 = React.useState(false),
-    hasDelayPassed = _useState6[0],
-    setHasDelayPassed = _useState6[1];
-  React.useEffect(function () {
-    console.log('timing...');
-    setTimeout(function () {
-      console.log('FIRE!');
-      setHasDelayPassed(true);
-    }, (config === null || config === void 0 ? void 0 : config.exitIntentDelay) || 0);
-  }, [config]);
+  var _useExitIntentDelay = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay),
+    hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
   var launchExitTrigger = React__default.useCallback(function () {
     if (!hasDelayPassed) {
-      log("Unable to launch exit intent, because of " + ((config === null || config === void 0 ? void 0 : config.exitIntentDelay) || 0) + "ms delay before one can be shot.");
+      log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
       log('Re-registering handler');
       reRegisterExitIntent();
       return;
@@ -1037,7 +1050,7 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire exit trigger');
     setDisplayTrigger('INVOCATION_EXIT_INTENT');
     startCooldown();
-  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent, config, hasDelayPassed]);
+  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent, hasDelayPassed]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');

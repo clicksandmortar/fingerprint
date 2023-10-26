@@ -5,6 +5,7 @@ import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
 import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
+import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { fakeTriggers } from '../utils/__dev/fakeTriggers'
@@ -181,23 +182,13 @@ export function CollectorProvider({
     startCooldown()
   }, [idleTriggers, log, setDisplayTrigger, startCooldown])
 
-  const [hasDelayPassed, setHasDelayPassed] = useState(false)
-  useEffect(() => {
-    console.log('timing...')
-    setTimeout(() => {
-      console.log('FIRE!')
-      setHasDelayPassed(true)
-    }, config?.exitIntentDelay || 0)
-  }, [config])
+  const { hasDelayPassed } = useExitIntentDelay(config?.exitIntentDelay)
 
   const launchExitTrigger = React.useCallback(() => {
     if (!hasDelayPassed) {
       log(
-        `Unable to launch exit intent, because of ${
-          config?.exitIntentDelay || 0
-        }ms delay before one can be shot.`
+        `Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`
       )
-
       log('Re-registering handler')
       reRegisterExitIntent()
       return
@@ -222,7 +213,6 @@ export function CollectorProvider({
     canNextTriggerOccur,
     getRemainingCooldownMs,
     reRegisterExitIntent,
-    config,
     hasDelayPassed
   ])
 
