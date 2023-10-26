@@ -7,6 +7,7 @@ import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
+import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -180,7 +181,28 @@ export function CollectorProvider({
     startCooldown()
   }, [idleTriggers, log, setDisplayTrigger, startCooldown])
 
+  const [hasDelayPassed, setHasDelayPassed] = useState(false)
+  useEffect(() => {
+    console.log('timing...')
+    setTimeout(() => {
+      console.log('FIRE!')
+      setHasDelayPassed(true)
+    }, config?.exitIntentDelay || 0)
+  }, [config])
+
   const launchExitTrigger = React.useCallback(() => {
+    if (!hasDelayPassed) {
+      log(
+        `Unable to launch exit intent, because of ${
+          config?.exitIntentDelay || 0
+        }ms delay before one can be shot.`
+      )
+
+      log('Re-registering handler')
+      reRegisterExitIntent()
+      return
+    }
+
     if (!canNextTriggerOccur()) {
       log(
         `Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
@@ -195,7 +217,14 @@ export function CollectorProvider({
     log('CollectorProvider: attempting to fire exit trigger')
     setDisplayTrigger('INVOCATION_EXIT_INTENT')
     startCooldown()
-  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent])
+  }, [
+    log,
+    canNextTriggerOccur,
+    getRemainingCooldownMs,
+    reRegisterExitIntent,
+    config,
+    hasDelayPassed
+  ])
 
   /**
    * Register exit intent triggers
@@ -314,7 +343,7 @@ export function CollectorProvider({
           // @todo turn this into the dynamic value
           setIdleTimeout(getIdleStatusDelay())
 
-          addPageTriggers(payload?.pageTriggers)
+          addPageTriggers(fakeTriggers)
 
           if (!payload.intently) {
             // remove intently overlay here

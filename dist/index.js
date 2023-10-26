@@ -857,6 +857,30 @@ function useTriggerDelay(cooldownMs) {
   };
 }
 
+var fakeTriggers = [{
+  id: 'sample_id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an EXIT_INTENT',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: 'sample_id_2',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an IDLE_TIME',
+    paragraph: 'And so is this'
+  }
+}];
+
 var getVisitorId = function getVisitorId() {
   if (typeof window === 'undefined') return null;
   var urlParams = new URLSearchParams(window.location.search);
@@ -987,7 +1011,23 @@ function CollectorProvider(_ref) {
     setDisplayTrigger('INVOCATION_IDLE_TIME');
     startCooldown();
   }, [idleTriggers, log, setDisplayTrigger, startCooldown]);
+  var _useState6 = React.useState(false),
+    hasDelayPassed = _useState6[0],
+    setHasDelayPassed = _useState6[1];
+  React.useEffect(function () {
+    console.log('timing...');
+    setTimeout(function () {
+      console.log('FIRE!');
+      setHasDelayPassed(true);
+    }, (config === null || config === void 0 ? void 0 : config.exitIntentDelay) || 0);
+  }, [config]);
   var launchExitTrigger = React__default.useCallback(function () {
+    if (!hasDelayPassed) {
+      log("Unable to launch exit intent, because of " + ((config === null || config === void 0 ? void 0 : config.exitIntentDelay) || 0) + "ms delay before one can be shot.");
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
     if (!canNextTriggerOccur()) {
       log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. \n        I will attempt again when the same signal occurs after this passes.");
       log('Re-registering handler');
@@ -997,7 +1037,7 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire exit trigger');
     setDisplayTrigger('INVOCATION_EXIT_INTENT');
     startCooldown();
-  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent]);
+  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent, config, hasDelayPassed]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -1088,7 +1128,7 @@ function CollectorProvider(_ref) {
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
             setIdleTimeout(getIdleStatusDelay());
-            addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+            addPageTriggers(fakeTriggers);
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
               setIntently(false);
@@ -1518,7 +1558,8 @@ var defaultFingerprintState = {
   unregisterHandler: function unregisterHandler() {},
   config: {
     idleDelay: undefined,
-    triggerCooldown: 60 * 1000
+    triggerCooldown: 60 * 1000,
+    exitIntentDelay: 0
   }
 };
 var FingerprintContext = React.createContext(_extends({}, defaultFingerprintState));
