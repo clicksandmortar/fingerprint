@@ -1048,6 +1048,16 @@ const useMixpanel = () => {
   return useContext(MixpanelContext);
 };
 
+const getVisitorId = () => {
+  if (typeof window === 'undefined') return null;
+  const urlParams = new URLSearchParams(window.location.search);
+  const vid = urlParams.get('v_id');
+  return vid;
+};
+const hasVisitorIDInURL = () => {
+  return getVisitorId() !== null;
+};
+
 const headers = {
   'Content-Type': 'application/json'
 };
@@ -1107,61 +1117,7 @@ const useCollectorMutation = () => {
   });
 };
 
-const useExitIntentDelay = (delay = 0) => {
-  const {
-    log
-  } = useLogging();
-  const [hasDelayPassed, setHasDelayPassed] = useState(false);
-  useEffect(() => {
-    log(`Exit intents are suspended because of initiation delay of ${delay}ms`);
-    setTimeout(() => {
-      setHasDelayPassed(true);
-      log('Exit intents can be issued again.');
-    }, delay);
-  }, [delay]);
-  return {
-    hasDelayPassed
-  };
-};
-
-const defaultTriggerCooldown = 60 * 1000;
-function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
-  const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
-  const startCooldown = React__default.useCallback(() => {
-    const currentTimeStamp = Number(new Date());
-    setLastTriggerTimeStamp(currentTimeStamp);
-  }, [setLastTriggerTimeStamp]);
-  const getRemainingCooldownMs = React__default.useCallback(() => {
-    if (!lastTriggerTimeStamp) return 0;
-    const currentTime = Number(new Date());
-    const remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
-    return remainingMS;
-  }, [lastTriggerTimeStamp, cooldownMs]);
-  const canNextTriggerOccur = React__default.useCallback(() => {
-    return getRemainingCooldownMs() <= 0;
-  }, [getRemainingCooldownMs]);
-  return {
-    startCooldown,
-    canNextTriggerOccur,
-    getRemainingCooldownMs
-  };
-}
-
-const getVisitorId = () => {
-  if (typeof window === 'undefined') return null;
-  const urlParams = new URLSearchParams(window.location.search);
-  const vid = urlParams.get('v_id');
-  return vid;
-};
-const hasVisitorIDInURL = () => {
-  return getVisitorId() !== null;
-};
-
-const defaultIdleStatusDelay = 5 * 1000;
-function CollectorProvider({
-  children,
-  handlers = []
-}) {
+const useCollectOnBoot = () => {
   const {
     log,
     error
@@ -1169,136 +1125,22 @@ function CollectorProvider({
   const {
     appId,
     booted,
-    initialDelay,
-    exitIntentTriggers,
-    idleTriggers,
-    config
+    initialDelay
   } = useFingerprint();
-  const configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
+  const {
+    addPageTriggers,
+    setIntently
+  } = useCollector();
   const {
     visitor,
     session
   } = useVisitor();
-  const {
-    canNextTriggerOccur,
-    startCooldown,
-    getRemainingCooldownMs
-  } = useTriggerDelay(config === null || config === void 0 ? void 0 : config.triggerCooldown);
   const {
     trackEvent
   } = useMixpanel();
   const {
     mutateAsync: collect
   } = useCollectorMutation();
-  const {
-    registerHandler,
-    resetState: reRegisterExitIntent
-  } = useExitIntent({
-    cookie: {
-      key: '_cm_exit',
-      daysToExpire: 0
-    }
-  });
-  const getIdleStatusDelay = React__default.useCallback(() => {
-    const idleDelay = configIdleDelay || defaultIdleStatusDelay;
-    const cooldownDelay = getRemainingCooldownMs();
-    const delayAdjustedForCooldown = idleDelay + cooldownDelay;
-    log(`Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + config.delay ${idleDelay}ms)`);
-    return delayAdjustedForCooldown;
-  }, [getRemainingCooldownMs, configIdleDelay]);
-  const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
-  const [pageTriggers, setPageTriggers] = useState([]);
-  const [displayTrigger, setDisplayTrigger] = useState(undefined);
-  const [intently, setIntently] = useState(false);
-  const [foundWatchers, setFoundWatchers] = useState(new Map());
-  const addPageTriggers = triggers => {
-    setPageTriggers(prev => uniqueBy([...prev, ...(triggers || [])], 'id'));
-  };
-  useEffect(() => {
-    if (intently) return;
-    log('CollectorProvider: removing intently overlay');
-    const runningInterval = setInterval(() => {
-      const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
-      Array.prototype.forEach.call(locatedIntentlyScript, node => {
-        node.parentNode.removeChild(node);
-        log('CollectorProvider: successfully removed intently overlay');
-        clearInterval(runningInterval);
-      });
-    }, 100);
-    return () => {
-      clearInterval(runningInterval);
-    };
-  }, [intently, log]);
-  const resetDisplayTrigger = useCallback(() => {
-    log('CollectorProvider: resetting displayTrigger');
-    setDisplayTrigger(undefined);
-  }, [log]);
-  const TriggerComponent = React__default.useCallback(() => {
-    var _handler$invoke, _handler;
-    if (!displayTrigger) return null;
-    let handler;
-    const trigger = pageTriggers.find(_trigger => {
-      const potentialTrigger = _trigger.invocation === displayTrigger;
-      const potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === _trigger.behaviour);
-      handler = potentialHandler;
-      return potentialTrigger && potentialHandler;
-    });
-    if (!trigger) {
-      error(`No trigger found for displayTrigger`, displayTrigger);
-      return null;
-    }
-    log('CollectorProvider: available handlers include: ', handlers);
-    log('CollectorProvider: trigger to match is: ', trigger);
-    log('CollectorProvider: attempting to show trigger', trigger, handler);
-    if (!handler) {
-      log('No handler found for trigger', trigger);
-      return null;
-    }
-    if (!handler.invoke) {
-      log('No invoke method found for handler', handler);
-      return null;
-    }
-    const potentialComponent = (_handler$invoke = (_handler = handler).invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(_handler, trigger);
-    if (potentialComponent && React__default.isValidElement(potentialComponent)) {
-      return potentialComponent;
-    }
-    return null;
-  }, [log, displayTrigger, pageTriggers, handlers, getRemainingCooldownMs, error, startCooldown, resetDisplayTrigger]);
-  const fireIdleTrigger = useCallback(() => {
-    if (!idleTriggers) return;
-    log('CollectorProvider: attempting to fire idle trigger');
-    setDisplayTrigger('INVOCATION_IDLE_TIME');
-    startCooldown();
-  }, [idleTriggers, log, setDisplayTrigger, startCooldown]);
-  const {
-    hasDelayPassed
-  } = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay);
-  const launchExitTrigger = React__default.useCallback(() => {
-    if (!hasDelayPassed) {
-      log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
-      log('Re-registering handler');
-      reRegisterExitIntent();
-      return;
-    }
-    if (!canNextTriggerOccur()) {
-      log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
-        I will attempt again when the same signal occurs after this passes.`);
-      log('Re-registering handler');
-      reRegisterExitIntent();
-      return;
-    }
-    log('CollectorProvider: attempting to fire exit trigger');
-    setDisplayTrigger('INVOCATION_EXIT_INTENT');
-    startCooldown();
-  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent, hasDelayPassed]);
-  useEffect(() => {
-    if (!exitIntentTriggers) return;
-    log('CollectorProvider: attempting to register exit trigger');
-    registerHandler({
-      id: 'clientTrigger',
-      handler: launchExitTrigger
-    });
-  }, [exitIntentTriggers, launchExitTrigger, log, registerHandler]);
   useEffect(() => {
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot');
@@ -1372,7 +1214,6 @@ function CollectorProvider({
         }
         const payload = await response.json();
         log('Sent collector data, retrieved:', payload);
-        setIdleTimeout(getIdleStatusDelay());
         addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         if (!payload.intently) {
           log('CollectorProvider: user is in Fingerprint cohort');
@@ -1395,7 +1236,101 @@ function CollectorProvider({
     return () => {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
+  }, [appId, booted, collect, error, initialDelay, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
+};
+const WithCollectOnBoot = () => {
+  useCollectOnBoot();
+  return null;
+};
+
+const useExitIntentDelay = (delay = 0) => {
+  const {
+    log
+  } = useLogging();
+  const [hasDelayPassed, setHasDelayPassed] = useState(false);
+  useEffect(() => {
+    log(`Exit intents are suspended because of initiation delay of ${delay}ms`);
+    setTimeout(() => {
+      setHasDelayPassed(true);
+      log('Exit intents can be issued again.');
+    }, delay);
+  }, [delay]);
+  return {
+    hasDelayPassed
+  };
+};
+
+const useKillIntently = () => {
+  const {
+    log
+  } = useLogging();
+  const [intently, setIntently] = useState(false);
+  useEffect(() => {
+    if (intently) return;
+    log('CollectorProvider: removing intently overlay');
+    const runningInterval = setInterval(() => {
+      const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
+      Array.prototype.forEach.call(locatedIntentlyScript, node => {
+        node.parentNode.removeChild(node);
+        log('CollectorProvider: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, 100);
+    return () => {
+      clearInterval(runningInterval);
+    };
+  }, [intently, log]);
+  return {
+    intently,
+    setIntently
+  };
+};
+
+const defaultTriggerCooldown = 60 * 1000;
+function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
+  const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
+  const startCooldown = React__default.useCallback(() => {
+    const currentTimeStamp = Number(new Date());
+    setLastTriggerTimeStamp(currentTimeStamp);
+  }, [setLastTriggerTimeStamp]);
+  const getRemainingCooldownMs = React__default.useCallback(() => {
+    if (!lastTriggerTimeStamp) return 0;
+    const currentTime = Number(new Date());
+    const remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
+    return remainingMS;
+  }, [lastTriggerTimeStamp, cooldownMs]);
+  const canNextTriggerOccur = React__default.useCallback(() => {
+    return getRemainingCooldownMs() <= 0;
+  }, [getRemainingCooldownMs]);
+  return {
+    startCooldown,
+    canNextTriggerOccur,
+    getRemainingCooldownMs
+  };
+}
+
+const useWatchers = () => {
+  const {
+    log,
+    error
+  } = useLogging();
+  const {
+    visitor,
+    session
+  } = useVisitor();
+  const {
+    trackEvent
+  } = useMixpanel();
+  const {
+    addPageTriggers
+  } = useContext(CollectorContext);
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const [foundWatchers, setFoundWatchers] = useState(new Map());
+  const {
+    appId
+  } = useFingerprint();
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
@@ -1421,7 +1356,6 @@ function CollectorProvider({
           }).then(async response => {
             const payload = await response.json();
             log('Sent collector data, retrieved:', payload);
-            setIdleTimeout(getIdleStatusDelay());
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
           }).catch(err => {
             error('failed to store collected data', err);
@@ -1431,7 +1365,7 @@ function CollectorProvider({
       });
     }, 500);
     return intervalId;
-  }, [appId, collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+  }, [appId, collect, error, foundWatchers, log, session, trackEvent, visitor]);
   useEffect(() => {
     if (!visitor.id) return;
     const intervalIds = [registerWatcher('.stage-5', '')];
@@ -1439,16 +1373,145 @@ function CollectorProvider({
       intervalIds.forEach(intervalId => clearInterval(intervalId));
     };
   }, [registerWatcher, visitor]);
+};
+const WithWatchers = () => {
+  useWatchers();
+  return null;
+};
+
+const defaultIdleStatusDelay = 5 * 1000;
+function CollectorProvider({
+  children,
+  handlers = []
+}) {
+  const {
+    log,
+    error
+  } = useLogging();
+  const {
+    exitIntentTriggers,
+    idleTriggers,
+    config
+  } = useFingerprint();
+  const configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
+  const {
+    canNextTriggerOccur,
+    startCooldown,
+    getRemainingCooldownMs
+  } = useTriggerDelay(config === null || config === void 0 ? void 0 : config.triggerCooldown);
+  const {
+    trackEvent
+  } = useMixpanel();
+  const {
+    registerHandler,
+    resetState: reRegisterExitIntent
+  } = useExitIntent({
+    cookie: {
+      key: '_cm_exit',
+      daysToExpire: 0
+    }
+  });
+  const getIdleStatusDelay = React__default.useCallback(() => {
+    const idleDelay = configIdleDelay || defaultIdleStatusDelay;
+    const cooldownDelay = getRemainingCooldownMs();
+    const delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log(`Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + config.delay ${idleDelay}ms)`);
+    return delayAdjustedForCooldown;
+  }, [getRemainingCooldownMs, configIdleDelay]);
+  const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
+  const [pageTriggers, setPageTriggers] = useState([]);
+  const [displayTrigger, setDisplayTrigger] = useState(undefined);
+  const {
+    setIntently
+  } = useKillIntently();
+  const addPageTriggers = triggers => {
+    setPageTriggers(prev => uniqueBy([...prev, ...(triggers || [])], 'id'));
+  };
+  const resetDisplayTrigger = useCallback(() => {
+    log('CollectorProvider: resetting displayTrigger');
+    setDisplayTrigger(undefined);
+  }, [log]);
+  const TriggerComponent = React__default.useCallback(() => {
+    var _handler$invoke, _handler;
+    if (!displayTrigger) return null;
+    let handler;
+    const trigger = pageTriggers.find(_trigger => {
+      const potentialTrigger = _trigger.invocation === displayTrigger;
+      const potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === _trigger.behaviour);
+      handler = potentialHandler;
+      return potentialTrigger && potentialHandler;
+    });
+    if (!trigger) {
+      error(`No trigger found for displayTrigger`, displayTrigger);
+      return null;
+    }
+    log('CollectorProvider: available handlers include: ', handlers);
+    log('CollectorProvider: trigger to match is: ', trigger);
+    log('CollectorProvider: attempting to show trigger', trigger, handler);
+    if (!handler) {
+      log('No handler found for trigger', trigger);
+      return null;
+    }
+    if (!handler.invoke) {
+      log('No invoke method found for handler', handler);
+      return null;
+    }
+    const potentialComponent = (_handler$invoke = (_handler = handler).invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(_handler, trigger);
+    if (potentialComponent && React__default.isValidElement(potentialComponent)) {
+      return potentialComponent;
+    }
+    return null;
+  }, [log, displayTrigger, pageTriggers, handlers, getRemainingCooldownMs, error, startCooldown, resetDisplayTrigger]);
+  const fireIdleTrigger = useCallback(() => {
+    if (!idleTriggers) return;
+    log('CollectorProvider: attempting to fire idle trigger');
+    setDisplayTrigger('INVOCATION_IDLE_TIME');
+    startCooldown();
+  }, [idleTriggers, log, setDisplayTrigger, startCooldown]);
+  const {
+    hasDelayPassed
+  } = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay);
+  const launchExitTrigger = React__default.useCallback(() => {
+    if (!hasDelayPassed) {
+      log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
+    if (!canNextTriggerOccur()) {
+      log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
+        I will attempt again when the same signal occurs after this passes.`);
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
+    log('CollectorProvider: attempting to fire exit trigger');
+    setDisplayTrigger('INVOCATION_EXIT_INTENT');
+    startCooldown();
+  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent, hasDelayPassed]);
+  useEffect(() => {
+    if (!exitIntentTriggers) return;
+    log('CollectorProvider: attempting to register exit trigger');
+    registerHandler({
+      id: 'clientTrigger',
+      handler: launchExitTrigger
+    });
+  }, [exitIntentTriggers, launchExitTrigger, log, registerHandler]);
+  useEffect(() => {
+    if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
+    setIdleTimeout(getIdleStatusDelay());
+  }, [pageTriggers]);
   const setTrigger = React__default.useCallback(trigger => {
     log('CollectorProvider: manually setting trigger', trigger);
     addPageTriggers([trigger]);
     setDisplayTrigger(trigger.invocation);
-  }, [log, setDisplayTrigger, addPageTriggers]);
+  }, [log, setDisplayTrigger]);
   const collectorContextVal = React__default.useMemo(() => ({
     addPageTriggers,
     resetDisplayTrigger,
     setTrigger,
-    trackEvent
+    trackEvent,
+    setIntently
   }), [resetDisplayTrigger, setTrigger, trackEvent]);
   return React__default.createElement(IdleTimerProvider, {
     timeout: idleTimeout,
@@ -1458,12 +1521,13 @@ function CollectorProvider({
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: collectorContextVal
-  }, children), React__default.createElement(TriggerComponent, null));
+  }, React__default.createElement(WithWatchers, null), React__default.createElement(WithCollectOnBoot, null), children), React__default.createElement(TriggerComponent, null));
 }
 const CollectorContext = createContext({
   addPageTriggers: () => {},
   resetDisplayTrigger: () => {},
   setTrigger: () => {},
+  setIntently: () => {},
   trackEvent: () => {}
 });
 

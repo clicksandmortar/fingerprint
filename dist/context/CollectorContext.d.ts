@@ -9,6 +9,7 @@ export declare type CollectorContextInterface = {
     addPageTriggers: (triggers: Trigger[]) => void;
     resetDisplayTrigger: () => void;
     setTrigger: (trigger: Trigger) => void;
+    setIntently: (bool: boolean) => void;
     trackEvent: (event: string, properties?: any) => void;
 };
 export declare const CollectorContext: React.Context<CollectorContextInterface>;
