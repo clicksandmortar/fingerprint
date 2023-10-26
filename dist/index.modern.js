@@ -1141,6 +1141,32 @@ const hasVisitorIDInURL = () => {
 };
 
 const defaultIdleStatusDelay = 5 * 1000;
+const useKillIntentlyOverlay = () => {
+  const [intently, setIntently] = useState(false);
+  const {
+    log
+  } = useLogging();
+  useEffect(() => {
+    if (intently) return;
+    log('CollectorProvider: removing intently overlay');
+    const runningInterval = setInterval(() => {
+      const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
+      Array.prototype.forEach.call(locatedIntentlyScript, node => {
+        node.parentNode.removeChild(node);
+        log('CollectorProvider: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, 100);
+    return () => {
+      clearInterval(runningInterval);
+    };
+  }, [intently, log]);
+  return {
+    intently,
+    setIntently
+  };
+};
+console.log(useKillIntentlyOverlay);
 function CollectorProvider({
   children,
   handlers = []
@@ -1192,26 +1218,13 @@ function CollectorProvider({
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
   const [pageTriggers, setPageTriggers] = useState([]);
   const [displayTrigger, setDisplayTrigger] = useState(undefined);
-  const [intently, setIntently] = useState(false);
+  const {
+    setIntently
+  } = useKillIntentlyOverlay();
   const [foundWatchers, setFoundWatchers] = useState(new Map());
   const addPageTriggers = triggers => {
     setPageTriggers(prev => uniqueBy([...prev, ...(triggers || [])], 'id'));
   };
-  useEffect(() => {
-    if (intently) return;
-    log('CollectorProvider: removing intently overlay');
-    const runningInterval = setInterval(() => {
-      const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
-      Array.prototype.forEach.call(locatedIntentlyScript, node => {
-        node.parentNode.removeChild(node);
-        log('CollectorProvider: successfully removed intently overlay');
-        clearInterval(runningInterval);
-      });
-    }, 100);
-    return () => {
-      clearInterval(runningInterval);
-    };
-  }, [intently, log]);
   const resetDisplayTrigger = useCallback(() => {
     log('CollectorProvider: resetting displayTrigger');
     setDisplayTrigger(undefined);
@@ -1445,9 +1458,14 @@ const useCollector = () => {
   return useContext(CollectorContext);
 };
 
+function checkForCnMBookingDomain(arg) {
+  return /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(arg);
+}
 const getBrand = () => {
   if (typeof window === 'undefined') return null;
+  if (checkForCnMBookingDomain(window.location.host)) return 'C&M Booking';
   if (window.location.host.startsWith('localhost')) return 'Stonehouse';
+  if (window.location.host.includes('gift.thediningoutgiftcard.co.uk')) return 'C&M Gift cards';
   if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
   return null;
@@ -1473,13 +1491,9 @@ const Modal = ({
     visitor
   } = useVisitor();
   const [open, setOpen] = useState(true);
-  const [stylesLoaded, setStylesLoaded] = useState(false);
   const [hasFired, setHasFired] = useState(false);
   const brand = React__default.useMemo(() => {
     return getBrand();
-  }, []);
-  const randomHash = useMemo(() => {
-    return v4().split('-')[0];
   }, []);
   useEffect(() => {
     if (!open) return;
@@ -1500,198 +1514,6 @@ const Modal = ({
     });
     setHasFired(true);
   }, [open]);
-  useEffect(() => {
-    const css = `
-      @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");
-
-@font-face {
-  font-family: "proxima-nova";
-  src: url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff2"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("opentype");
-  font-display: auto;
-  font-style: normal;
-  font-weight: 500;
-  font-stretch: normal;
-}
-
-:root {
-  --primary: #b6833f;
-  --secondary: white;
-  --text-shadow: 1px 1px 10px rgba(0,0,0,1);
-}
-
-.tk-proxima-nova {
-  font-family: "proxima-nova", sans-serif;
-}
-
-.f` + randomHash + `-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: "proxima-nova", sans-serif !important;
-  font-weight: 500;
-  font-style: normal;
-}
-
-.f` + randomHash + `-modal {
-  width: 80%;
-  max-width: 400px;
-  height: 500px;
-  overflow: hidden;
-  background-repeat: no-repeat;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
-}
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-modal {
-    width: 50%;
-    max-width: 600px;
-  }
-}
-
-.f` + randomHash + `-modalImage {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
-
-@media screen and (max-width:768px) {
-  .f` + randomHash + `-modal {
-    width: 100vw;
-  }
-}
-
-
-.f` + randomHash + `-curlyText {
-  font-family: "proxima-nova", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-  text-transform: uppercase;
-  text-align: center;
-  letter-spacing: 2pt;
-  fill: var(--secondary);
-  text-shadow: var(--text-shadow);
-  margin-top: -150px;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.f` + randomHash + `-curlyText text {
-  font-size: 1.3rem;
-}
-
-
-.f` + randomHash + `-mainText {
-  font-weight: 200;
-  font-family: "proxima-nova", sans-serif;
-  color: var(--secondary);
-  font-size: 2.1rem;
-  text-shadow: var(--text-shadow);
-  display: inline-block;
-  text-align: center;
-  margin-top: -4.5rem;
-}
-
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-}
-
-@media screen and (min-width: 1024px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-
-  .f` + randomHash + `-mainText {
-    font-size: 2.4rem;
-  }
-}
-
-@media screen and (min-width: 1150px) {
-  .f` + randomHash + `-mainText {
-    font-size: 2.7rem;
-  }
-}
-
-.f` + randomHash + `-cta {
-  font-family: "proxima-nova", sans-serif;
-  cursor: pointer;
-  background-color: var(--secondary);
-  padding: 0.75rem 3rem;
-  border-radius: 8px;
-  display: block;
-  font-size: 1.3rem;
-  color: var(--primary);
-  text-align: center;
-  text-transform: uppercase;
-  max-width: 400px;
-  margin: 0 auto;
-  text-decoration: none;
-}
-
-.f` + randomHash + `-cta:hover {
-  transition: all 0.3s;
-  filter: brightness(0.95);
-}
-
-.f` + randomHash + `-close-button {
-  border-radius: 100%;
-  background-color: var(--secondary);
-  width: 2rem;
-  height: 2rem;
-  position: absolute;
-  margin: 10px;
-  top: 0px;
-  right: 0px;
-  color: black;
-  font-size: 1.2rem;
-  font-weight: 300;
-  cursor: pointer;
-}
-
-.f` + randomHash + `-button-container {
-  flex: 1;
-  display: grid;
-  place-content: center;
-}
-
-.f` + randomHash + `-image-darken {
-  background: rgba(0,0,0,0.2);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
-}
-    `;
-    const styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  });
-  if (!stylesLoaded) {
-    return null;
-  }
   if (!open) {
     return null;
   }

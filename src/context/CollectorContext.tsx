@@ -19,6 +19,40 @@ export type CollectorProviderProps = {
   handlers?: Trigger[]
 }
 
+const useKillIntentlyOverlay = () => {
+  const [intently, setIntently] = useState<boolean>(false)
+  const { log } = useLogging()
+
+  // Removes the intently overlay, if intently is false
+  useEffect(() => {
+    if (intently) return
+
+    log('CollectorProvider: removing intently overlay')
+
+    const runningInterval = setInterval(() => {
+      const locatedIntentlyScript = document.querySelectorAll(
+        'div[id^=smc-v5-overlay-]'
+      )
+
+      Array.prototype.forEach.call(locatedIntentlyScript, (node: any) => {
+        node.parentNode.removeChild(node)
+
+        log('CollectorProvider: successfully removed intently overlay')
+
+        clearInterval(runningInterval)
+      })
+    }, 100)
+
+    return () => {
+      clearInterval(runningInterval)
+    }
+  }, [intently, log])
+
+  return { intently, setIntently }
+}
+
+console.log(useKillIntentlyOverlay)
+
 export function CollectorProvider({
   children,
   handlers = []
@@ -70,7 +104,7 @@ export function CollectorProvider({
   const [displayTrigger, setDisplayTrigger] = useState<
     Trigger['invocation'] | undefined
   >(undefined)
-  const [intently, setIntently] = useState<boolean>(false)
+  const { setIntently } = useKillIntentlyOverlay()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
@@ -83,31 +117,6 @@ export function CollectorProvider({
       uniqueBy<Trigger>([...prev, ...(triggers || [])], 'id')
     )
   }
-
-  // Removes the intently overlay, if intently is false
-  useEffect(() => {
-    if (intently) return
-
-    log('CollectorProvider: removing intently overlay')
-
-    const runningInterval = setInterval(() => {
-      const locatedIntentlyScript = document.querySelectorAll(
-        'div[id^=smc-v5-overlay-]'
-      )
-
-      Array.prototype.forEach.call(locatedIntentlyScript, (node: any) => {
-        node.parentNode.removeChild(node)
-
-        log('CollectorProvider: successfully removed intently overlay')
-
-        clearInterval(runningInterval)
-      })
-    }, 100)
-
-    return () => {
-      clearInterval(runningInterval)
-    }
-  }, [intently, log])
 
   const resetDisplayTrigger = useCallback(() => {
     log('CollectorProvider: resetting displayTrigger')
