@@ -11,7 +11,7 @@ const useExitIntentDelay = (delay: number = 0) => {
 
     setTimeout(() => {
       setHasDelayPassed(true)
-      log()
+      log('Exit intents can be issued again.')
     }, delay)
   }, [delay])
 

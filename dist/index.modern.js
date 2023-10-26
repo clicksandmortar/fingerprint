@@ -1116,7 +1116,7 @@ const useExitIntentDelay = (delay = 0) => {
     log(`Exit intents are suspended because of initiation delay of ${delay}ms`);
     setTimeout(() => {
       setHasDelayPassed(true);
-      log();
+      log('Exit intents can be issued again.');
     }, delay);
   }, [delay]);
   return {
@@ -1146,30 +1146,6 @@ function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
     getRemainingCooldownMs
   };
 }
-
-const fakeTriggers = [{
-  id: 'sample_id',
-  invocation: 'INVOCATION_EXIT_INTENT',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is an EXIT_INTENT',
-    paragraph: 'And so is this'
-  }
-}, {
-  id: 'sample_id_2',
-  invocation: 'INVOCATION_IDLE_TIME',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is an IDLE_TIME',
-    paragraph: 'And so is this'
-  }
-}];
 
 const getVisitorId = () => {
   if (typeof window === 'undefined') return null;
@@ -1397,7 +1373,7 @@ function CollectorProvider({
         const payload = await response.json();
         log('Sent collector data, retrieved:', payload);
         setIdleTimeout(getIdleStatusDelay());
-        addPageTriggers(fakeTriggers);
+        addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         if (!payload.intently) {
           log('CollectorProvider: user is in Fingerprint cohort');
           setIntently(false);
