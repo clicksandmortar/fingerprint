@@ -1,5 +1,5 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useState, createElement, useMemo, useEffect, createContext, useContext, useCallback } from 'react';
+import React__default, { useState, createElement, useEffect, createContext, useContext, useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
@@ -215,287 +215,9 @@ const TriggerInverse = ({}) => {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
-const CurlyText = ({
-  randomHash,
-  text
-}) => {
-  return React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    xmlnsXlink: 'http://www.w3.org/1999/xlink',
-    version: '1.1',
-    viewBox: '0 0 500 500',
-    className: 'f' + randomHash + '-curlyText'
-  }, React__default.createElement("defs", null, React__default.createElement("path", {
-    id: 'textPath',
-    d: 'M 0 500 A 175,100 0 0 1 500,500'
-  })), React__default.createElement("text", {
-    x: '0',
-    y: '0',
-    textAnchor: 'middle'
-  }, React__default.createElement("textPath", {
-    xlinkHref: '#textPath',
-    fill: 'white',
-    startOffset: '50%'
-  }, text)));
-};
-const BrownsModal = ({
-  trigger,
-  handleClickCallToAction,
-  handleCloseModal
-}) => {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  const randomHash = useMemo(() => {
-    return v4().split('-')[0];
-  }, []);
-  useEffect(() => {
-    const css = `
-      @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");
-
-@font-face {
-  font-family: "proxima-nova";
-  src: url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff2"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("opentype");
-  font-display: auto;
-  font-style: normal;
-  font-weight: 500;
-  font-stretch: normal;
-}
-
-:root {
-  --primary: #b6833f;
-  --secondary: white;
-  --text-shadow: 1px 1px 10px rgba(0,0,0,1);
-}
-
-.tk-proxima-nova {
-  font-family: "proxima-nova", sans-serif;
-}
-
-.f` + randomHash + `-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: "proxima-nova", sans-serif !important;
-  font-weight: 500;
-  font-style: normal;
-}
-
-.f` + randomHash + `-modal {
-  width: 80%;
-  max-width: 400px;
-  height: 500px;
-  overflow: hidden;
-  background-repeat: no-repeat;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
-}
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-modal {
-    width: 50%;
-    max-width: 600px;
-  }
-}
-
-.f` + randomHash + `-modalImage {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
-
-@media screen and (max-width:768px) {
-  .f` + randomHash + `-modal {
-    width: 100vw;
-  }
-}
-
-
-.f` + randomHash + `-curlyText {
-  font-family: "proxima-nova", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-  text-transform: uppercase;
-  text-align: center;
-  letter-spacing: 2pt;
-  fill: var(--secondary);
-  text-shadow: var(--text-shadow);
-  margin-top: -150px;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.f` + randomHash + `-curlyText text {
-  font-size: 1.3rem;
-}
-
-
-.f` + randomHash + `-mainText {
-  font-weight: 200;
-  font-family: "proxima-nova", sans-serif;
-  color: var(--secondary);
-  font-size: 2.1rem;
-  text-shadow: var(--text-shadow);
-  display: inline-block;
-  text-align: center;
-  margin-top: -4.5rem;
-}
-
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-}
-
-@media screen and (min-width: 1024px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-
-  .f` + randomHash + `-mainText {
-    font-size: 2.4rem;
-  }
-}
-
-@media screen and (min-width: 1150px) {
-  .f` + randomHash + `-mainText {
-    font-size: 2.7rem;
-  }
-}
-
-.f` + randomHash + `-cta {
-  font-family: "proxima-nova", sans-serif;
-  cursor: pointer;
-  background-color: var(--secondary);
-  padding: 0.75rem 3rem;
-  border-radius: 8px;
-  display: block;
-  font-size: 1.3rem;
-  color: var(--primary);
-  text-align: center;
-  text-transform: uppercase;
-  max-width: 400px;
-  margin: 0 auto;
-  text-decoration: none;
-}
-
-.f` + randomHash + `-cta:hover {
-  transition: all 0.3s;
-  filter: brightness(0.95);
-}
-
-.f` + randomHash + `-close-button {
-  border-radius: 100%;
-  background-color: var(--secondary);
-  width: 2rem;
-  height: 2rem;
-  position: absolute;
-  margin: 10px;
-  top: 0px;
-  right: 0px;
-  color: black;
-  font-size: 1.2rem;
-  font-weight: 300;
-  cursor: pointer;
-}
-
-.f` + randomHash + `-button-container {
-  flex: 1;
-  display: grid;
-  place-content: center;
-}
-
-.f` + randomHash + `-image-darken {
-  background: rgba(0,0,0,0.2);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
-}
-    `;
-    const styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  });
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: 'f' + randomHash + '-overlay'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-modal',
-    style: {
-      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative',
-      height: 500
-    }
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-image-darken'
-  }, React__default.createElement("button", {
-    className: 'f' + randomHash + '-close-button',
-    onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '16',
-    height: '16',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement(CurlyText, {
-    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
-    randomHash: randomHash
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1
-    },
-    className: 'f' + randomHash + '--spacer'
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      marginTop: -150,
-      textTransform: 'uppercase',
-      textAlign: 'center',
-      letterSpacing: '2pt'
-    }
-  }, React__default.createElement("span", {
-    className: 'f' + randomHash + '-mainText'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    className: 'f' + randomHash + '-buttonContainer'
-  }, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: 'f' + randomHash + '-cta',
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
-};
-
 const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;
-const StonehouseModal = ({
+const CnMStandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
@@ -504,173 +226,165 @@ const StonehouseModal = ({
   const [stylesLoaded, setStylesLoaded] = useState(false);
   useEffect(() => {
     const cssToApply = `
-      @font-face{
-        font-family: "Gotham Bold";
-        src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix") format("embedded-opentype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff") format("woff"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2") format("woff2"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf") format("truetype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold") format("svg");
-            font-display: auto;
-            font-style: normal;
-            font-weight: 500;
-            font-stretch: normal;
+    :root {
+      --primary: white;
+      --secondary: grey;
+      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     }
-     
-
-      :root {
-        --primary: white;
-        --secondary: #e0aa00;
-        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-      }
-      h1, h2, h3, h4, h5, h6, p, a, span {
-        line-height: 1.2;
-      }
-
-      .${prependClass('overlay')} {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-family: 'Gotham Bold';
-        font-weight: 500;
-        font-style: normal;
-      }
-
+    
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    a,
+    span {
+      line-height: 1.2;
+      font-family: Arial, Helvetica, sans-serif;
+    
+    }
+    
+    .${prependClass('overlay')} {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 500;
+      font-style: normal;
+    }
+    
+    .${prependClass('modal')} {
+      width: 80%;
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--text-shadow);
+    }
+    
+    
+    .${prependClass('text-center')} {
+      text-align: center;
+    }
+    
+    @media screen and (min-width: 768px) {
       .${prependClass('modal')} {
-        width: 80%;
-        height: 500px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        background-repeat: no-repeat;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: var(--text-shadow);
+        max-width: 600px;
       }
-
-      .${prependClass('gotham-bold')} {
-        font-family: 'Gotham Bold';
+    }
+    
+    @media screen and (max-width: 768px) {
+      .${prependClass('modal')} {
+        width: 95vw;
+        max-width: 600px;
       }
-
-      .${prependClass('text-center')} {
-        text-align: center;
-      }
-
-      @media screen and (min-width: 768px) {
-        .${prependClass('modal')} {
-          max-width: 600px;
-        }
-      }
-
-      @media screen and (max-width: 768px) {
-        .${prependClass('modal')} {
-          width: 95vw;
-          max-width: 600px;
-        }
-      }
-
-      .${prependClass('main-text')} {
-        flex: 1;
-        font-family: 'Gotham Bold';
-        font-weight: 500;
-        font-size: 3rem;
-        font-style: normal;
-        text-transform: uppercase;
-        text-align: center;
-        letter-spacing: 2pt;
-        fill: var(--secondary);
-        text-shadow: var(--text-shadow);
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: -10px;
-      }
-
-      .${prependClass('text-container')} {
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        text-shadow: var(--text-shadow);
-      }
-
-      .${prependClass('sub-text')} {
-        margin: auto;
-        font-weight: 600;
-        font-family: 'Gotham Bold';
-        font-size: 0.6rem;
-        letter-spacing: 2pt;
-
-        display: inline-block;
-        text-align: center;
-        text-transform: uppercase;
-      }
-
-      .${prependClass('cta')} {
-        font-family: 'Gotham Bold';
-        cursor: pointer;
-        background-color: var(--secondary);
-        padding: 0.75rem 1rem 0 1rem;
-        border-radius: 2px;
-        display: block;
-        font-size: 1.3rem;
-        color: var(--primary);
-        text-align: center;
-        text-transform: uppercase;
-        max-width: 400px;
-        margin: 0 auto;
-        text-decoration: none;
-        box-shadow: 0.3rem 0.3rem white;
-      }
-
-      .${prependClass('cta:hover')} {
-        transition: all 0.3s;
-        filter: brightness(0.95);
-      }
-
-      .${prependClass('close-button')} {
-        border-radius: 100%;
-        background-color: white;
-        width: 2rem;
-        border: none;
-        height: 2rem;
-        position: absolute;
-        margin: 10px;
-        top: 0px;
-        right: 0px;
-        color: black;
-        font-size: 1.2rem;
-        font-weight: 300;
-        cursor: pointer;
-        display: grid;
-        place-content: center;
-      }
-
-      .${prependClass('image-darken')} {
-        background: rgba(0, 0, 0, 0.1);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 100%;
-        padding: 2rem 1.5rem 1.5rem 1.5rem;
-      }
-
-      .${prependClass('text-shadow')} {
-        text-shadow: var(--text-shadow);
-      }
-
-      .${prependClass('box-shadow')} {
-        box-shadow: var(--text-shadow);
-      }
+    }
+    
+    .${prependClass('text-container')} {
+      flex-direction: column;
+      flex: 1;
+      text-shadow: var(--text-shadow);
+      display: grid;
+      place-content: center;
+    }
+    
+    .${prependClass('main-text')} {
+      font-weight: 500;
+      font-size: 2rem;
+      font-style: normal;
+      text-align: center;
+      margin-bottom: 1rem;
+      fill: var(--secondary);
+      text-shadow: var(--text-shadow);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    
+    }
+    
+    .${prependClass('sub-text')} {
+      margin: auto;
+      font-weight: 600;
+      font-size: 1.2rem;
+    
+      text-align: center;
+      text-transform: uppercase;
+    }
+    
+    .${prependClass('cta')} {
+      cursor: pointer;
+      background-color: var(--secondary);
+      padding: 0.3rem 1rem;
+      border-radius: 2px;
+      display: block;
+      font-size: 1.3rem;
+      color: var(--primary);
+      text-align: center;
+      text-transform: uppercase;
+      max-width: 400px;
+      margin: 0 auto;
+      text-decoration: none;
+      box-shadow: 0.3rem 0.3rem white;
+    }
+    
+    .${prependClass('cta:hover')} {
+      transition: all 0.3s;
+      filter: brightness(0.95);
+    }
+    
+    .${prependClass('close-button')} {
+      border-radius: 100%;
+      background-color: white;
+      width: 2rem;
+      border: none;
+      height: 2rem;
+      position: absolute;
+      margin: 10px;
+      top: 0px;
+      right: 0px;
+      color: black;
+      font-size: 1.2rem;
+      font-weight: 300;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+    }
+    
+    .${prependClass('close-button:hover')} {
+      transition: all 0.3s;
+      filter: brightness(0.95);
+    }
+    
+    .${prependClass('image-darken')} {
+      background: rgba(0, 0, 0, 0.1);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 100%;
+      padding: 2rem 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .${prependClass('text-shadow')} {
+      text-shadow: var(--text-shadow);
+    }
+    
+    .${prependClass('box-shadow')} {
+      box-shadow: var(--text-shadow);
+    }
     `;
     const styles = document.createElement('style');
     styles.type = 'text/css';
@@ -679,38 +393,10 @@ const StonehouseModal = ({
     setTimeout(() => {
       setStylesLoaded(true);
     }, 500);
-  }, [randomHash]);
+  }, []);
   if (!stylesLoaded) {
     return null;
   }
-  const TwoForTenThing = () => React__default.createElement("div", {
-    style: {
-      position: 'absolute',
-      left: '10%',
-      top: 250
-    }
-  }, React__default.createElement("div", {
-    className: prependClass(`box-shadow`),
-    style: {
-      borderRadius: '100%',
-      height: 100,
-      width: 100,
-      border: '2px solid white',
-      display: 'grid',
-      placeContent: 'center',
-      transform: 'rotate(-10deg)'
-    }
-  }, React__default.createElement("h4", {
-    className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`
-  }, "2 for"), React__default.createElement("h1", {
-    className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`,
-    style: {
-      marginLeft: 15,
-      marginBottom: -10
-    }
-  }, "10*"), React__default.createElement("h6", {
-    className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`
-  }, "COCKTAILS")));
   return React__default.createElement("div", {
     className: prependClass('overlay')
   }, React__default.createElement("div", {
@@ -740,9 +426,9 @@ const StonehouseModal = ({
     className: prependClass('text-container')
   }, React__default.createElement("h1", {
     className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
     className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", null, React__default.createElement(TwoForTenThing, null)), React__default.createElement("div", {
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'flex-end'
@@ -1471,9 +1157,15 @@ const useCollector = () => {
   return useContext(CollectorContext);
 };
 
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
 const getBrand = () => {
   if (typeof window === 'undefined') return null;
-  if (window.location.host.startsWith('localhost')) return 'Stonehouse';
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
   if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
   return null;
@@ -1499,13 +1191,9 @@ const Modal = ({
     visitor
   } = useVisitor();
   const [open, setOpen] = useState(true);
-  const [stylesLoaded, setStylesLoaded] = useState(false);
   const [hasFired, setHasFired] = useState(false);
   const brand = React__default.useMemo(() => {
     return getBrand();
-  }, []);
-  const randomHash = useMemo(() => {
-    return v4().split('-')[0];
   }, []);
   useEffect(() => {
     if (!open) return;
@@ -1526,198 +1214,6 @@ const Modal = ({
     });
     setHasFired(true);
   }, [open]);
-  useEffect(() => {
-    const css = `
-      @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");
-
-@font-face {
-  font-family: "proxima-nova";
-  src: url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff2"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("opentype");
-  font-display: auto;
-  font-style: normal;
-  font-weight: 500;
-  font-stretch: normal;
-}
-
-:root {
-  --primary: #b6833f;
-  --secondary: white;
-  --text-shadow: 1px 1px 10px rgba(0,0,0,1);
-}
-
-.tk-proxima-nova {
-  font-family: "proxima-nova", sans-serif;
-}
-
-.f` + randomHash + `-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: "proxima-nova", sans-serif !important;
-  font-weight: 500;
-  font-style: normal;
-}
-
-.f` + randomHash + `-modal {
-  width: 80%;
-  max-width: 400px;
-  height: 500px;
-  overflow: hidden;
-  background-repeat: no-repeat;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
-}
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-modal {
-    width: 50%;
-    max-width: 600px;
-  }
-}
-
-.f` + randomHash + `-modalImage {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
-
-@media screen and (max-width:768px) {
-  .f` + randomHash + `-modal {
-    width: 100vw;
-  }
-}
-
-
-.f` + randomHash + `-curlyText {
-  font-family: "proxima-nova", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-  text-transform: uppercase;
-  text-align: center;
-  letter-spacing: 2pt;
-  fill: var(--secondary);
-  text-shadow: var(--text-shadow);
-  margin-top: -150px;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.f` + randomHash + `-curlyText text {
-  font-size: 1.3rem;
-}
-
-
-.f` + randomHash + `-mainText {
-  font-weight: 200;
-  font-family: "proxima-nova", sans-serif;
-  color: var(--secondary);
-  font-size: 2.1rem;
-  text-shadow: var(--text-shadow);
-  display: inline-block;
-  text-align: center;
-  margin-top: -4.5rem;
-}
-
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-}
-
-@media screen and (min-width: 1024px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-
-  .f` + randomHash + `-mainText {
-    font-size: 2.4rem;
-  }
-}
-
-@media screen and (min-width: 1150px) {
-  .f` + randomHash + `-mainText {
-    font-size: 2.7rem;
-  }
-}
-
-.f` + randomHash + `-cta {
-  font-family: "proxima-nova", sans-serif;
-  cursor: pointer;
-  background-color: var(--secondary);
-  padding: 0.75rem 3rem;
-  border-radius: 8px;
-  display: block;
-  font-size: 1.3rem;
-  color: var(--primary);
-  text-align: center;
-  text-transform: uppercase;
-  max-width: 400px;
-  margin: 0 auto;
-  text-decoration: none;
-}
-
-.f` + randomHash + `-cta:hover {
-  transition: all 0.3s;
-  filter: brightness(0.95);
-}
-
-.f` + randomHash + `-close-button {
-  border-radius: 100%;
-  background-color: var(--secondary);
-  width: 2rem;
-  height: 2rem;
-  position: absolute;
-  margin: 10px;
-  top: 0px;
-  right: 0px;
-  color: black;
-  font-size: 1.2rem;
-  font-weight: 300;
-  cursor: pointer;
-}
-
-.f` + randomHash + `-button-container {
-  flex: 1;
-  display: grid;
-  place-content: center;
-}
-
-.f` + randomHash + `-image-darken {
-  background: rgba(0,0,0,0.2);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
-}
-    `;
-    const styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  });
-  if (!stylesLoaded) {
-    return null;
-  }
   if (!open) {
     return null;
   }
@@ -1732,17 +1228,11 @@ const Modal = ({
     resetDisplayTrigger();
     setOpen(false);
   };
-  if (brand === 'Stonehouse') return React__default.createElement(StonehouseModal, {
+  return React__default.createElement(CnMStandardModal, {
     trigger: trigger,
     handleClickCallToAction: handleClickCallToAction,
     handleCloseModal: handleCloseModal
   });
-  if (brand === 'Browns') return React__default.createElement(BrownsModal, {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  });
-  return null;
 };
 const TriggerModal = ({
   trigger

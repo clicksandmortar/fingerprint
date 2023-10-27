@@ -174,6 +174,11 @@ const StonehouseModal = ({
         display: grid;
         place-content: center;
       }
+      .${prependClass('close-button')}:hover {
+        transition: all 0.3s;
+        filter: brightness(0.95);
+      }
+      
 
       .${prependClass('image-darken')} {
         background: rgba(0, 0, 0, 0.1);

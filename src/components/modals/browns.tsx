@@ -242,6 +242,14 @@ export const BrownsModal = ({
 
 .f` +
       randomHash +
+      `-close-button:hover {
+  transition: all 0.3s;
+  filter: brightness(0.95);
+}
+
+
+.f` +
+      randomHash +
       `-button-container {
   flex: 1;
   display: grid;
