@@ -171,6 +171,8 @@ export default App
 
 ### FingerprintProvider
 
+#### Note: a lot of these fields are going to be moved to BE and configurable from Portal #soon
+
 | Prop                     | Type       | Default     | Description                                                                                                                                                           |
 | ------------------------ | ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | appId                    | `string`   | `undefined` | The application ID to use for fingerprint tracking. Fingerprint will not start tracking data until this is set, and has been validated by the server.                 |
@@ -183,7 +185,9 @@ export default App
 | exitIntentTriggers       | `boolean`  | `false`     | Whether or not to use exit intent to trigger behaviours.                                                                                                              |
 | idleTriggers             | `boolean`  | `false`     | Whether or not to use idle time to trigger behaviours.                                                                                                                |
 | config                   | `object`   | `undefined` | Config params where future optional parameters can be nested                                                                                                          |
+| config.exitIntentDelay   | `number`   | `0`         | time (ms) before exit intents CAN start to fire idle                                                                                                                          |
 | config.idleDelay         | `number`   | `undefined` | time (ms) before the user is considered idle                                                                                                                          |
+| config.triggerCooldown   | `number`   | `60 000`    | cooldown (ms) preventing triggers from being fired even if conditions are met
 
 ### useFingerprint
 
