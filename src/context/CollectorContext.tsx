@@ -3,6 +3,7 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 // import { isMobile } from 'react-device-detect' <= reminder where isMobile came from
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
+
 import { Trigger } from '../client/types'
 import { WithCollectOnBoot } from '../hooks/useCollectOnBoot'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
