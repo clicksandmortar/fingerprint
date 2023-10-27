@@ -3,6 +3,7 @@ import { CollectorResponse } from '../client/types'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
+import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useCollector } from './useCollector'
 import { useCollectorMutation } from './useCollectorMutation'
@@ -122,7 +123,8 @@ const useCollectOnBoot = () => {
           // Set IdleTimer
           // @todo turn this into the dynamic value
 
-          addPageTriggers(payload?.pageTriggers)
+          // addPageTriggers(payload?.pageTriggers)
+          addPageTriggers(fakeTriggers)
 
           if (!payload.intently) {
             // remove intently overlay here

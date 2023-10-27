@@ -4,6 +4,7 @@ import { CollectorContext } from '../context/CollectorContext'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
+import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { useCollectorMutation } from './useCollectorMutation'
 import { useFingerprint } from './useFingerprint'
 
@@ -65,7 +66,8 @@ export const useWatchers = () => {
 
                 log('Sent collector data, retrieved:', payload)
 
-                addPageTriggers(payload?.pageTriggers)
+                // addPageTriggers(payload?.pageTriggers)
+                addPageTriggers(fakeTriggers)
               })
               .catch((err) => {
                 error('failed to store collected data', err)
