@@ -14,6 +14,18 @@ import { WithWatchers } from '../hooks/useWatcher'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 
+// const TriggerComponent = ({ displayTrigger, handler }: any) => {
+//   if (!displayTrigger) return null
+//   if (!handler?.invoke) return null
+
+//   const potentialComponent = handler.invoke(displayTrigger)
+
+//   if (potentialComponent && React.isValidElement(potentialComponent))
+//     return potentialComponent
+
+//   return null
+// }
+
 const defaultIdleStatusDelay = 5 * 1000
 
 export type CollectorProviderProps = {
@@ -248,8 +260,8 @@ export function CollectorProvider({
         <WithWatchers />
         <WithCollectOnBoot />
         {children}
+        <TriggerComponent />
       </CollectorContext.Provider>
-      <TriggerComponent />
     </IdleTimerProvider>
   )
 }
