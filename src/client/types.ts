@@ -66,7 +66,11 @@ export type Trigger = {
     [key: string]: string
   }
   invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode
-  behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW'
+  behaviour?:
+    | 'BEHAVIOUR_MODAL'
+    | 'BEHAVIOUR_YOUTUBE'
+    | 'BEHAVIOUR_INVERSE_FLOW'
+    | 'BEHAVIOUR_BANNER'
   brand?: any
 }
 
