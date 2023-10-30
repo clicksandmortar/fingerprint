@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
+import { useFingerprint } from '../hooks/useFingerprint'
+import { bootstrapSession } from '../sessions/bootstrap'
 import { Session } from '../sessions/types'
+import { bootstrapVisitor } from '../visitors/bootstrap'
 import { Visitor } from '../visitors/types'
 import { useLogging } from './LoggingContext'
-import { bootstrapSession } from '../sessions/bootstrap'
-import { bootstrapVisitor } from '../visitors/bootstrap'
-import { useFingerprint } from '../hooks/useFingerprint'
 
 export type VisitorProviderProps = {
   children?: React.ReactNode
@@ -42,11 +42,19 @@ export const VisitorProvider = ({ children }: VisitorProviderProps) => {
     log('VisitorProvider: booted', session, visitor)
   }, [appId, booted])
 
+  const setVisitorData = React.useCallback(
+    (prop: Partial<Visitor>) => {
+      setVisitor({ ...visitor, ...prop })
+    },
+    [setVisitor]
+  )
+
   return (
     <VisitorContext.Provider
       value={{
         session,
-        visitor
+        visitor,
+        setVisitor: setVisitorData
       }}
     >
       {children}
@@ -57,11 +65,16 @@ export const VisitorProvider = ({ children }: VisitorProviderProps) => {
 export type VisitorContextInterface = {
   session: Session
   visitor: Visitor
+  setVisitor: (visitor: Partial<Visitor>) => void
 }
 
 export const VisitorContext = createContext<VisitorContextInterface>({
   session: {},
-  visitor: {}
+  visitor: {},
+  setVisitor: () =>
+    console.error(
+      'VisitorContext: setVisitor not setup properly. Check your Context order.'
+    )
 })
 
 export const useVisitor = () => {

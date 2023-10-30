@@ -2,6 +2,7 @@ import mixpanel, { Callback, Config } from 'mixpanel-browser'
 import React, { createContext, useContext, useEffect } from 'react'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { getEnvVars } from '../utils/getEnvVars'
+import { RegistrableUserProperties } from '../utils/types'
 import { useLogging } from './LoggingContext'
 import { useVisitor } from './VisitorContext'
 
@@ -40,10 +41,33 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     mixpanel.identify(visitor.id)
   }, [appId, visitor?.id])
 
+  useEffect(() => {
+    if (!visitor?.cohort) {
+      log('Able to register user cohort, but none provided. ')
+      return
+    }
+
+    registerUserData({ u_cohort: visitor.cohort })
+  }, [visitor])
+
+  const registerUserData = React.useCallback(
+    (properties: RegistrableUserProperties) => {
+      log(
+        `Mixpanel: attempting to'register/override properties: ${Object.keys(
+          properties
+        ).join(', ')}`
+      )
+
+      mixpanel.people.set(properties)
+    },
+    [log]
+  )
+
   return (
     <MixpanelContext.Provider
       value={{
-        trackEvent
+        trackEvent,
+        registerUserData
       }}
     >
       {children}
@@ -53,10 +77,18 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
 
 export type MixpanelContextInterface = {
   trackEvent: (event: string, props: any, callback?: Callback) => void
+  registerUserData: (props: RegistrableUserProperties) => void
 }
 
 export const MixpanelContext = createContext<MixpanelContextInterface>({
-  trackEvent: () => {}
+  trackEvent: () =>
+    console.error(
+      'Mixpanel: trackEvent not setup properly. Check your Context order.'
+    ),
+  registerUserData: () =>
+    console.error(
+      'Mixpanel: registerUserData not setup properly. Check your Context order.'
+    )
 })
 
 export const useMixpanel = () => {
