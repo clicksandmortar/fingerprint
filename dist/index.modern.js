@@ -987,16 +987,24 @@ const VisitorProvider = ({
     boot();
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
+  const setVisitorData = React__default.useCallback(prop => {
+    setVisitor({
+      ...visitor,
+      ...prop
+    });
+  }, [setVisitor]);
   return React__default.createElement(VisitorContext.Provider, {
     value: {
       session,
-      visitor
+      visitor,
+      setVisitor: setVisitorData
     }
   }, children);
 };
 const VisitorContext = createContext({
   session: {},
-  visitor: {}
+  visitor: {},
+  setVisitor: () => console.error('VisitorContext: setVisitor not setup properly. Check your Context order.')
 });
 const useVisitor = () => {
   return useContext(VisitorContext);
@@ -1035,14 +1043,29 @@ const MixpanelProvider = ({
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  useEffect(() => {
+    if (!(visitor !== null && visitor !== void 0 && visitor.cohort)) {
+      log('Able to register user cohort, but none provided. ');
+      return;
+    }
+    registerUserData({
+      u_cohort: visitor.cohort
+    });
+  }, [visitor]);
+  const registerUserData = React__default.useCallback(properties => {
+    log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
+    mixpanel.people.set(properties);
+  }, [log]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
-      trackEvent
+      trackEvent,
+      registerUserData
     }
   }, children);
 };
 const MixpanelContext = createContext({
-  trackEvent: () => {}
+  trackEvent: () => console.error('Mixpanel: trackEvent not setup properly. Check your Context order.'),
+  registerUserData: () => console.error('Mixpanel: registerUserData not setup properly. Check your Context order.')
 });
 const useMixpanel = () => {
   return useContext(MixpanelContext);
@@ -1177,7 +1200,8 @@ function CollectorProvider({
   const configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
   const {
     visitor,
-    session
+    session,
+    setVisitor
   } = useVisitor();
   const {
     canNextTriggerOccur,
@@ -1374,18 +1398,16 @@ function CollectorProvider({
         log('Sent collector data, retrieved:', payload);
         setIdleTimeout(getIdleStatusDelay());
         addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+        const cohort = payload.intently ? 'intently' : 'fingerprint';
+        setVisitor({
+          cohort
+        });
         if (!payload.intently) {
           log('CollectorProvider: user is in Fingerprint cohort');
           setIntently(false);
-          trackEvent('user_cohort', {
-            cohort: 'fingerprint'
-          });
         } else {
           log('CollectorProvider: user is in Intently cohort');
           setIntently(true);
-          trackEvent('user_cohort', {
-            cohort: 'intently'
-          });
         }
       }).catch(err => {
         error('failed to store collected data', err);
@@ -1395,7 +1417,7 @@ function CollectorProvider({
     return () => {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
+  }, [appId, booted, collect, error, setVisitor, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);

@@ -35,7 +35,7 @@ export function CollectorProvider({
   } = useFingerprint()
 
   const configIdleDelay = config?.idleDelay
-  const { visitor, session } = useVisitor()
+  const { visitor, session, setVisitor } = useVisitor()
   const { canNextTriggerOccur, startCooldown, getRemainingCooldownMs } =
     useTriggerDelay(config?.triggerCooldown)
   const { trackEvent } = useMixpanel()
@@ -334,20 +334,17 @@ export function CollectorProvider({
 
           addPageTriggers(payload?.pageTriggers)
 
+          const cohort = payload.intently ? 'intently' : 'fingerprint'
+          setVisitor({ cohort })
+
           if (!payload.intently) {
             // remove intently overlay here
             log('CollectorProvider: user is in Fingerprint cohort')
             setIntently(false)
-            trackEvent('user_cohort', {
-              cohort: 'fingerprint'
-            })
           } else {
             // show intently overlay here
             log('CollectorProvider: user is in Intently cohort')
             setIntently(true)
-            trackEvent('user_cohort', {
-              cohort: 'intently'
-            })
           }
         })
         .catch((err) => {
@@ -365,6 +362,7 @@ export function CollectorProvider({
     booted,
     collect,
     error,
+    setVisitor,
     handlers,
     initialDelay,
     getIdleStatusDelay,

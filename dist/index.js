@@ -694,16 +694,23 @@ var VisitorProvider = function VisitorProvider(_ref) {
     boot();
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
+  var setVisitorData = React__default.useCallback(function (prop) {
+    setVisitor(_extends({}, visitor, prop));
+  }, [setVisitor]);
   return React__default.createElement(VisitorContext.Provider, {
     value: {
       session: session,
-      visitor: visitor
+      visitor: visitor,
+      setVisitor: setVisitorData
     }
   }, children);
 };
 var VisitorContext = React.createContext({
   session: {},
-  visitor: {}
+  visitor: {},
+  setVisitor: function setVisitor() {
+    return console.error('VisitorContext: setVisitor not setup properly. Check your Context order.');
+  }
 });
 var useVisitor = function useVisitor() {
   return React.useContext(VisitorContext);
@@ -738,14 +745,33 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  React.useEffect(function () {
+    if (!(visitor !== null && visitor !== void 0 && visitor.cohort)) {
+      log('Able to register user cohort, but none provided. ');
+      return;
+    }
+    registerUserData({
+      u_cohort: visitor.cohort
+    });
+  }, [visitor]);
+  var registerUserData = React__default.useCallback(function (properties) {
+    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
+    mixpanel.people.set(properties);
+  }, [log]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
-      trackEvent: trackEvent
+      trackEvent: trackEvent,
+      registerUserData: registerUserData
     }
   }, children);
 };
 var MixpanelContext = React.createContext({
-  trackEvent: function trackEvent() {}
+  trackEvent: function trackEvent() {
+    return console.error('Mixpanel: trackEvent not setup properly. Check your Context order.');
+  },
+  registerUserData: function registerUserData() {
+    return console.error('Mixpanel: registerUserData not setup properly. Check your Context order.');
+  }
 });
 var useMixpanel = function useMixpanel() {
   return React.useContext(MixpanelContext);
@@ -906,7 +932,8 @@ function CollectorProvider(_ref) {
   var configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
-    session = _useVisitor.session;
+    session = _useVisitor.session,
+    setVisitor = _useVisitor.setVisitor;
   var _useTriggerDelay = useTriggerDelay(config === null || config === void 0 ? void 0 : config.triggerCooldown),
     canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
     startCooldown = _useTriggerDelay.startCooldown,
@@ -1118,18 +1145,16 @@ function CollectorProvider(_ref) {
             log('Sent collector data, retrieved:', payload);
             setIdleTimeout(getIdleStatusDelay());
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+            var cohort = payload.intently ? 'intently' : 'fingerprint';
+            setVisitor({
+              cohort: cohort
+            });
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
               setIntently(false);
-              trackEvent('user_cohort', {
-                cohort: 'fingerprint'
-              });
             } else {
               log('CollectorProvider: user is in Intently cohort');
               setIntently(true);
-              trackEvent('user_cohort', {
-                cohort: 'intently'
-              });
             }
           });
         } catch (e) {
@@ -1143,7 +1168,7 @@ function CollectorProvider(_ref) {
     return function () {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
+  }, [appId, booted, collect, error, setVisitor, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
