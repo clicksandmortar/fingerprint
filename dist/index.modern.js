@@ -1403,6 +1403,14 @@ const WithWatchers = () => {
   return null;
 };
 
+const getBrand = () => {
+  if (typeof window === 'undefined') return null;
+  if (window.location.host.startsWith('localhost')) return 'Stonehouse';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  return null;
+};
+
 const defaultIdleStatusDelay = 5 * 1000;
 function CollectorProvider({
   children,
@@ -1489,7 +1497,16 @@ function CollectorProvider({
     if (!displayTrigger) return null;
     if (!(handler !== null && handler !== void 0 && handler.invoke)) return null;
     const potentialComponent = handler.invoke(displayTrigger);
-    if (potentialComponent && React__default.isValidElement(potentialComponent)) return potentialComponent;
+    if (potentialComponent && React__default.isValidElement(potentialComponent)) {
+      trackEvent('trigger_displayed', {
+        triggerId: displayTrigger.id,
+        triggerType: displayTrigger.invocation,
+        triggerBehaviour: displayTrigger.behaviour,
+        time: new Date().toISOString(),
+        brand: getBrand()
+      });
+      return potentialComponent;
+    }
     return null;
   }, [displayTrigger, handler]);
   const fireIdleTrigger = useCallback(() => {
@@ -1563,14 +1580,6 @@ const CollectorContext = createContext({
 
 const useCollector = () => {
   return useContext(CollectorContext);
-};
-
-const getBrand = () => {
-  if (typeof window === 'undefined') return null;
-  if (window.location.host.startsWith('localhost')) return 'Stonehouse';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return null;
 };
 
 const Modal = ({

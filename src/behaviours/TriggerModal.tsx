@@ -42,13 +42,6 @@ const Modal = ({ trigger }: Props) => {
       error(e)
     }
 
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour,
-      time: new Date().toISOString(),
-      brand
-    })
     setHasFired(true)
   }, [open])
 

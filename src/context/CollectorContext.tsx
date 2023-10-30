@@ -11,6 +11,7 @@ import { useFingerprint } from '../hooks/useFingerprint'
 import useKillIntently from '../hooks/useKillIntently'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { WithWatchers } from '../hooks/useWatcher'
+import { getBrand } from '../utils/brand'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 
@@ -154,8 +155,16 @@ export function CollectorProvider({
 
     const potentialComponent = handler.invoke(displayTrigger)
 
-    if (potentialComponent && React.isValidElement(potentialComponent))
+    if (potentialComponent && React.isValidElement(potentialComponent)) {
+      trackEvent('trigger_displayed', {
+        triggerId: displayTrigger.id,
+        triggerType: displayTrigger.invocation,
+        triggerBehaviour: displayTrigger.behaviour,
+        time: new Date().toISOString(),
+        brand: getBrand()
+      })
       return potentialComponent
+    }
 
     return null
   }, [displayTrigger, handler])
@@ -247,7 +256,6 @@ export function CollectorProvider({
     }),
     [resetDisplayTrigger, setIntently, setTrigger, trackEvent]
   )
-
   return (
     <IdleTimerProvider
       timeout={idleTimeout}
