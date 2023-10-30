@@ -1,7 +1,15 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { Trigger } from '../../client/types'
+import { Trigger } from '../../../client/types'
+import { useFingerprint } from '../../../hooks/useFingerprint'
+import {
+  ButtonPosition,
+  ModalSize,
+  getModalButtonFlexPosition,
+  getModalButtonStylesBySize,
+  getModalStylesBySize
+} from './helpers'
 
 type Props = {
   trigger: Trigger
@@ -13,12 +21,21 @@ const randomHash = 'f' + uuidv4().split('-')[0]
 
 const prependClass = (className: string) => `f${randomHash}-${className}`
 
+const defaultElementSize: ModalSize = 'medium'
+const defaultButtonPosition: ButtonPosition = 'right'
+
 const CnMStandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }: Props) => {
+  const modalConfig = useFingerprint().config?.triggerConfig?.modal
+  const elementSize = modalConfig?.size || defaultElementSize
+
   const [stylesLoaded, setStylesLoaded] = useState(false)
+
+  const modalSizeStyle = getModalStylesBySize(elementSize)
+  const buttonSizeStyle = getModalButtonStylesBySize(elementSize)
 
   useEffect(() => {
     // @todo: note that because of the font being screwed up a bit on all of these host urls,
@@ -78,20 +95,7 @@ const CnMStandardModal = ({
     .${prependClass('text-center')} {
       text-align: center;
     }
-    
-    @media screen and (min-width: 768px) {
-      .${prependClass('modal')} {
-        max-width: 600px;
-      }
-    }
-    
-    @media screen and (max-width: 768px) {
-      .${prependClass('modal')} {
-        width: 95vw;
-        max-width: 600px;
-      }
-    }
-    
+  
     .${prependClass('text-container')} {
       flex-direction: column;
       flex: 1;
@@ -126,14 +130,12 @@ const CnMStandardModal = ({
     .${prependClass('cta')} {
       cursor: pointer;
       background-color: var(--secondary);
-      padding: 0.3rem 1rem;
       border-radius: 2px;
       display: block;
       font-size: 1.3rem;
       color: var(--primary);
       text-align: center;
       text-transform: uppercase;
-      max-width: 400px;
       margin: 0 auto;
       text-decoration: none;
       box-shadow: 0.3rem 0.3rem white;
@@ -208,7 +210,8 @@ const CnMStandardModal = ({
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
-          position: 'relative'
+          position: 'relative',
+          ...modalSizeStyle
         }}
       >
         <div className={prependClass('image-darken')}>
@@ -239,12 +242,20 @@ const CnMStandardModal = ({
             </p>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div
+            style={{
+              display: 'flex',
+              ...getModalButtonFlexPosition(
+                modalConfig?.buttonPosition || defaultButtonPosition
+              )
+            }}
+          >
             <div>
               <a
                 href={trigger?.data?.buttonURL}
                 className={prependClass('cta')}
                 onClick={handleClickCallToAction}
+                style={buttonSizeStyle}
               >
                 {trigger?.data?.buttonText}
               </a>

@@ -1,5 +1,5 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useState, createElement, useEffect, createContext, useContext, useCallback } from 'react';
+import React__default, { useState, createElement, useContext, useEffect, createContext, useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
@@ -215,15 +215,109 @@ const TriggerInverse = ({}) => {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
+const useFingerprint = () => {
+  return useContext(FingerprintContext);
+};
+
+const getModalStylesBySize = size => {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          width: '90%',
+          maxWidth: 400,
+          minHeight: 300
+        };
+      }
+    case 'medium':
+      {
+        return {
+          width: '90%',
+          maxWidth: 800,
+          minHeight: 400
+        };
+      }
+    case 'large':
+      {
+        return {
+          width: '90%',
+          maxWidth: 1200,
+          minHeight: 400
+        };
+      }
+    case 'full':
+      {
+        return {
+          width: '100vw',
+          height: '100vh'
+        };
+      }
+  }
+};
+const getModalButtonStylesBySize = size => {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'medium':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'large':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'full':
+      {
+        return {
+          fontSize: '1.5rem',
+          padding: '0.5rem 1.2rem'
+        };
+      }
+  }
+};
+const getModalButtonFlexPosition = position => {
+  switch (position) {
+    case 'left':
+      return {
+        justifyContent: 'flex-start'
+      };
+    case 'right':
+      return {
+        justifyContent: 'flex-end'
+      };
+    case 'center':
+      return {
+        justifyContent: 'center'
+      };
+  }
+};
+
 const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;
+const defaultElementSize = 'medium';
+const defaultButtonPosition = 'right';
 const CnMStandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }) => {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  const modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
+  const elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
   const [stylesLoaded, setStylesLoaded] = useState(false);
+  const modalSizeStyle = getModalStylesBySize(elementSize);
+  const buttonSizeStyle = getModalButtonStylesBySize(elementSize);
   useEffect(() => {
     const cssToApply = `
     :root {
@@ -279,20 +373,7 @@ const CnMStandardModal = ({
     .${prependClass('text-center')} {
       text-align: center;
     }
-    
-    @media screen and (min-width: 768px) {
-      .${prependClass('modal')} {
-        max-width: 600px;
-      }
-    }
-    
-    @media screen and (max-width: 768px) {
-      .${prependClass('modal')} {
-        width: 95vw;
-        max-width: 600px;
-      }
-    }
-    
+  
     .${prependClass('text-container')} {
       flex-direction: column;
       flex: 1;
@@ -327,14 +408,12 @@ const CnMStandardModal = ({
     .${prependClass('cta')} {
       cursor: pointer;
       background-color: var(--secondary);
-      padding: 0.3rem 1rem;
       border-radius: 2px;
       display: block;
       font-size: 1.3rem;
       color: var(--primary);
       text-align: center;
       text-transform: uppercase;
-      max-width: 400px;
       margin: 0 auto;
       text-decoration: none;
       box-shadow: 0.3rem 0.3rem white;
@@ -406,7 +485,8 @@ const CnMStandardModal = ({
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'cover',
-      position: 'relative'
+      position: 'relative',
+      ...modalSizeStyle
     }
   }, React__default.createElement("div", {
     className: prependClass('image-darken')
@@ -431,12 +511,13 @@ const CnMStandardModal = ({
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
     style: {
       display: 'flex',
-      justifyContent: 'flex-end'
+      ...getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition)
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
     className: prependClass('cta'),
-    onClick: handleClickCallToAction
+    onClick: handleClickCallToAction,
+    style: buttonSizeStyle
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
 };
 
@@ -485,10 +566,6 @@ const LoggingContext = createContext({
 });
 const useLogging = () => {
   return useContext(LoggingContext);
-};
-
-const useFingerprint = () => {
-  return useContext(FingerprintContext);
 };
 
 function getEnvVars() {
