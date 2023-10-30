@@ -71,3 +71,6 @@ yarn-error.log
 .idea
 
 .parcel-cache
+
+# build
+dist
