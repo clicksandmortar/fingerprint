@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react'
+import transcend from 'lodash/get'
+import { useEffect, useMemo, useState } from 'react'
+import { useGetInterpolate } from './useInterpolate'
 
 const getPositiveDateDiffInSec = (date1: Date, date2: Date) => {
   return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000))
@@ -45,12 +47,18 @@ function formatTimeStamp(targetDate: Date): string {
   return formattedDuration
 }
 
+type InterpolateVal = {
+  structure: Record<string, unknown>
+  key: string
+}
+
 type Props = {
   onZero?: () => void
   initialTimestamp?: Date
+  interpolate?: InterpolateVal
 }
 
-const useCountdown = ({ onZero, initialTimestamp }: Props) => {
+const useCountdown = ({ onZero, initialTimestamp, interpolate }: Props) => {
   const [timestamp, setTimeStamp] = useState<Date | null>(
     initialTimestamp || null
   )
@@ -82,7 +90,21 @@ const useCountdown = ({ onZero, initialTimestamp }: Props) => {
     }
   }, [onZero, timestamp, intId])
 
-  return { countdown, setTimeStamp }
+  const interpolatefunc = useGetInterpolate()
+
+  const formattedCountdown = useMemo(() => {
+    if (!interpolate) return countdown
+
+    const interpoaltedVal = interpolatefunc(
+      transcend(interpolate.structure, interpolate.key) as string,
+      interpolate.structure,
+      (val) => formatTimeStamp(new Date(val))
+    )
+
+    return `${interpoaltedVal}`
+  }, [countdown, interpolate, interpolatefunc])
+
+  return { countdown, setTimeStamp, formattedCountdown }
 }
 
 export default useCountdown
