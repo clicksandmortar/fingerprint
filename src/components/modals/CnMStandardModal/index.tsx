@@ -129,7 +129,7 @@ const CnMStandardModal = ({
     
     .${prependClass('cta')} {
       cursor: pointer;
-      background-color: var(--secondary);
+
       border-radius: 2px;
       display: block;
       font-size: 1.3rem;
@@ -255,7 +255,11 @@ const CnMStandardModal = ({
                 href={trigger?.data?.buttonURL}
                 className={prependClass('cta')}
                 onClick={handleClickCallToAction}
-                style={buttonSizeStyle}
+                style={{
+                  ...buttonSizeStyle,
+                  backgroundColor: 'var(--brand_primary_color)',
+                  color: 'var(--brand_text_primary_colo)r'
+                }}
               >
                 {trigger?.data?.buttonText}
               </a>

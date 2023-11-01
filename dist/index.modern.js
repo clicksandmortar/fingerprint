@@ -407,7 +407,7 @@ const CnMStandardModal = ({
     
     .${prependClass('cta')} {
       cursor: pointer;
-      background-color: var(--secondary);
+
       border-radius: 2px;
       display: block;
       font-size: 1.3rem;
@@ -517,7 +517,11 @@ const CnMStandardModal = ({
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
     className: prependClass('cta'),
     onClick: handleClickCallToAction,
-    style: buttonSizeStyle
+    style: {
+      ...buttonSizeStyle,
+      backgroundColor: 'var(--brand_primary_color)',
+      color: 'var(--brand_text_primary_colo)r'
+    }
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
 };
 
