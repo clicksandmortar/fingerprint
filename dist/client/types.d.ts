@@ -47,13 +47,13 @@ export declare type CollectorResponse = {
 };
 export declare type Invocation = 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
 export declare type Trigger = {
-    id?: string;
+    id: string;
     invocation?: Invocation;
     data?: {
         [key: string]: string;
     };
     invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode;
-    behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW';
+    behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW' | 'BEHAVIOUR_BANNER';
     brand?: any;
 };
 export declare type PageView = {

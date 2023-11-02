@@ -1,3 +1,3 @@
 export declare type RegistrableUserProperties = {
-    cohort?: 'intently' | 'fingerprint';
+    u_cohort?: 'intently' | 'fingerprint';
 };
