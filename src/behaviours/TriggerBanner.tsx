@@ -5,6 +5,8 @@ import { Trigger } from '../client/types'
 import CloseButton from '../components/CloseButton'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useCollector } from '../hooks/useCollector'
+import useCountdown from '../hooks/useCountdown'
+import { getInterpolate } from '../hooks/useInterpolate'
 
 type Props = {
   trigger: Trigger
@@ -20,13 +22,6 @@ const Banner = ({ trigger }: Props) => {
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
-
-  useEffect(() => {
-    const bannerHeight = container.current?.clientHeight
-    document.body.style.paddingTop = `${bannerHeight}px`
-
-    return resetPad
-  }, [container])
 
   const canBeDismissed = true
 
@@ -46,7 +41,32 @@ const Banner = ({ trigger }: Props) => {
     resetPad()
   }
 
+  const { formattedCountdown } = useCountdown({
+    onZero: handleClose,
+    initialTimestamp: new Date(trigger.data?.countdownEndTime || ''),
+    interpolate: {
+      text: trigger.data?.marketingText,
+      structure: trigger.data as Record<string, unknown>
+    }
+  })
+
+  const interpolate = React.useMemo(
+    () => getInterpolate(trigger.data || {}),
+    [trigger.data]
+  )
+
+  useEffect(() => {
+    const bannerHeight = container.current?.clientHeight
+    document.body.style.paddingTop = `${bannerHeight}px`
+
+    return resetPad
+  }, [container, formattedCountdown])
+
   if (!open) return null
+
+  // temporary solution. Takes a few cycles for the countdown to kick in,
+  // we dont want to show an empty div in its place
+  if (!formattedCountdown) return null
 
   return (
     // @TODO: convert to CSS?
@@ -59,7 +79,8 @@ const Banner = ({ trigger }: Props) => {
         top: 0,
         left: 0,
         width: '100%',
-        backgroundColor: '#6811B2',
+        background:
+          'linear-gradient(90deg, rgba(200,41,223,1) 0%, #1f62ff 100%)',
         display: 'flex',
         alignItems: 'center'
       }}
@@ -81,7 +102,7 @@ const Banner = ({ trigger }: Props) => {
             fontWeight: 600
           }}
         >
-          {trigger.data?.marketingText}
+          {formattedCountdown}
         </p>
 
         <button
@@ -96,7 +117,7 @@ const Banner = ({ trigger }: Props) => {
             cursor: 'pointer'
           }}
         >
-          {trigger.data?.buttonText}
+          {interpolate(trigger.data?.buttonText || '')}
         </button>
       </div>
       {canBeDismissed && (

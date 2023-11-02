@@ -1,4 +1,7 @@
 // THIS IS LITERALLY A COPY FROM OUR SHARED LIB SO AS NOT TO INTRODUCE ANOTHER DEP IN THE FINAL PACAKGE
+// STILL A WORK IN PROGRESS AND NEEDS TO BE HOOKED UP PROPERLY
+//
+// ...airbnb config failing .@TODO: @ed to look into
 
 // This eslint config was naenae'd by from a force much stronger than Ed - @cajacko (Charlie Jackson)
 
