@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { Trigger } from '../client/types'
-import CnMStandardModal from '../components/modals/CnMStandardModal'
+import CnMStandardModal from '../components/modals/StandardModal'
+import { BrownsModal } from '../components/modals/browns'
+import StonehouseModal from '../components/modals/stonehouse'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
@@ -67,32 +69,32 @@ const Modal = ({ trigger }: Props) => {
     setOpen(false)
   }
 
-  // if (brand === 'C&M')
-  return (
-    <CnMStandardModal
-      trigger={trigger}
-      handleClickCallToAction={handleClickCallToAction}
-      handleCloseModal={handleCloseModal}
-    />
-  )
-  // if (brand === 'Stonehouse')
-  //   return (
-  //     <StonehouseModal
-  //       trigger={trigger}
-  //       handleClickCallToAction={handleClickCallToAction}
-  //       handleCloseModal={handleCloseModal}
-  //     />
-  //   )
-  // if (brand === 'Browns')
-  //   return (
-  //     <BrownsModal
-  //       trigger={trigger}
-  //       handleClickCallToAction={handleClickCallToAction}
-  //       handleCloseModal={handleCloseModal}
-  //     />
-  //   )
+  if (brand === 'C&M')
+    return (
+      <CnMStandardModal
+        trigger={trigger}
+        handleClickCallToAction={handleClickCallToAction}
+        handleCloseModal={handleCloseModal}
+      />
+    )
+  if (brand === 'Stonehouse')
+    return (
+      <StonehouseModal
+        trigger={trigger}
+        handleClickCallToAction={handleClickCallToAction}
+        handleCloseModal={handleCloseModal}
+      />
+    )
+  if (brand === 'Browns')
+    return (
+      <BrownsModal
+        trigger={trigger}
+        handleClickCallToAction={handleClickCallToAction}
+        handleCloseModal={handleCloseModal}
+      />
+    )
 
-  // return null
+  return null
 }
 
 export const TriggerModal = ({ trigger }: Props) => {

@@ -1,4 +1,4 @@
-import { TriggerConfig } from '../components/modals/CnMStandardModal/helpers'
+import { TriggerConfig } from '../components/modals/StandardModal/helpers'
 import { Visitor } from '../visitors/types'
 
 export type CollectorUpdate = {

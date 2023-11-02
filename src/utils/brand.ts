@@ -1,5 +1,6 @@
 // Please dont let this become a pattern. This is a one off and should be moved to backend as soon as possible.
 
+///.... and it is becoming a pattern. 🙈
 export type SupportedBrand = 'Browns' | 'Stonehouse' | 'C&M'
 
 // eslint-disable-next-line camelcase
