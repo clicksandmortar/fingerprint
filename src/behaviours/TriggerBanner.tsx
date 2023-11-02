@@ -10,16 +10,16 @@ type Props = {
   trigger: Trigger
 }
 
+const resetPad = () => {
+  document.body.style.paddingTop = 'inherit'
+}
+
 const Banner = ({ trigger }: Props) => {
   const container = useRef<null | HTMLDivElement>(null)
 
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
-
-  const resetPad = () => {
-    document.body.style.paddingTop = 'inherit'
-  }
 
   useEffect(() => {
     const bannerHeight = container.current?.clientHeight
