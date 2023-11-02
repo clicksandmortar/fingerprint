@@ -8,6 +8,7 @@ export declare const VisitorProvider: ({ children }: VisitorProviderProps) => Re
 export declare type VisitorContextInterface = {
     session: Session;
     visitor: Visitor;
+    setVisitor: (visitor: Partial<Visitor>) => void;
 };
 export declare const VisitorContext: React.Context<VisitorContextInterface>;
 export declare const useVisitor: () => VisitorContextInterface;
