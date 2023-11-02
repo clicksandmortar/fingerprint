@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { clientHandlers } from '../client/handler'
-import { PageView, Trigger } from '../client/types'
+import { FingerprintConfig, PageView, Trigger } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
 import { LoggingProvider, useLogging } from './LoggingContext'
 import { MixpanelProvider } from './MixpanelContext'
@@ -58,11 +58,7 @@ export type FingerprintProviderProps = {
   exitIntentTriggers?: boolean
   idleTriggers?: boolean
   pageLoadTriggers?: boolean
-  config?: {
-    exitIntentDelay?: number
-    idleDelay?: number
-    triggerCooldown?: number
-  }
+  config?: FingerprintConfig
 }
 
 // @todo split this into multiple providers, FingerprintProvider should
@@ -176,7 +172,7 @@ export interface FingerprintContextInterface {
   trackEvent: (event: Event) => void
   trackPageView: (pageView: PageView) => void
   unregisterHandler: (trigger: Trigger) => void
-  config: FingerprintProviderProps['config']
+  config?: FingerprintConfig
 }
 
 const defaultFingerprintState: FingerprintContextInterface = {

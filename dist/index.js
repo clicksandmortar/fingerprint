@@ -255,6 +255,168 @@ var TriggerInverse = function TriggerInverse(_ref3) {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
+var useFingerprint = function useFingerprint() {
+  return React.useContext(FingerprintContext);
+};
+
+var getModalStylesBySize = function getModalStylesBySize(size) {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          width: '90%',
+          maxWidth: 400,
+          minHeight: 300
+        };
+      }
+    case 'medium':
+      {
+        return {
+          width: '90%',
+          maxWidth: 800,
+          minHeight: 400
+        };
+      }
+    case 'large':
+      {
+        return {
+          width: '90%',
+          maxWidth: 1200,
+          minHeight: 400
+        };
+      }
+    case 'full':
+      {
+        return {
+          width: '100vw',
+          height: '100vh'
+        };
+      }
+  }
+};
+var getModalButtonStylesBySize = function getModalButtonStylesBySize(size) {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'medium':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'large':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'full':
+      {
+        return {
+          fontSize: '1.5rem',
+          padding: '0.5rem 1.2rem'
+        };
+      }
+  }
+};
+var getModalButtonFlexPosition = function getModalButtonFlexPosition(position) {
+  switch (position) {
+    case 'left':
+      return {
+        justifyContent: 'flex-start'
+      };
+    case 'right':
+      return {
+        justifyContent: 'flex-end'
+      };
+    case 'center':
+      return {
+        justifyContent: 'center'
+      };
+  }
+};
+var randomHash = 'f' + uuid.v4().split('-')[0];
+var prependClass = function prependClass(className) {
+  return "f" + randomHash + "-" + className;
+};
+
+var defaultElementSize = 'medium';
+var defaultButtonPosition = 'right';
+var CnMStandardModal = function CnMStandardModal(_ref) {
+  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
+  var elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var modalSizeStyle = getModalStylesBySize(elementSize);
+  var buttonSizeStyle = getModalButtonStylesBySize(elementSize);
+  React.useEffect(function () {
+    var cssToApply = "\n    :root {\n      --primary: white;\n      --secondary: grey;\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      width: 80%;\n      height: 500px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: var(--secondary);\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: var(--primary);\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: _extends({
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }, modalSizeStyle)
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("button", {
+    className: prependClass('close-button'),
+    onClick: handleCloseModal
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '20',
+    height: '20',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: '#000',
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  }))), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    style: _extends({
+      display: 'flex'
+    }, getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition))
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction,
+    style: buttonSizeStyle
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
 var closeButtonStyles = {
   borderRadius: '100%',
   backgroundColor: 'white',
@@ -322,13 +484,13 @@ var BrownsModal = function BrownsModal(_ref2) {
     return uuid.v4().split('-')[0];
   }, []);
   React.useEffect(function () {
-    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-close-button:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(css));
     document.head.appendChild(styles);
     setStylesLoaded(true);
-  });
+  }, [randomHash]);
   if (!stylesLoaded) {
     return null;
   }
@@ -377,10 +539,6 @@ var BrownsModal = function BrownsModal(_ref2) {
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
 
-var randomHash = 'f' + uuid.v4().split('-')[0];
-var prependClass = function prependClass(className) {
-  return "f" + randomHash + "-" + className;
-};
 var StonehouseModal = function StonehouseModal(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   var trigger = _ref.trigger,
@@ -390,7 +548,7 @@ var StonehouseModal = function StonehouseModal(_ref) {
     stylesLoaded = _useState[0],
     setStylesLoaded = _useState[1];
   React.useEffect(function () {
-    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      h1, h2, h3, h4, h5, h6, p, a, span {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem 0 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      h1, h2, h3, h4, h5, h6, p, a, span {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem 0 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
@@ -398,7 +556,7 @@ var StonehouseModal = function StonehouseModal(_ref) {
     setTimeout(function () {
       setStylesLoaded(true);
     }, 500);
-  }, [randomHash]);
+  }, []);
   if (!stylesLoaded) {
     return null;
   }
@@ -515,10 +673,6 @@ var LoggingContext = React.createContext({
 });
 var useLogging = function useLogging() {
   return React.useContext(LoggingContext);
-};
-
-var useFingerprint = function useFingerprint() {
-  return React.useContext(FingerprintContext);
 };
 
 function getEnvVars() {
@@ -1298,9 +1452,15 @@ var useCollector = function useCollector() {
   return React.useContext(CollectorContext);
 };
 
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
 var getBrand = function getBrand() {
   if (typeof window === 'undefined') return null;
-  if (window.location.host.startsWith('localhost')) return 'Stonehouse';
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
   if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
   return null;
@@ -1361,6 +1521,11 @@ var Modal = function Modal(_ref) {
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };
+  if (brand === 'C&M') return React__default.createElement(CnMStandardModal, {
+    trigger: trigger,
+    handleClickCallToAction: handleClickCallToAction,
+    handleCloseModal: handleCloseModal
+  });
   if (brand === 'Stonehouse') return React__default.createElement(StonehouseModal, {
     trigger: trigger,
     handleClickCallToAction: handleClickCallToAction,

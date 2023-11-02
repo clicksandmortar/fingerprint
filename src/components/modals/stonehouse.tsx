@@ -1,18 +1,14 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../../client/types'
 import CloseButton from '../CloseButton'
+import { prependClass } from './StandardModal/helpers'
 
 type Props = {
   trigger: Trigger
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
 }
-
-const randomHash = 'f' + uuidv4().split('-')[0]
-
-const prependClass = (className: string) => `f${randomHash}-${className}`
 
 const StonehouseModal = ({
   trigger,
@@ -163,6 +159,11 @@ const StonehouseModal = ({
         top: 0px;
         right: 0px;
       }
+      .${prependClass('close-button')}:hover {
+        transition: all 0.3s;
+        filter: brightness(0.95);
+      }
+      
 
       .${prependClass('image-darken')} {
         background: rgba(0, 0, 0, 0.1);
@@ -190,7 +191,7 @@ const StonehouseModal = ({
     setTimeout(() => {
       setStylesLoaded(true)
     }, 500)
-  }, [randomHash])
+  }, [])
 
   if (!stylesLoaded) {
     return null

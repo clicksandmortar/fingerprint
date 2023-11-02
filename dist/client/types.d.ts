@@ -1,4 +1,5 @@
 /// <reference types="react" />
+import { TriggerConfig } from '../components/modals/StandardModal/helpers';
 import { Visitor } from '../visitors/types';
 export declare type CollectorUpdate = {
     appId: string;
@@ -60,4 +61,10 @@ export declare type PageView = {
     page: Page;
     referrer: Referrer;
     viewedAt: Date;
+};
+export declare type FingerprintConfig = {
+    exitIntentDelay?: number;
+    idleDelay?: number;
+    triggerCooldown?: number;
+    triggerConfig?: TriggerConfig;
 };

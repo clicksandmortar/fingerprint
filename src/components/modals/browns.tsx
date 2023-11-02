@@ -38,6 +38,7 @@ export const BrownsModal = ({
 }: Props) => {
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
+  // TODO: replace with `prependClass` from helpers
   const randomHash = useMemo(() => {
     return uuidv4().split('-')[0]
   }, [])
@@ -234,6 +235,14 @@ export const BrownsModal = ({
 
 .f` +
       randomHash +
+      `-close-button:hover {
+  transition: all 0.3s;
+  filter: brightness(0.95);
+}
+
+
+.f` +
+      randomHash +
       `-button-container {
   flex: 1;
   display: grid;
@@ -256,7 +265,7 @@ export const BrownsModal = ({
     styles.appendChild(document.createTextNode(css))
     document.head.appendChild(styles)
     setStylesLoaded(true)
-  })
+  }, [randomHash])
 
   if (!stylesLoaded) {
     return null

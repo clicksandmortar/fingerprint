@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-
 import { Trigger } from '../client/types'
+import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
 import { useLogging } from '../context/LoggingContext'
@@ -23,7 +23,6 @@ const Modal = ({ trigger }: Props) => {
   const { appId } = useFingerprint()
   const { visitor } = useVisitor()
   const [open, setOpen] = useState(true)
-
   const [hasFired, setHasFired] = useState(false)
 
   const brand = React.useMemo(() => {
@@ -70,6 +69,14 @@ const Modal = ({ trigger }: Props) => {
     setOpen(false)
   }
 
+  if (brand === 'C&M')
+    return (
+      <CnMStandardModal
+        trigger={trigger}
+        handleClickCallToAction={handleClickCallToAction}
+        handleCloseModal={handleCloseModal}
+      />
+    )
   if (brand === 'Stonehouse')
     return (
       <StonehouseModal

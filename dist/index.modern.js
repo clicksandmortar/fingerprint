@@ -1,5 +1,5 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useState, createElement, useMemo, useEffect, createContext, useContext, useCallback, useRef } from 'react';
+import React__default, { useState, createElement, useContext, useEffect, useMemo, createContext, useCallback, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
@@ -213,6 +213,312 @@ const TriggerInverse = ({}) => {
   }, isSubmitting || state.busy ? 'Sending Voucher...' : 'Get My Voucher')), state.error && state.responseStatusCode !== 409 && createElement("div", {
     className: `alert mt-5 bg-${landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour}/20`
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
+};
+
+const useFingerprint = () => {
+  return useContext(FingerprintContext);
+};
+
+const getModalStylesBySize = size => {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          width: '90%',
+          maxWidth: 400,
+          minHeight: 300
+        };
+      }
+    case 'medium':
+      {
+        return {
+          width: '90%',
+          maxWidth: 800,
+          minHeight: 400
+        };
+      }
+    case 'large':
+      {
+        return {
+          width: '90%',
+          maxWidth: 1200,
+          minHeight: 400
+        };
+      }
+    case 'full':
+      {
+        return {
+          width: '100vw',
+          height: '100vh'
+        };
+      }
+  }
+};
+const getModalButtonStylesBySize = size => {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'medium':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'large':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'full':
+      {
+        return {
+          fontSize: '1.5rem',
+          padding: '0.5rem 1.2rem'
+        };
+      }
+  }
+};
+const getModalButtonFlexPosition = position => {
+  switch (position) {
+    case 'left':
+      return {
+        justifyContent: 'flex-start'
+      };
+    case 'right':
+      return {
+        justifyContent: 'flex-end'
+      };
+    case 'center':
+      return {
+        justifyContent: 'center'
+      };
+  }
+};
+const randomHash = 'f' + v4().split('-')[0];
+const prependClass = className => `f${randomHash}-${className}`;
+
+const defaultElementSize = 'medium';
+const defaultButtonPosition = 'right';
+const CnMStandardModal = ({
+  trigger,
+  handleClickCallToAction,
+  handleCloseModal
+}) => {
+  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  const modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
+  const elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const modalSizeStyle = getModalStylesBySize(elementSize);
+  const buttonSizeStyle = getModalButtonStylesBySize(elementSize);
+  useEffect(() => {
+    const cssToApply = `
+    :root {
+      --primary: white;
+      --secondary: grey;
+      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+    
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    a,
+    span {
+      line-height: 1.2;
+      font-family: Arial, Helvetica, sans-serif;
+    
+    }
+    
+    .${prependClass('overlay')} {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 500;
+      font-style: normal;
+    }
+    
+    .${prependClass('modal')} {
+      width: 80%;
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--text-shadow);
+    }
+    
+    
+    .${prependClass('text-center')} {
+      text-align: center;
+    }
+  
+    .${prependClass('text-container')} {
+      flex-direction: column;
+      flex: 1;
+      text-shadow: var(--text-shadow);
+      display: grid;
+      place-content: center;
+    }
+    
+    .${prependClass('main-text')} {
+      font-weight: 500;
+      font-size: 2rem;
+      font-style: normal;
+      text-align: center;
+      margin-bottom: 1rem;
+      fill: var(--secondary);
+      text-shadow: var(--text-shadow);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    
+    }
+    
+    .${prependClass('sub-text')} {
+      margin: auto;
+      font-weight: 600;
+      font-size: 1.2rem;
+    
+      text-align: center;
+      text-transform: uppercase;
+    }
+    
+    .${prependClass('cta')} {
+      cursor: pointer;
+      background-color: var(--secondary);
+      border-radius: 2px;
+      display: block;
+      font-size: 1.3rem;
+      color: var(--primary);
+      text-align: center;
+      text-transform: uppercase;
+      margin: 0 auto;
+      text-decoration: none;
+      box-shadow: 0.3rem 0.3rem white;
+    }
+    
+    .${prependClass('cta:hover')} {
+      transition: all 0.3s;
+      filter: brightness(0.95);
+    }
+    
+    .${prependClass('close-button')} {
+      border-radius: 100%;
+      background-color: white;
+      width: 2rem;
+      border: none;
+      height: 2rem;
+      position: absolute;
+      margin: 10px;
+      top: 0px;
+      right: 0px;
+      color: black;
+      font-size: 1.2rem;
+      font-weight: 300;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+    }
+    
+    .${prependClass('close-button:hover')} {
+      transition: all 0.3s;
+      filter: brightness(0.95);
+    }
+    
+    .${prependClass('image-darken')} {
+      background: rgba(0, 0, 0, 0.1);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 100%;
+      padding: 2rem 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .${prependClass('text-shadow')} {
+      text-shadow: var(--text-shadow);
+    }
+    
+    .${prependClass('box-shadow')} {
+      box-shadow: var(--text-shadow);
+    }
+    `;
+    const styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(() => {
+      setStylesLoaded(true);
+    }, 500);
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: {
+      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative',
+      ...modalSizeStyle
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("button", {
+    className: prependClass('close-button'),
+    onClick: handleCloseModal
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '20',
+    height: '20',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: '#000',
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  }))), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    style: {
+      display: 'flex',
+      ...getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition)
+    }
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction,
+    style: buttonSizeStyle
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
 };
 
 const closeButtonStyles = {
@@ -444,6 +750,12 @@ const BrownsModal = ({
   right: 0px;
 }
 
+.f` + randomHash + `-close-button:hover {
+  transition: all 0.3s;
+  filter: brightness(0.95);
+}
+
+
 .f` + randomHash + `-button-container {
   flex: 1;
   display: grid;
@@ -464,7 +776,7 @@ const BrownsModal = ({
     styles.appendChild(document.createTextNode(css));
     document.head.appendChild(styles);
     setStylesLoaded(true);
-  });
+  }, [randomHash]);
   if (!stylesLoaded) {
     return null;
   }
@@ -513,8 +825,6 @@ const BrownsModal = ({
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
 
-const randomHash = 'f' + v4().split('-')[0];
-const prependClass = className => `f${randomHash}-${className}`;
 const StonehouseModal = ({
   trigger,
   handleClickCallToAction,
@@ -661,6 +971,11 @@ const StonehouseModal = ({
         top: 0px;
         right: 0px;
       }
+      .${prependClass('close-button')}:hover {
+        transition: all 0.3s;
+        filter: brightness(0.95);
+      }
+      
 
       .${prependClass('image-darken')} {
         background: rgba(0, 0, 0, 0.1);
@@ -687,7 +1002,7 @@ const StonehouseModal = ({
     setTimeout(() => {
       setStylesLoaded(true);
     }, 500);
-  }, [randomHash]);
+  }, []);
   if (!stylesLoaded) {
     return null;
   }
@@ -799,10 +1114,6 @@ const LoggingContext = createContext({
 });
 const useLogging = () => {
   return useContext(LoggingContext);
-};
-
-const useFingerprint = () => {
-  return useContext(FingerprintContext);
 };
 
 function getEnvVars() {
@@ -1513,9 +1824,15 @@ const useCollector = () => {
   return useContext(CollectorContext);
 };
 
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
 const getBrand = () => {
   if (typeof window === 'undefined') return null;
-  if (window.location.host.startsWith('localhost')) return 'Stonehouse';
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
   if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
   return null;
@@ -1578,6 +1895,11 @@ const Modal = ({
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };
+  if (brand === 'C&M') return React__default.createElement(CnMStandardModal, {
+    trigger: trigger,
+    handleClickCallToAction: handleClickCallToAction,
+    handleCloseModal: handleCloseModal
+  });
   if (brand === 'Stonehouse') return React__default.createElement(StonehouseModal, {
     trigger: trigger,
     handleClickCallToAction: handleClickCallToAction,

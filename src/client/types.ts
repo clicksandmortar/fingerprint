@@ -1,3 +1,4 @@
+import { TriggerConfig } from '../components/modals/StandardModal/helpers'
 import { Visitor } from '../visitors/types'
 
 export type CollectorUpdate = {
@@ -78,4 +79,12 @@ export type PageView = {
   page: Page
   referrer: Referrer
   viewedAt: Date
+}
+
+export type FingerprintConfig = {
+  exitIntentDelay?: number
+  idleDelay?: number
+  triggerCooldown?: number
+  // only applies to C&M Standard Modal
+  triggerConfig?: TriggerConfig
 }
