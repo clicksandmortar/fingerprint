@@ -184,10 +184,11 @@ export default App
 | consentCallback          | `function` | `undefined` | A callback function that will be invoked every second to check the consent status. The return value of this function will be used to determine the consent status.    |
 | exitIntentTriggers       | `boolean`  | `false`     | Whether or not to use exit intent to trigger behaviours.                                                                                                              |
 | idleTriggers             | `boolean`  | `false`     | Whether or not to use idle time to trigger behaviours.                                                                                                                |
+| pageLoadTriggers         | `boolean`  | `false`     | Whether or not to trigger behaviours on page load                                                                                                                     |
 | config                   | `object`   | `undefined` | Config params where future optional parameters can be nested                                                                                                          |
-| config.exitIntentDelay   | `number`   | `0`         | time (ms) before exit intents CAN start to fire idle                                                                                                                          |
+| config.exitIntentDelay   | `number`   | `0`         | time (ms) before exit intents CAN start to fire idle                                                                                                                  |
 | config.idleDelay         | `number`   | `undefined` | time (ms) before the user is considered idle                                                                                                                          |
-| config.triggerCooldown   | `number`   | `60 000`    | cooldown (ms) preventing triggers from being fired even if conditions are met
+| config.triggerCooldown   | `number`   | `60 000`    | cooldown (ms) preventing triggers from being fired even if conditions are met                                                                                         |
 
 ### useFingerprint
 

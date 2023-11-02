@@ -57,6 +57,7 @@ export type FingerprintProviderProps = {
   initialDelay?: number
   exitIntentTriggers?: boolean
   idleTriggers?: boolean
+  pageLoadTriggers?: boolean
   config?: FingerprintConfig
 }
 
@@ -72,6 +73,7 @@ export const FingerprintProvider = ({
   initialDelay = 0,
   exitIntentTriggers = true,
   idleTriggers = true,
+  pageLoadTriggers = true,
   config
 }: FingerprintProviderProps) => {
   const [booted, setBooted] = useState(false)
@@ -121,7 +123,7 @@ export const FingerprintProvider = ({
           value={{
             appId,
             booted,
-            currentTrigger: {},
+            currentTrigger: null,
             registerHandler: addAnotherHandler,
             trackEvent: () => {
               alert('trackEvent not implemented')
@@ -134,6 +136,7 @@ export const FingerprintProvider = ({
             },
             initialDelay,
             idleTriggers,
+            pageLoadTriggers,
             exitIntentTriggers,
             config
           }}
@@ -160,9 +163,10 @@ export interface FingerprintContextInterface {
   appId: string
   booted: boolean
   consent?: boolean
-  currentTrigger: Trigger
+  currentTrigger: Trigger | null
   exitIntentTriggers: boolean
   idleTriggers: boolean
+  pageLoadTriggers: boolean
   initialDelay: number
   registerHandler: (trigger: Trigger) => void
   trackEvent: (event: Event) => void
@@ -175,9 +179,10 @@ const defaultFingerprintState: FingerprintContextInterface = {
   appId: '',
   booted: false,
   consent: false,
-  currentTrigger: {},
+  currentTrigger: null,
   exitIntentTriggers: false,
   idleTriggers: false,
+  pageLoadTriggers: false,
   initialDelay: 0,
   registerHandler: () => {},
   trackEvent: () => {},
