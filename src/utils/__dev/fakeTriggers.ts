@@ -30,10 +30,11 @@ export const fakeTriggers: Trigger[] = [
     invocation: 'INVOCATION_PAGE_LOAD',
     behaviour: 'BEHAVIOUR_BANNER',
     data: {
-      buttonText: 'Click Here',
+      buttonText: 'Run',
       buttonURL: 'https://google.com',
       countdownEndTime: '2024-03-31T23:59',
-      marketingText: 'Testing for {{ countdownEndTime }}'
+      marketingText:
+        'You only have {{ countdownEndTime }} before the horse comes'
     }
   }
 ]
