@@ -302,9 +302,9 @@ const getModalButtonFlexPosition = position => {
       };
   }
 };
-
 const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;
+
 const defaultElementSize = 'medium';
 const defaultButtonPosition = 'right';
 const CnMStandardModal = ({
@@ -776,7 +776,7 @@ const BrownsModal = ({
     styles.appendChild(document.createTextNode(css));
     document.head.appendChild(styles);
     setStylesLoaded(true);
-  });
+  }, [randomHash]);
   if (!stylesLoaded) {
     return null;
   }
@@ -825,8 +825,6 @@ const BrownsModal = ({
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
 
-const randomHash$1 = 'f' + v4().split('-')[0];
-const prependClass$1 = className => `f${randomHash$1}-${className}`;
 const StonehouseModal = ({
   trigger,
   handleClickCallToAction,
@@ -859,7 +857,7 @@ const StonehouseModal = ({
         line-height: 1.2;
       }
 
-      .${prependClass$1('overlay')} {
+      .${prependClass('overlay')} {
         position: fixed;
         top: 0;
         left: 0;
@@ -875,7 +873,7 @@ const StonehouseModal = ({
         font-style: normal;
       }
 
-      .${prependClass$1('modal')} {
+      .${prependClass('modal')} {
         width: 80%;
         height: 500px;
         display: flex;
@@ -889,28 +887,28 @@ const StonehouseModal = ({
         box-shadow: var(--text-shadow);
       }
 
-      .${prependClass$1('gotham-bold')} {
+      .${prependClass('gotham-bold')} {
         font-family: 'Gotham Bold';
       }
 
-      .${prependClass$1('text-center')} {
+      .${prependClass('text-center')} {
         text-align: center;
       }
 
       @media screen and (min-width: 768px) {
-        .${prependClass$1('modal')} {
+        .${prependClass('modal')} {
           max-width: 600px;
         }
       }
 
       @media screen and (max-width: 768px) {
-        .${prependClass$1('modal')} {
+        .${prependClass('modal')} {
           width: 95vw;
           max-width: 600px;
         }
       }
 
-      .${prependClass$1('main-text')} {
+      .${prependClass('main-text')} {
         flex: 1;
         font-family: 'Gotham Bold';
         font-weight: 500;
@@ -927,14 +925,14 @@ const StonehouseModal = ({
         margin-bottom: -10px;
       }
 
-      .${prependClass$1('text-container')} {
+      .${prependClass('text-container')} {
         display: flex;
         justify-content: center;
         flex-direction: column;
         text-shadow: var(--text-shadow);
       }
 
-      .${prependClass$1('sub-text')} {
+      .${prependClass('sub-text')} {
         margin: auto;
         font-weight: 600;
         font-family: 'Gotham Bold';
@@ -946,7 +944,7 @@ const StonehouseModal = ({
         text-transform: uppercase;
       }
 
-      .${prependClass$1('cta')} {
+      .${prependClass('cta')} {
         font-family: 'Gotham Bold';
         cursor: pointer;
         background-color: var(--secondary);
@@ -963,23 +961,23 @@ const StonehouseModal = ({
         box-shadow: 0.3rem 0.3rem white;
       }
 
-      .${prependClass$1('cta:hover')} {
+      .${prependClass('cta:hover')} {
         transition: all 0.3s;
         filter: brightness(0.95);
       }
 
-      .${prependClass$1('close-button')} {
+      .${prependClass('close-button')} {
         position: absolute;
         top: 0px;
         right: 0px;
       }
-      .${prependClass$1('close-button')}:hover {
+      .${prependClass('close-button')}:hover {
         transition: all 0.3s;
         filter: brightness(0.95);
       }
       
 
-      .${prependClass$1('image-darken')} {
+      .${prependClass('image-darken')} {
         background: rgba(0, 0, 0, 0.1);
         height: 100%;
         display: flex;
@@ -989,11 +987,11 @@ const StonehouseModal = ({
         padding: 2rem 1.5rem 1.5rem 1.5rem;
       }
 
-      .${prependClass$1('text-shadow')} {
+      .${prependClass('text-shadow')} {
         text-shadow: var(--text-shadow);
       }
 
-      .${prependClass$1('box-shadow')} {
+      .${prependClass('box-shadow')} {
         box-shadow: var(--text-shadow);
       }
     `;
@@ -1004,7 +1002,7 @@ const StonehouseModal = ({
     setTimeout(() => {
       setStylesLoaded(true);
     }, 500);
-  }, [randomHash$1]);
+  }, []);
   if (!stylesLoaded) {
     return null;
   }
@@ -1015,7 +1013,7 @@ const StonehouseModal = ({
       top: 250
     }
   }, React__default.createElement("div", {
-    className: prependClass$1(`box-shadow`),
+    className: prependClass(`box-shadow`),
     style: {
       borderRadius: '100%',
       height: 100,
@@ -1026,20 +1024,20 @@ const StonehouseModal = ({
       transform: 'rotate(-10deg)'
     }
   }, React__default.createElement("h4", {
-    className: `${prependClass$1('gotham-bold')} ${prependClass$1('text-center')} ${prependClass$1('text-shadow')}`
+    className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`
   }, "2 for"), React__default.createElement("h1", {
-    className: `${prependClass$1('gotham-bold')} ${prependClass$1('text-center')} ${prependClass$1('text-shadow')}`,
+    className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`,
     style: {
       marginLeft: 15,
       marginBottom: -10
     }
   }, "10*"), React__default.createElement("h6", {
-    className: `${prependClass$1('gotham-bold')} ${prependClass$1('text-center')} ${prependClass$1('text-shadow')}`
+    className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`
   }, "COCKTAILS")));
   return React__default.createElement("div", {
-    className: prependClass$1('overlay')
+    className: prependClass('overlay')
   }, React__default.createElement("div", {
-    className: prependClass$1('modal'),
+    className: prependClass('modal'),
     style: {
       background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
       backgroundPosition: 'center',
@@ -1048,17 +1046,17 @@ const StonehouseModal = ({
       position: 'relative'
     }
   }, React__default.createElement("div", {
-    className: prependClass$1('image-darken')
+    className: prependClass('image-darken')
   }, React__default.createElement("div", {
-    className: prependClass$1('close-button')
+    className: prependClass('close-button')
   }, React__default.createElement(CloseButton, {
     onClick: handleCloseModal
   })), React__default.createElement("div", {
-    className: prependClass$1('text-container')
+    className: prependClass('text-container')
   }, React__default.createElement("h1", {
-    className: prependClass$1('main-text')
+    className: prependClass('main-text')
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
-    className: prependClass$1('sub-text')
+    className: prependClass('sub-text')
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", null, React__default.createElement(TwoForTenThing, null)), React__default.createElement("div", {
     style: {
       display: 'flex',
@@ -1066,7 +1064,7 @@ const StonehouseModal = ({
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass$1('cta'),
+    className: prependClass('cta'),
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
 };

@@ -15,3 +15,5 @@ export declare type TriggerConfig = {
 export declare const getModalStylesBySize: (size: ModalSize) => CSSProperties;
 export declare const getModalButtonStylesBySize: (size: ModalSize) => CSSProperties;
 export declare const getModalButtonFlexPosition: (position: ButtonPosition) => CSSProperties;
+export declare const randomHash: string;
+export declare const prependClass: (className: string) => string;

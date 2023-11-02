@@ -1,6 +1,5 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../../../client/types'
 import { useFingerprint } from '../../../hooks/useFingerprint'
 import {
@@ -8,7 +7,8 @@ import {
   ModalSize,
   getModalButtonFlexPosition,
   getModalButtonStylesBySize,
-  getModalStylesBySize
+  getModalStylesBySize,
+  prependClass
 } from './helpers'
 
 type Props = {
@@ -16,10 +16,6 @@ type Props = {
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
 }
-
-const randomHash = 'f' + uuidv4().split('-')[0]
-
-const prependClass = (className: string) => `f${randomHash}-${className}`
 
 const defaultElementSize: ModalSize = 'medium'
 const defaultButtonPosition: ButtonPosition = 'right'

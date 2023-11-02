@@ -1,4 +1,5 @@
 import { CSSProperties } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 export type ModalSize = 'small' | 'medium' | 'large' | 'full'
 export type ButtonPosition = 'left' | 'center' | 'right'
@@ -74,3 +75,7 @@ export const getModalButtonFlexPosition = (
       return { justifyContent: 'center' }
   }
 }
+
+export const randomHash = 'f' + uuidv4().split('-')[0]
+
+export const prependClass = (className: string) => `f${randomHash}-${className}`
