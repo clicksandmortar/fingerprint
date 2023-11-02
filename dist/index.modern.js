@@ -1,9 +1,5 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-<<<<<<< HEAD
-import React__default, { useState, createElement, useContext, useEffect, useMemo, createContext, useCallback } from 'react';
-=======
-import React__default, { useState, createElement, useMemo, useEffect, createContext, useContext, useCallback, useRef } from 'react';
->>>>>>> develop
+import React__default, { useState, createElement, useContext, useEffect, useMemo, createContext, useCallback, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
@@ -219,7 +215,6 @@ const TriggerInverse = ({}) => {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
-<<<<<<< HEAD
 const useFingerprint = () => {
   return useContext(FingerprintContext);
 };
@@ -524,7 +519,8 @@ const CnMStandardModal = ({
     onClick: handleClickCallToAction,
     style: buttonSizeStyle
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-=======
+};
+
 const closeButtonStyles = {
   borderRadius: '100%',
   backgroundColor: 'white',
@@ -560,7 +556,6 @@ const CloseButton = ({
     fillRule: 'evenodd',
     d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
   })));
->>>>>>> develop
 };
 
 const CurlyText = ({
@@ -973,16 +968,7 @@ const StonehouseModal = ({
         filter: brightness(0.95);
       }
 
-<<<<<<< HEAD
       .${prependClass$1('close-button')} {
-        border-radius: 100%;
-        background-color: white;
-        width: 2rem;
-        border: none;
-        height: 2rem;
-=======
-      .${prependClass('close-button')} {
->>>>>>> develop
         position: absolute;
         top: 0px;
         right: 0px;
@@ -1062,31 +1048,13 @@ const StonehouseModal = ({
       position: 'relative'
     }
   }, React__default.createElement("div", {
-<<<<<<< HEAD
     className: prependClass$1('image-darken')
-  }, React__default.createElement("button", {
-    className: prependClass$1('close-button'),
-    onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '20',
-    height: '20',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement("div", {
-    className: prependClass$1('text-container')
-=======
-    className: prependClass('image-darken')
   }, React__default.createElement("div", {
-    className: prependClass('close-button')
+    className: prependClass$1('close-button')
   }, React__default.createElement(CloseButton, {
     onClick: handleCloseModal
   })), React__default.createElement("div", {
-    className: prependClass('text-container')
->>>>>>> develop
+    className: prependClass$1('text-container')
   }, React__default.createElement("h1", {
     className: prependClass$1('main-text')
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
