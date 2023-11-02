@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 
 import { Trigger } from '../client/types'
@@ -10,14 +10,11 @@ type Props = {
   trigger: Trigger
 }
 
-const bannerHeight = 50
-
 const Banner = ({ trigger }: Props) => {
-  // const { log, error } = useLogging()
+  const container = useRef<null | HTMLDivElement>(null)
+
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
-  // const { appId } = useFingerprint()
-  // const { visitor } = useVisitor()
   const [open, setOpen] = useState(true)
 
   const resetPad = () => {
@@ -25,10 +22,11 @@ const Banner = ({ trigger }: Props) => {
   }
 
   useEffect(() => {
+    const bannerHeight = container.current?.clientHeight
     document.body.style.paddingTop = `${bannerHeight}px`
 
     return resetPad
-  }, [])
+  }, [container])
 
   const canBeDismissed = true
 
@@ -38,6 +36,7 @@ const Banner = ({ trigger }: Props) => {
     trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_blank')
     // if they navigated to the other page, makes sense to hide it
     setOpen(false)
+    resetPad()
   }
 
   const handleClose = () => {
@@ -54,58 +53,47 @@ const Banner = ({ trigger }: Props) => {
     // TODO: colors are hardcoded for now. check this Draft PR before changing the colors here
     // https://github.com/clicksandmortar/fingerprint/pull/64
     <div
+      ref={container}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
-        height: `${bannerHeight}px`,
         backgroundColor: '#6811B2',
-        display: 'flex'
+        display: 'flex',
+        alignItems: 'center'
       }}
     >
       <div
         style={{
-          flex: 1,
           display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           maxWidth: '1000px',
           margin: '0 auto'
         }}
       >
-        <div>
-          <p
-            style={{
-              margin: '10px 0 0 0',
-              lineHeight: '12px',
-              color: 'white',
-              fontWeight: 600
-            }}
-          >
-            {trigger.data?.heading}
-          </p>
-          {trigger.data?.paragraph && (
-            <p
-              style={{
-                margin: '10px 0',
-                color: 'white',
-                fontSize: 12,
-                fontWeight: 400
-              }}
-            >
-              {trigger.data?.paragraph}
-            </p>
-          )}
-        </div>
+        <p
+          style={{
+            lineHeight: '30px',
+            margin: '10px',
+            color: 'white',
+            fontWeight: 600
+          }}
+        >
+          {trigger.data?.marketingText}
+        </p>
+
         <button
           onClick={handleClickCallToAction}
           style={{
+            border: 'none',
             color: 'white',
             backgroundColor: '#EA3385',
             padding: '5px 10px',
-            height: '30px',
             margin: '10px 0',
-            borderRadius: '5px'
+            borderRadius: '5px',
+            cursor: 'pointer'
           }}
         >
           {trigger.data?.buttonText}

@@ -26,14 +26,14 @@ export const fakeTriggers: Trigger[] = [
     }
   },
   {
-    id: 'pageload-trigger-id',
+    id: '7af0fc17-6508-4b5a-9003-1039fc473250',
     invocation: 'INVOCATION_PAGE_LOAD',
     behaviour: 'BEHAVIOUR_BANNER',
     data: {
-      buttonText: 'Click me',
-      buttonURL: 'http://www.google.com',
-      heading: 'This is an BEHAVIOUR_BANNER',
-      paragraph: 'on INVOCATION_PAGE_LOAD'
+      buttonText: 'Click Here',
+      buttonURL: 'https://google.com',
+      countdownEndTime: '2024-03-31T23:59',
+      marketingText: 'Testing for {{ countdownEndTime }}'
     }
   }
 ]

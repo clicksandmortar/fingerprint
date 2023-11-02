@@ -1,5 +1,5 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useState, createElement, useMemo, useEffect, createContext, useContext, useCallback } from 'react';
+import React__default, { useState, createElement, useMemo, useEffect, createContext, useContext, useCallback, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
@@ -1193,14 +1193,14 @@ const fakeTriggers = [{
     paragraph: 'And so is this'
   }
 }, {
-  id: 'pageload-trigger-id',
+  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
   invocation: 'INVOCATION_PAGE_LOAD',
   behaviour: 'BEHAVIOUR_BANNER',
   data: {
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is an BEHAVIOUR_BANNER',
-    paragraph: 'on INVOCATION_PAGE_LOAD'
+    buttonText: 'Click Here',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'Testing for {{ countdownEndTime }}'
   }
 }];
 
@@ -1900,11 +1900,11 @@ const TriggerYoutube = ({
   }), document.body);
 };
 
-const bannerHeight = 50;
 const Banner = ({
   trigger
 }) => {
-  var _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6;
+  var _trigger$data3, _trigger$data4;
+  const container = useRef(null);
   const {
     removeActiveTrigger
   } = useCollector();
@@ -1916,15 +1916,18 @@ const Banner = ({
     document.body.style.paddingTop = 'inherit';
   };
   useEffect(() => {
+    var _container$current;
+    const bannerHeight = (_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientHeight;
     document.body.style.paddingTop = `${bannerHeight}px`;
     return resetPad;
-  }, []);
+  }, [container]);
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
     trackEvent('user_clicked_button', trigger);
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
     setOpen(false);
+    resetPad();
   };
   const handleClose = () => {
     trackEvent('user_closed_trigger', trigger);
@@ -1934,48 +1937,43 @@ const Banner = ({
   };
   if (!open) return null;
   return React__default.createElement("div", {
+    ref: container,
     style: {
       position: 'fixed',
       top: 0,
       left: 0,
       width: '100%',
-      height: `${bannerHeight}px`,
       backgroundColor: '#6811B2',
-      display: 'flex'
+      display: 'flex',
+      alignItems: 'center'
     }
   }, React__default.createElement("div", {
     style: {
-      flex: 1,
       display: 'flex',
+      alignItems: 'center',
       justifyContent: 'space-between',
       maxWidth: '1000px',
       margin: '0 auto'
     }
-  }, React__default.createElement("div", null, React__default.createElement("p", {
+  }, React__default.createElement("p", {
     style: {
-      margin: '10px 0 0 0',
-      lineHeight: '12px',
+      lineHeight: '30px',
+      margin: '10px',
       color: 'white',
       fontWeight: 600
     }
-  }, (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading), ((_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph) && React__default.createElement("p", {
-    style: {
-      margin: '10px 0',
-      color: 'white',
-      fontSize: 12,
-      fontWeight: 400
-    }
-  }, (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.paragraph)), React__default.createElement("button", {
+  }, (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.marketingText), React__default.createElement("button", {
     onClick: handleClickCallToAction,
     style: {
+      border: 'none',
       color: 'white',
       backgroundColor: '#EA3385',
       padding: '5px 10px',
-      height: '30px',
       margin: '10px 0',
-      borderRadius: '5px'
+      borderRadius: '5px',
+      cursor: 'pointer'
     }
-  }, (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonText)),  React__default.createElement(CloseButton, {
+  }, (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonText)),  React__default.createElement(CloseButton, {
     onClick: handleClose,
     style: {
       background: 'transparent',
