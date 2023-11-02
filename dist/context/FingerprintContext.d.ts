@@ -23,7 +23,7 @@ export interface FingerprintContextInterface {
     appId: string;
     booted: boolean;
     consent?: boolean;
-    currentTrigger: Trigger;
+    currentTrigger: Trigger | null;
     exitIntentTriggers: boolean;
     idleTriggers: boolean;
     pageLoadTriggers: boolean;

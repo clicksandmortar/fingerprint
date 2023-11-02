@@ -127,7 +127,7 @@ export const FingerprintProvider = ({
           value={{
             appId,
             booted,
-            currentTrigger: {},
+            currentTrigger: null,
             registerHandler: addAnotherHandler,
             trackEvent: () => {
               alert('trackEvent not implemented')
@@ -167,7 +167,7 @@ export interface FingerprintContextInterface {
   appId: string
   booted: boolean
   consent?: boolean
-  currentTrigger: Trigger
+  currentTrigger: Trigger | null
   exitIntentTriggers: boolean
   idleTriggers: boolean
   pageLoadTriggers: boolean
@@ -183,7 +183,7 @@ const defaultFingerprintState: FingerprintContextInterface = {
   appId: '',
   booted: false,
   consent: false,
-  currentTrigger: {},
+  currentTrigger: null,
   exitIntentTriggers: false,
   idleTriggers: false,
   pageLoadTriggers: false,

@@ -58,7 +58,7 @@ export type Invocation =
   | 'INVOCATION_PAGE_LOAD'
 
 export type Trigger = {
-  id?: string
+  id: string
   invocation?: Invocation
   // invoke:(trigger: Trigger) => void;
   // @todo: commented out, out of date?

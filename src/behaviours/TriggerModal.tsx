@@ -18,7 +18,7 @@ type Props = {
 
 const Modal = ({ trigger }: Props) => {
   const { log, error } = useLogging()
-  const { resetDisplayTrigger } = useCollector()
+  const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const { appId } = useFingerprint()
   const { visitor } = useVisitor()
@@ -299,7 +299,7 @@ const Modal = ({ trigger }: Props) => {
 
   const handleCloseModal = () => {
     trackEvent('user_closed_trigger', trigger)
-    resetDisplayTrigger()
+    removeActiveTrigger(trigger.id)
     setOpen(false)
   }
 

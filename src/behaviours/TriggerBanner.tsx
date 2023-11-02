@@ -14,7 +14,7 @@ const bannerHeight = 50
 
 const Banner = ({ trigger }: Props) => {
   // const { log, error } = useLogging()
-  const { resetDisplayTrigger } = useCollector()
+  const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   // const { appId } = useFingerprint()
   // const { visitor } = useVisitor()
@@ -35,12 +35,14 @@ const Banner = ({ trigger }: Props) => {
   const handleClickCallToAction = (e: any) => {
     e.preventDefault()
     trackEvent('user_clicked_button', trigger)
-    trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
+    trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_blank')
+    // if they navigated to the other page, makes sense to hide it
+    setOpen(false)
   }
 
   const handleClose = () => {
     trackEvent('user_closed_trigger', trigger)
-    resetDisplayTrigger()
+    removeActiveTrigger(trigger.id)
     setOpen(false)
     resetPad()
   }

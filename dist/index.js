@@ -921,6 +921,40 @@ function useTriggerDelay(cooldownMs) {
   };
 }
 
+var fakeTriggers = [{
+  id: 'exit-trigger-id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an EXIT_INTENT',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: 'idle-trigger-id',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an IDLE_TIME',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: 'pageload-trigger-id',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an BEHAVIOUR_BANNER',
+    paragraph: 'on INVOCATION_PAGE_LOAD'
+  }
+}];
+
 var getVisitorId = function getVisitorId() {
   if (typeof window === 'undefined') return null;
   var urlParams = new URLSearchParams(window.location.search);
@@ -974,27 +1008,27 @@ function CollectorProvider(_ref) {
     var delayAdjustedForCooldown = idleDelay + cooldownDelay;
     log("Setting idle delay at " + delayAdjustedForCooldown + "ms (cooldown " + cooldownDelay + "ms + config.delay " + idleDelay + "ms)");
     return delayAdjustedForCooldown;
-  }, [getRemainingCooldownMs, configIdleDelay]);
+  }, [configIdleDelay, getRemainingCooldownMs, log]);
   var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
   var _useState2 = React.useState([]),
     pageTriggers = _useState2[0],
     setPageTriggers = _useState2[1];
-  var _useState3 = React.useState(undefined),
-    displayTrigger = _useState3[0],
-    setDisplayTrigger = _useState3[1];
+  var _useState3 = React.useState([]),
+    displayTriggers = _useState3[0],
+    setDisplayedTriggers = _useState3[1];
   var _useState4 = React.useState(false),
     intently = _useState4[0],
     setIntently = _useState4[1];
   var _useState5 = React.useState(new Map()),
     foundWatchers = _useState5[0],
     setFoundWatchers = _useState5[1];
-  var addPageTriggers = function addPageTriggers(triggers) {
+  var addPageTriggers = React__default.useCallback(function (triggers) {
     setPageTriggers(function (prev) {
       return uniqueBy([].concat(prev, triggers || []), 'id');
     });
-  };
+  }, [setPageTriggers]);
   React.useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
@@ -1010,55 +1044,70 @@ function CollectorProvider(_ref) {
       clearInterval(runningInterval);
     };
   }, [intently, log]);
-  var resetDisplayTrigger = React.useCallback(function () {
-    log('CollectorProvider: resetting displayTrigger');
-    setDisplayTrigger(undefined);
-  }, [log]);
-  var TriggerComponent = React__default.useCallback(function () {
-    var _handler$invoke, _handler;
-    if (!displayTrigger) return null;
-    var handler;
-    var trigger = pageTriggers.find(function (_trigger) {
-      var potentialTrigger = _trigger.invocation === displayTrigger;
-      var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
-        return handler.behaviour === _trigger.behaviour;
-      });
-      handler = potentialHandler;
-      return potentialTrigger && potentialHandler;
+  var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
+    var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return handler.behaviour === _trigger.behaviour;
     });
-    if (!trigger) {
-      error("No trigger found for displayTrigger", displayTrigger);
+    if (!potentialHandler) return null;
+    return potentialHandler;
+  }, [handlers]);
+  var removeActiveTrigger = React.useCallback(function (id) {
+    log("CollectorProvider: removing id:" + id + " from displayTriggers");
+    var refreshedTriggers = displayTriggers.filter(function (triggerId) {
+      return triggerId !== id;
+    });
+    setDisplayedTriggers(refreshedTriggers);
+  }, [displayTriggers, log]);
+  var TriggerComponent = React__default.useCallback(function () {
+    if (!displayTriggers) return null;
+    var activeTriggers = pageTriggers.filter(function (trigger) {
+      return displayTriggers.includes(trigger.id);
+    });
+    if (!activeTriggers) {
+      error("No trigger found for displayTriggers", displayTriggers);
       return null;
     }
     log('CollectorProvider: available handlers include: ', handlers);
-    log('CollectorProvider: trigger to match is: ', trigger);
-    log('CollectorProvider: attempting to show trigger', trigger, handler);
-    if (!handler) {
-      log('No handler found for trigger', trigger);
+    log('CollectorProvider: activeTriggers to match are: ', activeTriggers);
+    log('CollectorProvider: attempting to show trigger', activeTriggers);
+    return activeTriggers.map(function (trigger) {
+      var _handler$invoke;
+      var handler = getHandlerForTrigger(trigger);
+      if (!handler) {
+        log('No handler found for trigger', trigger);
+        return null;
+      }
+      if (!handler.invoke) {
+        log('No invoke method found for handler', handler);
+        return null;
+      }
+      var potentialComponent = (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
+      if (potentialComponent && React__default.isValidElement(potentialComponent)) {
+        log('CollectorProvider: Potential component for trigger is valid. Mounting');
+        return potentialComponent;
+      }
+      log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
       return null;
-    }
-    if (!handler.invoke) {
-      log('No invoke method found for handler', handler);
-      return null;
-    }
-    var potentialComponent = (_handler$invoke = (_handler = handler).invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(_handler, trigger);
-    if (potentialComponent && React__default.isValidElement(potentialComponent)) {
-      log('CollectorProvider: Potential component for trigger is valid. Mounting');
-      return potentialComponent;
-    }
-    log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
-    return null;
-  }, [log, displayTrigger, pageTriggers, handlers, getRemainingCooldownMs, error, startCooldown, resetDisplayTrigger]);
+    });
+  }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
+    var invokableTrigger = pageTriggers.find(function (trigger) {
+      return trigger.invocation === invocation;
+    });
+    if (invokableTrigger) setDisplayedTriggers(function (ts) {
+      return [].concat(ts, [invokableTrigger.id]);
+    });
+  }, [pageTriggers, setDisplayedTriggers]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
-    setDisplayTrigger('INVOCATION_IDLE_TIME');
+    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
     startCooldown();
-  }, [idleTriggers, log, setDisplayTrigger, startCooldown, displayTrigger]);
+  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
   var _useExitIntentDelay = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay),
     hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
-  var launchExitTrigger = React__default.useCallback(function () {
-    if (displayTrigger) return;
+  var fireExitTrigger = React__default.useCallback(function () {
+    if (displayTriggers !== null && displayTriggers !== void 0 && displayTriggers.length) return;
     if (!hasDelayPassed) {
       log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
       log('Re-registering handler');
@@ -1072,34 +1121,29 @@ function CollectorProvider(_ref) {
       return;
     }
     log('CollectorProvider: attempting to fire exit trigger');
-    setDisplayTrigger('INVOCATION_EXIT_INTENT');
+    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
-  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent, hasDelayPassed, displayTrigger]);
+  }, [displayTriggers === null || displayTriggers === void 0 ? void 0 : displayTriggers.length, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
     registerHandler({
       id: 'clientTrigger',
-      handler: launchExitTrigger
+      handler: fireExitTrigger
     });
-  }, [exitIntentTriggers, launchExitTrigger, log, registerHandler]);
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
   var fireOnLoadTriggers = React.useCallback(function () {
-    log({
-      pageLoadTriggers: pageLoadTriggers
-    });
     if (!pageLoadTriggers) return;
-    if (displayTrigger) return;
+    if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
     log('CollectorProvider: attempting to fire on-page-load trigger');
-    setDisplayTrigger('INVOCATION_PAGE_LOAD');
-    startCooldown();
-  }, [pageLoadTriggers, log, setDisplayTrigger, startCooldown, displayTrigger]);
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
+  }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
   React.useEffect(function () {
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot');
       return;
     }
     var delay = setTimeout(function () {
-      fireOnLoadTriggers();
       if (!visitor.id) {
         log('CollectorProvider: Not yet collecting, awaiting visitor ID');
         return;
@@ -1176,7 +1220,7 @@ function CollectorProvider(_ref) {
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
             setIdleTimeout(getIdleStatusDelay());
-            addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+            addPageTriggers(fakeTriggers);
             var cohort = payload.intently ? 'intently' : 'fingerprint';
             setVisitor({
               cohort: cohort
@@ -1200,8 +1244,7 @@ function CollectorProvider(_ref) {
     return function () {
       clearTimeout(delay);
     };
-  }, [fireOnLoadTriggers, appId, booted, collect, error, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
-  
+  }, [appId, booted, collect, error, setVisitor, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id, fireOnLoadTriggers, addPageTriggers]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -1255,16 +1298,19 @@ function CollectorProvider(_ref) {
   var setTrigger = React__default.useCallback(function (trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
     addPageTriggers([trigger]);
-    setDisplayTrigger(trigger.invocation);
-  }, [log, setDisplayTrigger, addPageTriggers]);
+    setDisplayedTriggerByInvocation(trigger.invocation);
+  }, [log, setDisplayedTriggerByInvocation, addPageTriggers]);
   var collectorContextVal = React__default.useMemo(function () {
     return {
       addPageTriggers: addPageTriggers,
-      resetDisplayTrigger: resetDisplayTrigger,
+      removeActiveTrigger: removeActiveTrigger,
       setTrigger: setTrigger,
       trackEvent: trackEvent
     };
-  }, [resetDisplayTrigger, setTrigger, trackEvent]);
+  }, [addPageTriggers, removeActiveTrigger, setTrigger, trackEvent]);
+  React.useEffect(function () {
+    fireOnLoadTriggers();
+  }, [fireOnLoadTriggers]);
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
     timeout: idleTimeout,
     onPresenceChange: function onPresenceChange(presence) {
@@ -1273,11 +1319,11 @@ function CollectorProvider(_ref) {
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: collectorContextVal
-  }, children), React__default.createElement(TriggerComponent, null));
+  }, children, React__default.createElement(TriggerComponent, null)));
 }
 var CollectorContext = React.createContext({
   addPageTriggers: function addPageTriggers() {},
-  resetDisplayTrigger: function resetDisplayTrigger() {},
+  removeActiveTrigger: function removeActiveTrigger() {},
   setTrigger: function setTrigger() {},
   trackEvent: function trackEvent() {}
 });
@@ -1300,7 +1346,7 @@ var Modal = function Modal(_ref) {
     log = _useLogging.log,
     error = _useLogging.error;
   var _useCollector = useCollector(),
-    resetDisplayTrigger = _useCollector.resetDisplayTrigger;
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
   var _useFingerprint = useFingerprint(),
@@ -1363,7 +1409,7 @@ var Modal = function Modal(_ref) {
   };
   var handleCloseModal = function handleCloseModal() {
     trackEvent('user_closed_trigger', trigger);
-    resetDisplayTrigger();
+    removeActiveTrigger(trigger.id);
     setOpen(false);
   };
   if (brand === 'Stonehouse') return React__default.createElement(StonehouseModal, {
@@ -1462,7 +1508,7 @@ var Banner = function Banner(_ref) {
   var _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6;
   var trigger = _ref.trigger;
   var _useCollector = useCollector(),
-    resetDisplayTrigger = _useCollector.resetDisplayTrigger;
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
   var _useState = React.useState(true),
@@ -1479,11 +1525,12 @@ var Banner = function Banner(_ref) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
     trackEvent('user_clicked_button', trigger);
-    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
+    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    setOpen(false);
   };
   var handleClose = function handleClose() {
     trackEvent('user_closed_trigger', trigger);
-    resetDisplayTrigger();
+    removeActiveTrigger(trigger.id);
     setOpen(false);
     resetPad();
   };
@@ -1664,7 +1711,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     value: {
       appId: appId,
       booted: booted,
-      currentTrigger: {},
+      currentTrigger: null,
       registerHandler: addAnotherHandler,
       trackEvent: function trackEvent() {
         alert('trackEvent not implemented');
@@ -1694,7 +1741,7 @@ var defaultFingerprintState = {
   appId: '',
   booted: false,
   consent: false,
-  currentTrigger: {},
+  currentTrigger: null,
   exitIntentTriggers: false,
   idleTriggers: false,
   pageLoadTriggers: false,

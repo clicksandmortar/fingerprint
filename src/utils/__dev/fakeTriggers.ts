@@ -2,7 +2,7 @@ import { Trigger } from '../../client/types'
 
 export const fakeTriggers: Trigger[] = [
   {
-    id: 'sample_id',
+    id: 'exit-trigger-id',
     invocation: 'INVOCATION_EXIT_INTENT',
     behaviour: 'BEHAVIOUR_MODAL',
     data: {
@@ -14,7 +14,7 @@ export const fakeTriggers: Trigger[] = [
     }
   },
   {
-    id: 'sample_id_2',
+    id: 'idle-trigger-id',
     invocation: 'INVOCATION_IDLE_TIME',
     behaviour: 'BEHAVIOUR_MODAL',
     data: {
@@ -26,7 +26,7 @@ export const fakeTriggers: Trigger[] = [
     }
   },
   {
-    id: 'sample_id_3',
+    id: 'pageload-trigger-id',
     invocation: 'INVOCATION_PAGE_LOAD',
     behaviour: 'BEHAVIOUR_BANNER',
     data: {

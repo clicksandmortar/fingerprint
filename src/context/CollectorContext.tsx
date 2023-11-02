@@ -8,6 +8,7 @@ import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
+import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -26,6 +27,7 @@ export type CollectorProviderProps = {
 // - add support for multiple active triggers and then simplify
 // - prevent firing the next trigger even if the signal is correct, until the active one is dismissed (which is
 // problematic as CollectorContext is not available in the Trigger component)
+// eslint-disable-next-line require-jsdoc
 export function CollectorProvider({
   children,
   handlers = []
@@ -69,15 +71,13 @@ export function CollectorProvider({
     )
 
     return delayAdjustedForCooldown
-  }, [getRemainingCooldownMs, configIdleDelay])
+  }, [configIdleDelay, getRemainingCooldownMs, log])
 
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
     getIdleStatusDelay()
   )
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
-  const [displayTrigger, setDisplayTrigger] = useState<
-    Trigger['invocation'] | undefined
-  >(undefined)
+  const [displayTriggers, setDisplayedTriggers] = useState<string[]>([])
   const [intently, setIntently] = useState<boolean>(false)
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
@@ -86,11 +86,14 @@ export function CollectorProvider({
   /**
    * add triggers to existing ones, keep unique to prevent multi-firing
    */
-  const addPageTriggers = (triggers: Trigger[]) => {
-    setPageTriggers((prev) =>
-      uniqueBy<Trigger>([...prev, ...(triggers || [])], 'id')
-    )
-  }
+  const addPageTriggers = React.useCallback(
+    (triggers: Trigger[]) => {
+      setPageTriggers((prev) =>
+        uniqueBy<Trigger>([...prev, ...(triggers || [])], 'id')
+      )
+    },
+    [setPageTriggers]
+  )
 
   // Removes the intently overlay, if intently is false
   useEffect(() => {
@@ -117,89 +120,115 @@ export function CollectorProvider({
     }
   }, [intently, log])
 
-  const resetDisplayTrigger = useCallback(() => {
-    log('CollectorProvider: resetting displayTrigger')
-    setDisplayTrigger(undefined)
-  }, [log])
-
-  const TriggerComponent = React.useCallback(() => {
-    if (!displayTrigger) return null
-
-    let handler: Trigger | undefined
-
-    // TODO: UNDO
-    const trigger = pageTriggers.find((_trigger) => {
-      const potentialTrigger = _trigger.invocation === displayTrigger
-
+  const getHandlerForTrigger = React.useCallback(
+    (_trigger: Trigger) => {
       const potentialHandler = handlers?.find(
         (handler) => handler.behaviour === _trigger.behaviour
       )
+      if (!potentialHandler) return null
 
-      handler = potentialHandler
-      return potentialTrigger && potentialHandler
-    })
+      return potentialHandler
+    },
+    [handlers]
+  )
 
-    if (!trigger) {
-      error(`No trigger found for displayTrigger`, displayTrigger)
+  const removeActiveTrigger = useCallback(
+    (id: Trigger['id']) => {
+      log(`CollectorProvider: removing id:${id} from displayTriggers`)
+      const refreshedTriggers = displayTriggers.filter(
+        (triggerId) => triggerId !== id
+      )
+
+      setDisplayedTriggers(refreshedTriggers)
+    },
+    [displayTriggers, log]
+  )
+
+  const TriggerComponent = React.useCallback(():
+    | (JSX.Element | null)[]
+    | null => {
+    if (!displayTriggers) return null
+
+    // TODO: UNDO
+    const activeTriggers = pageTriggers.filter((trigger) =>
+      displayTriggers.includes(trigger.id)
+    )
+
+    if (!activeTriggers) {
+      error(`No trigger found for displayTriggers`, displayTriggers)
       return null
     }
 
     log('CollectorProvider: available handlers include: ', handlers)
-    log('CollectorProvider: trigger to match is: ', trigger)
+    log('CollectorProvider: activeTriggers to match are: ', activeTriggers)
 
-    log('CollectorProvider: attempting to show trigger', trigger, handler)
+    log('CollectorProvider: attempting to show trigger', activeTriggers)
 
-    if (!handler) {
-      log('No handler found for trigger', trigger)
-      return null
-    }
+    return activeTriggers.map((trigger) => {
+      const handler = getHandlerForTrigger(trigger)
 
-    if (!handler.invoke) {
-      log('No invoke method found for handler', handler)
-      return null
-    }
+      if (!handler) {
+        log('No handler found for trigger', trigger)
+        return null
+      }
+      if (!handler.invoke) {
+        log('No invoke method found for handler', handler)
+        return null
+      }
 
-    const potentialComponent = handler.invoke?.(trigger)
-    if (potentialComponent && React.isValidElement(potentialComponent)) {
+      const potentialComponent = handler.invoke?.(trigger)
+      if (potentialComponent && React.isValidElement(potentialComponent)) {
+        log(
+          'CollectorProvider: Potential component for trigger is valid. Mounting'
+        )
+        return potentialComponent
+      }
+
       log(
-        'CollectorProvider: Potential component for trigger is valid. Mounting'
+        'CollectorProvider: Potential component for trigger invalid. Running as regular func.'
       )
-      return potentialComponent
-    }
 
-    log(
-      'CollectorProvider: Potential component for trigger invalid. Running as regular func.'
-    )
-
-    return null
+      return null
+    })
   }, [
-    log,
-    displayTrigger,
+    displayTriggers,
     pageTriggers,
+    log,
     handlers,
-    getRemainingCooldownMs,
     error,
-    startCooldown,
-    resetDisplayTrigger
+    getHandlerForTrigger
   ])
+
+  const setDisplayedTriggerByInvocation = React.useCallback(
+    (invocation: Trigger['invocation']) => {
+      const invokableTrigger = pageTriggers.find(
+        (trigger) => trigger.invocation === invocation
+      )
+
+      if (invokableTrigger)
+        setDisplayedTriggers((ts) => [...ts, invokableTrigger.id])
+    },
+    [pageTriggers, setDisplayedTriggers]
+  )
 
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return
-    // if (displayTrigger) return
+    // if (displayTriggers) return
 
     /**
      * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
      * the diff elsewhere
      */
     log('CollectorProvider: attempting to fire idle time trigger')
-    setDisplayTrigger('INVOCATION_IDLE_TIME')
+    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME')
     startCooldown()
-  }, [idleTriggers, log, setDisplayTrigger, startCooldown, displayTrigger])
+  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown])
 
   const { hasDelayPassed } = useExitIntentDelay(config?.exitIntentDelay)
 
-  const launchExitTrigger = React.useCallback(() => {
-    if (displayTrigger) return
+  const fireExitTrigger = React.useCallback(() => {
+    if (displayTriggers?.length) return
+
     if (!hasDelayPassed) {
       log(
         `Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`
@@ -221,15 +250,17 @@ export function CollectorProvider({
     }
 
     log('CollectorProvider: attempting to fire exit trigger')
-    setDisplayTrigger('INVOCATION_EXIT_INTENT')
+    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT')
     startCooldown()
   }, [
-    log,
-    canNextTriggerOccur,
-    getRemainingCooldownMs,
-    reRegisterExitIntent,
+    displayTriggers?.length,
     hasDelayPassed,
-    displayTrigger
+    canNextTriggerOccur,
+    log,
+    setDisplayedTriggerByInvocation,
+    startCooldown,
+    reRegisterExitIntent,
+    getRemainingCooldownMs
   ])
 
   /**
@@ -242,23 +273,21 @@ export function CollectorProvider({
 
     registerHandler({
       id: 'clientTrigger',
-      handler: launchExitTrigger
+      handler: fireExitTrigger
     })
-  }, [exitIntentTriggers, launchExitTrigger, log, registerHandler])
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
 
   const fireOnLoadTriggers = useCallback(() => {
-    log({ pageLoadTriggers })
     if (!pageLoadTriggers) return
-    if (displayTrigger) return
+    if (!pageTriggers?.length) return
 
     /**
      * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
      * the diff elsewhere
      */
     log('CollectorProvider: attempting to fire on-page-load trigger')
-    setDisplayTrigger('INVOCATION_PAGE_LOAD')
-    startCooldown()
-  }, [pageLoadTriggers, log, setDisplayTrigger, startCooldown, displayTrigger])
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD')
+  }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation])
 
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
@@ -269,7 +298,6 @@ export function CollectorProvider({
     }
 
     const delay = setTimeout(() => {
-      fireOnLoadTriggers()
       if (!visitor.id) {
         log('CollectorProvider: Not yet collecting, awaiting visitor ID')
         return
@@ -364,7 +392,8 @@ export function CollectorProvider({
           // @todo turn this into the dynamic value
           setIdleTimeout(getIdleStatusDelay())
 
-          addPageTriggers(payload?.pageTriggers)
+          // addPageTriggers(payload?.pageTriggers)
+          addPageTriggers(fakeTriggers)
 
           const cohort = payload.intently ? 'intently' : 'fingerprint'
           setVisitor({ cohort })
@@ -403,7 +432,8 @@ export function CollectorProvider({
     trackEvent,
     visitor,
     session?.id,
-    fireOnLoadTriggers
+    fireOnLoadTriggers,
+    addPageTriggers
   ])
 
   const registerWatcher = React.useCallback(
@@ -488,20 +518,24 @@ export function CollectorProvider({
     (trigger: Trigger) => {
       log('CollectorProvider: manually setting trigger', trigger)
       addPageTriggers([trigger])
-      setDisplayTrigger(trigger.invocation)
+      setDisplayedTriggerByInvocation(trigger.invocation)
     },
-    [log, setDisplayTrigger, addPageTriggers]
+    [log, setDisplayedTriggerByInvocation, addPageTriggers]
   )
 
   const collectorContextVal = React.useMemo(
     () => ({
       addPageTriggers,
-      resetDisplayTrigger,
+      removeActiveTrigger,
       setTrigger,
       trackEvent
     }),
-    [resetDisplayTrigger, setTrigger, trackEvent]
+    [addPageTriggers, removeActiveTrigger, setTrigger, trackEvent]
   )
+
+  useEffect(() => {
+    fireOnLoadTriggers()
+  }, [fireOnLoadTriggers])
 
   return (
     <IdleTimerProvider
@@ -513,22 +547,23 @@ export function CollectorProvider({
     >
       <CollectorContext.Provider value={collectorContextVal}>
         {children}
+        {/* @ts-ignore */}
+        <TriggerComponent />
       </CollectorContext.Provider>
       {/* @TODO: this component has no access to any collector related stuff. Deal with this ASAP */}
-      <TriggerComponent />
     </IdleTimerProvider>
   )
 }
 
 export type CollectorContextInterface = {
   addPageTriggers: (triggers: Trigger[]) => void
-  resetDisplayTrigger: () => void
+  removeActiveTrigger: (id: Trigger['id']) => void
   setTrigger: (trigger: Trigger) => void
   trackEvent: (event: string, properties?: any) => void
 }
 export const CollectorContext = createContext<CollectorContextInterface>({
   addPageTriggers: () => {},
-  resetDisplayTrigger: () => {},
+  removeActiveTrigger: () => {},
   setTrigger: () => {},
   trackEvent: () => {}
 })
