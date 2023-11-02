@@ -20,6 +20,12 @@ export type CollectorProviderProps = {
   handlers?: Trigger[]
 }
 
+// @TODO: Colleector only handles one trigger at a time currently.
+// Therefore, a banner gets hidden as soon as an idle intent pops out, for example.
+// We need to either:
+// - add support for multiple active triggers and then simplify
+// - prevent firing the next trigger even if the signal is correct, until the active one is dismissed (which is
+// problematic as CollectorContext is not available in the Trigger component)
 export function CollectorProvider({
   children,
   handlers = []
@@ -31,6 +37,7 @@ export function CollectorProvider({
     initialDelay,
     exitIntentTriggers,
     idleTriggers,
+    pageLoadTriggers,
     config
   } = useFingerprint()
 
@@ -154,8 +161,15 @@ export function CollectorProvider({
 
     const potentialComponent = handler.invoke?.(trigger)
     if (potentialComponent && React.isValidElement(potentialComponent)) {
+      log(
+        'CollectorProvider: Potential component for trigger is valid. Mounting'
+      )
       return potentialComponent
     }
+
+    log(
+      'CollectorProvider: Potential component for trigger invalid. Running as regular func.'
+    )
 
     return null
   }, [
@@ -171,19 +185,21 @@ export function CollectorProvider({
 
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return
+    // if (displayTrigger) return
 
     /**
      * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
      * the diff elsewhere
      */
-    log('CollectorProvider: attempting to fire idle trigger')
+    log('CollectorProvider: attempting to fire idle time trigger')
     setDisplayTrigger('INVOCATION_IDLE_TIME')
     startCooldown()
-  }, [idleTriggers, log, setDisplayTrigger, startCooldown])
+  }, [idleTriggers, log, setDisplayTrigger, startCooldown, displayTrigger])
 
   const { hasDelayPassed } = useExitIntentDelay(config?.exitIntentDelay)
 
   const launchExitTrigger = React.useCallback(() => {
+    if (displayTrigger) return
     if (!hasDelayPassed) {
       log(
         `Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`
@@ -212,7 +228,8 @@ export function CollectorProvider({
     canNextTriggerOccur,
     getRemainingCooldownMs,
     reRegisterExitIntent,
-    hasDelayPassed
+    hasDelayPassed,
+    displayTrigger
   ])
 
   /**
@@ -229,6 +246,20 @@ export function CollectorProvider({
     })
   }, [exitIntentTriggers, launchExitTrigger, log, registerHandler])
 
+  const fireOnLoadTriggers = useCallback(() => {
+    log({ pageLoadTriggers })
+    if (!pageLoadTriggers) return
+    if (displayTrigger) return
+
+    /**
+     * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
+     * the diff elsewhere
+     */
+    log('CollectorProvider: attempting to fire on-page-load trigger')
+    setDisplayTrigger('INVOCATION_PAGE_LOAD')
+    startCooldown()
+  }, [pageLoadTriggers, log, setDisplayTrigger, startCooldown, displayTrigger])
+
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
   useEffect(() => {
@@ -238,6 +269,7 @@ export function CollectorProvider({
     }
 
     const delay = setTimeout(() => {
+      fireOnLoadTriggers()
       if (!visitor.id) {
         log('CollectorProvider: Not yet collecting, awaiting visitor ID')
         return
@@ -372,7 +404,8 @@ export function CollectorProvider({
     log,
     trackEvent,
     visitor,
-    session?.id
+    session?.id,
+    fireOnLoadTriggers
   ])
 
   const registerWatcher = React.useCallback(
@@ -483,6 +516,7 @@ export function CollectorProvider({
       <CollectorContext.Provider value={collectorContextVal}>
         {children}
       </CollectorContext.Provider>
+      {/* @TODO: this component has no access to any collector related stuff. Deal with this ASAP */}
       <TriggerComponent />
     </IdleTimerProvider>
   )

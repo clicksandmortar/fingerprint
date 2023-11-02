@@ -24,5 +24,16 @@ export const fakeTriggers: Trigger[] = [
       heading: 'This is an IDLE_TIME',
       paragraph: 'And so is this'
     }
+  },
+  {
+    id: 'sample_id_3',
+    invocation: 'INVOCATION_PAGE_LOAD',
+    behaviour: 'BEHAVIOUR_BANNER',
+    data: {
+      buttonText: 'Click me',
+      buttonURL: 'http://www.google.com',
+      heading: 'This is an BEHAVIOUR_BANNER',
+      paragraph: 'on INVOCATION_PAGE_LOAD'
+    }
   }
 ]

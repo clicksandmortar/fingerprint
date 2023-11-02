@@ -57,6 +57,7 @@ export type FingerprintProviderProps = {
   initialDelay?: number
   exitIntentTriggers?: boolean
   idleTriggers?: boolean
+  pageLoadTriggers?: boolean
   config?: {
     exitIntentDelay?: number
     idleDelay?: number
@@ -76,6 +77,7 @@ export const FingerprintProvider = ({
   initialDelay = 0,
   exitIntentTriggers = true,
   idleTriggers = true,
+  pageLoadTriggers = true,
   config
 }: FingerprintProviderProps) => {
   const [booted, setBooted] = useState(false)
@@ -138,6 +140,7 @@ export const FingerprintProvider = ({
             },
             initialDelay,
             idleTriggers,
+            pageLoadTriggers,
             exitIntentTriggers,
             config
           }}
@@ -167,6 +170,7 @@ export interface FingerprintContextInterface {
   currentTrigger: Trigger
   exitIntentTriggers: boolean
   idleTriggers: boolean
+  pageLoadTriggers: boolean
   initialDelay: number
   registerHandler: (trigger: Trigger) => void
   trackEvent: (event: Event) => void
@@ -182,6 +186,7 @@ const defaultFingerprintState: FingerprintContextInterface = {
   currentTrigger: {},
   exitIntentTriggers: false,
   idleTriggers: false,
+  pageLoadTriggers: false,
   initialDelay: 0,
   registerHandler: () => {},
   trackEvent: () => {},

@@ -215,6 +215,43 @@ const TriggerInverse = ({}) => {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
+const closeButtonStyles = {
+  borderRadius: '100%',
+  backgroundColor: 'white',
+  width: '2rem',
+  border: 'none',
+  height: '2rem',
+  margin: 10,
+  color: 'black',
+  fontSize: '1.2rem',
+  fontWeight: 300,
+  cursor: 'pointer',
+  display: 'grid',
+  placeContent: 'center'
+};
+const CloseButton = ({
+  onClick,
+  style
+}) => {
+  const buttonStyle = {
+    ...closeButtonStyles,
+    ...style
+  };
+  return React__default.createElement("button", {
+    style: buttonStyle,
+    onClick: onClick
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '16',
+    height: '16',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: buttonStyle.color || buttonStyle.fill,
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  })));
+};
+
 const CurlyText = ({
   randomHash,
   text
@@ -402,18 +439,9 @@ const BrownsModal = ({
 }
 
 .f` + randomHash + `-close-button {
-  border-radius: 100%;
-  background-color: var(--secondary);
-  width: 2rem;
-  height: 2rem;
   position: absolute;
-  margin: 10px;
   top: 0px;
   right: 0px;
-  color: black;
-  font-size: 1.2rem;
-  font-weight: 300;
-  cursor: pointer;
 }
 
 .f` + randomHash + `-button-container {
@@ -454,19 +482,11 @@ const BrownsModal = ({
     }
   }, React__default.createElement("div", {
     className: 'f' + randomHash + '-image-darken'
-  }, React__default.createElement("button", {
-    className: 'f' + randomHash + '-close-button',
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-close-button'
+  }, React__default.createElement(CloseButton, {
     onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '16',
-    height: '16',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement(CurlyText, {
+  })), React__default.createElement(CurlyText, {
     text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
     randomHash: randomHash
   }), React__default.createElement("div", {
@@ -637,21 +657,9 @@ const StonehouseModal = ({
       }
 
       .${prependClass('close-button')} {
-        border-radius: 100%;
-        background-color: white;
-        width: 2rem;
-        border: none;
-        height: 2rem;
         position: absolute;
-        margin: 10px;
         top: 0px;
         right: 0px;
-        color: black;
-        font-size: 1.2rem;
-        font-weight: 300;
-        cursor: pointer;
-        display: grid;
-        place-content: center;
       }
 
       .${prependClass('image-darken')} {
@@ -724,19 +732,11 @@ const StonehouseModal = ({
     }
   }, React__default.createElement("div", {
     className: prependClass('image-darken')
-  }, React__default.createElement("button", {
-    className: prependClass('close-button'),
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
     onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '20',
-    height: '20',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement("div", {
+  })), React__default.createElement("div", {
     className: prependClass('text-container')
   }, React__default.createElement("h1", {
     className: prependClass('main-text')
@@ -1172,6 +1172,7 @@ function CollectorProvider({
     initialDelay,
     exitIntentTriggers,
     idleTriggers,
+    pageLoadTriggers,
     config
   } = useFingerprint();
   const configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
@@ -1260,20 +1261,23 @@ function CollectorProvider({
     }
     const potentialComponent = (_handler$invoke = (_handler = handler).invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(_handler, trigger);
     if (potentialComponent && React__default.isValidElement(potentialComponent)) {
+      log('CollectorProvider: Potential component for trigger is valid. Mounting');
       return potentialComponent;
     }
+    log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
     return null;
   }, [log, displayTrigger, pageTriggers, handlers, getRemainingCooldownMs, error, startCooldown, resetDisplayTrigger]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
-    log('CollectorProvider: attempting to fire idle trigger');
+    log('CollectorProvider: attempting to fire idle time trigger');
     setDisplayTrigger('INVOCATION_IDLE_TIME');
     startCooldown();
-  }, [idleTriggers, log, setDisplayTrigger, startCooldown]);
+  }, [idleTriggers, log, setDisplayTrigger, startCooldown, displayTrigger]);
   const {
     hasDelayPassed
   } = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay);
   const launchExitTrigger = React__default.useCallback(() => {
+    if (displayTrigger) return;
     if (!hasDelayPassed) {
       log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
       log('Re-registering handler');
@@ -1290,7 +1294,7 @@ function CollectorProvider({
     log('CollectorProvider: attempting to fire exit trigger');
     setDisplayTrigger('INVOCATION_EXIT_INTENT');
     startCooldown();
-  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent, hasDelayPassed]);
+  }, [log, canNextTriggerOccur, getRemainingCooldownMs, reRegisterExitIntent, hasDelayPassed, displayTrigger]);
   useEffect(() => {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -1299,12 +1303,23 @@ function CollectorProvider({
       handler: launchExitTrigger
     });
   }, [exitIntentTriggers, launchExitTrigger, log, registerHandler]);
+  const fireOnLoadTriggers = useCallback(() => {
+    log({
+      pageLoadTriggers
+    });
+    if (!pageLoadTriggers) return;
+    if (displayTrigger) return;
+    log('CollectorProvider: attempting to fire on-page-load trigger');
+    setDisplayTrigger('INVOCATION_PAGE_LOAD');
+    startCooldown();
+  }, [pageLoadTriggers, log, setDisplayTrigger, startCooldown, displayTrigger]);
   useEffect(() => {
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot');
       return;
     }
     const delay = setTimeout(() => {
+      fireOnLoadTriggers();
       if (!visitor.id) {
         log('CollectorProvider: Not yet collecting, awaiting visitor ID');
         return;
@@ -1395,7 +1410,7 @@ function CollectorProvider({
     return () => {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id]);
+  }, [appId, booted, collect, error, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id, fireOnLoadTriggers]);
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
@@ -1824,6 +1839,96 @@ const TriggerYoutube = ({
   }), document.body);
 };
 
+const bannerHeight = 50;
+const Banner = ({
+  trigger
+}) => {
+  var _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6;
+  const {
+    resetDisplayTrigger
+  } = useCollector();
+  const {
+    trackEvent
+  } = useMixpanel();
+  const [open, setOpen] = useState(true);
+  const resetPad = () => {
+    document.body.style.paddingTop = 'inherit';
+  };
+  useEffect(() => {
+    document.body.style.paddingTop = `${bannerHeight}px`;
+    return resetPad;
+  }, []);
+  const handleClickCallToAction = e => {
+    var _trigger$data, _trigger$data2;
+    e.preventDefault();
+    trackEvent('user_clicked_button', trigger);
+    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
+  };
+  const handleClose = () => {
+    trackEvent('user_closed_trigger', trigger);
+    resetDisplayTrigger();
+    setOpen(false);
+    resetPad();
+  };
+  if (!open) return null;
+  return React__default.createElement("div", {
+    style: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: `${bannerHeight}px`,
+      backgroundColor: '#6811B2',
+      display: 'flex'
+    }
+  }, React__default.createElement("div", {
+    style: {
+      flex: 1,
+      display: 'flex',
+      justifyContent: 'space-between',
+      maxWidth: '1000px',
+      margin: '0 auto'
+    }
+  }, React__default.createElement("div", null, React__default.createElement("p", {
+    style: {
+      margin: '10px 0 0 0',
+      lineHeight: '12px',
+      color: 'white',
+      fontWeight: 600
+    }
+  }, (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading), ((_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph) && React__default.createElement("p", {
+    style: {
+      margin: '10px 0',
+      color: 'white',
+      fontSize: 12,
+      fontWeight: 400
+    }
+  }, (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.paragraph)), React__default.createElement("button", {
+    onClick: handleClickCallToAction,
+    style: {
+      color: 'white',
+      backgroundColor: '#EA3385',
+      padding: '5px 10px',
+      height: '30px',
+      margin: '10px 0',
+      borderRadius: '5px'
+    }
+  }, (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonText)),  React__default.createElement(CloseButton, {
+    onClick: handleClose,
+    style: {
+      background: 'transparent',
+      color: 'white'
+    }
+  }));
+};
+const TriggerBanner = ({
+  trigger
+}) => {
+  return ReactDOM.createPortal(React__default.createElement(Banner, {
+    trigger: trigger
+  }), document.body);
+};
+
 const clientHandlers = [{
   id: 'modal_v1',
   behaviour: 'BEHAVIOUR_MODAL',
@@ -1840,6 +1945,12 @@ const clientHandlers = [{
   id: 'inverse_v1',
   behaviour: 'BEHAVIOUR_INVERSE_FLOW',
   invoke: trigger => React__default.createElement(TriggerInverse, {
+    trigger: trigger
+  })
+}, {
+  id: 'banner_v1',
+  behaviour: 'BEHAVIOUR_BANNER',
+  invoke: trigger => React__default.createElement(TriggerBanner, {
     trigger: trigger
   })
 }];
@@ -1879,6 +1990,7 @@ const FingerprintProvider = ({
   initialDelay: _initialDelay = 0,
   exitIntentTriggers: _exitIntentTriggers = true,
   idleTriggers: _idleTriggers = true,
+  pageLoadTriggers: _pageLoadTriggers = true,
   config
 }) => {
   const [booted, setBooted] = useState(false);
@@ -1925,6 +2037,7 @@ const FingerprintProvider = ({
       },
       initialDelay: _initialDelay,
       idleTriggers: _idleTriggers,
+      pageLoadTriggers: _pageLoadTriggers,
       exitIntentTriggers: _exitIntentTriggers,
       config
     }
@@ -1942,6 +2055,7 @@ const defaultFingerprintState = {
   currentTrigger: {},
   exitIntentTriggers: false,
   idleTriggers: false,
+  pageLoadTriggers: false,
   initialDelay: 0,
   registerHandler: () => {},
   trackEvent: () => {},
