@@ -7,12 +7,12 @@ import { useHostname } from './useHostname'
 export const useCollectorMutation = () => {
   const { log, error } = useLogging()
 
-  const hostname = useHostname();
+  const requestHost = useHostname();
 
   return useMutation<Response, unknown, CollectorUpdate, unknown>(
     (data: CollectorUpdate) => {
       return request
-        .post(hostname + '/collector/' + data?.visitor?.id, {...data, hostname})
+        .post(hostname + '/collector/' + data?.visitor?.id, {...data, hostname: requestHost})
         .then((response) => {
           log('Collector API response', response)
           return response
