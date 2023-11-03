@@ -3,10 +3,15 @@ import ReactDOM from 'react-dom'
 
 import { Trigger } from '../client/types'
 import CloseButton from '../components/CloseButton'
+import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
+import { useVisitor } from '../context/VisitorContext'
 import { useCollector } from '../hooks/useCollector'
 import useCountdown from '../hooks/useCountdown'
+import { useFingerprint } from '../hooks/useFingerprint'
 import { getInterpolate } from '../hooks/useInterpolate'
+import { getBrand } from '../utils/brand'
+import { hostname, request } from '../utils/http'
 
 type Props = {
   trigger: Trigger
@@ -22,6 +27,40 @@ const Banner = ({ trigger }: Props) => {
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
+  const { appId } = useFingerprint()
+  const { visitor } = useVisitor()
+  const { log, error } = useLogging()
+
+  const [hasFired, setHasFired] = useState(false)
+
+  const brand = React.useMemo(() => {
+    return getBrand()
+  }, [])
+
+  // @Todo: @Ed - extract into a reusable piece, or move the logic to TriggerComponent
+  useEffect(() => {
+    if (!open) return
+    if (hasFired) return
+
+    try {
+      request
+        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+          seenTriggerIDs: [trigger.id]
+        })
+        .then(log)
+    } catch (e) {
+      error(e)
+    }
+
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.invocation,
+      triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
+      brand
+    })
+    setHasFired(true)
+  }, [open])
 
   const canBeDismissed = true
 
