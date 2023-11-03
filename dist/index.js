@@ -676,7 +676,7 @@ var useLogging = function useLogging() {
 };
 
 function getEnvVars() {
-  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location;
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
   var isDev = false;
   switch (true) {
     case typeof window === 'undefined':
@@ -684,6 +684,7 @@ function getEnvVars() {
     case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
     case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
     case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
       isDev = true;
       break;
     default:
@@ -1008,13 +1009,24 @@ var request = {
   }
 };
 
+var useHostname = function useHostname() {
+  var _window;
+  if (((_window = window) === null || _window === void 0 ? void 0 : _window.location) !== undefined) {
+    return window.location.hostname;
+  }
+  return '';
+};
+
 var useCollectorMutation = function useCollectorMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
+  var requestHost = useHostname();
   return reactQuery.useMutation(function (data) {
     var _data$visitor;
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(function (response) {
+    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), _extends({}, data, {
+      hostname: requestHost
+    })).then(function (response) {
       log('Collector API response', response);
       return response;
     })["catch"](function (err) {

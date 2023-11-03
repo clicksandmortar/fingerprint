@@ -13,6 +13,7 @@ export function getEnvVars(): EnvVars {
     case window?.location?.host?.includes('clicksandmortar.tech'):
     case window?.location?.host.startsWith('stage65-az'):
     case window?.location?.host.startsWith('test65-az'):
+    case window?.location?.host.includes('vercel.app'): // Assuming all vercel apps are our staging
       isDev = true
       break
     default:
