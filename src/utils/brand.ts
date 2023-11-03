@@ -27,5 +27,5 @@ export const getBrand = (): SupportedBrand | null => {
     return 'Stonehouse'
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns'
 
-  return null
+  return 'C&M'
 }
