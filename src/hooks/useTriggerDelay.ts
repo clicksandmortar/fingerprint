@@ -19,11 +19,13 @@ export function useTriggerDelay(cooldownMs: number = defaultTriggerCooldown) {
     const currentTime = Number(new Date())
     const remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime
 
+    if (remainingMS < 0) return 0
+
     return remainingMS
   }, [lastTriggerTimeStamp, cooldownMs])
 
   const canNextTriggerOccur = React.useCallback(() => {
-    return getRemainingCooldownMs() <= 0
+    return getRemainingCooldownMs() === 0
   }, [getRemainingCooldownMs])
 
   return {

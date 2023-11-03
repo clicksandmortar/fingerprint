@@ -1469,10 +1469,11 @@ function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
     if (!lastTriggerTimeStamp) return 0;
     const currentTime = Number(new Date());
     const remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
+    if (remainingMS < 0) return 0;
     return remainingMS;
   }, [lastTriggerTimeStamp, cooldownMs]);
   const canNextTriggerOccur = React__default.useCallback(() => {
-    return getRemainingCooldownMs() <= 0;
+    return getRemainingCooldownMs() === 0;
   }, [getRemainingCooldownMs]);
   return {
     startCooldown,
@@ -3296,6 +3297,39 @@ const Banner = ({
     trackEvent
   } = useMixpanel();
   const [open, setOpen] = useState(true);
+  const {
+    appId
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log,
+    error
+  } = useLogging();
+  const [hasFired, setHasFired] = useState(false);
+  const brand = React__default.useMemo(() => {
+    return getBrand();
+  }, []);
+  useEffect(() => {
+    if (!open) return;
+    if (hasFired) return;
+    try {
+      request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+        seenTriggerIDs: [trigger.id]
+      }).then(log);
+    } catch (e) {
+      error(e);
+    }
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.invocation,
+      triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
+      brand
+    });
+    setHasFired(true);
+  }, [open]);
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
     e.preventDefault();

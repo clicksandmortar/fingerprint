@@ -1063,10 +1063,11 @@ function useTriggerDelay(cooldownMs) {
     if (!lastTriggerTimeStamp) return 0;
     var currentTime = Number(new Date());
     var remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
+    if (remainingMS < 0) return 0;
     return remainingMS;
   }, [lastTriggerTimeStamp, cooldownMs]);
   var canNextTriggerOccur = React__default.useCallback(function () {
-    return getRemainingCooldownMs() <= 0;
+    return getRemainingCooldownMs() === 0;
   }, [getRemainingCooldownMs]);
   return {
     startCooldown: startCooldown,
@@ -2935,6 +2936,38 @@ var Banner = function Banner(_ref) {
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useState2 = React.useState(false),
+    hasFired = _useState2[0],
+    setHasFired = _useState2[1];
+  var brand = React__default.useMemo(function () {
+    return getBrand();
+  }, []);
+  React.useEffect(function () {
+    if (!open) return;
+    if (hasFired) return;
+    try {
+      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+        seenTriggerIDs: [trigger.id]
+      }).then(log);
+    } catch (e) {
+      error(e);
+    }
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.invocation,
+      triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
+      brand: brand
+    });
+    setHasFired(true);
+  }, [open]);
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
