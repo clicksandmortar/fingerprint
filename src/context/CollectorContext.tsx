@@ -3,7 +3,7 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 // import { isMobile } from 'react-device-detect' <= reminder where isMobile came from
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { CollectorResponse, Trigger } from '../client/types'
+import { CollectorVisitorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -341,7 +341,7 @@ export function CollectorProvider({
           }
         })
           .then(async (response: Response) => {
-            const payload: CollectorResponse = await response.json()
+            const payload: CollectorVisitorResponse = await response.json()
 
             log('Sent login collector data, retrieved:', payload)
           })
@@ -383,7 +383,7 @@ export function CollectorProvider({
             return
           }
 
-          const payload: CollectorResponse = await response.json()
+          const payload: CollectorVisitorResponse = await response.json()
 
           log('Sent collector data, retrieved:', payload)
 
@@ -467,7 +467,7 @@ export function CollectorProvider({
               ]
             })
               .then(async (response: Response) => {
-                const payload: CollectorResponse = await response.json()
+                const payload: CollectorVisitorResponse = await response.json()
 
                 log('Sent collector data, retrieved:', payload)
 
@@ -512,7 +512,7 @@ export function CollectorProvider({
     }
   }, [registerWatcher, visitor])
 
-  const setTrigger = React.useCallback(
+  const setActiveTrigger = React.useCallback(
     (trigger: Trigger) => {
       log('CollectorProvider: manually setting trigger', trigger)
       addPageTriggers([trigger])
@@ -524,11 +524,12 @@ export function CollectorProvider({
   const collectorContextVal = React.useMemo(
     () => ({
       addPageTriggers,
+      setPageTriggers,
       removeActiveTrigger,
-      setTrigger,
+      setActiveTrigger,
       trackEvent
     }),
-    [addPageTriggers, removeActiveTrigger, setTrigger, trackEvent]
+    [addPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]
   )
 
   useEffect(() => {
@@ -555,13 +556,26 @@ export function CollectorProvider({
 
 export type CollectorContextInterface = {
   addPageTriggers: (triggers: Trigger[]) => void
+  setPageTriggers: (triggers: Trigger[]) => void
   removeActiveTrigger: (id: Trigger['id']) => void
-  setTrigger: (trigger: Trigger) => void
+  setActiveTrigger: (trigger: Trigger) => void
   trackEvent: (event: string, properties?: any) => void
 }
+
 export const CollectorContext = createContext<CollectorContextInterface>({
-  addPageTriggers: () => {},
-  removeActiveTrigger: () => {},
-  setTrigger: () => {},
-  trackEvent: () => {}
+  addPageTriggers: () => {
+    console.error('addPageTriggers not implemented correctly')
+  },
+  setPageTriggers: () => {
+    console.error('setPageTriggers not implemented correctly')
+  },
+  removeActiveTrigger: () => {
+    console.error('removeActiveTrigger not implemented correctly')
+  },
+  setActiveTrigger: () => {
+    console.error('setActiveTrigger not implemented correctly')
+  },
+  trackEvent: () => {
+    console.error('trackEvent not implemented correctly')
+  }
 })

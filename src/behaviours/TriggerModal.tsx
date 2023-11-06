@@ -4,24 +4,18 @@ import { Trigger } from '../client/types'
 import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
-import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
-import { useVisitor } from '../context/VisitorContext'
 import { useCollector } from '../hooks/useCollector'
-import { useFingerprint } from '../hooks/useFingerprint'
+import useOnTriggerActivation from '../hooks/useOnTriggerActivation'
 import { getBrand } from '../utils/brand'
-import { hostname, request } from '../utils/http'
 
 type Props = {
   trigger: Trigger
 }
 
 const Modal = ({ trigger }: Props) => {
-  const { log, error } = useLogging()
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
-  const { appId } = useFingerprint()
-  const { visitor } = useVisitor()
   const [open, setOpen] = useState(true)
   const [hasFired, setHasFired] = useState(false)
 
@@ -29,29 +23,14 @@ const Modal = ({ trigger }: Props) => {
     return getBrand()
   }, [])
 
+  const onActivation = useOnTriggerActivation(trigger)
   useEffect(() => {
     if (!open) return
     if (hasFired) return
 
-    try {
-      request
-        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
-          seenTriggerIDs: [trigger.id]
-        })
-        .then(log)
-    } catch (e) {
-      error(e)
-    }
-
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour,
-      time: new Date().toISOString(),
-      brand
-    })
+    onActivation()
     setHasFired(true)
-  }, [open])
+  }, [open, hasFired, setHasFired])
 
   if (!open) {
     return null
