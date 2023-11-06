@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../../client/types'
+import CloseButton from '../CloseButton'
 
 type Props = {
   trigger: Trigger
@@ -37,6 +38,7 @@ export const BrownsModal = ({
 }: Props) => {
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
+  // TODO: replace with `prependClass` from helpers
   const randomHash = useMemo(() => {
     return uuidv4().split('-')[0]
   }, [])
@@ -226,19 +228,18 @@ export const BrownsModal = ({
 .f` +
       randomHash +
       `-close-button {
-  border-radius: 100%;
-  background-color: var(--secondary);
-  width: 2rem;
-  height: 2rem;
   position: absolute;
-  margin: 10px;
   top: 0px;
   right: 0px;
-  color: black;
-  font-size: 1.2rem;
-  font-weight: 300;
-  cursor: pointer;
 }
+
+.f` +
+      randomHash +
+      `-close-button:hover {
+  transition: all 0.3s;
+  filter: brightness(0.95);
+}
+
 
 .f` +
       randomHash +
@@ -264,7 +265,7 @@ export const BrownsModal = ({
     styles.appendChild(document.createTextNode(css))
     document.head.appendChild(styles)
     setStylesLoaded(true)
-  })
+  }, [randomHash])
 
   if (!stylesLoaded) {
     return null
@@ -284,23 +285,9 @@ export const BrownsModal = ({
         }}
       >
         <div className={'f' + randomHash + '-image-darken'}>
-          <button
-            className={'f' + randomHash + '-close-button'}
-            onClick={handleCloseModal}
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='16'
-              height='16'
-              viewBox='0 0 16 16'
-            >
-              <path
-                fill='#000'
-                fillRule='evenodd'
-                d='M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-              />
-            </svg>
-          </button>
+          <div className={'f' + randomHash + '-close-button'}>
+            <CloseButton onClick={handleCloseModal} />
+          </div>
 
           <CurlyText text={trigger?.data?.heading} randomHash={randomHash} />
 

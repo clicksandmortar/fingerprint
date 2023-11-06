@@ -1,17 +1,14 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../../client/types'
+import CloseButton from '../CloseButton'
+import { prependClass } from './StandardModal/helpers'
 
 type Props = {
   trigger: Trigger
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
 }
-
-const randomHash = 'f' + uuidv4().split('-')[0]
-
-const prependClass = (className: string) => `f${randomHash}-${className}`
 
 const StonehouseModal = ({
   trigger,
@@ -158,22 +155,15 @@ const StonehouseModal = ({
       }
 
       .${prependClass('close-button')} {
-        border-radius: 100%;
-        background-color: white;
-        width: 2rem;
-        border: none;
-        height: 2rem;
         position: absolute;
-        margin: 10px;
         top: 0px;
         right: 0px;
-        color: black;
-        font-size: 1.2rem;
-        font-weight: 300;
-        cursor: pointer;
-        display: grid;
-        place-content: center;
       }
+      .${prependClass('close-button')}:hover {
+        transition: all 0.3s;
+        filter: brightness(0.95);
+      }
+      
 
       .${prependClass('image-darken')} {
         background: rgba(0, 0, 0, 0.1);
@@ -201,7 +191,7 @@ const StonehouseModal = ({
     setTimeout(() => {
       setStylesLoaded(true)
     }, 500)
-  }, [randomHash])
+  }, [])
 
   if (!stylesLoaded) {
     return null
@@ -260,23 +250,9 @@ const StonehouseModal = ({
         }}
       >
         <div className={prependClass('image-darken')}>
-          <button
-            className={prependClass('close-button')}
-            onClick={handleCloseModal}
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='20'
-              height='20'
-              viewBox='0 0 16 16'
-            >
-              <path
-                fill='#000'
-                fillRule='evenodd'
-                d='M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-              />
-            </svg>
-          </button>
+          <div className={prependClass('close-button')}>
+            <CloseButton onClick={handleCloseModal} />
+          </div>
 
           <div className={prependClass('text-container')}>
             <h1 className={prependClass('main-text')}>

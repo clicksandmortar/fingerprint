@@ -1,13 +1,12 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useState, createElement, createContext, useContext, useEffect, useCallback, useMemo } from 'react';
+import React__default, { useState, createElement, useContext, useEffect, useMemo, createContext, useCallback, useRef } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useForm } from 'react-hook-form';
 import ReactDOM from 'react-dom';
-import { validate, version, v4 } from 'uuid';
+import { v4, validate, version } from 'uuid';
 import mixpanel from 'mixpanel-browser';
 import Cookies from 'js-cookie';
 import uniqueBy from 'lodash.uniqby';
-import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 
@@ -253,6 +252,376 @@ var TriggerInverse = function TriggerInverse(_ref3) {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
+var useFingerprint = function useFingerprint() {
+  return useContext(FingerprintContext);
+};
+
+var getModalStylesBySize = function getModalStylesBySize(size) {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          width: '90%',
+          maxWidth: 400,
+          minHeight: 300
+        };
+      }
+    case 'medium':
+      {
+        return {
+          width: '90%',
+          maxWidth: 800,
+          minHeight: 400
+        };
+      }
+    case 'large':
+      {
+        return {
+          width: '90%',
+          maxWidth: 1200,
+          minHeight: 400
+        };
+      }
+    case 'full':
+      {
+        return {
+          width: '100vw',
+          height: '100vh'
+        };
+      }
+  }
+};
+var getModalButtonStylesBySize = function getModalButtonStylesBySize(size) {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'medium':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'large':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'full':
+      {
+        return {
+          fontSize: '1.5rem',
+          padding: '0.5rem 1.2rem'
+        };
+      }
+  }
+};
+var getModalButtonFlexPosition = function getModalButtonFlexPosition(position) {
+  switch (position) {
+    case 'left':
+      return {
+        justifyContent: 'flex-start'
+      };
+    case 'right':
+      return {
+        justifyContent: 'flex-end'
+      };
+    case 'center':
+      return {
+        justifyContent: 'center'
+      };
+  }
+};
+var randomHash = 'f' + v4().split('-')[0];
+var prependClass = function prependClass(className) {
+  return "f" + randomHash + "-" + className;
+};
+
+var defaultElementSize = 'medium';
+var defaultButtonPosition = 'right';
+var CnMStandardModal = function CnMStandardModal(_ref) {
+  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
+  var elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var modalSizeStyle = getModalStylesBySize(elementSize);
+  var buttonSizeStyle = getModalButtonStylesBySize(elementSize);
+  useEffect(function () {
+    var cssToApply = "\n    :root {\n      --primary: white;\n      --secondary: grey;\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      width: 80%;\n      height: 500px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: var(--secondary);\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: var(--primary);\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: _extends({
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }, modalSizeStyle)
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("button", {
+    className: prependClass('close-button'),
+    onClick: handleCloseModal
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '20',
+    height: '20',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: '#000',
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  }))), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    style: _extends({
+      display: 'flex'
+    }, getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition))
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction,
+    style: buttonSizeStyle
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
+var closeButtonStyles = {
+  borderRadius: '100%',
+  backgroundColor: 'white',
+  width: '2rem',
+  border: 'none',
+  height: '2rem',
+  margin: 10,
+  color: 'black',
+  fontSize: '1.2rem',
+  fontWeight: 300,
+  cursor: 'pointer',
+  display: 'grid',
+  placeContent: 'center'
+};
+var CloseButton = function CloseButton(_ref) {
+  var onClick = _ref.onClick,
+    style = _ref.style;
+  var buttonStyle = _extends({}, closeButtonStyles, style);
+  return React__default.createElement("button", {
+    style: buttonStyle,
+    onClick: onClick
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '16',
+    height: '16',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: buttonStyle.color || buttonStyle.fill,
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  })));
+};
+
+var CurlyText = function CurlyText(_ref) {
+  var randomHash = _ref.randomHash,
+    text = _ref.text;
+  return React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    xmlnsXlink: 'http://www.w3.org/1999/xlink',
+    version: '1.1',
+    viewBox: '0 0 500 500',
+    className: 'f' + randomHash + '-curlyText'
+  }, React__default.createElement("defs", null, React__default.createElement("path", {
+    id: 'textPath',
+    d: 'M 0 500 A 175,100 0 0 1 500,500'
+  })), React__default.createElement("text", {
+    x: '0',
+    y: '0',
+    textAnchor: 'middle'
+  }, React__default.createElement("textPath", {
+    xlinkHref: '#textPath',
+    fill: 'white',
+    startOffset: '50%'
+  }, text)));
+};
+var BrownsModal = function BrownsModal(_ref2) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref2.trigger,
+    handleClickCallToAction = _ref2.handleClickCallToAction,
+    handleCloseModal = _ref2.handleCloseModal;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var randomHash = useMemo(function () {
+    return v4().split('-')[0];
+  }, []);
+  useEffect(function () {
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-close-button:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(css));
+    document.head.appendChild(styles);
+    setStylesLoaded(true);
+  }, [randomHash]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: 'f' + randomHash + '-overlay'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-modal',
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative',
+      height: 500
+    }
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-image-darken'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-close-button'
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement(CurlyText, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
+    randomHash: randomHash
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1
+    },
+    className: 'f' + randomHash + '--spacer'
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1,
+      marginTop: -150,
+      textTransform: 'uppercase',
+      textAlign: 'center',
+      letterSpacing: '2pt'
+    }
+  }, React__default.createElement("span", {
+    className: 'f' + randomHash + '-mainText'
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    className: 'f' + randomHash + '-buttonContainer'
+  }, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: 'f' + randomHash + '-cta',
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
+};
+
+var StonehouseModal = function StonehouseModal(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  useEffect(function () {
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      h1, h2, h3, h4, h5, h6, p, a, span {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem 0 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  var TwoForTenThing = function TwoForTenThing() {
+    return React__default.createElement("div", {
+      style: {
+        position: 'absolute',
+        left: '10%',
+        top: 250
+      }
+    }, React__default.createElement("div", {
+      className: prependClass("box-shadow"),
+      style: {
+        borderRadius: '100%',
+        height: 100,
+        width: 100,
+        border: '2px solid white',
+        display: 'grid',
+        placeContent: 'center',
+        transform: 'rotate(-10deg)'
+      }
+    }, React__default.createElement("h4", {
+      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
+    }, "2 for"), React__default.createElement("h1", {
+      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow'),
+      style: {
+        marginLeft: 15,
+        marginBottom: -10
+      }
+    }, "10*"), React__default.createElement("h6", {
+      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
+    }, "COCKTAILS")));
+  };
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", null, React__default.createElement(TwoForTenThing, null)), React__default.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'flex-end'
+    }
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
 var LoggingProvider = function LoggingProvider(_ref) {
   var debug = _ref.debug,
     children = _ref.children;
@@ -303,18 +672,20 @@ var useLogging = function useLogging() {
   return useContext(LoggingContext);
 };
 
-var useFingerprint = function useFingerprint() {
-  return useContext(FingerprintContext);
-};
-
 function getEnvVars() {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
   var isDev = false;
-  if (typeof window === 'undefined') {
-    isDev = true;
-  } else {
-    var _window, _window$location, _window$location$host, _window2, _window2$location;
-    if ((_window = window) !== null && _window !== void 0 && (_window$location = _window.location) !== null && _window$location !== void 0 && (_window$location$host = _window$location.host) !== null && _window$location$host !== void 0 && _window$location$host.includes('localhost')) isDev = true;
-    if (((_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : _window2$location.host) === "stage65-az.harvester.co.uk") isDev = true;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
   }
   if (isDev) return {
     FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
@@ -391,33 +762,31 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
   if (getCookie(cookieAccountJWT)) {
     visitor.jwt = getCookie(cookieAccountJWT);
   }
-  if (!getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
-    var visitorId = v4();
-    var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie('_cm_id')),
-      sessionId = _getSessionIdAndEndTi.sessionId,
-      endTime = _getSessionIdAndEndTi.endTime;
-    setCookie('_cm_id', visitorId + "|" + sessionId + "|" + endTime.toISOString(), 365);
-    visitor.id = visitorId;
-    session.id = sessionId;
-    session.endTime = endTime;
-    setSession(session);
-    setVisitor(visitor);
-    return;
+  if (typeof window !== 'undefined') {
+    var urlParams = new URLSearchParams(window.location.search);
+    var vid = urlParams.get('v_id');
+    if (vid) {
+      visitor.id = vid;
+    }
   }
-  if (getCookie('_cm_id')) {
+  if (!visitor.id && !getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
+    var visitorId = v4();
+    visitor.id = visitorId;
+  }
+  if (!visitor.id && getCookie('_cm_id')) {
     var c = getCookie('_cm_id');
     var _c$split = c.split('|'),
       _visitorId = _c$split[0];
-    var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie('_cm_id')),
-      _sessionId = _getSessionIdAndEndTi2.sessionId,
-      _endTime = _getSessionIdAndEndTi2.endTime;
-    setCookie('_cm_id', _visitorId + "|" + _sessionId + "|" + _endTime.toISOString(), 365);
     visitor.id = _visitorId;
-    session.id = _sessionId;
-    session.endTime = _endTime;
-    setSession(session);
-    setVisitor(visitor);
   }
+  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie('_cm_id')),
+    sessionId = _getSessionIdAndEndTi.sessionId,
+    endTime = _getSessionIdAndEndTi.endTime;
+  setCookie('_cm_id', visitor.id + "|" + sessionId + "|" + endTime.toISOString(), 365);
+  session.id = sessionId;
+  session.endTime = endTime;
+  setSession(session);
+  setVisitor(visitor);
 };
 var getSessionIdAndEndTime = function getSessionIdAndEndTime(cookieData) {
   var t = new Date();
@@ -494,16 +863,23 @@ var VisitorProvider = function VisitorProvider(_ref) {
     boot();
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
+  var setVisitorData = React__default.useCallback(function (prop) {
+    setVisitor(_extends({}, visitor, prop));
+  }, [setVisitor]);
   return React__default.createElement(VisitorContext.Provider, {
     value: {
       session: session,
-      visitor: visitor
+      visitor: visitor,
+      setVisitor: setVisitorData
     }
   }, children);
 };
 var VisitorContext = createContext({
   session: {},
-  visitor: {}
+  visitor: {},
+  setVisitor: function setVisitor() {
+    return console.error('VisitorContext: setVisitor not setup properly. Check your Context order.');
+  }
 });
 var useVisitor = function useVisitor() {
   return useContext(VisitorContext);
@@ -538,14 +914,33 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  useEffect(function () {
+    if (!(visitor !== null && visitor !== void 0 && visitor.cohort)) {
+      log('Able to register user cohort, but none provided. ');
+      return;
+    }
+    registerUserData({
+      u_cohort: visitor.cohort
+    });
+  }, [visitor]);
+  var registerUserData = React__default.useCallback(function (properties) {
+    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
+    mixpanel.people.set(properties);
+  }, [log]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
-      trackEvent: trackEvent
+      trackEvent: trackEvent,
+      registerUserData: registerUserData
     }
   }, children);
 };
 var MixpanelContext = createContext({
-  trackEvent: function trackEvent() {}
+  trackEvent: function trackEvent() {
+    return console.error('Mixpanel: trackEvent not setup properly. Check your Context order.');
+  },
+  registerUserData: function registerUserData() {
+    return console.error('Mixpanel: registerUserData not setup properly. Check your Context order.');
+  }
 });
 var useMixpanel = function useMixpanel() {
   return useContext(MixpanelContext);
@@ -611,13 +1006,24 @@ var request = {
   }
 };
 
+var useHostname = function useHostname() {
+  var _window;
+  if (((_window = window) === null || _window === void 0 ? void 0 : _window.location) !== undefined) {
+    return window.location.hostname;
+  }
+  return '';
+};
+
 var useCollectorMutation = function useCollectorMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
+  var requestHost = useHostname();
   return useMutation(function (data) {
     var _data$visitor;
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), data).then(function (response) {
+    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), _extends({}, data, {
+      hostname: requestHost
+    })).then(function (response) {
       log('Collector API response', response);
       return response;
     })["catch"](function (err) {
@@ -629,7 +1035,67 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
-var idleStatusAfterMs = 5 * 1000;
+var useExitIntentDelay = function useExitIntentDelay(delay) {
+  if (delay === void 0) {
+    delay = 0;
+  }
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = useState(false),
+    hasDelayPassed = _useState[0],
+    setHasDelayPassed = _useState[1];
+  useEffect(function () {
+    log("Exit intents are suspended because of initiation delay of " + delay + "ms");
+    setTimeout(function () {
+      setHasDelayPassed(true);
+      log('Exit intents can be issued again.');
+    }, delay);
+  }, [delay]);
+  return {
+    hasDelayPassed: hasDelayPassed
+  };
+};
+
+var defaultTriggerCooldown = 60 * 1000;
+function useTriggerDelay(cooldownMs) {
+  if (cooldownMs === void 0) {
+    cooldownMs = defaultTriggerCooldown;
+  }
+  var _useState = useState(null),
+    lastTriggerTimeStamp = _useState[0],
+    setLastTriggerTimeStamp = _useState[1];
+  var startCooldown = React__default.useCallback(function () {
+    var currentTimeStamp = Number(new Date());
+    setLastTriggerTimeStamp(currentTimeStamp);
+  }, [setLastTriggerTimeStamp]);
+  var getRemainingCooldownMs = React__default.useCallback(function () {
+    if (!lastTriggerTimeStamp) return 0;
+    var currentTime = Number(new Date());
+    var remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
+    if (remainingMS < 0) return 0;
+    return remainingMS;
+  }, [lastTriggerTimeStamp, cooldownMs]);
+  var canNextTriggerOccur = React__default.useCallback(function () {
+    return getRemainingCooldownMs() === 0;
+  }, [getRemainingCooldownMs]);
+  return {
+    startCooldown: startCooldown,
+    canNextTriggerOccur: canNextTriggerOccur,
+    getRemainingCooldownMs: getRemainingCooldownMs
+  };
+}
+
+var getVisitorId = function getVisitorId() {
+  if (typeof window === 'undefined') return null;
+  var urlParams = new URLSearchParams(window.location.search);
+  var vid = urlParams.get('v_id');
+  return vid;
+};
+var hasVisitorIDInURL = function hasVisitorIDInURL() {
+  return getVisitorId() !== null;
+};
+
+var defaultIdleStatusDelay = 5 * 1000;
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -643,10 +1109,17 @@ function CollectorProvider(_ref) {
     initialDelay = _useFingerprint.initialDelay,
     exitIntentTriggers = _useFingerprint.exitIntentTriggers,
     idleTriggers = _useFingerprint.idleTriggers,
+    pageLoadTriggers = _useFingerprint.pageLoadTriggers,
     config = _useFingerprint.config;
+  var configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
-    session = _useVisitor.session;
+    session = _useVisitor.session,
+    setVisitor = _useVisitor.setVisitor;
+  var _useTriggerDelay = useTriggerDelay(config === null || config === void 0 ? void 0 : config.triggerCooldown),
+    canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
+    startCooldown = _useTriggerDelay.startCooldown,
+    getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
   var _useCollectorMutation = useCollectorMutation(),
@@ -657,29 +1130,35 @@ function CollectorProvider(_ref) {
         daysToExpire: 0
       }
     }),
-    registerHandler = _useExitIntent.registerHandler;
-  var _useState = useState((config === null || config === void 0 ? void 0 : config.idleDelay) || idleStatusAfterMs),
+    registerHandler = _useExitIntent.registerHandler,
+    reRegisterExitIntent = _useExitIntent.resetState;
+  var getIdleStatusDelay = React__default.useCallback(function () {
+    var idleDelay = configIdleDelay || defaultIdleStatusDelay;
+    var cooldownDelay = getRemainingCooldownMs();
+    var delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log("Setting idle delay at " + delayAdjustedForCooldown + "ms (cooldown " + cooldownDelay + "ms + config.delay " + idleDelay + "ms)");
+    return delayAdjustedForCooldown;
+  }, [configIdleDelay, getRemainingCooldownMs, log]);
+  var _useState = useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
   var _useState2 = useState([]),
     pageTriggers = _useState2[0],
     setPageTriggers = _useState2[1];
-  var _useState3 = useState(undefined),
-    displayTrigger = _useState3[0],
-    setDisplayTrigger = _useState3[1];
+  var _useState3 = useState([]),
+    displayTriggers = _useState3[0],
+    setDisplayedTriggers = _useState3[1];
   var _useState4 = useState(false),
     intently = _useState4[0],
     setIntently = _useState4[1];
   var _useState5 = useState(new Map()),
     foundWatchers = _useState5[0],
     setFoundWatchers = _useState5[1];
-  var addPageTriggers = function addPageTriggers(triggers) {
+  var addPageTriggers = React__default.useCallback(function (triggers) {
     setPageTriggers(function (prev) {
       return uniqueBy([].concat(prev, triggers || []), 'id');
     });
-  };
-  log('CollectorProvider: user is on mobile?', isMobile);
-  var shouldLaunchIdleTriggers = isMobile;
+  }, [setPageTriggers]);
   useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
@@ -695,49 +1174,86 @@ function CollectorProvider(_ref) {
       clearInterval(runningInterval);
     };
   }, [intently, log]);
-  var TriggerComponent = React__default.useCallback(function () {
-    var _handler$invoke, _handler;
-    if (!displayTrigger) return null;
-    var handler;
-    var trigger = pageTriggers.find(function (_trigger) {
-      var potentialTrigger = _trigger.invocation === displayTrigger;
-      var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
-        return handler.behaviour === _trigger.behaviour;
-      });
-      handler = potentialHandler;
-      return potentialTrigger && potentialHandler;
+  var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
+    var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return handler.behaviour === _trigger.behaviour;
     });
-    log('CollectorProvider: available triggers include: ', pageTriggers);
-    log('CollectorProvider: attempting to show displayTrigger', displayTrigger, trigger);
-    if (!trigger) {
-      error("No trigger found for displayTrigger", displayTrigger);
+    if (!potentialHandler) return null;
+    return potentialHandler;
+  }, [handlers]);
+  var removeActiveTrigger = useCallback(function (id) {
+    log("CollectorProvider: removing id:" + id + " from displayTriggers");
+    var refreshedTriggers = displayTriggers.filter(function (triggerId) {
+      return triggerId !== id;
+    });
+    setDisplayedTriggers(refreshedTriggers);
+  }, [displayTriggers, log]);
+  var TriggerComponent = React__default.useCallback(function () {
+    if (!displayTriggers) return null;
+    var activeTriggers = pageTriggers.filter(function (trigger) {
+      return displayTriggers.includes(trigger.id);
+    });
+    if (!activeTriggers) {
+      error("No trigger found for displayTriggers", displayTriggers);
       return null;
     }
     log('CollectorProvider: available handlers include: ', handlers);
-    log('CollectorProvider: trigger to match is: ', trigger);
-    log('CollectorProvider: attempting to show trigger', trigger, handler);
-    if (!handler) {
-      log('No handler found for trigger', trigger);
+    log('CollectorProvider: activeTriggers to match are: ', activeTriggers);
+    log('CollectorProvider: attempting to show trigger', activeTriggers);
+    return activeTriggers.map(function (trigger) {
+      var _handler$invoke;
+      var handler = getHandlerForTrigger(trigger);
+      if (!handler) {
+        log('No handler found for trigger', trigger);
+        return null;
+      }
+      if (!handler.invoke) {
+        log('No invoke method found for handler', handler);
+        return null;
+      }
+      var potentialComponent = (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
+      if (potentialComponent && React__default.isValidElement(potentialComponent)) {
+        log('CollectorProvider: Potential component for trigger is valid. Mounting');
+        return potentialComponent;
+      }
+      log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
       return null;
-    }
-    if (!handler.invoke) {
-      log('No invoke method found for handler', handler);
-      return null;
-    }
-    var potentialComponent = (_handler$invoke = (_handler = handler).invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(_handler, trigger);
-    if (potentialComponent && React__default.isValidElement(potentialComponent)) return potentialComponent;
-    return null;
-  }, [displayTrigger, error, handlers, log, pageTriggers, handlers]);
+    });
+  }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
+    var invokableTrigger = pageTriggers.find(function (trigger) {
+      return trigger.invocation === invocation;
+    });
+    if (invokableTrigger) setDisplayedTriggers(function (ts) {
+      return [].concat(ts, [invokableTrigger.id]);
+    });
+  }, [pageTriggers, setDisplayedTriggers]);
   var fireIdleTrigger = useCallback(function () {
     if (!idleTriggers) return;
-    if (!shouldLaunchIdleTriggers) return;
-    log('CollectorProvider: attempting to fire idle trigger');
-    setDisplayTrigger('INVOCATION_IDLE_TIME');
-  }, [idleTriggers, log, shouldLaunchIdleTriggers]);
-  var fireExitTrigger = useCallback(function () {
+    log('CollectorProvider: attempting to fire idle time trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
+    startCooldown();
+  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
+  var _useExitIntentDelay = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay),
+    hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
+  var fireExitTrigger = React__default.useCallback(function () {
+    if (displayTriggers !== null && displayTriggers !== void 0 && displayTriggers.length) return;
+    if (!hasDelayPassed) {
+      log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
+    if (!canNextTriggerOccur()) {
+      log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. \n        I will attempt again when the same signal occurs after this passes.");
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
     log('CollectorProvider: attempting to fire exit trigger');
-    setDisplayTrigger('INVOCATION_EXIT_INTENT');
-  }, [log, exitIntentTriggers, setDisplayTrigger]);
+    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
+    startCooldown();
+  }, [displayTriggers === null || displayTriggers === void 0 ? void 0 : displayTriggers.length, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -746,10 +1262,12 @@ function CollectorProvider(_ref) {
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
-  var resetDisplayTrigger = useCallback(function () {
-    log('CollectorProvider: resetting displayTrigger');
-    setDisplayTrigger(undefined);
-  }, [log]);
+  var fireOnLoadTriggers = useCallback(function () {
+    if (!pageLoadTriggers) return;
+    if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
+    log('CollectorProvider: attempting to fire on-page-load trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
+  }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
   useEffect(function () {
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot');
@@ -761,6 +1279,11 @@ function CollectorProvider(_ref) {
         return;
       }
       log('CollectorProvider: collecting data');
+      if (hasVisitorIDInURL()) {
+        trackEvent('abandoned_journey_landing', {
+          from_email: true
+        });
+      }
       var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
         var _cur$split = cur.split('='),
           key = _cur$split[0],
@@ -826,20 +1349,18 @@ function CollectorProvider(_ref) {
           }
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
-            setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || idleStatusAfterMs);
+            setIdleTimeout(getIdleStatusDelay());
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+            var cohort = payload.intently ? 'intently' : 'fingerprint';
+            setVisitor({
+              cohort: cohort
+            });
             if (!payload.intently) {
               log('CollectorProvider: user is in Fingerprint cohort');
               setIntently(false);
-              trackEvent('user_cohort', {
-                cohort: 'fingerprint'
-              });
             } else {
               log('CollectorProvider: user is in Intently cohort');
               setIntently(true);
-              trackEvent('user_cohort', {
-                cohort: 'intently'
-              });
             }
           });
         } catch (e) {
@@ -853,8 +1374,8 @@ function CollectorProvider(_ref) {
     return function () {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, handlers, initialDelay, log, trackEvent, visitor]);
-  var registerWatcher = function registerWatcher(configuredSelector, configuredSearch) {
+  }, [appId, booted, collect, error, setVisitor, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id, fireOnLoadTriggers, addPageTriggers]);
+  var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
       var found = false;
@@ -880,7 +1401,7 @@ function CollectorProvider(_ref) {
             try {
               return Promise.resolve(response.json()).then(function (payload) {
                 log('Sent collector data, retrieved:', payload);
-                setIdleTimeout((config === null || config === void 0 ? void 0 : config.idleDelay) || idleStatusAfterMs);
+                setIdleTimeout(getIdleStatusDelay());
                 addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
               });
             } catch (e) {
@@ -894,7 +1415,7 @@ function CollectorProvider(_ref) {
       });
     }, 500);
     return intervalId;
-  };
+  }, [appId, collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
   useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];
@@ -903,20 +1424,23 @@ function CollectorProvider(_ref) {
         return clearInterval(intervalId);
       });
     };
-  }, [visitor]);
+  }, [registerWatcher, visitor]);
   var setTrigger = React__default.useCallback(function (trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
     addPageTriggers([trigger]);
-    setDisplayTrigger(trigger.invocation);
-  }, [log, pageTriggers, setDisplayTrigger, addPageTriggers]);
+    setDisplayedTriggerByInvocation(trigger.invocation);
+  }, [log, setDisplayedTriggerByInvocation, addPageTriggers]);
   var collectorContextVal = React__default.useMemo(function () {
     return {
       addPageTriggers: addPageTriggers,
-      resetDisplayTrigger: resetDisplayTrigger,
+      removeActiveTrigger: removeActiveTrigger,
       setTrigger: setTrigger,
       trackEvent: trackEvent
     };
-  }, [resetDisplayTrigger, setTrigger, trackEvent]);
+  }, [addPageTriggers, removeActiveTrigger, setTrigger, trackEvent]);
+  useEffect(function () {
+    fireOnLoadTriggers();
+  }, [fireOnLoadTriggers]);
   return React__default.createElement(IdleTimerProvider, {
     timeout: idleTimeout,
     onPresenceChange: function onPresenceChange(presence) {
@@ -925,11 +1449,11 @@ function CollectorProvider(_ref) {
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: collectorContextVal
-  }, children), React__default.createElement(TriggerComponent, null));
+  }, children, React__default.createElement(TriggerComponent, null)));
 }
 var CollectorContext = createContext({
   addPageTriggers: function addPageTriggers() {},
-  resetDisplayTrigger: function resetDisplayTrigger() {},
+  removeActiveTrigger: function removeActiveTrigger() {},
   setTrigger: function setTrigger() {},
   trackEvent: function trackEvent() {}
 });
@@ -938,207 +1462,18 @@ var useCollector = function useCollector() {
   return useContext(CollectorContext);
 };
 
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
 var getBrand = function getBrand() {
   if (typeof window === 'undefined') return null;
-  if (window.location.host.startsWith('localhost')) return 'Stonehouse';
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
   if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
   return null;
-};
-
-var randomHash = 'f' + v4().split('-')[0];
-var prependClass = function prependClass(className) {
-  return "f" + randomHash + "-" + className;
-};
-var StonehouseModal = function StonehouseModal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref.trigger,
-    handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal;
-  var _useState = useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  useEffect(function () {
-    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      h1, h2, h3, h4, h5, h6, p, a, span {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem 0 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        border-radius: 100%;\n        background-color: white;\n        width: 2rem;\n        border: none;\n        height: 2rem;\n        position: absolute;\n        margin: 10px;\n        top: 0px;\n        right: 0px;\n        color: black;\n        font-size: 1.2rem;\n        font-weight: 300;\n        cursor: pointer;\n        display: grid;\n        place-content: center;\n      }\n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-  }, [randomHash]);
-  if (!stylesLoaded) {
-    return null;
-  }
-  var TwoForTenThing = function TwoForTenThing() {
-    return React__default.createElement("div", {
-      style: {
-        position: 'absolute',
-        left: '10%',
-        top: 250
-      }
-    }, React__default.createElement("div", {
-      className: prependClass("box-shadow"),
-      style: {
-        borderRadius: '100%',
-        height: 100,
-        width: 100,
-        border: '2px solid white',
-        display: 'grid',
-        placeContent: 'center',
-        transform: 'rotate(-10deg)'
-      }
-    }, React__default.createElement("h4", {
-      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
-    }, "2 for"), React__default.createElement("h1", {
-      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow'),
-      style: {
-        marginLeft: 15,
-        marginBottom: -10
-      }
-    }, "10*"), React__default.createElement("h6", {
-      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
-    }, "COCKTAILS")));
-  };
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('image-darken')
-  }, React__default.createElement("button", {
-    className: prependClass('close-button'),
-    onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '20',
-    height: '20',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", null, React__default.createElement(TwoForTenThing, null)), React__default.createElement("div", {
-    style: {
-      display: 'flex',
-      justifyContent: 'flex-end'
-    }
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-
-var CurlyText = function CurlyText(_ref) {
-  var randomHash = _ref.randomHash,
-    text = _ref.text;
-  return React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    xmlnsXlink: 'http://www.w3.org/1999/xlink',
-    version: '1.1',
-    viewBox: '0 0 500 500',
-    className: 'f' + randomHash + '-curlyText'
-  }, React__default.createElement("defs", null, React__default.createElement("path", {
-    id: 'textPath',
-    d: 'M 0 500 A 175,100 0 0 1 500,500'
-  })), React__default.createElement("text", {
-    x: '0',
-    y: '0',
-    textAnchor: 'middle'
-  }, React__default.createElement("textPath", {
-    xlinkHref: '#textPath',
-    fill: 'white',
-    startOffset: '50%'
-  }, text)));
-};
-var BrownsModal = function BrownsModal(_ref2) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref2.trigger,
-    handleClickCallToAction = _ref2.handleClickCallToAction,
-    handleCloseModal = _ref2.handleCloseModal;
-  var _useState = useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var randomHash = useMemo(function () {
-    return v4().split('-')[0];
-  }, []);
-  useEffect(function () {
-    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  });
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: 'f' + randomHash + '-overlay'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-modal',
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative',
-      height: 500
-    }
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-image-darken'
-  }, React__default.createElement("button", {
-    className: 'f' + randomHash + '-close-button',
-    onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '16',
-    height: '16',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement(CurlyText, {
-    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
-    randomHash: randomHash
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1
-    },
-    className: 'f' + randomHash + '--spacer'
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      marginTop: -150,
-      textTransform: 'uppercase',
-      textAlign: 'center',
-      letterSpacing: '2pt'
-    }
-  }, React__default.createElement("span", {
-    className: 'f' + randomHash + '-mainText'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    className: 'f' + randomHash + '-buttonContainer'
-  }, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: 'f' + randomHash + '-cta',
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
 
 var Modal = function Modal(_ref) {
@@ -1147,7 +1482,7 @@ var Modal = function Modal(_ref) {
     log = _useLogging.log,
     error = _useLogging.error;
   var _useCollector = useCollector(),
-    resetDisplayTrigger = _useCollector.resetDisplayTrigger;
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
   var _useFingerprint = useFingerprint(),
@@ -1158,16 +1493,14 @@ var Modal = function Modal(_ref) {
     open = _useState[0],
     setOpen = _useState[1];
   var _useState2 = useState(false),
-    stylesLoaded = _useState2[0],
-    setStylesLoaded = _useState2[1];
+    hasFired = _useState2[0],
+    setHasFired = _useState2[1];
   var brand = React__default.useMemo(function () {
     return getBrand();
   }, []);
-  var randomHash = useMemo(function () {
-    return v4().split('-')[0];
-  }, []);
   useEffect(function () {
     if (!open) return;
+    if (hasFired) return;
     try {
       request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
         seenTriggerIDs: [trigger.id]
@@ -1179,20 +1512,11 @@ var Modal = function Modal(_ref) {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
       brand: brand
     });
+    setHasFired(true);
   }, [open]);
-  useEffect(function () {
-    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  border-radius: 100%;\n  background-color: var(--secondary);\n  width: 2rem;\n  height: 2rem;\n  position: absolute;\n  margin: 10px;\n  top: 0px;\n  right: 0px;\n  color: black;\n  font-size: 1.2rem;\n  font-weight: 300;\n  cursor: pointer;\n}\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  });
-  if (!stylesLoaded) {
-    return null;
-  }
   if (!open) {
     return null;
   }
@@ -1204,9 +1528,14 @@ var Modal = function Modal(_ref) {
   };
   var handleCloseModal = function handleCloseModal() {
     trackEvent('user_closed_trigger', trigger);
-    resetDisplayTrigger();
+    removeActiveTrigger(trigger.id);
     setOpen(false);
   };
+  if (brand === 'C&M') return React__default.createElement(CnMStandardModal, {
+    trigger: trigger,
+    handleClickCallToAction: handleClickCallToAction,
+    handleCloseModal: handleCloseModal
+  });
   if (brand === 'Stonehouse') return React__default.createElement(StonehouseModal, {
     trigger: trigger,
     handleClickCallToAction: handleClickCallToAction,
@@ -1298,6 +1627,1442 @@ var TriggerYoutube = function TriggerYoutube(_ref2) {
   }), document.body);
 };
 
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray = Array.isArray;
+
+var isArray_1 = isArray;
+
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
+
+var _freeGlobal = freeGlobal;
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = _freeGlobal || freeSelf || Function('return this')();
+
+var _root = root;
+
+/** Built-in value references. */
+var Symbol = _root.Symbol;
+
+var _Symbol = Symbol;
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var nativeObjectToString = objectProto.toString;
+
+/** Built-in value references. */
+var symToStringTag = _Symbol ? _Symbol.toStringTag : undefined;
+
+/**
+ * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the raw `toStringTag`.
+ */
+function getRawTag(value) {
+  var isOwn = hasOwnProperty.call(value, symToStringTag),
+      tag = value[symToStringTag];
+
+  try {
+    value[symToStringTag] = undefined;
+    var unmasked = true;
+  } catch (e) {}
+
+  var result = nativeObjectToString.call(value);
+  if (unmasked) {
+    if (isOwn) {
+      value[symToStringTag] = tag;
+    } else {
+      delete value[symToStringTag];
+    }
+  }
+  return result;
+}
+
+var _getRawTag = getRawTag;
+
+/** Used for built-in method references. */
+var objectProto$1 = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var nativeObjectToString$1 = objectProto$1.toString;
+
+/**
+ * Converts `value` to a string using `Object.prototype.toString`.
+ *
+ * @private
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
+ */
+function objectToString(value) {
+  return nativeObjectToString$1.call(value);
+}
+
+var _objectToString = objectToString;
+
+/** `Object#toString` result references. */
+var nullTag = '[object Null]',
+    undefinedTag = '[object Undefined]';
+
+/** Built-in value references. */
+var symToStringTag$1 = _Symbol ? _Symbol.toStringTag : undefined;
+
+/**
+ * The base implementation of `getTag` without fallbacks for buggy environments.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the `toStringTag`.
+ */
+function baseGetTag(value) {
+  if (value == null) {
+    return value === undefined ? undefinedTag : nullTag;
+  }
+  return (symToStringTag$1 && symToStringTag$1 in Object(value))
+    ? _getRawTag(value)
+    : _objectToString(value);
+}
+
+var _baseGetTag = baseGetTag;
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return value != null && typeof value == 'object';
+}
+
+var isObjectLike_1 = isObjectLike;
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike_1(value) && _baseGetTag(value) == symbolTag);
+}
+
+var isSymbol_1 = isSymbol;
+
+/** Used to match property names within property paths. */
+var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
+    reIsPlainProp = /^\w*$/;
+
+/**
+ * Checks if `value` is a property name and not a property path.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {Object} [object] The object to query keys on.
+ * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+ */
+function isKey(value, object) {
+  if (isArray_1(value)) {
+    return false;
+  }
+  var type = typeof value;
+  if (type == 'number' || type == 'symbol' || type == 'boolean' ||
+      value == null || isSymbol_1(value)) {
+    return true;
+  }
+  return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
+    (object != null && value in Object(object));
+}
+
+var _isKey = isKey;
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return value != null && (type == 'object' || type == 'function');
+}
+
+var isObject_1 = isObject;
+
+/** `Object#toString` result references. */
+var asyncTag = '[object AsyncFunction]',
+    funcTag = '[object Function]',
+    genTag = '[object GeneratorFunction]',
+    proxyTag = '[object Proxy]';
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  if (!isObject_1(value)) {
+    return false;
+  }
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in Safari 9 which returns 'object' for typed arrays and other constructors.
+  var tag = _baseGetTag(value);
+  return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
+}
+
+var isFunction_1 = isFunction;
+
+/** Used to detect overreaching core-js shims. */
+var coreJsData = _root['__core-js_shared__'];
+
+var _coreJsData = coreJsData;
+
+/** Used to detect methods masquerading as native. */
+var maskSrcKey = (function() {
+  var uid = /[^.]+$/.exec(_coreJsData && _coreJsData.keys && _coreJsData.keys.IE_PROTO || '');
+  return uid ? ('Symbol(src)_1.' + uid) : '';
+}());
+
+/**
+ * Checks if `func` has its source masked.
+ *
+ * @private
+ * @param {Function} func The function to check.
+ * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+ */
+function isMasked(func) {
+  return !!maskSrcKey && (maskSrcKey in func);
+}
+
+var _isMasked = isMasked;
+
+/** Used for built-in method references. */
+var funcProto = Function.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
+
+/**
+ * Converts `func` to its source code.
+ *
+ * @private
+ * @param {Function} func The function to convert.
+ * @returns {string} Returns the source code.
+ */
+function toSource(func) {
+  if (func != null) {
+    try {
+      return funcToString.call(func);
+    } catch (e) {}
+    try {
+      return (func + '');
+    } catch (e) {}
+  }
+  return '';
+}
+
+var _toSource = toSource;
+
+/**
+ * Used to match `RegExp`
+ * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+ */
+var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+
+/** Used to detect host constructors (Safari). */
+var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+/** Used for built-in method references. */
+var funcProto$1 = Function.prototype,
+    objectProto$2 = Object.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString$1 = funcProto$1.toString;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty$1 = objectProto$2.hasOwnProperty;
+
+/** Used to detect if a method is native. */
+var reIsNative = RegExp('^' +
+  funcToString$1.call(hasOwnProperty$1).replace(reRegExpChar, '\\$&')
+  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+);
+
+/**
+ * The base implementation of `_.isNative` without bad shim checks.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a native function,
+ *  else `false`.
+ */
+function baseIsNative(value) {
+  if (!isObject_1(value) || _isMasked(value)) {
+    return false;
+  }
+  var pattern = isFunction_1(value) ? reIsNative : reIsHostCtor;
+  return pattern.test(_toSource(value));
+}
+
+var _baseIsNative = baseIsNative;
+
+/**
+ * Gets the value at `key` of `object`.
+ *
+ * @private
+ * @param {Object} [object] The object to query.
+ * @param {string} key The key of the property to get.
+ * @returns {*} Returns the property value.
+ */
+function getValue(object, key) {
+  return object == null ? undefined : object[key];
+}
+
+var _getValue = getValue;
+
+/**
+ * Gets the native function at `key` of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {string} key The key of the method to get.
+ * @returns {*} Returns the function if it's native, else `undefined`.
+ */
+function getNative(object, key) {
+  var value = _getValue(object, key);
+  return _baseIsNative(value) ? value : undefined;
+}
+
+var _getNative = getNative;
+
+/* Built-in method references that are verified to be native. */
+var nativeCreate = _getNative(Object, 'create');
+
+var _nativeCreate = nativeCreate;
+
+/**
+ * Removes all key-value entries from the hash.
+ *
+ * @private
+ * @name clear
+ * @memberOf Hash
+ */
+function hashClear() {
+  this.__data__ = _nativeCreate ? _nativeCreate(null) : {};
+  this.size = 0;
+}
+
+var _hashClear = hashClear;
+
+/**
+ * Removes `key` and its value from the hash.
+ *
+ * @private
+ * @name delete
+ * @memberOf Hash
+ * @param {Object} hash The hash to modify.
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function hashDelete(key) {
+  var result = this.has(key) && delete this.__data__[key];
+  this.size -= result ? 1 : 0;
+  return result;
+}
+
+var _hashDelete = hashDelete;
+
+/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED = '__lodash_hash_undefined__';
+
+/** Used for built-in method references. */
+var objectProto$3 = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty$2 = objectProto$3.hasOwnProperty;
+
+/**
+ * Gets the hash value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf Hash
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function hashGet(key) {
+  var data = this.__data__;
+  if (_nativeCreate) {
+    var result = data[key];
+    return result === HASH_UNDEFINED ? undefined : result;
+  }
+  return hasOwnProperty$2.call(data, key) ? data[key] : undefined;
+}
+
+var _hashGet = hashGet;
+
+/** Used for built-in method references. */
+var objectProto$4 = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty$3 = objectProto$4.hasOwnProperty;
+
+/**
+ * Checks if a hash value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf Hash
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function hashHas(key) {
+  var data = this.__data__;
+  return _nativeCreate ? (data[key] !== undefined) : hasOwnProperty$3.call(data, key);
+}
+
+var _hashHas = hashHas;
+
+/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED$1 = '__lodash_hash_undefined__';
+
+/**
+ * Sets the hash `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf Hash
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the hash instance.
+ */
+function hashSet(key, value) {
+  var data = this.__data__;
+  this.size += this.has(key) ? 0 : 1;
+  data[key] = (_nativeCreate && value === undefined) ? HASH_UNDEFINED$1 : value;
+  return this;
+}
+
+var _hashSet = hashSet;
+
+/**
+ * Creates a hash object.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function Hash(entries) {
+  var index = -1,
+      length = entries == null ? 0 : entries.length;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+// Add methods to `Hash`.
+Hash.prototype.clear = _hashClear;
+Hash.prototype['delete'] = _hashDelete;
+Hash.prototype.get = _hashGet;
+Hash.prototype.has = _hashHas;
+Hash.prototype.set = _hashSet;
+
+var _Hash = Hash;
+
+/**
+ * Removes all key-value entries from the list cache.
+ *
+ * @private
+ * @name clear
+ * @memberOf ListCache
+ */
+function listCacheClear() {
+  this.__data__ = [];
+  this.size = 0;
+}
+
+var _listCacheClear = listCacheClear;
+
+/**
+ * Performs a
+ * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+ * comparison between two values to determine if they are equivalent.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to compare.
+ * @param {*} other The other value to compare.
+ * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+ * @example
+ *
+ * var object = { 'a': 1 };
+ * var other = { 'a': 1 };
+ *
+ * _.eq(object, object);
+ * // => true
+ *
+ * _.eq(object, other);
+ * // => false
+ *
+ * _.eq('a', 'a');
+ * // => true
+ *
+ * _.eq('a', Object('a'));
+ * // => false
+ *
+ * _.eq(NaN, NaN);
+ * // => true
+ */
+function eq(value, other) {
+  return value === other || (value !== value && other !== other);
+}
+
+var eq_1 = eq;
+
+/**
+ * Gets the index at which the `key` is found in `array` of key-value pairs.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {*} key The key to search for.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function assocIndexOf(array, key) {
+  var length = array.length;
+  while (length--) {
+    if (eq_1(array[length][0], key)) {
+      return length;
+    }
+  }
+  return -1;
+}
+
+var _assocIndexOf = assocIndexOf;
+
+/** Used for built-in method references. */
+var arrayProto = Array.prototype;
+
+/** Built-in value references. */
+var splice = arrayProto.splice;
+
+/**
+ * Removes `key` and its value from the list cache.
+ *
+ * @private
+ * @name delete
+ * @memberOf ListCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function listCacheDelete(key) {
+  var data = this.__data__,
+      index = _assocIndexOf(data, key);
+
+  if (index < 0) {
+    return false;
+  }
+  var lastIndex = data.length - 1;
+  if (index == lastIndex) {
+    data.pop();
+  } else {
+    splice.call(data, index, 1);
+  }
+  --this.size;
+  return true;
+}
+
+var _listCacheDelete = listCacheDelete;
+
+/**
+ * Gets the list cache value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf ListCache
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function listCacheGet(key) {
+  var data = this.__data__,
+      index = _assocIndexOf(data, key);
+
+  return index < 0 ? undefined : data[index][1];
+}
+
+var _listCacheGet = listCacheGet;
+
+/**
+ * Checks if a list cache value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf ListCache
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function listCacheHas(key) {
+  return _assocIndexOf(this.__data__, key) > -1;
+}
+
+var _listCacheHas = listCacheHas;
+
+/**
+ * Sets the list cache `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf ListCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the list cache instance.
+ */
+function listCacheSet(key, value) {
+  var data = this.__data__,
+      index = _assocIndexOf(data, key);
+
+  if (index < 0) {
+    ++this.size;
+    data.push([key, value]);
+  } else {
+    data[index][1] = value;
+  }
+  return this;
+}
+
+var _listCacheSet = listCacheSet;
+
+/**
+ * Creates an list cache object.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function ListCache(entries) {
+  var index = -1,
+      length = entries == null ? 0 : entries.length;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+// Add methods to `ListCache`.
+ListCache.prototype.clear = _listCacheClear;
+ListCache.prototype['delete'] = _listCacheDelete;
+ListCache.prototype.get = _listCacheGet;
+ListCache.prototype.has = _listCacheHas;
+ListCache.prototype.set = _listCacheSet;
+
+var _ListCache = ListCache;
+
+/* Built-in method references that are verified to be native. */
+var Map$1 = _getNative(_root, 'Map');
+
+var _Map = Map$1;
+
+/**
+ * Removes all key-value entries from the map.
+ *
+ * @private
+ * @name clear
+ * @memberOf MapCache
+ */
+function mapCacheClear() {
+  this.size = 0;
+  this.__data__ = {
+    'hash': new _Hash,
+    'map': new (_Map || _ListCache),
+    'string': new _Hash
+  };
+}
+
+var _mapCacheClear = mapCacheClear;
+
+/**
+ * Checks if `value` is suitable for use as unique object key.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
+ */
+function isKeyable(value) {
+  var type = typeof value;
+  return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
+    ? (value !== '__proto__')
+    : (value === null);
+}
+
+var _isKeyable = isKeyable;
+
+/**
+ * Gets the data for `map`.
+ *
+ * @private
+ * @param {Object} map The map to query.
+ * @param {string} key The reference key.
+ * @returns {*} Returns the map data.
+ */
+function getMapData(map, key) {
+  var data = map.__data__;
+  return _isKeyable(key)
+    ? data[typeof key == 'string' ? 'string' : 'hash']
+    : data.map;
+}
+
+var _getMapData = getMapData;
+
+/**
+ * Removes `key` and its value from the map.
+ *
+ * @private
+ * @name delete
+ * @memberOf MapCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function mapCacheDelete(key) {
+  var result = _getMapData(this, key)['delete'](key);
+  this.size -= result ? 1 : 0;
+  return result;
+}
+
+var _mapCacheDelete = mapCacheDelete;
+
+/**
+ * Gets the map value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf MapCache
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function mapCacheGet(key) {
+  return _getMapData(this, key).get(key);
+}
+
+var _mapCacheGet = mapCacheGet;
+
+/**
+ * Checks if a map value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf MapCache
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function mapCacheHas(key) {
+  return _getMapData(this, key).has(key);
+}
+
+var _mapCacheHas = mapCacheHas;
+
+/**
+ * Sets the map `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf MapCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the map cache instance.
+ */
+function mapCacheSet(key, value) {
+  var data = _getMapData(this, key),
+      size = data.size;
+
+  data.set(key, value);
+  this.size += data.size == size ? 0 : 1;
+  return this;
+}
+
+var _mapCacheSet = mapCacheSet;
+
+/**
+ * Creates a map cache object to store key-value pairs.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function MapCache(entries) {
+  var index = -1,
+      length = entries == null ? 0 : entries.length;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+// Add methods to `MapCache`.
+MapCache.prototype.clear = _mapCacheClear;
+MapCache.prototype['delete'] = _mapCacheDelete;
+MapCache.prototype.get = _mapCacheGet;
+MapCache.prototype.has = _mapCacheHas;
+MapCache.prototype.set = _mapCacheSet;
+
+var _MapCache = MapCache;
+
+/** Error message constants. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/**
+ * Creates a function that memoizes the result of `func`. If `resolver` is
+ * provided, it determines the cache key for storing the result based on the
+ * arguments provided to the memoized function. By default, the first argument
+ * provided to the memoized function is used as the map cache key. The `func`
+ * is invoked with the `this` binding of the memoized function.
+ *
+ * **Note:** The cache is exposed as the `cache` property on the memoized
+ * function. Its creation may be customized by replacing the `_.memoize.Cache`
+ * constructor with one whose instances implement the
+ * [`Map`](http://ecma-international.org/ecma-262/7.0/#sec-properties-of-the-map-prototype-object)
+ * method interface of `clear`, `delete`, `get`, `has`, and `set`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to have its output memoized.
+ * @param {Function} [resolver] The function to resolve the cache key.
+ * @returns {Function} Returns the new memoized function.
+ * @example
+ *
+ * var object = { 'a': 1, 'b': 2 };
+ * var other = { 'c': 3, 'd': 4 };
+ *
+ * var values = _.memoize(_.values);
+ * values(object);
+ * // => [1, 2]
+ *
+ * values(other);
+ * // => [3, 4]
+ *
+ * object.a = 2;
+ * values(object);
+ * // => [1, 2]
+ *
+ * // Modify the result cache.
+ * values.cache.set(object, ['a', 'b']);
+ * values(object);
+ * // => ['a', 'b']
+ *
+ * // Replace `_.memoize.Cache`.
+ * _.memoize.Cache = WeakMap;
+ */
+function memoize(func, resolver) {
+  if (typeof func != 'function' || (resolver != null && typeof resolver != 'function')) {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  var memoized = function() {
+    var args = arguments,
+        key = resolver ? resolver.apply(this, args) : args[0],
+        cache = memoized.cache;
+
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    var result = func.apply(this, args);
+    memoized.cache = cache.set(key, result) || cache;
+    return result;
+  };
+  memoized.cache = new (memoize.Cache || _MapCache);
+  return memoized;
+}
+
+// Expose `MapCache`.
+memoize.Cache = _MapCache;
+
+var memoize_1 = memoize;
+
+/** Used as the maximum memoize cache size. */
+var MAX_MEMOIZE_SIZE = 500;
+
+/**
+ * A specialized version of `_.memoize` which clears the memoized function's
+ * cache when it exceeds `MAX_MEMOIZE_SIZE`.
+ *
+ * @private
+ * @param {Function} func The function to have its output memoized.
+ * @returns {Function} Returns the new memoized function.
+ */
+function memoizeCapped(func) {
+  var result = memoize_1(func, function(key) {
+    if (cache.size === MAX_MEMOIZE_SIZE) {
+      cache.clear();
+    }
+    return key;
+  });
+
+  var cache = result.cache;
+  return result;
+}
+
+var _memoizeCapped = memoizeCapped;
+
+/** Used to match property names within property paths. */
+var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
+
+/** Used to match backslashes in property paths. */
+var reEscapeChar = /\\(\\)?/g;
+
+/**
+ * Converts `string` to a property path array.
+ *
+ * @private
+ * @param {string} string The string to convert.
+ * @returns {Array} Returns the property path array.
+ */
+var stringToPath = _memoizeCapped(function(string) {
+  var result = [];
+  if (string.charCodeAt(0) === 46 /* . */) {
+    result.push('');
+  }
+  string.replace(rePropName, function(match, number, quote, subString) {
+    result.push(quote ? subString.replace(reEscapeChar, '$1') : (number || match));
+  });
+  return result;
+});
+
+var _stringToPath = stringToPath;
+
+/**
+ * A specialized version of `_.map` for arrays without support for iteratee
+ * shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the new mapped array.
+ */
+function arrayMap(array, iteratee) {
+  var index = -1,
+      length = array == null ? 0 : array.length,
+      result = Array(length);
+
+  while (++index < length) {
+    result[index] = iteratee(array[index], index, array);
+  }
+  return result;
+}
+
+var _arrayMap = arrayMap;
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = _Symbol ? _Symbol.prototype : undefined,
+    symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+/**
+ * The base implementation of `_.toString` which doesn't convert nullish
+ * values to empty strings.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+function baseToString(value) {
+  // Exit early for strings to avoid a performance hit in some environments.
+  if (typeof value == 'string') {
+    return value;
+  }
+  if (isArray_1(value)) {
+    // Recursively convert values (susceptible to call stack limits).
+    return _arrayMap(value, baseToString) + '';
+  }
+  if (isSymbol_1(value)) {
+    return symbolToString ? symbolToString.call(value) : '';
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+var _baseToString = baseToString;
+
+/**
+ * Converts `value` to a string. An empty string is returned for `null`
+ * and `undefined` values. The sign of `-0` is preserved.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
+ * @example
+ *
+ * _.toString(null);
+ * // => ''
+ *
+ * _.toString(-0);
+ * // => '-0'
+ *
+ * _.toString([1, 2, 3]);
+ * // => '1,2,3'
+ */
+function toString(value) {
+  return value == null ? '' : _baseToString(value);
+}
+
+var toString_1 = toString;
+
+/**
+ * Casts `value` to a path array if it's not one.
+ *
+ * @private
+ * @param {*} value The value to inspect.
+ * @param {Object} [object] The object to query keys on.
+ * @returns {Array} Returns the cast property path array.
+ */
+function castPath(value, object) {
+  if (isArray_1(value)) {
+    return value;
+  }
+  return _isKey(value, object) ? [value] : _stringToPath(toString_1(value));
+}
+
+var _castPath = castPath;
+
+/** Used as references for various `Number` constants. */
+var INFINITY$1 = 1 / 0;
+
+/**
+ * Converts `value` to a string key if it's not a string or symbol.
+ *
+ * @private
+ * @param {*} value The value to inspect.
+ * @returns {string|symbol} Returns the key.
+ */
+function toKey(value) {
+  if (typeof value == 'string' || isSymbol_1(value)) {
+    return value;
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY$1) ? '-0' : result;
+}
+
+var _toKey = toKey;
+
+/**
+ * The base implementation of `_.get` without support for default values.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path of the property to get.
+ * @returns {*} Returns the resolved value.
+ */
+function baseGet(object, path) {
+  path = _castPath(path, object);
+
+  var index = 0,
+      length = path.length;
+
+  while (object != null && index < length) {
+    object = object[_toKey(path[index++])];
+  }
+  return (index && index == length) ? object : undefined;
+}
+
+var _baseGet = baseGet;
+
+/**
+ * Gets the value at `path` of `object`. If the resolved value is
+ * `undefined`, the `defaultValue` is returned in its place.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.7.0
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path of the property to get.
+ * @param {*} [defaultValue] The value returned for `undefined` resolved values.
+ * @returns {*} Returns the resolved value.
+ * @example
+ *
+ * var object = { 'a': [{ 'b': { 'c': 3 } }] };
+ *
+ * _.get(object, 'a[0].b.c');
+ * // => 3
+ *
+ * _.get(object, ['a', '0', 'b', 'c']);
+ * // => 3
+ *
+ * _.get(object, 'a.b.c', 'default');
+ * // => 'default'
+ */
+function get(object, path, defaultValue) {
+  var result = object == null ? undefined : _baseGet(object, path);
+  return result === undefined ? defaultValue : result;
+}
+
+var get_1 = get;
+
+var defualtFormatString = function defualtFormatString(val) {
+  return val;
+};
+var getInterpolate = function getInterpolate(structure) {
+  var interpolate = function interpolate(text, formatString) {
+    if (formatString === void 0) {
+      formatString = defualtFormatString;
+    }
+    var replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, function (match, keys) {
+      var value = get_1(structure, keys);
+      if (formatString) value = formatString(value);
+      return value !== undefined ? value : match;
+    });
+    return replacedText;
+  };
+  return interpolate;
+};
+
+var getPositiveDateDiffInSec = function getPositiveDateDiffInSec(date1, date2) {
+  return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
+};
+function formatTimeStamp(targetDate) {
+  var durationInSeconds = getPositiveDateDiffInSec(new Date(), targetDate);
+  var days = Math.floor(durationInSeconds / (60 * 60 * 24));
+  var hours = Math.floor(durationInSeconds % (60 * 60 * 24) / (60 * 60));
+  var minutes = Math.floor(durationInSeconds % (60 * 60) / 60);
+  var seconds = durationInSeconds % 60;
+  var parts = [];
+  if (days > 0) {
+    parts.push(days + " day" + (days > 1 ? 's' : ''));
+  }
+  if (hours > 0) {
+    parts.push(hours + " hour" + (hours > 1 ? 's' : ''));
+  }
+  if (minutes > 0) {
+    parts.push(minutes + " minute" + (minutes > 1 ? 's' : ''));
+  }
+  if (seconds > 0) {
+    parts.push(seconds + " second" + (seconds > 1 ? 's' : ''));
+  }
+  if (parts.length === 0) {
+    return '0 sec';
+  }
+  if (parts.length === 1) {
+    return parts[0];
+  }
+  var lastPart = parts.pop();
+  var formattedDuration = parts.join(' ') + (" and " + lastPart);
+  return formattedDuration;
+}
+var useCountdown = function useCountdown(_ref) {
+  var onZero = _ref.onZero,
+    initialTimestamp = _ref.initialTimestamp,
+    interpolate = _ref.interpolate;
+  var _useLogging = useLogging(),
+    error = _useLogging.error;
+  var _useState = useState(initialTimestamp || null),
+    timestamp = _useState[0],
+    setTimeStamp = _useState[1];
+  var _useState2 = useState(''),
+    countdown = _useState2[0],
+    setCountdown = _useState2[1];
+  var _useState3 = useState(),
+    intId = _useState3[0],
+    setIntId = _useState3[1];
+  useEffect(function () {
+    if (timestamp === null) return;
+    var id = setInterval(function () {
+      var result = formatTimeStamp(new Date(timestamp));
+      setCountdown(result);
+    }, 1000);
+    setIntId(id);
+    return function () {
+      return clearInterval(id);
+    };
+  }, [timestamp]);
+  useEffect(function () {
+    if (!onZero) return;
+    if (timestamp === null) return;
+    var currentDate = new Date();
+    var diff = getPositiveDateDiffInSec(currentDate, new Date(timestamp));
+    if (diff <= 0) {
+      onZero();
+      clearInterval(intId);
+    }
+  }, [onZero, timestamp, intId]);
+  var interpolatefunc = useMemo(function () {
+    return getInterpolate(interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure);
+  }, [interpolate]);
+  var formattedCountdown = useMemo(function () {
+    if (!interpolate) {
+      error('No interpolation provided to timer. Rendering just countdown.');
+      return countdown;
+    }
+    if (!interpolatefunc) {
+      error("interpolatefunc couldn't be created. Rendering just countdown.");
+      return countdown;
+    }
+    if (!(interpolate !== null && interpolate !== void 0 && interpolate.text)) {
+      error('No text provided to timer interpolation. Rendering just countdown.');
+      return countdown;
+    }
+    var formatVal = function formatVal(val) {
+      return formatTimeStamp(new Date(val));
+    };
+    var interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
+    return interpoaltedVal;
+  }, [countdown, interpolate, interpolatefunc]);
+  return {
+    countdown: countdown,
+    setTimeStamp: setTimeStamp,
+    formattedCountdown: formattedCountdown
+  };
+};
+
+var resetPad = function resetPad() {
+  document.body.style.paddingTop = 'inherit';
+};
+var Banner = function Banner(_ref) {
+  var _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger;
+  var container = useRef(null);
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useState = useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useState2 = useState(false),
+    hasFired = _useState2[0],
+    setHasFired = _useState2[1];
+  var brand = React__default.useMemo(function () {
+    return getBrand();
+  }, []);
+  useEffect(function () {
+    if (!open) return;
+    if (hasFired) return;
+    try {
+      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+        seenTriggerIDs: [trigger.id]
+      }).then(log);
+    } catch (e) {
+      error(e);
+    }
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.invocation,
+      triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
+      brand: brand
+    });
+    setHasFired(true);
+  }, [open]);
+  var handleClickCallToAction = function handleClickCallToAction(e) {
+    var _trigger$data, _trigger$data2;
+    e.preventDefault();
+    trackEvent('user_clicked_button', trigger);
+    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    setOpen(false);
+    resetPad();
+  };
+  var handleClose = function handleClose() {
+    trackEvent('user_closed_trigger', trigger);
+    removeActiveTrigger(trigger.id);
+    setOpen(false);
+    resetPad();
+  };
+  var _useCountdown = useCountdown({
+      onZero: handleClose,
+      initialTimestamp: new Date(((_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.countdownEndTime) || ''),
+      interpolate: {
+        text: (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.marketingText,
+        structure: trigger.data
+      }
+    }),
+    formattedCountdown = _useCountdown.formattedCountdown;
+  var interpolate = React__default.useMemo(function () {
+    return getInterpolate(trigger.data || {});
+  }, [trigger.data]);
+  useEffect(function () {
+    var _container$current;
+    var bannerHeight = (_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientHeight;
+    document.body.style.paddingTop = bannerHeight + "px";
+    return resetPad;
+  }, [container, formattedCountdown]);
+  if (!open) return null;
+  if (!formattedCountdown) return null;
+  return React__default.createElement("div", {
+    ref: container,
+    style: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      background: 'linear-gradient(90deg, rgba(200,41,223,1) 0%, #1f62ff 100%)',
+      display: 'flex',
+      alignItems: 'center'
+    }
+  }, React__default.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      maxWidth: '1000px',
+      margin: '0 auto'
+    }
+  }, React__default.createElement("p", {
+    style: {
+      lineHeight: '30px',
+      margin: '10px',
+      color: 'white',
+      fontWeight: 600
+    }
+  }, formattedCountdown), React__default.createElement("button", {
+    onClick: handleClickCallToAction,
+    style: {
+      border: 'none',
+      color: 'white',
+      backgroundColor: '#EA3385',
+      padding: '5px 10px',
+      margin: '10px 0',
+      borderRadius: '5px',
+      cursor: 'pointer'
+    }
+  }, interpolate(((_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText) || ''))),  React__default.createElement(CloseButton, {
+    onClick: handleClose,
+    style: {
+      background: 'transparent',
+      color: 'white'
+    }
+  }));
+};
+var TriggerBanner = function TriggerBanner(_ref2) {
+  var trigger = _ref2.trigger;
+  return ReactDOM.createPortal(React__default.createElement(Banner, {
+    trigger: trigger
+  }), document.body);
+};
+
 var clientHandlers = [{
   id: 'modal_v1',
   behaviour: 'BEHAVIOUR_MODAL',
@@ -1322,10 +3087,44 @@ var clientHandlers = [{
       trigger: trigger
     });
   }
+}, {
+  id: 'banner_v1',
+  behaviour: 'BEHAVIOUR_BANNER',
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerBanner, {
+      trigger: trigger
+    });
+  }
 }];
 
 var queryClient = new QueryClient();
 var cookieAccountJWT = 'b2c_token';
+var useConsentCheck = function useConsentCheck(consent, consentCallback) {
+  var _useState = useState(consent),
+    consentGiven = _useState[0],
+    setConsentGiven = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  useEffect(function () {
+    if (consent) {
+      setConsentGiven(consent);
+      return;
+    }
+    log('Fingerprint Widget Consent: ', consent);
+    if (!consentCallback) return;
+    var consentGivenViaCallback = consentCallback();
+    var interval = setInterval(function () {
+      setConsentGiven(consent);
+    }, 1000);
+    if (consentGivenViaCallback) {
+      clearInterval(interval);
+    }
+    return function () {
+      return clearInterval(interval);
+    };
+  }, [consentCallback, consent]);
+  return consentGiven;
+};
 var FingerprintProvider = function FingerprintProvider(_ref) {
   var appId = _ref.appId,
     children = _ref.children,
@@ -1340,49 +3139,25 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
     _ref$idleTriggers = _ref.idleTriggers,
     idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers,
+    _ref$pageLoadTriggers = _ref.pageLoadTriggers,
+    pageLoadTriggers = _ref$pageLoadTriggers === void 0 ? true : _ref$pageLoadTriggers,
     config = _ref.config;
-  var _useState = useState(consent),
-    consentGiven = _useState[0],
-    setConsentGiven = _useState[1];
   var _useState2 = useState(false),
     booted = _useState2[0],
     setBooted = _useState2[1];
   var _useState3 = useState(defaultHandlers || clientHandlers),
     handlers = _useState3[0],
     setHandlers = _useState3[1];
-  var registerHandler = React__default.useCallback(function (trigger) {
+  var consentGiven = useConsentCheck(consent, consentCallback);
+  var addAnotherHandler = React__default.useCallback(function (trigger) {
     setHandlers(function (handlers) {
       return [].concat(handlers, [trigger]);
     });
   }, [setHandlers]);
   useEffect(function () {
-    if (consent) {
-      setConsentGiven(consent);
-      return;
-    }
-    console.log('Fingerprint Widget Consent: ', consent);
-    if (!consentCallback) return;
-    var consentGivenViaCallback = consentCallback();
-    var interval = setInterval(function () {
-      setConsentGiven(consent);
-    }, 1000);
-    if (consentGivenViaCallback) {
-      clearInterval(interval);
-    }
-    return function () {
-      return clearInterval(interval);
-    };
-  }, [consentCallback, consent]);
-  useEffect(function () {
-    if (!appId) {
-      throw new Error('C&M Fingerprint: appId is required');
-    }
-    if (booted) {
-      return;
-    }
-    if (!consentGiven) {
-      return;
-    }
+    if (!appId) throw new Error('C&M Fingerprint: appId is required');
+    if (booted) return;
+    if (!consentGiven) return;
     var performBoot = function performBoot() {
       try {
         setBooted(true);
@@ -1407,8 +3182,8 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     value: {
       appId: appId,
       booted: booted,
-      currentTrigger: {},
-      registerHandler: registerHandler,
+      currentTrigger: null,
+      registerHandler: addAnotherHandler,
       trackEvent: function trackEvent() {
         alert('trackEvent not implemented');
       },
@@ -1420,6 +3195,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       },
       initialDelay: initialDelay,
       idleTriggers: idleTriggers,
+      pageLoadTriggers: pageLoadTriggers,
       exitIntentTriggers: exitIntentTriggers,
       config: config
     }
@@ -1436,9 +3212,10 @@ var defaultFingerprintState = {
   appId: '',
   booted: false,
   consent: false,
-  currentTrigger: {},
+  currentTrigger: null,
   exitIntentTriggers: false,
   idleTriggers: false,
+  pageLoadTriggers: false,
   initialDelay: 0,
   registerHandler: function registerHandler() {},
   trackEvent: function trackEvent() {},
@@ -1446,7 +3223,8 @@ var defaultFingerprintState = {
   unregisterHandler: function unregisterHandler() {},
   config: {
     idleDelay: undefined,
-    trackIdleOnDesktop: false
+    triggerCooldown: 60 * 1000,
+    exitIntentDelay: 0
   }
 };
 var FingerprintContext = createContext(_extends({}, defaultFingerprintState));
