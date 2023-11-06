@@ -1476,11 +1476,7 @@ var getBrand = function getBrand() {
   if (window.location.host.startsWith('localhost')) return 'C&M';
   if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-<<<<<<< HEAD
   return 'C&M';
-=======
-  return null;
->>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
 };
 
 var Modal = function Modal(_ref) {
