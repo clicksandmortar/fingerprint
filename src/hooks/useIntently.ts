@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 
+const selectorRateMs = 250
+
 /**
  * This file contains all Intently related logic and hooks.
  */
@@ -28,7 +30,7 @@ function useTrackIntentlyModal() {
 
       setIsVisible(true)
       clearInterval(id)
-    }, 1000)
+    }, selectorRateMs)
 
     return () => clearInterval(id)
   }, [setIsVisible])
