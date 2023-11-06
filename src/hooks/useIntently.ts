@@ -15,11 +15,13 @@ function useTrackIntentlyModal() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      const item = document.querySelector('smc-overlay-inner') as HTMLElement
+      const intentlyInnerOverlay = document.querySelector(
+        'smc-overlay-inner'
+      ) as HTMLElement
 
-      if (!item) {
+      if (!intentlyInnerOverlay) {
         log(
-          'useTrackIntentlyModal: Could not locate intently modal, not tracking performance.'
+          'useTrackIntentlyModal: Could not locate intently modal- intentlyInnerOverlay, not tracking performance.'
         )
         return
       }
