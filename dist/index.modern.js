@@ -215,11 +215,19 @@ const TriggerInverse = ({}) => {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
+<<<<<<< HEAD
 const useFingerprint = () => {
   return useContext(FingerprintContext);
 };
 
 const getModalStylesBySize = size => {
+=======
+var useFingerprint = function useFingerprint() {
+  return useContext(FingerprintContext);
+};
+
+var getModalStylesBySize = function getModalStylesBySize(size) {
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
   switch (size) {
     case 'small':
       {
@@ -228,6 +236,7 @@ const getModalStylesBySize = size => {
           maxWidth: 400,
           minHeight: 300
         };
+<<<<<<< HEAD
       }
     case 'medium':
       {
@@ -301,10 +310,1222 @@ const getModalButtonFlexPosition = position => {
         justifyContent: 'center'
       };
   }
+=======
+      }
+    case 'medium':
+      {
+        return {
+          width: '90%',
+          maxWidth: 800,
+          minHeight: 400
+        };
+      }
+    case 'large':
+      {
+        return {
+          width: '90%',
+          maxWidth: 1200,
+          minHeight: 400
+        };
+      }
+    case 'full':
+      {
+        return {
+          width: '100vw',
+          height: '100vh'
+        };
+      }
+  }
+};
+var getModalButtonStylesBySize = function getModalButtonStylesBySize(size) {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'medium':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'large':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'full':
+      {
+        return {
+          fontSize: '1.5rem',
+          padding: '0.5rem 1.2rem'
+        };
+      }
+  }
+};
+var getModalButtonFlexPosition = function getModalButtonFlexPosition(position) {
+  switch (position) {
+    case 'left':
+      return {
+        justifyContent: 'flex-start'
+      };
+    case 'right':
+      return {
+        justifyContent: 'flex-end'
+      };
+    case 'center':
+      return {
+        justifyContent: 'center'
+      };
+  }
+};
+var randomHash = 'f' + v4().split('-')[0];
+var prependClass = function prependClass(className) {
+  return "f" + randomHash + "-" + className;
+};
+
+var defaultElementSize = 'medium';
+var defaultButtonPosition = 'right';
+var CnMStandardModal = function CnMStandardModal(_ref) {
+  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
+  var elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var modalSizeStyle = getModalStylesBySize(elementSize);
+  var buttonSizeStyle = getModalButtonStylesBySize(elementSize);
+  useEffect(function () {
+    var cssToApply = "\n    :root {\n      --primary: white;\n      --secondary: grey;\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      width: 80%;\n      height: 500px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: var(--secondary);\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: var(--primary);\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: _extends({
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }, modalSizeStyle)
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("button", {
+    className: prependClass('close-button'),
+    onClick: handleCloseModal
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '20',
+    height: '20',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: '#000',
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  }))), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    style: _extends({
+      display: 'flex'
+    }, getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition))
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction,
+    style: buttonSizeStyle
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
+var closeButtonStyles = {
+  borderRadius: '100%',
+  backgroundColor: 'white',
+  width: '2rem',
+  border: 'none',
+  height: '2rem',
+  margin: 10,
+  color: 'black',
+  fontSize: '1.2rem',
+  fontWeight: 300,
+  cursor: 'pointer',
+  display: 'grid',
+  placeContent: 'center'
+};
+var CloseButton = function CloseButton(_ref) {
+  var onClick = _ref.onClick,
+    style = _ref.style;
+  var buttonStyle = _extends({}, closeButtonStyles, style);
+  return React__default.createElement("button", {
+    style: buttonStyle,
+    onClick: onClick
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '16',
+    height: '16',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: buttonStyle.color || buttonStyle.fill,
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  })));
+};
+
+var CurlyText = function CurlyText(_ref) {
+  var randomHash = _ref.randomHash,
+    text = _ref.text;
+  return React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    xmlnsXlink: 'http://www.w3.org/1999/xlink',
+    version: '1.1',
+    viewBox: '0 0 500 500',
+    className: 'f' + randomHash + '-curlyText'
+  }, React__default.createElement("defs", null, React__default.createElement("path", {
+    id: 'textPath',
+    d: 'M 0 500 A 175,100 0 0 1 500,500'
+  })), React__default.createElement("text", {
+    x: '0',
+    y: '0',
+    textAnchor: 'middle'
+  }, React__default.createElement("textPath", {
+    xlinkHref: '#textPath',
+    fill: 'white',
+    startOffset: '50%'
+  }, text)));
+};
+var BrownsModal = function BrownsModal(_ref2) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref2.trigger,
+    handleClickCallToAction = _ref2.handleClickCallToAction,
+    handleCloseModal = _ref2.handleCloseModal;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var randomHash = useMemo(function () {
+    return v4().split('-')[0];
+  }, []);
+  useEffect(function () {
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-close-button:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(css));
+    document.head.appendChild(styles);
+    setStylesLoaded(true);
+  }, [randomHash]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: 'f' + randomHash + '-overlay'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-modal',
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative',
+      height: 500
+    }
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-image-darken'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-close-button'
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement(CurlyText, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
+    randomHash: randomHash
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1
+    },
+    className: 'f' + randomHash + '--spacer'
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1,
+      marginTop: -150,
+      textTransform: 'uppercase',
+      textAlign: 'center',
+      letterSpacing: '2pt'
+    }
+  }, React__default.createElement("span", {
+    className: 'f' + randomHash + '-mainText'
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    className: 'f' + randomHash + '-buttonContainer'
+  }, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: 'f' + randomHash + '-cta',
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
+};
+
+var StonehouseModal = function StonehouseModal(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  useEffect(function () {
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      h1, h2, h3, h4, h5, h6, p, a, span {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem 0 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  var TwoForTenThing = function TwoForTenThing() {
+    return React__default.createElement("div", {
+      style: {
+        position: 'absolute',
+        left: '10%',
+        top: 250
+      }
+    }, React__default.createElement("div", {
+      className: prependClass("box-shadow"),
+      style: {
+        borderRadius: '100%',
+        height: 100,
+        width: 100,
+        border: '2px solid white',
+        display: 'grid',
+        placeContent: 'center',
+        transform: 'rotate(-10deg)'
+      }
+    }, React__default.createElement("h4", {
+      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
+    }, "2 for"), React__default.createElement("h1", {
+      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow'),
+      style: {
+        marginLeft: 15,
+        marginBottom: -10
+      }
+    }, "10*"), React__default.createElement("h6", {
+      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
+    }, "COCKTAILS")));
+  };
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", null, React__default.createElement(TwoForTenThing, null)), React__default.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'flex-end'
+    }
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
+var LoggingProvider = function LoggingProvider(_ref) {
+  var debug = _ref.debug,
+    children = _ref.children;
+  var log = function log() {
+    if (debug) {
+      var _console;
+      (_console = console).log.apply(_console, arguments);
+    }
+  };
+  var warn = function warn() {
+    if (debug) {
+      var _console2;
+      (_console2 = console).warn.apply(_console2, arguments);
+    }
+  };
+  var error = function error() {
+    if (debug) {
+      var _console3;
+      (_console3 = console).error.apply(_console3, arguments);
+    }
+  };
+  var info = function info() {
+    if (debug) {
+      var _console4;
+      (_console4 = console).info.apply(_console4, arguments);
+    }
+  };
+  useEffect(function () {
+    if (!debug) return;
+    log('LoggingProvider: In Debug Mode');
+  });
+  return React__default.createElement(LoggingContext.Provider, {
+    value: {
+      log: log,
+      warn: warn,
+      error: error,
+      info: info
+    }
+  }, children);
+};
+var LoggingContext = createContext({
+  log: function log() {},
+  warn: function warn() {},
+  error: function error() {},
+  info: function info() {}
+});
+var useLogging = function useLogging() {
+  return useContext(LoggingContext);
+};
+
+function getEnvVars() {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
+  var isDev = false;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
+
+var setCookie = function setCookie(name, value, expires) {
+  return Cookies.set(name, value, {
+    expires: expires,
+    sameSite: 'strict'
+  });
+};
+var getCookie = function getCookie(name) {
+  return Cookies.get(name);
+};
+var onCookieChanged = function onCookieChanged(callback, interval) {
+  if (interval === void 0) {
+    interval = 1000;
+  }
+  var lastCookie = document.cookie;
+  setInterval(function () {
+    var cookie = document.cookie;
+    if (cookie !== lastCookie) {
+      try {
+        callback({
+          oldValue: lastCookie,
+          newValue: cookie
+        });
+      } finally {
+        lastCookie = cookie;
+      }
+    }
+  }, interval);
+};
+
+var bootstrapSession = function bootstrapSession(_ref) {
+  var appId = _ref.appId,
+    setSession = _ref.setSession;
+  var session = {
+    firstVisit: undefined
+  };
+  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
+    setCookie('_cm', appId, 365);
+    setSession(session);
+    return;
+  }
+  if (getCookie('_cm') && getCookie('_cm') === appId) {
+    session.firstVisit = false;
+    setSession(session);
+  }
+};
+
+var uuidValidateV4 = function uuidValidateV4(uuid) {
+  return validate(uuid) && version(uuid) === 4;
+};
+
+var validVisitorId = function validVisitorId(id) {
+  var splitCookie = id.split('|');
+  return uuidValidateV4(splitCookie[0]);
+};
+
+var bootstrapVisitor = function bootstrapVisitor(_ref) {
+  var setVisitor = _ref.setVisitor,
+    session = _ref.session,
+    setSession = _ref.setSession;
+  var visitor = {
+    id: undefined
+  };
+  if (getCookie(cookieAccountJWT)) {
+    visitor.jwt = getCookie(cookieAccountJWT);
+  }
+  if (typeof window !== 'undefined') {
+    var urlParams = new URLSearchParams(window.location.search);
+    var vid = urlParams.get('v_id');
+    if (vid) {
+      visitor.id = vid;
+    }
+  }
+  if (!visitor.id && !getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
+    var visitorId = v4();
+    visitor.id = visitorId;
+  }
+  if (!visitor.id && getCookie('_cm_id')) {
+    var c = getCookie('_cm_id');
+    var _c$split = c.split('|'),
+      _visitorId = _c$split[0];
+    visitor.id = _visitorId;
+  }
+  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie('_cm_id')),
+    sessionId = _getSessionIdAndEndTi.sessionId,
+    endTime = _getSessionIdAndEndTi.endTime;
+  setCookie('_cm_id', visitor.id + "|" + sessionId + "|" + endTime.toISOString(), 365);
+  session.id = sessionId;
+  session.endTime = endTime;
+  setSession(session);
+  setVisitor(visitor);
+};
+var getSessionIdAndEndTime = function getSessionIdAndEndTime(cookieData) {
+  var t = new Date();
+  t.setMinutes(t.getMinutes() + 30);
+  var sessionId;
+  var endTime = t;
+  if (!cookieData || hasCookieValueExpired(cookieData)) {
+    sessionId = v4();
+  } else {
+    var c = cookieData;
+    var _c$split2 = c.split('|'),
+      sessId = _c$split2[1];
+    if (sessId === 'undefined' || sessId === undefined) {
+      sessId = v4();
+    }
+    sessionId = sessId;
+  }
+  return {
+    sessionId: sessionId,
+    endTime: endTime
+  };
+};
+var hasCookieValueExpired = function hasCookieValueExpired(cookieData) {
+  if (!cookieData) return true;
+  var cookieSplit = cookieData.split('|');
+  if (cookieSplit.length > 1) {
+    var timestampString = cookieSplit[cookieSplit.length - 1];
+    var expiryTimeEpoch = Date.parse(timestampString);
+    var expiryTime = new Date();
+    expiryTime.setTime(expiryTimeEpoch);
+    var n = new Date();
+    if (n > expiryTime) {
+      return true;
+    }
+  }
+  return false;
+};
+
+var VisitorProvider = function VisitorProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId,
+    booted = _useFingerprint.booted;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = useState({}),
+    session = _useState[0],
+    setSession = _useState[1];
+  var _useState2 = useState({}),
+    visitor = _useState2[0],
+    setVisitor = _useState2[1];
+  useEffect(function () {
+    if (!booted) {
+      log('VisitorProvider: not booted');
+      return;
+    }
+    log('VisitorProvider: booting');
+    var boot = function boot() {
+      try {
+        return Promise.resolve(bootstrapSession({
+          appId: appId,
+          setSession: setSession
+        })).then(function () {
+          return Promise.resolve(bootstrapVisitor({
+            setVisitor: setVisitor,
+            session: session,
+            setSession: setSession
+          })).then(function () {});
+        });
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    };
+    boot();
+    log('VisitorProvider: booted', session, visitor);
+  }, [appId, booted]);
+  var setVisitorData = React__default.useCallback(function (prop) {
+    setVisitor(_extends({}, visitor, prop));
+  }, [setVisitor]);
+  return React__default.createElement(VisitorContext.Provider, {
+    value: {
+      session: session,
+      visitor: visitor,
+      setVisitor: setVisitorData
+    }
+  }, children);
+};
+var VisitorContext = createContext({
+  session: {},
+  visitor: {},
+  setVisitor: function setVisitor() {
+    return console.error('VisitorContext: setVisitor not setup properly. Check your Context order.');
+  }
+});
+var useVisitor = function useVisitor() {
+  return useContext(VisitorContext);
+};
+
+var init = function init(cfg) {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+var trackEvent = function trackEvent(event, props, callback) {
+  return mixpanel.track(event, props, callback);
+};
+var MixpanelProvider = function MixpanelProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  useEffect(function () {
+    if (!appId || !visitor.id) {
+      return;
+    }
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  useEffect(function () {
+    if (!(visitor !== null && visitor !== void 0 && visitor.cohort)) {
+      log('Able to register user cohort, but none provided. ');
+      return;
+    }
+    registerUserData({
+      u_cohort: visitor.cohort
+    });
+  }, [visitor]);
+  var registerUserData = React__default.useCallback(function (properties) {
+    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
+    mixpanel.people.set(properties);
+  }, [log]);
+  return React__default.createElement(MixpanelContext.Provider, {
+    value: {
+      trackEvent: trackEvent,
+      registerUserData: registerUserData
+    }
+  }, children);
+};
+var MixpanelContext = createContext({
+  trackEvent: function trackEvent() {
+    return console.error('Mixpanel: trackEvent not setup properly. Check your Context order.');
+  },
+  registerUserData: function registerUserData() {
+    return console.error('Mixpanel: registerUserData not setup properly. Check your Context order.');
+  }
+});
+var useMixpanel = function useMixpanel() {
+  return useContext(MixpanelContext);
+};
+
+var headers = {
+  'Content-Type': 'application/json'
+};
+var hostname = getEnvVars().FINGERPRINT_API_HOSTNAME;
+var request = {
+  get: function (url, params) {
+    try {
+      return Promise.resolve(fetch(url + '?' + new URLSearchParams(params), {
+        method: 'GET',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  post: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  patch: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PATCH',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  put: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  "delete": function (url) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'DELETE',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+};
+
+var useHostname = function useHostname() {
+  var _window;
+  if (((_window = window) === null || _window === void 0 ? void 0 : _window.location) !== undefined) {
+    return window.location.hostname;
+  }
+  return '';
+};
+
+var useCollectorMutation = function useCollectorMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var requestHost = useHostname();
+  return useMutation(function (data) {
+    var _data$visitor;
+    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), _extends({}, data, {
+      hostname: requestHost
+    })).then(function (response) {
+      log('Collector API response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Collector API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: function onSuccess() {}
+  });
+};
+
+var useExitIntentDelay = function useExitIntentDelay(delay) {
+  if (delay === void 0) {
+    delay = 0;
+  }
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = useState(false),
+    hasDelayPassed = _useState[0],
+    setHasDelayPassed = _useState[1];
+  useEffect(function () {
+    log("Exit intents are suspended because of initiation delay of " + delay + "ms");
+    setTimeout(function () {
+      setHasDelayPassed(true);
+      log('Exit intents can be issued again.');
+    }, delay);
+  }, [delay]);
+  return {
+    hasDelayPassed: hasDelayPassed
+  };
+};
+
+var defaultTriggerCooldown = 60 * 1000;
+function useTriggerDelay(cooldownMs) {
+  if (cooldownMs === void 0) {
+    cooldownMs = defaultTriggerCooldown;
+  }
+  var _useState = useState(null),
+    lastTriggerTimeStamp = _useState[0],
+    setLastTriggerTimeStamp = _useState[1];
+  var startCooldown = React__default.useCallback(function () {
+    var currentTimeStamp = Number(new Date());
+    setLastTriggerTimeStamp(currentTimeStamp);
+  }, [setLastTriggerTimeStamp]);
+  var getRemainingCooldownMs = React__default.useCallback(function () {
+    if (!lastTriggerTimeStamp) return 0;
+    var currentTime = Number(new Date());
+    var remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
+    if (remainingMS < 0) return 0;
+    return remainingMS;
+  }, [lastTriggerTimeStamp, cooldownMs]);
+  var canNextTriggerOccur = React__default.useCallback(function () {
+    return getRemainingCooldownMs() === 0;
+  }, [getRemainingCooldownMs]);
+  return {
+    startCooldown: startCooldown,
+    canNextTriggerOccur: canNextTriggerOccur,
+    getRemainingCooldownMs: getRemainingCooldownMs
+  };
+}
+
+var getVisitorId = function getVisitorId() {
+  if (typeof window === 'undefined') return null;
+  var urlParams = new URLSearchParams(window.location.search);
+  var vid = urlParams.get('v_id');
+  return vid;
+};
+var hasVisitorIDInURL = function hasVisitorIDInURL() {
+  return getVisitorId() !== null;
+};
+
+var defaultIdleStatusDelay = 5 * 1000;
+function CollectorProvider(_ref) {
+  var children = _ref.children,
+    _ref$handlers = _ref.handlers,
+    handlers = _ref$handlers === void 0 ? [] : _ref$handlers;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId,
+    booted = _useFingerprint.booted,
+    initialDelay = _useFingerprint.initialDelay,
+    exitIntentTriggers = _useFingerprint.exitIntentTriggers,
+    idleTriggers = _useFingerprint.idleTriggers,
+    pageLoadTriggers = _useFingerprint.pageLoadTriggers,
+    config = _useFingerprint.config;
+  var configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor,
+    session = _useVisitor.session,
+    setVisitor = _useVisitor.setVisitor;
+  var _useTriggerDelay = useTriggerDelay(config === null || config === void 0 ? void 0 : config.triggerCooldown),
+    canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
+    startCooldown = _useTriggerDelay.startCooldown,
+    getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useExitIntent = useExitIntent({
+      cookie: {
+        key: '_cm_exit',
+        daysToExpire: 0
+      }
+    }),
+    registerHandler = _useExitIntent.registerHandler,
+    reRegisterExitIntent = _useExitIntent.resetState;
+  var getIdleStatusDelay = React__default.useCallback(function () {
+    var idleDelay = configIdleDelay || defaultIdleStatusDelay;
+    var cooldownDelay = getRemainingCooldownMs();
+    var delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log("Setting idle delay at " + delayAdjustedForCooldown + "ms (cooldown " + cooldownDelay + "ms + config.delay " + idleDelay + "ms)");
+    return delayAdjustedForCooldown;
+  }, [configIdleDelay, getRemainingCooldownMs, log]);
+  var _useState = useState(getIdleStatusDelay()),
+    idleTimeout = _useState[0],
+    setIdleTimeout = _useState[1];
+  var _useState2 = useState([]),
+    pageTriggers = _useState2[0],
+    setPageTriggers = _useState2[1];
+  var _useState3 = useState([]),
+    displayTriggers = _useState3[0],
+    setDisplayedTriggers = _useState3[1];
+  var _useState4 = useState(false),
+    intently = _useState4[0],
+    setIntently = _useState4[1];
+  var _useState5 = useState(new Map()),
+    foundWatchers = _useState5[0],
+    setFoundWatchers = _useState5[1];
+  var addPageTriggers = React__default.useCallback(function (triggers) {
+    setPageTriggers(function (prev) {
+      return uniqueBy([].concat(prev, triggers || []), 'id');
+    });
+  }, [setPageTriggers]);
+  useEffect(function () {
+    if (intently) return;
+    log('CollectorProvider: removing intently overlay');
+    var runningInterval = setInterval(function () {
+      var locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
+      Array.prototype.forEach.call(locatedIntentlyScript, function (node) {
+        node.parentNode.removeChild(node);
+        log('CollectorProvider: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, 100);
+    return function () {
+      clearInterval(runningInterval);
+    };
+  }, [intently, log]);
+  var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
+    var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return handler.behaviour === _trigger.behaviour;
+    });
+    if (!potentialHandler) return null;
+    return potentialHandler;
+  }, [handlers]);
+  var removeActiveTrigger = useCallback(function (id) {
+    log("CollectorProvider: removing id:" + id + " from displayTriggers");
+    var refreshedTriggers = displayTriggers.filter(function (triggerId) {
+      return triggerId !== id;
+    });
+    setDisplayedTriggers(refreshedTriggers);
+  }, [displayTriggers, log]);
+  var TriggerComponent = React__default.useCallback(function () {
+    if (!displayTriggers) return null;
+    var activeTriggers = pageTriggers.filter(function (trigger) {
+      return displayTriggers.includes(trigger.id);
+    });
+    if (!activeTriggers) {
+      error("No trigger found for displayTriggers", displayTriggers);
+      return null;
+    }
+    log('CollectorProvider: available handlers include: ', handlers);
+    log('CollectorProvider: activeTriggers to match are: ', activeTriggers);
+    log('CollectorProvider: attempting to show trigger', activeTriggers);
+    return activeTriggers.map(function (trigger) {
+      var _handler$invoke;
+      var handler = getHandlerForTrigger(trigger);
+      if (!handler) {
+        log('No handler found for trigger', trigger);
+        return null;
+      }
+      if (!handler.invoke) {
+        log('No invoke method found for handler', handler);
+        return null;
+      }
+      var potentialComponent = (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
+      if (potentialComponent && React__default.isValidElement(potentialComponent)) {
+        log('CollectorProvider: Potential component for trigger is valid. Mounting');
+        return potentialComponent;
+      }
+      log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
+      return null;
+    });
+  }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
+    var invokableTrigger = pageTriggers.find(function (trigger) {
+      return trigger.invocation === invocation;
+    });
+    if (invokableTrigger) setDisplayedTriggers(function (ts) {
+      return [].concat(ts, [invokableTrigger.id]);
+    });
+  }, [pageTriggers, setDisplayedTriggers]);
+  var fireIdleTrigger = useCallback(function () {
+    if (!idleTriggers) return;
+    log('CollectorProvider: attempting to fire idle time trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
+    startCooldown();
+  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
+  var _useExitIntentDelay = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay),
+    hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
+  var fireExitTrigger = React__default.useCallback(function () {
+    if (displayTriggers !== null && displayTriggers !== void 0 && displayTriggers.length) return;
+    if (!hasDelayPassed) {
+      log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
+    if (!canNextTriggerOccur()) {
+      log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. \n        I will attempt again when the same signal occurs after this passes.");
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
+    log('CollectorProvider: attempting to fire exit trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
+    startCooldown();
+  }, [displayTriggers === null || displayTriggers === void 0 ? void 0 : displayTriggers.length, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
+  useEffect(function () {
+    if (!exitIntentTriggers) return;
+    log('CollectorProvider: attempting to register exit trigger');
+    registerHandler({
+      id: 'clientTrigger',
+      handler: fireExitTrigger
+    });
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
+  var fireOnLoadTriggers = useCallback(function () {
+    if (!pageLoadTriggers) return;
+    if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
+    log('CollectorProvider: attempting to fire on-page-load trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
+  }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
+  useEffect(function () {
+    if (!booted) {
+      log('CollectorProvider: Not yet collecting, awaiting boot');
+      return;
+    }
+    var delay = setTimeout(function () {
+      if (!visitor.id) {
+        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
+        return;
+      }
+      log('CollectorProvider: collecting data');
+      if (hasVisitorIDInURL()) {
+        trackEvent('abandoned_journey_landing', {
+          from_email: true
+        });
+      }
+      var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+        var _cur$split = cur.split('='),
+          key = _cur$split[0],
+          value = _cur$split[1];
+        if (!key) return acc;
+        acc[key] = value;
+        return acc;
+      }, {});
+      var hash = window.location.hash.substring(3);
+      var hashParams = hash.split('&').reduce(function (result, item) {
+        var parts = item.split('=');
+        result[parts[0]] = parts[1];
+        return result;
+      }, {});
+      if (hashParams.id_token) {
+        log('CollectorProvider: user logged in event fired');
+        trackEvent('user_logged_in', {});
+        collect({
+          appId: appId,
+          visitor: visitor,
+          sessionId: session === null || session === void 0 ? void 0 : session.id,
+          account: {
+            token: hashParams.id_token
+          }
+        }).then(function (response) {
+          try {
+            return Promise.resolve(response.json()).then(function (payload) {
+              log('Sent login collector data, retrieved:', payload);
+            });
+          } catch (e) {
+            return Promise.reject(e);
+          }
+        })["catch"](function (err) {
+          error('failed to store collected data', err);
+        });
+      }
+      collect({
+        appId: appId,
+        visitor: visitor,
+        sessionId: session === null || session === void 0 ? void 0 : session.id,
+        page: {
+          url: window.location.href,
+          path: window.location.pathname,
+          title: document.title,
+          params: params
+        },
+        referrer: {
+          url: document.referrer,
+          title: '',
+          utm: {
+            source: params === null || params === void 0 ? void 0 : params.utm_source,
+            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+            term: params === null || params === void 0 ? void 0 : params.utm_term,
+            content: params === null || params === void 0 ? void 0 : params.utm_content
+          }
+        }
+      }).then(function (response) {
+        try {
+          if (response.status === 204) {
+            setIntently(true);
+            return Promise.resolve();
+          }
+          return Promise.resolve(response.json()).then(function (payload) {
+            log('Sent collector data, retrieved:', payload);
+            setIdleTimeout(getIdleStatusDelay());
+            addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+            var cohort = payload.intently ? 'intently' : 'fingerprint';
+            setVisitor({
+              cohort: cohort
+            });
+            if (!payload.intently) {
+              log('CollectorProvider: user is in Fingerprint cohort');
+              setIntently(false);
+            } else {
+              log('CollectorProvider: user is in Intently cohort');
+              setIntently(true);
+            }
+          });
+        } catch (e) {
+          return Promise.reject(e);
+        }
+      })["catch"](function (err) {
+        error('failed to store collected data', err);
+      });
+      log('CollectorProvider: collected data');
+    }, initialDelay);
+    return function () {
+      clearTimeout(delay);
+    };
+  }, [appId, booted, collect, error, setVisitor, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id, fireOnLoadTriggers, addPageTriggers]);
+  var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
+    var intervalId = setInterval(function () {
+      var inputs = document.querySelectorAll(configuredSelector);
+      var found = false;
+      inputs.forEach(function (element) {
+        if (configuredSearch === '' && window.getComputedStyle(element).display !== 'none') {
+          found = true;
+        } else if (element.textContent === configuredSearch) {
+          found = true;
+        }
+        if (found && !foundWatchers[configuredSelector]) {
+          trackEvent('booking_complete', {});
+          foundWatchers[configuredSelector] = true;
+          setFoundWatchers(foundWatchers);
+          collect({
+            appId: appId,
+            visitor: visitor,
+            sessionId: session === null || session === void 0 ? void 0 : session.id,
+            elements: [{
+              path: window.location.pathname,
+              selector: configuredSelector
+            }]
+          }).then(function (response) {
+            try {
+              return Promise.resolve(response.json()).then(function (payload) {
+                log('Sent collector data, retrieved:', payload);
+                setIdleTimeout(getIdleStatusDelay());
+                addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+              });
+            } catch (e) {
+              return Promise.reject(e);
+            }
+          })["catch"](function (err) {
+            error('failed to store collected data', err);
+          });
+          clearInterval(intervalId);
+        }
+      });
+    }, 500);
+    return intervalId;
+  }, [appId, collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+  useEffect(function () {
+    if (!visitor.id) return;
+    var intervalIds = [registerWatcher('.stage-5', '')];
+    return function () {
+      intervalIds.forEach(function (intervalId) {
+        return clearInterval(intervalId);
+      });
+    };
+  }, [registerWatcher, visitor]);
+  var setTrigger = React__default.useCallback(function (trigger) {
+    log('CollectorProvider: manually setting trigger', trigger);
+    addPageTriggers([trigger]);
+    setDisplayedTriggerByInvocation(trigger.invocation);
+  }, [log, setDisplayedTriggerByInvocation, addPageTriggers]);
+  var collectorContextVal = React__default.useMemo(function () {
+    return {
+      addPageTriggers: addPageTriggers,
+      removeActiveTrigger: removeActiveTrigger,
+      setTrigger: setTrigger,
+      trackEvent: trackEvent
+    };
+  }, [addPageTriggers, removeActiveTrigger, setTrigger, trackEvent]);
+  useEffect(function () {
+    fireOnLoadTriggers();
+  }, [fireOnLoadTriggers]);
+  return React__default.createElement(IdleTimerProvider, {
+    timeout: idleTimeout,
+    onPresenceChange: function onPresenceChange(presence) {
+      log('presence changed', presence);
+    },
+    onIdle: fireIdleTrigger
+  }, React__default.createElement(CollectorContext.Provider, {
+    value: collectorContextVal
+  }, children, React__default.createElement(TriggerComponent, null)));
+}
+var CollectorContext = createContext({
+  addPageTriggers: function addPageTriggers() {},
+  removeActiveTrigger: function removeActiveTrigger() {},
+  setTrigger: function setTrigger() {},
+  trackEvent: function trackEvent() {}
+});
+
+var useCollector = function useCollector() {
+  return useContext(CollectorContext);
+};
+
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+var getBrand = function getBrand() {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  return null;
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
 };
 const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;
 
+<<<<<<< HEAD
 const defaultElementSize = 'medium';
 const defaultButtonPosition = 'right';
 const CnMStandardModal = ({
@@ -1877,6 +3098,31 @@ const Modal = ({
     return getBrand();
   }, []);
   useEffect(() => {
+=======
+var Modal = function Modal(_ref) {
+  var trigger = _ref.trigger;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useState = useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  var _useState2 = useState(false),
+    hasFired = _useState2[0],
+    setHasFired = _useState2[1];
+  var brand = React__default.useMemo(function () {
+    return getBrand();
+  }, []);
+  useEffect(function () {
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     if (!open) return;
     if (hasFired) return;
     try {
@@ -1891,7 +3137,11 @@ const Modal = ({
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
       time: new Date().toISOString(),
+<<<<<<< HEAD
       brand
+=======
+      brand: brand
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     });
     setHasFired(true);
   }, [open]);
@@ -3195,11 +4445,24 @@ function get(object, path, defaultValue) {
 
 var get_1 = get;
 
+<<<<<<< HEAD
 const defualtFormatString = val => val;
 const getInterpolate = structure => {
   const interpolate = (text, formatString = defualtFormatString) => {
     const replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, (match, keys) => {
       let value = get_1(structure, keys);
+=======
+var defualtFormatString = function defualtFormatString(val) {
+  return val;
+};
+var getInterpolate = function getInterpolate(structure) {
+  var interpolate = function interpolate(text, formatString) {
+    if (formatString === void 0) {
+      formatString = defualtFormatString;
+    }
+    var replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, function (match, keys) {
+      var value = get_1(structure, keys);
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
       if (formatString) value = formatString(value);
       return value !== undefined ? value : match;
     });
@@ -3208,6 +4471,7 @@ const getInterpolate = structure => {
   return interpolate;
 };
 
+<<<<<<< HEAD
 const getPositiveDateDiffInSec = (date1, date2) => {
   return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
 };
@@ -3229,6 +4493,29 @@ function formatTimeStamp(targetDate) {
   }
   if (seconds > 0) {
     parts.push(`${seconds} second${seconds > 1 ? 's' : ''}`);
+=======
+var getPositiveDateDiffInSec = function getPositiveDateDiffInSec(date1, date2) {
+  return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
+};
+function formatTimeStamp(targetDate) {
+  var durationInSeconds = getPositiveDateDiffInSec(new Date(), targetDate);
+  var days = Math.floor(durationInSeconds / (60 * 60 * 24));
+  var hours = Math.floor(durationInSeconds % (60 * 60 * 24) / (60 * 60));
+  var minutes = Math.floor(durationInSeconds % (60 * 60) / 60);
+  var seconds = durationInSeconds % 60;
+  var parts = [];
+  if (days > 0) {
+    parts.push(days + " day" + (days > 1 ? 's' : ''));
+  }
+  if (hours > 0) {
+    parts.push(hours + " hour" + (hours > 1 ? 's' : ''));
+  }
+  if (minutes > 0) {
+    parts.push(minutes + " minute" + (minutes > 1 ? 's' : ''));
+  }
+  if (seconds > 0) {
+    parts.push(seconds + " second" + (seconds > 1 ? 's' : ''));
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
   }
   if (parts.length === 0) {
     return '0 sec';
@@ -3236,6 +4523,7 @@ function formatTimeStamp(targetDate) {
   if (parts.length === 1) {
     return parts[0];
   }
+<<<<<<< HEAD
   const lastPart = parts.pop();
   const formattedDuration = parts.join(' ') + ` and ${lastPart}`;
   return formattedDuration;
@@ -3265,13 +4553,57 @@ const useCountdown = ({
     if (timestamp === null) return;
     const currentDate = new Date();
     const diff = getPositiveDateDiffInSec(currentDate, new Date(timestamp));
+=======
+  var lastPart = parts.pop();
+  var formattedDuration = parts.join(' ') + (" and " + lastPart);
+  return formattedDuration;
+}
+var useCountdown = function useCountdown(_ref) {
+  var onZero = _ref.onZero,
+    initialTimestamp = _ref.initialTimestamp,
+    interpolate = _ref.interpolate;
+  var _useLogging = useLogging(),
+    error = _useLogging.error;
+  var _useState = useState(initialTimestamp || null),
+    timestamp = _useState[0],
+    setTimeStamp = _useState[1];
+  var _useState2 = useState(''),
+    countdown = _useState2[0],
+    setCountdown = _useState2[1];
+  var _useState3 = useState(),
+    intId = _useState3[0],
+    setIntId = _useState3[1];
+  useEffect(function () {
+    if (timestamp === null) return;
+    var id = setInterval(function () {
+      var result = formatTimeStamp(new Date(timestamp));
+      setCountdown(result);
+    }, 1000);
+    setIntId(id);
+    return function () {
+      return clearInterval(id);
+    };
+  }, [timestamp]);
+  useEffect(function () {
+    if (!onZero) return;
+    if (timestamp === null) return;
+    var currentDate = new Date();
+    var diff = getPositiveDateDiffInSec(currentDate, new Date(timestamp));
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     if (diff <= 0) {
       onZero();
       clearInterval(intId);
     }
   }, [onZero, timestamp, intId]);
+<<<<<<< HEAD
   const interpolatefunc = useMemo(() => getInterpolate(interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure), [interpolate]);
   const formattedCountdown = useMemo(() => {
+=======
+  var interpolatefunc = useMemo(function () {
+    return getInterpolate(interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure);
+  }, [interpolate]);
+  var formattedCountdown = useMemo(function () {
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     if (!interpolate) {
       error('No interpolation provided to timer. Rendering just countdown.');
       return countdown;
@@ -3284,6 +4616,7 @@ const useCountdown = ({
       error('No text provided to timer interpolation. Rendering just countdown.');
       return countdown;
     }
+<<<<<<< HEAD
     const formatVal = val => formatTimeStamp(new Date(val));
     const interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
     return interpoaltedVal;
@@ -3329,6 +4662,53 @@ const Banner = ({
     if (hasFired) return;
     try {
       request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+=======
+    var formatVal = function formatVal(val) {
+      return formatTimeStamp(new Date(val));
+    };
+    var interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
+    return interpoaltedVal;
+  }, [countdown, interpolate, interpolatefunc]);
+  return {
+    countdown: countdown,
+    setTimeStamp: setTimeStamp,
+    formattedCountdown: formattedCountdown
+  };
+};
+
+var resetPad = function resetPad() {
+  document.body.style.paddingTop = 'inherit';
+};
+var Banner = function Banner(_ref) {
+  var _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger;
+  var container = useRef(null);
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useState = useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useState2 = useState(false),
+    hasFired = _useState2[0],
+    setHasFired = _useState2[1];
+  var brand = React__default.useMemo(function () {
+    return getBrand();
+  }, []);
+  useEffect(function () {
+    if (!open) return;
+    if (hasFired) return;
+    try {
+      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
         seenTriggerIDs: [trigger.id]
       }).then(log);
     } catch (e) {
@@ -3339,11 +4719,19 @@ const Banner = ({
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
       time: new Date().toISOString(),
+<<<<<<< HEAD
       brand
     });
     setHasFired(true);
   }, [open]);
   const handleClickCallToAction = e => {
+=======
+      brand: brand
+    });
+    setHasFired(true);
+  }, [open]);
+  var handleClickCallToAction = function handleClickCallToAction(e) {
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     var _trigger$data, _trigger$data2;
     e.preventDefault();
     trackEvent('user_clicked_button', trigger);
@@ -3351,12 +4739,17 @@ const Banner = ({
     setOpen(false);
     resetPad();
   };
+<<<<<<< HEAD
   const handleClose = () => {
+=======
+  var handleClose = function handleClose() {
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
     resetPad();
   };
+<<<<<<< HEAD
   const {
     formattedCountdown
   } = useCountdown({
@@ -3372,6 +4765,24 @@ const Banner = ({
     var _container$current;
     const bannerHeight = (_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientHeight;
     document.body.style.paddingTop = `${bannerHeight}px`;
+=======
+  var _useCountdown = useCountdown({
+      onZero: handleClose,
+      initialTimestamp: new Date(((_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.countdownEndTime) || ''),
+      interpolate: {
+        text: (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.marketingText,
+        structure: trigger.data
+      }
+    }),
+    formattedCountdown = _useCountdown.formattedCountdown;
+  var interpolate = React__default.useMemo(function () {
+    return getInterpolate(trigger.data || {});
+  }, [trigger.data]);
+  useEffect(function () {
+    var _container$current;
+    var bannerHeight = (_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientHeight;
+    document.body.style.paddingTop = bannerHeight + "px";
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     return resetPad;
   }, [container, formattedCountdown]);
   if (!open) return null;
@@ -3421,15 +4832,24 @@ const Banner = ({
     }
   }));
 };
+<<<<<<< HEAD
 const TriggerBanner = ({
   trigger
 }) => {
+=======
+var TriggerBanner = function TriggerBanner(_ref2) {
+  var trigger = _ref2.trigger;
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
   return ReactDOM.createPortal(React__default.createElement(Banner, {
     trigger: trigger
   }), document.body);
 };
 
+<<<<<<< HEAD
 const clientHandlers = [{
+=======
+var clientHandlers = [{
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
   id: 'modal_v1',
   behaviour: 'BEHAVIOUR_MODAL',
   invoke: trigger => React__default.createElement(TriggerModal, {
@@ -3444,6 +4864,7 @@ const clientHandlers = [{
 }, {
   id: 'inverse_v1',
   behaviour: 'BEHAVIOUR_INVERSE_FLOW',
+<<<<<<< HEAD
   invoke: trigger => React__default.createElement(TriggerInverse, {
     trigger: trigger
   })
@@ -3463,19 +4884,51 @@ const useConsentCheck = (consent, consentCallback) => {
     log
   } = useLogging();
   useEffect(() => {
+=======
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerInverse, {
+      trigger: trigger
+    });
+  }
+}, {
+  id: 'banner_v1',
+  behaviour: 'BEHAVIOUR_BANNER',
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerBanner, {
+      trigger: trigger
+    });
+  }
+}];
+
+var queryClient = new QueryClient();
+var cookieAccountJWT = 'b2c_token';
+var useConsentCheck = function useConsentCheck(consent, consentCallback) {
+  var _useState = useState(consent),
+    consentGiven = _useState[0],
+    setConsentGiven = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  useEffect(function () {
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     if (consent) {
       setConsentGiven(consent);
       return;
     }
     log('Fingerprint Widget Consent: ', consent);
     if (!consentCallback) return;
+<<<<<<< HEAD
     const consentGivenViaCallback = consentCallback();
     const interval = setInterval(() => {
+=======
+    var consentGivenViaCallback = consentCallback();
+    var interval = setInterval(function () {
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
       setConsentGiven(consent);
     }, 1000);
     if (consentGivenViaCallback) {
       clearInterval(interval);
     }
+<<<<<<< HEAD
     return () => clearInterval(interval);
   }, [consentCallback, consent]);
   return consentGiven;
@@ -3507,6 +4960,54 @@ const FingerprintProvider = ({
     if (!consentGiven) return;
     const performBoot = async () => {
       setBooted(true);
+=======
+    return function () {
+      return clearInterval(interval);
+    };
+  }, [consentCallback, consent]);
+  return consentGiven;
+};
+var FingerprintProvider = function FingerprintProvider(_ref) {
+  var appId = _ref.appId,
+    children = _ref.children,
+    _ref$consent = _ref.consent,
+    consent = _ref$consent === void 0 ? false : _ref$consent,
+    consentCallback = _ref.consentCallback,
+    debug = _ref.debug,
+    defaultHandlers = _ref.defaultHandlers,
+    _ref$initialDelay = _ref.initialDelay,
+    initialDelay = _ref$initialDelay === void 0 ? 0 : _ref$initialDelay,
+    _ref$exitIntentTrigge = _ref.exitIntentTriggers,
+    exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
+    _ref$idleTriggers = _ref.idleTriggers,
+    idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers,
+    _ref$pageLoadTriggers = _ref.pageLoadTriggers,
+    pageLoadTriggers = _ref$pageLoadTriggers === void 0 ? true : _ref$pageLoadTriggers,
+    config = _ref.config;
+  var _useState2 = useState(false),
+    booted = _useState2[0],
+    setBooted = _useState2[1];
+  var _useState3 = useState(defaultHandlers || clientHandlers),
+    handlers = _useState3[0],
+    setHandlers = _useState3[1];
+  var consentGiven = useConsentCheck(consent, consentCallback);
+  var addAnotherHandler = React__default.useCallback(function (trigger) {
+    setHandlers(function (handlers) {
+      return [].concat(handlers, [trigger]);
+    });
+  }, [setHandlers]);
+  useEffect(function () {
+    if (!appId) throw new Error('C&M Fingerprint: appId is required');
+    if (booted) return;
+    if (!consentGiven) return;
+    var performBoot = function performBoot() {
+      try {
+        setBooted(true);
+        return Promise.resolve();
+      } catch (e) {
+        return Promise.reject(e);
+      }
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     };
     performBoot();
   }, [consentGiven]);
@@ -3522,11 +5023,19 @@ const FingerprintProvider = ({
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {
     value: {
+<<<<<<< HEAD
       appId,
       booted,
       currentTrigger: null,
       registerHandler: addAnotherHandler,
       trackEvent: () => {
+=======
+      appId: appId,
+      booted: booted,
+      currentTrigger: null,
+      registerHandler: addAnotherHandler,
+      trackEvent: function trackEvent() {
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
         alert('trackEvent not implemented');
       },
       trackPageView: () => {
@@ -3535,11 +5044,19 @@ const FingerprintProvider = ({
       unregisterHandler: () => {
         alert('unregisterHandler not implemented');
       },
+<<<<<<< HEAD
       initialDelay: _initialDelay,
       idleTriggers: _idleTriggers,
       pageLoadTriggers: _pageLoadTriggers,
       exitIntentTriggers: _exitIntentTriggers,
       config
+=======
+      initialDelay: initialDelay,
+      idleTriggers: idleTriggers,
+      pageLoadTriggers: pageLoadTriggers,
+      exitIntentTriggers: exitIntentTriggers,
+      config: config
+>>>>>>> fe36cc6f33925974c892866a543ea3f03897fdf4
     }
   }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
