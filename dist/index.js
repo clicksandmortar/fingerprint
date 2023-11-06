@@ -1059,6 +1059,86 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
+function useTrackIntentlyModal() {
+  var _useState = React.useState(false),
+    isVisible = _useState[0],
+    setIsVisible = _useState[1];
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  React.useEffect(function () {
+    var id = setInterval(function () {
+      var item = document.querySelector('smc-overlay-inner');
+      if (!item) {
+        log('useTrackIntentlyModal: Could not locate intently modal, not tracking performance.');
+        return;
+      }
+      log('useTrackIntentlyModal: Located Intently modal. Releasing the Kraken.');
+      setIsVisible(true);
+      clearInterval(id);
+    }, 1000);
+    return function () {
+      return clearInterval(id);
+    };
+  }, [setIsVisible]);
+  var getHandleTrackAction = function getHandleTrackAction(action) {
+    return function () {
+      log("useTrackIntentlyModal: user clicked " + action + " button");
+      trackEvent("intently__user_clicked_" + action + "_button", {});
+    };
+  };
+  React.useEffect(function () {
+    if (!isVisible) return;
+    var closeBtn = document.querySelector('[data-close-type="x_close"]');
+    var exitHandler = getHandleTrackAction('exit');
+    var ctaBtn = document.querySelector('smc-input-group > span');
+    var ctaHandler = getHandleTrackAction('CTA');
+    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
+    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
+    return function () {
+      ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
+      closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
+    };
+  }, [isVisible]);
+  return {
+    isVisible: isVisible,
+    setIsVisible: setIsVisible
+  };
+}
+var useRemoveIntently = function useRemoveIntently() {
+  var _useState2 = React.useState(false),
+    intently = _useState2[0],
+    setIntently = _useState2[1];
+  var _useLogging2 = useLogging(),
+    log = _useLogging2.log;
+  React.useEffect(function () {
+    if (intently) return;
+    log('useRemoveIntently: removing intently overlay');
+    var runningInterval = setInterval(function () {
+      var locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
+      Array.prototype.forEach.call(locatedIntentlyScript, function (node) {
+        node.parentNode.removeChild(node);
+        log('useRemoveIntently: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, 100);
+    return function () {
+      clearInterval(runningInterval);
+    };
+  }, [intently, log]);
+  return {
+    intently: intently,
+    setIntently: setIntently
+  };
+};
+function useIntently() {
+  useTrackIntentlyModal();
+  var intentlyState = useRemoveIntently();
+  return intentlyState;
+}
+
 var defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs) {
   if (cooldownMs === void 0) {
@@ -1151,32 +1231,16 @@ function CollectorProvider(_ref) {
   var _useState3 = React.useState([]),
     displayTriggers = _useState3[0],
     setDisplayedTriggers = _useState3[1];
-  var _useState4 = React.useState(false),
-    intently = _useState4[0],
-    setIntently = _useState4[1];
-  var _useState5 = React.useState(new Map()),
-    foundWatchers = _useState5[0],
-    setFoundWatchers = _useState5[1];
+  var _useIntently = useIntently(),
+    setIntently = _useIntently.setIntently;
+  var _useState4 = React.useState(new Map()),
+    foundWatchers = _useState4[0],
+    setFoundWatchers = _useState4[1];
   var addPageTriggers = React__default.useCallback(function (triggers) {
     setPageTriggers(function (prev) {
       return uniqueBy([].concat(prev, triggers || []), 'id');
     });
   }, [setPageTriggers]);
-  React.useEffect(function () {
-    if (intently) return;
-    log('CollectorProvider: removing intently overlay');
-    var runningInterval = setInterval(function () {
-      var locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
-      Array.prototype.forEach.call(locatedIntentlyScript, function (node) {
-        node.parentNode.removeChild(node);
-        log('CollectorProvider: successfully removed intently overlay');
-        clearInterval(runningInterval);
-      });
-    }, 100);
-    return function () {
-      clearInterval(runningInterval);
-    };
-  }, [intently, log]);
   var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
     var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
       return handler.behaviour === _trigger.behaviour;
@@ -1476,7 +1540,7 @@ var getBrand = function getBrand() {
   if (window.location.host.startsWith('localhost')) return 'C&M';
   if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return null;
+  return 'C&M';
 };
 
 var Modal = function Modal(_ref) {
