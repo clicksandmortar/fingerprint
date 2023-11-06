@@ -26,15 +26,24 @@ jobs:
           name: dist
           path: dist/
           retention-days: 7
+      - name: Configure AWS Credentials Staging
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::228243989488:role/ci/ci-fingerprint-upload
+          role-session-name: ci-fingerprint-upload
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Staging Deploy
+        working-directory: ./dist
+        run: |
+          aws s3 cp . s3://cam-cdn-fingerprint-script-staging-origin/ --recursive --exclude "*" --include="fingerprint.js" --content-type="text/javascript"
+          aws cloudfront create-invalidation --distribution-id E108OSBUN9XAH1 --paths "/*"
       - name: Configure AWS Credentials Production
-        if: github.ref == 'refs/heads/main'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::580831181531:role/ci/ci-fingerprint-upload
           role-session-name: ci-fingerprint-upload
           aws-region: ${{ vars.AWS_REGION }}
       - name: Production Deploy
-        if: github.ref == 'refs/heads/main'
         working-directory: ./dist
         run: |
           aws s3 cp . s3://cam-cdn-fingerprint-script-production-origin/ --recursive --exclude "*" --include="fingerprint.js" --content-type="text/javascript"
