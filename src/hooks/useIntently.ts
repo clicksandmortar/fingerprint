@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
+import { getBrand } from '../utils/brand'
 
-const selectorRateMs = 250
+const selectorRateMs = 100
 
 /**
  * This file contains all Intently related logic and hooks.
@@ -15,13 +16,28 @@ function useTrackIntentlyModal() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      const intentlyInnerOverlay = document.querySelector(
-        'smc-overlay-inner'
-      ) as HTMLElement
+      const intentlyOuterContainer = document.querySelector('smc-overlay-outer')
+
+      if (!intentlyOuterContainer) {
+        log("useTrackIntentlyModal: Intently container hasn't mounted yet...")
+        return
+      }
+
+      const isIntentlyOuterVisible =
+        window.getComputedStyle(intentlyOuterContainer).display === 'block'
+
+      if (!isIntentlyOuterVisible) {
+        log(
+          'useTrackIntentlyModal: Intently container has mounted, but not visible yet.'
+        )
+        return
+      }
+
+      const intentlyInnerOverlay = document.querySelector('smc-overlay-inner')
 
       if (!intentlyInnerOverlay) {
         log(
-          'useTrackIntentlyModal: Could not locate intently modal- intentlyInnerOverlay, not tracking performance.'
+          'useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.'
         )
         return
       }
@@ -31,6 +47,14 @@ function useTrackIntentlyModal() {
       )
 
       setIsVisible(true)
+      trackEvent('trigger_displayed', {
+        triggerId: 'Intently',
+        triggerType: 'INVOCATION_EXIT_INTENT',
+        triggerBehaviour: 'BEHAVIOUR_MODAL',
+        time: new Date().toISOString(),
+        brand: getBrand()
+      })
+
       clearInterval(id)
     }, selectorRateMs)
 
@@ -40,7 +64,7 @@ function useTrackIntentlyModal() {
   const getHandleTrackAction = (action: 'exit' | 'CTA') => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`)
 
-    trackEvent(`intently__user_clicked_${action}_button`, {})
+    trackEvent(`user_clicked_${action}_button`, {})
   }
 
   useEffect(() => {
@@ -48,6 +72,7 @@ function useTrackIntentlyModal() {
 
     const closeBtn = document.querySelector('[data-close-type="x_close"]')
     const exitHandler = getHandleTrackAction('exit')
+
     const ctaBtn = document.querySelector('smc-input-group > span')
     const ctaHandler = getHandleTrackAction('CTA')
 
@@ -94,7 +119,7 @@ const useRemoveIntently = () => {
 
         clearInterval(runningInterval)
       })
-    }, 100)
+    }, selectorRateMs)
 
     return () => {
       clearInterval(runningInterval)
