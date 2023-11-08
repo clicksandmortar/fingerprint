@@ -3074,6 +3074,18 @@ const BrownsModal = ({
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
 
+const primaryColor = `rgb(33,147,174)`;
+const secondaryColor = `#e0aa00`;
+const callToActionColor = 'rgb(235,63,43)';
+const mainGrey = 'rgb(70,70,70)';
+const scaleBg = scale => {
+  const imageWidth = 800;
+  const imageHeight = 700;
+  return {
+    height: imageHeight * scale,
+    width: imageWidth * scale
+  };
+};
 const StonehouseModal = ({
   trigger,
   handleClickCallToAction,
@@ -3098,13 +3110,9 @@ const StonehouseModal = ({
      
 
       :root {
-        --primary: white;
-        --secondary: #e0aa00;
         --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
       }
-      h1, h2, h3, h4, h5, h6, p, a, span {
-        line-height: 1.2;
-      }
+  
 
       .${prependClass('overlay')} {
         position: fixed;
@@ -3123,8 +3131,6 @@ const StonehouseModal = ({
       }
 
       .${prependClass('modal')} {
-        width: 80%;
-        height: 500px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -3134,6 +3140,8 @@ const StonehouseModal = ({
         align-items: center;
         justify-content: space-between;
         box-shadow: var(--text-shadow);
+        width: ${scaleBg(1).width}px;
+        height: ${scaleBg(1).height}px;
       }
 
       .${prependClass('gotham-bold')} {
@@ -3144,30 +3152,18 @@ const StonehouseModal = ({
         text-align: center;
       }
 
-      @media screen and (min-width: 768px) {
-        .${prependClass('modal')} {
-          max-width: 600px;
-        }
-      }
-
-      @media screen and (max-width: 768px) {
-        .${prependClass('modal')} {
-          width: 95vw;
-          max-width: 600px;
-        }
-      }
+  
 
       .${prependClass('main-text')} {
+        line-height: 1.2;
         flex: 1;
         font-family: 'Gotham Bold';
         font-weight: 500;
-        font-size: 3rem;
+        font-size: 4rem;
         font-style: normal;
         text-transform: uppercase;
         text-align: center;
         letter-spacing: 2pt;
-        fill: var(--secondary);
-        text-shadow: var(--text-shadow);
         max-width: 400px;
         margin-left: auto;
         margin-right: auto;
@@ -3178,36 +3174,37 @@ const StonehouseModal = ({
         display: flex;
         justify-content: center;
         flex-direction: column;
-        text-shadow: var(--text-shadow);
       }
 
       .${prependClass('sub-text')} {
+        line-height: 1;
         margin: auto;
         font-weight: 600;
         font-family: 'Gotham Bold';
-        font-size: 0.6rem;
+        font-size: 3.5rem;
+        color: ${secondaryColor};
         letter-spacing: 2pt;
-
         display: inline-block;
         text-align: center;
-        text-transform: uppercase;
       }
 
       .${prependClass('cta')} {
+        line-height: 1.2;
         font-family: 'Gotham Bold';
         cursor: pointer;
-        background-color: var(--secondary);
-        padding: 0.75rem 1rem 0 1rem;
+
+        background-color: ${callToActionColor};
         border-radius: 2px;
+        padding: 1.75rem 2rem 0.5rem 2rem;
         display: block;
         font-size: 1.3rem;
-        color: var(--primary);
+        color: white;
         text-align: center;
         text-transform: uppercase;
         max-width: 400px;
         margin: 0 auto;
         text-decoration: none;
-        box-shadow: 0.3rem 0.3rem white;
+        box-shadow: -2px 2px 8px black;
       }
 
       .${prependClass('cta:hover')} {
@@ -3226,14 +3223,14 @@ const StonehouseModal = ({
       }
       
 
-      .${prependClass('image-darken')} {
-        background: rgba(0, 0, 0, 0.1);
+      .${prependClass('image-container')} {
+
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         width: 100%;
-        padding: 2rem 1.5rem 1.5rem 1.5rem;
+        padding: 10rem 1.5rem 8rem 1.5rem;
       }
 
       .${prependClass('text-shadow')} {
@@ -3242,6 +3239,46 @@ const StonehouseModal = ({
 
       .${prependClass('box-shadow')} {
         box-shadow: var(--text-shadow);
+      }
+
+      @media screen and (max-width: 768px) {
+        .${prependClass('modal')} {
+          height: ${scaleBg(0.7).height}px;
+          width: ${scaleBg(0.7).width}px;
+        }
+        .${prependClass('main-text')}{
+          font-size: 3rem;
+        }
+        .${prependClass('sub-text')}{
+          font-size: 1.7rem;
+        }
+        .${prependClass('cta')}{
+          padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
+          font-size: 1rem;
+        }
+        .${prependClass('image-container')} {
+          padding: 8rem 1.5rem 6rem 1.5rem;
+        }
+      }
+      
+      @media screen and (max-width: 550px) {
+        .${prependClass('modal')} {
+          height: ${scaleBg(0.4).height}px;
+          width: ${scaleBg(0.4).width}px;
+        }
+        .${prependClass('main-text')}{
+          font-size: 2rem;
+        }
+        .${prependClass('sub-text')}{
+          font-size: 1rem;
+        }
+        .${prependClass('cta')}{
+          padding: 0.8rem 0.8rem 0rem 0.8rem;  
+          font-size: 0.8rem;
+        }
+        .${prependClass('image-container')} {
+          padding: 4rem 1.5rem 4rem 1.5rem;
+        }
       }
     `;
     const styles = document.createElement('style');
@@ -3252,37 +3289,28 @@ const StonehouseModal = ({
       setStylesLoaded(true);
     }, 500);
   }, []);
+  const textColorByRoute = React__default.useMemo(() => {
+    if (location.href.includes('tablebooking')) return {
+      heading: {
+        color: 'white'
+      },
+      paragraph: {
+        color: secondaryColor
+      }
+    };
+    return {
+      heading: {
+        color: primaryColor,
+        WebkitTextStroke: `2px ${mainGrey}`
+      },
+      paragraph: {
+        color: mainGrey
+      }
+    };
+  }, []);
   if (!stylesLoaded) {
     return null;
   }
-  const TwoForTenThing = () => React__default.createElement("div", {
-    style: {
-      position: 'absolute',
-      left: '10%',
-      top: 250
-    }
-  }, React__default.createElement("div", {
-    className: prependClass(`box-shadow`),
-    style: {
-      borderRadius: '100%',
-      height: 100,
-      width: 100,
-      border: '2px solid white',
-      display: 'grid',
-      placeContent: 'center',
-      transform: 'rotate(-10deg)'
-    }
-  }, React__default.createElement("h4", {
-    className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`
-  }, "2 for"), React__default.createElement("h1", {
-    className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`,
-    style: {
-      marginLeft: 15,
-      marginBottom: -10
-    }
-  }, "10*"), React__default.createElement("h6", {
-    className: `${prependClass('gotham-bold')} ${prependClass('text-center')} ${prependClass('text-shadow')}`
-  }, "COCKTAILS")));
   return React__default.createElement("div", {
     className: prependClass('overlay')
   }, React__default.createElement("div", {
@@ -3295,7 +3323,7 @@ const StonehouseModal = ({
       position: 'relative'
     }
   }, React__default.createElement("div", {
-    className: prependClass('image-darken')
+    className: prependClass('image-container')
   }, React__default.createElement("div", {
     className: prependClass('close-button')
   }, React__default.createElement(CloseButton, {
@@ -3303,13 +3331,15 @@ const StonehouseModal = ({
   })), React__default.createElement("div", {
     className: prependClass('text-container')
   }, React__default.createElement("h1", {
-    className: prependClass('main-text')
+    className: prependClass('main-text'),
+    style: textColorByRoute.heading
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", null, React__default.createElement(TwoForTenThing, null)), React__default.createElement("div", {
+    className: prependClass('sub-text'),
+    style: textColorByRoute.paragraph
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
     style: {
       display: 'flex',
-      justifyContent: 'flex-end'
+      justifyContent: 'center'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,

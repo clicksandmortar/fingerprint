@@ -1,7 +1,7 @@
 name: Build
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
 jobs:
   build:
@@ -27,14 +27,14 @@ jobs:
           path: dist/
           retention-days: 7
       - name: Configure AWS Credentials Staging
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/main'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::228243989488:role/ci/ci-fingerprint-upload
           role-session-name: ci-fingerprint-upload
           aws-region: ${{ vars.AWS_REGION }}
       - name: Staging Deploy
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/main'
         working-directory: ./dist
         run: |
           aws s3 cp . s3://cam-cdn-fingerprint-script-staging-origin/ --recursive --exclude "*" --include="fingerprint.js" --content-type="text/javascript"
