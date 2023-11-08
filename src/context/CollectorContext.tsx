@@ -28,7 +28,6 @@ export type CollectorProviderProps = {
 // - prevent firing the next trigger even if the signal is correct, until the active one is dismissed (which is
 // problematic as CollectorContext is not available in the Trigger component)
 // eslint-disable-next-line require-jsdoc
-
 export function CollectorProvider({
   children,
   handlers = []

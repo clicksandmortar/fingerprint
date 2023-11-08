@@ -9,6 +9,22 @@ type Props = {
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
 }
+const primaryColor = `rgb(33,147,174)`
+const secondaryColor = `#e0aa00`
+const callToActionColor = 'rgb(235,63,43)'
+const mainGrey = 'rgb(70,70,70)'
+
+const scaleBg = (scale: number) => {
+  // todo: based on images for the campaign of 800x700.
+  // we could make more programmatic, but only if we plan to change the image.
+  const imageWidth = 800
+  const imageHeight = 700
+
+  return {
+    height: imageHeight * scale,
+    width: imageWidth * scale
+  }
+}
 
 const StonehouseModal = ({
   trigger,
@@ -37,13 +53,9 @@ const StonehouseModal = ({
      
 
       :root {
-        --primary: white;
-        --secondary: #e0aa00;
         --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
       }
-      h1, h2, h3, h4, h5, h6, p, a, span {
-        line-height: 1.2;
-      }
+  
 
       .${prependClass('overlay')} {
         position: fixed;
@@ -62,8 +74,6 @@ const StonehouseModal = ({
       }
 
       .${prependClass('modal')} {
-        width: 80%;
-        height: 500px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -73,6 +83,8 @@ const StonehouseModal = ({
         align-items: center;
         justify-content: space-between;
         box-shadow: var(--text-shadow);
+        width: ${scaleBg(1).width}px;
+        height: ${scaleBg(1).height}px;
       }
 
       .${prependClass('gotham-bold')} {
@@ -83,30 +95,18 @@ const StonehouseModal = ({
         text-align: center;
       }
 
-      @media screen and (min-width: 768px) {
-        .${prependClass('modal')} {
-          max-width: 600px;
-        }
-      }
-
-      @media screen and (max-width: 768px) {
-        .${prependClass('modal')} {
-          width: 95vw;
-          max-width: 600px;
-        }
-      }
+  
 
       .${prependClass('main-text')} {
+        line-height: 1.2;
         flex: 1;
         font-family: 'Gotham Bold';
         font-weight: 500;
-        font-size: 3rem;
+        font-size: 4rem;
         font-style: normal;
         text-transform: uppercase;
         text-align: center;
         letter-spacing: 2pt;
-        fill: var(--secondary);
-        text-shadow: var(--text-shadow);
         max-width: 400px;
         margin-left: auto;
         margin-right: auto;
@@ -117,36 +117,37 @@ const StonehouseModal = ({
         display: flex;
         justify-content: center;
         flex-direction: column;
-        text-shadow: var(--text-shadow);
       }
 
       .${prependClass('sub-text')} {
+        line-height: 1;
         margin: auto;
         font-weight: 600;
         font-family: 'Gotham Bold';
-        font-size: 0.6rem;
+        font-size: 3.5rem;
+        color: ${secondaryColor};
         letter-spacing: 2pt;
-
         display: inline-block;
         text-align: center;
-        text-transform: uppercase;
       }
 
       .${prependClass('cta')} {
+        line-height: 1.2;
         font-family: 'Gotham Bold';
         cursor: pointer;
-        background-color: var(--secondary);
-        padding: 0.75rem 1rem 0 1rem;
+
+        background-color: ${callToActionColor};
         border-radius: 2px;
+        padding: 1.75rem 2rem 0.5rem 2rem;
         display: block;
         font-size: 1.3rem;
-        color: var(--primary);
+        color: white;
         text-align: center;
         text-transform: uppercase;
         max-width: 400px;
         margin: 0 auto;
         text-decoration: none;
-        box-shadow: 0.3rem 0.3rem white;
+        box-shadow: -2px 2px 8px black;
       }
 
       .${prependClass('cta:hover')} {
@@ -165,14 +166,14 @@ const StonehouseModal = ({
       }
       
 
-      .${prependClass('image-darken')} {
-        background: rgba(0, 0, 0, 0.1);
+      .${prependClass('image-container')} {
+
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         width: 100%;
-        padding: 2rem 1.5rem 1.5rem 1.5rem;
+        padding: 10rem 1.5rem 8rem 1.5rem;
       }
 
       .${prependClass('text-shadow')} {
@@ -181,6 +182,46 @@ const StonehouseModal = ({
 
       .${prependClass('box-shadow')} {
         box-shadow: var(--text-shadow);
+      }
+
+      @media screen and (max-width: 768px) {
+        .${prependClass('modal')} {
+          height: ${scaleBg(0.7).height}px;
+          width: ${scaleBg(0.7).width}px;
+        }
+        .${prependClass('main-text')}{
+          font-size: 3rem;
+        }
+        .${prependClass('sub-text')}{
+          font-size: 1.7rem;
+        }
+        .${prependClass('cta')}{
+          padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
+          font-size: 1rem;
+        }
+        .${prependClass('image-container')} {
+          padding: 8rem 1.5rem 6rem 1.5rem;
+        }
+      }
+      
+      @media screen and (max-width: 550px) {
+        .${prependClass('modal')} {
+          height: ${scaleBg(0.4).height}px;
+          width: ${scaleBg(0.4).width}px;
+        }
+        .${prependClass('main-text')}{
+          font-size: 2rem;
+        }
+        .${prependClass('sub-text')}{
+          font-size: 1rem;
+        }
+        .${prependClass('cta')}{
+          padding: 0.8rem 0.8rem 0rem 0.8rem;  
+          font-size: 0.8rem;
+        }
+        .${prependClass('image-container')} {
+          padding: 4rem 1.5rem 4rem 1.5rem;
+        }
       }
     `
 
@@ -193,50 +234,31 @@ const StonehouseModal = ({
     }, 500)
   }, [])
 
+  // When I am summoned by the Lord for the Final Judgment
+  // I hope he never brings up the decision to write this:
+  const textColorByRoute = React.useMemo((): {
+    paragraph: React.CSSProperties
+    heading: React.CSSProperties
+  } => {
+    if (location.href.includes('tablebooking'))
+      return {
+        heading: { color: 'white' },
+        paragraph: { color: secondaryColor }
+      }
+
+    // else - nationalsearch
+    return {
+      heading: {
+        color: primaryColor,
+        WebkitTextStroke: `2px ${mainGrey}`
+      },
+      paragraph: { color: mainGrey }
+    }
+  }, [])
+
   if (!stylesLoaded) {
     return null
   }
-
-  const TwoForTenThing = () => (
-    <div style={{ position: 'absolute', left: '10%', top: 250 }}>
-      <div
-        className={prependClass(`box-shadow`)}
-        style={{
-          borderRadius: '100%',
-          height: 100,
-          width: 100,
-          border: '2px solid white',
-          display: 'grid',
-          placeContent: 'center',
-          transform: 'rotate(-10deg)'
-        }}
-      >
-        <h4
-          className={`${prependClass('gotham-bold')} ${prependClass(
-            'text-center'
-          )} ${prependClass('text-shadow')}`}
-        >
-          2 for
-        </h4>
-        <h1
-          className={`${prependClass('gotham-bold')} ${prependClass(
-            'text-center'
-          )} ${prependClass('text-shadow')}`}
-          style={{ marginLeft: 15, marginBottom: -10 }}
-        >
-          10*
-        </h1>
-        <h6
-          className={`${prependClass('gotham-bold')} ${prependClass(
-            'text-center'
-          )} ${prependClass('text-shadow')}`}
-        >
-          COCKTAILS
-        </h6>
-      </div>
-    </div>
-  )
-
   return (
     <div className={prependClass('overlay')}>
       <div
@@ -249,23 +271,27 @@ const StonehouseModal = ({
           position: 'relative'
         }}
       >
-        <div className={prependClass('image-darken')}>
+        <div className={prependClass('image-container')}>
           <div className={prependClass('close-button')}>
             <CloseButton onClick={handleCloseModal} />
           </div>
 
           <div className={prependClass('text-container')}>
-            <h1 className={prependClass('main-text')}>
+            <h1
+              className={prependClass('main-text')}
+              style={textColorByRoute.heading}
+            >
               {trigger?.data?.heading}
             </h1>
-            <span className={prependClass('sub-text')}>
+            <span
+              className={prependClass('sub-text')}
+              style={textColorByRoute.paragraph}
+            >
               {trigger?.data?.paragraph}
             </span>
           </div>
-          <div>
-            <TwoForTenThing />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div>
               <a
                 href={trigger?.data?.buttonURL}

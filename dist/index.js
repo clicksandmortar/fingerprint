@@ -539,6 +539,18 @@ var BrownsModal = function BrownsModal(_ref2) {
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
 
+var primaryColor = "rgb(33,147,174)";
+var secondaryColor = "#e0aa00";
+var callToActionColor = 'rgb(235,63,43)';
+var mainGrey = 'rgb(70,70,70)';
+var scaleBg = function scaleBg(scale) {
+  var imageWidth = 800;
+  var imageHeight = 700;
+  return {
+    height: imageHeight * scale,
+    width: imageWidth * scale
+  };
+};
 var StonehouseModal = function StonehouseModal(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   var trigger = _ref.trigger,
@@ -548,7 +560,7 @@ var StonehouseModal = function StonehouseModal(_ref) {
     stylesLoaded = _useState[0],
     setStylesLoaded = _useState[1];
   React.useEffect(function () {
-    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --primary: white;\n        --secondary: #e0aa00;\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n      h1, h2, h3, h4, h5, h6, p, a, span {\n        line-height: 1.2;\n      }\n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        width: 80%;\n        height: 500px;\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      @media screen and (min-width: 768px) {\n        ." + prependClass('modal') + " {\n          max-width: 600px;\n        }\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          width: 95vw;\n          max-width: 600px;\n        }\n      }\n\n      ." + prependClass('main-text') + " {\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 3rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        fill: var(--secondary);\n        text-shadow: var(--text-shadow);\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('sub-text') + " {\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 0.6rem;\n        letter-spacing: 2pt;\n\n        display: inline-block;\n        text-align: center;\n        text-transform: uppercase;\n      }\n\n      ." + prependClass('cta') + " {\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: var(--secondary);\n        padding: 0.75rem 1rem 0 1rem;\n        border-radius: 2px;\n        display: block;\n        font-size: 1.3rem;\n        color: var(--primary);\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: 0.3rem 0.3rem white;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-darken') + " {\n        background: rgba(0, 0, 0, 0.1);\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 2rem 1.5rem 1.5rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n    ";
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        width: " + scaleBg(1).width + "px;\n        height: " + scaleBg(1).height + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n  \n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 4rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 3.5rem;\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        padding: 1.75rem 2rem 0.5rem 2rem;\n        display: block;\n        font-size: 1.3rem;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 10rem 1.5rem 8rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.7).height + "px;\n          width: " + scaleBg(0.7).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 3rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.7rem;\n        }\n        ." + prependClass('cta') + "{\n          padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n          font-size: 1rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 8rem 1.5rem 6rem 1.5rem;\n        }\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1rem;\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 4rem 1.5rem 4rem 1.5rem;\n        }\n      }\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
@@ -557,39 +569,28 @@ var StonehouseModal = function StonehouseModal(_ref) {
       setStylesLoaded(true);
     }, 500);
   }, []);
+  var textColorByRoute = React__default.useMemo(function () {
+    if (location.href.includes('tablebooking')) return {
+      heading: {
+        color: 'white'
+      },
+      paragraph: {
+        color: secondaryColor
+      }
+    };
+    return {
+      heading: {
+        color: primaryColor,
+        WebkitTextStroke: "2px " + mainGrey
+      },
+      paragraph: {
+        color: mainGrey
+      }
+    };
+  }, []);
   if (!stylesLoaded) {
     return null;
   }
-  var TwoForTenThing = function TwoForTenThing() {
-    return React__default.createElement("div", {
-      style: {
-        position: 'absolute',
-        left: '10%',
-        top: 250
-      }
-    }, React__default.createElement("div", {
-      className: prependClass("box-shadow"),
-      style: {
-        borderRadius: '100%',
-        height: 100,
-        width: 100,
-        border: '2px solid white',
-        display: 'grid',
-        placeContent: 'center',
-        transform: 'rotate(-10deg)'
-      }
-    }, React__default.createElement("h4", {
-      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
-    }, "2 for"), React__default.createElement("h1", {
-      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow'),
-      style: {
-        marginLeft: 15,
-        marginBottom: -10
-      }
-    }, "10*"), React__default.createElement("h6", {
-      className: prependClass('gotham-bold') + " " + prependClass('text-center') + " " + prependClass('text-shadow')
-    }, "COCKTAILS")));
-  };
   return React__default.createElement("div", {
     className: prependClass('overlay')
   }, React__default.createElement("div", {
@@ -602,7 +603,7 @@ var StonehouseModal = function StonehouseModal(_ref) {
       position: 'relative'
     }
   }, React__default.createElement("div", {
-    className: prependClass('image-darken')
+    className: prependClass('image-container')
   }, React__default.createElement("div", {
     className: prependClass('close-button')
   }, React__default.createElement(CloseButton, {
@@ -610,13 +611,15 @@ var StonehouseModal = function StonehouseModal(_ref) {
   })), React__default.createElement("div", {
     className: prependClass('text-container')
   }, React__default.createElement("h1", {
-    className: prependClass('main-text')
+    className: prependClass('main-text'),
+    style: textColorByRoute.heading
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", null, React__default.createElement(TwoForTenThing, null)), React__default.createElement("div", {
+    className: prependClass('sub-text'),
+    style: textColorByRoute.paragraph
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
     style: {
       display: 'flex',
-      justifyContent: 'flex-end'
+      justifyContent: 'center'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
@@ -1059,6 +1062,7 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
+var selectorRateMs = 250;
 function useTrackIntentlyModal() {
   var _useState = React.useState(false),
     isVisible = _useState[0],
@@ -1070,15 +1074,15 @@ function useTrackIntentlyModal() {
     error = _useLogging.error;
   React.useEffect(function () {
     var id = setInterval(function () {
-      var item = document.querySelector('smc-overlay-inner');
-      if (!item) {
-        log('useTrackIntentlyModal: Could not locate intently modal, not tracking performance.');
+      var intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
+      if (!intentlyInnerOverlay) {
+        log('useTrackIntentlyModal: Could not locate intently modal- intentlyInnerOverlay, not tracking performance.');
         return;
       }
       log('useTrackIntentlyModal: Located Intently modal. Releasing the Kraken.');
       setIsVisible(true);
       clearInterval(id);
-    }, 1000);
+    }, selectorRateMs);
     return function () {
       return clearInterval(id);
     };
