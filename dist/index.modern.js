@@ -1330,10 +1330,10 @@ const VisitorProvider = ({
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
   const setVisitorData = React__default.useCallback(prop => {
-    setVisitor({
+    setVisitor(visitor => ({
       ...visitor,
       ...prop
-    });
+    }));
   }, [setVisitor]);
   return React__default.createElement(VisitorContext.Provider, {
     value: {
@@ -1466,11 +1466,20 @@ const useCollectorMutation = () => {
     log,
     error
   } = useLogging();
+  const {
+    appId
+  } = useFingerprint();
+  const {
+    visitor,
+    session
+  } = useVisitor();
   const requestHost = useHostname();
   return useMutation(data => {
-    var _data$visitor;
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), {
+    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), {
       ...data,
+      appId,
+      visitor,
+      sessionId: session === null || session === void 0 ? void 0 : session.id,
       hostname: requestHost
     }).then(response => {
       log('Collector API response', response);
@@ -1545,7 +1554,6 @@ function CollectorProvider({
     error
   } = useLogging();
   const {
-    appId,
     booted,
     initialDelay,
     exitIntentTriggers,
@@ -1727,9 +1735,6 @@ function CollectorProvider({
         log('CollectorProvider: user logged in event fired');
         trackEvent('user_logged_in', {});
         collect({
-          appId,
-          visitor,
-          sessionId: session === null || session === void 0 ? void 0 : session.id,
           account: {
             token: hashParams.id_token
           }
@@ -1741,9 +1746,6 @@ function CollectorProvider({
         });
       }
       collect({
-        appId,
-        visitor,
-        sessionId: session === null || session === void 0 ? void 0 : session.id,
         page: {
           url: window.location.href,
           path: window.location.pathname,
@@ -1771,7 +1773,7 @@ function CollectorProvider({
         setIdleTimeout(getIdleStatusDelay());
         addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         const cohort = payload.intently ? 'intently' : 'fingerprint';
-        setVisitor({
+        if (visitor.cohort !== cohort) setVisitor({
           cohort
         });
         if (!payload.intently) {
@@ -1789,7 +1791,7 @@ function CollectorProvider({
     return () => {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, setVisitor, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id, fireOnLoadTriggers, addPageTriggers]);
+  }, [booted, collect, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
@@ -1805,9 +1807,6 @@ function CollectorProvider({
           foundWatchers[configuredSelector] = true;
           setFoundWatchers(foundWatchers);
           collect({
-            appId,
-            visitor,
-            sessionId: session === null || session === void 0 ? void 0 : session.id,
             elements: [{
               path: window.location.pathname,
               selector: configuredSelector
@@ -1825,7 +1824,7 @@ function CollectorProvider({
       });
     }, 500);
     return intervalId;
-  }, [appId, collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+  }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
   useEffect(() => {
     if (!visitor.id) return;
     const intervalIds = [registerWatcher('.stage-5', '')];

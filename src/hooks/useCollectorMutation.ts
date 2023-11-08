@@ -1,18 +1,28 @@
 import { useMutation } from '@tanstack/react-query'
 import { CollectorUpdate } from '../client/types'
-import { hostname, request } from '../utils/http'
 import { useLogging } from '../context/LoggingContext'
+import { useVisitor } from '../context/VisitorContext'
+import { hostname, request } from '../utils/http'
+import { useFingerprint } from './useFingerprint'
 import { useHostname } from './useHostname'
 
 export const useCollectorMutation = () => {
   const { log, error } = useLogging()
+  const { appId } = useFingerprint()
+  const { visitor, session } = useVisitor()
 
-  const requestHost = useHostname();
+  const requestHost = useHostname()
 
   return useMutation<Response, unknown, CollectorUpdate, unknown>(
     (data: CollectorUpdate) => {
       return request
-        .post(hostname + '/collector/' + data?.visitor?.id, {...data, hostname: requestHost})
+        .post(hostname + '/collector/' + visitor?.id, {
+          ...data,
+          appId,
+          visitor,
+          sessionId: session?.id,
+          hostname: requestHost
+        })
         .then((response) => {
           log('Collector API response', response)
           return response
