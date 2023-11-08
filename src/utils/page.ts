@@ -51,3 +51,15 @@ export function getReferrer() {
     }
   }
 }
+
+/**
+ * Some apps (like our gatsby based ones) can't
+ */
+export function refreshURL() {
+  if (typeof window === `undefined`) return
+  const url = window.location.href
+  if (typeof url !== `undefined`) {
+    window.history.pushState({}, '', url)
+  }
+  return
+}

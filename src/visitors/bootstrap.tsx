@@ -1,16 +1,20 @@
 import { v4 as uuidv4 } from 'uuid'
+import { cookieAccountJWT } from '../context/FingerprintContext'
+import { Session } from '../sessions/types'
+import { getCookie, setCookie } from '../utils/cookies'
 import { Visitor } from './types'
 import { validVisitorId } from './utils'
-import { getCookie, setCookie } from '../utils/cookies'
-import { Session } from '../sessions/types'
-import { cookieAccountJWT } from '../context/FingerprintContext'
 
 export const bootstrapVisitor = ({
-  setVisitor,
+  setVisitorId,
+  setVisitorCohort,
+  setVisitorJwt,
   session,
   setSession
 }: {
-  setVisitor: (session: Visitor) => void
+  setVisitorId: (session: any) => void
+  setVisitorCohort: (session: any) => void
+  setVisitorJwt: (session: any) => void
   session: Session
   setSession: (session: Session) => void
 }) => {
@@ -53,11 +57,15 @@ export const bootstrapVisitor = ({
     365
   )
 
+  setVisitorId(visitor.id)
+  setVisitorJwt(visitor.jwt)
+  setVisitorCohort(visitor.cohort)
+
   session.id = sessionId
   session.endTime = endTime
   setSession(session)
 
-  setVisitor(visitor)
+  // setVisitor(visitor)
 }
 
 const getSessionIdAndEndTime = (

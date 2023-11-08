@@ -14,7 +14,13 @@ export const VisitorProvider = ({ children }: VisitorProviderProps) => {
   const { appId, booted } = useFingerprint()
   const { log } = useLogging()
   const [session, setSession] = useState<Session>({})
-  const [visitor, setVisitor] = useState<Visitor>({})
+  const [visitorId, setVisitorId] = useState<Visitor['id']>(undefined)
+  const [visitorCohort, setVisitorCohort] = useState<
+    Visitor['cohort'] | undefined
+  >(undefined)
+  const [visitorJwt, setVisitorJwt] = useState<Visitor['jwt'] | undefined>(
+    undefined
+  )
 
   useEffect(() => {
     if (!booted) {
@@ -31,7 +37,9 @@ export const VisitorProvider = ({ children }: VisitorProviderProps) => {
       })
 
       await bootstrapVisitor({
-        setVisitor,
+        setVisitorJwt,
+        setVisitorId,
+        setVisitorCohort,
         session,
         setSession
       })
@@ -44,7 +52,7 @@ export const VisitorProvider = ({ children }: VisitorProviderProps) => {
 
   const setVisitorData = React.useCallback(
     (prop: Partial<Visitor>) => {
-      setVisitor({ ...visitor, ...prop })
+      setVisitor((_visitor) => ({ ..._visitor, ...prop }))
     },
     [setVisitor]
   )

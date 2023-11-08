@@ -44,7 +44,7 @@ export function CollectorProvider({
   } = useFingerprint()
 
   const configIdleDelay = config?.idleDelay
-  const { visitor, session, setVisitor } = useVisitor()
+  const { visitor, session } = useVisitor()
   const { canNextTriggerOccur, startCooldown, getRemainingCooldownMs } =
     useTriggerDelay(config?.triggerCooldown)
   const { trackEvent } = useMixpanel()
@@ -289,6 +289,109 @@ export function CollectorProvider({
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD')
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation])
 
+  const visitorId = visitor.id
+  console.log('re-rung, checking,', { visitor })
+
+  const run = useCallback(() => {
+    if (!visitorId) {
+      log('CollectorProvider: Not yet collecting, awaiting visitor ID')
+      return
+    }
+
+    log('CollectorProvider: collecting data')
+
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      })
+    }
+
+    const hash: string = window.location.hash.substring(3)
+
+    const hashParams = hash.split('&').reduce((result: any, item: any) => {
+      const parts = item.split('=')
+      result[parts[0]] = parts[1]
+      return result
+    }, {})
+
+    if (hashParams.id_token) {
+      log('CollectorProvider: user logged in event fired')
+      trackEvent('user_logged_in', {})
+
+      collect({
+        appId,
+        visitor,
+        sessionId: session?.id,
+        account: {
+          token: hashParams.id_token
+        }
+      })
+        .then(async (response: Response) => {
+          const payload: CollectorVisitorResponse = await response.json()
+
+          log('Sent login collector data, retrieved:', payload)
+        })
+        .catch((err) => {
+          error('failed to store collected data', err)
+        })
+    }
+
+    collect({
+      appId,
+      visitor,
+      sessionId: session?.id,
+      page: getPagePayload() || undefined,
+      referrer: getReferrer() || undefined
+    })
+      .then(async (response: Response) => {
+        if (response.status === 204) {
+          setIntently(true)
+          return
+        }
+
+        const payload: CollectorVisitorResponse = await response.json()
+
+        log('Sent collector data, retrieved:', payload)
+
+        // Set IdleTimer
+        // @todo turn this into the dynamic value
+        setIdleTimeout(getIdleStatusDelay())
+
+        addPageTriggers(payload?.pageTriggers)
+
+        // const cohort = payload.intently ? 'intently' : 'fingerprint'
+
+        // setVisitor({ cohort })
+
+        if (!payload.intently) {
+          // remove intently overlay here
+          log('CollectorProvider: user is in Fingerprint cohort')
+          setIntently(false)
+        } else {
+          // show intently overlay here
+          log('CollectorProvider: user is in Intently cohort')
+          setIntently(true)
+        }
+      })
+      .catch((err) => {
+        error('failed to store collected data', err)
+      })
+
+    log('CollectorProvider: collected data')
+  }, [
+    visitorId,
+    log,
+    collect,
+    appId,
+    visitor,
+    session?.id,
+    trackEvent,
+    error,
+    getIdleStatusDelay,
+    addPageTriggers
+    // setVisitor
+  ])
+
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
   useEffect(() => {
@@ -298,112 +401,23 @@ export function CollectorProvider({
     }
 
     const delay = setTimeout(() => {
-      if (!visitor.id) {
-        log('CollectorProvider: Not yet collecting, awaiting visitor ID')
-        return
-      }
-
-      log('CollectorProvider: collecting data')
-
-      if (hasVisitorIDInURL()) {
-        trackEvent('abandoned_journey_landing', {
-          from_email: true
-        })
-      }
-
-      const hash: string = window.location.hash.substring(3)
-
-      const hashParams = hash.split('&').reduce((result: any, item: any) => {
-        const parts = item.split('=')
-        result[parts[0]] = parts[1]
-        return result
-      }, {})
-
-      if (hashParams.id_token) {
-        log('CollectorProvider: user logged in event fired')
-        trackEvent('user_logged_in', {})
-
-        collect({
-          appId,
-          visitor,
-          sessionId: session?.id,
-          account: {
-            token: hashParams.id_token
-          }
-        })
-          .then(async (response: Response) => {
-            const payload: CollectorVisitorResponse = await response.json()
-
-            log('Sent login collector data, retrieved:', payload)
-          })
-          .catch((err) => {
-            error('failed to store collected data', err)
-          })
-      }
-
-      collect({
-        appId,
-        visitor,
-        sessionId: session?.id,
-        page: getPagePayload() || undefined,
-        referrer: getReferrer() || undefined
-      })
-        .then(async (response: Response) => {
-          if (response.status === 204) {
-            setIntently(true)
-            return
-          }
-
-          const payload: CollectorVisitorResponse = await response.json()
-
-          log('Sent collector data, retrieved:', payload)
-
-          // Set IdleTimer
-          // @todo turn this into the dynamic value
-          setIdleTimeout(getIdleStatusDelay())
-
-          addPageTriggers(payload?.pageTriggers)
-
-          const cohort = payload.intently ? 'intently' : 'fingerprint'
-          setVisitor({ cohort })
-
-          if (!payload.intently) {
-            // remove intently overlay here
-            log('CollectorProvider: user is in Fingerprint cohort')
-            setIntently(false)
-          } else {
-            // show intently overlay here
-            log('CollectorProvider: user is in Intently cohort')
-            setIntently(true)
-          }
-        })
-        .catch((err) => {
-          error('failed to store collected data', err)
-        })
-
-      log('CollectorProvider: collected data')
+      console.log('SETTTTTTT')
+      run()
     }, initialDelay)
 
     return () => {
       clearTimeout(delay)
     }
-  }, [
-    appId,
-    booted,
-    collect,
-    error,
-    setVisitor,
-    handlers,
-    initialDelay,
-    getIdleStatusDelay,
-    setIdleTimeout,
-    log,
-    trackEvent,
-    visitor,
-    session?.id,
-    fireOnLoadTriggers,
-    addPageTriggers
-  ])
+  }, [run, booted, initialDelay, log])
+
+  // useEffect(() => {
+  //   // refreshURL()
+  //   console.log('re-rung, recalc..', history.length, window.location.href)
+  //   // const currentPath = JSON.stringify(window.location.href)
+  //   // console.log('RE-RUNG', currentPath)
+
+  //   // run()
+  // }, [run, window, history])
 
   const registerWatcher = React.useCallback(
     (configuredSelector: string, configuredSearch: string) => {
@@ -474,14 +488,14 @@ export function CollectorProvider({
   )
 
   useEffect(() => {
-    if (!visitor.id) return
+    if (!visitorId) return
     const intervalIds = [registerWatcher('.stage-5', '')]
 
     // Cleanup all the watchers
     return () => {
       intervalIds.forEach((intervalId) => clearInterval(intervalId))
     }
-  }, [registerWatcher, visitor])
+  }, [registerWatcher, visitorId])
 
   const setActiveTrigger = React.useCallback(
     (trigger: Trigger) => {

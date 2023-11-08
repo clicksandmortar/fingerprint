@@ -18,3 +18,7 @@ export declare function getReferrer(): {
         content: string | undefined;
     };
 };
+/**
+ * Some apps (like our gatsby based ones) can't
+ */
+export declare function refreshURL(): void;
