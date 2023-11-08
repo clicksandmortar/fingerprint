@@ -882,7 +882,6 @@ const StonehouseModal = ({
       }
 
       .${prependClass('modal')} {
-        height: 700px;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -892,8 +891,8 @@ const StonehouseModal = ({
         align-items: center;
         justify-content: space-between;
         box-shadow: var(--text-shadow);
-        width: 95vw;
-        width: 800px;
+        width: ${scaleBg(1).width}px;
+        height: ${scaleBg(1).height}px;
       }
 
       .${prependClass('gotham-bold')} {
