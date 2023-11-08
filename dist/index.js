@@ -531,6 +531,45 @@ function useTriggerDelay(cooldownMs) {
   };
 }
 
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+    var _cur$split = cur.split('='),
+      key = _cur$split[0],
+      value = _cur$split[1];
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  var params = getReducedSearchParams();
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    params: params
+  };
+}
+function getReferrer() {
+  var params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
 var getVisitorId = function getVisitorId() {
   if (typeof window === 'undefined') return null;
   var urlParams = new URLSearchParams(window.location.search);
@@ -730,14 +769,6 @@ function CollectorProvider(_ref) {
           from_email: true
         });
       }
-      var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-        var _cur$split = cur.split('='),
-          key = _cur$split[0],
-          value = _cur$split[1];
-        if (!key) return acc;
-        acc[key] = value;
-        return acc;
-      }, {});
       var hash = window.location.hash.substring(3);
       var hashParams = hash.split('&').reduce(function (result, item) {
         var parts = item.split('=');
@@ -770,23 +801,8 @@ function CollectorProvider(_ref) {
         appId: appId,
         visitor: visitor,
         sessionId: session === null || session === void 0 ? void 0 : session.id,
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params: params
-        },
-        referrer: {
-          url: document.referrer,
-          title: '',
-          utm: {
-            source: params === null || params === void 0 ? void 0 : params.utm_source,
-            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-            term: params === null || params === void 0 ? void 0 : params.utm_term,
-            content: params === null || params === void 0 ? void 0 : params.utm_content
-          }
-        }
+        page: getPagePayload() || undefined,
+        referrer: getReferrer() || undefined
       }).then(function (response) {
         try {
           if (response.status === 204) {
@@ -2252,24 +2268,11 @@ var useOnTriggerActivation = function useOnTriggerActivation(trigger) {
     error = _useLogging.error;
   var visitorId = visitor.id;
   return React__default.useCallback(function () {
-    var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-      var _cur$split = cur.split('='),
-        key = _cur$split[0],
-        value = _cur$split[1];
-      if (!key) return acc;
-      acc[key] = value;
-      return acc;
-    }, {});
     try {
       request.put(hostname + "/triggers/" + appId + "/" + visitorId + "/seen", {
         seenTriggerIDs: [trigger.id],
         appId: appId,
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params: params
-        }
+        page: getPagePayload()
       }).then(function (r) {
         try {
           return Promise.resolve(r.json()).then(function (payload) {
@@ -2317,7 +2320,7 @@ var Banner = function Banner(_ref) {
     if (hasFired) return;
     onActivation();
     setHasFired(true);
-  }, [open, hasFired, setHasFired]);
+  }, [open, hasFired, setHasFired, onActivation]);
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
@@ -2985,7 +2988,7 @@ var Modal = function Modal(_ref) {
     if (hasFired) return;
     onActivation();
     setHasFired(true);
-  }, [open, hasFired, setHasFired]);
+  }, [open, hasFired, setHasFired, onActivation]);
   if (!open) {
     return null;
   }

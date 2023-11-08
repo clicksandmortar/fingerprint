@@ -30,7 +30,7 @@ const Modal = ({ trigger }: Props) => {
 
     onActivation()
     setHasFired(true)
-  }, [open, hasFired, setHasFired])
+  }, [open, hasFired, setHasFired, onActivation])
 
   if (!open) {
     return null

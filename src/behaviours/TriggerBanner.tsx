@@ -33,7 +33,7 @@ const Banner = ({ trigger }: Props) => {
 
     onActivation()
     setHasFired(true)
-  }, [open, hasFired, setHasFired])
+  }, [open, hasFired, setHasFired, onActivation])
 
   const canBeDismissed = true
 

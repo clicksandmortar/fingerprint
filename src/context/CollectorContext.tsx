@@ -8,6 +8,7 @@ import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
+import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -310,16 +311,6 @@ export function CollectorProvider({
         })
       }
 
-      const params: any = new URLSearchParams(window.location.search)
-        .toString()
-        .split('&')
-        .reduce((acc, cur) => {
-          const [key, value] = cur.split('=')
-          if (!key) return acc
-          acc[key] = value
-          return acc
-        }, {})
-
       const hash: string = window.location.hash.substring(3)
 
       const hashParams = hash.split('&').reduce((result: any, item: any) => {
@@ -354,28 +345,8 @@ export function CollectorProvider({
         appId,
         visitor,
         sessionId: session?.id,
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params
-        },
-        referrer: {
-          url: document.referrer,
-          title: '',
-          utm: {
-            // eslint-disable-next-line camelcase
-            source: params?.utm_source,
-            // eslint-disable-next-line camelcase
-            medium: params?.utm_medium,
-            // eslint-disable-next-line camelcase
-            campaign: params?.utm_campaign,
-            // eslint-disable-next-line camelcase
-            term: params?.utm_term,
-            // eslint-disable-next-line camelcase
-            content: params?.utm_content
-          }
-        }
+        page: getPagePayload() || undefined,
+        referrer: getReferrer() || undefined
       })
         .then(async (response: Response) => {
           if (response.status === 204) {

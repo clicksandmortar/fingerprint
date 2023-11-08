@@ -5,6 +5,7 @@ import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { getBrand } from '../utils/brand'
 import { hostname, request } from '../utils/http'
+import { getPagePayload } from '../utils/page'
 import { useCollector } from './useCollector'
 import { useFingerprint } from './useFingerprint'
 
@@ -17,30 +18,12 @@ const useOnTriggerActivation = (trigger: Trigger) => {
   const { id: visitorId } = visitor
 
   return React.useCallback(() => {
-    // @TODO: make it dryer. Collector uses it too.
-    const params: any = new URLSearchParams(window.location.search)
-      .toString()
-      .split('&')
-      .reduce((acc, cur) => {
-        const [key, value] = cur.split('=')
-        if (!key) return acc
-        acc[key] = value
-        return acc
-      }, {})
-
     try {
       request
         .put(`${hostname}/triggers/${appId}/${visitorId}/seen`, {
           seenTriggerIDs: [trigger.id],
           appId,
-
-          // @TODO: Ed to abstract all this crap away
-          page: {
-            url: window.location.href,
-            path: window.location.pathname,
-            title: document.title,
-            params
-          }
+          page: getPagePayload()
         })
         .then(async (r) => {
           const payload: CollectorVisitorResponse = await r.json()

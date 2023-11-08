@@ -477,6 +477,43 @@ function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   };
 }
 
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+    const [key, value] = cur.split('=');
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  const params = getReducedSearchParams();
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    params
+  };
+}
+function getReferrer() {
+  const params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
 const getVisitorId = () => {
   if (typeof window === 'undefined') return null;
   const urlParams = new URLSearchParams(window.location.search);
@@ -663,12 +700,6 @@ function CollectorProvider({
           from_email: true
         });
       }
-      const params = new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-        const [key, value] = cur.split('=');
-        if (!key) return acc;
-        acc[key] = value;
-        return acc;
-      }, {});
       const hash = window.location.hash.substring(3);
       const hashParams = hash.split('&').reduce((result, item) => {
         const parts = item.split('=');
@@ -696,23 +727,8 @@ function CollectorProvider({
         appId,
         visitor,
         sessionId: session === null || session === void 0 ? void 0 : session.id,
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params
-        },
-        referrer: {
-          url: document.referrer,
-          title: '',
-          utm: {
-            source: params === null || params === void 0 ? void 0 : params.utm_source,
-            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-            term: params === null || params === void 0 ? void 0 : params.utm_term,
-            content: params === null || params === void 0 ? void 0 : params.utm_content
-          }
-        }
+        page: getPagePayload() || undefined,
+        referrer: getReferrer() || undefined
       }).then(async response => {
         if (response.status === 204) {
           setIntently(true);
@@ -2156,22 +2172,11 @@ const useOnTriggerActivation = trigger => {
     id: visitorId
   } = visitor;
   return React__default.useCallback(() => {
-    const params = new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-      const [key, value] = cur.split('=');
-      if (!key) return acc;
-      acc[key] = value;
-      return acc;
-    }, {});
     try {
       request.put(`${hostname}/triggers/${appId}/${visitorId}/seen`, {
         seenTriggerIDs: [trigger.id],
         appId,
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params
-        }
+        page: getPagePayload()
       }).then(async r => {
         const payload = await r.json();
         const newTriggers = payload === null || payload === void 0 ? void 0 : payload.pageTriggers;
@@ -2213,7 +2218,7 @@ const Banner = ({
     if (hasFired) return;
     onActivation();
     setHasFired(true);
-  }, [open, hasFired, setHasFired]);
+  }, [open, hasFired, setHasFired, onActivation]);
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
@@ -3368,7 +3373,7 @@ const Modal = ({
     if (hasFired) return;
     onActivation();
     setHasFired(true);
-  }, [open, hasFired, setHasFired]);
+  }, [open, hasFired, setHasFired, onActivation]);
   if (!open) {
     return null;
   }
