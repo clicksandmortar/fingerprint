@@ -729,31 +729,8 @@ function CollectorProvider({
         });
       }
       collect({
-<<<<<<< HEAD
-        appId,
-        visitor,
-        sessionId: session === null || session === void 0 ? void 0 : session.id,
         page: getPagePayload() || undefined,
         referrer: getReferrer() || undefined
-=======
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params
-        },
-        referrer: {
-          url: document.referrer,
-          title: '',
-          utm: {
-            source: params === null || params === void 0 ? void 0 : params.utm_source,
-            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-            term: params === null || params === void 0 ? void 0 : params.utm_term,
-            content: params === null || params === void 0 ? void 0 : params.utm_content
-          }
-        }
->>>>>>> main
       }).then(async response => {
         if (response.status === 204) {
           setIntently(true);
