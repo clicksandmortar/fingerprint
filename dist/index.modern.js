@@ -1587,7 +1587,7 @@ function useTrackIntentlyModal() {
   };
 }
 const useRemoveIntently = () => {
-  const [intently, setIntently] = useState(false);
+  const [intently, setIntently] = useState(true);
   const {
     log
   } = useLogging();
@@ -1964,8 +1964,6 @@ const useCollector = () => {
   return useContext(CollectorContext);
 };
 
-<<<<<<< HEAD
-=======
 const useSeenMutation = () => {
   const {
     log,
@@ -1993,21 +1991,6 @@ const useSeenMutation = () => {
   });
 };
 
-const TEMP_isCNMBrand = () => {
-  if (typeof window === 'undefined') return false;
-  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-const getBrand = () => {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return 'C&M';
-};
-
->>>>>>> main
 const Modal = ({
   trigger
 }) => {
