@@ -76,7 +76,7 @@ export function CollectorProvider({
   )
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
   const [displayTriggers, setDisplayedTriggers] = useState<string[]>([])
-  const [intently, setIntently] = useState<boolean>(false)
+  const [intently, setIntently] = useState<boolean>(true)
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
