@@ -641,7 +641,7 @@ function CollectorProvider(_ref) {
   var _useState3 = React.useState([]),
     displayTriggers = _useState3[0],
     setDisplayedTriggers = _useState3[1];
-  var _useState4 = React.useState(false),
+  var _useState4 = React.useState(true),
     intently = _useState4[0],
     setIntently = _useState4[1];
   var _useState5 = React.useState(new Map()),
@@ -730,7 +730,6 @@ function CollectorProvider(_ref) {
   var _useExitIntentDelay = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay),
     hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
   var fireExitTrigger = React__default.useCallback(function () {
-    if (displayTriggers !== null && displayTriggers !== void 0 && displayTriggers.length) return;
     if (!hasDelayPassed) {
       log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
       log('Re-registering handler');
@@ -761,7 +760,11 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
+  var _useState6 = React.useState(false),
+    hasCollected = _useState6[0],
+    setHasCollected = _useState6[1];
   React.useEffect(function () {
+    if (hasCollected) return;
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot');
       return;
@@ -833,12 +836,13 @@ function CollectorProvider(_ref) {
       })["catch"](function (err) {
         error('failed to store collected data', err);
       });
+      setHasCollected(true);
       log('CollectorProvider: collected data');
     }, initialDelay);
     return function () {
       clearTimeout(delay);
     };
-  }, [booted, collect, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
+  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -903,15 +907,16 @@ function CollectorProvider(_ref) {
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
+  var onPresenseChange = React__default.useCallback(function (presence) {
+    log('presence changed', presence);
+  }, [log]);
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
     timeout: idleTimeout,
-    onPresenceChange: function onPresenceChange(presence) {
-      log('presence changed', presence);
-    },
+    onPresenceChange: onPresenseChange,
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: collectorContextVal
-  }, children, React__default.createElement(TriggerComponent, null)));
+  }, children, TriggerComponent()));
 }
 var CollectorContext = React.createContext({
   addPageTriggers: function addPageTriggers() {
@@ -2253,39 +2258,19 @@ var getBrand = function getBrand() {
   return 'C&M';
 };
 
-var useOnTriggerActivation = function useOnTriggerActivation(trigger) {
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+var useSeenMutation = function useSeenMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
   var _useCollector = useCollector(),
     setPageTriggers = _useCollector.setPageTriggers;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
-  var visitorId = visitor.id;
-  return React__default.useCallback(function () {
-    try {
-      request.put(hostname + "/triggers/" + appId + "/" + visitorId + "/seen", {
-        seenTriggerIDs: [trigger.id],
-        appId: appId,
-        page: getPagePayload()
-      }).then(function (r) {
-        try {
-          return Promise.resolve(r.json()).then(function (payload) {
-            var newTriggers = payload === null || payload === void 0 ? void 0 : payload.pageTriggers;
-            if (!newTriggers) return;
-            setPageTriggers(newTriggers);
-          });
-        } catch (e) {
-          return Promise.reject(e);
-        }
-      });
-    } catch (e) {
-      error(e);
-    }
+  var trackTriggerSeen = React__default.useCallback(function (trigger) {
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
@@ -2293,7 +2278,33 @@ var useOnTriggerActivation = function useOnTriggerActivation(trigger) {
       time: new Date().toISOString(),
       brand: getBrand()
     });
-  }, [appId, error, log, trackEvent, trigger, visitorId]);
+  }, [trackEvent]);
+  return reactQuery.useMutation(function (trigger) {
+    trackTriggerSeen(trigger);
+    return request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+      seenTriggerIDs: [trigger.id]
+    }).then(function (response) {
+      log('Seen mutation: response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Seen mutation: error', err);
+      return err;
+    });
+  }, {
+    mutationKey: ['seen'],
+    onSuccess: function (res) {
+      try {
+        return Promise.resolve(res.json()).then(function (r) {
+          if (!r.pageTriggers) return r;
+          log('Seen mutation: replacing triggers with:', r.pageTriggers);
+          setPageTriggers(r.pageTriggers);
+          return r;
+        });
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    }
+  });
 };
 
 var resetPad = function resetPad() {
@@ -2313,13 +2324,23 @@ var Banner = function Banner(_ref) {
   var _useState2 = React.useState(false),
     hasFired = _useState2[0],
     setHasFired = _useState2[1];
-  var onActivation = useOnTriggerActivation(trigger);
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSuccess = _useSeenMutation.isSuccess,
+    isLoading = _useSeenMutation.isLoading;
   React.useEffect(function () {
     if (!open) return;
     if (hasFired) return;
-    onActivation();
+    if (isSuccess) return;
+    if (isLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+    }, 500);
     setHasFired(true);
-  }, [open, hasFired, setHasFired, onActivation]);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
@@ -2981,13 +3002,23 @@ var Modal = function Modal(_ref) {
   var brand = React__default.useMemo(function () {
     return getBrand();
   }, []);
-  var onActivation = useOnTriggerActivation(trigger);
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSuccess = _useSeenMutation.isSuccess,
+    isLoading = _useSeenMutation.isLoading;
   React.useEffect(function () {
     if (!open) return;
     if (hasFired) return;
-    onActivation();
+    if (isSuccess) return;
+    if (isLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+    }, 500);
     setHasFired(true);
-  }, [open, hasFired, setHasFired, onActivation]);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
   if (!open) {
     return null;
   }

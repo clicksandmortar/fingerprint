@@ -586,7 +586,7 @@ function CollectorProvider({
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
   const [pageTriggers, setPageTriggers] = useState([]);
   const [displayTriggers, setDisplayedTriggers] = useState([]);
-  const [intently, setIntently] = useState(false);
+  const [intently, setIntently] = useState(true);
   const [foundWatchers, setFoundWatchers] = useState(new Map());
   const addPageTriggers = React__default.useCallback(triggers => {
     setPageTriggers(prev => uniqueBy([...prev, ...(triggers || [])], 'id'));
@@ -660,7 +660,6 @@ function CollectorProvider({
     hasDelayPassed
   } = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay);
   const fireExitTrigger = React__default.useCallback(() => {
-    if (displayTriggers !== null && displayTriggers !== void 0 && displayTriggers.length) return;
     if (!hasDelayPassed) {
       log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
       log('Re-registering handler');
@@ -692,7 +691,9 @@ function CollectorProvider({
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
+  const [hasCollected, setHasCollected] = useState(false);
   useEffect(() => {
+    if (hasCollected) return;
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot');
       return;
@@ -754,12 +755,13 @@ function CollectorProvider({
       }).catch(err => {
         error('failed to store collected data', err);
       });
+      setHasCollected(true);
       log('CollectorProvider: collected data');
     }, initialDelay);
     return () => {
       clearTimeout(delay);
     };
-  }, [booted, collect, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
+  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
@@ -815,15 +817,16 @@ function CollectorProvider({
   useEffect(() => {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
+  const onPresenseChange = React__default.useCallback(presence => {
+    log('presence changed', presence);
+  }, [log]);
   return React__default.createElement(IdleTimerProvider, {
     timeout: idleTimeout,
-    onPresenceChange: presence => {
-      log('presence changed', presence);
-    },
+    onPresenceChange: onPresenseChange,
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: collectorContextVal
-  }, children, React__default.createElement(TriggerComponent, null)));
+  }, children, TriggerComponent()));
 }
 const CollectorContext = createContext({
   addPageTriggers: () => {
@@ -2150,41 +2153,24 @@ const getBrand = () => {
   return 'C&M';
 };
 
-const useOnTriggerActivation = trigger => {
+const useSeenMutation = () => {
   const {
-    trackEvent
-  } = useMixpanel();
+    log,
+    error
+  } = useLogging();
   const {
     appId
   } = useFingerprint();
+  const {
+    trackEvent
+  } = useMixpanel();
   const {
     setPageTriggers
   } = useCollector();
   const {
     visitor
   } = useVisitor();
-  const {
-    log,
-    error
-  } = useLogging();
-  const {
-    id: visitorId
-  } = visitor;
-  return React__default.useCallback(() => {
-    try {
-      request.put(`${hostname}/triggers/${appId}/${visitorId}/seen`, {
-        seenTriggerIDs: [trigger.id],
-        appId,
-        page: getPagePayload()
-      }).then(async r => {
-        const payload = await r.json();
-        const newTriggers = payload === null || payload === void 0 ? void 0 : payload.pageTriggers;
-        if (!newTriggers) return;
-        setPageTriggers(newTriggers);
-      });
-    } catch (e) {
-      error(e);
-    }
+  const trackTriggerSeen = React__default.useCallback(trigger => {
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
@@ -2192,7 +2178,28 @@ const useOnTriggerActivation = trigger => {
       time: new Date().toISOString(),
       brand: getBrand()
     });
-  }, [appId, error, log, trackEvent, trigger, visitorId]);
+  }, [trackEvent]);
+  return useMutation(trigger => {
+    trackTriggerSeen(trigger);
+    return request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+      seenTriggerIDs: [trigger.id]
+    }).then(response => {
+      log('Seen mutation: response', response);
+      return response;
+    }).catch(err => {
+      error('Seen mutation: error', err);
+      return err;
+    });
+  }, {
+    mutationKey: ['seen'],
+    onSuccess: async res => {
+      const r = await res.json();
+      if (!r.pageTriggers) return r;
+      log('Seen mutation: replacing triggers with:', r.pageTriggers);
+      setPageTriggers(r.pageTriggers);
+      return r;
+    }
+  });
 };
 
 const resetPad = () => {
@@ -2211,13 +2218,24 @@ const Banner = ({
   } = useMixpanel();
   const [open, setOpen] = useState(true);
   const [hasFired, setHasFired] = useState(false);
-  const onActivation = useOnTriggerActivation(trigger);
+  const {
+    mutate: runSeen,
+    isSuccess,
+    isLoading
+  } = useSeenMutation();
   useEffect(() => {
     if (!open) return;
     if (hasFired) return;
-    onActivation();
+    if (isSuccess) return;
+    if (isLoading) return;
+    const tId = setTimeout(() => {
+      runSeen(trigger);
+    }, 500);
     setHasFired(true);
-  }, [open, hasFired, setHasFired, onActivation]);
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
@@ -3366,13 +3384,24 @@ const Modal = ({
   const brand = React__default.useMemo(() => {
     return getBrand();
   }, []);
-  const onActivation = useOnTriggerActivation(trigger);
+  const {
+    mutate: runSeen,
+    isSuccess,
+    isLoading
+  } = useSeenMutation();
   useEffect(() => {
     if (!open) return;
     if (hasFired) return;
-    onActivation();
+    if (isSuccess) return;
+    if (isLoading) return;
+    const tId = setTimeout(() => {
+      runSeen(trigger);
+    }, 500);
     setHasFired(true);
-  }, [open, hasFired, setHasFired, onActivation]);
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
   if (!open) {
     return null;
   }

@@ -7,7 +7,7 @@ import { useMixpanel } from '../context/MixpanelContext'
 import { useCollector } from '../hooks/useCollector'
 import useCountdown from '../hooks/useCountdown'
 import { getInterpolate } from '../hooks/useInterpolate'
-import useOnTriggerActivation from '../hooks/useOnTriggerActivation'
+import { useSeenMutation } from '../hooks/useSeenMutation'
 
 type Props = {
   trigger: Trigger
@@ -26,14 +26,29 @@ const Banner = ({ trigger }: Props) => {
 
   const [hasFired, setHasFired] = useState(false)
 
-  const onActivation = useOnTriggerActivation(trigger)
+  const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
+
+  // @Todo: @Ed - extract into a reusable piece, or move the logic to TriggerComponent
   useEffect(() => {
     if (!open) return
     if (hasFired) return
+    if (isSuccess) return
+    if (isLoading) return
 
-    onActivation()
+    // seen gets called multiple times since Collector currently
+    // like to over-rerender componets. This timeout prevents from firing a ton
+    // even with this, Banner can still re-issue the same request since all components
+    // get re-rendered and unlike Modal, Banner gets to stay.
+    //  @Ed to deal with at a later point
+    const tId = setTimeout(() => {
+      runSeen(trigger)
+    }, 500)
+
     setHasFired(true)
-  }, [open, hasFired, setHasFired, onActivation])
+    return () => {
+      clearTimeout(tId)
+    }
+  }, [open, isSuccess, isLoading])
 
   const canBeDismissed = true
 

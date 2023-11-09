@@ -77,7 +77,7 @@ export function CollectorProvider({
   )
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
   const [displayTriggers, setDisplayedTriggers] = useState<string[]>([])
-  const [intently, setIntently] = useState<boolean>(false)
+  const [intently, setIntently] = useState<boolean>(true)
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
@@ -212,7 +212,6 @@ export function CollectorProvider({
 
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return
-    // if (displayTriggers) return
 
     /**
      * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
@@ -226,8 +225,6 @@ export function CollectorProvider({
   const { hasDelayPassed } = useExitIntentDelay(config?.exitIntentDelay)
 
   const fireExitTrigger = React.useCallback(() => {
-    if (displayTriggers?.length) return
-
     if (!hasDelayPassed) {
       log(
         `Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`
@@ -288,9 +285,14 @@ export function CollectorProvider({
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD')
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation])
 
+  // temp hack for collector to onl fire once.
+  // @Ed to come up with a proper way to handle this once
+  // we rule out Contexts
+  const [hasCollected, setHasCollected] = useState(false)
   // @todo this should be invoked when booted
   // and then on any window page URL changes.
   useEffect(() => {
+    if (hasCollected) return
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot')
       return
@@ -373,7 +375,7 @@ export function CollectorProvider({
         .catch((err) => {
           error('failed to store collected data', err)
         })
-
+      setHasCollected(true)
       log('CollectorProvider: collected data')
     }, initialDelay)
 
@@ -383,6 +385,7 @@ export function CollectorProvider({
   }, [
     booted,
     collect,
+    hasCollected,
     error,
     setVisitor,
     visitor.id,
@@ -495,18 +498,22 @@ export function CollectorProvider({
     fireOnLoadTriggers()
   }, [fireOnLoadTriggers])
 
+  const onPresenseChange = React.useCallback(
+    (presence: PresenceType) => {
+      log('presence changed', presence)
+    },
+    [log]
+  )
+
   return (
     <IdleTimerProvider
       timeout={idleTimeout}
-      onPresenceChange={(presence: PresenceType) => {
-        log('presence changed', presence)
-      }}
+      onPresenceChange={onPresenseChange}
       onIdle={fireIdleTrigger}
     >
       <CollectorContext.Provider value={collectorContextVal}>
         {children}
-        {/* @ts-ignore */}
-        <TriggerComponent />
+        {TriggerComponent()}
       </CollectorContext.Provider>
       {/* @TODO: this component has no access to any collector related stuff. Deal with this ASAP */}
     </IdleTimerProvider>

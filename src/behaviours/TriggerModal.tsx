@@ -6,7 +6,7 @@ import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useCollector } from '../hooks/useCollector'
-import useOnTriggerActivation from '../hooks/useOnTriggerActivation'
+import { useSeenMutation } from '../hooks/useSeenMutation'
 import { getBrand } from '../utils/brand'
 
 type Props = {
@@ -22,15 +22,25 @@ const Modal = ({ trigger }: Props) => {
   const brand = React.useMemo(() => {
     return getBrand()
   }, [])
+  const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
 
-  const onActivation = useOnTriggerActivation(trigger)
   useEffect(() => {
     if (!open) return
     if (hasFired) return
+    if (isSuccess) return
+    if (isLoading) return
 
-    onActivation()
+    // seen gets called multiple times since Collector currently
+    // like to over-rerender componets. This timeout prevents from firing a ton
+    const tId = setTimeout(() => {
+      runSeen(trigger)
+    }, 500)
+
     setHasFired(true)
-  }, [open, hasFired, setHasFired, onActivation])
+    return () => {
+      clearTimeout(tId)
+    }
+  }, [open, isSuccess, isLoading])
 
   if (!open) {
     return null
