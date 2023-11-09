@@ -24,6 +24,7 @@ const Modal = ({ trigger }: Props) => {
   }, [])
 
   const onActivation = useOnTriggerActivation(trigger)
+
   useEffect(() => {
     if (!open) return
     if (hasFired) return
@@ -48,14 +49,6 @@ const Modal = ({ trigger }: Props) => {
     setOpen(false)
   }
 
-  if (brand === 'C&M')
-    return (
-      <CnMStandardModal
-        trigger={trigger}
-        handleClickCallToAction={handleClickCallToAction}
-        handleCloseModal={handleCloseModal}
-      />
-    )
   if (brand === 'Stonehouse')
     return (
       <StonehouseModal
@@ -73,7 +66,13 @@ const Modal = ({ trigger }: Props) => {
       />
     )
 
-  return null
+  return (
+    <CnMStandardModal
+      trigger={trigger}
+      handleClickCallToAction={handleClickCallToAction}
+      handleCloseModal={handleCloseModal}
+    />
+  )
 }
 
 export const TriggerModal = ({ trigger }: Props) => {
