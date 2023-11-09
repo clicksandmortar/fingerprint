@@ -1152,7 +1152,7 @@ function useTrackIntentlyModal() {
   };
 }
 var useRemoveIntently = function useRemoveIntently() {
-  var _useState2 = React.useState(false),
+  var _useState2 = React.useState(true),
     intently = _useState2[0],
     setIntently = _useState2[1];
   var _useLogging2 = useLogging(),
@@ -1377,9 +1377,9 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
-  var _useState6 = React.useState(false),
-    hasCollected = _useState6[0],
-    setHasCollected = _useState6[1];
+  var _useState5 = React.useState(false),
+    hasCollected = _useState5[0],
+    setHasCollected = _useState5[1];
   React.useEffect(function () {
     if (hasCollected) return;
     if (!booted) {
@@ -1568,8 +1568,6 @@ var useCollector = function useCollector() {
   return React.useContext(CollectorContext);
 };
 
-<<<<<<< HEAD
-=======
 var useSeenMutation = function useSeenMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
@@ -1594,21 +1592,6 @@ var useSeenMutation = function useSeenMutation() {
   });
 };
 
-var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
-  if (typeof window === 'undefined') return false;
-  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-var getBrand = function getBrand() {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return 'C&M';
-};
-
->>>>>>> main
 var Modal = function Modal(_ref) {
   var trigger = _ref.trigger;
   var _useCollector = useCollector(),
