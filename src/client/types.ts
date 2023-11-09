@@ -2,9 +2,9 @@ import { TriggerConfig } from '../components/modals/StandardModal/helpers'
 import { Visitor } from '../visitors/types'
 
 export type CollectorUpdate = {
-  appId: string
-  visitor: Visitor
-  sessionId: string | undefined
+  appId?: string
+  visitor?: Visitor
+  sessionId?: string | undefined
   page?: Page | undefined
   referrer?: Referrer | undefined
   elements?: PageElement[] | undefined
