@@ -310,7 +310,9 @@ var VisitorProvider = function VisitorProvider(_ref) {
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
   var setVisitorData = React__default.useCallback(function (prop) {
-    setVisitor(_extends({}, visitor, prop));
+    setVisitor(function (visitor) {
+      return _extends({}, visitor, prop);
+    });
   }, [setVisitor]);
   return React__default.createElement(VisitorContext.Provider, {
     value: {
@@ -464,10 +466,17 @@ var useCollectorMutation = function useCollectorMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor,
+    session = _useVisitor.session;
   var requestHost = useHostname();
   return reactQuery.useMutation(function (data) {
-    var _data$visitor;
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), _extends({}, data, {
+    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), _extends({}, data, {
+      appId: appId,
+      visitor: visitor,
+      sessionId: session === null || session === void 0 ? void 0 : session.id,
       hostname: requestHost
     })).then(function (response) {
       log('Collector API response', response);
@@ -589,7 +598,6 @@ function CollectorProvider(_ref) {
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId,
     booted = _useFingerprint.booted,
     initialDelay = _useFingerprint.initialDelay,
     exitIntentTriggers = _useFingerprint.exitIntentTriggers,
@@ -779,9 +787,6 @@ function CollectorProvider(_ref) {
         log('CollectorProvider: user logged in event fired');
         trackEvent('user_logged_in', {});
         collect({
-          appId: appId,
-          visitor: visitor,
-          sessionId: session === null || session === void 0 ? void 0 : session.id,
           account: {
             token: hashParams.id_token
           }
@@ -798,11 +803,31 @@ function CollectorProvider(_ref) {
         });
       }
       collect({
+<<<<<<< HEAD
         appId: appId,
         visitor: visitor,
         sessionId: session === null || session === void 0 ? void 0 : session.id,
         page: getPagePayload() || undefined,
         referrer: getReferrer() || undefined
+=======
+        page: {
+          url: window.location.href,
+          path: window.location.pathname,
+          title: document.title,
+          params: params
+        },
+        referrer: {
+          url: document.referrer,
+          title: '',
+          utm: {
+            source: params === null || params === void 0 ? void 0 : params.utm_source,
+            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+            term: params === null || params === void 0 ? void 0 : params.utm_term,
+            content: params === null || params === void 0 ? void 0 : params.utm_content
+          }
+        }
+>>>>>>> main
       }).then(function (response) {
         try {
           if (response.status === 204) {
@@ -814,7 +839,7 @@ function CollectorProvider(_ref) {
             setIdleTimeout(getIdleStatusDelay());
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             var cohort = payload.intently ? 'intently' : 'fingerprint';
-            setVisitor({
+            if (visitor.cohort !== cohort) setVisitor({
               cohort: cohort
             });
             if (!payload.intently) {
@@ -836,7 +861,7 @@ function CollectorProvider(_ref) {
     return function () {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, setVisitor, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id, fireOnLoadTriggers, addPageTriggers]);
+  }, [booted, collect, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -852,9 +877,6 @@ function CollectorProvider(_ref) {
           foundWatchers[configuredSelector] = true;
           setFoundWatchers(foundWatchers);
           collect({
-            appId: appId,
-            visitor: visitor,
-            sessionId: session === null || session === void 0 ? void 0 : session.id,
             elements: [{
               path: window.location.pathname,
               selector: configuredSelector
@@ -877,7 +899,7 @@ function CollectorProvider(_ref) {
       });
     }, 500);
     return intervalId;
-  }, [appId, collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+  }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
   React.useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];

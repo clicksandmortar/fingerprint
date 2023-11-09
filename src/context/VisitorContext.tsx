@@ -44,7 +44,7 @@ export const VisitorProvider = ({ children }: VisitorProviderProps) => {
 
   const setVisitorData = React.useCallback(
     (prop: Partial<Visitor>) => {
-      setVisitor({ ...visitor, ...prop })
+      setVisitor((visitor) => ({ ...visitor, ...prop }))
     },
     [setVisitor]
   )

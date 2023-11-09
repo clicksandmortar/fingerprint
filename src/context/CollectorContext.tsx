@@ -34,7 +34,6 @@ export function CollectorProvider({
 }: CollectorProviderProps) {
   const { log, error } = useLogging()
   const {
-    appId,
     booted,
     initialDelay,
     exitIntentTriggers,
@@ -302,7 +301,6 @@ export function CollectorProvider({
         log('CollectorProvider: Not yet collecting, awaiting visitor ID')
         return
       }
-
       log('CollectorProvider: collecting data')
 
       if (hasVisitorIDInURL()) {
@@ -324,9 +322,6 @@ export function CollectorProvider({
         trackEvent('user_logged_in', {})
 
         collect({
-          appId,
-          visitor,
-          sessionId: session?.id,
           account: {
             token: hashParams.id_token
           }
@@ -342,9 +337,6 @@ export function CollectorProvider({
       }
 
       collect({
-        appId,
-        visitor,
-        sessionId: session?.id,
         page: getPagePayload() || undefined,
         referrer: getReferrer() || undefined
       })
@@ -365,7 +357,8 @@ export function CollectorProvider({
           addPageTriggers(payload?.pageTriggers)
 
           const cohort = payload.intently ? 'intently' : 'fingerprint'
-          setVisitor({ cohort })
+
+          if (visitor.cohort !== cohort) setVisitor({ cohort })
 
           if (!payload.intently) {
             // remove intently overlay here
@@ -388,20 +381,18 @@ export function CollectorProvider({
       clearTimeout(delay)
     }
   }, [
-    appId,
     booted,
     collect,
     error,
     setVisitor,
+    visitor.id,
+    session.id,
     handlers,
     initialDelay,
     getIdleStatusDelay,
     setIdleTimeout,
     log,
     trackEvent,
-    visitor,
-    session?.id,
-    fireOnLoadTriggers,
     addPageTriggers
   ])
 
@@ -426,10 +417,8 @@ export function CollectorProvider({
             trackEvent('booking_complete', {})
             foundWatchers[configuredSelector] = true
             setFoundWatchers(foundWatchers)
+
             collect({
-              appId,
-              visitor,
-              sessionId: session?.id,
               elements: [
                 {
                   path: window.location.pathname,
@@ -460,7 +449,6 @@ export function CollectorProvider({
       return intervalId
     },
     [
-      appId,
       collect,
       error,
       foundWatchers,
