@@ -3,15 +3,12 @@ import ReactDOM from 'react-dom'
 
 import { Trigger } from '../client/types'
 import CloseButton from '../components/CloseButton'
-import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
-import { useVisitor } from '../context/VisitorContext'
 import { useCollector } from '../hooks/useCollector'
 import useCountdown from '../hooks/useCountdown'
-import { useFingerprint } from '../hooks/useFingerprint'
 import { getInterpolate } from '../hooks/useInterpolate'
+import { useSeenMutation } from '../hooks/useSeenMutation'
 import { getBrand } from '../utils/brand'
-import { hostname, request } from '../utils/http'
 
 type Props = {
   trigger: Trigger
@@ -27,9 +24,6 @@ const Banner = ({ trigger }: Props) => {
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
-  const { appId } = useFingerprint()
-  const { visitor } = useVisitor()
-  const { log, error } = useLogging()
 
   const [hasFired, setHasFired] = useState(false)
 
@@ -37,20 +31,23 @@ const Banner = ({ trigger }: Props) => {
     return getBrand()
   }, [])
 
+  const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
+
   // @Todo: @Ed - extract into a reusable piece, or move the logic to TriggerComponent
   useEffect(() => {
     if (!open) return
     if (hasFired) return
+    if (isSuccess) return
+    if (isLoading) return
 
-    try {
-      request
-        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
-          seenTriggerIDs: [trigger.id]
-        })
-        .then(log)
-    } catch (e) {
-      error(e)
-    }
+    // seen gets called multiple times since Collector currently
+    // like to over-rerender componets. This timeout prevents from firing a ton
+    // even with this, Banner can still re-issue the same request since all components
+    // get re-rendered and unlike Modal, Banner gets to stay.
+    //  @Ed to deal with at a later point
+    const tId = setTimeout(() => {
+      runSeen(trigger)
+    }, 500)
 
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
@@ -60,7 +57,10 @@ const Banner = ({ trigger }: Props) => {
       brand
     })
     setHasFired(true)
-  }, [open])
+    return () => {
+      clearTimeout(tId)
+    }
+  }, [open, isSuccess, isLoading])
 
   const canBeDismissed = true
 
