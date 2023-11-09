@@ -98,7 +98,7 @@ function useTrackIntentlyModal() {
 }
 
 const useRemoveIntently = () => {
-  const [intently, setIntently] = useState<boolean>(false)
+  const [intently, setIntently] = useState<boolean>(true)
   const { log } = useLogging()
 
   // Removes the intently overlay, if intently is false

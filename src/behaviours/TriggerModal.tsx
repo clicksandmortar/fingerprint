@@ -4,45 +4,38 @@ import { Trigger } from '../client/types'
 import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
-import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
-import { useVisitor } from '../context/VisitorContext'
 import { useCollector } from '../hooks/useCollector'
-import { useFingerprint } from '../hooks/useFingerprint'
+import { useSeenMutation } from '../hooks/useSeenMutation'
 import { getBrand } from '../utils/brand'
-import { hostname, request } from '../utils/http'
 
 type Props = {
   trigger: Trigger
 }
 
 const Modal = ({ trigger }: Props) => {
-  const { log, error } = useLogging()
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
-  const { appId } = useFingerprint()
-  const { visitor } = useVisitor()
+
   const [open, setOpen] = useState(true)
   const [hasFired, setHasFired] = useState(false)
 
   const brand = React.useMemo(() => {
     return getBrand()
   }, [])
+  const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
 
   useEffect(() => {
     if (!open) return
     if (hasFired) return
+    if (isSuccess) return
+    if (isLoading) return
 
-    try {
-      request
-        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
-          seenTriggerIDs: [trigger.id]
-        })
-        .then(log)
-    } catch (e) {
-      error(e)
-    }
-
+    // seen gets called multiple times since Collector currently
+    // like to over-rerender componets. This timeout prevents from firing a ton
+    const tId = setTimeout(() => {
+      runSeen(trigger)
+    }, 500)
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
@@ -51,7 +44,10 @@ const Modal = ({ trigger }: Props) => {
       brand
     })
     setHasFired(true)
-  }, [open])
+    return () => {
+      clearTimeout(tId)
+    }
+  }, [open, isSuccess, isLoading])
 
   if (!open) {
     return null

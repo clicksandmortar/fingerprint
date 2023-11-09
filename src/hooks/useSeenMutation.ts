@@ -1,27 +1,20 @@
 import { useMutation } from '@tanstack/react-query'
-import { CollectorUpdate } from '../client/types'
+import { Trigger } from '../client/types'
 import { useLogging } from '../context/LoggingContext'
 import { useVisitor } from '../context/VisitorContext'
 import { hostname, request } from '../utils/http'
 import { useFingerprint } from './useFingerprint'
-import { useHostname } from './useHostname'
 
-export const useCollectorMutation = () => {
+export const useSeenMutation = () => {
   const { log, error } = useLogging()
   const { appId } = useFingerprint()
-  const { visitor, session } = useVisitor()
+  const { visitor } = useVisitor()
 
-  const requestHost = useHostname()
-
-  return useMutation<Response, unknown, CollectorUpdate, unknown>(
-    (data: CollectorUpdate) => {
+  return useMutation<Response, {}, unknown, unknown>(
+    (trigger: Trigger) => {
       return request
-        .post(hostname + '/collector/' + visitor?.id, {
-          ...data,
-          appId,
-          visitor,
-          sessionId: session?.id,
-          hostname: requestHost
+        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+          seenTriggerIDs: [trigger.id]
         })
         .then((response) => {
           log('Collector API response', response)
@@ -33,6 +26,7 @@ export const useCollectorMutation = () => {
         })
     },
     {
+      mutationKey: ['seen'],
       onSuccess: () => {}
     }
   )

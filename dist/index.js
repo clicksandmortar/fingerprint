@@ -628,6 +628,31 @@ var StonehouseModal = function StonehouseModal(_ref) {
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
 };
 
+function getEnvVars() {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
+  var isDev = false;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
+
 var LoggingProvider = function LoggingProvider(_ref) {
   var debug = _ref.debug,
     children = _ref.children;
@@ -677,31 +702,6 @@ var LoggingContext = React.createContext({
 var useLogging = function useLogging() {
   return React.useContext(LoggingContext);
 };
-
-function getEnvVars() {
-  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
-  var isDev = false;
-  switch (true) {
-    case typeof window === 'undefined':
-    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
-    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
-    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
-    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
-    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
-      isDev = true;
-      break;
-    default:
-      isDev = false;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
 
 var setCookie = function setCookie(name, value, expires) {
   return Cookies.set(name, value, {
@@ -870,7 +870,9 @@ var VisitorProvider = function VisitorProvider(_ref) {
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
   var setVisitorData = React__default.useCallback(function (prop) {
-    setVisitor(_extends({}, visitor, prop));
+    setVisitor(function (visitor) {
+      return _extends({}, visitor, prop);
+    });
   }, [setVisitor]);
   return React__default.createElement(VisitorContext.Provider, {
     value: {
@@ -1024,10 +1026,17 @@ var useCollectorMutation = function useCollectorMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor,
+    session = _useVisitor.session;
   var requestHost = useHostname();
   return reactQuery.useMutation(function (data) {
-    var _data$visitor;
-    return request.post(hostname + '/collector/' + (data === null || data === void 0 ? void 0 : (_data$visitor = data.visitor) === null || _data$visitor === void 0 ? void 0 : _data$visitor.id), _extends({}, data, {
+    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), _extends({}, data, {
+      appId: appId,
+      visitor: visitor,
+      sessionId: session === null || session === void 0 ? void 0 : session.id,
       hostname: requestHost
     })).then(function (response) {
       log('Collector API response', response);
@@ -1222,7 +1231,6 @@ function CollectorProvider(_ref) {
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId,
     booted = _useFingerprint.booted,
     initialDelay = _useFingerprint.initialDelay,
     exitIntentTriggers = _useFingerprint.exitIntentTriggers,
@@ -1339,7 +1347,6 @@ function CollectorProvider(_ref) {
   var _useExitIntentDelay = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay),
     hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
   var fireExitTrigger = React__default.useCallback(function () {
-    if (displayTriggers !== null && displayTriggers !== void 0 && displayTriggers.length) return;
     if (!hasDelayPassed) {
       log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
       log('Re-registering handler');
@@ -1370,7 +1377,11 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
+  var _useState6 = React.useState(false),
+    hasCollected = _useState6[0],
+    setHasCollected = _useState6[1];
   React.useEffect(function () {
+    if (hasCollected) return;
     if (!booted) {
       log('CollectorProvider: Not yet collecting, awaiting boot');
       return;
@@ -1404,9 +1415,6 @@ function CollectorProvider(_ref) {
         log('CollectorProvider: user logged in event fired');
         trackEvent('user_logged_in', {});
         collect({
-          appId: appId,
-          visitor: visitor,
-          sessionId: session === null || session === void 0 ? void 0 : session.id,
           account: {
             token: hashParams.id_token
           }
@@ -1423,9 +1431,6 @@ function CollectorProvider(_ref) {
         });
       }
       collect({
-        appId: appId,
-        visitor: visitor,
-        sessionId: session === null || session === void 0 ? void 0 : session.id,
         page: {
           url: window.location.href,
           path: window.location.pathname,
@@ -1454,7 +1459,7 @@ function CollectorProvider(_ref) {
             setIdleTimeout(getIdleStatusDelay());
             addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             var cohort = payload.intently ? 'intently' : 'fingerprint';
-            setVisitor({
+            if (visitor.cohort !== cohort) setVisitor({
               cohort: cohort
             });
             if (!payload.intently) {
@@ -1471,12 +1476,13 @@ function CollectorProvider(_ref) {
       })["catch"](function (err) {
         error('failed to store collected data', err);
       });
+      setHasCollected(true);
       log('CollectorProvider: collected data');
     }, initialDelay);
     return function () {
       clearTimeout(delay);
     };
-  }, [appId, booted, collect, error, setVisitor, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, visitor, session === null || session === void 0 ? void 0 : session.id, fireOnLoadTriggers, addPageTriggers]);
+  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -1492,9 +1498,6 @@ function CollectorProvider(_ref) {
           foundWatchers[configuredSelector] = true;
           setFoundWatchers(foundWatchers);
           collect({
-            appId: appId,
-            visitor: visitor,
-            sessionId: session === null || session === void 0 ? void 0 : session.id,
             elements: [{
               path: window.location.pathname,
               selector: configuredSelector
@@ -1517,7 +1520,7 @@ function CollectorProvider(_ref) {
       });
     }, 500);
     return intervalId;
-  }, [appId, collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+  }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
   React.useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];
@@ -1543,15 +1546,16 @@ function CollectorProvider(_ref) {
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
+  var onPresenseChange = React__default.useCallback(function (presence) {
+    log('presence changed', presence);
+  }, [log]);
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
     timeout: idleTimeout,
-    onPresenceChange: function onPresenceChange(presence) {
-      log('presence changed', presence);
-    },
+    onPresenceChange: onPresenseChange,
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: collectorContextVal
-  }, children, React__default.createElement(TriggerComponent, null)));
+  }, children, TriggerComponent()));
 }
 var CollectorContext = React.createContext({
   addPageTriggers: function addPageTriggers() {},
@@ -1564,19 +1568,53 @@ var useCollector = function useCollector() {
   return React.useContext(CollectorContext);
 };
 
-var Modal = function Modal(_ref) {
-  var trigger = _ref.trigger;
+<<<<<<< HEAD
+=======
+var useSeenMutation = function useSeenMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
-  var _useCollector = useCollector(),
-    removeActiveTrigger = _useCollector.removeActiveTrigger;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
   var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
+  return reactQuery.useMutation(function (trigger) {
+    return request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+      seenTriggerIDs: [trigger.id]
+    }).then(function (response) {
+      log('Collector API response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Collector API error', err);
+      return err;
+    });
+  }, {
+    mutationKey: ['seen'],
+    onSuccess: function onSuccess() {}
+  });
+};
+
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+var getBrand = function getBrand() {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  return 'C&M';
+};
+
+>>>>>>> main
+var Modal = function Modal(_ref) {
+  var trigger = _ref.trigger;
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
@@ -1586,16 +1624,18 @@ var Modal = function Modal(_ref) {
   var brand = React__default.useMemo(function () {
     return getBrand();
   }, []);
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSuccess = _useSeenMutation.isSuccess,
+    isLoading = _useSeenMutation.isLoading;
   React.useEffect(function () {
     if (!open) return;
     if (hasFired) return;
-    try {
-      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
-        seenTriggerIDs: [trigger.id]
-      }).then(log);
-    } catch (e) {
-      error(e);
-    }
+    if (isSuccess) return;
+    if (isLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+    }, 500);
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
@@ -1604,7 +1644,10 @@ var Modal = function Modal(_ref) {
       brand: brand
     });
     setHasFired(true);
-  }, [open]);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
   if (!open) {
     return null;
   }
@@ -3033,29 +3076,24 @@ var Banner = function Banner(_ref) {
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
   var _useState2 = React.useState(false),
     hasFired = _useState2[0],
     setHasFired = _useState2[1];
   var brand = React__default.useMemo(function () {
     return getBrand();
   }, []);
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSuccess = _useSeenMutation.isSuccess,
+    isLoading = _useSeenMutation.isLoading;
   React.useEffect(function () {
     if (!open) return;
     if (hasFired) return;
-    try {
-      request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
-        seenTriggerIDs: [trigger.id]
-      }).then(log);
-    } catch (e) {
-      error(e);
-    }
+    if (isSuccess) return;
+    if (isLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+    }, 500);
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
@@ -3064,7 +3102,10 @@ var Banner = function Banner(_ref) {
       brand: brand
     });
     setHasFired(true);
-  }, [open]);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();

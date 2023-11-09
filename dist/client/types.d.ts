@@ -2,9 +2,9 @@
 import { TriggerConfig } from '../components/modals/StandardModal/helpers';
 import { Visitor } from '../visitors/types';
 export declare type CollectorUpdate = {
-    appId: string;
-    visitor: Visitor;
-    sessionId: string | undefined;
+    appId?: string;
+    visitor?: Visitor;
+    sessionId?: string | undefined;
     page?: Page | undefined;
     referrer?: Referrer | undefined;
     elements?: PageElement[] | undefined;
@@ -39,7 +39,7 @@ export declare type Referrer = {
         term?: string;
     };
 };
-export declare type CollectorResponse = {
+export declare type CollectorVisitorResponse = {
     firstSeen: Date;
     lastSeen: Date;
     visits: number;
