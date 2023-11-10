@@ -83,8 +83,8 @@ const StonehouseModal = ({
         align-items: center;
         justify-content: space-between;
         box-shadow: var(--text-shadow);
-        width: ${scaleBg(1).width}px;
-        height: ${scaleBg(1).height}px;
+        height: ${scaleBg(0.7).height}px;
+        width: ${scaleBg(0.7).width}px;
       }
 
       .${prependClass('gotham-bold')} {
@@ -95,14 +95,11 @@ const StonehouseModal = ({
         text-align: center;
       }
 
-  
-
       .${prependClass('main-text')} {
         line-height: 1.2;
         flex: 1;
         font-family: 'Gotham Bold';
         font-weight: 500;
-        font-size: 4rem;
         font-style: normal;
         text-transform: uppercase;
         text-align: center;
@@ -111,6 +108,7 @@ const StonehouseModal = ({
         margin-left: auto;
         margin-right: auto;
         margin-bottom: -10px;
+        font-size: 3rem;
       }
 
       .${prependClass('text-container')} {
@@ -124,23 +122,20 @@ const StonehouseModal = ({
         margin: auto;
         font-weight: 600;
         font-family: 'Gotham Bold';
-        font-size: 3.5rem;
         color: ${secondaryColor};
         letter-spacing: 2pt;
         display: inline-block;
         text-align: center;
+        font-size: 1.7rem;
       }
 
       .${prependClass('cta')} {
         line-height: 1.2;
         font-family: 'Gotham Bold';
         cursor: pointer;
-
         background-color: ${callToActionColor};
         border-radius: 2px;
-        padding: 1.75rem 2rem 0.5rem 2rem;
         display: block;
-        font-size: 1.3rem;
         color: white;
         text-align: center;
         text-transform: uppercase;
@@ -148,6 +143,8 @@ const StonehouseModal = ({
         margin: 0 auto;
         text-decoration: none;
         box-shadow: -2px 2px 8px black;
+        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
+        font-size: 1rem;
       }
 
       .${prependClass('cta:hover')} {
@@ -173,7 +170,8 @@ const StonehouseModal = ({
         flex-direction: column;
         justify-content: space-between;
         width: 100%;
-        padding: 10rem 1.5rem 8rem 1.5rem;
+        padding: 8rem 1.5rem 6rem 1.5rem;
+
       }
 
       .${prependClass('text-shadow')} {
@@ -182,26 +180,6 @@ const StonehouseModal = ({
 
       .${prependClass('box-shadow')} {
         box-shadow: var(--text-shadow);
-      }
-
-      @media screen and (max-width: 768px) {
-        .${prependClass('modal')} {
-          height: ${scaleBg(0.7).height}px;
-          width: ${scaleBg(0.7).width}px;
-        }
-        .${prependClass('main-text')}{
-          font-size: 3rem;
-        }
-        .${prependClass('sub-text')}{
-          font-size: 1.7rem;
-        }
-        .${prependClass('cta')}{
-          padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
-          font-size: 1rem;
-        }
-        .${prependClass('image-container')} {
-          padding: 8rem 1.5rem 6rem 1.5rem;
-        }
       }
       
       @media screen and (max-width: 550px) {
