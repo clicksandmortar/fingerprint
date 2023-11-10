@@ -1020,7 +1020,7 @@ const StonehouseModal = ({
     };
   }, []);
   const textColorByRoute = React__default.useMemo(() => {
-    if (!location.href.includes('tablebooking')) return {
+    if (location.href.includes('tablebooking')) return {
       heading: {
         color: 'white'
       },
@@ -1355,6 +1355,7 @@ const MixpanelProvider = ({
   const {
     log
   } = useLogging();
+  const [initiated, setInitiated] = useState(false);
   useEffect(() => {
     if (!appId || !visitor.id) {
       return;
@@ -1363,6 +1364,7 @@ const MixpanelProvider = ({
     init({
       debug: true
     });
+    setInitiated(true);
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
@@ -1374,7 +1376,7 @@ const MixpanelProvider = ({
     registerUserData({
       u_cohort: visitor.cohort
     });
-  }, [visitor]);
+  }, [visitor, setInitiated]);
   const registerUserData = React__default.useCallback(properties => {
     log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
     mixpanel.people.set(properties);
@@ -1382,13 +1384,19 @@ const MixpanelProvider = ({
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent,
-      registerUserData
+      registerUserData,
+      state: {
+        initiated
+      }
     }
   }, children);
 };
 const MixpanelContext = createContext({
   trackEvent: () => console.error('Mixpanel: trackEvent not setup properly. Check your Context order.'),
-  registerUserData: () => console.error('Mixpanel: registerUserData not setup properly. Check your Context order.')
+  registerUserData: () => console.error('Mixpanel: registerUserData not setup properly. Check your Context order.'),
+  state: {
+    initiated: false
+  }
 });
 const useMixpanel = () => {
   return useContext(MixpanelContext);
@@ -1506,30 +1514,34 @@ const getBrand = () => {
 };
 
 const selectorRateMs = 100;
-function useTrackIntentlyModal() {
+function useTrackIntentlyModal({
+  intently
+}) {
   const [isVisible, setIsVisible] = useState(false);
   const {
-    trackEvent
+    trackEvent,
+    state: {
+      initiated
+    }
   } = useMixpanel();
   const {
     log,
     error
   } = useLogging();
   useEffect(() => {
+    if (!initiated) return;
+    if (!intently) return;
     const id = setInterval(() => {
       const intentlyOuterContainer = document.querySelector('smc-overlay-outer');
       if (!intentlyOuterContainer) {
-        log("useTrackIntentlyModal: Intently container hasn't mounted yet...");
         return;
       }
       const isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
       if (!isIntentlyOuterVisible) {
-        log('useTrackIntentlyModal: Intently container has mounted, but not visible yet.');
         return;
       }
       const intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
       if (!intentlyInnerOverlay) {
-        log('useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.');
         return;
       }
       log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
@@ -1543,8 +1555,10 @@ function useTrackIntentlyModal() {
       });
       clearInterval(id);
     }, selectorRateMs);
-    return () => clearInterval(id);
-  }, [setIsVisible]);
+    return () => {
+      clearInterval(id);
+    };
+  }, [intently, log, setIsVisible, trackEvent, initiated]);
   const getHandleTrackAction = action => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`);
     trackEvent(`user_clicked_${action}_button`, {});
@@ -1561,14 +1575,15 @@ function useTrackIntentlyModal() {
       ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
       closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
     };
-  }, [isVisible]);
+  }, [error, getHandleTrackAction, isVisible]);
   return {
     isVisible,
     setIsVisible
   };
 }
-const useRemoveIntently = () => {
-  const [intently, setIntently] = useState(true);
+const useRemoveIntently = ({
+  intently
+}) => {
   const {
     log
   } = useLogging();
@@ -1587,15 +1602,19 @@ const useRemoveIntently = () => {
       clearInterval(runningInterval);
     };
   }, [intently, log]);
-  return {
-    intently,
-    setIntently
-  };
 };
 function useIntently() {
-  useTrackIntentlyModal();
-  const intentlyState = useRemoveIntently();
-  return intentlyState;
+  const [intently, setIntently] = useState(true);
+  useRemoveIntently({
+    intently
+  });
+  useTrackIntentlyModal({
+    intently
+  });
+  return {
+    setIntently,
+    intently
+  };
 }
 
 const defaultTriggerCooldown = 60 * 1000;

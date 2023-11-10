@@ -573,7 +573,7 @@ var StonehouseModal = function StonehouseModal(_ref) {
     };
   }, []);
   var textColorByRoute = React__default.useMemo(function () {
-    if (!location.href.includes('tablebooking')) return {
+    if (location.href.includes('tablebooking')) return {
       heading: {
         color: 'white'
       },
@@ -916,6 +916,9 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
+  var _useState = React.useState(false),
+    initiated = _useState[0],
+    setInitiated = _useState[1];
   React.useEffect(function () {
     if (!appId || !visitor.id) {
       return;
@@ -924,6 +927,7 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     init({
       debug: true
     });
+    setInitiated(true);
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
@@ -935,7 +939,7 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     registerUserData({
       u_cohort: visitor.cohort
     });
-  }, [visitor]);
+  }, [visitor, setInitiated]);
   var registerUserData = React__default.useCallback(function (properties) {
     log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
     mixpanel.people.set(properties);
@@ -943,7 +947,10 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent: trackEvent,
-      registerUserData: registerUserData
+      registerUserData: registerUserData,
+      state: {
+        initiated: initiated
+      }
     }
   }, children);
 };
@@ -953,6 +960,9 @@ var MixpanelContext = React.createContext({
   },
   registerUserData: function registerUserData() {
     return console.error('Mixpanel: registerUserData not setup properly. Check your Context order.');
+  },
+  state: {
+    initiated: false
   }
 });
 var useMixpanel = function useMixpanel() {
@@ -1091,30 +1101,31 @@ var getBrand = function getBrand() {
 };
 
 var selectorRateMs = 100;
-function useTrackIntentlyModal() {
+function useTrackIntentlyModal(_ref) {
+  var intently = _ref.intently;
   var _useState = React.useState(false),
     isVisible = _useState[0],
     setIsVisible = _useState[1];
   var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+    trackEvent = _useMixpanel.trackEvent,
+    initiated = _useMixpanel.state.initiated;
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
   React.useEffect(function () {
+    if (!initiated) return;
+    if (!intently) return;
     var id = setInterval(function () {
       var intentlyOuterContainer = document.querySelector('smc-overlay-outer');
       if (!intentlyOuterContainer) {
-        log("useTrackIntentlyModal: Intently container hasn't mounted yet...");
         return;
       }
       var isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
       if (!isIntentlyOuterVisible) {
-        log('useTrackIntentlyModal: Intently container has mounted, but not visible yet.');
         return;
       }
       var intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
       if (!intentlyInnerOverlay) {
-        log('useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.');
         return;
       }
       log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
@@ -1129,9 +1140,9 @@ function useTrackIntentlyModal() {
       clearInterval(id);
     }, selectorRateMs);
     return function () {
-      return clearInterval(id);
+      clearInterval(id);
     };
-  }, [setIsVisible]);
+  }, [intently, log, setIsVisible, trackEvent, initiated]);
   var getHandleTrackAction = function getHandleTrackAction(action) {
     return function () {
       log("useTrackIntentlyModal: user clicked " + action + " button");
@@ -1150,16 +1161,14 @@ function useTrackIntentlyModal() {
       ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
       closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
     };
-  }, [isVisible]);
+  }, [error, getHandleTrackAction, isVisible]);
   return {
     isVisible: isVisible,
     setIsVisible: setIsVisible
   };
 }
-var useRemoveIntently = function useRemoveIntently() {
-  var _useState2 = React.useState(true),
-    intently = _useState2[0],
-    setIntently = _useState2[1];
+var useRemoveIntently = function useRemoveIntently(_ref2) {
+  var intently = _ref2.intently;
   var _useLogging2 = useLogging(),
     log = _useLogging2.log;
   React.useEffect(function () {
@@ -1177,15 +1186,21 @@ var useRemoveIntently = function useRemoveIntently() {
       clearInterval(runningInterval);
     };
   }, [intently, log]);
-  return {
-    intently: intently,
-    setIntently: setIntently
-  };
 };
 function useIntently() {
-  useTrackIntentlyModal();
-  var intentlyState = useRemoveIntently();
-  return intentlyState;
+  var _useState2 = React.useState(true),
+    intently = _useState2[0],
+    setIntently = _useState2[1];
+  useRemoveIntently({
+    intently: intently
+  });
+  useTrackIntentlyModal({
+    intently: intently
+  });
+  return {
+    setIntently: setIntently,
+    intently: intently
+  };
 }
 
 var defaultTriggerCooldown = 60 * 1000;
