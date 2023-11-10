@@ -5,21 +5,31 @@ import { getBrand } from '../utils/brand'
 
 const selectorRateMs = 100
 
+type IntentlyProps = {
+  intently: boolean
+}
 /**
  * This file contains all Intently related logic and hooks.
  */
 
-function useTrackIntentlyModal() {
+function useTrackIntentlyModal({ intently }: IntentlyProps) {
   const [isVisible, setIsVisible] = useState<boolean>(false)
-  const { trackEvent } = useMixpanel()
+  const {
+    trackEvent,
+    state: { initiated }
+  } = useMixpanel()
   const { log, error } = useLogging()
 
   useEffect(() => {
+    // prevents the occasional race condition
+    if (!initiated) return
+    // do not run if the user is in the Fingerprint cohort.
+    if (!intently) return
+
     const id = setInterval(() => {
       const intentlyOuterContainer = document.querySelector('smc-overlay-outer')
 
       if (!intentlyOuterContainer) {
-        log("useTrackIntentlyModal: Intently container hasn't mounted yet...")
         return
       }
 
@@ -27,18 +37,14 @@ function useTrackIntentlyModal() {
         window.getComputedStyle(intentlyOuterContainer).display === 'block'
 
       if (!isIntentlyOuterVisible) {
-        log(
-          'useTrackIntentlyModal: Intently container has mounted, but not visible yet.'
-        )
+        // do not add logs here, gets spammy very quick.
         return
       }
 
       const intentlyInnerOverlay = document.querySelector('smc-overlay-inner')
 
       if (!intentlyInnerOverlay) {
-        log(
-          'useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.'
-        )
+        // do not add logs here, gets spammy very quick.
         return
       }
 
@@ -58,8 +64,10 @@ function useTrackIntentlyModal() {
       clearInterval(id)
     }, selectorRateMs)
 
-    return () => clearInterval(id)
-  }, [setIsVisible])
+    return () => {
+      clearInterval(id)
+    }
+  }, [intently, log, setIsVisible, trackEvent, initiated])
 
   const getHandleTrackAction = (action: 'exit' | 'CTA') => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`)
@@ -92,13 +100,12 @@ function useTrackIntentlyModal() {
       ctaBtn?.removeEventListener('click', ctaHandler)
       closeBtn?.removeEventListener('click', exitHandler)
     }
-  }, [isVisible])
+  }, [error, getHandleTrackAction, isVisible])
 
   return { isVisible, setIsVisible }
 }
 
-const useRemoveIntently = () => {
-  const [intently, setIntently] = useState<boolean>(true)
+const useRemoveIntently = ({ intently }: IntentlyProps) => {
   const { log } = useLogging()
 
   // Removes the intently overlay, if intently is false
@@ -125,18 +132,15 @@ const useRemoveIntently = () => {
       clearInterval(runningInterval)
     }
   }, [intently, log])
-
-  return {
-    intently,
-    setIntently
-  }
 }
 
 export function useIntently() {
-  useTrackIntentlyModal()
+  const [intently, setIntently] = useState<boolean>(true)
 
-  const intentlyState = useRemoveIntently()
-  return intentlyState
+  useRemoveIntently({ intently })
+  useTrackIntentlyModal({ intently })
+
+  return { setIntently, intently }
 }
 
 export default useIntently

@@ -47,8 +47,531 @@ const CloseButton = ({
   })));
 };
 
+<<<<<<< HEAD
 const useFingerprint = () => {
   return useContext(FingerprintContext);
+=======
+const CurlyText = ({
+  randomHash,
+  text
+}) => {
+  return React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    xmlnsXlink: 'http://www.w3.org/1999/xlink',
+    version: '1.1',
+    viewBox: '0 0 500 500',
+    className: 'f' + randomHash + '-curlyText'
+  }, React__default.createElement("defs", null, React__default.createElement("path", {
+    id: 'textPath',
+    d: 'M 0 500 A 175,100 0 0 1 500,500'
+  })), React__default.createElement("text", {
+    x: '0',
+    y: '0',
+    textAnchor: 'middle'
+  }, React__default.createElement("textPath", {
+    xlinkHref: '#textPath',
+    fill: 'white',
+    startOffset: '50%'
+  }, text)));
+};
+const BrownsModal = ({
+  trigger,
+  handleClickCallToAction,
+  handleCloseModal
+}) => {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const randomHash = useMemo(() => {
+    return v4().split('-')[0];
+  }, []);
+  useEffect(() => {
+    const css = `
+      @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");
+
+@font-face {
+  font-family: "proxima-nova";
+  src: url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff2"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("opentype");
+  font-display: auto;
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: normal;
+}
+
+:root {
+  --primary: #b6833f;
+  --secondary: white;
+  --text-shadow: 1px 1px 10px rgba(0,0,0,1);
+}
+
+.tk-proxima-nova {
+  font-family: "proxima-nova", sans-serif;
+}
+
+.f` + randomHash + `-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "proxima-nova", sans-serif !important;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.f` + randomHash + `-modal {
+  width: 80%;
+  max-width: 400px;
+  height: 500px;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+}
+
+@media screen and (min-width: 768px) {
+  .f` + randomHash + `-modal {
+    width: 50%;
+    max-width: 600px;
+  }
+}
+
+.f` + randomHash + `-modalImage {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+
+@media screen and (max-width:768px) {
+  .f` + randomHash + `-modal {
+    width: 100vw;
+  }
+}
+
+
+.f` + randomHash + `-curlyText {
+  font-family: "proxima-nova", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 2pt;
+  fill: var(--secondary);
+  text-shadow: var(--text-shadow);
+  margin-top: -150px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.f` + randomHash + `-curlyText text {
+  font-size: 1.3rem;
+}
+
+
+.f` + randomHash + `-mainText {
+  font-weight: 200;
+  font-family: "proxima-nova", sans-serif;
+  color: var(--secondary);
+  font-size: 2.1rem;
+  text-shadow: var(--text-shadow);
+  display: inline-block;
+  text-align: center;
+  margin-top: -4.5rem;
+}
+
+
+@media screen and (min-width: 768px) {
+  .f` + randomHash + `-curlyText {
+    margin-top: -200px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .f` + randomHash + `-curlyText {
+    margin-top: -200px;
+  }
+
+  .f` + randomHash + `-mainText {
+    font-size: 2.4rem;
+  }
+}
+
+@media screen and (min-width: 1150px) {
+  .f` + randomHash + `-mainText {
+    font-size: 2.7rem;
+  }
+}
+
+.f` + randomHash + `-cta {
+  font-family: "proxima-nova", sans-serif;
+  cursor: pointer;
+  background-color: var(--secondary);
+  padding: 0.75rem 3rem;
+  border-radius: 8px;
+  display: block;
+  font-size: 1.3rem;
+  color: var(--primary);
+  text-align: center;
+  text-transform: uppercase;
+  max-width: 400px;
+  margin: 0 auto;
+  text-decoration: none;
+}
+
+.f` + randomHash + `-cta:hover {
+  transition: all 0.3s;
+  filter: brightness(0.95);
+}
+
+.f` + randomHash + `-close-button {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+
+.f` + randomHash + `-close-button:hover {
+  transition: all 0.3s;
+  filter: brightness(0.95);
+}
+
+
+.f` + randomHash + `-button-container {
+  flex: 1;
+  display: grid;
+  place-content: center;
+}
+
+.f` + randomHash + `-image-darken {
+  background: rgba(0,0,0,0.2);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+}
+    `;
+    const styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(css));
+    document.head.appendChild(styles);
+    setStylesLoaded(true);
+  }, [randomHash]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: 'f' + randomHash + '-overlay'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-modal',
+    style: {
+      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative',
+      height: 500
+    }
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-image-darken'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-close-button'
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement(CurlyText, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
+    randomHash: randomHash
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1
+    },
+    className: 'f' + randomHash + '--spacer'
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1,
+      marginTop: -150,
+      textTransform: 'uppercase',
+      textAlign: 'center',
+      letterSpacing: '2pt'
+    }
+  }, React__default.createElement("span", {
+    className: 'f' + randomHash + '-mainText'
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    className: 'f' + randomHash + '-buttonContainer'
+  }, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: 'f' + randomHash + '-cta',
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
+};
+
+const primaryColor = `rgb(33,147,174)`;
+const secondaryColor = `#e0aa00`;
+const callToActionColor = 'rgb(235,63,43)';
+const mainGrey = 'rgb(70,70,70)';
+const scaleBg = scale => {
+  const imageWidth = 800;
+  const imageHeight = 700;
+  return {
+    height: imageHeight * scale,
+    width: imageWidth * scale
+  };
+};
+const StonehouseModal = ({
+  trigger,
+  handleClickCallToAction,
+  handleCloseModal
+}) => {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+  useEffect(() => {
+    const cssToApply = `
+      @font-face{
+        font-family: "Gotham Bold";
+        src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix") format("embedded-opentype"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff") format("woff"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2") format("woff2"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf") format("truetype"),
+            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold") format("svg");
+            font-display: auto;
+            font-style: normal;
+            font-weight: 500;
+            font-stretch: normal;
+    }
+     
+
+      :root {
+        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      }
+  
+
+      .${prependClass('overlay')} {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Gotham Bold';
+        font-weight: 500;
+        font-style: normal;
+      }
+
+      .${prependClass('modal')} {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background-repeat: no-repeat;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--text-shadow);
+        height: ${scaleBg(0.7).height}px;
+        width: ${scaleBg(0.7).width}px;
+      }
+
+      .${prependClass('gotham-bold')} {
+        font-family: 'Gotham Bold';
+      }
+
+      .${prependClass('text-center')} {
+        text-align: center;
+      }
+
+      .${prependClass('main-text')} {
+        line-height: 1.2;
+        font-family: 'Gotham Bold';
+        font-weight: 500;
+        font-style: normal;
+        text-transform: uppercase;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 0;
+        margin-bottom: -1.5rem;
+        font-size: 4.5rem;
+      }
+
+      .${prependClass('text-container')} {
+        display: grid;
+        place-content: center;
+        flex: 1;
+      }
+
+      .${prependClass('sub-text')} {
+        line-height: 1;
+        margin: auto;
+        font-weight: 600;
+        font-family: 'Gotham Bold';
+        color: ${secondaryColor};
+        letter-spacing: 2pt;
+        display: inline-block;
+        text-align: center;
+        font-size: 2.4rem;
+      }
+
+      .${prependClass('cta')} {
+        line-height: 1.2;
+        font-family: 'Gotham Bold';
+        cursor: pointer;
+        background-color: ${callToActionColor};
+        border-radius: 2px;
+        display: block;
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+        margin: 0 auto;
+        text-decoration: none;
+        box-shadow: -2px 2px 8px black;
+        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
+        font-size: 1.3rem;
+      }
+
+      .${prependClass('cta:hover')} {
+        transition: all 0.3s;
+        filter: brightness(0.95);
+      }
+
+      .${prependClass('close-button')} {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+      }
+      .${prependClass('close-button')}:hover {
+        transition: all 0.3s;
+        filter: brightness(0.95);
+      }
+      
+
+      .${prependClass('image-container')} {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        padding: 4rem 1.5rem 2rem 1.5rem;
+      }
+
+      .${prependClass('text-shadow')} {
+        text-shadow: var(--text-shadow);
+      }
+
+      .${prependClass('box-shadow')} {
+        box-shadow: var(--text-shadow);
+      }
+      
+      @media screen and (max-width: 550px) {
+        .${prependClass('modal')} {
+          height: ${scaleBg(0.4).height}px;
+          width: ${scaleBg(0.4).width}px;
+        }
+        .${prependClass('main-text')}{
+          font-size: 2.5rem;
+          margin-bottom: -0.6rem;
+        }
+        .${prependClass('sub-text')}{
+          font-size: 1.9rem;
+          letter-spacing: 1.2pt;
+
+        }
+        .${prependClass('cta')}{
+          padding: 0.8rem 0.8rem 0rem 0.8rem;  
+          font-size: 0.8rem;
+        }
+        .${prependClass('image-container')} {
+          padding: 2rem 1.5rem 1rem 1.5rem;
+        }
+      }
+    `;
+    const styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(() => {
+      setStylesLoaded(true);
+    }, 500);
+    return () => {
+      document.head.removeChild(styles);
+    };
+  }, []);
+  const textColorByRoute = React__default.useMemo(() => {
+    if (location.href.includes('tablebooking')) return {
+      heading: {
+        color: 'white'
+      },
+      paragraph: {
+        color: secondaryColor
+      }
+    };
+    return {
+      heading: {
+        color: primaryColor,
+        WebkitTextStroke: `2px ${mainGrey}`
+      },
+      paragraph: {
+        color: mainGrey
+      }
+    };
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: {
+      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-container')
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text'),
+    style: textColorByRoute.heading
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
+    className: prependClass('sub-text'),
+    style: textColorByRoute.paragraph
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    style: {
+      flex: 1,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+>>>>>>> main
 };
 
 function getEnvVars() {
@@ -326,6 +849,7 @@ const MixpanelProvider = ({
   const {
     log
   } = useLogging();
+  const [initiated, setInitiated] = useState(false);
   useEffect(() => {
     if (!appId || !visitor.id) {
       return;
@@ -334,6 +858,7 @@ const MixpanelProvider = ({
     init({
       debug: true
     });
+    setInitiated(true);
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
@@ -345,7 +870,7 @@ const MixpanelProvider = ({
     registerUserData({
       u_cohort: visitor.cohort
     });
-  }, [visitor]);
+  }, [visitor, setInitiated]);
   const registerUserData = React__default.useCallback(properties => {
     log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
     mixpanel.people.set(properties);
@@ -353,13 +878,19 @@ const MixpanelProvider = ({
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent,
-      registerUserData
+      registerUserData,
+      state: {
+        initiated
+      }
     }
   }, children);
 };
 const MixpanelContext = createContext({
   trackEvent: () => console.error('Mixpanel: trackEvent not setup properly. Check your Context order.'),
-  registerUserData: () => console.error('Mixpanel: registerUserData not setup properly. Check your Context order.')
+  registerUserData: () => console.error('Mixpanel: registerUserData not setup properly. Check your Context order.'),
+  state: {
+    initiated: false
+  }
 });
 const useMixpanel = () => {
   return useContext(MixpanelContext);
@@ -477,30 +1008,34 @@ const getBrand = () => {
 };
 
 const selectorRateMs = 100;
-function useTrackIntentlyModal() {
+function useTrackIntentlyModal({
+  intently
+}) {
   const [isVisible, setIsVisible] = useState(false);
   const {
-    trackEvent
+    trackEvent,
+    state: {
+      initiated
+    }
   } = useMixpanel();
   const {
     log,
     error
   } = useLogging();
   useEffect(() => {
+    if (!initiated) return;
+    if (!intently) return;
     const id = setInterval(() => {
       const intentlyOuterContainer = document.querySelector('smc-overlay-outer');
       if (!intentlyOuterContainer) {
-        log("useTrackIntentlyModal: Intently container hasn't mounted yet...");
         return;
       }
       const isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
       if (!isIntentlyOuterVisible) {
-        log('useTrackIntentlyModal: Intently container has mounted, but not visible yet.');
         return;
       }
       const intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
       if (!intentlyInnerOverlay) {
-        log('useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.');
         return;
       }
       log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
@@ -514,8 +1049,10 @@ function useTrackIntentlyModal() {
       });
       clearInterval(id);
     }, selectorRateMs);
-    return () => clearInterval(id);
-  }, [setIsVisible]);
+    return () => {
+      clearInterval(id);
+    };
+  }, [intently, log, setIsVisible, trackEvent, initiated]);
   const getHandleTrackAction = action => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`);
     trackEvent(`user_clicked_${action}_button`, {});
@@ -532,14 +1069,15 @@ function useTrackIntentlyModal() {
       ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
       closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
     };
-  }, [isVisible]);
+  }, [error, getHandleTrackAction, isVisible]);
   return {
     isVisible,
     setIsVisible
   };
 }
-const useRemoveIntently = () => {
-  const [intently, setIntently] = useState(true);
+const useRemoveIntently = ({
+  intently
+}) => {
   const {
     log
   } = useLogging();
@@ -558,15 +1096,19 @@ const useRemoveIntently = () => {
       clearInterval(runningInterval);
     };
   }, [intently, log]);
-  return {
-    intently,
-    setIntently
-  };
 };
 function useIntently() {
-  useTrackIntentlyModal();
-  const intentlyState = useRemoveIntently();
-  return intentlyState;
+  const [intently, setIntently] = useState(true);
+  useRemoveIntently({
+    intently
+  });
+  useTrackIntentlyModal({
+    intently
+  });
+  return {
+    setIntently,
+    intently
+  };
 }
 
 const defaultTriggerCooldown = 60 * 1000;
