@@ -1540,8 +1540,10 @@ function useTrackIntentlyModal({
       });
       clearInterval(id);
     }, selectorRateMs);
-    return () => clearInterval(id);
-  }, [setIsVisible]);
+    return () => {
+      clearInterval(id);
+    };
+  }, [intently, log, setIsVisible, trackEvent]);
   const getHandleTrackAction = action => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`);
     trackEvent(`user_clicked_${action}_button`, {});
@@ -1558,7 +1560,7 @@ function useTrackIntentlyModal({
       ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
       closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
     };
-  }, [isVisible]);
+  }, [error, getHandleTrackAction, isVisible]);
   return {
     isVisible,
     setIsVisible

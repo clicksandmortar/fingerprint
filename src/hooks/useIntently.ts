@@ -59,8 +59,10 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
       clearInterval(id)
     }, selectorRateMs)
 
-    return () => clearInterval(id)
-  }, [setIsVisible])
+    return () => {
+      clearInterval(id)
+    }
+  }, [intently, log, setIsVisible, trackEvent])
 
   const getHandleTrackAction = (action: 'exit' | 'CTA') => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`)
@@ -93,7 +95,7 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
       ctaBtn?.removeEventListener('click', ctaHandler)
       closeBtn?.removeEventListener('click', exitHandler)
     }
-  }, [isVisible])
+  }, [error, getHandleTrackAction, isVisible])
 
   return { isVisible, setIsVisible }
 }
