@@ -1551,7 +1551,7 @@ function useTrackIntentlyModal() {
         log('useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.');
         return;
       }
-      log('useTrackIntentlyModal: Located Intently modal. Releasing the Kraken.');
+      log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
       setIsVisible(true);
       trackEvent('trigger_displayed', {
         triggerId: 'Intently',

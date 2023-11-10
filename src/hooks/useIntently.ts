@@ -43,7 +43,7 @@ function useTrackIntentlyModal() {
       }
 
       log(
-        'useTrackIntentlyModal: Located Intently modal. Releasing the Kraken.'
+        'useTrackIntentlyModal: Located Intently modal. Measuring performance'
       )
 
       setIsVisible(true)
