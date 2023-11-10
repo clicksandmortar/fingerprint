@@ -14,10 +14,15 @@ type IntentlyProps = {
 
 function useTrackIntentlyModal({ intently }: IntentlyProps) {
   const [isVisible, setIsVisible] = useState<boolean>(false)
-  const { trackEvent } = useMixpanel()
+  const {
+    trackEvent,
+    state: { initiated }
+  } = useMixpanel()
   const { log, error } = useLogging()
 
   useEffect(() => {
+    // prevents the occasional race condition
+    if (!initiated) return
     // do not run if the user is in the Fingerprint cohort.
     if (!intently) return
 
@@ -62,7 +67,7 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
     return () => {
       clearInterval(id)
     }
-  }, [intently, log, setIsVisible, trackEvent])
+  }, [intently, log, setIsVisible, trackEvent, initiated])
 
   const getHandleTrackAction = (action: 'exit' | 'CTA') => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`)

@@ -1352,6 +1352,7 @@ const MixpanelProvider = ({
   const {
     log
   } = useLogging();
+  const [initiated, setInitiated] = useState(false);
   useEffect(() => {
     if (!appId || !visitor.id) {
       return;
@@ -1360,6 +1361,7 @@ const MixpanelProvider = ({
     init({
       debug: true
     });
+    setInitiated(true);
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
@@ -1371,7 +1373,7 @@ const MixpanelProvider = ({
     registerUserData({
       u_cohort: visitor.cohort
     });
-  }, [visitor]);
+  }, [visitor, setInitiated]);
   const registerUserData = React__default.useCallback(properties => {
     log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
     mixpanel.people.set(properties);
@@ -1379,13 +1381,19 @@ const MixpanelProvider = ({
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent,
-      registerUserData
+      registerUserData,
+      state: {
+        initiated
+      }
     }
   }, children);
 };
 const MixpanelContext = createContext({
   trackEvent: () => console.error('Mixpanel: trackEvent not setup properly. Check your Context order.'),
-  registerUserData: () => console.error('Mixpanel: registerUserData not setup properly. Check your Context order.')
+  registerUserData: () => console.error('Mixpanel: registerUserData not setup properly. Check your Context order.'),
+  state: {
+    initiated: false
+  }
 });
 const useMixpanel = () => {
   return useContext(MixpanelContext);
@@ -1508,13 +1516,17 @@ function useTrackIntentlyModal({
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const {
-    trackEvent
+    trackEvent,
+    state: {
+      initiated
+    }
   } = useMixpanel();
   const {
     log,
     error
   } = useLogging();
   useEffect(() => {
+    if (!initiated) return;
     if (!intently) return;
     const id = setInterval(() => {
       const intentlyOuterContainer = document.querySelector('smc-overlay-outer');
@@ -1543,7 +1555,7 @@ function useTrackIntentlyModal({
     return () => {
       clearInterval(id);
     };
-  }, [intently, log, setIsVisible, trackEvent]);
+  }, [intently, log, setIsVisible, trackEvent, initiated]);
   const getHandleTrackAction = action => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`);
     trackEvent(`user_clicked_${action}_button`, {});

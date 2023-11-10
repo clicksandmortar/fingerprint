@@ -1,5 +1,5 @@
 import mixpanel, { Callback, Config } from 'mixpanel-browser'
-import React, { createContext, useContext, useEffect } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { getEnvVars } from '../utils/getEnvVars'
 import { RegistrableUserProperties } from '../utils/types'
@@ -26,6 +26,7 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
   const { appId } = useFingerprint()
   const { visitor } = useVisitor()
   const { log } = useLogging()
+  const [initiated, setInitiated] = useState(false)
 
   useEffect(() => {
     if (!appId || !visitor.id) {
@@ -35,6 +36,7 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     log('MixpanelProvider: booting')
 
     init({ debug: true })
+    setInitiated(true)
 
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel')
 
@@ -48,7 +50,7 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     }
 
     registerUserData({ u_cohort: visitor.cohort })
-  }, [visitor])
+  }, [visitor, setInitiated])
 
   const registerUserData = React.useCallback(
     (properties: RegistrableUserProperties) => {
@@ -67,7 +69,10 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     <MixpanelContext.Provider
       value={{
         trackEvent,
-        registerUserData
+        registerUserData,
+        state: {
+          initiated
+        }
       }}
     >
       {children}
@@ -78,6 +83,9 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
 export type MixpanelContextInterface = {
   trackEvent: (event: string, props: any, callback?: Callback) => void
   registerUserData: (props: RegistrableUserProperties) => void
+  state: {
+    initiated: boolean
+  }
 }
 
 export const MixpanelContext = createContext<MixpanelContextInterface>({
@@ -88,7 +96,10 @@ export const MixpanelContext = createContext<MixpanelContextInterface>({
   registerUserData: () =>
     console.error(
       'Mixpanel: registerUserData not setup properly. Check your Context order.'
-    )
+    ),
+  state: {
+    initiated: false
+  }
 })
 
 export const useMixpanel = () => {

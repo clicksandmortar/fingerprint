@@ -911,6 +911,9 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
+  var _useState = React.useState(false),
+    initiated = _useState[0],
+    setInitiated = _useState[1];
   React.useEffect(function () {
     if (!appId || !visitor.id) {
       return;
@@ -919,6 +922,7 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     init({
       debug: true
     });
+    setInitiated(true);
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
@@ -930,7 +934,7 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     registerUserData({
       u_cohort: visitor.cohort
     });
-  }, [visitor]);
+  }, [visitor, setInitiated]);
   var registerUserData = React__default.useCallback(function (properties) {
     log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
     mixpanel.people.set(properties);
@@ -938,7 +942,10 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent: trackEvent,
-      registerUserData: registerUserData
+      registerUserData: registerUserData,
+      state: {
+        initiated: initiated
+      }
     }
   }, children);
 };
@@ -948,6 +955,9 @@ var MixpanelContext = React.createContext({
   },
   registerUserData: function registerUserData() {
     return console.error('Mixpanel: registerUserData not setup properly. Check your Context order.');
+  },
+  state: {
+    initiated: false
   }
 });
 var useMixpanel = function useMixpanel() {
@@ -1092,11 +1102,13 @@ function useTrackIntentlyModal(_ref) {
     isVisible = _useState[0],
     setIsVisible = _useState[1];
   var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+    trackEvent = _useMixpanel.trackEvent,
+    initiated = _useMixpanel.state.initiated;
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
   React.useEffect(function () {
+    if (!initiated) return;
     if (!intently) return;
     var id = setInterval(function () {
       var intentlyOuterContainer = document.querySelector('smc-overlay-outer');
@@ -1125,7 +1137,7 @@ function useTrackIntentlyModal(_ref) {
     return function () {
       clearInterval(id);
     };
-  }, [intently, log, setIsVisible, trackEvent]);
+  }, [intently, log, setIsVisible, trackEvent, initiated]);
   var getHandleTrackAction = function getHandleTrackAction(action) {
     return function () {
       log("useTrackIntentlyModal: user clicked " + action + " button");
