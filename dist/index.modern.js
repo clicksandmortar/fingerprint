@@ -462,6 +462,113 @@ const useExitIntentDelay = (delay = 0) => {
   };
 };
 
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+const getBrand = () => {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  return 'C&M';
+};
+
+const selectorRateMs = 100;
+function useTrackIntentlyModal() {
+  const [isVisible, setIsVisible] = useState(false);
+  const {
+    trackEvent
+  } = useMixpanel();
+  const {
+    log,
+    error
+  } = useLogging();
+  useEffect(() => {
+    const id = setInterval(() => {
+      const intentlyOuterContainer = document.querySelector('smc-overlay-outer');
+      if (!intentlyOuterContainer) {
+        log("useTrackIntentlyModal: Intently container hasn't mounted yet...");
+        return;
+      }
+      const isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
+      if (!isIntentlyOuterVisible) {
+        log('useTrackIntentlyModal: Intently container has mounted, but not visible yet.');
+        return;
+      }
+      const intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
+      if (!intentlyInnerOverlay) {
+        log('useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.');
+        return;
+      }
+      log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
+      setIsVisible(true);
+      trackEvent('trigger_displayed', {
+        triggerId: 'Intently',
+        triggerType: 'INVOCATION_EXIT_INTENT',
+        triggerBehaviour: 'BEHAVIOUR_MODAL',
+        time: new Date().toISOString(),
+        brand: getBrand()
+      });
+      clearInterval(id);
+    }, selectorRateMs);
+    return () => clearInterval(id);
+  }, [setIsVisible]);
+  const getHandleTrackAction = action => () => {
+    log(`useTrackIntentlyModal: user clicked ${action} button`);
+    trackEvent(`user_clicked_${action}_button`, {});
+  };
+  useEffect(() => {
+    if (!isVisible) return;
+    const closeBtn = document.querySelector('[data-close-type="x_close"]');
+    const exitHandler = getHandleTrackAction('exit');
+    const ctaBtn = document.querySelector('smc-input-group > span');
+    const ctaHandler = getHandleTrackAction('CTA');
+    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
+    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
+    return () => {
+      ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
+      closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
+    };
+  }, [isVisible]);
+  return {
+    isVisible,
+    setIsVisible
+  };
+}
+const useRemoveIntently = () => {
+  const [intently, setIntently] = useState(true);
+  const {
+    log
+  } = useLogging();
+  useEffect(() => {
+    if (intently) return;
+    log('useRemoveIntently: removing intently overlay');
+    const runningInterval = setInterval(() => {
+      const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
+      Array.prototype.forEach.call(locatedIntentlyScript, node => {
+        node.parentNode.removeChild(node);
+        log('useRemoveIntently: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, selectorRateMs);
+    return () => {
+      clearInterval(runningInterval);
+    };
+  }, [intently, log]);
+  return {
+    intently,
+    setIntently
+  };
+};
+function useIntently() {
+  useTrackIntentlyModal();
+  const intentlyState = useRemoveIntently();
+  return intentlyState;
+}
+
 const defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
@@ -586,7 +693,9 @@ function CollectorProvider({
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
   const [pageTriggers, setPageTriggersState] = useState([]);
   const [displayTriggers, setDisplayedTriggers] = useState([]);
-  const [intently, setIntently] = useState(true);
+  const {
+    setIntently
+  } = useIntently();
   const [foundWatchers, setFoundWatchers] = useState(new Map());
   const setPageTriggers = React__default.useCallback(triggers => {
     setPageTriggersState(prev => {
@@ -594,21 +703,6 @@ function CollectorProvider({
       return uniqueBy([...(triggers || []), ...nonDismissed], 'id');
     });
   }, [setPageTriggersState, displayTriggers]);
-  useEffect(() => {
-    if (intently) return;
-    log('CollectorProvider: removing intently overlay');
-    const runningInterval = setInterval(() => {
-      const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
-      Array.prototype.forEach.call(locatedIntentlyScript, node => {
-        node.parentNode.removeChild(node);
-        log('CollectorProvider: successfully removed intently overlay');
-        clearInterval(runningInterval);
-      });
-    }, 100);
-    return () => {
-      clearInterval(runningInterval);
-    };
-  }, [intently, log]);
   const getHandlerForTrigger = React__default.useCallback(_trigger => {
     const potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === _trigger.behaviour);
     if (!potentialHandler) return null;
@@ -2139,20 +2233,6 @@ const useCountdown = ({
   };
 };
 
-const TEMP_isCNMBrand = () => {
-  if (typeof window === 'undefined') return false;
-  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-const getBrand = () => {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return 'C&M';
-};
-
 const useSeenMutation = () => {
   const {
     log,
@@ -3163,8 +3243,8 @@ const StonehouseModal = ({
         align-items: center;
         justify-content: space-between;
         box-shadow: var(--text-shadow);
-        width: ${scaleBg(1).width}px;
-        height: ${scaleBg(1).height}px;
+        height: ${scaleBg(0.7).height}px;
+        width: ${scaleBg(0.7).width}px;
       }
 
       .${prependClass('gotham-bold')} {
@@ -3175,28 +3255,24 @@ const StonehouseModal = ({
         text-align: center;
       }
 
-  
-
       .${prependClass('main-text')} {
         line-height: 1.2;
-        flex: 1;
         font-family: 'Gotham Bold';
         font-weight: 500;
-        font-size: 4rem;
         font-style: normal;
         text-transform: uppercase;
         text-align: center;
-        letter-spacing: 2pt;
-        max-width: 400px;
         margin-left: auto;
         margin-right: auto;
-        margin-bottom: -10px;
+        margin-top: 0;
+        margin-bottom: -1.5rem;
+        font-size: 4.5rem;
       }
 
       .${prependClass('text-container')} {
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
+        display: grid;
+        place-content: center;
+        flex: 1;
       }
 
       .${prependClass('sub-text')} {
@@ -3204,30 +3280,28 @@ const StonehouseModal = ({
         margin: auto;
         font-weight: 600;
         font-family: 'Gotham Bold';
-        font-size: 3.5rem;
         color: ${secondaryColor};
         letter-spacing: 2pt;
         display: inline-block;
         text-align: center;
+        font-size: 2.4rem;
       }
 
       .${prependClass('cta')} {
         line-height: 1.2;
         font-family: 'Gotham Bold';
         cursor: pointer;
-
         background-color: ${callToActionColor};
         border-radius: 2px;
-        padding: 1.75rem 2rem 0.5rem 2rem;
         display: block;
-        font-size: 1.3rem;
         color: white;
         text-align: center;
         text-transform: uppercase;
-        max-width: 400px;
         margin: 0 auto;
         text-decoration: none;
         box-shadow: -2px 2px 8px black;
+        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
+        font-size: 1.3rem;
       }
 
       .${prependClass('cta:hover')} {
@@ -3247,13 +3321,12 @@ const StonehouseModal = ({
       
 
       .${prependClass('image-container')} {
-
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         width: 100%;
-        padding: 10rem 1.5rem 8rem 1.5rem;
+        padding: 4rem 1.5rem 2rem 1.5rem;
       }
 
       .${prependClass('text-shadow')} {
@@ -3263,26 +3336,6 @@ const StonehouseModal = ({
       .${prependClass('box-shadow')} {
         box-shadow: var(--text-shadow);
       }
-
-      @media screen and (max-width: 768px) {
-        .${prependClass('modal')} {
-          height: ${scaleBg(0.7).height}px;
-          width: ${scaleBg(0.7).width}px;
-        }
-        .${prependClass('main-text')}{
-          font-size: 3rem;
-        }
-        .${prependClass('sub-text')}{
-          font-size: 1.7rem;
-        }
-        .${prependClass('cta')}{
-          padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
-          font-size: 1rem;
-        }
-        .${prependClass('image-container')} {
-          padding: 8rem 1.5rem 6rem 1.5rem;
-        }
-      }
       
       @media screen and (max-width: 550px) {
         .${prependClass('modal')} {
@@ -3290,17 +3343,20 @@ const StonehouseModal = ({
           width: ${scaleBg(0.4).width}px;
         }
         .${prependClass('main-text')}{
-          font-size: 2rem;
+          font-size: 2.5rem;
+          margin-bottom: -0.6rem;
         }
         .${prependClass('sub-text')}{
-          font-size: 1rem;
+          font-size: 1.9rem;
+          letter-spacing: 1.2pt;
+
         }
         .${prependClass('cta')}{
           padding: 0.8rem 0.8rem 0rem 0.8rem;  
           font-size: 0.8rem;
         }
         .${prependClass('image-container')} {
-          padding: 4rem 1.5rem 4rem 1.5rem;
+          padding: 2rem 1.5rem 1rem 1.5rem;
         }
       }
     `;
@@ -3311,6 +3367,9 @@ const StonehouseModal = ({
     setTimeout(() => {
       setStylesLoaded(true);
     }, 500);
+    return () => {
+      document.head.removeChild(styles);
+    };
   }, []);
   const textColorByRoute = React__default.useMemo(() => {
     if (location.href.includes('tablebooking')) return {
@@ -3361,8 +3420,10 @@ const StonehouseModal = ({
     style: textColorByRoute.paragraph
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
     style: {
+      flex: 1,
       display: 'flex',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      alignItems: 'center'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,

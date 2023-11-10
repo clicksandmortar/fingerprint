@@ -511,6 +511,118 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+var getBrand = function getBrand() {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  return 'C&M';
+};
+
+var selectorRateMs = 100;
+function useTrackIntentlyModal() {
+  var _useState = React.useState(false),
+    isVisible = _useState[0],
+    setIsVisible = _useState[1];
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  React.useEffect(function () {
+    var id = setInterval(function () {
+      var intentlyOuterContainer = document.querySelector('smc-overlay-outer');
+      if (!intentlyOuterContainer) {
+        log("useTrackIntentlyModal: Intently container hasn't mounted yet...");
+        return;
+      }
+      var isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
+      if (!isIntentlyOuterVisible) {
+        log('useTrackIntentlyModal: Intently container has mounted, but not visible yet.');
+        return;
+      }
+      var intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
+      if (!intentlyInnerOverlay) {
+        log('useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.');
+        return;
+      }
+      log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
+      setIsVisible(true);
+      trackEvent('trigger_displayed', {
+        triggerId: 'Intently',
+        triggerType: 'INVOCATION_EXIT_INTENT',
+        triggerBehaviour: 'BEHAVIOUR_MODAL',
+        time: new Date().toISOString(),
+        brand: getBrand()
+      });
+      clearInterval(id);
+    }, selectorRateMs);
+    return function () {
+      return clearInterval(id);
+    };
+  }, [setIsVisible]);
+  var getHandleTrackAction = function getHandleTrackAction(action) {
+    return function () {
+      log("useTrackIntentlyModal: user clicked " + action + " button");
+      trackEvent("user_clicked_" + action + "_button", {});
+    };
+  };
+  React.useEffect(function () {
+    if (!isVisible) return;
+    var closeBtn = document.querySelector('[data-close-type="x_close"]');
+    var exitHandler = getHandleTrackAction('exit');
+    var ctaBtn = document.querySelector('smc-input-group > span');
+    var ctaHandler = getHandleTrackAction('CTA');
+    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
+    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
+    return function () {
+      ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
+      closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
+    };
+  }, [isVisible]);
+  return {
+    isVisible: isVisible,
+    setIsVisible: setIsVisible
+  };
+}
+var useRemoveIntently = function useRemoveIntently() {
+  var _useState2 = React.useState(true),
+    intently = _useState2[0],
+    setIntently = _useState2[1];
+  var _useLogging2 = useLogging(),
+    log = _useLogging2.log;
+  React.useEffect(function () {
+    if (intently) return;
+    log('useRemoveIntently: removing intently overlay');
+    var runningInterval = setInterval(function () {
+      var locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
+      Array.prototype.forEach.call(locatedIntentlyScript, function (node) {
+        node.parentNode.removeChild(node);
+        log('useRemoveIntently: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, selectorRateMs);
+    return function () {
+      clearInterval(runningInterval);
+    };
+  }, [intently, log]);
+  return {
+    intently: intently,
+    setIntently: setIntently
+  };
+};
+function useIntently() {
+  useTrackIntentlyModal();
+  var intentlyState = useRemoveIntently();
+  return intentlyState;
+}
+
 var defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs) {
   if (cooldownMs === void 0) {
@@ -641,12 +753,11 @@ function CollectorProvider(_ref) {
   var _useState3 = React.useState([]),
     displayTriggers = _useState3[0],
     setDisplayedTriggers = _useState3[1];
-  var _useState4 = React.useState(true),
-    intently = _useState4[0],
-    setIntently = _useState4[1];
-  var _useState5 = React.useState(new Map()),
-    foundWatchers = _useState5[0],
-    setFoundWatchers = _useState5[1];
+  var _useIntently = useIntently(),
+    setIntently = _useIntently.setIntently;
+  var _useState4 = React.useState(new Map()),
+    foundWatchers = _useState4[0],
+    setFoundWatchers = _useState4[1];
   var setPageTriggers = React__default.useCallback(function (triggers) {
     setPageTriggersState(function (prev) {
       var nonDismissed = prev.filter(function (tr) {
@@ -655,21 +766,6 @@ function CollectorProvider(_ref) {
       return uniqueBy([].concat(triggers || [], nonDismissed), 'id');
     });
   }, [setPageTriggersState, displayTriggers]);
-  React.useEffect(function () {
-    if (intently) return;
-    log('CollectorProvider: removing intently overlay');
-    var runningInterval = setInterval(function () {
-      var locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
-      Array.prototype.forEach.call(locatedIntentlyScript, function (node) {
-        node.parentNode.removeChild(node);
-        log('CollectorProvider: successfully removed intently overlay');
-        clearInterval(runningInterval);
-      });
-    }, 100);
-    return function () {
-      clearInterval(runningInterval);
-    };
-  }, [intently, log]);
   var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
     var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
       return handler.behaviour === _trigger.behaviour;
@@ -768,9 +864,9 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
-  var _useState6 = React.useState(false),
-    hasCollected = _useState6[0],
-    setHasCollected = _useState6[1];
+  var _useState5 = React.useState(false),
+    hasCollected = _useState5[0],
+    setHasCollected = _useState5[1];
   React.useEffect(function () {
     if (hasCollected) return;
     if (!booted) {
@@ -2248,20 +2344,6 @@ var useCountdown = function useCountdown(_ref) {
   };
 };
 
-var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
-  if (typeof window === 'undefined') return false;
-  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-var getBrand = function getBrand() {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return 'C&M';
-};
-
 var useSeenMutation = function useSeenMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
@@ -2924,7 +3006,7 @@ var StonehouseModal = function StonehouseModal(_ref) {
     stylesLoaded = _useState[0],
     setStylesLoaded = _useState[1];
   React.useEffect(function () {
-    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        width: " + scaleBg(1).width + "px;\n        height: " + scaleBg(1).height + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n  \n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        flex: 1;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-size: 4rem;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        letter-spacing: 2pt;\n        max-width: 400px;\n        margin-left: auto;\n        margin-right: auto;\n        margin-bottom: -10px;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: flex;\n        justify-content: center;\n        flex-direction: column;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        font-size: 3.5rem;\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        padding: 1.75rem 2rem 0.5rem 2rem;\n        display: block;\n        font-size: 1.3rem;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        max-width: 400px;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 10rem 1.5rem 8rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n\n      @media screen and (max-width: 768px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.7).height + "px;\n          width: " + scaleBg(0.7).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 3rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.7rem;\n        }\n        ." + prependClass('cta') + "{\n          padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n          font-size: 1rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 8rem 1.5rem 6rem 1.5rem;\n        }\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1rem;\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 4rem 1.5rem 4rem 1.5rem;\n        }\n      }\n    ";
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        height: " + scaleBg(0.7).height + "px;\n        width: " + scaleBg(0.7).width + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        margin-left: auto;\n        margin-right: auto;\n        margin-top: 0;\n        margin-bottom: -1.5rem;\n        font-size: 4.5rem;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: grid;\n        place-content: center;\n        flex: 1;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n        font-size: 2.4rem;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        display: block;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n        font-size: 1.3rem;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 4rem 1.5rem 2rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2.5rem;\n          margin-bottom: -0.6rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.9rem;\n          letter-spacing: 1.2pt;\n\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 2rem 1.5rem 1rem 1.5rem;\n        }\n      }\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
@@ -2932,6 +3014,9 @@ var StonehouseModal = function StonehouseModal(_ref) {
     setTimeout(function () {
       setStylesLoaded(true);
     }, 500);
+    return function () {
+      document.head.removeChild(styles);
+    };
   }, []);
   var textColorByRoute = React__default.useMemo(function () {
     if (location.href.includes('tablebooking')) return {
@@ -2982,8 +3067,10 @@ var StonehouseModal = function StonehouseModal(_ref) {
     style: textColorByRoute.paragraph
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
     style: {
+      flex: 1,
       display: 'flex',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      alignItems: 'center'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
