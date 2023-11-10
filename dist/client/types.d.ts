@@ -39,7 +39,7 @@ export declare type Referrer = {
         term?: string;
     };
 };
-export declare type CollectorVisitorResponse = {
+export declare type CollectorResponse = {
     firstSeen: Date;
     lastSeen: Date;
     visits: number;
