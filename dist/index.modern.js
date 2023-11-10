@@ -891,8 +891,8 @@ const StonehouseModal = ({
         align-items: center;
         justify-content: space-between;
         box-shadow: var(--text-shadow);
-        width: ${scaleBg(1).width}px;
-        height: ${scaleBg(1).height}px;
+        width: ${scaleBg(0.715).width}px;
+        height: ${scaleBg(0.715).height}px;
       }
 
       .${prependClass('gotham-bold')} {
@@ -1597,7 +1597,7 @@ function CollectorProvider({
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
   const [pageTriggers, setPageTriggers] = useState([]);
   const [displayTriggers, setDisplayedTriggers] = useState([]);
-  const [intently, setIntently] = useState(false);
+  const [intently, setIntently] = useState(true);
   const [foundWatchers, setFoundWatchers] = useState(new Map());
   const addPageTriggers = React__default.useCallback(triggers => {
     setPageTriggers(prev => uniqueBy([...prev, ...(triggers || [])], 'id'));
