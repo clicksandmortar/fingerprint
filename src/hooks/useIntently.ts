@@ -5,11 +5,14 @@ import { getBrand } from '../utils/brand'
 
 const selectorRateMs = 100
 
+type IntentlyProps = {
+  intently: boolean
+}
 /**
  * This file contains all Intently related logic and hooks.
  */
 
-function useTrackIntentlyModal({ intently }: { intently: boolean }) {
+function useTrackIntentlyModal({ intently }: IntentlyProps) {
   const [isVisible, setIsVisible] = useState<boolean>(false)
   const { trackEvent } = useMixpanel()
   const { log, error } = useLogging()
@@ -95,8 +98,7 @@ function useTrackIntentlyModal({ intently }: { intently: boolean }) {
   return { isVisible, setIsVisible }
 }
 
-const useRemoveIntently = () => {
-  const [intently, setIntently] = useState<boolean>(true)
+const useRemoveIntently = ({ intently }: IntentlyProps) => {
   const { log } = useLogging()
 
   // Removes the intently overlay, if intently is false
@@ -123,17 +125,15 @@ const useRemoveIntently = () => {
       clearInterval(runningInterval)
     }
   }, [intently, log])
-
-  return {
-    intently,
-    setIntently
-  }
 }
 
 export function useIntently() {
-  const intentlyState = useRemoveIntently()
-  useTrackIntentlyModal({ intently: intentlyState.intently })
-  return intentlyState
+  const [intently, setIntently] = useState<boolean>(true)
+
+  useRemoveIntently({ intently })
+  useTrackIntentlyModal({ intently })
+
+  return { setIntently, intently }
 }
 
 export default useIntently

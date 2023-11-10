@@ -1564,8 +1564,9 @@ function useTrackIntentlyModal({
     setIsVisible
   };
 }
-const useRemoveIntently = () => {
-  const [intently, setIntently] = useState(true);
+const useRemoveIntently = ({
+  intently
+}) => {
   const {
     log
   } = useLogging();
@@ -1584,17 +1585,19 @@ const useRemoveIntently = () => {
       clearInterval(runningInterval);
     };
   }, [intently, log]);
-  return {
-    intently,
-    setIntently
-  };
 };
 function useIntently() {
-  const intentlyState = useRemoveIntently();
-  useTrackIntentlyModal({
-    intently: intentlyState.intently
+  const [intently, setIntently] = useState(true);
+  useRemoveIntently({
+    intently
   });
-  return intentlyState;
+  useTrackIntentlyModal({
+    intently
+  });
+  return {
+    setIntently,
+    intently
+  };
 }
 
 const defaultTriggerCooldown = 60 * 1000;

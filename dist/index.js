@@ -1150,10 +1150,8 @@ function useTrackIntentlyModal(_ref) {
     setIsVisible: setIsVisible
   };
 }
-var useRemoveIntently = function useRemoveIntently() {
-  var _useState2 = React.useState(true),
-    intently = _useState2[0],
-    setIntently = _useState2[1];
+var useRemoveIntently = function useRemoveIntently(_ref2) {
+  var intently = _ref2.intently;
   var _useLogging2 = useLogging(),
     log = _useLogging2.log;
   React.useEffect(function () {
@@ -1171,17 +1169,21 @@ var useRemoveIntently = function useRemoveIntently() {
       clearInterval(runningInterval);
     };
   }, [intently, log]);
-  return {
-    intently: intently,
-    setIntently: setIntently
-  };
 };
 function useIntently() {
-  var intentlyState = useRemoveIntently();
-  useTrackIntentlyModal({
-    intently: intentlyState.intently
+  var _useState2 = React.useState(true),
+    intently = _useState2[0],
+    setIntently = _useState2[1];
+  useRemoveIntently({
+    intently: intently
   });
-  return intentlyState;
+  useTrackIntentlyModal({
+    intently: intently
+  });
+  return {
+    setIntently: setIntently,
+    intently: intently
+  };
 }
 
 var defaultTriggerCooldown = 60 * 1000;
