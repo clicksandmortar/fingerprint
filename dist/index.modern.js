@@ -905,24 +905,22 @@ const StonehouseModal = ({
 
       .${prependClass('main-text')} {
         line-height: 1.2;
-        flex: 1;
         font-family: 'Gotham Bold';
         font-weight: 500;
         font-style: normal;
         text-transform: uppercase;
         text-align: center;
-        letter-spacing: 2pt;
-        max-width: 400px;
         margin-left: auto;
         margin-right: auto;
-        margin-bottom: -10px;
-        font-size: 3rem;
+        margin-top: 0;
+        margin-bottom: -1.5rem;
+        font-size: 4.5rem;
       }
 
       .${prependClass('text-container')} {
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
+        display: grid;
+        place-content: center;
+        flex: 1;
       }
 
       .${prependClass('sub-text')} {
@@ -934,7 +932,7 @@ const StonehouseModal = ({
         letter-spacing: 2pt;
         display: inline-block;
         text-align: center;
-        font-size: 1.7rem;
+        font-size: 2.4rem;
       }
 
       .${prependClass('cta')} {
@@ -947,12 +945,11 @@ const StonehouseModal = ({
         color: white;
         text-align: center;
         text-transform: uppercase;
-        max-width: 400px;
         margin: 0 auto;
         text-decoration: none;
         box-shadow: -2px 2px 8px black;
         padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
-        font-size: 1rem;
+        font-size: 1.3rem;
       }
 
       .${prependClass('cta:hover')} {
@@ -972,14 +969,12 @@ const StonehouseModal = ({
       
 
       .${prependClass('image-container')} {
-
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         width: 100%;
-        padding: 8rem 1.5rem 6rem 1.5rem;
-
+        padding: 4rem 1.5rem 2rem 1.5rem;
       }
 
       .${prependClass('text-shadow')} {
@@ -996,17 +991,20 @@ const StonehouseModal = ({
           width: ${scaleBg(0.4).width}px;
         }
         .${prependClass('main-text')}{
-          font-size: 2rem;
+          font-size: 2.5rem;
+          margin-bottom: -0.6rem;
         }
         .${prependClass('sub-text')}{
-          font-size: 1rem;
+          font-size: 1.9rem;
+          letter-spacing: 1.2pt;
+
         }
         .${prependClass('cta')}{
           padding: 0.8rem 0.8rem 0rem 0.8rem;  
           font-size: 0.8rem;
         }
         .${prependClass('image-container')} {
-          padding: 4rem 1.5rem 4rem 1.5rem;
+          padding: 2rem 1.5rem 1rem 1.5rem;
         }
       }
     `;
@@ -1017,9 +1015,12 @@ const StonehouseModal = ({
     setTimeout(() => {
       setStylesLoaded(true);
     }, 500);
+    return () => {
+      document.head.removeChild(styles);
+    };
   }, []);
   const textColorByRoute = React__default.useMemo(() => {
-    if (location.href.includes('tablebooking')) return {
+    if (!location.href.includes('tablebooking')) return {
       heading: {
         color: 'white'
       },
@@ -1067,8 +1068,10 @@ const StonehouseModal = ({
     style: textColorByRoute.paragraph
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
     style: {
+      flex: 1,
       display: 'flex',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      alignItems: 'center'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
