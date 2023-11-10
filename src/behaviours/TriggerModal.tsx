@@ -34,9 +34,9 @@ const Modal = ({ trigger }: Props) => {
     // like to over-rerender componets. This timeout prevents from firing a ton
     const tId = setTimeout(() => {
       runSeen(trigger)
-    }, 500)
+      setHasFired(true)
+    }, 1500)
 
-    setHasFired(true)
     return () => {
       clearTimeout(tId)
     }

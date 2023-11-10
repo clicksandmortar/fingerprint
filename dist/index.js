@@ -637,7 +637,7 @@ function CollectorProvider(_ref) {
     setIdleTimeout = _useState[1];
   var _useState2 = React.useState([]),
     pageTriggers = _useState2[0],
-    setPageTriggers = _useState2[1];
+    setPageTriggersState = _useState2[1];
   var _useState3 = React.useState([]),
     displayTriggers = _useState3[0],
     setDisplayedTriggers = _useState3[1];
@@ -647,11 +647,14 @@ function CollectorProvider(_ref) {
   var _useState5 = React.useState(new Map()),
     foundWatchers = _useState5[0],
     setFoundWatchers = _useState5[1];
-  var addPageTriggers = React__default.useCallback(function (triggers) {
-    setPageTriggers(function (prev) {
-      return uniqueBy([].concat(prev, triggers || []), 'id');
+  var setPageTriggers = React__default.useCallback(function (triggers) {
+    setPageTriggersState(function (prev) {
+      var nonDismissed = prev.filter(function (tr) {
+        return displayTriggers.includes(tr.id);
+      });
+      return uniqueBy([].concat(triggers || [], nonDismissed), 'id');
     });
-  }, [setPageTriggers]);
+  }, [setPageTriggersState, displayTriggers]);
   React.useEffect(function () {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
@@ -680,7 +683,12 @@ function CollectorProvider(_ref) {
       return triggerId !== id;
     });
     setDisplayedTriggers(refreshedTriggers);
-  }, [displayTriggers, log]);
+    setPageTriggersState(function (prev) {
+      return prev.filter(function (trigger) {
+        return trigger.id !== id;
+      });
+    });
+  }, [displayTriggers, log, setPageTriggers]);
   var TriggerComponent = React__default.useCallback(function () {
     if (!displayTriggers) return null;
     var activeTriggers = pageTriggers.filter(function (trigger) {
@@ -817,7 +825,7 @@ function CollectorProvider(_ref) {
           return Promise.resolve(response.json()).then(function (payload) {
             log('Sent collector data, retrieved:', payload);
             setIdleTimeout(getIdleStatusDelay());
-            addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+            setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             var cohort = payload.intently ? 'intently' : 'fingerprint';
             if (visitor.cohort !== cohort) setVisitor({
               cohort: cohort
@@ -842,7 +850,7 @@ function CollectorProvider(_ref) {
     return function () {
       clearTimeout(delay);
     };
-  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
+  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, setPageTriggers]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -867,7 +875,7 @@ function CollectorProvider(_ref) {
               return Promise.resolve(response.json()).then(function (payload) {
                 log('Sent collector data, retrieved:', payload);
                 setIdleTimeout(getIdleStatusDelay());
-                addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+                setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
               });
             } catch (e) {
               return Promise.reject(e);
@@ -892,18 +900,17 @@ function CollectorProvider(_ref) {
   }, [registerWatcher, visitor]);
   var setActiveTrigger = React__default.useCallback(function (trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
-    addPageTriggers([trigger]);
+    setPageTriggers([trigger]);
     setDisplayedTriggerByInvocation(trigger.invocation);
-  }, [log, setDisplayedTriggerByInvocation, addPageTriggers]);
+  }, [log, setDisplayedTriggerByInvocation, setPageTriggers]);
   var collectorContextVal = React__default.useMemo(function () {
     return {
-      addPageTriggers: addPageTriggers,
       setPageTriggers: setPageTriggers,
       removeActiveTrigger: removeActiveTrigger,
       setActiveTrigger: setActiveTrigger,
       trackEvent: trackEvent
     };
-  }, [addPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]);
+  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]);
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
@@ -919,9 +926,6 @@ function CollectorProvider(_ref) {
   }, children, TriggerComponent()));
 }
 var CollectorContext = React.createContext({
-  addPageTriggers: function addPageTriggers() {
-    console.error('addPageTriggers not implemented correctly');
-  },
   setPageTriggers: function setPageTriggers() {
     console.error('setPageTriggers not implemented correctly');
   },
@@ -2282,7 +2286,9 @@ var useSeenMutation = function useSeenMutation() {
   return reactQuery.useMutation(function (trigger) {
     trackTriggerSeen(trigger);
     return request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
-      seenTriggerIDs: [trigger.id]
+      seenTriggerIDs: [trigger.id],
+      visitor: visitor,
+      page: getPagePayload()
     }).then(function (response) {
       log('Seen mutation: response', response);
       return response;
@@ -2295,7 +2301,6 @@ var useSeenMutation = function useSeenMutation() {
     onSuccess: function (res) {
       try {
         return Promise.resolve(res.json()).then(function (r) {
-          if (!r.pageTriggers) return r;
           log('Seen mutation: replacing triggers with:', r.pageTriggers);
           setPageTriggers(r.pageTriggers);
           return r;
@@ -3013,8 +3018,8 @@ var Modal = function Modal(_ref) {
     if (isLoading) return;
     var tId = setTimeout(function () {
       runSeen(trigger);
-    }, 500);
-    setHasFired(true);
+      setHasFired(true);
+    }, 1500);
     return function () {
       clearTimeout(tId);
     };

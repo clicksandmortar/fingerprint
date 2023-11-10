@@ -6,7 +6,6 @@ export declare type CollectorProviderProps = {
 };
 export declare function CollectorProvider({ children, handlers }: CollectorProviderProps): React.JSX.Element;
 export declare type CollectorContextInterface = {
-    addPageTriggers: (triggers: Trigger[]) => void;
     setPageTriggers: (triggers: Trigger[]) => void;
     removeActiveTrigger: (id: Trigger['id']) => void;
     setActiveTrigger: (trigger: Trigger) => void;

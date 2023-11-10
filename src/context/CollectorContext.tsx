@@ -75,7 +75,7 @@ export function CollectorProvider({
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
     getIdleStatusDelay()
   )
-  const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
+  const [pageTriggers, setPageTriggersState] = useState<Trigger[]>([])
   const [displayTriggers, setDisplayedTriggers] = useState<string[]>([])
   const [intently, setIntently] = useState<boolean>(true)
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
@@ -85,13 +85,16 @@ export function CollectorProvider({
   /**
    * add triggers to existing ones, keep unique to prevent multi-firing
    */
-  const addPageTriggers = React.useCallback(
+  const setPageTriggers = React.useCallback(
     (triggers: Trigger[]) => {
-      setPageTriggers((prev) =>
-        uniqueBy<Trigger>([...prev, ...(triggers || [])], 'id')
-      )
+      setPageTriggersState((prev) => {
+        const nonDismissed = prev.filter((tr) =>
+          displayTriggers.includes(tr.id)
+        )
+        return uniqueBy<Trigger>([...(triggers || []), ...nonDismissed], 'id')
+      })
     },
-    [setPageTriggers]
+    [setPageTriggersState, displayTriggers]
   )
 
   // Removes the intently overlay, if intently is false
@@ -139,8 +142,11 @@ export function CollectorProvider({
       )
 
       setDisplayedTriggers(refreshedTriggers)
+      setPageTriggersState((prev) =>
+        prev.filter((trigger) => trigger.id !== id)
+      )
     },
-    [displayTriggers, log]
+    [displayTriggers, log, setPageTriggers]
   )
 
   const TriggerComponent = React.useCallback(():
@@ -356,7 +362,7 @@ export function CollectorProvider({
           // @todo turn this into the dynamic value
           setIdleTimeout(getIdleStatusDelay())
 
-          addPageTriggers(payload?.pageTriggers)
+          setPageTriggers(payload?.pageTriggers)
 
           const cohort = payload.intently ? 'intently' : 'fingerprint'
 
@@ -396,7 +402,7 @@ export function CollectorProvider({
     setIdleTimeout,
     log,
     trackEvent,
-    addPageTriggers
+    setPageTriggers
   ])
 
   const registerWatcher = React.useCallback(
@@ -438,7 +444,7 @@ export function CollectorProvider({
                 // @todo turn this into the dynamic value
                 setIdleTimeout(getIdleStatusDelay())
 
-                addPageTriggers(payload?.pageTriggers)
+                setPageTriggers(payload?.pageTriggers)
               })
               .catch((err) => {
                 error('failed to store collected data', err)
@@ -477,21 +483,20 @@ export function CollectorProvider({
   const setActiveTrigger = React.useCallback(
     (trigger: Trigger) => {
       log('CollectorProvider: manually setting trigger', trigger)
-      addPageTriggers([trigger])
+      setPageTriggers([trigger])
       setDisplayedTriggerByInvocation(trigger.invocation)
     },
-    [log, setDisplayedTriggerByInvocation, addPageTriggers]
+    [log, setDisplayedTriggerByInvocation, setPageTriggers]
   )
 
   const collectorContextVal = React.useMemo(
     () => ({
-      addPageTriggers,
       setPageTriggers,
       removeActiveTrigger,
       setActiveTrigger,
       trackEvent
     }),
-    [addPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]
+    [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]
   )
 
   useEffect(() => {
@@ -521,7 +526,6 @@ export function CollectorProvider({
 }
 
 export type CollectorContextInterface = {
-  addPageTriggers: (triggers: Trigger[]) => void
   setPageTriggers: (triggers: Trigger[]) => void
   removeActiveTrigger: (id: Trigger['id']) => void
   setActiveTrigger: (trigger: Trigger) => void
@@ -529,9 +533,6 @@ export type CollectorContextInterface = {
 }
 
 export const CollectorContext = createContext<CollectorContextInterface>({
-  addPageTriggers: () => {
-    console.error('addPageTriggers not implemented correctly')
-  },
   setPageTriggers: () => {
     console.error('setPageTriggers not implemented correctly')
   },

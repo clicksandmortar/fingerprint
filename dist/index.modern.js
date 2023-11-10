@@ -584,13 +584,16 @@ function CollectorProvider({
     return delayAdjustedForCooldown;
   }, [configIdleDelay, getRemainingCooldownMs, log]);
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
-  const [pageTriggers, setPageTriggers] = useState([]);
+  const [pageTriggers, setPageTriggersState] = useState([]);
   const [displayTriggers, setDisplayedTriggers] = useState([]);
   const [intently, setIntently] = useState(true);
   const [foundWatchers, setFoundWatchers] = useState(new Map());
-  const addPageTriggers = React__default.useCallback(triggers => {
-    setPageTriggers(prev => uniqueBy([...prev, ...(triggers || [])], 'id'));
-  }, [setPageTriggers]);
+  const setPageTriggers = React__default.useCallback(triggers => {
+    setPageTriggersState(prev => {
+      const nonDismissed = prev.filter(tr => displayTriggers.includes(tr.id));
+      return uniqueBy([...(triggers || []), ...nonDismissed], 'id');
+    });
+  }, [setPageTriggersState, displayTriggers]);
   useEffect(() => {
     if (intently) return;
     log('CollectorProvider: removing intently overlay');
@@ -615,7 +618,8 @@ function CollectorProvider({
     log(`CollectorProvider: removing id:${id} from displayTriggers`);
     const refreshedTriggers = displayTriggers.filter(triggerId => triggerId !== id);
     setDisplayedTriggers(refreshedTriggers);
-  }, [displayTriggers, log]);
+    setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
+  }, [displayTriggers, log, setPageTriggers]);
   const TriggerComponent = React__default.useCallback(() => {
     if (!displayTriggers) return null;
     const activeTriggers = pageTriggers.filter(trigger => displayTriggers.includes(trigger.id));
@@ -740,7 +744,7 @@ function CollectorProvider({
         const payload = await response.json();
         log('Sent collector data, retrieved:', payload);
         setIdleTimeout(getIdleStatusDelay());
-        addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         const cohort = payload.intently ? 'intently' : 'fingerprint';
         if (visitor.cohort !== cohort) setVisitor({
           cohort
@@ -761,7 +765,7 @@ function CollectorProvider({
     return () => {
       clearTimeout(delay);
     };
-  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
+  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, setPageTriggers]);
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
@@ -785,7 +789,7 @@ function CollectorProvider({
             const payload = await response.json();
             log('Sent collector data, retrieved:', payload);
             setIdleTimeout(getIdleStatusDelay());
-            addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+            setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
           }).catch(err => {
             error('failed to store collected data', err);
           });
@@ -804,16 +808,15 @@ function CollectorProvider({
   }, [registerWatcher, visitor]);
   const setActiveTrigger = React__default.useCallback(trigger => {
     log('CollectorProvider: manually setting trigger', trigger);
-    addPageTriggers([trigger]);
+    setPageTriggers([trigger]);
     setDisplayedTriggerByInvocation(trigger.invocation);
-  }, [log, setDisplayedTriggerByInvocation, addPageTriggers]);
+  }, [log, setDisplayedTriggerByInvocation, setPageTriggers]);
   const collectorContextVal = React__default.useMemo(() => ({
-    addPageTriggers,
     setPageTriggers,
     removeActiveTrigger,
     setActiveTrigger,
     trackEvent
-  }), [addPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]);
+  }), [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]);
   useEffect(() => {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
@@ -829,9 +832,6 @@ function CollectorProvider({
   }, children, TriggerComponent()));
 }
 const CollectorContext = createContext({
-  addPageTriggers: () => {
-    console.error('addPageTriggers not implemented correctly');
-  },
   setPageTriggers: () => {
     console.error('setPageTriggers not implemented correctly');
   },
@@ -2182,7 +2182,9 @@ const useSeenMutation = () => {
   return useMutation(trigger => {
     trackTriggerSeen(trigger);
     return request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
-      seenTriggerIDs: [trigger.id]
+      seenTriggerIDs: [trigger.id],
+      visitor,
+      page: getPagePayload()
     }).then(response => {
       log('Seen mutation: response', response);
       return response;
@@ -2194,7 +2196,6 @@ const useSeenMutation = () => {
     mutationKey: ['seen'],
     onSuccess: async res => {
       const r = await res.json();
-      if (!r.pageTriggers) return r;
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
       setPageTriggers(r.pageTriggers);
       return r;
@@ -3396,8 +3397,8 @@ const Modal = ({
     if (isLoading) return;
     const tId = setTimeout(() => {
       runSeen(trigger);
-    }, 500);
-    setHasFired(true);
+      setHasFired(true);
+    }, 1500);
     return () => {
       clearTimeout(tId);
     };

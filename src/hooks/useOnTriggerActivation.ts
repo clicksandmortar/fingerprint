@@ -27,10 +27,9 @@ const useOnTriggerActivation = (trigger: Trigger) => {
         })
         .then(async (r) => {
           const payload: CollectorVisitorResponse = await r.json()
-          const newTriggers = payload?.pageTriggers
-          if (!newTriggers) return
 
-          setPageTriggers(newTriggers)
+          // no pageTriggers = no triggers, rather than missing key. serverside omition. Means we set pagetriggers to nothing.
+          setPageTriggers(payload?.pageTriggers)
         })
     } catch (e) {
       error(e)
