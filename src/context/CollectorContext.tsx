@@ -7,6 +7,7 @@ import { CollectorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
+import useIntently from '../hooks/useIntently'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
@@ -76,7 +77,7 @@ export function CollectorProvider({
   )
   const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
   const [displayTriggers, setDisplayedTriggers] = useState<string[]>([])
-  const [intently, setIntently] = useState<boolean>(true)
+  const { setIntently } = useIntently()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
@@ -92,31 +93,6 @@ export function CollectorProvider({
     },
     [setPageTriggers]
   )
-
-  // Removes the intently overlay, if intently is false
-  useEffect(() => {
-    if (intently) return
-
-    log('CollectorProvider: removing intently overlay')
-
-    const runningInterval = setInterval(() => {
-      const locatedIntentlyScript = document.querySelectorAll(
-        'div[id^=smc-v5-overlay-]'
-      )
-
-      Array.prototype.forEach.call(locatedIntentlyScript, (node: any) => {
-        node.parentNode.removeChild(node)
-
-        log('CollectorProvider: successfully removed intently overlay')
-
-        clearInterval(runningInterval)
-      })
-    }, 100)
-
-    return () => {
-      clearInterval(runningInterval)
-    }
-  }, [intently, log])
 
   const getHandlerForTrigger = React.useCallback(
     (_trigger: Trigger) => {

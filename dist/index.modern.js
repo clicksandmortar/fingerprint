@@ -1488,6 +1488,113 @@ const useExitIntentDelay = (delay = 0) => {
   };
 };
 
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+const getBrand = () => {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  return 'C&M';
+};
+
+const selectorRateMs = 100;
+function useTrackIntentlyModal() {
+  const [isVisible, setIsVisible] = useState(false);
+  const {
+    trackEvent
+  } = useMixpanel();
+  const {
+    log,
+    error
+  } = useLogging();
+  useEffect(() => {
+    const id = setInterval(() => {
+      const intentlyOuterContainer = document.querySelector('smc-overlay-outer');
+      if (!intentlyOuterContainer) {
+        log("useTrackIntentlyModal: Intently container hasn't mounted yet...");
+        return;
+      }
+      const isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
+      if (!isIntentlyOuterVisible) {
+        log('useTrackIntentlyModal: Intently container has mounted, but not visible yet.');
+        return;
+      }
+      const intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
+      if (!intentlyInnerOverlay) {
+        log('useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.');
+        return;
+      }
+      log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
+      setIsVisible(true);
+      trackEvent('trigger_displayed', {
+        triggerId: 'Intently',
+        triggerType: 'INVOCATION_EXIT_INTENT',
+        triggerBehaviour: 'BEHAVIOUR_MODAL',
+        time: new Date().toISOString(),
+        brand: getBrand()
+      });
+      clearInterval(id);
+    }, selectorRateMs);
+    return () => clearInterval(id);
+  }, [setIsVisible]);
+  const getHandleTrackAction = action => () => {
+    log(`useTrackIntentlyModal: user clicked ${action} button`);
+    trackEvent(`user_clicked_${action}_button`, {});
+  };
+  useEffect(() => {
+    if (!isVisible) return;
+    const closeBtn = document.querySelector('[data-close-type="x_close"]');
+    const exitHandler = getHandleTrackAction('exit');
+    const ctaBtn = document.querySelector('smc-input-group > span');
+    const ctaHandler = getHandleTrackAction('CTA');
+    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
+    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
+    return () => {
+      ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
+      closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
+    };
+  }, [isVisible]);
+  return {
+    isVisible,
+    setIsVisible
+  };
+}
+const useRemoveIntently = () => {
+  const [intently, setIntently] = useState(true);
+  const {
+    log
+  } = useLogging();
+  useEffect(() => {
+    if (intently) return;
+    log('useRemoveIntently: removing intently overlay');
+    const runningInterval = setInterval(() => {
+      const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
+      Array.prototype.forEach.call(locatedIntentlyScript, node => {
+        node.parentNode.removeChild(node);
+        log('useRemoveIntently: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, selectorRateMs);
+    return () => {
+      clearInterval(runningInterval);
+    };
+  }, [intently, log]);
+  return {
+    intently,
+    setIntently
+  };
+};
+function useIntently() {
+  useTrackIntentlyModal();
+  const intentlyState = useRemoveIntently();
+  return intentlyState;
+}
+
 const defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
@@ -1575,26 +1682,13 @@ function CollectorProvider({
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
   const [pageTriggers, setPageTriggers] = useState([]);
   const [displayTriggers, setDisplayedTriggers] = useState([]);
-  const [intently, setIntently] = useState(true);
+  const {
+    setIntently
+  } = useIntently();
   const [foundWatchers, setFoundWatchers] = useState(new Map());
   const addPageTriggers = React__default.useCallback(triggers => {
     setPageTriggers(prev => uniqueBy([...prev, ...(triggers || [])], 'id'));
   }, [setPageTriggers]);
-  useEffect(() => {
-    if (intently) return;
-    log('CollectorProvider: removing intently overlay');
-    const runningInterval = setInterval(() => {
-      const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
-      Array.prototype.forEach.call(locatedIntentlyScript, node => {
-        node.parentNode.removeChild(node);
-        log('CollectorProvider: successfully removed intently overlay');
-        clearInterval(runningInterval);
-      });
-    }, 100);
-    return () => {
-      clearInterval(runningInterval);
-    };
-  }, [intently, log]);
   const getHandlerForTrigger = React__default.useCallback(_trigger => {
     const potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === _trigger.behaviour);
     if (!potentialHandler) return null;
@@ -1873,20 +1967,6 @@ const useSeenMutation = () => {
     mutationKey: ['seen'],
     onSuccess: () => {}
   });
-};
-
-const TEMP_isCNMBrand = () => {
-  if (typeof window === 'undefined') return false;
-  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-const getBrand = () => {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return 'C&M';
 };
 
 const Modal = ({
