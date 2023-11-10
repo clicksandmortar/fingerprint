@@ -220,7 +220,7 @@ const StonehouseModal = ({
     paragraph: React.CSSProperties
     heading: React.CSSProperties
   } => {
-    if (!location.href.includes('tablebooking'))
+    if (location.href.includes('tablebooking'))
       return {
         heading: { color: 'white' },
         paragraph: { color: secondaryColor }
