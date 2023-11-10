@@ -1086,7 +1086,8 @@ var getBrand = function getBrand() {
 };
 
 var selectorRateMs = 100;
-function useTrackIntentlyModal() {
+function useTrackIntentlyModal(_ref) {
+  var intently = _ref.intently;
   var _useState = React.useState(false),
     isVisible = _useState[0],
     setIsVisible = _useState[1];
@@ -1096,20 +1097,18 @@ function useTrackIntentlyModal() {
     log = _useLogging.log,
     error = _useLogging.error;
   React.useEffect(function () {
+    if (!intently) return;
     var id = setInterval(function () {
       var intentlyOuterContainer = document.querySelector('smc-overlay-outer');
       if (!intentlyOuterContainer) {
-        log("useTrackIntentlyModal: Intently container hasn't mounted yet...");
         return;
       }
       var isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
       if (!isIntentlyOuterVisible) {
-        log('useTrackIntentlyModal: Intently container has mounted, but not visible yet.');
         return;
       }
       var intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
       if (!intentlyInnerOverlay) {
-        log('useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.');
         return;
       }
       log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
@@ -1178,8 +1177,10 @@ var useRemoveIntently = function useRemoveIntently() {
   };
 };
 function useIntently() {
-  useTrackIntentlyModal();
   var intentlyState = useRemoveIntently();
+  useTrackIntentlyModal({
+    intently: intentlyState.intently
+  });
   return intentlyState;
 }
 

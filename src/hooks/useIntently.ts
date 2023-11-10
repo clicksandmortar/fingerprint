@@ -9,17 +9,19 @@ const selectorRateMs = 100
  * This file contains all Intently related logic and hooks.
  */
 
-function useTrackIntentlyModal() {
+function useTrackIntentlyModal({ intently }: { intently: boolean }) {
   const [isVisible, setIsVisible] = useState<boolean>(false)
   const { trackEvent } = useMixpanel()
   const { log, error } = useLogging()
 
   useEffect(() => {
+    // do not run if the user is in the Fingerprint cohort.
+    if (!intently) return
+
     const id = setInterval(() => {
       const intentlyOuterContainer = document.querySelector('smc-overlay-outer')
 
       if (!intentlyOuterContainer) {
-        log("useTrackIntentlyModal: Intently container hasn't mounted yet...")
         return
       }
 
@@ -27,18 +29,14 @@ function useTrackIntentlyModal() {
         window.getComputedStyle(intentlyOuterContainer).display === 'block'
 
       if (!isIntentlyOuterVisible) {
-        log(
-          'useTrackIntentlyModal: Intently container has mounted, but not visible yet.'
-        )
+        // do not add logs here, gets spammy very quick.
         return
       }
 
       const intentlyInnerOverlay = document.querySelector('smc-overlay-inner')
 
       if (!intentlyInnerOverlay) {
-        log(
-          'useTrackIntentlyModal: Could not locate intently overlay inner content, not tracking performance.'
-        )
+        // do not add logs here, gets spammy very quick.
         return
       }
 
@@ -133,9 +131,8 @@ const useRemoveIntently = () => {
 }
 
 export function useIntently() {
-  useTrackIntentlyModal()
-
   const intentlyState = useRemoveIntently()
+  useTrackIntentlyModal({ intently: intentlyState.intently })
   return intentlyState
 }
 
