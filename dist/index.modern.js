@@ -891,13 +891,8 @@ const StonehouseModal = ({
         align-items: center;
         justify-content: space-between;
         box-shadow: var(--text-shadow);
-<<<<<<< Updated upstream
-        width: ${scaleBg(0.715).width}px;
-        height: ${scaleBg(0.715).height}px;
-=======
         height: ${scaleBg(0.7).height}px;
-          width: ${scaleBg(0.7).width}px;
->>>>>>> Stashed changes
+        width: ${scaleBg(0.7).width}px;
       }
 
       .${prependClass('gotham-bold')} {
