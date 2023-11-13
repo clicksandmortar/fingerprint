@@ -1203,6 +1203,27 @@ function useIntently() {
   };
 }
 
+var useRunOnPathChange = function useRunOnPathChange(func, config) {
+  var _useState = React.useState(''),
+    lastCollectedPath = _useState[0],
+    setLastCollectedPath = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  React.useEffect(function () {
+    if (config !== null && config !== void 0 && config.skip) return;
+    if (!location.pathname) return;
+    if (location.pathname === lastCollectedPath) return;
+    var tId = setTimeout(function () {
+      log('useRunOnPathChange: running for path: ', location.pathname);
+      setLastCollectedPath(location.pathname);
+      func();
+    }, (config === null || config === void 0 ? void 0 : config.delay) || 300);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [location.pathname, func, setLastCollectedPath, config]);
+};
+
 var defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs) {
   if (cooldownMs === void 0) {
@@ -1397,98 +1418,42 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
-  var _useState5 = React.useState(false),
-    hasCollected = _useState5[0],
-    setHasCollected = _useState5[1];
-  React.useEffect(function () {
-    if (hasCollected) return;
-    if (!booted) {
-      log('CollectorProvider: Not yet collecting, awaiting boot');
+  var collectAndApplyVisitorInfo = React__default.useCallback(function () {
+    if (!visitor.id) {
+      log('CollectorProvider: Not yet collecting, awaiting visitor ID');
       return;
     }
-    var delay = setTimeout(function () {
-      if (!visitor.id) {
-        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
-        return;
-      }
-      log('CollectorProvider: collecting data');
-      if (hasVisitorIDInURL()) {
-        trackEvent('abandoned_journey_landing', {
-          from_email: true
-        });
-      }
-      var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-        var _cur$split = cur.split('='),
-          key = _cur$split[0],
-          value = _cur$split[1];
-        if (!key) return acc;
-        acc[key] = value;
-        return acc;
-      }, {});
-      var hash = window.location.hash.substring(3);
-      var hashParams = hash.split('&').reduce(function (result, item) {
-        var parts = item.split('=');
-        result[parts[0]] = parts[1];
-        return result;
-      }, {});
-      if (hashParams.id_token) {
-        log('CollectorProvider: user logged in event fired');
-        trackEvent('user_logged_in', {});
-        collect({
-          account: {
-            token: hashParams.id_token
-          }
-        }).then(function (response) {
-          try {
-            return Promise.resolve(response.json()).then(function (payload) {
-              log('Sent login collector data, retrieved:', payload);
-            });
-          } catch (e) {
-            return Promise.reject(e);
-          }
-        })["catch"](function (err) {
-          error('failed to store collected data', err);
-        });
-      }
+    log('CollectorProvider: collecting data');
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      });
+    }
+    var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+      var _cur$split = cur.split('='),
+        key = _cur$split[0],
+        value = _cur$split[1];
+      if (!key) return acc;
+      acc[key] = value;
+      return acc;
+    }, {});
+    var hash = window.location.hash.substring(3);
+    var hashParams = hash.split('&').reduce(function (result, item) {
+      var parts = item.split('=');
+      result[parts[0]] = parts[1];
+      return result;
+    }, {});
+    if (hashParams.id_token) {
+      log('CollectorProvider: user logged in event fired');
+      trackEvent('user_logged_in', {});
       collect({
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params: params
-        },
-        referrer: {
-          url: document.referrer,
-          title: '',
-          utm: {
-            source: params === null || params === void 0 ? void 0 : params.utm_source,
-            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-            term: params === null || params === void 0 ? void 0 : params.utm_term,
-            content: params === null || params === void 0 ? void 0 : params.utm_content
-          }
+        account: {
+          token: hashParams.id_token
         }
       }).then(function (response) {
         try {
-          if (response.status === 204) {
-            setIntently(true);
-            return Promise.resolve();
-          }
           return Promise.resolve(response.json()).then(function (payload) {
-            log('Sent collector data, retrieved:', payload);
-            setIdleTimeout(getIdleStatusDelay());
-            addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-            var cohort = payload.intently ? 'intently' : 'fingerprint';
-            if (visitor.cohort !== cohort) setVisitor({
-              cohort: cohort
-            });
-            if (!payload.intently) {
-              log('CollectorProvider: user is in Fingerprint cohort');
-              setIntently(false);
-            } else {
-              log('CollectorProvider: user is in Intently cohort');
-              setIntently(true);
-            }
+            log('Sent login collector data, retrieved:', payload);
           });
         } catch (e) {
           return Promise.reject(e);
@@ -1496,13 +1461,55 @@ function CollectorProvider(_ref) {
       })["catch"](function (err) {
         error('failed to store collected data', err);
       });
-      setHasCollected(true);
-      log('CollectorProvider: collected data');
-    }, initialDelay);
-    return function () {
-      clearTimeout(delay);
-    };
-  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
+    }
+    collect({
+      page: {
+        url: window.location.href,
+        path: window.location.pathname,
+        title: document.title,
+        params: params
+      },
+      referrer: {
+        url: document.referrer,
+        title: '',
+        utm: {
+          source: params === null || params === void 0 ? void 0 : params.utm_source,
+          medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+          campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+          term: params === null || params === void 0 ? void 0 : params.utm_term,
+          content: params === null || params === void 0 ? void 0 : params.utm_content
+        }
+      }
+    }).then(function (response) {
+      try {
+        if (response.status === 204) {
+          setIntently(true);
+          return Promise.resolve();
+        }
+        return Promise.resolve(response.json()).then(function (payload) {
+          log('Sent collector data, retrieved:', payload);
+          setIdleTimeout(getIdleStatusDelay());
+          addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+          var cohort = payload.intently ? 'intently' : 'fingerprint';
+          if (visitor.cohort !== cohort) setVisitor({
+            cohort: cohort
+          });
+          if (!payload.intently) {
+            log('CollectorProvider: user is in Fingerprint cohort');
+            setIntently(false);
+          } else {
+            log('CollectorProvider: user is in Intently cohort');
+            setIntently(true);
+          }
+        });
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    })["catch"](function (err) {
+      error('failed to store collected data', err);
+    });
+    log('CollectorProvider: collected data');
+  }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIdleTimeout, trackEvent, addPageTriggers]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -1541,6 +1548,10 @@ function CollectorProvider(_ref) {
     }, 500);
     return intervalId;
   }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+  useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  });
   React.useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];

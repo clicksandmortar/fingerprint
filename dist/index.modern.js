@@ -1617,6 +1617,26 @@ function useIntently() {
   };
 }
 
+const useRunOnPathChange = (func, config) => {
+  const [lastCollectedPath, setLastCollectedPath] = useState('');
+  const {
+    log
+  } = useLogging();
+  useEffect(() => {
+    if (config !== null && config !== void 0 && config.skip) return;
+    if (!location.pathname) return;
+    if (location.pathname === lastCollectedPath) return;
+    const tId = setTimeout(() => {
+      log('useRunOnPathChange: running for path: ', location.pathname);
+      setLastCollectedPath(location.pathname);
+      func();
+    }, (config === null || config === void 0 ? void 0 : config.delay) || 300);
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [location.pathname, func, setLastCollectedPath, config]);
+};
+
 const defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
@@ -1796,98 +1816,86 @@ function CollectorProvider({
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
-  const [hasCollected, setHasCollected] = useState(false);
-  useEffect(() => {
-    if (hasCollected) return;
-    if (!booted) {
-      log('CollectorProvider: Not yet collecting, awaiting boot');
+  const collectAndApplyVisitorInfo = React__default.useCallback(() => {
+    if (!visitor.id) {
+      log('CollectorProvider: Not yet collecting, awaiting visitor ID');
       return;
     }
-    const delay = setTimeout(() => {
-      if (!visitor.id) {
-        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
-        return;
-      }
-      log('CollectorProvider: collecting data');
-      if (hasVisitorIDInURL()) {
-        trackEvent('abandoned_journey_landing', {
-          from_email: true
-        });
-      }
-      const params = new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-        const [key, value] = cur.split('=');
-        if (!key) return acc;
-        acc[key] = value;
-        return acc;
-      }, {});
-      const hash = window.location.hash.substring(3);
-      const hashParams = hash.split('&').reduce((result, item) => {
-        const parts = item.split('=');
-        result[parts[0]] = parts[1];
-        return result;
-      }, {});
-      if (hashParams.id_token) {
-        log('CollectorProvider: user logged in event fired');
-        trackEvent('user_logged_in', {});
-        collect({
-          account: {
-            token: hashParams.id_token
-          }
-        }).then(async response => {
-          const payload = await response.json();
-          log('Sent login collector data, retrieved:', payload);
-        }).catch(err => {
-          error('failed to store collected data', err);
-        });
-      }
+    log('CollectorProvider: collecting data');
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      });
+    }
+    const params = new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+      const [key, value] = cur.split('=');
+      if (!key) return acc;
+      acc[key] = value;
+      return acc;
+    }, {});
+    const hash = window.location.hash.substring(3);
+    const hashParams = hash.split('&').reduce((result, item) => {
+      const parts = item.split('=');
+      result[parts[0]] = parts[1];
+      return result;
+    }, {});
+    if (hashParams.id_token) {
+      log('CollectorProvider: user logged in event fired');
+      trackEvent('user_logged_in', {});
       collect({
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params
-        },
-        referrer: {
-          url: document.referrer,
-          title: '',
-          utm: {
-            source: params === null || params === void 0 ? void 0 : params.utm_source,
-            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-            term: params === null || params === void 0 ? void 0 : params.utm_term,
-            content: params === null || params === void 0 ? void 0 : params.utm_content
-          }
+        account: {
+          token: hashParams.id_token
         }
       }).then(async response => {
-        if (response.status === 204) {
-          setIntently(true);
-          return;
-        }
         const payload = await response.json();
-        log('Sent collector data, retrieved:', payload);
-        setIdleTimeout(getIdleStatusDelay());
-        addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-        const cohort = payload.intently ? 'intently' : 'fingerprint';
-        if (visitor.cohort !== cohort) setVisitor({
-          cohort
-        });
-        if (!payload.intently) {
-          log('CollectorProvider: user is in Fingerprint cohort');
-          setIntently(false);
-        } else {
-          log('CollectorProvider: user is in Intently cohort');
-          setIntently(true);
-        }
+        log('Sent login collector data, retrieved:', payload);
       }).catch(err => {
         error('failed to store collected data', err);
       });
-      setHasCollected(true);
-      log('CollectorProvider: collected data');
-    }, initialDelay);
-    return () => {
-      clearTimeout(delay);
-    };
-  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
+    }
+    collect({
+      page: {
+        url: window.location.href,
+        path: window.location.pathname,
+        title: document.title,
+        params
+      },
+      referrer: {
+        url: document.referrer,
+        title: '',
+        utm: {
+          source: params === null || params === void 0 ? void 0 : params.utm_source,
+          medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+          campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+          term: params === null || params === void 0 ? void 0 : params.utm_term,
+          content: params === null || params === void 0 ? void 0 : params.utm_content
+        }
+      }
+    }).then(async response => {
+      if (response.status === 204) {
+        setIntently(true);
+        return;
+      }
+      const payload = await response.json();
+      log('Sent collector data, retrieved:', payload);
+      setIdleTimeout(getIdleStatusDelay());
+      addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+      const cohort = payload.intently ? 'intently' : 'fingerprint';
+      if (visitor.cohort !== cohort) setVisitor({
+        cohort
+      });
+      if (!payload.intently) {
+        log('CollectorProvider: user is in Fingerprint cohort');
+        setIntently(false);
+      } else {
+        log('CollectorProvider: user is in Intently cohort');
+        setIntently(true);
+      }
+    }).catch(err => {
+      error('failed to store collected data', err);
+    });
+    log('CollectorProvider: collected data');
+  }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIdleTimeout, trackEvent, addPageTriggers]);
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
@@ -1921,6 +1929,10 @@ function CollectorProvider({
     }, 500);
     return intervalId;
   }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+  useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  });
   useEffect(() => {
     if (!visitor.id) return;
     const intervalIds = [registerWatcher('.stage-5', '')];
