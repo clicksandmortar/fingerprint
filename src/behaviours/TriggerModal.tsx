@@ -16,7 +16,6 @@ type Props = {
 const Modal = ({ trigger }: Props) => {
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
-
   const [open, setOpen] = useState(true)
   const [hasFired, setHasFired] = useState(false)
 
@@ -35,15 +34,9 @@ const Modal = ({ trigger }: Props) => {
     // like to over-rerender componets. This timeout prevents from firing a ton
     const tId = setTimeout(() => {
       runSeen(trigger)
-    }, 500)
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour,
-      time: new Date().toISOString(),
-      brand
-    })
-    setHasFired(true)
+      setHasFired(true)
+    }, 1500)
+
     return () => {
       clearTimeout(tId)
     }

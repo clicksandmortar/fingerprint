@@ -4,14 +4,14 @@ var reactQuery = require('@tanstack/react-query');
 var React = require('react');
 var React__default = _interopDefault(React);
 var reactErrorBoundary = require('react-error-boundary');
-var reactHookForm = require('react-hook-form');
 var ReactDOM = _interopDefault(require('react-dom'));
-var uuid = require('uuid');
 var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
+var uuid = require('uuid');
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
+var reactHookForm = require('react-hook-form');
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -30,392 +30,6 @@ function _extends() {
 function _objectDestructuringEmpty(obj) {
   if (obj == null) throw new TypeError("Cannot destructure " + obj);
 }
-
-var baseUrl = 'https://bookings-bff.starship-staging.com';
-var makeFullUrl = function makeFullUrl(resource, params) {
-  if (params === void 0) {
-    params = {};
-  }
-  if (resource.startsWith('/')) {
-    resource = resource.substring(1);
-  }
-  var fullUri = baseUrl + "/" + resource;
-  if (Object.keys(params).length === 0) {
-    return fullUri;
-  }
-  return fullUri + "?" + new URLSearchParams(params).toString();
-};
-var Button = function Button(_ref) {
-  var children = _ref.children,
-    className = _ref.className,
-    onClick = _ref.onClick,
-    disabled = _ref.disabled,
-    _ref$colour = _ref.colour,
-    colour = _ref$colour === void 0 ? 'primary' : _ref$colour;
-  var builtButtonClasses = "btn step-button bg-" + colour + " border-" + colour + " text-white hover:bg-" + colour + "/80 disabled:text-" + colour + "/50 disabled:border-" + colour + "/50" + (className ? ' ' + className : '');
-  if (disabled) {
-    builtButtonClasses += ' disabled';
-  }
-  return React.createElement("button", {
-    disabled: disabled,
-    className: builtButtonClasses,
-    onClick: onClick
-  }, children);
-};
-var Voucher = function Voucher(_ref2) {
-  var details = _ref2.details;
-  return React.createElement("div", null, React.createElement("h3", null, "Terms of Voucher"), React.createElement("p", {
-    className: 'text-sm'
-  }, details.termsAndConditions));
-};
-var TriggerInverse = function TriggerInverse(_ref3) {
-  var onSubmit = function onSubmit(data) {
-    try {
-      setState({
-        busy: true
-      });
-      try {
-        if (form.campaign !== '') {
-          submitVoucher(data).then(function () {
-            var eventData = {
-              item_name: landingPage === null || landingPage === void 0 ? void 0 : landingPage.name,
-              affiliation: 'Booking Flow'
-            };
-            console.log(eventData);
-          });
-        }
-      } catch (e) {}
-      return Promise.resolve();
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-  var submitVoucher = function submitVoucher(data) {
-    try {
-      var reqData = _extends({}, data, {
-        bookingLink: (location === null || location === void 0 ? void 0 : location.origin) + "/" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.slug)
-      });
-      return Promise.resolve(fetch(makeFullUrl("campaigns/" + (form === null || form === void 0 ? void 0 : form.campaign) + "/voucher?locationID=" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.identifier)), {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-type': 'application/json'
-        },
-        body: JSON.stringify(reqData)
-      })).then(function (response) {
-        response.json().then(function (responseData) {
-          if (response.ok) {
-            setState({
-              busy: false,
-              complete: true,
-              voucher: responseData.voucher
-            });
-          } else {
-            setState({
-              busy: false,
-              error: responseData,
-              responseStatusCode: response.status
-            });
-          }
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  };
-  _objectDestructuringEmpty(_ref3);
-  var landingPage = {};
-  var form = {};
-  var location = {};
-  var _React$useState = React.useState(true),
-    open = _React$useState[0],
-    setOpen = _React$useState[1];
-  if (!open) {
-    return null;
-  }
-  var _useForm = reactHookForm.useForm(),
-    register = _useForm.register,
-    handleSubmit = _useForm.handleSubmit,
-    isSubmitting = _useForm.formState.isSubmitting;
-  var initialState = {
-    busy: false,
-    complete: false,
-    voucher: null,
-    error: null,
-    responseStatusCode: 0
-  };
-  var _React$useState2 = React.useState(initialState),
-    state = _React$useState2[0],
-    setState = _React$useState2[1];
-  if (state.complete === true) {
-    return React.createElement("div", {
-      className: 'container'
-    }, React.createElement("h2", null, "Voucher Sent!"), React.createElement("p", {
-      className: 'text-md'
-    }, "Good news! We've sent your voucher to the email provided!"), state.voucher && React.createElement("div", {
-      className: 'col-12 mt-3'
-    }, React.createElement(Voucher, {
-      details: state.voucher
-    })));
-  }
-  if (state.responseStatusCode === 409) {
-    return React.createElement("div", {
-      className: 'container'
-    }, React.createElement("h2", {
-      className: 'mt-3'
-    }, "Uh-oh!"), React.createElement("p", null, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\xA0", React.createElement("a", {
-      href: '/help',
-      className: 'underline font-serif tracking-wide',
-      onClick: function onClick() {
-        return setOpen(false);
-      }
-    }, "contact us")));
-  }
-  return React.createElement("div", {
-    style: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 9999
-    }
-  }, React.createElement("main", {
-    className: 'flex-grow flex flex-col justify-center container relative'
-  }, React.createElement("div", {
-    className: 'w-full'
-  }, React.createElement("div", {
-    className: 'cms-content text-center md:text-left'
-  }, React.createElement("h2", null, "Get Your Voucher"), React.createElement("p", null, "To receive your voucher, we just need a few details from you."), React.createElement("h3", {
-    className: "bar-title border-l-4 border-solid border-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour)
-  }, "Contact Info"), React.createElement("form", {
-    onSubmit: handleSubmit(onSubmit)
-  }, React.createElement("div", {
-    className: 'grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2'
-  }, React.createElement("div", null, React.createElement("label", {
-    htmlFor: 'first_name'
-  }, "First Name*"), React.createElement("input", Object.assign({}, register('firstName', {
-    required: true,
-    minLength: 2,
-    maxLength: 30,
-    validate: function validate(value) {
-      return value.trim().length >= 2;
-    }
-  }), {
-    type: 'text',
-    className: 'form-input',
-    id: 'firstName'
-  }))), React.createElement("div", null, React.createElement("label", {
-    htmlFor: 'last_name'
-  }, "Last Name*"), React.createElement("input", Object.assign({}, register('lastName', {
-    required: true,
-    minLength: 2,
-    maxLength: 30,
-    validate: function validate(value) {
-      return value.trim().length >= 2;
-    }
-  }), {
-    type: 'text',
-    className: 'form-input',
-    id: 'lastName'
-  }))), React.createElement("div", null, React.createElement("label", {
-    htmlFor: 'email'
-  }, "Email*"), React.createElement("input", Object.assign({}, register('emailAddress', {
-    required: true
-  }), {
-    type: 'email',
-    className: 'form-input',
-    id: 'email'
-  })))), React.createElement("div", null, React.createElement("p", null, "* Required Field")), React.createElement("div", {
-    className: 'flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start'
-  }, React.createElement("div", {
-    className: 'form-check'
-  }, React.createElement("input", Object.assign({
-    type: 'checkbox'
-  }, register('terms', {
-    required: true
-  }), {
-    className: 'form-check-input',
-    id: 'terms'
-  })), ' ', React.createElement("label", {
-    htmlFor: 'terms',
-    className: 'form-check-label'
-  }, "I confirm that I have read & agreed with the", ' ', React.createElement("a", {
-    href: landingPage === null || landingPage === void 0 ? void 0 : landingPage.privacyPolicy,
-    target: '_blank',
-    rel: 'noreferrer'
-  }, "Privacy Policy"), "*")), React.createElement(Button, {
-    className: 'btn mt-2 md:mt-0',
-    type: 'submit',
-    colour: landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour,
-    disabled: state.busy || isSubmitting
-  }, isSubmitting || state.busy ? 'Sending Voucher...' : 'Get My Voucher')), state.error && state.responseStatusCode !== 409 && React.createElement("div", {
-    className: "alert mt-5 bg-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour) + "/20"
-  }, "There was a problem sending your voucher. Please check your details and try again."))))));
-};
-
-var useFingerprint = function useFingerprint() {
-  return React.useContext(FingerprintContext);
-};
-
-var getModalStylesBySize = function getModalStylesBySize(size) {
-  switch (size) {
-    case 'small':
-      {
-        return {
-          width: '90%',
-          maxWidth: 400,
-          minHeight: 300
-        };
-      }
-    case 'medium':
-      {
-        return {
-          width: '90%',
-          maxWidth: 800,
-          minHeight: 400
-        };
-      }
-    case 'large':
-      {
-        return {
-          width: '90%',
-          maxWidth: 1200,
-          minHeight: 400
-        };
-      }
-    case 'full':
-      {
-        return {
-          width: '100vw',
-          height: '100vh'
-        };
-      }
-  }
-};
-var getModalButtonStylesBySize = function getModalButtonStylesBySize(size) {
-  switch (size) {
-    case 'small':
-      {
-        return {
-          fontSize: '1.3rem',
-          padding: '0.3rem 1rem'
-        };
-      }
-    case 'medium':
-      {
-        return {
-          fontSize: '1.3rem',
-          padding: '0.3rem 1rem'
-        };
-      }
-    case 'large':
-      {
-        return {
-          fontSize: '1.3rem',
-          padding: '0.3rem 1rem'
-        };
-      }
-    case 'full':
-      {
-        return {
-          fontSize: '1.5rem',
-          padding: '0.5rem 1.2rem'
-        };
-      }
-  }
-};
-var getModalButtonFlexPosition = function getModalButtonFlexPosition(position) {
-  switch (position) {
-    case 'left':
-      return {
-        justifyContent: 'flex-start'
-      };
-    case 'right':
-      return {
-        justifyContent: 'flex-end'
-      };
-    case 'center':
-      return {
-        justifyContent: 'center'
-      };
-  }
-};
-var randomHash = 'f' + uuid.v4().split('-')[0];
-var prependClass = function prependClass(className) {
-  return "f" + randomHash + "-" + className;
-};
-
-var defaultElementSize = 'medium';
-var defaultButtonPosition = 'right';
-var CnMStandardModal = function CnMStandardModal(_ref) {
-  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref.trigger,
-    handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal;
-  var modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
-  var elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var modalSizeStyle = getModalStylesBySize(elementSize);
-  var buttonSizeStyle = getModalButtonStylesBySize(elementSize);
-  React.useEffect(function () {
-    var cssToApply = "\n    :root {\n      --primary: white;\n      --secondary: grey;\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      width: 80%;\n      height: 500px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: var(--secondary);\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: var(--primary);\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-  }, []);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    style: _extends({
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }, modalSizeStyle)
-  }, React__default.createElement("div", {
-    className: prependClass('image-darken')
-  }, React__default.createElement("button", {
-    className: prependClass('close-button'),
-    onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '20',
-    height: '20',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    style: _extends({
-      display: 'flex'
-    }, getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition))
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction,
-    style: buttonSizeStyle
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
 
 var closeButtonStyles = {
   borderRadius: '100%',
@@ -450,187 +64,8 @@ var CloseButton = function CloseButton(_ref) {
   })));
 };
 
-var CurlyText = function CurlyText(_ref) {
-  var randomHash = _ref.randomHash,
-    text = _ref.text;
-  return React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    xmlnsXlink: 'http://www.w3.org/1999/xlink',
-    version: '1.1',
-    viewBox: '0 0 500 500',
-    className: 'f' + randomHash + '-curlyText'
-  }, React__default.createElement("defs", null, React__default.createElement("path", {
-    id: 'textPath',
-    d: 'M 0 500 A 175,100 0 0 1 500,500'
-  })), React__default.createElement("text", {
-    x: '0',
-    y: '0',
-    textAnchor: 'middle'
-  }, React__default.createElement("textPath", {
-    xlinkHref: '#textPath',
-    fill: 'white',
-    startOffset: '50%'
-  }, text)));
-};
-var BrownsModal = function BrownsModal(_ref2) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref2.trigger,
-    handleClickCallToAction = _ref2.handleClickCallToAction,
-    handleCloseModal = _ref2.handleCloseModal;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var randomHash = React.useMemo(function () {
-    return uuid.v4().split('-')[0];
-  }, []);
-  React.useEffect(function () {
-    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-close-button:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  }, [randomHash]);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: 'f' + randomHash + '-overlay'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-modal',
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative',
-      height: 500
-    }
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-image-darken'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-close-button'
-  }, React__default.createElement(CloseButton, {
-    onClick: handleCloseModal
-  })), React__default.createElement(CurlyText, {
-    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
-    randomHash: randomHash
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1
-    },
-    className: 'f' + randomHash + '--spacer'
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      marginTop: -150,
-      textTransform: 'uppercase',
-      textAlign: 'center',
-      letterSpacing: '2pt'
-    }
-  }, React__default.createElement("span", {
-    className: 'f' + randomHash + '-mainText'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    className: 'f' + randomHash + '-buttonContainer'
-  }, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: 'f' + randomHash + '-cta',
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
-};
-
-var primaryColor = "rgb(33,147,174)";
-var secondaryColor = "#e0aa00";
-var callToActionColor = 'rgb(235,63,43)';
-var mainGrey = 'rgb(70,70,70)';
-var scaleBg = function scaleBg(scale) {
-  var imageWidth = 800;
-  var imageHeight = 700;
-  return {
-    height: imageHeight * scale,
-    width: imageWidth * scale
-  };
-};
-var StonehouseModal = function StonehouseModal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref.trigger,
-    handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  React.useEffect(function () {
-    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        height: " + scaleBg(0.7).height + "px;\n        width: " + scaleBg(0.7).width + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        margin-left: auto;\n        margin-right: auto;\n        margin-top: 0;\n        margin-bottom: -1.5rem;\n        font-size: 4.5rem;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: grid;\n        place-content: center;\n        flex: 1;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n        font-size: 2.4rem;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        display: block;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n        font-size: 1.3rem;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 4rem 1.5rem 2rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2.5rem;\n          margin-bottom: -0.6rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.9rem;\n          letter-spacing: 1.2pt;\n\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 2rem 1.5rem 1rem 1.5rem;\n        }\n      }\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-    return function () {
-      document.head.removeChild(styles);
-    };
-  }, []);
-  var textColorByRoute = React__default.useMemo(function () {
-    if (location.href.includes('tablebooking')) return {
-      heading: {
-        color: 'white'
-      },
-      paragraph: {
-        color: secondaryColor
-      }
-    };
-    return {
-      heading: {
-        color: primaryColor,
-        WebkitTextStroke: "2px " + mainGrey
-      },
-      paragraph: {
-        color: mainGrey
-      }
-    };
-  }, []);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('image-container')
-  }, React__default.createElement("div", {
-    className: prependClass('close-button')
-  }, React__default.createElement(CloseButton, {
-    onClick: handleCloseModal
-  })), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text'),
-    style: textColorByRoute.heading
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
-    className: prependClass('sub-text'),
-    style: textColorByRoute.paragraph
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+var useFingerprint = function useFingerprint() {
+  return React.useContext(FingerprintContext);
 };
 
 var LoggingProvider = function LoggingProvider(_ref) {
@@ -1215,6 +650,27 @@ function useIntently() {
   };
 }
 
+var useRunOnPathChange = function useRunOnPathChange(func, config) {
+  var _useState = React.useState(''),
+    lastCollectedPath = _useState[0],
+    setLastCollectedPath = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  React.useEffect(function () {
+    if (config !== null && config !== void 0 && config.skip) return;
+    if (!location.pathname) return;
+    if (location.pathname === lastCollectedPath) return;
+    var tId = setTimeout(function () {
+      log('useRunOnPathChange: running for path: ', location.pathname);
+      setLastCollectedPath(location.pathname);
+      func();
+    }, (config === null || config === void 0 ? void 0 : config.delay) || 300);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [location.pathname, func, setLastCollectedPath, config]);
+};
+
 var defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs) {
   if (cooldownMs === void 0) {
@@ -1241,6 +697,45 @@ function useTriggerDelay(cooldownMs) {
     startCooldown: startCooldown,
     canNextTriggerOccur: canNextTriggerOccur,
     getRemainingCooldownMs: getRemainingCooldownMs
+  };
+}
+
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+    var _cur$split = cur.split('='),
+      key = _cur$split[0],
+      value = _cur$split[1];
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  var params = getReducedSearchParams();
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    params: params
+  };
+}
+function getReferrer() {
+  var params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
   };
 }
 
@@ -1302,7 +797,7 @@ function CollectorProvider(_ref) {
     setIdleTimeout = _useState[1];
   var _useState2 = React.useState([]),
     pageTriggers = _useState2[0],
-    setPageTriggers = _useState2[1];
+    setPageTriggersState = _useState2[1];
   var _useState3 = React.useState([]),
     displayTriggers = _useState3[0],
     setDisplayedTriggers = _useState3[1];
@@ -1311,11 +806,14 @@ function CollectorProvider(_ref) {
   var _useState4 = React.useState(new Map()),
     foundWatchers = _useState4[0],
     setFoundWatchers = _useState4[1];
-  var addPageTriggers = React__default.useCallback(function (triggers) {
-    setPageTriggers(function (prev) {
-      return uniqueBy([].concat(prev, triggers || []), 'id');
+  var setPageTriggers = React__default.useCallback(function (triggers) {
+    setPageTriggersState(function (prev) {
+      var nonDismissed = prev.filter(function (tr) {
+        return displayTriggers.includes(tr.id);
+      });
+      return uniqueBy([].concat(triggers || [], nonDismissed), 'id');
     });
-  }, [setPageTriggers]);
+  }, [setPageTriggersState, displayTriggers]);
   var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
     var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
       return handler.behaviour === _trigger.behaviour;
@@ -1329,7 +827,12 @@ function CollectorProvider(_ref) {
       return triggerId !== id;
     });
     setDisplayedTriggers(refreshedTriggers);
-  }, [displayTriggers, log]);
+    setPageTriggersState(function (prev) {
+      return prev.filter(function (trigger) {
+        return trigger.id !== id;
+      });
+    });
+  }, [displayTriggers, log, setPageTriggers]);
   var TriggerComponent = React__default.useCallback(function () {
     if (!displayTriggers) return null;
     var activeTriggers = pageTriggers.filter(function (trigger) {
@@ -1409,98 +912,34 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
-  var _useState5 = React.useState(false),
-    hasCollected = _useState5[0],
-    setHasCollected = _useState5[1];
-  React.useEffect(function () {
-    if (hasCollected) return;
-    if (!booted) {
-      log('CollectorProvider: Not yet collecting, awaiting boot');
+  var collectAndApplyVisitorInfo = React__default.useCallback(function () {
+    if (!visitor.id) {
+      log('CollectorProvider: Not yet collecting, awaiting visitor ID');
       return;
     }
-    var delay = setTimeout(function () {
-      if (!visitor.id) {
-        log('CollectorProvider: Not yet collecting, awaiting visitor ID');
-        return;
-      }
-      log('CollectorProvider: collecting data');
-      if (hasVisitorIDInURL()) {
-        trackEvent('abandoned_journey_landing', {
-          from_email: true
-        });
-      }
-      var params = new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-        var _cur$split = cur.split('='),
-          key = _cur$split[0],
-          value = _cur$split[1];
-        if (!key) return acc;
-        acc[key] = value;
-        return acc;
-      }, {});
-      var hash = window.location.hash.substring(3);
-      var hashParams = hash.split('&').reduce(function (result, item) {
-        var parts = item.split('=');
-        result[parts[0]] = parts[1];
-        return result;
-      }, {});
-      if (hashParams.id_token) {
-        log('CollectorProvider: user logged in event fired');
-        trackEvent('user_logged_in', {});
-        collect({
-          account: {
-            token: hashParams.id_token
-          }
-        }).then(function (response) {
-          try {
-            return Promise.resolve(response.json()).then(function (payload) {
-              log('Sent login collector data, retrieved:', payload);
-            });
-          } catch (e) {
-            return Promise.reject(e);
-          }
-        })["catch"](function (err) {
-          error('failed to store collected data', err);
-        });
-      }
+    log('CollectorProvider: collecting data');
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      });
+    }
+    var hash = window.location.hash.substring(3);
+    var hashParams = hash.split('&').reduce(function (result, item) {
+      var parts = item.split('=');
+      result[parts[0]] = parts[1];
+      return result;
+    }, {});
+    if (hashParams.id_token) {
+      log('CollectorProvider: user logged in event fired');
+      trackEvent('user_logged_in', {});
       collect({
-        page: {
-          url: window.location.href,
-          path: window.location.pathname,
-          title: document.title,
-          params: params
-        },
-        referrer: {
-          url: document.referrer,
-          title: '',
-          utm: {
-            source: params === null || params === void 0 ? void 0 : params.utm_source,
-            medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-            campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-            term: params === null || params === void 0 ? void 0 : params.utm_term,
-            content: params === null || params === void 0 ? void 0 : params.utm_content
-          }
+        account: {
+          token: hashParams.id_token
         }
       }).then(function (response) {
         try {
-          if (response.status === 204) {
-            setIntently(true);
-            return Promise.resolve();
-          }
           return Promise.resolve(response.json()).then(function (payload) {
-            log('Sent collector data, retrieved:', payload);
-            setIdleTimeout(getIdleStatusDelay());
-            addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-            var cohort = payload.intently ? 'intently' : 'fingerprint';
-            if (visitor.cohort !== cohort) setVisitor({
-              cohort: cohort
-            });
-            if (!payload.intently) {
-              log('CollectorProvider: user is in Fingerprint cohort');
-              setIntently(false);
-            } else {
-              log('CollectorProvider: user is in Intently cohort');
-              setIntently(true);
-            }
+            log('Sent login collector data, retrieved:', payload);
           });
         } catch (e) {
           return Promise.reject(e);
@@ -1508,13 +947,40 @@ function CollectorProvider(_ref) {
       })["catch"](function (err) {
         error('failed to store collected data', err);
       });
-      setHasCollected(true);
-      log('CollectorProvider: collected data');
-    }, initialDelay);
-    return function () {
-      clearTimeout(delay);
-    };
-  }, [booted, collect, hasCollected, error, setVisitor, visitor.id, session.id, handlers, initialDelay, getIdleStatusDelay, setIdleTimeout, log, trackEvent, addPageTriggers]);
+    }
+    collect({
+      page: getPagePayload() || undefined,
+      referrer: getReferrer() || undefined
+    }).then(function (response) {
+      try {
+        if (response.status === 204) {
+          setIntently(true);
+          return Promise.resolve();
+        }
+        return Promise.resolve(response.json()).then(function (payload) {
+          log('Sent collector data, retrieved:', payload);
+          setIdleTimeout(getIdleStatusDelay());
+          setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+          var cohort = payload.intently ? 'intently' : 'fingerprint';
+          if (visitor.cohort !== cohort) setVisitor({
+            cohort: cohort
+          });
+          if (!payload.intently) {
+            log('CollectorProvider: user is in Fingerprint cohort');
+            setIntently(false);
+          } else {
+            log('CollectorProvider: user is in Intently cohort');
+            setIntently(true);
+          }
+        });
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    })["catch"](function (err) {
+      error('failed to store collected data', err);
+    });
+    log('CollectorProvider: collected data');
+  }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIdleTimeout, trackEvent, setPageTriggers]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -1539,7 +1005,7 @@ function CollectorProvider(_ref) {
               return Promise.resolve(response.json()).then(function (payload) {
                 log('Sent collector data, retrieved:', payload);
                 setIdleTimeout(getIdleStatusDelay());
-                addPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+                setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
               });
             } catch (e) {
               return Promise.reject(e);
@@ -1553,6 +1019,10 @@ function CollectorProvider(_ref) {
     }, 500);
     return intervalId;
   }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+  useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  });
   React.useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];
@@ -1562,19 +1032,19 @@ function CollectorProvider(_ref) {
       });
     };
   }, [registerWatcher, visitor]);
-  var setTrigger = React__default.useCallback(function (trigger) {
+  var setActiveTrigger = React__default.useCallback(function (trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
-    addPageTriggers([trigger]);
+    setPageTriggers([trigger]);
     setDisplayedTriggerByInvocation(trigger.invocation);
-  }, [log, setDisplayedTriggerByInvocation, addPageTriggers]);
+  }, [log, setDisplayedTriggerByInvocation, setPageTriggers]);
   var collectorContextVal = React__default.useMemo(function () {
     return {
-      addPageTriggers: addPageTriggers,
+      setPageTriggers: setPageTriggers,
       removeActiveTrigger: removeActiveTrigger,
-      setTrigger: setTrigger,
+      setActiveTrigger: setActiveTrigger,
       trackEvent: trackEvent
     };
-  }, [addPageTriggers, removeActiveTrigger, setTrigger, trackEvent]);
+  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]);
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
@@ -1590,189 +1060,22 @@ function CollectorProvider(_ref) {
   }, children, TriggerComponent()));
 }
 var CollectorContext = React.createContext({
-  addPageTriggers: function addPageTriggers() {},
-  removeActiveTrigger: function removeActiveTrigger() {},
-  setTrigger: function setTrigger() {},
-  trackEvent: function trackEvent() {}
+  setPageTriggers: function setPageTriggers() {
+    console.error('setPageTriggers not implemented correctly');
+  },
+  removeActiveTrigger: function removeActiveTrigger() {
+    console.error('removeActiveTrigger not implemented correctly');
+  },
+  setActiveTrigger: function setActiveTrigger() {
+    console.error('setActiveTrigger not implemented correctly');
+  },
+  trackEvent: function trackEvent() {
+    console.error('trackEvent not implemented correctly');
+  }
 });
 
 var useCollector = function useCollector() {
   return React.useContext(CollectorContext);
-};
-
-var useSeenMutation = function useSeenMutation() {
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var _useEnvVars = useEnvVars(),
-    FINGERPRINT_API_HOSTNAME = _useEnvVars.FINGERPRINT_API_HOSTNAME;
-  return reactQuery.useMutation(function (trigger) {
-    return request.put(FINGERPRINT_API_HOSTNAME + "/triggers/" + appId + "/" + visitor.id + "/seen", {
-      seenTriggerIDs: [trigger.id]
-    }).then(function (response) {
-      log('Collector API response', response);
-      return response;
-    })["catch"](function (err) {
-      error('Collector API error', err);
-      return err;
-    });
-  }, {
-    mutationKey: ['seen'],
-    onSuccess: function onSuccess() {}
-  });
-};
-
-var Modal = function Modal(_ref) {
-  var trigger = _ref.trigger;
-  var _useCollector = useCollector(),
-    removeActiveTrigger = _useCollector.removeActiveTrigger;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
-  var _useState = React.useState(true),
-    open = _useState[0],
-    setOpen = _useState[1];
-  var _useState2 = React.useState(false),
-    hasFired = _useState2[0],
-    setHasFired = _useState2[1];
-  var brand = React__default.useMemo(function () {
-    return getBrand();
-  }, []);
-  var _useSeenMutation = useSeenMutation(),
-    runSeen = _useSeenMutation.mutate,
-    isSuccess = _useSeenMutation.isSuccess,
-    isLoading = _useSeenMutation.isLoading;
-  React.useEffect(function () {
-    if (!open) return;
-    if (hasFired) return;
-    if (isSuccess) return;
-    if (isLoading) return;
-    var tId = setTimeout(function () {
-      runSeen(trigger);
-    }, 500);
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour,
-      time: new Date().toISOString(),
-      brand: brand
-    });
-    setHasFired(true);
-    return function () {
-      clearTimeout(tId);
-    };
-  }, [open, isSuccess, isLoading]);
-  if (!open) {
-    return null;
-  }
-  var handleClickCallToAction = function handleClickCallToAction(e) {
-    var _trigger$data, _trigger$data2;
-    e.preventDefault();
-    trackEvent('user_clicked_button', trigger);
-    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
-  };
-  var handleCloseModal = function handleCloseModal() {
-    trackEvent('user_closed_trigger', trigger);
-    removeActiveTrigger(trigger.id);
-    setOpen(false);
-  };
-  if (brand === 'C&M') return React__default.createElement(CnMStandardModal, {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  });
-  if (brand === 'Stonehouse') return React__default.createElement(StonehouseModal, {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  });
-  if (brand === 'Browns') return React__default.createElement(BrownsModal, {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  });
-  return null;
-};
-var TriggerModal = function TriggerModal(_ref2) {
-  var trigger = _ref2.trigger;
-  return ReactDOM.createPortal(React__default.createElement(Modal, {
-    trigger: trigger
-  }), document.body);
-};
-
-var Youtube = function Youtube(_ref) {
-  var _trigger$brand, _trigger$brand2, _trigger$brand3, _trigger$brand4, _trigger$data;
-  var trigger = _ref.trigger;
-  var _useState = React.useState(true),
-    open = _useState[0],
-    setOpen = _useState[1];
-  if (!open) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    style: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 9999
-    }
-  }, React__default.createElement("div", {
-    style: {
-      background: "#fff url('" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$brand = trigger.brand) === null || _trigger$brand === void 0 ? void 0 : _trigger$brand.backgroundImage) + "') no-repeat center center",
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%,-50%)',
-      backgroundColor: '#fff',
-      borderRadius: '0.5rem',
-      padding: 0,
-      boxShadow: '0 0 1rem rgba(0,0,0,0.5)',
-      border: '3px solid white',
-      zIndex: 9999
-    }
-  }, React__default.createElement("div", {
-    style: {
-      backgroundColor: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand2 = trigger.brand) === null || _trigger$brand2 === void 0 ? void 0 : _trigger$brand2.overlayColor,
-      maxWidth: '600px',
-      padding: '2rem',
-      borderRadius: '0.5rem'
-    }
-  }, React__default.createElement("button", {
-    onClick: function onClick() {
-      setOpen(false);
-    },
-    style: {
-      position: 'absolute',
-      top: '0.5rem',
-      right: '0.5rem',
-      fontSize: '2rem',
-      backgroundColor: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand3 = trigger.brand) === null || _trigger$brand3 === void 0 ? void 0 : _trigger$brand3.fontColor,
-      color: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand4 = trigger.brand) === null || _trigger$brand4 === void 0 ? void 0 : _trigger$brand4.primaryColor,
-      border: 'none',
-      borderRadius: '0.5rem',
-      padding: '0 1rem'
-    }
-  }, "\xD7"), React__default.createElement("iframe", {
-    src: trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.url,
-    allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
-    style: {
-      width: '500px',
-      height: '260px',
-      marginTop: '1rem'
-    }
-  }))));
-};
-var TriggerYoutube = function TriggerYoutube(_ref2) {
-  var trigger = _ref2.trigger;
-  return ReactDOM.createPortal(React__default.createElement(Youtube, {
-    trigger: trigger
-  }), document.body);
 };
 
 /**
@@ -3079,6 +2382,58 @@ var useCountdown = function useCountdown(_ref) {
   };
 };
 
+var useSeenMutation = function useSeenMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useCollector = useCollector(),
+    setPageTriggers = _useCollector.setPageTriggers;
+  var _useEnvVars = useEnvVars(),
+    FINGERPRINT_API_HOSTNAME = _useEnvVars.FINGERPRINT_API_HOSTNAME;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var trackTriggerSeen = React__default.useCallback(function (trigger) {
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.invocation,
+      triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
+      brand: getBrand()
+    });
+  }, [trackEvent]);
+  return reactQuery.useMutation(function (trigger) {
+    trackTriggerSeen(trigger);
+    return request.put(FINGERPRINT_API_HOSTNAME + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+      seenTriggerIDs: [trigger.id],
+      visitor: visitor,
+      page: getPagePayload()
+    }).then(function (response) {
+      log('Seen mutation: response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Seen mutation: error', err);
+      return err;
+    });
+  }, {
+    mutationKey: ['seen'],
+    onSuccess: function (res) {
+      try {
+        return Promise.resolve(res.json()).then(function (r) {
+          log('Seen mutation: replacing triggers with:', r.pageTriggers);
+          setPageTriggers(r.pageTriggers);
+          return r;
+        });
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    }
+  });
+};
+
 var resetPad = function resetPad() {
   document.body.style.paddingTop = 'inherit';
 };
@@ -3096,9 +2451,6 @@ var Banner = function Banner(_ref) {
   var _useState2 = React.useState(false),
     hasFired = _useState2[0],
     setHasFired = _useState2[1];
-  var brand = React__default.useMemo(function () {
-    return getBrand();
-  }, []);
   var _useSeenMutation = useSeenMutation(),
     runSeen = _useSeenMutation.mutate,
     isSuccess = _useSeenMutation.isSuccess,
@@ -3111,13 +2463,6 @@ var Banner = function Banner(_ref) {
     var tId = setTimeout(function () {
       runSeen(trigger);
     }, 500);
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour,
-      time: new Date().toISOString(),
-      brand: brand
-    });
     setHasFired(true);
     return function () {
       clearTimeout(tId);
@@ -3209,11 +2554,719 @@ var TriggerBanner = function TriggerBanner(_ref2) {
   }), document.body);
 };
 
+var baseUrl = 'https://bookings-bff.starship-staging.com';
+var makeFullUrl = function makeFullUrl(resource, params) {
+  if (params === void 0) {
+    params = {};
+  }
+  if (resource.startsWith('/')) {
+    resource = resource.substring(1);
+  }
+  var fullUri = baseUrl + "/" + resource;
+  if (Object.keys(params).length === 0) {
+    return fullUri;
+  }
+  return fullUri + "?" + new URLSearchParams(params).toString();
+};
+var Button = function Button(_ref) {
+  var children = _ref.children,
+    className = _ref.className,
+    onClick = _ref.onClick,
+    disabled = _ref.disabled,
+    _ref$colour = _ref.colour,
+    colour = _ref$colour === void 0 ? 'primary' : _ref$colour;
+  var builtButtonClasses = "btn step-button bg-" + colour + " border-" + colour + " text-white hover:bg-" + colour + "/80 disabled:text-" + colour + "/50 disabled:border-" + colour + "/50" + (className ? ' ' + className : '');
+  if (disabled) {
+    builtButtonClasses += ' disabled';
+  }
+  return React.createElement("button", {
+    disabled: disabled,
+    className: builtButtonClasses,
+    onClick: onClick
+  }, children);
+};
+var Voucher = function Voucher(_ref2) {
+  var details = _ref2.details;
+  return React.createElement("div", null, React.createElement("h3", null, "Terms of Voucher"), React.createElement("p", {
+    className: 'text-sm'
+  }, details.termsAndConditions));
+};
+var TriggerInverse = function TriggerInverse(_ref3) {
+  var onSubmit = function onSubmit(data) {
+    try {
+      setState({
+        busy: true
+      });
+      try {
+        if (form.campaign !== '') {
+          submitVoucher(data).then(function () {
+            var eventData = {
+              item_name: landingPage === null || landingPage === void 0 ? void 0 : landingPage.name,
+              affiliation: 'Booking Flow'
+            };
+            console.log(eventData);
+          });
+        }
+      } catch (e) {}
+      return Promise.resolve();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+  var submitVoucher = function submitVoucher(data) {
+    try {
+      var reqData = _extends({}, data, {
+        bookingLink: (location === null || location === void 0 ? void 0 : location.origin) + "/" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.slug)
+      });
+      return Promise.resolve(fetch(makeFullUrl("campaigns/" + (form === null || form === void 0 ? void 0 : form.campaign) + "/voucher?locationID=" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.identifier)), {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(reqData)
+      })).then(function (response) {
+        response.json().then(function (responseData) {
+          if (response.ok) {
+            setState({
+              busy: false,
+              complete: true,
+              voucher: responseData.voucher
+            });
+          } else {
+            setState({
+              busy: false,
+              error: responseData,
+              responseStatusCode: response.status
+            });
+          }
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+  _objectDestructuringEmpty(_ref3);
+  var landingPage = {};
+  var form = {};
+  var location = {};
+  var _React$useState = React.useState(true),
+    open = _React$useState[0],
+    setOpen = _React$useState[1];
+  if (!open) {
+    return null;
+  }
+  var _useForm = reactHookForm.useForm(),
+    register = _useForm.register,
+    handleSubmit = _useForm.handleSubmit,
+    isSubmitting = _useForm.formState.isSubmitting;
+  var initialState = {
+    busy: false,
+    complete: false,
+    voucher: null,
+    error: null,
+    responseStatusCode: 0
+  };
+  var _React$useState2 = React.useState(initialState),
+    state = _React$useState2[0],
+    setState = _React$useState2[1];
+  if (state.complete === true) {
+    return React.createElement("div", {
+      className: 'container'
+    }, React.createElement("h2", null, "Voucher Sent!"), React.createElement("p", {
+      className: 'text-md'
+    }, "Good news! We've sent your voucher to the email provided!"), state.voucher && React.createElement("div", {
+      className: 'col-12 mt-3'
+    }, React.createElement(Voucher, {
+      details: state.voucher
+    })));
+  }
+  if (state.responseStatusCode === 409) {
+    return React.createElement("div", {
+      className: 'container'
+    }, React.createElement("h2", {
+      className: 'mt-3'
+    }, "Uh-oh!"), React.createElement("p", null, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\xA0", React.createElement("a", {
+      href: '/help',
+      className: 'underline font-serif tracking-wide',
+      onClick: function onClick() {
+        return setOpen(false);
+      }
+    }, "contact us")));
+  }
+  return React.createElement("div", {
+    style: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      zIndex: 9999
+    }
+  }, React.createElement("main", {
+    className: 'flex-grow flex flex-col justify-center container relative'
+  }, React.createElement("div", {
+    className: 'w-full'
+  }, React.createElement("div", {
+    className: 'cms-content text-center md:text-left'
+  }, React.createElement("h2", null, "Get Your Voucher"), React.createElement("p", null, "To receive your voucher, we just need a few details from you."), React.createElement("h3", {
+    className: "bar-title border-l-4 border-solid border-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour)
+  }, "Contact Info"), React.createElement("form", {
+    onSubmit: handleSubmit(onSubmit)
+  }, React.createElement("div", {
+    className: 'grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2'
+  }, React.createElement("div", null, React.createElement("label", {
+    htmlFor: 'first_name'
+  }, "First Name*"), React.createElement("input", Object.assign({}, register('firstName', {
+    required: true,
+    minLength: 2,
+    maxLength: 30,
+    validate: function validate(value) {
+      return value.trim().length >= 2;
+    }
+  }), {
+    type: 'text',
+    className: 'form-input',
+    id: 'firstName'
+  }))), React.createElement("div", null, React.createElement("label", {
+    htmlFor: 'last_name'
+  }, "Last Name*"), React.createElement("input", Object.assign({}, register('lastName', {
+    required: true,
+    minLength: 2,
+    maxLength: 30,
+    validate: function validate(value) {
+      return value.trim().length >= 2;
+    }
+  }), {
+    type: 'text',
+    className: 'form-input',
+    id: 'lastName'
+  }))), React.createElement("div", null, React.createElement("label", {
+    htmlFor: 'email'
+  }, "Email*"), React.createElement("input", Object.assign({}, register('emailAddress', {
+    required: true
+  }), {
+    type: 'email',
+    className: 'form-input',
+    id: 'email'
+  })))), React.createElement("div", null, React.createElement("p", null, "* Required Field")), React.createElement("div", {
+    className: 'flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start'
+  }, React.createElement("div", {
+    className: 'form-check'
+  }, React.createElement("input", Object.assign({
+    type: 'checkbox'
+  }, register('terms', {
+    required: true
+  }), {
+    className: 'form-check-input',
+    id: 'terms'
+  })), ' ', React.createElement("label", {
+    htmlFor: 'terms',
+    className: 'form-check-label'
+  }, "I confirm that I have read & agreed with the", ' ', React.createElement("a", {
+    href: landingPage === null || landingPage === void 0 ? void 0 : landingPage.privacyPolicy,
+    target: '_blank',
+    rel: 'noreferrer'
+  }, "Privacy Policy"), "*")), React.createElement(Button, {
+    className: 'btn mt-2 md:mt-0',
+    type: 'submit',
+    colour: landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour,
+    disabled: state.busy || isSubmitting
+  }, isSubmitting || state.busy ? 'Sending Voucher...' : 'Get My Voucher')), state.error && state.responseStatusCode !== 409 && React.createElement("div", {
+    className: "alert mt-5 bg-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour) + "/20"
+  }, "There was a problem sending your voucher. Please check your details and try again."))))));
+};
+
+var getModalStylesBySize = function getModalStylesBySize(size) {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          width: '90%',
+          maxWidth: 400,
+          minHeight: 300
+        };
+      }
+    case 'medium':
+      {
+        return {
+          width: '90%',
+          maxWidth: 800,
+          minHeight: 400
+        };
+      }
+    case 'large':
+      {
+        return {
+          width: '90%',
+          maxWidth: 1200,
+          minHeight: 400
+        };
+      }
+    case 'full':
+      {
+        return {
+          width: '100vw',
+          height: '100vh'
+        };
+      }
+  }
+};
+var getModalButtonStylesBySize = function getModalButtonStylesBySize(size) {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'medium':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'large':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'full':
+      {
+        return {
+          fontSize: '1.5rem',
+          padding: '0.5rem 1.2rem'
+        };
+      }
+  }
+};
+var getModalButtonFlexPosition = function getModalButtonFlexPosition(position) {
+  switch (position) {
+    case 'left':
+      return {
+        justifyContent: 'flex-start'
+      };
+    case 'right':
+      return {
+        justifyContent: 'flex-end'
+      };
+    case 'center':
+      return {
+        justifyContent: 'center'
+      };
+  }
+};
+var randomHash = 'f' + uuid.v4().split('-')[0];
+var prependClass = function prependClass(className) {
+  return "f" + randomHash + "-" + className;
+};
+
+var defaultElementSize = 'medium';
+var defaultButtonPosition = 'right';
+var CnMStandardModal = function CnMStandardModal(_ref) {
+  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
+  var elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var modalSizeStyle = getModalStylesBySize(elementSize);
+  var buttonSizeStyle = getModalButtonStylesBySize(elementSize);
+  React.useEffect(function () {
+    var cssToApply = "\n    :root {\n      --primary: white;\n      --secondary: grey;\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      width: 80%;\n      height: 500px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: var(--secondary);\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: var(--primary);\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: _extends({
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }, modalSizeStyle)
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("button", {
+    className: prependClass('close-button'),
+    onClick: handleCloseModal
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '20',
+    height: '20',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: '#000',
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  }))), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    style: _extends({
+      display: 'flex'
+    }, getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition))
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction,
+    style: buttonSizeStyle
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
+var CurlyText = function CurlyText(_ref) {
+  var randomHash = _ref.randomHash,
+    text = _ref.text;
+  return React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    xmlnsXlink: 'http://www.w3.org/1999/xlink',
+    version: '1.1',
+    viewBox: '0 0 500 500',
+    className: 'f' + randomHash + '-curlyText'
+  }, React__default.createElement("defs", null, React__default.createElement("path", {
+    id: 'textPath',
+    d: 'M 0 500 A 175,100 0 0 1 500,500'
+  })), React__default.createElement("text", {
+    x: '0',
+    y: '0',
+    textAnchor: 'middle'
+  }, React__default.createElement("textPath", {
+    xlinkHref: '#textPath',
+    fill: 'white',
+    startOffset: '50%'
+  }, text)));
+};
+var BrownsModal = function BrownsModal(_ref2) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref2.trigger,
+    handleClickCallToAction = _ref2.handleClickCallToAction,
+    handleCloseModal = _ref2.handleCloseModal;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var randomHash = React.useMemo(function () {
+    return uuid.v4().split('-')[0];
+  }, []);
+  React.useEffect(function () {
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-close-button:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(css));
+    document.head.appendChild(styles);
+    setStylesLoaded(true);
+  }, [randomHash]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: 'f' + randomHash + '-overlay'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-modal',
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative',
+      height: 500
+    }
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-image-darken'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-close-button'
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement(CurlyText, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
+    randomHash: randomHash
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1
+    },
+    className: 'f' + randomHash + '--spacer'
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1,
+      marginTop: -150,
+      textTransform: 'uppercase',
+      textAlign: 'center',
+      letterSpacing: '2pt'
+    }
+  }, React__default.createElement("span", {
+    className: 'f' + randomHash + '-mainText'
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    className: 'f' + randomHash + '-buttonContainer'
+  }, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: 'f' + randomHash + '-cta',
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
+};
+
+var primaryColor = "rgb(33,147,174)";
+var secondaryColor = "#e0aa00";
+var callToActionColor = 'rgb(235,63,43)';
+var mainGrey = 'rgb(70,70,70)';
+var scaleBg = function scaleBg(scale) {
+  var imageWidth = 800;
+  var imageHeight = 700;
+  return {
+    height: imageHeight * scale,
+    width: imageWidth * scale
+  };
+};
+var StonehouseModal = function StonehouseModal(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  React.useEffect(function () {
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        height: " + scaleBg(0.7).height + "px;\n        width: " + scaleBg(0.7).width + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        margin-left: auto;\n        margin-right: auto;\n        margin-top: 0;\n        margin-bottom: -1.5rem;\n        font-size: 4.5rem;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: grid;\n        place-content: center;\n        flex: 1;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n        font-size: 2.4rem;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        display: block;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n        font-size: 1.3rem;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 4rem 1.5rem 2rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2.5rem;\n          margin-bottom: -0.6rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.9rem;\n          letter-spacing: 1.2pt;\n\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 2rem 1.5rem 1rem 1.5rem;\n        }\n      }\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+    return function () {
+      document.head.removeChild(styles);
+    };
+  }, []);
+  var textColorByRoute = React__default.useMemo(function () {
+    if (location.href.includes('tablebooking')) return {
+      heading: {
+        color: 'white'
+      },
+      paragraph: {
+        color: secondaryColor
+      }
+    };
+    return {
+      heading: {
+        color: primaryColor,
+        WebkitTextStroke: "2px " + mainGrey
+      },
+      paragraph: {
+        color: mainGrey
+      }
+    };
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-container')
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text'),
+    style: textColorByRoute.heading
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
+    className: prependClass('sub-text'),
+    style: textColorByRoute.paragraph
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    style: {
+      flex: 1,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
+var Modal = function Modal(_ref) {
+  var trigger = _ref.trigger;
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useState = React.useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  var _useState2 = React.useState(false),
+    hasFired = _useState2[0],
+    setHasFired = _useState2[1];
+  var brand = React__default.useMemo(function () {
+    return getBrand();
+  }, []);
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSuccess = _useSeenMutation.isSuccess,
+    isLoading = _useSeenMutation.isLoading;
+  React.useEffect(function () {
+    if (!open) return;
+    if (hasFired) return;
+    if (isSuccess) return;
+    if (isLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+      setHasFired(true);
+    }, 1500);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
+  if (!open) {
+    return null;
+  }
+  var handleClickCallToAction = function handleClickCallToAction(e) {
+    var _trigger$data, _trigger$data2;
+    e.preventDefault();
+    trackEvent('user_clicked_button', trigger);
+    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
+  };
+  var handleCloseModal = function handleCloseModal() {
+    trackEvent('user_closed_trigger', trigger);
+    removeActiveTrigger(trigger.id);
+    setOpen(false);
+  };
+  if (brand === 'C&M') return React__default.createElement(CnMStandardModal, {
+    trigger: trigger,
+    handleClickCallToAction: handleClickCallToAction,
+    handleCloseModal: handleCloseModal
+  });
+  if (brand === 'Stonehouse') return React__default.createElement(StonehouseModal, {
+    trigger: trigger,
+    handleClickCallToAction: handleClickCallToAction,
+    handleCloseModal: handleCloseModal
+  });
+  if (brand === 'Browns') return React__default.createElement(BrownsModal, {
+    trigger: trigger,
+    handleClickCallToAction: handleClickCallToAction,
+    handleCloseModal: handleCloseModal
+  });
+  return null;
+};
+var TriggerModal = function TriggerModal(_ref2) {
+  var trigger = _ref2.trigger;
+  return ReactDOM.createPortal(React__default.createElement(Modal, {
+    trigger: trigger
+  }), document.body);
+};
+
+var Youtube = function Youtube(_ref) {
+  var _trigger$brand, _trigger$brand2, _trigger$brand3, _trigger$brand4, _trigger$data;
+  var trigger = _ref.trigger;
+  var _useState = React.useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  if (!open) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    style: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      zIndex: 9999
+    }
+  }, React__default.createElement("div", {
+    style: {
+      background: "#fff url('" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$brand = trigger.brand) === null || _trigger$brand === void 0 ? void 0 : _trigger$brand.backgroundImage) + "') no-repeat center center",
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%,-50%)',
+      backgroundColor: '#fff',
+      borderRadius: '0.5rem',
+      padding: 0,
+      boxShadow: '0 0 1rem rgba(0,0,0,0.5)',
+      border: '3px solid white',
+      zIndex: 9999
+    }
+  }, React__default.createElement("div", {
+    style: {
+      backgroundColor: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand2 = trigger.brand) === null || _trigger$brand2 === void 0 ? void 0 : _trigger$brand2.overlayColor,
+      maxWidth: '600px',
+      padding: '2rem',
+      borderRadius: '0.5rem'
+    }
+  }, React__default.createElement("button", {
+    onClick: function onClick() {
+      setOpen(false);
+    },
+    style: {
+      position: 'absolute',
+      top: '0.5rem',
+      right: '0.5rem',
+      fontSize: '2rem',
+      backgroundColor: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand3 = trigger.brand) === null || _trigger$brand3 === void 0 ? void 0 : _trigger$brand3.fontColor,
+      color: trigger === null || trigger === void 0 ? void 0 : (_trigger$brand4 = trigger.brand) === null || _trigger$brand4 === void 0 ? void 0 : _trigger$brand4.primaryColor,
+      border: 'none',
+      borderRadius: '0.5rem',
+      padding: '0 1rem'
+    }
+  }, "\xD7"), React__default.createElement("iframe", {
+    src: trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.url,
+    allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
+    style: {
+      width: '500px',
+      height: '260px',
+      marginTop: '1rem'
+    }
+  }))));
+};
+var TriggerYoutube = function TriggerYoutube(_ref2) {
+  var trigger = _ref2.trigger;
+  return ReactDOM.createPortal(React__default.createElement(Youtube, {
+    trigger: trigger
+  }), document.body);
+};
+
 var clientHandlers = [{
   id: 'modal_v1',
   behaviour: 'BEHAVIOUR_MODAL',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerModal, {
+      key: trigger.id,
       trigger: trigger
     });
   }
@@ -3222,6 +3275,7 @@ var clientHandlers = [{
   behaviour: 'BEHAVIOUR_YOUTUBE',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerYoutube, {
+      key: trigger.id,
       trigger: trigger
     });
   }
@@ -3230,6 +3284,7 @@ var clientHandlers = [{
   behaviour: 'BEHAVIOUR_INVERSE_FLOW',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerInverse, {
+      key: trigger.id,
       trigger: trigger
     });
   }
@@ -3238,6 +3293,7 @@ var clientHandlers = [{
   behaviour: 'BEHAVIOUR_BANNER',
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerBanner, {
+      key: trigger.id,
       trigger: trigger
     });
   }
