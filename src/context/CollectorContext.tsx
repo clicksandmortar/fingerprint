@@ -383,46 +383,6 @@ export function CollectorProvider({
     addPageTriggers
   ])
 
-  // temp hack for collector to onl fire once.
-  // @Ed to come up with a proper way to handle this once
-  // we rule out Contexts
-  // const [hasCollected, setHasCollected] = useState(false)
-  // @todo this should be invoked when booted
-  // and then on any window page URL changes.
-  // useEffect(() => {
-  //   if (hasCollected) return
-  //   if (!booted) {
-  //     log('CollectorProvider: Not yet collecting, awaiting boot')
-  //     return
-  //   }
-
-  //   const delay = setTimeout(() => {
-  //     // collectAndApplyVisitorInfo()
-  //   }, initialDelay)
-
-  //   return () => {
-  //     clearTimeout(delay)
-  //   }
-  // }, [
-  //   booted,
-  //   collect,
-  //   collectAndApplyVisitorInfo,
-  //   hasCollected,
-  //   initialDelay,
-  //   log,
-  //   error,
-  //   setVisitor,
-  //   visitor.id,
-  //   session.id,
-  //   handlers,
-  //   initialDelay,
-  //   getIdleStatusDelay,
-  //   setIdleTimeout,
-  //   log,
-  //   trackEvent,
-  //   addPageTriggers
-  // ])
-
   const registerWatcher = React.useCallback(
     (configuredSelector: string, configuredSearch: string) => {
       const intervalId = setInterval(() => {
