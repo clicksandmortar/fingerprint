@@ -14,17 +14,13 @@ To install the Fingerprint on your website, simply copy the script tag provided 
     r = i.getElementsByTagName(n)[0]
     p.src = g
     p.id = e
-    p.setAttribute('data-debug', rp)
-    p.setAttribute('data-consent', ri)
     r.parentNode.insertBefore(p, r)
   })(
     window,
     document,
     'script',
     'https://cdn.fingerprint.host/fingerprint.js',
-    '{ YOUR APP ID }',
-    { DEBUG }, // Set to false to disable debug mode. Always set to false in production.
-    true // Set to false to disable consent checks.
+    '{ YOUR TRADING UNIT ID }'
   )
 </script>
 <!-- End C&M Fingerprint Embed Code -->
@@ -40,9 +36,4 @@ The Fingerprint does not currently expose any cookie consent functionality. If y
 
 ## Parameters
 
-The script tag accepts the following parameters:
-
-| Parameter         | Type      | Default     | Description                                                                                                                                                           |
-| ----------------- | --------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `{ YOUR APP ID }` | `string`  | `undefined` | The application ID to use for fingerprint tracking. Fingerprint will not start tracking data until this is set, and has been validated by the server.                 |
-| `{ DEBUG }`       | `boolean` | `false`     | Whether or not to log debug information to the console. When set to true this will log all fingerprint events to the console. When false, only errors will be logged. |
+The script tag no longer accepts parameters. All configuration should be made in the C&M portal.
