@@ -1,18 +1,10 @@
-import mixpanel, { Callback, Config } from 'mixpanel-browser'
+import mixpanel, { Callback } from 'mixpanel-browser'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useFingerprint } from '../hooks/useFingerprint'
-import { getEnvVars } from '../utils/getEnvVars'
 import { RegistrableUserProperties } from '../utils/types'
 import { useLogging } from './LoggingContext'
 import { useVisitor } from './VisitorContext'
-
-const init = (cfg: Partial<Config>) => {
-  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  })
-}
+import { useEnvVars } from '../hooks/useEnvVars'
 
 const trackEvent = (event: string, props: any, callback?: Callback): void => {
   return mixpanel.track(event, props, callback)
@@ -26,6 +18,7 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
   const { appId } = useFingerprint()
   const { visitor } = useVisitor()
   const { log } = useLogging()
+  const { MIXPANEL_TOKEN } = useEnvVars()
   const [initiated, setInitiated] = useState(false)
 
   useEffect(() => {
@@ -35,7 +28,12 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
 
     log('MixpanelProvider: booting')
 
-    init({ debug: true })
+    mixpanel.init(MIXPANEL_TOKEN, {
+      debug: true,
+      track_pageview: true,
+      persistence: 'localStorage'
+    })
+
     setInitiated(true)
 
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel')

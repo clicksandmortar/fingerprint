@@ -1,7 +1,7 @@
-import { ExampleComponent } from '.'
+import { FingerprintProvider } from './index'
 
-describe('ExampleComponent', () => {
+describe('FingerprintProvider', () => {
   it('is truthy', () => {
-    expect(ExampleComponent).toBeTruthy()
+    expect(FingerprintProvider).toBeTruthy()
   })
 })

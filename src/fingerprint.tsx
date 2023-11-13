@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { Widget } from './widget/Widget'
 
 // Creates widget container
@@ -20,13 +20,23 @@ document.body.appendChild(widget)
 console.log('Fingerprint Widget Loaded')
 
 // Renders widget
-ReactDOM.render(
-  <React.StrictMode>
-    <Widget
-      appId={document?.currentScript?.getAttribute('id') || ''}
-      consent={document?.currentScript?.getAttribute('data-consent') === 'true'}
-      debug={document?.currentScript?.getAttribute('data-debug') === 'false'}
-    />
-  </React.StrictMode>,
-  document.getElementById('fingerprint-widget')
-)
+export const render = () => {
+  const container = document.getElementById('fingerprint-widget')
+  const root = createRoot(container!)
+
+  root.render(
+    <React.StrictMode>
+      <Widget
+        appId={document?.currentScript?.getAttribute('id') || ''}
+        tenantId={document?.currentScript?.getAttribute('data-tenant') || ''}
+        // The follow props are deprecated and will be removed in a future release.
+        consent={
+          document?.currentScript?.getAttribute('data-consent') === 'true'
+        }
+        debug={document?.currentScript?.getAttribute('data-debug') === 'false'}
+      />
+    </React.StrictMode>
+  )
+}
+
+render()

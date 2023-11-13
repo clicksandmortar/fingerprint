@@ -82,6 +82,6 @@ const Youtube = ({ trigger }: Props) => {
   )
 }
 
-export const TriggerYoutube = ({ trigger }: Props) => {
+export const TriggerYoutube = ({ trigger }: Props): React.ReactPortal => {
   return ReactDOM.createPortal(<Youtube trigger={trigger} />, document.body)
 }

@@ -1080,31 +1080,6 @@ const StonehouseModal = ({
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
 };
 
-function getEnvVars() {
-  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
-  let isDev = false;
-  switch (true) {
-    case typeof window === 'undefined':
-    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
-    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
-    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
-    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
-    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
-      isDev = true;
-      break;
-    default:
-      isDev = false;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
-
 const LoggingProvider = ({
   debug,
   children
@@ -1333,13 +1308,41 @@ const useVisitor = () => {
   return useContext(VisitorContext);
 };
 
-const init = cfg => {
-  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
+const tenantAwareHost = (isDev = false, tenant = 'mab') => {
+  return 'https://' + tenant + '.api.uk.clicksandmortar-' + (isDev ? 'staging' : 'production') + '.com/fingerprint';
 };
+const useEnvVars = () => {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
+  const {
+    log
+  } = useLogging();
+  const {
+    tenantId
+  } = useContext(FingerprintContext);
+  let isDev = false;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
+  }
+  log('Fingerprint Environment isDev: ', isDev);
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: tenantAwareHost(isDev, tenantId),
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: tenantAwareHost(isDev, tenantId),
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+};
+
 const trackEvent = (event, props, callback) => {
   return mixpanel.track(event, props, callback);
 };
@@ -1355,14 +1358,19 @@ const MixpanelProvider = ({
   const {
     log
   } = useLogging();
+  const {
+    MIXPANEL_TOKEN
+  } = useEnvVars();
   const [initiated, setInitiated] = useState(false);
   useEffect(() => {
     if (!appId || !visitor.id) {
       return;
     }
     log('MixpanelProvider: booting');
-    init({
-      debug: true
+    mixpanel.init(MIXPANEL_TOKEN, {
+      debug: true,
+      track_pageview: true,
+      persistence: 'localStorage'
     });
     setInitiated(true);
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
@@ -1405,7 +1413,6 @@ const useMixpanel = () => {
 const headers = {
   'Content-Type': 'application/json'
 };
-const hostname = getEnvVars().FINGERPRINT_API_HOSTNAME;
 const request = {
   get: async (url, params) => {
     return await fetch(url + '?' + new URLSearchParams(params), {
@@ -1462,9 +1469,12 @@ const useCollectorMutation = () => {
     visitor,
     session
   } = useVisitor();
+  const {
+    FINGERPRINT_API_HOSTNAME
+  } = useEnvVars();
   const requestHost = useHostname();
   return useMutation(data => {
-    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), {
+    return request.post(FINGERPRINT_API_HOSTNAME + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), {
       ...data,
       appId,
       visitor,
@@ -1772,7 +1782,7 @@ function CollectorProvider({
       return;
     }
     if (!canNextTriggerOccur()) {
-      log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
+      log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining.
         I will attempt again when the same signal occurs after this passes.`);
       log('Re-registering handler');
       reRegisterExitIntent();
@@ -1975,8 +1985,11 @@ const useSeenMutation = () => {
   const {
     visitor
   } = useVisitor();
+  const {
+    FINGERPRINT_API_HOSTNAME
+  } = useEnvVars();
   return useMutation(trigger => {
-    return request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+    return request.put(`${FINGERPRINT_API_HOSTNAME}/triggers/${appId}/${visitor.id}/seen`, {
       seenTriggerIDs: [trigger.id]
     }).then(response => {
       log('Collector API response', response);
@@ -3586,8 +3599,6 @@ const clientHandlers = [{
   })
 }];
 
-const queryClient = new QueryClient();
-const cookieAccountJWT = 'b2c_token';
 const useConsentCheck = (consent, consentCallback) => {
   const [consentGiven, setConsentGiven] = useState(consent);
   const {
@@ -3611,12 +3622,16 @@ const useConsentCheck = (consent, consentCallback) => {
   }, [consentCallback, consent]);
   return consentGiven;
 };
+
+const queryClient = new QueryClient();
+const cookieAccountJWT = 'b2c_token';
 const FingerprintProvider = ({
   appId,
+  tenantId,
   children,
-  consent: _consent = false,
+  consent: _consent = true,
   consentCallback,
-  debug,
+  debug: _debug = false,
   defaultHandlers,
   initialDelay: _initialDelay = 0,
   exitIntentTriggers: _exitIntentTriggers = true,
@@ -3648,24 +3663,16 @@ const FingerprintProvider = ({
     return children;
   }
   return React__default.createElement(LoggingProvider, {
-    debug: debug
+    debug: _debug
   }, React__default.createElement(QueryClientProvider, {
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {
     value: {
       appId,
+      tenantId,
       booted,
       currentTrigger: null,
       registerHandler: addAnotherHandler,
-      trackEvent: () => {
-        alert('trackEvent not implemented');
-      },
-      trackPageView: () => {
-        alert('trackPageView not implemented');
-      },
-      unregisterHandler: () => {
-        alert('unregisterHandler not implemented');
-      },
       initialDelay: _initialDelay,
       idleTriggers: _idleTriggers,
       pageLoadTriggers: _pageLoadTriggers,
@@ -3681,6 +3688,7 @@ const FingerprintProvider = ({
 };
 const defaultFingerprintState = {
   appId: '',
+  tenantId: '',
   booted: false,
   consent: false,
   currentTrigger: null,
@@ -3689,9 +3697,6 @@ const defaultFingerprintState = {
   pageLoadTriggers: false,
   initialDelay: 0,
   registerHandler: () => {},
-  trackEvent: () => {},
-  trackPageView: () => {},
-  unregisterHandler: () => {},
   config: {
     idleDelay: undefined,
     triggerCooldown: 60 * 1000,
