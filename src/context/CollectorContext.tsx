@@ -10,6 +10,7 @@ import { useFingerprint } from '../hooks/useFingerprint'
 import useIntently from '../hooks/useIntently'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
+import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -76,7 +77,7 @@ export function CollectorProvider({
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
     getIdleStatusDelay()
   )
-  const [pageTriggers, setPageTriggers] = useState<Trigger[]>([])
+  const [pageTriggers, setPageTriggersState] = useState<Trigger[]>([])
   const [displayTriggers, setDisplayedTriggers] = useState<string[]>([])
   const { setIntently } = useIntently()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
@@ -86,13 +87,16 @@ export function CollectorProvider({
   /**
    * add triggers to existing ones, keep unique to prevent multi-firing
    */
-  const addPageTriggers = React.useCallback(
+  const setPageTriggers = React.useCallback(
     (triggers: Trigger[]) => {
-      setPageTriggers((prev) =>
-        uniqueBy<Trigger>([...prev, ...(triggers || [])], 'id')
-      )
+      setPageTriggersState((prev) => {
+        const nonDismissed = prev.filter((tr) =>
+          displayTriggers.includes(tr.id)
+        )
+        return uniqueBy<Trigger>([...(triggers || []), ...nonDismissed], 'id')
+      })
     },
-    [setPageTriggers]
+    [setPageTriggersState, displayTriggers]
   )
 
   const getHandlerForTrigger = React.useCallback(
@@ -116,7 +120,7 @@ export function CollectorProvider({
 
       setDisplayedTriggers(refreshedTriggers)
     },
-    [displayTriggers, log]
+    [displayTriggers, log, setPageTriggers]
   )
 
   const TriggerComponent = React.useCallback(():
@@ -274,16 +278,6 @@ export function CollectorProvider({
       })
     }
 
-    const params: any = new URLSearchParams(window.location.search)
-      .toString()
-      .split('&')
-      .reduce((acc, cur) => {
-        const [key, value] = cur.split('=')
-        if (!key) return acc
-        acc[key] = value
-        return acc
-      }, {})
-
     const hash: string = window.location.hash.substring(3)
 
     const hashParams = hash.split('&').reduce((result: any, item: any) => {
@@ -312,28 +306,8 @@ export function CollectorProvider({
     }
 
     collect({
-      page: {
-        url: window.location.href,
-        path: window.location.pathname,
-        title: document.title,
-        params
-      },
-      referrer: {
-        url: document.referrer,
-        title: '',
-        utm: {
-          // eslint-disable-next-line camelcase
-          source: params?.utm_source,
-          // eslint-disable-next-line camelcase
-          medium: params?.utm_medium,
-          // eslint-disable-next-line camelcase
-          campaign: params?.utm_campaign,
-          // eslint-disable-next-line camelcase
-          term: params?.utm_term,
-          // eslint-disable-next-line camelcase
-          content: params?.utm_content
-        }
-      }
+      page: getPagePayload() || undefined,
+      referrer: getReferrer() || undefined
     })
       .then(async (response: Response) => {
         if (response.status === 204) {
@@ -349,7 +323,7 @@ export function CollectorProvider({
         // @todo turn this into the dynamic value
         setIdleTimeout(getIdleStatusDelay())
 
-        addPageTriggers(payload?.pageTriggers)
+        setPageTriggers(payload?.pageTriggers)
 
         const cohort = payload.intently ? 'intently' : 'fingerprint'
 
@@ -368,7 +342,6 @@ export function CollectorProvider({
       .catch((err) => {
         error('failed to store collected data', err)
       })
-    // setHasCollected(true)
     log('CollectorProvider: collected data')
   }, [
     collect,
@@ -380,7 +353,7 @@ export function CollectorProvider({
     getIdleStatusDelay,
     setIdleTimeout,
     trackEvent,
-    addPageTriggers
+    setPageTriggers
   ])
 
   const registerWatcher = React.useCallback(
@@ -422,7 +395,7 @@ export function CollectorProvider({
                 // @todo turn this into the dynamic value
                 setIdleTimeout(getIdleStatusDelay())
 
-                addPageTriggers(payload?.pageTriggers)
+                setPageTriggers(payload?.pageTriggers)
               })
               .catch((err) => {
                 error('failed to store collected data', err)
@@ -464,23 +437,23 @@ export function CollectorProvider({
     }
   }, [registerWatcher, visitor])
 
-  const setTrigger = React.useCallback(
+  const setActiveTrigger = React.useCallback(
     (trigger: Trigger) => {
       log('CollectorProvider: manually setting trigger', trigger)
-      addPageTriggers([trigger])
+      setPageTriggers([trigger])
       setDisplayedTriggerByInvocation(trigger.invocation)
     },
-    [log, setDisplayedTriggerByInvocation, addPageTriggers]
+    [log, setDisplayedTriggerByInvocation, setPageTriggers]
   )
 
   const collectorContextVal = React.useMemo(
     () => ({
-      addPageTriggers,
+      setPageTriggers,
       removeActiveTrigger,
-      setTrigger,
+      setActiveTrigger,
       trackEvent
     }),
-    [addPageTriggers, removeActiveTrigger, setTrigger, trackEvent]
+    [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]
   )
 
   useEffect(() => {
@@ -510,14 +483,23 @@ export function CollectorProvider({
 }
 
 export type CollectorContextInterface = {
-  addPageTriggers: (triggers: Trigger[]) => void
+  setPageTriggers: (triggers: Trigger[]) => void
   removeActiveTrigger: (id: Trigger['id']) => void
-  setTrigger: (trigger: Trigger) => void
+  setActiveTrigger: (trigger: Trigger) => void
   trackEvent: (event: string, properties?: any) => void
 }
+
 export const CollectorContext = createContext<CollectorContextInterface>({
-  addPageTriggers: () => {},
-  removeActiveTrigger: () => {},
-  setTrigger: () => {},
-  trackEvent: () => {}
+  setPageTriggers: () => {
+    console.error('setPageTriggers not implemented correctly')
+  },
+  removeActiveTrigger: () => {
+    console.error('removeActiveTrigger not implemented correctly')
+  },
+  setActiveTrigger: () => {
+    console.error('setActiveTrigger not implemented correctly')
+  },
+  trackEvent: () => {
+    console.error('trackEvent not implemented correctly')
+  }
 })
