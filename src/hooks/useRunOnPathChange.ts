@@ -7,7 +7,7 @@ type Config = {
   delay?: number
 }
 // takes a function and runs it when the path changes
-// optionally takes a skip condition
+// optionally takes a skip condition and init delay
 const useRunOnPathChange = (func: FuncProp, config?: Config) => {
   const [lastCollectedPath, setLastCollectedPath] = useState<string>('')
   const { log } = useLogging()
