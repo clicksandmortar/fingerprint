@@ -3,7 +3,7 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 // import { isMobile } from 'react-device-detect' <= reminder where isMobile came from
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { CollectorResponse, Trigger } from '../client/types'
+import { CollectorVisitorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -119,6 +119,9 @@ export function CollectorProvider({
       )
 
       setDisplayedTriggers(refreshedTriggers)
+      setPageTriggersState((prev) =>
+        prev.filter((trigger) => trigger.id !== id)
+      )
     },
     [displayTriggers, log, setPageTriggers]
   )
@@ -296,7 +299,7 @@ export function CollectorProvider({
         }
       })
         .then(async (response: Response) => {
-          const payload: CollectorResponse = await response.json()
+          const payload: CollectorVisitorResponse = await response.json()
 
           log('Sent login collector data, retrieved:', payload)
         })
@@ -315,7 +318,7 @@ export function CollectorProvider({
           return
         }
 
-        const payload: CollectorResponse = await response.json()
+        const payload: CollectorVisitorResponse = await response.json()
 
         log('Sent collector data, retrieved:', payload)
 
@@ -387,7 +390,7 @@ export function CollectorProvider({
               ]
             })
               .then(async (response: Response) => {
-                const payload: CollectorResponse = await response.json()
+                const payload: CollectorVisitorResponse = await response.json()
 
                 log('Sent collector data, retrieved:', payload)
 
