@@ -8,7 +8,6 @@ import { useCollector } from '../hooks/useCollector'
 import useCountdown from '../hooks/useCountdown'
 import { getInterpolate } from '../hooks/useInterpolate'
 import { useSeenMutation } from '../hooks/useSeenMutation'
-import { getBrand } from '../utils/brand'
 
 type Props = {
   trigger: Trigger
@@ -26,10 +25,6 @@ const Banner = ({ trigger }: Props) => {
   const [open, setOpen] = useState(true)
 
   const [hasFired, setHasFired] = useState(false)
-
-  const brand = React.useMemo(() => {
-    return getBrand()
-  }, [])
 
   const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
 
@@ -49,13 +44,6 @@ const Banner = ({ trigger }: Props) => {
       runSeen(trigger)
     }, 500)
 
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour,
-      time: new Date().toISOString(),
-      brand
-    })
     setHasFired(true)
     return () => {
       clearTimeout(tId)

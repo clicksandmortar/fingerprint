@@ -44,7 +44,7 @@ export type Referrer = {
   }
 }
 
-export type CollectorResponse = {
+export type CollectorVisitorResponse = {
   firstSeen: Date
   lastSeen: Date
   visits: number
