@@ -8,6 +8,7 @@ import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
 import useIntently from '../hooks/useIntently'
+import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
@@ -267,116 +268,93 @@ export function CollectorProvider({
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD')
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation])
 
-  // temp hack for collector to onl fire once.
-  // @Ed to come up with a proper way to handle this once
-  // we rule out Contexts
-  const [hasCollected, setHasCollected] = useState(false)
-  // @todo this should be invoked when booted
-  // and then on any window page URL changes.
-  useEffect(() => {
-    if (hasCollected) return
-    if (!booted) {
-      log('CollectorProvider: Not yet collecting, awaiting boot')
+  const collectAndApplyVisitorInfo = React.useCallback(() => {
+    if (!visitor.id) {
+      log('CollectorProvider: Not yet collecting, awaiting visitor ID')
       return
     }
+    log('CollectorProvider: collecting data')
 
-    const delay = setTimeout(() => {
-      if (!visitor.id) {
-        log('CollectorProvider: Not yet collecting, awaiting visitor ID')
-        return
-      }
-      log('CollectorProvider: collecting data')
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      })
+    }
 
-      if (hasVisitorIDInURL()) {
-        trackEvent('abandoned_journey_landing', {
-          from_email: true
-        })
-      }
+    const hash: string = window.location.hash.substring(3)
 
-      const hash: string = window.location.hash.substring(3)
+    const hashParams = hash.split('&').reduce((result: any, item: any) => {
+      const parts = item.split('=')
+      result[parts[0]] = parts[1]
+      return result
+    }, {})
 
-      const hashParams = hash.split('&').reduce((result: any, item: any) => {
-        const parts = item.split('=')
-        result[parts[0]] = parts[1]
-        return result
-      }, {})
-
-      if (hashParams.id_token) {
-        log('CollectorProvider: user logged in event fired')
-        trackEvent('user_logged_in', {})
-
-        collect({
-          account: {
-            token: hashParams.id_token
-          }
-        })
-          .then(async (response: Response) => {
-            const payload: CollectorVisitorResponse = await response.json()
-
-            log('Sent login collector data, retrieved:', payload)
-          })
-          .catch((err) => {
-            error('failed to store collected data', err)
-          })
-      }
+    if (hashParams.id_token) {
+      log('CollectorProvider: user logged in event fired')
+      trackEvent('user_logged_in', {})
 
       collect({
-        page: getPagePayload() || undefined,
-        referrer: getReferrer() || undefined
+        account: {
+          token: hashParams.id_token
+        }
       })
         .then(async (response: Response) => {
-          if (response.status === 204) {
-            setIntently(true)
-            return
-          }
-
           const payload: CollectorVisitorResponse = await response.json()
 
-          log('Sent collector data, retrieved:', payload)
-
-          // Set IdleTimer
-          // @todo turn this into the dynamic value
-          setIdleTimeout(getIdleStatusDelay())
-
-          setPageTriggers(payload?.pageTriggers)
-
-          const cohort = payload.intently ? 'intently' : 'fingerprint'
-
-          if (visitor.cohort !== cohort) setVisitor({ cohort })
-
-          if (!payload.intently) {
-            // remove intently overlay here
-            log('CollectorProvider: user is in Fingerprint cohort')
-            setIntently(false)
-          } else {
-            // show intently overlay here
-            log('CollectorProvider: user is in Intently cohort')
-            setIntently(true)
-          }
+          log('Sent login collector data, retrieved:', payload)
         })
         .catch((err) => {
           error('failed to store collected data', err)
         })
-      setHasCollected(true)
-      log('CollectorProvider: collected data')
-    }, initialDelay)
-
-    return () => {
-      clearTimeout(delay)
     }
+
+    collect({
+      page: getPagePayload() || undefined,
+      referrer: getReferrer() || undefined
+    })
+      .then(async (response: Response) => {
+        if (response.status === 204) {
+          setIntently(true)
+          return
+        }
+
+        const payload: CollectorVisitorResponse = await response.json()
+
+        log('Sent collector data, retrieved:', payload)
+
+        // Set IdleTimer
+        // @todo turn this into the dynamic value
+        setIdleTimeout(getIdleStatusDelay())
+
+        setPageTriggers(payload?.pageTriggers)
+
+        const cohort = payload.intently ? 'intently' : 'fingerprint'
+
+        if (visitor.cohort !== cohort) setVisitor({ cohort })
+
+        if (!payload.intently) {
+          // remove intently overlay here
+          log('CollectorProvider: user is in Fingerprint cohort')
+          setIntently(false)
+        } else {
+          // show intently overlay here
+          log('CollectorProvider: user is in Intently cohort')
+          setIntently(true)
+        }
+      })
+      .catch((err) => {
+        error('failed to store collected data', err)
+      })
+    log('CollectorProvider: collected data')
   }, [
-    booted,
     collect,
-    hasCollected,
+    log,
     error,
     setVisitor,
-    visitor.id,
-    session.id,
+    visitor,
     handlers,
-    initialDelay,
     getIdleStatusDelay,
     setIdleTimeout,
-    log,
     trackEvent,
     setPageTriggers
   ])
@@ -445,6 +423,12 @@ export function CollectorProvider({
       visitor
     ]
   )
+
+  // TODO: keep tracking whether we ever need to add a skip condition
+  useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  })
 
   useEffect(() => {
     if (!visitor.id) return
