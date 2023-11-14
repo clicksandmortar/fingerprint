@@ -7,7 +7,9 @@ import { SupportedBrand, getBrand } from '../../utils/brand'
 const collinBrandsPathConversionMap: Partial<{
   [K in SupportedBrand]: string
 }> = {
-  Stonehouse: '/tablebooking/enquiry-form-completed'
+  Stonehouse: '/tablebooking/enquiry-form-completed',
+  'All Bar One': '/bookings/dmnc-complete',
+  Sizzling: '/tablebooking/enquiry-form-completed'
 }
 
 /**
@@ -32,7 +34,7 @@ export function useCollinsBookingComplete() {
     if (!isConversionPath) return
 
     log(
-      'useCollinsBookingComplete: Collins booking complete based on path and brand'
+      `useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`
     )
 
     trackEvent('booking_complete', {})
