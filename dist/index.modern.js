@@ -470,6 +470,59 @@ const useExitIntentDelay = (delay = 0) => {
   };
 };
 
+const useIsElementVisible = () => {
+  const getIsVisible = React__default.useCallback(selector => {
+    const element = document.querySelector(selector);
+    if (!element) return false;
+    if (window.getComputedStyle(element).visibility === 'hidden') return false;
+    if (window.getComputedStyle(element).display === 'none') return false;
+    if (window.getComputedStyle(element).opacity === '0') return false;
+    if (window.getComputedStyle(element).height === '0px') return false;
+    if (window.getComputedStyle(element).width === '0px') return false;
+    return true;
+  }, []);
+  return {
+    getIsVisible
+  };
+};
+
+const interval = 250;
+const useIncompleteTriggers = () => {
+  const [incompleteTriggers, setIncompleteTriggers] = useState([]);
+  const [visibleTriggers, setVisibleTriggers] = useState([]);
+  const {
+    getIsVisible
+  } = useIsElementVisible();
+  const visibilityQuerySelectors = React__default.useMemo(() => {
+    return incompleteTriggers.map(trigger => trigger.signals.map(signal => {
+      if (signal.op !== 'CanSeeElementOnPage') return null;
+      return {
+        trigger,
+        selector: signal.parameters.selector
+      };
+    })).flat().filter(selector => selector !== null);
+  }, [incompleteTriggers]);
+  useEffect(() => {
+    if (!visibilityQuerySelectors.length) return;
+    const intId = setInterval(() => {
+      const visibleItems = visibilityQuerySelectors.map(reducedTrigger => {
+        const isElementVisible = getIsVisible(reducedTrigger.selector);
+        if (isElementVisible) return reducedTrigger.trigger;
+        return null;
+      }).filter(Boolean);
+      setVisibleTriggers(visibleItems);
+    }, interval);
+    return () => {
+      clearInterval(intId);
+    };
+  }, [incompleteTriggers, getIsVisible]);
+  return {
+    incompleteTriggers,
+    setIncompleteTriggers,
+    visibleTriggers
+  };
+};
+
 const TEMP_isCNMBrand = () => {
   if (typeof window === 'undefined') return false;
   const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
@@ -736,6 +789,14 @@ function CollectorProvider({
     setIntently
   } = useIntently();
   const [foundWatchers, setFoundWatchers] = useState(new Map());
+  const {
+    setIncompleteTriggers,
+    visibleTriggers: visibleIncompleteTriggers
+  } = useIncompleteTriggers();
+  useEffect(() => {
+    if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
+    setPageTriggersState(prev => [...prev, ...visibleIncompleteTriggers]);
+  }, [visibleIncompleteTriggers, setPageTriggersState]);
   const setPageTriggers = React__default.useCallback(triggers => {
     setPageTriggersState(prev => {
       const nonDismissed = prev.filter(tr => displayTriggers.includes(tr.id));
@@ -750,12 +811,13 @@ function CollectorProvider({
   const removeActiveTrigger = useCallback(id => {
     log(`CollectorProvider: removing id:${id} from displayTriggers`);
     const refreshedTriggers = displayTriggers.filter(triggerId => triggerId !== id);
+    setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
     setDisplayedTriggers(refreshedTriggers);
     setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
   }, [displayTriggers, log, setPageTriggers]);
   const TriggerComponent = React__default.useCallback(() => {
     if (!displayTriggers) return null;
-    const activeTriggers = pageTriggers.filter(trigger => displayTriggers.includes(trigger.id));
+    const activeTriggers = [...pageTriggers, ...visibleIncompleteTriggers].filter(trigger => displayTriggers.includes(trigger.id));
     if (!activeTriggers) {
       error(`No trigger found for displayTriggers`, displayTriggers);
       return null;
@@ -782,11 +844,11 @@ function CollectorProvider({
       log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
       return null;
     });
-  }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger, visibleIncompleteTriggers]);
   const setDisplayedTriggerByInvocation = React__default.useCallback(invocation => {
-    const invokableTrigger = pageTriggers.find(trigger => trigger.invocation === invocation);
+    const invokableTrigger = [...pageTriggers, ...visibleIncompleteTriggers].find(trigger => trigger.invocation === invocation);
     if (invokableTrigger) setDisplayedTriggers(ts => [...ts, invokableTrigger.id]);
-  }, [pageTriggers, setDisplayedTriggers]);
+  }, [pageTriggers, setDisplayedTriggers, visibleIncompleteTriggers]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
@@ -871,6 +933,7 @@ function CollectorProvider({
       log('Sent collector data, retrieved:', payload);
       setIdleTimeout(getIdleStatusDelay());
       setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+      setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
       const cohort = payload.intently ? 'intently' : 'fingerprint';
       if (visitor.cohort !== cohort) setVisitor({
         cohort
@@ -886,7 +949,7 @@ function CollectorProvider({
       error('failed to store collected data', err);
     });
     log('CollectorProvider: collected data');
-  }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIdleTimeout, trackEvent, setPageTriggers]);
+  }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIncompleteTriggers, setIdleTimeout, trackEvent, setPageTriggers]);
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
@@ -911,6 +974,7 @@ function CollectorProvider({
             log('Sent collector data, retrieved:', payload);
             setIdleTimeout(getIdleStatusDelay());
             setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+            setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
           }).catch(err => {
             error('failed to store collected data', err);
           });

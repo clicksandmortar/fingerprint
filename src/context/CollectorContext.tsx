@@ -7,6 +7,7 @@ import { CollectorVisitorResponse, Trigger } from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
+import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
 import useIntently from '../hooks/useIntently'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
@@ -78,12 +79,25 @@ export function CollectorProvider({
     getIdleStatusDelay()
   )
   const [pageTriggers, setPageTriggersState] = useState<Trigger[]>([])
+
   const [displayTriggers, setDisplayedTriggers] = useState<string[]>([])
   const { setIntently } = useIntently()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
 
+  const {
+    // incompleteTriggers,
+    setIncompleteTriggers,
+    visibleTriggers: visibleIncompleteTriggers
+  } = useIncompleteTriggers()
+
+  useEffect(() => {
+    if (!visibleIncompleteTriggers?.length) return
+
+    // const appliedTriggers = visibleTriggers;
+    setPageTriggersState((prev) => [...prev, ...visibleIncompleteTriggers])
+  }, [visibleIncompleteTriggers, setPageTriggersState])
   /**
    * add triggers to existing ones, keep unique to prevent multi-firing
    */
@@ -117,6 +131,9 @@ export function CollectorProvider({
       const refreshedTriggers = displayTriggers.filter(
         (triggerId) => triggerId !== id
       )
+      setIncompleteTriggers((prev) =>
+        prev.filter((trigger) => trigger.id !== id)
+      )
 
       setDisplayedTriggers(refreshedTriggers)
       setPageTriggersState((prev) =>
@@ -132,9 +149,10 @@ export function CollectorProvider({
     if (!displayTriggers) return null
 
     // TODO: UNDO
-    const activeTriggers = pageTriggers.filter((trigger) =>
-      displayTriggers.includes(trigger.id)
-    )
+    const activeTriggers = [
+      ...pageTriggers,
+      ...visibleIncompleteTriggers
+    ].filter((trigger) => displayTriggers.includes(trigger.id))
 
     if (!activeTriggers) {
       error(`No trigger found for displayTriggers`, displayTriggers)
@@ -178,19 +196,21 @@ export function CollectorProvider({
     log,
     handlers,
     error,
-    getHandlerForTrigger
+    getHandlerForTrigger,
+    visibleIncompleteTriggers
   ])
 
   const setDisplayedTriggerByInvocation = React.useCallback(
     (invocation: Trigger['invocation']) => {
-      const invokableTrigger = pageTriggers.find(
-        (trigger) => trigger.invocation === invocation
-      )
+      const invokableTrigger = [
+        ...pageTriggers,
+        ...visibleIncompleteTriggers
+      ].find((trigger) => trigger.invocation === invocation)
 
       if (invokableTrigger)
         setDisplayedTriggers((ts) => [...ts, invokableTrigger.id])
     },
-    [pageTriggers, setDisplayedTriggers]
+    [pageTriggers, setDisplayedTriggers, visibleIncompleteTriggers]
   )
 
   const fireIdleTrigger = useCallback(() => {
@@ -327,6 +347,7 @@ export function CollectorProvider({
         setIdleTimeout(getIdleStatusDelay())
 
         setPageTriggers(payload?.pageTriggers)
+        setIncompleteTriggers(payload?.incompleteTriggers || [])
 
         const cohort = payload.intently ? 'intently' : 'fingerprint'
 
@@ -354,6 +375,7 @@ export function CollectorProvider({
     visitor,
     handlers,
     getIdleStatusDelay,
+    setIncompleteTriggers,
     setIdleTimeout,
     trackEvent,
     setPageTriggers
@@ -399,6 +421,7 @@ export function CollectorProvider({
                 setIdleTimeout(getIdleStatusDelay())
 
                 setPageTriggers(payload?.pageTriggers)
+                setIncompleteTriggers(payload?.incompleteTriggers || [])
               })
               .catch((err) => {
                 error('failed to store collected data', err)

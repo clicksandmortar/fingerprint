@@ -521,6 +521,66 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
+var useIsElementVisible = function useIsElementVisible() {
+  var getIsVisible = React__default.useCallback(function (selector) {
+    var element = document.querySelector(selector);
+    if (!element) return false;
+    if (window.getComputedStyle(element).visibility === 'hidden') return false;
+    if (window.getComputedStyle(element).display === 'none') return false;
+    if (window.getComputedStyle(element).opacity === '0') return false;
+    if (window.getComputedStyle(element).height === '0px') return false;
+    if (window.getComputedStyle(element).width === '0px') return false;
+    return true;
+  }, []);
+  return {
+    getIsVisible: getIsVisible
+  };
+};
+
+var interval = 250;
+var useIncompleteTriggers = function useIncompleteTriggers() {
+  var _useState = React.useState([]),
+    incompleteTriggers = _useState[0],
+    setIncompleteTriggers = _useState[1];
+  var _useState2 = React.useState([]),
+    visibleTriggers = _useState2[0],
+    setVisibleTriggers = _useState2[1];
+  var _useIsElementVisible = useIsElementVisible(),
+    getIsVisible = _useIsElementVisible.getIsVisible;
+  var visibilityQuerySelectors = React__default.useMemo(function () {
+    return incompleteTriggers.map(function (trigger) {
+      return trigger.signals.map(function (signal) {
+        if (signal.op !== 'CanSeeElementOnPage') return null;
+        return {
+          trigger: trigger,
+          selector: signal.parameters.selector
+        };
+      });
+    }).flat().filter(function (selector) {
+      return selector !== null;
+    });
+  }, [incompleteTriggers]);
+  React.useEffect(function () {
+    if (!visibilityQuerySelectors.length) return;
+    var intId = setInterval(function () {
+      var visibleItems = visibilityQuerySelectors.map(function (reducedTrigger) {
+        var isElementVisible = getIsVisible(reducedTrigger.selector);
+        if (isElementVisible) return reducedTrigger.trigger;
+        return null;
+      }).filter(Boolean);
+      setVisibleTriggers(visibleItems);
+    }, interval);
+    return function () {
+      clearInterval(intId);
+    };
+  }, [incompleteTriggers, getIsVisible]);
+  return {
+    incompleteTriggers: incompleteTriggers,
+    setIncompleteTriggers: setIncompleteTriggers,
+    visibleTriggers: visibleTriggers
+  };
+};
+
 var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
   if (typeof window === 'undefined') return false;
   var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
@@ -794,6 +854,15 @@ function CollectorProvider(_ref) {
   var _useState4 = React.useState(new Map()),
     foundWatchers = _useState4[0],
     setFoundWatchers = _useState4[1];
+  var _useIncompleteTrigger = useIncompleteTriggers(),
+    setIncompleteTriggers = _useIncompleteTrigger.setIncompleteTriggers,
+    visibleIncompleteTriggers = _useIncompleteTrigger.visibleTriggers;
+  React.useEffect(function () {
+    if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
+    setPageTriggersState(function (prev) {
+      return [].concat(prev, visibleIncompleteTriggers);
+    });
+  }, [visibleIncompleteTriggers, setPageTriggersState]);
   var setPageTriggers = React__default.useCallback(function (triggers) {
     setPageTriggersState(function (prev) {
       var nonDismissed = prev.filter(function (tr) {
@@ -814,6 +883,11 @@ function CollectorProvider(_ref) {
     var refreshedTriggers = displayTriggers.filter(function (triggerId) {
       return triggerId !== id;
     });
+    setIncompleteTriggers(function (prev) {
+      return prev.filter(function (trigger) {
+        return trigger.id !== id;
+      });
+    });
     setDisplayedTriggers(refreshedTriggers);
     setPageTriggersState(function (prev) {
       return prev.filter(function (trigger) {
@@ -823,7 +897,7 @@ function CollectorProvider(_ref) {
   }, [displayTriggers, log, setPageTriggers]);
   var TriggerComponent = React__default.useCallback(function () {
     if (!displayTriggers) return null;
-    var activeTriggers = pageTriggers.filter(function (trigger) {
+    var activeTriggers = [].concat(pageTriggers, visibleIncompleteTriggers).filter(function (trigger) {
       return displayTriggers.includes(trigger.id);
     });
     if (!activeTriggers) {
@@ -852,15 +926,15 @@ function CollectorProvider(_ref) {
       log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
       return null;
     });
-  }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger, visibleIncompleteTriggers]);
   var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
-    var invokableTrigger = pageTriggers.find(function (trigger) {
+    var invokableTrigger = [].concat(pageTriggers, visibleIncompleteTriggers).find(function (trigger) {
       return trigger.invocation === invocation;
     });
     if (invokableTrigger) setDisplayedTriggers(function (ts) {
       return [].concat(ts, [invokableTrigger.id]);
     });
-  }, [pageTriggers, setDisplayedTriggers]);
+  }, [pageTriggers, setDisplayedTriggers, visibleIncompleteTriggers]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
@@ -949,6 +1023,7 @@ function CollectorProvider(_ref) {
           log('Sent collector data, retrieved:', payload);
           setIdleTimeout(getIdleStatusDelay());
           setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+          setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
           var cohort = payload.intently ? 'intently' : 'fingerprint';
           if (visitor.cohort !== cohort) setVisitor({
             cohort: cohort
@@ -968,7 +1043,7 @@ function CollectorProvider(_ref) {
       error('failed to store collected data', err);
     });
     log('CollectorProvider: collected data');
-  }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIdleTimeout, trackEvent, setPageTriggers]);
+  }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIncompleteTriggers, setIdleTimeout, trackEvent, setPageTriggers]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -994,6 +1069,7 @@ function CollectorProvider(_ref) {
                 log('Sent collector data, retrieved:', payload);
                 setIdleTimeout(getIdleStatusDelay());
                 setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+                setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
               });
             } catch (e) {
               return Promise.reject(e);
