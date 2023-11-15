@@ -4,7 +4,6 @@ import { Trigger } from '../client/types'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
-import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { getBrand } from '../utils/brand'
 import { hostname, request } from '../utils/http'
 import { getPagePayload } from '../utils/page'
@@ -57,7 +56,7 @@ export const useSeenMutation = () => {
 
         log('Seen mutation: replacing triggers with:', r.pageTriggers)
         // no pageTriggers = no triggers, rather than missing key. serverside omition. Means we set pagetriggers to nothing.
-        setPageTriggers(fakeTriggers)
+        setPageTriggers(r.pageTriggers)
         return r
       }
     }
