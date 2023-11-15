@@ -741,7 +741,7 @@ function useFormCollector() {
     log = _useLogging.log;
   if (!visitor.id) return;
   useEffect(function () {
-    var forms = document.getElementsByTagName('form');
+    var forms = document.querySelectorAll('form');
     log(forms);
   }, []);
 }

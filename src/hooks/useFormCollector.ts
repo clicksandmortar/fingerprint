@@ -11,15 +11,7 @@ export default function useFormCollector() {
   if (!visitor.id) return
 
   useEffect(() => {
-    const forms = document.getElementsByTagName('form');
+    const forms = document.querySelectorAll('form');
     log(forms)
-    // for (let i = 0; i < forms.length; i++) {
-    //   const f = forms[i];
-    //   f.addEventListener("submit", e => {
-    //     if (!e) return
-    //     const data = e?.currentTarget
-    //     log(data)
-    //   })
-    // }
   }, [])
 }
