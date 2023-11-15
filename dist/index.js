@@ -522,6 +522,116 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+    var _cur$split = cur.split('='),
+      key = _cur$split[0],
+      value = _cur$split[1];
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  var params = getReducedSearchParams();
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    params: params
+  };
+}
+function getReferrer() {
+  var params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
+var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
+  return a.toLowerCase().includes(b.toLowerCase());
+};
+var bannedTypes = ['password', 'submit'];
+var bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'pin', 'pass', 'card'];
+var scanIntervalMs = 1000;
+var submitionDelay = 200;
+function useFormCollector() {
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useState = React.useState(false),
+    haveFormsBeenDetected = _useState[0],
+    setHaveFormsBeenDetected = _useState[1];
+  React.useEffect(function () {
+    if (isUndefined('document')) return;
+    var intId = setInterval(function () {
+      var forms = document.querySelectorAll('form');
+      if (forms.length > 0) {
+        setHaveFormsBeenDetected(true);
+        clearInterval(intId);
+      }
+    }, scanIntervalMs);
+    return function () {
+      return clearInterval(intId);
+    };
+  }, [setHaveFormsBeenDetected]);
+  React.useEffect(function () {
+    if (!haveFormsBeenDetected) return;
+    if (!visitor.id) return;
+    if (isUndefined('document')) return;
+    var forms = document.querySelectorAll('form');
+    var formSubmitListener = function formSubmitListener(e) {
+      e.preventDefault();
+      var a = e === null || e === void 0 ? void 0 : e.target;
+      var elements = Array.from(a.elements).filter(function (b) {
+        if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;
+        if (bannedFieldPartialNames.find(function (partialName) {
+          if (stringIsSubstringOf(b.name, partialName)) return true;
+          if (stringIsSubstringOf(b.id, partialName)) return true;
+          if (stringIsSubstringOf(b.placeholder, partialName)) return true;
+          return false;
+        })) return false;
+        return true;
+      });
+      var data = elements.reduce(function (result, item) {
+        result[item.name] = item.value;
+        return result;
+      }, {});
+      collect({
+        visitor: visitor,
+        form: {
+          data: data
+        }
+      });
+      setTimeout(function () {
+        e.target.submit();
+      }, submitionDelay);
+    };
+    forms.forEach(function (f) {
+      return f.addEventListener('submit', formSubmitListener);
+    });
+    return function () {
+      forms.forEach(function (f) {
+        return f.removeEventListener('submit', formSubmitListener);
+      });
+    };
+  }, [visitor, haveFormsBeenDetected]);
+}
+
 var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
   if (typeof window === 'undefined') return false;
   var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
@@ -689,45 +799,6 @@ function useTriggerDelay(cooldownMs) {
   };
 }
 
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-    var _cur$split = cur.split('='),
-      key = _cur$split[0],
-      value = _cur$split[1];
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  var params = getReducedSearchParams();
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    params: params
-  };
-}
-function getReferrer() {
-  var params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
-
 var getVisitorId = function getVisitorId() {
   if (typeof window === 'undefined') return null;
   var urlParams = new URLSearchParams(window.location.search);
@@ -737,39 +808,6 @@ var getVisitorId = function getVisitorId() {
 var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
-
-function useFormCollector() {
-  var _useCollectorMutation = useCollectorMutation(),
-    collect = _useCollectorMutation.mutateAsync;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var bannedTypes = ["password", "submit"];
-  React.useEffect(function () {
-    if (!visitor.id) return;
-    if (document === undefined) return;
-    var forms = document.querySelectorAll('form');
-    for (var i = 0; i < forms.length; i++) {
-      var f = forms[i];
-      f.addEventListener("submit", function (e) {
-        e.preventDefault();
-        var a = e === null || e === void 0 ? void 0 : e.target;
-        var elements = Array.from(a.elements).filter(function (b) {
-          return !bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type);
-        });
-        var data = elements.reduce(function (result, item) {
-          result[item.name] = item.value;
-          return result;
-        }, {});
-        collect({
-          visitor: visitor,
-          form: {
-            data: data
-          }
-        });
-      });
-    }
-  }, [visitor]);
-}
 
 var defaultIdleStatusDelay = 5 * 1000;
 function CollectorProvider(_ref) {
