@@ -909,7 +909,9 @@ function CollectorProvider(_ref) {
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
-  useFormCollector();
+  React.useEffect(function () {
+    useFormCollector();
+  }, []);
   var fireOnLoadTriggers = React.useCallback(function () {
     if (!pageLoadTriggers) return;
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;

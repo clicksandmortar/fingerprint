@@ -256,7 +256,9 @@ export function CollectorProvider({
       handler: fireExitTrigger
     })
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
-  useFormCollector()
+  useEffect(() => {
+    useFormCollector()
+  }, [])
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return
     if (!pageTriggers?.length) return

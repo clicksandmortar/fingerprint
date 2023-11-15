@@ -906,7 +906,9 @@ function CollectorProvider(_ref) {
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
-  useFormCollector();
+  useEffect(function () {
+    useFormCollector();
+  }, []);
   var fireOnLoadTriggers = useCallback(function () {
     if (!pageLoadTriggers) return;
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
