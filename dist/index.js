@@ -743,16 +743,21 @@ function useFormCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
+  var bannedTypes = ["password", "submit"];
   React.useEffect(function () {
     if (!visitor.id) return;
     if (document === undefined) return;
     var forms = document.querySelectorAll('form');
     for (var i = 0; i < forms.length; i++) {
       var f = forms[i];
+      log('Form +', i);
       f.addEventListener("submit", function (e) {
         e.preventDefault();
         var a = e === null || e === void 0 ? void 0 : e.target;
-        log(a.elements);
+        var elements = a.filter(function (b) {
+          return bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type);
+        });
+        log(elements);
       });
     }
   }, [visitor]);
