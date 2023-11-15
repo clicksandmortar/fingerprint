@@ -303,7 +303,10 @@ const useEnvVars = () => {
     default:
       isDev = false;
   }
-  log('Fingerprint Environment isDev: ', isDev);
+  log('Fingerprint Environment: ', {
+    isDev,
+    tenantId
+  });
   if (isDev) return {
     FINGERPRINT_API_HOSTNAME: tenantAwareHost(isDev, tenantId),
     MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
@@ -3738,7 +3741,7 @@ const FingerprintProvider = ({
 };
 const defaultFingerprintState = {
   appId: '',
-  tenantId: '',
+  tenantId: undefined,
   booted: false,
   consent: false,
   currentTrigger: null,

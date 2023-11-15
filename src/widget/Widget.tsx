@@ -12,6 +12,8 @@ type Props = {
 export const Widget = (props: Props) => {
   const { consent, debug, tenantId } = props
 
+  let newProps = { ...props }
+
   if (consent || debug) {
     console.warn(
       'The consent and debug props are deprecated and will be removed in a future release. Please update your Fingerprint Widget to use the new script tag.'
@@ -22,7 +24,9 @@ export const Widget = (props: Props) => {
     console.warn(
       'The tenant prop is required and will be required in a future release. Please update your Fingerprint Widget to use the new script tag.'
     )
+
+    newProps.tenantId = undefined
   }
 
-  return <FingerprintProvider {...props} />
+  return <FingerprintProvider {...newProps} />
 }

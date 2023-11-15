@@ -129,7 +129,7 @@ export interface FingerprintContextInterface {
 
 const defaultFingerprintState: FingerprintContextInterface = {
   appId: '',
-  tenantId: '',
+  tenantId: undefined,
   booted: false,
   consent: false,
   currentTrigger: null,

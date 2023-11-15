@@ -15,7 +15,7 @@ export declare type FingerprintProviderProps = {
     pageLoadTriggers?: boolean;
     config?: FingerprintConfig;
 };
-export declare const FingerprintProvider: ({ appId, tenantId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, config }: FingerprintProviderProps) => {} | null | undefined;
+export declare const FingerprintProvider: ({ appId, tenantId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, config }: FingerprintProviderProps) => number | boolean | Iterable<React.ReactNode> | React.JSX.Element | null | undefined;
 export interface FingerprintContextInterface {
     appId: string;
     tenantId?: string;
