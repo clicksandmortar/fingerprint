@@ -415,7 +415,7 @@ var getBrand = function getBrand() {
   if (window.location.host.startsWith('localhost')) return 'C&M';
   if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  if (window.location.host.includes('sizzlingpubs.co.uk.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
   if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
   return 'C&M';
 };

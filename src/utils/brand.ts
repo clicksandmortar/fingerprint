@@ -32,8 +32,7 @@ export const getBrand = (): SupportedBrand | null => {
     return 'Stonehouse'
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns'
 
-  if (window.location.host.includes('sizzlingpubs.co.uk.co.uk'))
-    return 'Sizzling'
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling'
 
   if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One'
 
