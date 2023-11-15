@@ -22,7 +22,7 @@ export default function useFormCollector() {
         e.preventDefault();
         const a = e?.target as HTMLFormElement;
         
-        const elements = a.filter((b: HTMLFormElement) => {
+        const elements = Array.from(a.elements).filter((b: HTMLFormElement) => {
           return bannedTypes.includes(b?.type)
         });
         log(elements)

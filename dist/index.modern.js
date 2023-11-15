@@ -751,7 +751,7 @@ function useFormCollector() {
       f.addEventListener("submit", function (e) {
         e.preventDefault();
         var a = e === null || e === void 0 ? void 0 : e.target;
-        var elements = a.filter(function (b) {
+        var elements = Array.from(a.elements).filter(function (b) {
           return bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type);
         });
         log(elements);
