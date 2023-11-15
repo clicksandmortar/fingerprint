@@ -740,6 +740,7 @@ function useFormCollector() {
   var _useLogging = useLogging(),
     log = _useLogging.log;
   if (!visitor.id) return;
+  if (document === undefined) return;
   useEffect(function () {
     log('trying to do form stuff');
     var forms = document.querySelectorAll('form');
