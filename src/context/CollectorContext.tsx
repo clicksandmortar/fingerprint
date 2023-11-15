@@ -388,8 +388,6 @@ export function CollectorProvider({
     setPageTriggers
   ])
 
-  console.log('ya', { displayTriggers })
-
   const registerWatcher = React.useCallback(
     (configuredSelector: string, configuredSearch: string) => {
       const intervalId = setInterval(() => {

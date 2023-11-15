@@ -3273,9 +3273,6 @@ function CollectorProvider(_ref) {
     });
     log('CollectorProvider: collected data');
   }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIncompleteTriggers, setIdleTimeout, trackEvent, setPageTriggers]);
-  console.log('ya', {
-    displayTriggers: displayTriggers
-  });
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);

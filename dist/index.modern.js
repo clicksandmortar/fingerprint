@@ -3181,9 +3181,6 @@ function CollectorProvider({
     });
     log('CollectorProvider: collected data');
   }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIncompleteTriggers, setIdleTimeout, trackEvent, setPageTriggers]);
-  console.log('ya', {
-    displayTriggers
-  });
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
