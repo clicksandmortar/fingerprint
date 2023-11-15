@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
 import { CollectorVisitorResponse, Trigger } from '../client/types'
+import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -51,6 +52,7 @@ export function CollectorProvider({
     useTriggerDelay(config?.triggerCooldown)
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
+  const { checkCollinsBookingComplete } = useCollinsBookingComplete()
 
   // @todo remove this for our own exit intent implementation, for instance:
   // https://fullstackheroes.com/tutorials/react/exit-intent-react/
@@ -427,12 +429,6 @@ export function CollectorProvider({
     ]
   )
 
-  // TODO: keep tracking whether we ever need to add a skip condition
-  useRunOnPathChange(collectAndApplyVisitorInfo, {
-    skip: !booted,
-    delay: initialDelay
-  })
-
   useEffect(() => {
     if (!visitor.id) return
     const intervalIds = [registerWatcher('.stage-5', '')]
@@ -465,6 +461,16 @@ export function CollectorProvider({
   useEffect(() => {
     fireOnLoadTriggers()
   }, [fireOnLoadTriggers])
+
+  useRunOnPathChange(checkCollinsBookingComplete, {
+    skip: !booted,
+    delay: initialDelay
+  })
+
+  useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  })
 
   const onPresenseChange = React.useCallback(
     (presence: PresenceType) => {

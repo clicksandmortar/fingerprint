@@ -1,7 +1,13 @@
 // Please dont let this become a pattern. This is a one off and should be moved to backend as soon as possible.
 
 ///.... and it is becoming a pattern. 🙈
-export type SupportedBrand = 'Browns' | 'Stonehouse' | 'C&M'
+export type SupportedBrand =
+  | 'Browns'
+  | 'Stonehouse'
+  | 'C&M'
+  | 'Sizzling'
+  | 'All Bar One'
+  | 'Ember'
 
 // eslint-disable-next-line camelcase
 const TEMP_isCNMBrand = () => {
@@ -26,6 +32,11 @@ export const getBrand = (): SupportedBrand | null => {
   if (window.location.host.includes('stonehouserestaurants.co.uk'))
     return 'Stonehouse'
   if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns'
+
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling'
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember'
+
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One'
 
   return 'C&M'
 }
