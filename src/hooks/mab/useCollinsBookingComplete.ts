@@ -9,7 +9,8 @@ const collinBrandsPathConversionMap: Partial<{
 }> = {
   Stonehouse: '/tablebooking/enquiry-form-completed',
   'All Bar One': '/bookings/dmnc-complete',
-  Sizzling: '/tablebooking/enquiry-form-completed'
+  Sizzling: '/tablebooking/enquiry-form-completed',
+  Ember: '/tablebooking/enquiry-form-completed'
 }
 
 /**
