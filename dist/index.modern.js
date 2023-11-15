@@ -748,7 +748,8 @@ function useFormCollector() {
       var f = forms[i];
       f.addEventListener("submit", function (e) {
         e.preventDefault();
-        log(e);
+        var a = e === null || e === void 0 ? void 0 : e.target;
+        log(a.elements);
       });
     }
   }, [visitor]);
