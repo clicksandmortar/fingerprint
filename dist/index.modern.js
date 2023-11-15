@@ -3037,8 +3037,8 @@ function CollectorProvider({
   const removeActiveTrigger = useCallback(id => {
     log(`CollectorProvider: removing id:${id} from displayTriggers`);
     const refreshedTriggers = displayTriggers.filter(triggerId => triggerId !== id);
-    setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
     setDisplayedTriggers(refreshedTriggers);
+    setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
     setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
   }, [displayTriggers, log, setPageTriggers]);
   const combinedTriggers = React__default.useMemo(() => [...pageTriggers, ...visibleIncompleteTriggers], [pageTriggers, visibleIncompleteTriggers]);
@@ -3235,8 +3235,9 @@ function CollectorProvider({
     setPageTriggers,
     removeActiveTrigger,
     setActiveTrigger,
+    setIncompleteTriggers,
     trackEvent
-  }), [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]);
+  }), [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers]);
   useEffect(() => {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
@@ -3257,6 +3258,9 @@ const CollectorContext = createContext({
   },
   removeActiveTrigger: () => {
     console.error('removeActiveTrigger not implemented correctly');
+  },
+  setIncompleteTriggers: () => {
+    console.error('setIncompleteTriggers not implemented correctly');
   },
   setActiveTrigger: () => {
     console.error('setActiveTrigger not implemented correctly');
@@ -3732,7 +3736,8 @@ const useSeenMutation = () => {
     trackEvent
   } = useMixpanel();
   const {
-    setPageTriggers
+    setPageTriggers,
+    setIncompleteTriggers
   } = useCollector();
   const {
     visitor
@@ -3760,11 +3765,12 @@ const useSeenMutation = () => {
       return err;
     });
   }, {
-    mutationKey: ['seen'],
     onSuccess: async res => {
       const r = await res.json();
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
       setPageTriggers(r.pageTriggers);
+      log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
+      setIncompleteTriggers(r.incompleteTriggers);
       return r;
     }
   });

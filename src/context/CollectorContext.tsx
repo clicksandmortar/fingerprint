@@ -3,7 +3,11 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 // import { isMobile } from 'react-device-detect' <= reminder where isMobile came from
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { CollectorVisitorResponse, Trigger } from '../client/types'
+import {
+  CollectorVisitorResponse,
+  IncompleteTrigger,
+  Trigger
+} from '../client/types'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -104,6 +108,8 @@ export function CollectorProvider({
         const nonDismissed = prev.filter((tr) =>
           displayTriggers.includes(tr.id)
         )
+        // no pageTriggers = no triggers, rather than missing key.
+        // serverside omition. Means we set pagetriggers to nothing.
         return uniqueBy<Trigger>([...(triggers || []), ...nonDismissed], 'id')
       })
     },
@@ -128,11 +134,10 @@ export function CollectorProvider({
       const refreshedTriggers = displayTriggers.filter(
         (triggerId) => triggerId !== id
       )
+      setDisplayedTriggers(refreshedTriggers)
       setIncompleteTriggers((prev) =>
         prev.filter((trigger) => trigger.id !== id)
       )
-
-      setDisplayedTriggers(refreshedTriggers)
       setPageTriggersState((prev) =>
         prev.filter((trigger) => trigger.id !== id)
       )
@@ -350,14 +355,12 @@ export function CollectorProvider({
         // Set IdleTimer
         // @todo turn this into the dynamic value
         setIdleTimeout(getIdleStatusDelay())
-
         setPageTriggers(payload?.pageTriggers)
         setIncompleteTriggers(
           payload?.incompleteTriggers || fakeIncompleteTriggers
         )
 
         const cohort = payload.intently ? 'intently' : 'fingerprint'
-
         if (visitor.cohort !== cohort) setVisitor({ cohort })
 
         if (!payload.intently) {
@@ -486,9 +489,16 @@ export function CollectorProvider({
       setPageTriggers,
       removeActiveTrigger,
       setActiveTrigger,
+      setIncompleteTriggers,
       trackEvent
     }),
-    [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]
+    [
+      setPageTriggers,
+      removeActiveTrigger,
+      setActiveTrigger,
+      trackEvent,
+      setIncompleteTriggers
+    ]
   )
 
   useEffect(() => {
@@ -519,6 +529,7 @@ export function CollectorProvider({
 
 export type CollectorContextInterface = {
   setPageTriggers: (triggers: Trigger[]) => void
+  setIncompleteTriggers: (triggers: IncompleteTrigger[]) => void
   removeActiveTrigger: (id: Trigger['id']) => void
   setActiveTrigger: (trigger: Trigger) => void
   trackEvent: (event: string, properties?: any) => void
@@ -530,6 +541,9 @@ export const CollectorContext = createContext<CollectorContextInterface>({
   },
   removeActiveTrigger: () => {
     console.error('removeActiveTrigger not implemented correctly')
+  },
+  setIncompleteTriggers: () => {
+    console.error('setIncompleteTriggers not implemented correctly')
   },
   setActiveTrigger: () => {
     console.error('setActiveTrigger not implemented correctly')

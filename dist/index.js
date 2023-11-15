@@ -3105,12 +3105,12 @@ function CollectorProvider(_ref) {
     var refreshedTriggers = displayTriggers.filter(function (triggerId) {
       return triggerId !== id;
     });
+    setDisplayedTriggers(refreshedTriggers);
     setIncompleteTriggers(function (prev) {
       return prev.filter(function (trigger) {
         return trigger.id !== id;
       });
     });
-    setDisplayedTriggers(refreshedTriggers);
     setPageTriggersState(function (prev) {
       return prev.filter(function (trigger) {
         return trigger.id !== id;
@@ -3335,9 +3335,10 @@ function CollectorProvider(_ref) {
       setPageTriggers: setPageTriggers,
       removeActiveTrigger: removeActiveTrigger,
       setActiveTrigger: setActiveTrigger,
+      setIncompleteTriggers: setIncompleteTriggers,
       trackEvent: trackEvent
     };
-  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]);
+  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers]);
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
@@ -3358,6 +3359,9 @@ var CollectorContext = React.createContext({
   },
   removeActiveTrigger: function removeActiveTrigger() {
     console.error('removeActiveTrigger not implemented correctly');
+  },
+  setIncompleteTriggers: function setIncompleteTriggers() {
+    console.error('setIncompleteTriggers not implemented correctly');
   },
   setActiveTrigger: function setActiveTrigger() {
     console.error('setActiveTrigger not implemented correctly');
@@ -3845,7 +3849,8 @@ var useSeenMutation = function useSeenMutation() {
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
   var _useCollector = useCollector(),
-    setPageTriggers = _useCollector.setPageTriggers;
+    setPageTriggers = _useCollector.setPageTriggers,
+    setIncompleteTriggers = _useCollector.setIncompleteTriggers;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
   var trackTriggerSeen = React__default.useCallback(function (trigger) {
@@ -3871,12 +3876,13 @@ var useSeenMutation = function useSeenMutation() {
       return err;
     });
   }, {
-    mutationKey: ['seen'],
     onSuccess: function (res) {
       try {
         return Promise.resolve(res.json()).then(function (r) {
           log('Seen mutation: replacing triggers with:', r.pageTriggers);
           setPageTriggers(r.pageTriggers);
+          log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
+          setIncompleteTriggers(r.incompleteTriggers);
           return r;
         });
       } catch (e) {
