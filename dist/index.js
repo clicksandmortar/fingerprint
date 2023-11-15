@@ -688,6 +688,40 @@ function useTriggerDelay(cooldownMs) {
   };
 }
 
+var fakeTriggers = [{
+  id: 'exit-trigger-id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an EXIT_INTENT',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: 'idle-trigger-id',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an IDLE_TIME',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+}];
+
 function isUndefined(o) {
   return typeof o === 'undefined';
 }
@@ -853,14 +887,32 @@ function CollectorProvider(_ref) {
       return null;
     });
   }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  var getIsBehaviourVisible = React__default.useCallback(function (type) {
+    if (displayTriggers.length === 0) return false;
+    if (displayTriggers.find(function (triggerId) {
+      var _pageTriggers$find;
+      return ((_pageTriggers$find = pageTriggers.find(function (trigger) {
+        return trigger.id === triggerId;
+      })) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
+    })) return true;
+    return false;
+  }, [displayTriggers, pageTriggers]);
   var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
     var invokableTrigger = pageTriggers.find(function (trigger) {
       return trigger.invocation === invocation;
     });
-    if (invokableTrigger) setDisplayedTriggers(function (ts) {
+    if (!invokableTrigger) {
+      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
+      return;
+    }
+    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
+      return;
+    }
+    setDisplayedTriggers(function (ts) {
       return [].concat(ts, [invokableTrigger.id]);
     });
-  }, [pageTriggers, setDisplayedTriggers]);
+  }, [pageTriggers, setDisplayedTriggers, getIsBehaviourVisible]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
@@ -948,7 +1000,7 @@ function CollectorProvider(_ref) {
         return Promise.resolve(response.json()).then(function (payload) {
           log('Sent collector data, retrieved:', payload);
           setIdleTimeout(getIdleStatusDelay());
-          setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+          setPageTriggers(fakeTriggers);
           var cohort = payload.intently ? 'intently' : 'fingerprint';
           if (visitor.cohort !== cohort) setVisitor({
             cohort: cohort
@@ -2410,7 +2462,7 @@ var useSeenMutation = function useSeenMutation() {
       try {
         return Promise.resolve(res.json()).then(function (r) {
           log('Seen mutation: replacing triggers with:', r.pageTriggers);
-          setPageTriggers(r.pageTriggers);
+          setPageTriggers(fakeTriggers);
           return r;
         });
       } catch (e) {

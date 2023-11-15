@@ -10,6 +10,7 @@ import { useFingerprint } from '../hooks/useFingerprint'
 import useIntently from '../hooks/useIntently'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
+import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
@@ -78,7 +79,7 @@ export function CollectorProvider({
     getIdleStatusDelay()
   )
   const [pageTriggers, setPageTriggersState] = useState<Trigger[]>([])
-  const [displayTriggers, setDisplayedTriggers] = useState<string[]>([])
+  const [displayTriggers, setDisplayedTriggers] = useState<Trigger['id'][]>([])
   const { setIntently } = useIntently()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
@@ -181,16 +182,44 @@ export function CollectorProvider({
     getHandlerForTrigger
   ])
 
+  const getIsBehaviourVisible = React.useCallback(
+    (type: Trigger['behaviour']) => {
+      if (displayTriggers.length === 0) return false
+      if (
+        displayTriggers.find(
+          (triggerId) =>
+            pageTriggers.find((trigger) => trigger.id === triggerId)
+              ?.behaviour === type
+        )
+      )
+        return true
+
+      return false
+    },
+    [displayTriggers, pageTriggers]
+  )
+
   const setDisplayedTriggerByInvocation = React.useCallback(
     (invocation: Trigger['invocation']) => {
       const invokableTrigger = pageTriggers.find(
         (trigger) => trigger.invocation === invocation
       )
 
-      if (invokableTrigger)
-        setDisplayedTriggers((ts) => [...ts, invokableTrigger.id])
+      if (!invokableTrigger) {
+        log('CollectorProvider: Trigger not invokable ', invokableTrigger)
+        return
+      }
+      if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+        log(
+          'CollectorProvider: Behaviour already visible, not showing trigger',
+          invokableTrigger
+        )
+        return
+      }
+
+      setDisplayedTriggers((ts) => [...ts, invokableTrigger.id])
     },
-    [pageTriggers, setDisplayedTriggers]
+    [pageTriggers, setDisplayedTriggers, getIsBehaviourVisible]
   )
 
   const fireIdleTrigger = useCallback(() => {
@@ -326,7 +355,8 @@ export function CollectorProvider({
         // @todo turn this into the dynamic value
         setIdleTimeout(getIdleStatusDelay())
 
-        setPageTriggers(payload?.pageTriggers)
+        setPageTriggers(fakeTriggers)
+        // setPageTriggers(payload?.pageTriggers)
 
         const cohort = payload.intently ? 'intently' : 'fingerprint'
 

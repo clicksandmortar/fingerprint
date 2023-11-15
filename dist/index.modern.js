@@ -632,6 +632,40 @@ function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   };
 }
 
+const fakeTriggers = [{
+  id: 'exit-trigger-id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an EXIT_INTENT',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: 'idle-trigger-id',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an IDLE_TIME',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+}];
+
 function isUndefined(o) {
   return typeof o === 'undefined';
 }
@@ -783,10 +817,26 @@ function CollectorProvider({
       return null;
     });
   }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  const getIsBehaviourVisible = React__default.useCallback(type => {
+    if (displayTriggers.length === 0) return false;
+    if (displayTriggers.find(triggerId => {
+      var _pageTriggers$find;
+      return ((_pageTriggers$find = pageTriggers.find(trigger => trigger.id === triggerId)) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
+    })) return true;
+    return false;
+  }, [displayTriggers, pageTriggers]);
   const setDisplayedTriggerByInvocation = React__default.useCallback(invocation => {
     const invokableTrigger = pageTriggers.find(trigger => trigger.invocation === invocation);
-    if (invokableTrigger) setDisplayedTriggers(ts => [...ts, invokableTrigger.id]);
-  }, [pageTriggers, setDisplayedTriggers]);
+    if (!invokableTrigger) {
+      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
+      return;
+    }
+    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
+      return;
+    }
+    setDisplayedTriggers(ts => [...ts, invokableTrigger.id]);
+  }, [pageTriggers, setDisplayedTriggers, getIsBehaviourVisible]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
@@ -870,7 +920,7 @@ function CollectorProvider({
       const payload = await response.json();
       log('Sent collector data, retrieved:', payload);
       setIdleTimeout(getIdleStatusDelay());
-      setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+      setPageTriggers(fakeTriggers);
       const cohort = payload.intently ? 'intently' : 'fingerprint';
       if (visitor.cohort !== cohort) setVisitor({
         cohort
@@ -2308,7 +2358,7 @@ const useSeenMutation = () => {
     onSuccess: async res => {
       const r = await res.json();
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
-      setPageTriggers(r.pageTriggers);
+      setPageTriggers(fakeTriggers);
       return r;
     }
   });
