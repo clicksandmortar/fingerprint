@@ -739,10 +739,10 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
 };
 
 function useFormCollector() {
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
   var bannedTypes = ["password", "submit"];
   React.useEffect(function () {
     if (!visitor.id) return;
@@ -750,14 +750,22 @@ function useFormCollector() {
     var forms = document.querySelectorAll('form');
     for (var i = 0; i < forms.length; i++) {
       var f = forms[i];
-      log('Form +', i);
       f.addEventListener("submit", function (e) {
         e.preventDefault();
         var a = e === null || e === void 0 ? void 0 : e.target;
         var elements = Array.from(a.elements).filter(function (b) {
           return !bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type);
         });
-        log(elements);
+        var data = elements.reduce(function (result, item) {
+          result[item.name] = item.value;
+          return result;
+        }, {});
+        collect({
+          visitor: visitor,
+          form: {
+            data: data
+          }
+        });
       });
     }
   }, [visitor]);
