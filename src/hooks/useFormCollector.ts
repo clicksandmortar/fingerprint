@@ -10,10 +10,9 @@ export default function useFormCollector() {
 
   useEffect(() => {
     if (!visitor.id) return
-
     if (document === undefined) return
     log('trying to do form stuff')
     const forms = document.querySelectorAll('form');
     log(forms)
-  }, [])
+  }, [visitor])
 }
