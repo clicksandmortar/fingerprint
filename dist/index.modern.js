@@ -463,6 +463,7 @@ var request = {
 
 var useHostname = function useHostname() {
   var _window;
+  if (window === undefined) return '';
   if (((_window = window) === null || _window === void 0 ? void 0 : _window.location) !== undefined) {
     return window.location.hostname;
   }
