@@ -737,6 +737,18 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
+function useFormCollector() {
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  if (!visitor.id) return;
+  React.useEffect(function () {
+    var forms = document.getElementsByTagName('form');
+    log(forms);
+  }, []);
+}
+
 var defaultIdleStatusDelay = 5 * 1000;
 function CollectorProvider(_ref) {
   var children = _ref.children,
@@ -894,6 +906,7 @@ function CollectorProvider(_ref) {
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
+  useFormCollector();
   var fireOnLoadTriggers = React.useCallback(function () {
     if (!pageLoadTriggers) return;
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
