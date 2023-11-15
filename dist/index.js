@@ -750,7 +750,8 @@ function useFormCollector() {
     for (var i = 0; i < forms.length; i++) {
       var f = forms[i];
       f.addEventListener("submit", function (e) {
-        log(e.currentTarget);
+        e.preventDefault();
+        log(e);
       });
     }
   }, [visitor]);
