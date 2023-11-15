@@ -257,7 +257,7 @@ export function CollectorProvider({
     })
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
 
-  useFormCollector() // This definitely feels wrong
+  useFormCollector()
 
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return

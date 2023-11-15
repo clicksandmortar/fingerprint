@@ -741,6 +741,7 @@ function useFormCollector() {
     log = _useLogging.log;
   if (!visitor.id) return;
   useEffect(function () {
+    log('trying to do form stuff');
     var forms = document.querySelectorAll('form');
     log(forms);
   }, []);
