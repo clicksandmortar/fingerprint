@@ -87,16 +87,12 @@ export function CollectorProvider({
     new Map()
   )
 
-  const {
-    // incompleteTriggers,
-    setIncompleteTriggers,
-    visibleTriggers: visibleIncompleteTriggers
-  } = useIncompleteTriggers()
+  const { setIncompleteTriggers, visibleTriggers: visibleIncompleteTriggers } =
+    useIncompleteTriggers()
 
   useEffect(() => {
     if (!visibleIncompleteTriggers?.length) return
 
-    // const appliedTriggers = visibleTriggers;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
   }, [visibleIncompleteTriggers, setPageTriggersState])
   /**
