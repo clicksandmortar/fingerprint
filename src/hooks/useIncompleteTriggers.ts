@@ -1,3 +1,5 @@
+import isEqual from 'lodash/isEqual'
+
 import React, { useEffect, useState } from 'react'
 import { IncompleteTrigger, Trigger } from '../client/types'
 import useIsElementVisible from './useIsElementVisible'
@@ -32,9 +34,9 @@ const useIncompleteTriggers = () => {
         })
       )
       .flat()
-      .filter((selector) => selector !== null) as ReducedTrigger[]
+      .filter(Boolean) as ReducedTrigger[]
+    // @TODO: ^ there is a proper type to eliminate nulls
   }, [incompleteTriggers])
-  // @TODO: ^ there is a proper type to eliminate nulls
 
   useEffect(() => {
     if (!visibilityQuerySelectors.length) return
@@ -49,13 +51,28 @@ const useIncompleteTriggers = () => {
         })
         .filter(Boolean) as Trigger[]
 
-      setVisibleTriggers(visibleItems)
+      // these next few lines are a bit of a hack, it
+      // prevents unnecessary re-renders in the Collector
+      // though still unclear how performant object comparison
+      if (!visibleItems.length) return
+      setVisibleTriggers((prev) => {
+        // this likely performs like shit.
+        const areSame = isEqual(visibleItems, prev)
+        if (areSame) return prev
+
+        return visibleItems
+      })
     }, interval)
 
     return () => {
       clearInterval(intId)
     }
-  }, [incompleteTriggers, getIsVisible])
+  }, [
+    incompleteTriggers,
+    getIsVisible,
+    setVisibleTriggers,
+    visibilityQuerySelectors
+  ])
 
   return {
     incompleteTriggers,

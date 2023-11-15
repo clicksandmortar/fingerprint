@@ -8,6 +8,7 @@ import React from 'react'
 const useIsElementVisible = () => {
   const getIsVisible = React.useCallback((selector: string) => {
     const element = document.querySelector(selector)
+
     if (!element) return false
     // visibility
     if (window.getComputedStyle(element).visibility === 'hidden') return false
@@ -18,9 +19,9 @@ const useIsElementVisible = () => {
 
     // @TODO: do we want these checks in place?
     //height
-    if (window.getComputedStyle(element).height === '0px') return false
+    // if (window.getComputedStyle(element).height === '0px') return false
     //width
-    if (window.getComputedStyle(element).width === '0px') return false
+    // if (window.getComputedStyle(element).width === '0px') return false
 
     return true
   }, [])
