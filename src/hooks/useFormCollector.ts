@@ -16,7 +16,7 @@ export default function useFormCollector() {
       const f = forms[i];
       f.addEventListener("submit", e => {
         if (!e) return
-        const data = e?.currentTarget?.elements
+        const data = e?.currentTarget
         log(data)
       })
     }
