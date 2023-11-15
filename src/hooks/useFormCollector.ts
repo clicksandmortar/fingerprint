@@ -15,6 +15,7 @@ export default function useFormCollector() {
     for (let i = 0; i < forms.length; i++) {
       const f = forms[i]
       f.addEventListener("submit", (e) => {
+        e.preventDefault();
         log(e.currentTarget);
       })
     }
