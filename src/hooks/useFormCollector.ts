@@ -14,7 +14,7 @@ export default function useFormCollector() {
     const forms = document.querySelectorAll('form');
     for (let i = 0; i < forms.length; i++) {
       const f = forms[i]
-      f.addEventListener("submit", (e: SubmitEvent) => {
+      f.addEventListener("submit", (e) => {
         log(e.currentTarget);
       })
     }

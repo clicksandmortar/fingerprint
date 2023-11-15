@@ -743,13 +743,17 @@ function useFormCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
-  if (!visitor.id) return;
-  if (document === undefined) return;
   React.useEffect(function () {
-    log('trying to do form stuff');
+    if (!visitor.id) return;
+    if (document === undefined) return;
     var forms = document.querySelectorAll('form');
-    log(forms);
-  }, []);
+    for (var i = 0; i < forms.length; i++) {
+      var f = forms[i];
+      f.addEventListener("submit", function (e) {
+        log(e.currentTarget);
+      });
+    }
+  }, [visitor]);
 }
 
 var defaultIdleStatusDelay = 5 * 1000;
@@ -909,9 +913,7 @@ function CollectorProvider(_ref) {
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
-  React.useEffect(function () {
-    useFormCollector();
-  }, []);
+  useFormCollector();
   var fireOnLoadTriggers = React.useCallback(function () {
     if (!pageLoadTriggers) return;
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
