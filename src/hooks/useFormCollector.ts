@@ -12,6 +12,11 @@ export default function useFormCollector() {
     if (!visitor.id) return
     if (document === undefined) return
     const forms = document.querySelectorAll('form');
-    log('forms', forms)
+    for (let i = 0; i < forms.length; i++) {
+      const f = forms[i]
+      f.addEventListener("submit", (e: SubmitEvent) => {
+        log(e.currentTarget);
+      })
+    }
   }, [visitor])
 }
