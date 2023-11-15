@@ -15,6 +15,7 @@ import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
+import useFormCollector from '../hooks/useFormCollector'
 
 const defaultIdleStatusDelay = 5 * 1000
 
@@ -255,6 +256,8 @@ export function CollectorProvider({
       handler: fireExitTrigger
     })
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
+
+  useFormCollector()
 
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return
