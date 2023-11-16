@@ -337,7 +337,8 @@ var init = function init(cfg) {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
     debug: cfg.debug,
     track_pageview: true,
-    persistence: 'localStorage'
+    persistence: 'localStorage',
+    ignore_dnt: true
   });
 };
 var trackEvent = function trackEvent(event, props, callback) {

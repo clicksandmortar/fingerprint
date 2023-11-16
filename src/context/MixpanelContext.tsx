@@ -10,7 +10,8 @@ const init = (cfg: Partial<Config>) => {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
     debug: cfg.debug,
     track_pageview: true,
-    persistence: 'localStorage'
+    persistence: 'localStorage',
+    ignore_dnt: true,
   })
 }
 
