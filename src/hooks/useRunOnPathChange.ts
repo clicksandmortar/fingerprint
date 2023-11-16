@@ -10,25 +10,27 @@ type Config = {
 // optionally takes a skip condition and init delay
 const useRunOnPathChange = (func: FuncProp, config?: Config) => {
   const [lastCollectedPath, setLastCollectedPath] = useState<string>('')
+  const [lastCollectedHash, setLastCollectedHash] = useState<string>('')
   const { log } = useLogging()
 
   useEffect(() => {
     if (config?.skip) return
     if (!location.pathname) return
-    if (location.pathname === lastCollectedPath) return
+    if (location.pathname === lastCollectedPath && location.hash === lastCollectedHash) return
 
     // added timeout to prevent occasional double firing on page load
     const tId = setTimeout(() => {
       log('useRunOnPathChange: running for path: ', location.pathname)
 
       setLastCollectedPath(location.pathname)
+      setLastCollectedHash(location.hash)
       func()
     }, config?.delay || 300)
 
     return () => {
       clearTimeout(tId)
     }
-  }, [location.pathname, func, setLastCollectedPath, config])
+  }, [location.pathname, location.hash, func, setLastCollectedPath, config])
 }
 
 export default useRunOnPathChange
