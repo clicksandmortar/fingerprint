@@ -402,7 +402,52 @@ var useMixpanel = function useMixpanel() {
   return useContext(MixpanelContext);
 };
 
-var headers = {
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+const getBrand = () => {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+
+const collinBrandsPathConversionMap = {
+  Stonehouse: '/tablebooking/enquiry-form-completed',
+  'All Bar One': '/bookings/dmnc-complete',
+  Sizzling: '/tablebooking/enquiry-form-completed',
+  Ember: '/tablebooking/enquiry-form-completed'
+};
+function useCollinsBookingComplete() {
+  const {
+    trackEvent
+  } = useMixpanel();
+  const {
+    log
+  } = useLogging();
+  const checkCollinsBookingComplete = React__default.useCallback(() => {
+    const brand = getBrand();
+    if (!brand) return;
+    const conversionPathForBrand = collinBrandsPathConversionMap[brand];
+    if (!conversionPathForBrand) return;
+    const isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
+    if (!isConversionPath) return;
+    log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
+    trackEvent('booking_complete', {});
+  }, [trackEvent, log]);
+  return {
+    checkCollinsBookingComplete
+  };
+}
+
+const headers = {
   'Content-Type': 'application/json'
 };
 var hostname = getEnvVars().FINGERPRINT_API_HOSTNAME;
@@ -519,33 +564,22 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
-var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
-  if (typeof window === 'undefined') return false;
-  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-var getBrand = function getBrand() {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return 'C&M';
-};
-
-var selectorRateMs = 100;
-function useTrackIntentlyModal(_ref) {
-  var intently = _ref.intently;
-  var _useState = useState(false),
-    isVisible = _useState[0],
-    setIsVisible = _useState[1];
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent,
-    initiated = _useMixpanel.state.initiated;
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
-  useEffect(function () {
+const selectorRateMs = 100;
+function useTrackIntentlyModal({
+  intently
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const {
+    trackEvent,
+    state: {
+      initiated
+    }
+  } = useMixpanel();
+  const {
+    log,
+    error
+  } = useLogging();
+  useEffect(() => {
     if (!initiated) return;
     if (!intently) return;
     var id = setInterval(function () {
@@ -735,47 +769,57 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
-var defaultIdleStatusDelay = 5 * 1000;
-function CollectorProvider(_ref) {
-  var children = _ref.children,
-    _ref$handlers = _ref.handlers,
-    handlers = _ref$handlers === void 0 ? [] : _ref$handlers;
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
-  var _useFingerprint = useFingerprint(),
-    booted = _useFingerprint.booted,
-    initialDelay = _useFingerprint.initialDelay,
-    exitIntentTriggers = _useFingerprint.exitIntentTriggers,
-    idleTriggers = _useFingerprint.idleTriggers,
-    pageLoadTriggers = _useFingerprint.pageLoadTriggers,
-    config = _useFingerprint.config;
-  var configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor,
-    session = _useVisitor.session,
-    setVisitor = _useVisitor.setVisitor;
-  var _useTriggerDelay = useTriggerDelay(config === null || config === void 0 ? void 0 : config.triggerCooldown),
-    canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
-    startCooldown = _useTriggerDelay.startCooldown,
-    getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
-  var _useCollectorMutation = useCollectorMutation(),
-    collect = _useCollectorMutation.mutateAsync;
-  var _useExitIntent = useExitIntent({
-      cookie: {
-        key: '_cm_exit',
-        daysToExpire: 0
-      }
-    }),
-    registerHandler = _useExitIntent.registerHandler,
-    reRegisterExitIntent = _useExitIntent.resetState;
-  var getIdleStatusDelay = React__default.useCallback(function () {
-    var idleDelay = configIdleDelay || defaultIdleStatusDelay;
-    var cooldownDelay = getRemainingCooldownMs();
-    var delayAdjustedForCooldown = idleDelay + cooldownDelay;
-    log("Setting idle delay at " + delayAdjustedForCooldown + "ms (cooldown " + cooldownDelay + "ms + config.delay " + idleDelay + "ms)");
+const defaultIdleStatusDelay = 5 * 1000;
+function CollectorProvider({
+  children,
+  handlers = []
+}) {
+  const {
+    log,
+    error
+  } = useLogging();
+  const {
+    booted,
+    initialDelay,
+    exitIntentTriggers,
+    idleTriggers,
+    pageLoadTriggers,
+    config
+  } = useFingerprint();
+  const configIdleDelay = config === null || config === void 0 ? void 0 : config.idleDelay;
+  const {
+    visitor,
+    session,
+    setVisitor
+  } = useVisitor();
+  const {
+    canNextTriggerOccur,
+    startCooldown,
+    getRemainingCooldownMs
+  } = useTriggerDelay(config === null || config === void 0 ? void 0 : config.triggerCooldown);
+  const {
+    trackEvent
+  } = useMixpanel();
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const {
+    checkCollinsBookingComplete
+  } = useCollinsBookingComplete();
+  const {
+    registerHandler,
+    resetState: reRegisterExitIntent
+  } = useExitIntent({
+    cookie: {
+      key: '_cm_exit',
+      daysToExpire: 0
+    }
+  });
+  const getIdleStatusDelay = React__default.useCallback(() => {
+    const idleDelay = configIdleDelay || defaultIdleStatusDelay;
+    const cooldownDelay = getRemainingCooldownMs();
+    const delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log(`Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + config.delay ${idleDelay}ms)`);
     return delayAdjustedForCooldown;
   }, [configIdleDelay, getRemainingCooldownMs, log]);
   var _useState = useState(getIdleStatusDelay()),
@@ -1005,11 +1049,7 @@ function CollectorProvider(_ref) {
     }, 500);
     return intervalId;
   }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
-  useRunOnPathChange(collectAndApplyVisitorInfo, {
-    skip: !booted,
-    delay: initialDelay
-  });
-  useEffect(function () {
+  useEffect(() => {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];
     return function () {
@@ -1034,7 +1074,15 @@ function CollectorProvider(_ref) {
   useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
-  var onPresenseChange = React__default.useCallback(function (presence) {
+  useRunOnPathChange(checkCollinsBookingComplete, {
+    skip: !booted,
+    delay: initialDelay
+  });
+  useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  });
+  const onPresenseChange = React__default.useCallback(presence => {
     log('presence changed', presence);
   }, [log]);
   return React__default.createElement(IdleTimerProvider, {

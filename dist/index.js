@@ -405,6 +405,49 @@ var useMixpanel = function useMixpanel() {
   return React.useContext(MixpanelContext);
 };
 
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+var getBrand = function getBrand() {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+
+var collinBrandsPathConversionMap = {
+  Stonehouse: '/tablebooking/enquiry-form-completed',
+  'All Bar One': '/bookings/dmnc-complete',
+  Sizzling: '/tablebooking/enquiry-form-completed',
+  Ember: '/tablebooking/enquiry-form-completed'
+};
+function useCollinsBookingComplete() {
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var checkCollinsBookingComplete = React__default.useCallback(function () {
+    var brand = getBrand();
+    if (!brand) return;
+    var conversionPathForBrand = collinBrandsPathConversionMap[brand];
+    if (!conversionPathForBrand) return;
+    var isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
+    if (!isConversionPath) return;
+    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
+    trackEvent('booking_complete', {});
+  }, [trackEvent, log]);
+  return {
+    checkCollinsBookingComplete: checkCollinsBookingComplete
+  };
+}
+
 var headers = {
   'Content-Type': 'application/json'
 };
@@ -520,20 +563,6 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   return {
     hasDelayPassed: hasDelayPassed
   };
-};
-
-var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
-  if (typeof window === 'undefined') return false;
-  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-var getBrand = function getBrand() {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return 'C&M';
 };
 
 var selectorRateMs = 100;
@@ -766,6 +795,8 @@ function CollectorProvider(_ref) {
     trackEvent = _useMixpanel.trackEvent;
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
+  var _useCollinsBookingCom = useCollinsBookingComplete(),
+    checkCollinsBookingComplete = _useCollinsBookingCom.checkCollinsBookingComplete;
   var _useExitIntent = useExitIntent.useExitIntent({
       cookie: {
         key: '_cm_exit',
@@ -1008,10 +1039,6 @@ function CollectorProvider(_ref) {
     }, 500);
     return intervalId;
   }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
-  useRunOnPathChange(collectAndApplyVisitorInfo, {
-    skip: !booted,
-    delay: initialDelay
-  });
   React.useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];
@@ -1037,6 +1064,14 @@ function CollectorProvider(_ref) {
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
+  useRunOnPathChange(checkCollinsBookingComplete, {
+    skip: !booted,
+    delay: initialDelay
+  });
+  useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  });
   var onPresenseChange = React__default.useCallback(function (presence) {
     log('presence changed', presence);
   }, [log]);
