@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
+import { isMobile } from 'react-device-detect'
 import ReactDOM from 'react-dom'
 import { Trigger } from '../client/types'
+import FullyClickableModal from '../components/modals/FullyClickableModal'
 import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
@@ -49,6 +51,7 @@ const Modal = ({ trigger }: Props) => {
   const handleClickCallToAction = (e: any) => {
     e.preventDefault()
     trackEvent('user_clicked_button', trigger)
+
     trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
   }
 
@@ -58,32 +61,35 @@ const Modal = ({ trigger }: Props) => {
     setOpen(false)
   }
 
-  if (brand === 'C&M')
-    return (
-      <CnMStandardModal
-        trigger={trigger}
-        handleClickCallToAction={handleClickCallToAction}
-        handleCloseModal={handleCloseModal}
-      />
-    )
-  if (brand === 'Stonehouse')
-    return (
-      <StonehouseModal
-        trigger={trigger}
-        handleClickCallToAction={handleClickCallToAction}
-        handleCloseModal={handleCloseModal}
-      />
-    )
-  if (brand === 'Browns')
-    return (
-      <BrownsModal
-        trigger={trigger}
-        handleClickCallToAction={handleClickCallToAction}
-        handleCloseModal={handleCloseModal}
-      />
-    )
+  const modalProps = {
+    trigger: trigger,
+    handleClickCallToAction: handleClickCallToAction,
+    handleCloseModal: handleCloseModal
+  }
 
-  return null
+  switch (brand) {
+    // NOTE: these are just temp for go-live, soon we will combine all of these into one modal
+    // with support for all underlying behaviours + potential scale config
+    case 'Ember': {
+      const style = isMobile
+        ? { height: 1000, width: 640 } // 1.56x
+        : { width: 813, height: 490 } // original image is { width: 1381, height: 828 }, scaled down to 490w
+      return <FullyClickableModal {...modalProps} style={style} />
+    }
+    case 'Sizzling': {
+      const style = isMobile
+        ? { height: 1000, width: 640 } // 1.56x
+        : { width: 819, height: 490 } // original image is { width: 1246, height: 747 }, scaled down to 490w
+      return <FullyClickableModal {...modalProps} style={style} />
+    }
+    case 'Stonehouse':
+      return <StonehouseModal {...modalProps} />
+    case 'Browns':
+      return <BrownsModal {...modalProps} />
+    case 'C&M':
+    default:
+      return <CnMStandardModal {...modalProps} />
+  }
 }
 
 export const TriggerModal = ({ trigger }: Props) => {
