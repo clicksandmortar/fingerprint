@@ -13,13 +13,15 @@ type Props = {
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
   style: { width: number; height: number }
+  imageURL: string
 }
 
 const FullyClickableModal = ({
-  trigger,
+  // trigger,
   handleClickCallToAction,
   handleCloseModal,
-  style
+  style,
+  imageURL
 }: Props) => {
   const [stylesLoaded, setStylesLoaded] = useState(false)
   const { height, width } = style
@@ -56,7 +58,6 @@ const FullyClickableModal = ({
   }, [style])
 
   // TODO:reminder:
-  // const isEntireModalClickable = !trigger?.data?.buttonText;
   const isEntireModalClickable = true
 
   useEffect(() => {
@@ -223,7 +224,7 @@ const FullyClickableModal = ({
         className={prependClass('modal')}
         onClick={handleModalAction}
         style={{
-          background: `url(${trigger?.data?.backgroundURL})`,
+          background: `url(${imageURL})`,
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',

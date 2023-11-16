@@ -2889,11 +2889,10 @@ var prependClass = function prependClass(className) {
 };
 
 var FullyClickableModal = function FullyClickableModal(_ref) {
-  var _trigger$data;
-  var trigger = _ref.trigger,
-    handleClickCallToAction = _ref.handleClickCallToAction,
+  var handleClickCallToAction = _ref.handleClickCallToAction,
     handleCloseModal = _ref.handleCloseModal,
-    style = _ref.style;
+    style = _ref.style,
+    imageURL = _ref.imageURL;
   var _useState = React.useState(false),
     stylesLoaded = _useState[0],
     setStylesLoaded = _useState[1];
@@ -2932,7 +2931,7 @@ var FullyClickableModal = function FullyClickableModal(_ref) {
     className: prependClass('modal'),
     onClick: handleModalAction,
     style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      background: "url(" + imageURL + ")",
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'cover',
@@ -3252,6 +3251,8 @@ var Modal = function Modal(_ref) {
   switch (brand) {
     case 'Ember':
       {
+        var image = reactDeviceDetect.isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
+        if (window.location.href.includes('nationalsearch')) image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg";
         var style = reactDeviceDetect.isMobile ? {
           height: 1000,
           width: 640
@@ -3260,11 +3261,14 @@ var Modal = function Modal(_ref) {
           height: 490
         };
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
-          style: style
+          style: style,
+          imageURL: image
         }));
       }
     case 'Sizzling':
       {
+        var _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg";
+        if (window.location.href.includes('signup')) _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg";
         var _style = reactDeviceDetect.isMobile ? {
           height: 1000,
           width: 640
@@ -3273,7 +3277,8 @@ var Modal = function Modal(_ref) {
           height: 490
         };
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
-          style: _style
+          style: _style,
+          imageURL: _image
         }));
       }
     case 'Stonehouse':

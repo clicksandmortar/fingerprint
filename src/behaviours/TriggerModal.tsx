@@ -71,16 +71,42 @@ const Modal = ({ trigger }: Props) => {
     // NOTE: these are just temp for go-live, soon we will combine all of these into one modal
     // with support for all underlying behaviours + potential scale config
     case 'Ember': {
+      // /tablebooking > Christmas + BOOK NOW
+      let image = isMobile
+        ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg'
+        : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg'
+
+      // /nationalsearch > Christmas + FIND OUT MORE
+      if (window.location.href.includes('nationalsearch'))
+        image = isMobile
+          ? `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg`
+          : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`
+
       const style = isMobile
         ? { height: 1000, width: 640 } // 1.56x
         : { width: 813, height: 490 } // original image is { width: 1381, height: 828 }, scaled down to 490w
-      return <FullyClickableModal {...modalProps} style={style} />
+      return (
+        <FullyClickableModal {...modalProps} style={style} imageURL={image} />
+      )
     }
     case 'Sizzling': {
+      // Find A Pub  > Christmas  + BOOK NOW
+      let image = isMobile
+        ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg`
+        : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg`
+
+      // Sign Up  > Christmas  + FIND OUT MORE
+      if (window.location.href.includes('signup'))
+        image = isMobile
+          ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg`
+          : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`
+
       const style = isMobile
         ? { height: 1000, width: 640 } // 1.56x
         : { width: 819, height: 490 } // original image is { width: 1246, height: 747 }, scaled down to 490w
-      return <FullyClickableModal {...modalProps} style={style} />
+      return (
+        <FullyClickableModal {...modalProps} style={style} imageURL={image} />
+      )
     }
     case 'Stonehouse':
       return <StonehouseModal {...modalProps} />

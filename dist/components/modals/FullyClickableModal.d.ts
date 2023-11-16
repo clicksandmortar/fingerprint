@@ -12,6 +12,7 @@ declare type Props = {
         width: number;
         height: number;
     };
+    imageURL: string;
 };
-declare const FullyClickableModal: ({ trigger, handleClickCallToAction, handleCloseModal, style }: Props) => React.JSX.Element | null;
+declare const FullyClickableModal: ({ handleClickCallToAction, handleCloseModal, style, imageURL }: Props) => React.JSX.Element | null;
 export default FullyClickableModal;

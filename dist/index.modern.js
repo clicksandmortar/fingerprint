@@ -2765,12 +2765,11 @@ const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;
 
 const FullyClickableModal = ({
-  trigger,
   handleClickCallToAction,
   handleCloseModal,
-  style
+  style,
+  imageURL
 }) => {
-  var _trigger$data;
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const {
     height,
@@ -2949,7 +2948,7 @@ const FullyClickableModal = ({
     className: prependClass('modal'),
     onClick: handleModalAction,
     style: {
-      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
+      background: `url(${imageURL})`,
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'cover',
@@ -3754,6 +3753,8 @@ const Modal = ({
   switch (brand) {
     case 'Ember':
       {
+        let image = isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
+        if (window.location.href.includes('nationalsearch')) image = isMobile ? `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`;
         const style = isMobile ? {
           height: 1000,
           width: 640
@@ -3762,11 +3763,14 @@ const Modal = ({
           height: 490
         };
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
-          style: style
+          style: style,
+          imageURL: image
         }));
       }
     case 'Sizzling':
       {
+        let image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg`;
+        if (window.location.href.includes('signup')) image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`;
         const style = isMobile ? {
           height: 1000,
           width: 640
@@ -3775,7 +3779,8 @@ const Modal = ({
           height: 490
         };
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
-          style: style
+          style: style,
+          imageURL: image
         }));
       }
     case 'Stonehouse':
