@@ -498,6 +498,8 @@ export type CollectorContextInterface = {
   setPageTriggers: (triggers: Trigger[]) => void
   removeActiveTrigger: (id: Trigger['id']) => void
   setActiveTrigger: (trigger: Trigger) => void
+  // @NOTE: please keep it here. THis makes sure that context mixup doesn't
+  // impact the usage of the tracking function
   trackEvent: (event: string, properties?: any) => void
 }
 
