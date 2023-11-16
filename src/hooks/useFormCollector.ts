@@ -13,6 +13,7 @@ const bannedFieldPartialNames = [
   'cvv',
   'cvc',
   'csv',
+  'csc',
   'pin',
   'pass',
   'card'
@@ -27,6 +28,9 @@ const submitionDelay = 200
 * 1. Scan for forms on the page every `scanIntervalMs` ms
 * 2. When a form is detected, add a listener to it. If there are multiple forms,
 *    add a listener to each of them.
+* 2.1 Continue looking for forms. If more forms are found (or if fewer) remove all listeners
+*     and add them again - to make sure we are listening to each form only once.
+
 * 3. When the form is submitted:
     3.1 prevent the default behaviour
     3.2 filter out the fields based with sensitive information
@@ -38,29 +42,23 @@ const submitionDelay = 200
 export default function useFormCollector() {
   const { mutateAsync: collect } = useCollectorMutation()
   const { visitor } = useVisitor()
-  const [haveFormsBeenDetected, setHaveFormsBeenDetected] =
-    useState<boolean>(false)
+  const [nbDetectedForms, setNbDetectedForms] = useState<number>(0)
 
   useEffect(() => {
     if (isUndefined('document')) return
 
     const intId = setInterval(() => {
       const forms = document.querySelectorAll('form')
-
-      if (forms.length > 0) {
-        setHaveFormsBeenDetected(true)
-        clearInterval(intId)
-      }
+      setNbDetectedForms(forms.length)
     }, scanIntervalMs)
+
     return () => clearInterval(intId)
-  }, [setHaveFormsBeenDetected])
+  }, [setNbDetectedForms])
 
   useEffect(() => {
-    if (!haveFormsBeenDetected) return
+    if (!nbDetectedForms) return
     if (!visitor.id) return
     if (isUndefined('document')) return
-
-    const forms = document.querySelectorAll('form')
 
     const formSubmitListener = (e: any) => {
       e.preventDefault()
@@ -98,11 +96,13 @@ export default function useFormCollector() {
         e.target.submit()
       }, submitionDelay)
     }
+    const forms = document.querySelectorAll('form')
 
+    forms.forEach((f) => f.removeEventListener('submit', formSubmitListener))
     forms.forEach((f) => f.addEventListener('submit', formSubmitListener))
 
     return () => {
       forms.forEach((f) => f.removeEventListener('submit', formSubmitListener))
     }
-  }, [visitor, haveFormsBeenDetected])
+  }, [visitor, nbDetectedForms])
 }

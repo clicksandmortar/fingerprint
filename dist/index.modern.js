@@ -459,12 +459,8 @@ const request = {
 };
 
 const useHostname = () => {
-  var _window;
-  if (window === undefined) return '';
-  if (((_window = window) === null || _window === void 0 ? void 0 : _window.location) !== undefined) {
-    return window.location.hostname;
-  }
-  return '';
+  var _window, _window$location;
+  return ((_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : _window$location.hostname) || '';
 };
 
 const useCollectorMutation = () => {
@@ -557,7 +553,7 @@ const stringIsSubstringOf = (a, b) => {
   return a.toLowerCase().includes(b.toLowerCase());
 };
 const bannedTypes = ['password', 'submit'];
-const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'pin', 'pass', 'card'];
+const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
 const scanIntervalMs = 1000;
 const submitionDelay = 200;
 function useFormCollector() {
@@ -567,23 +563,19 @@ function useFormCollector() {
   const {
     visitor
   } = useVisitor();
-  const [haveFormsBeenDetected, setHaveFormsBeenDetected] = useState(false);
+  const [nbDetectedForms, setNbDetectedForms] = useState(0);
   useEffect(() => {
     if (isUndefined('document')) return;
     const intId = setInterval(() => {
       const forms = document.querySelectorAll('form');
-      if (forms.length > 0) {
-        setHaveFormsBeenDetected(true);
-        clearInterval(intId);
-      }
+      setNbDetectedForms(forms.length);
     }, scanIntervalMs);
     return () => clearInterval(intId);
-  }, [setHaveFormsBeenDetected]);
+  }, [setNbDetectedForms]);
   useEffect(() => {
-    if (!haveFormsBeenDetected) return;
+    if (!nbDetectedForms) return;
     if (!visitor.id) return;
     if (isUndefined('document')) return;
-    const forms = document.querySelectorAll('form');
     const formSubmitListener = e => {
       e.preventDefault();
       const a = e === null || e === void 0 ? void 0 : e.target;
@@ -611,11 +603,13 @@ function useFormCollector() {
         e.target.submit();
       }, submitionDelay);
     };
+    const forms = document.querySelectorAll('form');
+    forms.forEach(f => f.removeEventListener('submit', formSubmitListener));
     forms.forEach(f => f.addEventListener('submit', formSubmitListener));
     return () => {
       forms.forEach(f => f.removeEventListener('submit', formSubmitListener));
     };
-  }, [visitor, haveFormsBeenDetected]);
+  }, [visitor, nbDetectedForms]);
 }
 
 const selectorRateMs = 100;
