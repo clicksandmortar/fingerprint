@@ -12,6 +12,7 @@ var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
 var reactHookForm = require('react-hook-form');
+var reactDeviceDetect = require('react-device-detect');
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -404,6 +405,49 @@ var useMixpanel = function useMixpanel() {
   return React.useContext(MixpanelContext);
 };
 
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+var getBrand = function getBrand() {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+
+var collinBrandsPathConversionMap = {
+  Stonehouse: '/tablebooking/enquiry-form-completed',
+  'All Bar One': '/bookings/dmnc-complete',
+  Sizzling: '/tablebooking/enquiry-form-completed',
+  Ember: '/tablebooking/enquiry-form-completed'
+};
+function useCollinsBookingComplete() {
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var checkCollinsBookingComplete = React__default.useCallback(function () {
+    var brand = getBrand();
+    if (!brand) return;
+    var conversionPathForBrand = collinBrandsPathConversionMap[brand];
+    if (!conversionPathForBrand) return;
+    var isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
+    if (!isConversionPath) return;
+    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
+    trackEvent('booking_complete', {});
+  }, [trackEvent, log]);
+  return {
+    checkCollinsBookingComplete: checkCollinsBookingComplete
+  };
+}
+
 var headers = {
   'Content-Type': 'application/json'
 };
@@ -519,20 +563,6 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   return {
     hasDelayPassed: hasDelayPassed
   };
-};
-
-var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
-  if (typeof window === 'undefined') return false;
-  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-var getBrand = function getBrand() {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return 'C&M';
 };
 
 var selectorRateMs = 100;
@@ -765,6 +795,8 @@ function CollectorProvider(_ref) {
     trackEvent = _useMixpanel.trackEvent;
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
+  var _useCollinsBookingCom = useCollinsBookingComplete(),
+    checkCollinsBookingComplete = _useCollinsBookingCom.checkCollinsBookingComplete;
   var _useExitIntent = useExitIntent.useExitIntent({
       cookie: {
         key: '_cm_exit',
@@ -1025,10 +1057,6 @@ function CollectorProvider(_ref) {
     }, 500);
     return intervalId;
   }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
-  useRunOnPathChange(collectAndApplyVisitorInfo, {
-    skip: !booted,
-    delay: initialDelay
-  });
   React.useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];
@@ -1054,6 +1082,14 @@ function CollectorProvider(_ref) {
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
+  useRunOnPathChange(checkCollinsBookingComplete, {
+    skip: !booted,
+    delay: initialDelay
+  });
+  useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  });
   var onPresenseChange = React__default.useCallback(function (presence) {
     log('presence changed', presence);
   }, [log]);
@@ -2870,6 +2906,62 @@ var prependClass = function prependClass(className) {
   return "f" + randomHash + "-" + className;
 };
 
+var FullyClickableModal = function FullyClickableModal(_ref) {
+  var handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal,
+    style = _ref.style,
+    imageURL = _ref.imageURL;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var height = style.height,
+    width = style.width;
+  var appendResponsiveBehaviour = React__default.useCallback(function () {
+    return reactDeviceDetect.isMobile ? "." + prependClass('modal') + " {\n      max-width: 95%;\n      max-height: 95%;\n    }" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.8 * height + "px;\n    width: " + 0.8 * width + "px;\n  }\n}\n@media screen and (max-width: 1100px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n\n";
+  }, [style]);
+  React.useEffect(function () {
+    var cssToApply = "\n  \n    ." + prependClass('overlay') + " {\n      background-color: rgba(0, 0, 0, 0.7);\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + ( 'transition: all 0.3s ease-in-out;' ) + "\n      " + ( 'cursor: pointer;' ) + "\n    }\n\n    " + ( "." + prependClass('modal') + ":hover {\n      filter: brightness(1.05);\n      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n    }" ) + "\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n\n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n\n    " + appendResponsiveBehaviour() + "\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+    return function () {
+      document.head.removeChild(styles);
+    };
+  }, [style, appendResponsiveBehaviour]);
+  var handleModalAction = React__default.useCallback(function (e) {
+    e.stopPropagation();
+    return handleClickCallToAction(e);
+  }, [handleClickCallToAction]);
+  var handleClickClose = React__default.useCallback(function (e) {
+    e.stopPropagation();
+    return handleCloseModal(e);
+  }, [handleCloseModal]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    onClick: handleModalAction,
+    style: {
+      background: "url(" + imageURL + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleClickClose
+  }))));
+};
+
 var defaultElementSize = 'medium';
 var defaultButtonPosition = 'right';
 var CnMStandardModal = function CnMStandardModal(_ref) {
@@ -3169,22 +3261,52 @@ var Modal = function Modal(_ref) {
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };
-  if (brand === 'C&M') return React__default.createElement(CnMStandardModal, {
+  var modalProps = {
     trigger: trigger,
     handleClickCallToAction: handleClickCallToAction,
     handleCloseModal: handleCloseModal
-  });
-  if (brand === 'Stonehouse') return React__default.createElement(StonehouseModal, {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  });
-  if (brand === 'Browns') return React__default.createElement(BrownsModal, {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  });
-  return null;
+  };
+  switch (brand) {
+    case 'Ember':
+      {
+        var image = reactDeviceDetect.isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
+        if (window.location.href.includes('nationalsearch')) image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg";
+        var style = reactDeviceDetect.isMobile ? {
+          height: 1000,
+          width: 640
+        } : {
+          width: 813,
+          height: 490
+        };
+        return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
+          style: style,
+          imageURL: image
+        }));
+      }
+    case 'Sizzling':
+      {
+        var _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg";
+        if (window.location.href.includes('signup')) _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg";
+        var _style = reactDeviceDetect.isMobile ? {
+          height: 1000,
+          width: 640
+        } : {
+          width: 819,
+          height: 490
+        };
+        return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
+          style: _style,
+          imageURL: _image
+        }));
+      }
+    case 'Stonehouse':
+      return React__default.createElement(StonehouseModal, Object.assign({}, modalProps));
+    case 'Browns':
+      return React__default.createElement(BrownsModal, Object.assign({}, modalProps));
+    case 'C&M':
+    default:
+      return React__default.createElement(CnMStandardModal, Object.assign({}, modalProps));
+  }
 };
 var TriggerModal = function TriggerModal(_ref2) {
   var trigger = _ref2.trigger;
