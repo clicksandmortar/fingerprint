@@ -621,7 +621,7 @@ function isEqual(nodeList1, nodeList2) {
 var bannedTypes = ['password', 'submit'];
 var bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
 var scanIntervalMs = 1000;
-var submitionDelay = 20000;
+var submitionDelay = 200;
 function useFormCollector() {
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;

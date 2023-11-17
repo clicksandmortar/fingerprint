@@ -41,7 +41,7 @@ const bannedFieldPartialNames = [
 ]
 
 const scanIntervalMs = 1000
-const submitionDelay = 20000
+const submitionDelay = 200
 
 /**
  * Hook into forms on the page and collect their data

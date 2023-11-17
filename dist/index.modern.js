@@ -570,7 +570,7 @@ function isEqual(nodeList1, nodeList2) {
 const bannedTypes = ['password', 'submit'];
 const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
 const scanIntervalMs = 1000;
-const submitionDelay = 20000;
+const submitionDelay = 200;
 function useFormCollector() {
   const {
     mutateAsync: collect
