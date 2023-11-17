@@ -4,7 +4,28 @@ import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
 
 const stringIsSubstringOf = (a: string, b: string) => {
+  if (a === b) return true
+  if (!a || !b) return false
+
   return a.toLowerCase().includes(b.toLowerCase())
+}
+
+function isEqual(nodeList1: NodeList, nodeList2: NodeList) {
+  if (nodeList1?.length !== nodeList2?.length) {
+    return false
+  }
+
+  // classic for loops are most performant 🤷🏻‍♀️
+  const largerList =
+    nodeList1?.length > nodeList2?.length ? nodeList1 : nodeList2
+
+  for (let i = 0; i < largerList?.length; i++) {
+    if (nodeList1[i] !== nodeList2[i]) {
+      return false
+    }
+  }
+
+  return true
 }
 
 const bannedTypes = ['password', 'submit']
@@ -20,7 +41,7 @@ const bannedFieldPartialNames = [
 ]
 
 const scanIntervalMs = 1000
-const submitionDelay = 200
+const submitionDelay = 20000
 
 /**
  * Hook into forms on the page and collect their data
@@ -42,23 +63,28 @@ const submitionDelay = 200
 export default function useFormCollector() {
   const { mutateAsync: collect } = useCollectorMutation()
   const { visitor } = useVisitor()
-  const [nbDetectedForms, setNbDetectedForms] = useState<number>(0)
+  // any, just because TS complains about NodeList not being iterable
+  const [nodeList, setNodeList] = useState<any>()
 
   useEffect(() => {
     if (isUndefined('document')) return
 
     const intId = setInterval(() => {
       const forms = document.querySelectorAll('form')
-      setNbDetectedForms(forms.length)
+      if (isEqual(forms, nodeList)) return
+
+      setNodeList(forms)
     }, scanIntervalMs)
 
     return () => clearInterval(intId)
-  }, [setNbDetectedForms])
+  }, [setNodeList, nodeList])
 
   useEffect(() => {
-    if (!nbDetectedForms) return
+    if (!nodeList) return
     if (!visitor.id) return
     if (isUndefined('document')) return
+
+    const forms = document.querySelectorAll('form')
 
     const formSubmitListener = (e: any) => {
       e.preventDefault()
@@ -96,7 +122,6 @@ export default function useFormCollector() {
         e.target.submit()
       }, submitionDelay)
     }
-    const forms = document.querySelectorAll('form')
 
     forms.forEach((f) => f.removeEventListener('submit', formSubmitListener))
     forms.forEach((f) => f.addEventListener('submit', formSubmitListener))
@@ -104,5 +129,5 @@ export default function useFormCollector() {
     return () => {
       forms.forEach((f) => f.removeEventListener('submit', formSubmitListener))
     }
-  }, [visitor, nbDetectedForms])
+  }, [visitor, nodeList])
 }
