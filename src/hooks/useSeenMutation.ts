@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 import React from 'react'
 import { Trigger } from '../client/types'
+import { useBrand } from '../context/Config'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
-import { getBrand } from '../utils/brand'
 import { hostname, request } from '../utils/http'
 import { getPagePayload } from '../utils/page'
 import { useCollector } from './useCollector'
@@ -16,6 +16,7 @@ export const useSeenMutation = () => {
   const { trackEvent } = useMixpanel()
   const { setPageTriggers } = useCollector()
   const { visitor } = useVisitor()
+  const brand = useBrand()
 
   const trackTriggerSeen = React.useCallback(
     (trigger: Trigger) => {
@@ -24,10 +25,10 @@ export const useSeenMutation = () => {
         triggerType: trigger.invocation,
         triggerBehaviour: trigger.behaviour,
         time: new Date().toISOString(),
-        brand: getBrand()
+        brand
       })
     },
-    [trackEvent]
+    [trackEvent, brand]
   )
 
   return useMutation<Response, {}, unknown, unknown>(

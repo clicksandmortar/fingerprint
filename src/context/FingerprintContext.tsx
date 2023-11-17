@@ -4,6 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { clientHandlers } from '../client/handler'
 import { FingerprintConfig, PageView, Trigger } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
+import { ConfigProvider } from './Config'
 import { LoggingProvider, useLogging } from './LoggingContext'
 import { MixpanelProvider } from './MixpanelContext'
 import { VisitorProvider } from './VisitorContext'
@@ -117,45 +118,47 @@ export const FingerprintProvider = ({
   }
 
   return (
-    <LoggingProvider debug={debug}>
-      <QueryClientProvider client={queryClient}>
-        <FingerprintContext.Provider
-          value={{
-            appId,
-            booted,
-            currentTrigger: null,
-            registerHandler: addAnotherHandler,
-            trackEvent: () => {
-              alert('trackEvent not implemented')
-            },
-            trackPageView: () => {
-              alert('trackPageView not implemented')
-            },
-            unregisterHandler: () => {
-              alert('unregisterHandler not implemented')
-            },
-            initialDelay,
-            idleTriggers,
-            pageLoadTriggers,
-            exitIntentTriggers,
-            config
-          }}
-        >
-          <VisitorProvider>
-            <MixpanelProvider>
-              <CollectorProvider handlers={handlers}>
-                <ErrorBoundary
-                  onError={(error, info) => console.error(error, info)}
-                  fallback={<div>An application error occurred.</div>}
-                >
-                  {children}
-                </ErrorBoundary>
-              </CollectorProvider>
-            </MixpanelProvider>
-          </VisitorProvider>
-        </FingerprintContext.Provider>
-      </QueryClientProvider>
-    </LoggingProvider>
+    <ConfigProvider>
+      <LoggingProvider debug={debug}>
+        <QueryClientProvider client={queryClient}>
+          <FingerprintContext.Provider
+            value={{
+              appId,
+              booted,
+              currentTrigger: null,
+              registerHandler: addAnotherHandler,
+              trackEvent: () => {
+                alert('trackEvent not implemented')
+              },
+              trackPageView: () => {
+                alert('trackPageView not implemented')
+              },
+              unregisterHandler: () => {
+                alert('unregisterHandler not implemented')
+              },
+              initialDelay,
+              idleTriggers,
+              pageLoadTriggers,
+              exitIntentTriggers,
+              config
+            }}
+          >
+            <VisitorProvider>
+              <MixpanelProvider>
+                <CollectorProvider handlers={handlers}>
+                  <ErrorBoundary
+                    onError={(error, info) => console.error(error, info)}
+                    fallback={<div>An application error occurred.</div>}
+                  >
+                    {children}
+                  </ErrorBoundary>
+                </CollectorProvider>
+              </MixpanelProvider>
+            </VisitorProvider>
+          </FingerprintContext.Provider>
+        </QueryClientProvider>
+      </LoggingProvider>
+    </ConfigProvider>
   )
 }
 

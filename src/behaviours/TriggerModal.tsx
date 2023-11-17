@@ -6,10 +6,10 @@ import FullyClickableModal from '../components/modals/FullyClickableModal'
 import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
+import { useBrand } from '../context/Config'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useCollector } from '../hooks/useCollector'
 import { useSeenMutation } from '../hooks/useSeenMutation'
-import { getBrand } from '../utils/brand'
 
 type Props = {
   trigger: Trigger
@@ -21,9 +21,7 @@ const Modal = ({ trigger }: Props) => {
   const [open, setOpen] = useState(true)
   const [hasFired, setHasFired] = useState(false)
 
-  const brand = React.useMemo(() => {
-    return getBrand()
-  }, [])
+  const brand = useBrand()
   const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
 
   useEffect(() => {

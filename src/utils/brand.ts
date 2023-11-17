@@ -21,7 +21,7 @@ const TEMP_isCNMBrand = () => {
   return isCnMBookingDomain
 }
 
-export const getBrand = (): SupportedBrand | null => {
+export const _LEGACY_getBrand = (): SupportedBrand | null => {
   if (typeof window === 'undefined') return null
 
   if (TEMP_isCNMBrand()) return 'C&M'

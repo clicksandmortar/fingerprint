@@ -13,11 +13,10 @@ import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
+import { useConfig } from './Config'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
-
-const defaultIdleStatusDelay = 5 * 1000
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
@@ -41,14 +40,19 @@ export function CollectorProvider({
     initialDelay,
     exitIntentTriggers,
     idleTriggers,
-    pageLoadTriggers,
-    config
+    pageLoadTriggers
   } = useFingerprint()
-
-  const configIdleDelay = config?.idleDelay
+  const {
+    setConfigEntry,
+    config: { trigger: config }
+  } = useConfig()
   const { visitor, session, setVisitor } = useVisitor()
-  const { canNextTriggerOccur, startCooldown, getRemainingCooldownMs } =
-    useTriggerDelay(config?.triggerCooldown)
+  const {
+    canNextTriggerOccur,
+    startCooldown,
+    getRemainingCooldownMs,
+    getIdleStatusDelay
+  } = useTriggerDelay()
   const { trackEvent } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
   const { checkCollinsBookingComplete } = useCollinsBookingComplete()
@@ -58,23 +62,6 @@ export function CollectorProvider({
   const { registerHandler, resetState: reRegisterExitIntent } = useExitIntent({
     cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
-
-  /**
-   * Recalculate the idle delay based on config / default val and cooldown.
-   */
-  const getIdleStatusDelay = React.useCallback((): number => {
-    const idleDelay = configIdleDelay || defaultIdleStatusDelay
-
-    const cooldownDelay = getRemainingCooldownMs()
-
-    const delayAdjustedForCooldown = idleDelay + cooldownDelay
-
-    log(
-      `Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + config.delay ${idleDelay}ms)`
-    )
-
-    return delayAdjustedForCooldown
-  }, [configIdleDelay, getRemainingCooldownMs, log])
 
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
     getIdleStatusDelay()
@@ -207,7 +194,9 @@ export function CollectorProvider({
     startCooldown()
   }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown])
 
-  const { hasDelayPassed } = useExitIntentDelay(config?.exitIntentDelay)
+  const { hasDelayPassed } = useExitIntentDelay(
+    config?.displayTriggerAfterSecs * 1000
+  )
 
   const fireExitTrigger = React.useCallback(() => {
     if (!hasDelayPassed) {
@@ -329,6 +318,7 @@ export function CollectorProvider({
         setIdleTimeout(getIdleStatusDelay())
 
         setPageTriggers(payload?.pageTriggers)
+        setConfigEntry(payload.config)
 
         const cohort = payload.intently ? 'intently' : 'fingerprint'
 
@@ -358,7 +348,8 @@ export function CollectorProvider({
     getIdleStatusDelay,
     setIdleTimeout,
     trackEvent,
-    setPageTriggers
+    setPageTriggers,
+    setConfigEntry
   ])
 
   const registerWatcher = React.useCallback(

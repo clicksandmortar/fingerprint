@@ -9,6 +9,6 @@ export declare type LoggingContextInterface = {
     error: (...message: any) => void;
     info: (...message: any) => void;
 };
-export declare const LoggingProvider: ({ debug, children }: LoggingProviderProps) => React.JSX.Element;
+export declare const LoggingProvider: ({ children }: LoggingProviderProps) => React.JSX.Element;
 export declare const LoggingContext: React.Context<LoggingContextInterface>;
 export declare const useLogging: () => LoggingContextInterface;
