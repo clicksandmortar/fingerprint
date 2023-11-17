@@ -55,7 +55,6 @@ export const useSeenMutation = () => {
         const r = await res.json()
 
         log('Seen mutation: replacing triggers with:', r.pageTriggers)
-
         setPageTriggers(r.pageTriggers)
 
         log(
