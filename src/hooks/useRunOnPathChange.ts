@@ -11,12 +11,17 @@ type Config = {
 const useRunOnPathChange = (func: FuncProp, config?: Config) => {
   const [lastCollectedPath, setLastCollectedPath] = useState<string>('')
   const [lastCollectedHash, setLastCollectedHash] = useState<string>('')
+  const [lastCollectedQuery, setLastCollectedQuery] = useState<string>('')
   const { log } = useLogging()
 
   useEffect(() => {
     if (config?.skip) return
     if (!location.pathname) return
-    if (location.pathname === lastCollectedPath && location.hash === lastCollectedHash) return
+    if (
+      location.pathname === lastCollectedPath
+      && location.hash === lastCollectedHash
+      && location.search === lastCollectedQuery
+    ) return
 
     // added timeout to prevent occasional double firing on page load
     const tId = setTimeout(() => {
@@ -24,6 +29,7 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
 
       setLastCollectedPath(location.pathname)
       setLastCollectedHash(location.hash)
+      setLastCollectedQuery(location.search)
       func()
     }, config?.delay || 300)
 
