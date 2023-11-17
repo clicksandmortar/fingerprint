@@ -120,6 +120,7 @@ function ConfigProvider({
         ...updatedConfigEntries,
         brand: {
           ...prev.brand,
+          ...updatedConfigEntries.brand,
           colors: shouldUpdateColors ? {
             ...(prev.brand.colors || defaultColors),
             ...((updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.brand) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.colors) || {})

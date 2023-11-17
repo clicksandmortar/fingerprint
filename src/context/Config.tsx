@@ -55,6 +55,7 @@ export function ConfigProvider({ children }: Props) {
           ...updatedConfigEntries,
           brand: {
             ...prev.brand,
+            ...updatedConfigEntries.brand,
             // there is a chance that config.brand.colors isn't returned
             // when its not configured. In that case, we want to use either the colors already
             // in the config state, or the default colors

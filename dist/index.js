@@ -134,7 +134,7 @@ function ConfigProvider(_ref) {
     setConfig(function (prev) {
       var _updatedConfigEntries2;
       return _extends({}, prev, updatedConfigEntries, {
-        brand: _extends({}, prev.brand, {
+        brand: _extends({}, prev.brand, updatedConfigEntries.brand, {
           colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.brand) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.colors) || {}) : prev.brand.colors
         }),
         trigger: _extends({}, prev.trigger, objStringtoObjNum(updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : updatedConfigEntries.trigger))
