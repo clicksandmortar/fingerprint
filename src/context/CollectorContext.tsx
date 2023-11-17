@@ -94,12 +94,16 @@ export function CollectorProvider({
     new Map()
   )
 
+  // Passing the funcs down to other contexts from here. So please keep it until Collector
+  // is refactored
   const { setIncompleteTriggers, visibleTriggers: visibleIncompleteTriggers } =
     useIncompleteTriggers()
 
   useEffect(() => {
     if (!visibleIncompleteTriggers?.length) return
 
+    // TODO: eventually we may want support for multiple signals so this
+    // will need to be refactored / reworked
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
   }, [visibleIncompleteTriggers, setPageTriggersState])
   /**
