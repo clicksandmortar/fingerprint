@@ -249,7 +249,7 @@ export function CollectorProvider({
 
     if (!canNextTriggerOccur()) {
       log(
-        `Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
+        `Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining.
         I will attempt again when the same signal occurs after this passes.`
       )
 

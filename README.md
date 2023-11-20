@@ -173,22 +173,22 @@ export default App
 
 #### Note: a lot of these fields are going to be moved to BE and configurable from Portal #soon
 
-| Prop                     | Type       | Default     | Description                                                                                                                                                           |
-| ------------------------ | ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| appId                    | `string`   | `undefined` | The application ID to use for fingerprint tracking. Fingerprint will not start tracking data until this is set, and has been validated by the server.                 |
-| debug                    | `boolean`  | `false`     | Whether or not to log debug information to the console. When set to true this will log all fingerprint events to the console. When false, only errors will be logged. |
-| defaultHandlers          | `object`   | `{}`        | A map of default handlers to use for behaviours that don't have a handler registered. Set this to an empty object to disable the default handlers.                    |
-| initialDelay             | `number`   | `0`         | The initial delay in milliseconds before the Fingerprint will start tracking data and provide the first trigger.                                                      |
-| minimumDelay             | `number`   | `15000`     | The minimum delay in milliseconds between triggers.                                                                                                                   |
-| consent                  | `boolean`  | `false`     | Whether or not the user has consented to the use of cookies.                                                                                                          |
-| consentCallback          | `function` | `undefined` | A callback function that will be invoked every second to check the consent status. The return value of this function will be used to determine the consent status.    |
-| exitIntentTriggers       | `boolean`  | `false`     | Whether or not to use exit intent to trigger behaviours.                                                                                                              |
-| idleTriggers             | `boolean`  | `false`     | Whether or not to use idle time to trigger behaviours.                                                                                                                |
-| pageLoadTriggers         | `boolean`  | `false`     | Whether or not to trigger behaviours on page load                                                                                                                     |
-| config                   | `object`   | `undefined` | Config params where future optional parameters can be nested                                                                                                          |
-| config.exitIntentDelay   | `number`   | `0`         | time (ms) before exit intents CAN start to fire idle                                                                                                                  |
-| config.idleDelay         | `number`   | `undefined` | time (ms) before the user is considered idle                                                                                                                          |
-| config.triggerCooldown   | `number`   | `60 000`    | cooldown (ms) preventing triggers from being fired even if conditions are met                                                                                         |
+| Prop                   | Type       | Default     | Description                                                                                                                                                           |
+| ---------------------- | ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| appId                  | `string`   | `undefined` | The application ID to use for fingerprint tracking. Fingerprint will not start tracking data until this is set, and has been validated by the server.                 |
+| debug                  | `boolean`  | `false`     | Whether or not to log debug information to the console. When set to true this will log all fingerprint events to the console. When false, only errors will be logged. |
+| defaultHandlers        | `object`   | `{}`        | A map of default handlers to use for behaviours that don't have a handler registered. Set this to an empty object to disable the default handlers.                    |
+| initialDelay           | `number`   | `0`         | The initial delay in milliseconds before the Fingerprint will start tracking data and provide the first trigger.                                                      |
+| minimumDelay           | `number`   | `15000`     | The minimum delay in milliseconds between triggers.                                                                                                                   |
+| consent                | `boolean`  | `false`     | Whether or not the user has consented to the use of cookies.                                                                                                          |
+| consentCallback        | `function` | `undefined` | A callback function that will be invoked every second to check the consent status. The return value of this function will be used to determine the consent status.    |
+| exitIntentTriggers     | `boolean`  | `false`     | Whether or not to use exit intent to trigger behaviours.                                                                                                              |
+| idleTriggers           | `boolean`  | `false`     | Whether or not to use idle time to trigger behaviours.                                                                                                                |
+| pageLoadTriggers       | `boolean`  | `false`     | Whether or not to trigger behaviours on page load                                                                                                                     |
+| config                 | `object`   | `undefined` | Config params where future optional parameters can be nested                                                                                                          |
+| config.exitIntentDelay | `number`   | `0`         | time (ms) before exit intents CAN start to fire idle                                                                                                                  |
+| config.idleDelay       | `number`   | `undefined` | time (ms) before the user is considered idle                                                                                                                          |
+| config.triggerCooldown | `number`   | `60 000`    | cooldown (ms) preventing triggers from being fired even if conditions are met                                                                                         |
 
 ### useFingerprint
 

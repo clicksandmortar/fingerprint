@@ -5,16 +5,18 @@ import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { getBrand } from '../utils/brand'
-import { hostname, request } from '../utils/http'
+import { request } from '../utils/http'
 import { getPagePayload } from '../utils/page'
 import { useCollector } from './useCollector'
 import { useFingerprint } from './useFingerprint'
+import { useEnvVars } from './useEnvVars'
 
 export const useSeenMutation = () => {
   const { log, error } = useLogging()
   const { appId } = useFingerprint()
   const { trackEvent } = useMixpanel()
   const { setPageTriggers } = useCollector()
+  const { FINGERPRINT_API_HOSTNAME } = useEnvVars()
   const { visitor } = useVisitor()
 
   const trackTriggerSeen = React.useCallback(
@@ -30,16 +32,19 @@ export const useSeenMutation = () => {
     [trackEvent]
   )
 
-  return useMutation<Response, {}, unknown, unknown>(
+  return useMutation<Response, {}, Trigger, unknown>(
     (trigger: Trigger) => {
       trackTriggerSeen(trigger)
 
       return request
-        .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
-          seenTriggerIDs: [trigger.id],
-          visitor,
-          page: getPagePayload()
-        })
+        .put(
+          `${FINGERPRINT_API_HOSTNAME}/triggers/${appId}/${visitor.id}/seen`,
+          {
+            seenTriggerIDs: [trigger.id],
+            visitor,
+            page: getPagePayload()
+          }
+        )
         .then((response) => {
           log('Seen mutation: response', response)
           return response

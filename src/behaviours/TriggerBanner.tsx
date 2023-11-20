@@ -157,6 +157,6 @@ const Banner = ({ trigger }: Props) => {
   )
 }
 
-export const TriggerBanner = ({ trigger }: Props) => {
+export const TriggerBanner = ({ trigger }: Props): React.ReactPortal => {
   return ReactDOM.createPortal(<Banner trigger={trigger} />, document.body)
 }

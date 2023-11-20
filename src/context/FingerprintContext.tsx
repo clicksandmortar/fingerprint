@@ -2,53 +2,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { clientHandlers } from '../client/handler'
-import { FingerprintConfig, PageView, Trigger } from '../client/types'
+import { FingerprintConfig, Trigger } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
-import { LoggingProvider, useLogging } from './LoggingContext'
+import { LoggingProvider } from './LoggingContext'
 import { MixpanelProvider } from './MixpanelContext'
 import { VisitorProvider } from './VisitorContext'
+import { useConsentCheck } from '../hooks/useConsentCheck'
 
 const queryClient = new QueryClient()
 
 export const cookieAccountJWT = 'b2c_token'
 
-/** * @todo - extract */
-const useConsentCheck = (consent: boolean, consentCallback: any) => {
-  const [consentGiven, setConsentGiven] = useState(consent)
-  const { log } = useLogging()
-  /**
-   * Effect checks for user consent either via direct variable or a callback.
-   * in any case, once one of the conditions is met, the single state gets set to true, allowing the logic to flow.
-   * TODO: Think if it makes sense to memoize / derive that state instead? Gonna be tricky with an interval involved.
-   */
-  useEffect(() => {
-    if (consent) {
-      setConsentGiven(consent)
-      return
-    }
-
-    log('Fingerprint Widget Consent: ', consent)
-
-    if (!consentCallback) return
-    const consentGivenViaCallback = consentCallback()
-
-    const interval = setInterval(() => {
-      setConsentGiven(consent)
-    }, 1000)
-
-    // if the user has consented, no reason to continue pinging every sec.
-    if (consentGivenViaCallback) {
-      clearInterval(interval)
-    }
-
-    // clear on onmount
-    return () => clearInterval(interval)
-  }, [consentCallback, consent])
-
-  return consentGiven
-}
 export type FingerprintProviderProps = {
   appId?: string
+  tenantId?: string
   children?: React.ReactNode
   consent?: boolean
   consentCallback?: () => boolean
@@ -65,10 +32,11 @@ export type FingerprintProviderProps = {
 // only bootstrap the app.
 export const FingerprintProvider = ({
   appId,
+  tenantId,
   children,
-  consent = false,
+  consent = true,
   consentCallback,
-  debug,
+  debug = false,
   defaultHandlers,
   initialDelay = 0,
   exitIntentTriggers = true,
@@ -78,7 +46,6 @@ export const FingerprintProvider = ({
 }: FingerprintProviderProps) => {
   const [booted, setBooted] = useState(false)
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
-
   const consentGiven = useConsentCheck(consent, consentCallback)
 
   // @todo Move this to a Handlers Context and add logging.
@@ -97,11 +64,6 @@ export const FingerprintProvider = ({
     if (!consentGiven) return
 
     const performBoot = async () => {
-      // @todo this should be invoked when booted.
-      // It will call out to the API to confirm the
-      // appId is valid and return the app configuration.
-
-      // gonna fetch some nice configs here bruv
       setBooted(true)
     }
 
@@ -122,18 +84,10 @@ export const FingerprintProvider = ({
         <FingerprintContext.Provider
           value={{
             appId,
+            tenantId,
             booted,
             currentTrigger: null,
             registerHandler: addAnotherHandler,
-            trackEvent: () => {
-              alert('trackEvent not implemented')
-            },
-            trackPageView: () => {
-              alert('trackPageView not implemented')
-            },
-            unregisterHandler: () => {
-              alert('unregisterHandler not implemented')
-            },
             initialDelay,
             idleTriggers,
             pageLoadTriggers,
@@ -161,6 +115,7 @@ export const FingerprintProvider = ({
 
 export interface FingerprintContextInterface {
   appId: string
+  tenantId?: string
   booted: boolean
   consent?: boolean
   currentTrigger: Trigger | null
@@ -169,14 +124,12 @@ export interface FingerprintContextInterface {
   pageLoadTriggers: boolean
   initialDelay: number
   registerHandler: (trigger: Trigger) => void
-  trackEvent: (event: Event) => void
-  trackPageView: (pageView: PageView) => void
-  unregisterHandler: (trigger: Trigger) => void
   config?: FingerprintConfig
 }
 
 const defaultFingerprintState: FingerprintContextInterface = {
   appId: '',
+  tenantId: undefined,
   booted: false,
   consent: false,
   currentTrigger: null,
@@ -185,9 +138,6 @@ const defaultFingerprintState: FingerprintContextInterface = {
   pageLoadTriggers: false,
   initialDelay: 0,
   registerHandler: () => {},
-  trackEvent: () => {},
-  trackPageView: () => {},
-  unregisterHandler: () => {},
   config: {
     idleDelay: undefined,
     triggerCooldown: 60 * 1000,

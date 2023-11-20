@@ -118,6 +118,6 @@ const Modal = ({ trigger }: Props) => {
   }
 }
 
-export const TriggerModal = ({ trigger }: Props) => {
+export const TriggerModal = ({ trigger }: Props): React.ReactPortal => {
   return ReactDOM.createPortal(<Modal trigger={trigger} />, document.body)
 }

@@ -18,8 +18,7 @@
         r = i.getElementsByTagName(n)[0]
         p.src = g
         p.id = e
-        p.setAttribute('data-debug', rp)
-        p.setAttribute('data-consent', ri)
+        p.setAttribute('data-tenant', nt)
         r.parentNode.insertBefore(p, r)
       })(
         window,
@@ -27,8 +26,9 @@
         'script',
         '../dist/fingerprint.js',
         '889b0839-965f-448c-b681-c0f49900ca99',
-        false, // Set to false to disable debug mode
-        false // Set to false to disable consent mode
+        null,
+        null,
+        'tenant'
       )
     </script>
     <!-- End C&M Fingerprint Embed Code -->

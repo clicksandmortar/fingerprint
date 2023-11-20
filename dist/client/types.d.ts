@@ -9,12 +9,6 @@ export declare type CollectorUpdate = {
     referrer?: Referrer | undefined;
     elements?: PageElement[] | undefined;
     account?: Account | undefined;
-    form?: Form | undefined;
-};
-export declare type Form = {
-    data: {
-        [key: string]: any;
-    };
 };
 export declare type Account = {
     token: string;

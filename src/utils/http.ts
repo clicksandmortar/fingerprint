@@ -1,7 +1,4 @@
-import { getEnvVars } from './getEnvVars'
 const headers = { 'Content-Type': 'application/json' }
-
-export const hostname = getEnvVars().FINGERPRINT_API_HOSTNAME
 
 export const request = {
   get: async (url: string, params: any) => {
