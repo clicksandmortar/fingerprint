@@ -21,6 +21,7 @@ export function getEnvVars(): EnvVars {
   }
 
   // if (isDev)
+  console.log(isDev)
   return {
     FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
     MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
