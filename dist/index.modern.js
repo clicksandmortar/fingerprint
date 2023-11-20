@@ -577,6 +577,9 @@ function useFormCollector() {
   const {
     visitor
   } = useVisitor();
+  const {
+    log
+  } = useLogging();
   const [nodeList, setNodeList] = useState();
   useEffect(() => {
     if (isUndefined('document')) return;
@@ -606,7 +609,26 @@ function useFormCollector() {
         return true;
       });
       const data = elements.reduce((result, item) => {
-        result[item.name] = item.value;
+        let fieldName = item.name;
+        if (!fieldName) {
+          if (item.id) {
+            log('useFormCollector: form field has no name, falling back to id', {
+              item
+            });
+            fieldName = item.id;
+          } else if (item.placeholder) {
+            log('useFormCollector: form field has no name or id, falling back to placeholder', {
+              item
+            });
+            fieldName = item.placeholder;
+          } else {
+            log('useFormCollector: form field has no name, id or placeholder, fallback to type', {
+              item
+            });
+            fieldName = item.type;
+          }
+        }
+        result[fieldName] = item.value;
         return result;
       }, {});
       collect({

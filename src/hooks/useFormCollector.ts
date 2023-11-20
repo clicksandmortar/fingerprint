@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLogging } from '../context/LoggingContext'
 import { useVisitor } from '../context/VisitorContext'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
@@ -64,6 +65,7 @@ const submitionDelay = 200
 export default function useFormCollector() {
   const { mutateAsync: collect } = useCollectorMutation()
   const { visitor } = useVisitor()
+  const { log } = useLogging()
   // any, just because TS complains about NodeList not being iterable
   const [nodeList, setNodeList] = useState<any>()
 
@@ -109,12 +111,29 @@ export default function useFormCollector() {
 
       const data = elements.reduce((result: any, item: any) => {
         let fieldName = item.name
+
         if (!fieldName) {
-          if (item.id) fieldName = item.id
-          else if (item.placeholder) fieldName = item.placeholder
-          else fieldName = item.type
+          if (item.id) {
+            log(
+              'useFormCollector: form field has no name, falling back to id',
+              { item }
+            )
+            fieldName = item.id
+          } else if (item.placeholder) {
+            log(
+              'useFormCollector: form field has no name or id, falling back to placeholder',
+              { item }
+            )
+            fieldName = item.placeholder
+          } else {
+            log(
+              'useFormCollector: form field has no name, id or placeholder, fallback to type',
+              { item }
+            )
+            fieldName = item.type
+          }
         }
-        result[item.name] = item.value
+        result[fieldName] = item.value
         return result
       }, {})
 

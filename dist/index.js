@@ -626,6 +626,8 @@ function useFormCollector() {
     collect = _useCollectorMutation.mutateAsync;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
   var _useState = React.useState(),
     nodeList = _useState[0],
     setNodeList = _useState[1];
@@ -659,7 +661,26 @@ function useFormCollector() {
         return true;
       });
       var data = elements.reduce(function (result, item) {
-        result[item.name] = item.value;
+        var fieldName = item.name;
+        if (!fieldName) {
+          if (item.id) {
+            log('useFormCollector: form field has no name, falling back to id', {
+              item: item
+            });
+            fieldName = item.id;
+          } else if (item.placeholder) {
+            log('useFormCollector: form field has no name or id, falling back to placeholder', {
+              item: item
+            });
+            fieldName = item.placeholder;
+          } else {
+            log('useFormCollector: form field has no name, id or placeholder, fallback to type', {
+              item: item
+            });
+            fieldName = item.type;
+          }
+        }
+        result[fieldName] = item.value;
         return result;
       }, {});
       collect({
