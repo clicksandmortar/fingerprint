@@ -319,36 +319,36 @@ var tenantAwareHost = function tenantAwareHost(isDev, tenant) {
   return 'https://' + tenant + '.api.uk.clicksandmortar-' + (isDev ? 'staging' : 'production') + '.com/fingerprint';
 };
 var useEnvVars = function useEnvVars() {
-  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var _useContext = React.useContext(FingerprintContext),
     tenantId = _useContext.tenantId;
-  var isDev = false;
-  switch (true) {
-    case typeof window === 'undefined':
-    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
-    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
-    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
-    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
-    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
-      isDev = true;
-      break;
-    default:
-      isDev = false;
-  }
-  log('Fingerprint Environment: ', {
-    isDev: isDev,
-    tenantId: tenantId
-  });
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: tenantAwareHost(isDev, tenantId),
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  var _useState = React.useState(false),
+    isDev = _useState[0],
+    setIsDev = _useState[1];
+  var env = {
+    FINGERPRINT_API_HOSTNAME: '',
+    MIXPANEL_TOKEN: ''
   };
-  return {
-    FINGERPRINT_API_HOSTNAME: tenantAwareHost(isDev, tenantId),
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
+  React.useMemo(function () {
+    var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
+    switch (true) {
+      case typeof window === 'undefined':
+      case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+      case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+      case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+      case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+      case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+        setIsDev(true);
+        break;
+      default:
+        setIsDev(false);
+    }
+  }, []);
+  env.FINGERPRINT_API_HOSTNAME = tenantAwareHost(isDev, tenantId);
+  env.MIXPANEL_TOKEN = isDev ? 'd122fa924e1ea97d6b98569440c65a95' : 'cfca3a93becd5735a4f04dc8e10ede27';
+  log('Fingerprint Environment: ', env);
+  return env;
 };
 
 var trackEvent = function trackEvent(event, props, callback) {
