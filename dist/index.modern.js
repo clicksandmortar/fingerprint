@@ -78,12 +78,12 @@ function getEnvVars() {
 }
 
 const defaultColors = {
-  backgroundPrimary: 'grey',
-  backgroundPrimaryDimmed: '',
-  backgroundSecondary: '',
-  shadeOfGrey: '',
-  textPrimary: 'white',
-  greyText: ''
+  backgroundPrimary: '#2a3d6d',
+  backgroundPrimaryDimmed: 'rgb(27,233,237)',
+  backgroundSecondary: 'rgb(226,226,226)',
+  shadeOfGrey: 'rgb(13,14,49)',
+  textPrimary: '#ffffff',
+  greyText: '#40404b'
 };
 const defaultConfig = {
   script: {
@@ -776,40 +776,6 @@ function useTriggerDelay() {
   };
 }
 
-const fakeTriggers = [{
-  id: 'exit-trigger-id',
-  invocation: 'INVOCATION_EXIT_INTENT',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Purchase now (EXIT INTENT)',
-    buttonURL: 'http://www.google.com',
-    heading: '25% Off Gift Cards',
-    paragraph: 'Get 25% off a gift card, if you buy today!'
-  }
-}, {
-  id: 'idle-trigger-id',
-  invocation: 'INVOCATION_IDLE_TIME',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is an IDLE_TIME',
-    paragraph: 'And so is this'
-  }
-}, {
-  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    buttonText: 'Run',
-    buttonURL: 'https://google.com',
-    countdownEndTime: '2024-03-31T23:59',
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
-  }
-}];
-
 function isUndefined(o) {
   return typeof o === 'undefined';
 }
@@ -1048,7 +1014,7 @@ function CollectorProvider({
       const payload = await response.json();
       log('Sent collector data, retrieved:', payload);
       setIdleTimeout(getIdleStatusDelay());
-      setPageTriggers(fakeTriggers);
+      setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
       setConfigEntry(payload.config);
       const cohort = payload.intently ? 'intently' : 'fingerprint';
       if (visitor.cohort !== cohort) setVisitor({
@@ -2492,7 +2458,7 @@ const useSeenMutation = () => {
     onSuccess: async res => {
       const r = await res.json();
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
-      setPageTriggers(fakeTriggers);
+      setPageTriggers(r.pageTriggers);
       return r;
     }
   });

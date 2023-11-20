@@ -1,13 +1,16 @@
 import React, { PropsWithChildren, createContext, useState } from 'react'
 import { Config } from '../client/types'
 
+// 27 233 237 - dimmed, 41 100 249 - main, 13 14 49 - text Secondary, white primary, 226 226 226 greyBg, some dark grey text ?
+
+// follows the colors of the C&M logo. Mostly
 export const defaultColors = {
-  backgroundPrimary: 'grey',
-  backgroundPrimaryDimmed: '',
-  backgroundSecondary: '',
-  shadeOfGrey: '',
-  textPrimary: 'white',
-  greyText: ''
+  backgroundPrimary: '#2a3d6d', // the original C&M one was too bright - 'rgb(144, 175, 255)',
+  backgroundPrimaryDimmed: 'rgb(27,233,237)',
+  backgroundSecondary: 'rgb(226,226,226)',
+  shadeOfGrey: 'rgb(13,14,49)',
+  textPrimary: '#ffffff',
+  greyText: '#40404b'
 }
 
 const defaultConfig: Config = {
