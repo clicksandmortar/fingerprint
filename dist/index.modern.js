@@ -9,6 +9,7 @@ import uniqueBy from 'lodash.uniqby';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 import { useForm } from 'react-hook-form';
+import { isMobile } from 'react-device-detect';
 
 const closeButtonStyles = {
   borderRadius: '100%',
@@ -384,6 +385,51 @@ const useMixpanel = () => {
   return useContext(MixpanelContext);
 };
 
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+const getBrand = () => {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+
+const collinBrandsPathConversionMap = {
+  Stonehouse: '/tablebooking/enquiry-form-completed',
+  'All Bar One': '/bookings/dmnc-complete',
+  Sizzling: '/tablebooking/enquiry-form-completed',
+  Ember: '/tablebooking/enquiry-form-completed'
+};
+function useCollinsBookingComplete() {
+  const {
+    trackEvent
+  } = useMixpanel();
+  const {
+    log
+  } = useLogging();
+  const checkCollinsBookingComplete = React__default.useCallback(() => {
+    const brand = getBrand();
+    if (!brand) return;
+    const conversionPathForBrand = collinBrandsPathConversionMap[brand];
+    if (!conversionPathForBrand) return;
+    const isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
+    if (!isConversionPath) return;
+    log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
+    trackEvent('booking_complete', {});
+  }, [trackEvent, log]);
+  return {
+    checkCollinsBookingComplete
+  };
+}
+
 const headers = {
   'Content-Type': 'application/json'
 };
@@ -481,20 +527,6 @@ const useExitIntentDelay = (delay = 0) => {
   return {
     hasDelayPassed
   };
-};
-
-const TEMP_isCNMBrand = () => {
-  if (typeof window === 'undefined') return false;
-  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-const getBrand = () => {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  return 'C&M';
 };
 
 const selectorRateMs = 100;
@@ -727,6 +759,9 @@ function CollectorProvider({
     mutateAsync: collect
   } = useCollectorMutation();
   const {
+    checkCollinsBookingComplete
+  } = useCollinsBookingComplete();
+  const {
     registerHandler,
     resetState: reRegisterExitIntent
   } = useExitIntent({
@@ -933,10 +968,6 @@ function CollectorProvider({
     }, 500);
     return intervalId;
   }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
-  useRunOnPathChange(collectAndApplyVisitorInfo, {
-    skip: !booted,
-    delay: initialDelay
-  });
   useEffect(() => {
     if (!visitor.id) return;
     const intervalIds = [registerWatcher('.stage-5', '')];
@@ -958,6 +989,14 @@ function CollectorProvider({
   useEffect(() => {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
+  useRunOnPathChange(checkCollinsBookingComplete, {
+    skip: !booted,
+    delay: initialDelay
+  });
+  useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  });
   const onPresenseChange = React__default.useCallback(presence => {
     log('presence changed', presence);
   }, [log]);
@@ -2741,6 +2780,203 @@ const getModalButtonFlexPosition = position => {
 const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;
 
+const FullyClickableModal = ({
+  handleClickCallToAction,
+  handleCloseModal,
+  style,
+  imageURL
+}) => {
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const {
+    height,
+    width
+  } = style;
+  const appendResponsiveBehaviour = React__default.useCallback(() => {
+    return isMobile ? `.${prependClass('modal')} {
+      max-width: 95%;
+      max-height: 95%;
+    }` : `
+
+@media screen and (max-width: 1400px) {
+  .${prependClass('modal')} {
+    height: ${0.8 * height}px;
+    width: ${0.8 * width}px;
+  }
+}
+@media screen and (max-width: 1100px) {
+  .${prependClass('modal')} {
+    height: ${0.6 * height}px;
+    width: ${0.6 * width}px;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .${prependClass('modal')} {
+    height: ${0.4 * height}px;
+    width: ${0.4 * width}px;
+  }
+}
+
+`;
+  }, [style]);
+  useEffect(() => {
+    const cssToApply = `
+  
+    .${prependClass('overlay')} {
+      background-color: rgba(0, 0, 0, 0.7);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 500;
+      font-style: normal;
+    }
+    
+    .${prependClass('modal')} {
+      height: ${height}px;
+      width: ${width}px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--text-shadow);
+      ${ 'transition: all 0.3s ease-in-out;' }
+      ${ 'cursor: pointer;' }
+    }
+
+    ${ `.${prependClass('modal')}:hover {
+      filter: brightness(1.05);
+      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;
+    }` }
+    
+    
+    .${prependClass('text-center')} {
+      text-align: center;
+    }
+  
+    .${prependClass('text-container')} {
+      flex-direction: column;
+      flex: 1;
+      text-shadow: var(--text-shadow);
+      display: grid;
+      place-content: center;
+    }
+    
+    .${prependClass('main-text')} {
+      font-weight: 500;
+      font-size: 2rem;
+      font-style: normal;
+      text-align: center;
+      margin-bottom: 1rem;
+      fill: var(--secondary);
+      text-shadow: var(--text-shadow);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    
+    }
+    
+    .${prependClass('sub-text')} {
+      margin: auto;
+      font-weight: 600;
+      font-size: 1.2rem;
+    
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .${prependClass('close-button')} {
+      border-radius: 100%;
+      background-color: white;
+      width: 2rem;
+      border: none;
+      height: 2rem;
+      position: absolute;
+      margin: 10px;
+      top: 0px;
+      right: 0px;
+      color: black;
+      font-size: 1.2rem;
+      font-weight: 300;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+    }
+    
+    .${prependClass('close-button:hover')} {
+      transition: all 0.3s;
+      filter: brightness(0.95);
+    }
+    
+    .${prependClass('image-darken')} {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 100%;
+      padding: 2rem 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .${prependClass('text-shadow')} {
+      text-shadow: var(--text-shadow);
+    }
+    
+    .${prependClass('box-shadow')} {
+      box-shadow: var(--text-shadow);
+    }
+
+    ${appendResponsiveBehaviour()}
+    `;
+    const styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(() => {
+      setStylesLoaded(true);
+    }, 500);
+    return () => {
+      document.head.removeChild(styles);
+    };
+  }, [style, appendResponsiveBehaviour]);
+  const handleModalAction = React__default.useCallback(e => {
+    e.stopPropagation();
+    return handleClickCallToAction(e);
+  }, [handleClickCallToAction]);
+  const handleClickClose = React__default.useCallback(e => {
+    e.stopPropagation();
+    return handleCloseModal(e);
+  }, [handleCloseModal]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    onClick: handleModalAction,
+    style: {
+      background: `url(${imageURL})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleClickClose
+  }))));
+};
+
 const defaultElementSize = 'medium';
 const defaultButtonPosition = 'right';
 const CnMStandardModal = ({
@@ -3525,22 +3761,52 @@ const Modal = ({
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };
-  if (brand === 'C&M') return React__default.createElement(CnMStandardModal, {
+  const modalProps = {
     trigger: trigger,
     handleClickCallToAction: handleClickCallToAction,
     handleCloseModal: handleCloseModal
-  });
-  if (brand === 'Stonehouse') return React__default.createElement(StonehouseModal, {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  });
-  if (brand === 'Browns') return React__default.createElement(BrownsModal, {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  });
-  return null;
+  };
+  switch (brand) {
+    case 'Ember':
+      {
+        let image = isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
+        if (window.location.href.includes('nationalsearch')) image = isMobile ? `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`;
+        const style = isMobile ? {
+          height: 1000,
+          width: 640
+        } : {
+          width: 813,
+          height: 490
+        };
+        return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
+          style: style,
+          imageURL: image
+        }));
+      }
+    case 'Sizzling':
+      {
+        let image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg`;
+        if (window.location.href.includes('signup')) image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`;
+        const style = isMobile ? {
+          height: 1000,
+          width: 640
+        } : {
+          width: 819,
+          height: 490
+        };
+        return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
+          style: style,
+          imageURL: image
+        }));
+      }
+    case 'Stonehouse':
+      return React__default.createElement(StonehouseModal, Object.assign({}, modalProps));
+    case 'Browns':
+      return React__default.createElement(BrownsModal, Object.assign({}, modalProps));
+    case 'C&M':
+    default:
+      return React__default.createElement(CnMStandardModal, Object.assign({}, modalProps));
+  }
 };
 const TriggerModal = ({
   trigger
