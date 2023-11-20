@@ -29,7 +29,7 @@ export const render = () => {
       <Widget
         appId={document?.currentScript?.getAttribute('id') || ''}
         tenantId={document?.currentScript?.getAttribute('data-tenant') || ''}
-        // The follow props are deprecated and will be removed in a future release.
+        // @deprecated The follow props are deprecated and will be removed in a future release.
         consent={
           document?.currentScript?.getAttribute('data-consent') === 'true'
         }
