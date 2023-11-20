@@ -37,7 +37,7 @@ jobs:
         if: github.event_name == 'pull_request'
         working-directory: ./dist
         run: |
-          aws s3 cp . s3://cam-cdn-fingerprint-script-development-staging-origin/${GITHUB_SHA}/ --recursive --exclude "*" --include="fingerprint.js" --content-type="text/javascript"
+          aws s3 cp . s3://cam-cdn-fingerprint-script-development-staging-origin/${{github.event.pull_request.head.sha}}/ --recursive --exclude "*" --include="fingerprint.js" --content-type="text/javascript"
       - name: Configure AWS Credentials Staging
         if: github.ref == 'refs/heads/main'
         uses: aws-actions/configure-aws-credentials@v2

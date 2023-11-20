@@ -642,8 +642,9 @@ const useRunOnPathChange = (func, config) => {
       log('useRunOnPathChange: running for path: ', location.href);
       setLastCollected(location.href);
       func();
-    }, (config === null || config === void 0 ? void 0 : config.delay) || 300);
+    }, 300);
     return () => {
+      log('useRunOnPathChange: clearing 300ms timeout', location.href, lastCollected);
       clearTimeout(tId);
     };
   }, [location.href, func, setLastCollected, config]);
