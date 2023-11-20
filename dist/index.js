@@ -670,23 +670,23 @@ function useIntently() {
 
 var useRunOnPathChange = function useRunOnPathChange(func, config) {
   var _useState = React.useState(''),
-    lastCollectedPath = _useState[0],
-    setLastCollectedPath = _useState[1];
+    lastCollected = _useState[0],
+    setLastCollected = _useState[1];
   var _useLogging = useLogging(),
     log = _useLogging.log;
   React.useEffect(function () {
     if (config !== null && config !== void 0 && config.skip) return;
-    if (!location.pathname) return;
-    if (location.pathname === lastCollectedPath) return;
+    if (!location.href) return;
+    if (location.href === lastCollected) return;
     var tId = setTimeout(function () {
-      log('useRunOnPathChange: running for path: ', location.pathname);
-      setLastCollectedPath(location.pathname);
+      log('useRunOnPathChange: running for path: ', location.href);
+      setLastCollected(location.href);
       func();
     }, (config === null || config === void 0 ? void 0 : config.delay) || 300);
     return function () {
       clearTimeout(tId);
     };
-  }, [location.pathname, func, setLastCollectedPath, config]);
+  }, [location.href, func, setLastCollected, config]);
 };
 
 var defaultTriggerCooldown = 60 * 1000;

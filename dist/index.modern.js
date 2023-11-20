@@ -621,23 +621,23 @@ function useIntently() {
 }
 
 const useRunOnPathChange = (func, config) => {
-  const [lastCollectedPath, setLastCollectedPath] = useState('');
+  const [lastCollected, setLastCollected] = useState('');
   const {
     log
   } = useLogging();
   useEffect(() => {
     if (config !== null && config !== void 0 && config.skip) return;
-    if (!location.pathname) return;
-    if (location.pathname === lastCollectedPath) return;
+    if (!location.href) return;
+    if (location.href === lastCollected) return;
     const tId = setTimeout(() => {
-      log('useRunOnPathChange: running for path: ', location.pathname);
-      setLastCollectedPath(location.pathname);
+      log('useRunOnPathChange: running for path: ', location.href);
+      setLastCollected(location.href);
       func();
     }, (config === null || config === void 0 ? void 0 : config.delay) || 300);
     return () => {
       clearTimeout(tId);
     };
-  }, [location.pathname, func, setLastCollectedPath, config]);
+  }, [location.href, func, setLastCollected, config]);
 };
 
 const defaultTriggerCooldown = 60 * 1000;
