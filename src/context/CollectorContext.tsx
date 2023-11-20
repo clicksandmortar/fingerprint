@@ -11,9 +11,11 @@ import { useFingerprint } from '../hooks/useFingerprint'
 import useIntently from '../hooks/useIntently'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
+import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
-import { useConfig } from './Config'
+
+import { useConfig } from '../hooks/useBrandConfig'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
@@ -317,7 +319,8 @@ export function CollectorProvider({
         // @todo turn this into the dynamic value
         setIdleTimeout(getIdleStatusDelay())
 
-        setPageTriggers(payload?.pageTriggers)
+        // setPageTriggers(payload?.pageTriggers)
+        setPageTriggers(fakeTriggers)
         setConfigEntry(payload.config)
 
         const cohort = payload.intently ? 'intently' : 'fingerprint'

@@ -1,7 +1,7 @@
 import React, { PropsWithChildren, createContext, useState } from 'react'
 import { Config } from '../client/types'
 
-const defaultColors = {
+export const defaultColors = {
   backgroundPrimary: 'grey',
   backgroundPrimaryDimmed: '',
   backgroundSecondary: '',
@@ -64,16 +64,21 @@ export function ConfigProvider({ children }: Props) {
                   ...(prev.brand.colors || defaultColors),
                   ...(updatedConfigEntries?.brand?.colors || {})
                 }
-              : prev.brand.colors
+              : prev.brand.colors,
+            name: 'C&M'
           },
           trigger: {
             ...prev.trigger,
+            // the stars aligned in the shittiest-most way making it so that the BE returns these as strings
             ...objStringtoObjNum(updatedConfigEntries?.trigger)
+          },
+          script: {
+            debugMode: true
           }
         }
       })
     },
-    []
+    [setConfig]
   )
 
   const value: ConfigContextType = {
@@ -97,20 +102,3 @@ export const ConfigContext = createContext<ConfigContextType>({
     console.error('ConfigContext: setConfigEntry not implemented')
   }
 })
-
-export const useConfig = () => React.useContext(ConfigContext)
-
-export const useBrand = () => useConfig().config.brand.name
-export const useTriggerConfig = () => useConfig().config.trigger
-export const useScriptConfig = () => useConfig().config.script
-
-export const useBrandColors = (): typeof defaultColors => {
-  // if the color object isn't set in state, likely it isn't configured on the backend
-  // use the default colors in that case
-  const colors = useConfig().config.brand.colors
-
-  if (!colors) return defaultColors
-  if (!Object.keys(colors).length) return defaultColors
-
-  return colors
-}

@@ -1,12 +1,13 @@
 import { useMutation } from '@tanstack/react-query'
 import React from 'react'
 import { Trigger } from '../client/types'
-import { useBrand } from '../context/Config'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
+import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { hostname, request } from '../utils/http'
 import { getPagePayload } from '../utils/page'
+import { useBrand } from './useBrandConfig'
 import { useCollector } from './useCollector'
 import { useFingerprint } from './useFingerprint'
 
@@ -57,7 +58,8 @@ export const useSeenMutation = () => {
 
         log('Seen mutation: replacing triggers with:', r.pageTriggers)
         // no pageTriggers = no triggers, rather than missing key. serverside omition. Means we set pagetriggers to nothing.
-        setPageTriggers(r.pageTriggers)
+        setPageTriggers(fakeTriggers)
+        // setPageTriggers(r.pageTriggers)
         return r
       }
     }

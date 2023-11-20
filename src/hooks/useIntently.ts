@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useBrand } from '../context/Config'
+
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
+import { useBrand } from './useBrandConfig'
 
 const selectorRateMs = 100
 

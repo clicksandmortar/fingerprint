@@ -135,12 +135,16 @@ function ConfigProvider(_ref) {
       var _updatedConfigEntries2;
       return _extends({}, prev, updatedConfigEntries, {
         brand: _extends({}, prev.brand, updatedConfigEntries.brand, {
-          colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.brand) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.colors) || {}) : prev.brand.colors
+          colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.brand) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.colors) || {}) : prev.brand.colors,
+          name: 'C&M'
         }),
-        trigger: _extends({}, prev.trigger, objStringtoObjNum(updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : updatedConfigEntries.trigger))
+        trigger: _extends({}, prev.trigger, objStringtoObjNum(updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : updatedConfigEntries.trigger)),
+        script: {
+          debugMode: true
+        }
       });
     });
-  }, []);
+  }, [setConfig]);
   var value = {
     config: config,
     setConfigEntry: setConfigEntry
@@ -155,20 +159,52 @@ var ConfigContext = React.createContext({
     console.error('ConfigContext: setConfigEntry not implemented');
   }
 });
+
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+var _LEGACY_getBrand = function _LEGACY_getBrand() {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+var haveBrandColorsBeenConfigured = function haveBrandColorsBeenConfigured(colors) {
+  if (!colors) return false;
+  if (typeof colors !== 'object') return false;
+  if (Object.keys(colors).length === 0) return false;
+  if (Object.values(colors).every(function (color) {
+    return color === '#000000';
+  })) return false;
+  return true;
+};
+
 var useConfig = function useConfig() {
   return React__default.useContext(ConfigContext);
 };
 var useBrand = function useBrand() {
-  return useConfig().config.brand.name;
+  var configBrandName = useConfig().config.brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
 };
 var useTriggerConfig = function useTriggerConfig() {
   return useConfig().config.trigger;
 };
 var useBrandColors = function useBrandColors() {
   var colors = useConfig().config.brand.colors;
-  if (!colors) return defaultColors;
-  if (!Object.keys(colors).length) return defaultColors;
-  return colors;
+  return React__default.useMemo(function () {
+    if (!colors) return defaultColors;
+    if (!Object.keys(colors).length) return defaultColors;
+    if (haveBrandColorsBeenConfigured(colors)) return colors;
+    return defaultColors;
+  }, [colors]);
 };
 
 var LoggingProvider = function LoggingProvider(_ref) {
@@ -754,8 +790,9 @@ function useTriggerDelay() {
   var _useState = React.useState(null),
     lastTriggerTimeStamp = _useState[0],
     setLastTriggerTimeStamp = _useState[1];
-  var cooldownMs = useTriggerConfig().triggerCooldownSecs * 1000;
-  var idleDelay = useTriggerConfig().userIdleThresholdSecs * 1000;
+  var triggerConfig = useTriggerConfig();
+  var cooldownMs = triggerConfig.triggerCooldownSecs * 1000;
+  var idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var startCooldown = React__default.useCallback(function () {
@@ -785,6 +822,40 @@ function useTriggerDelay() {
     getIdleStatusDelay: getIdleStatusDelay
   };
 }
+
+var fakeTriggers = [{
+  id: 'exit-trigger-id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Purchase now (EXIT INTENT)',
+    buttonURL: 'http://www.google.com',
+    heading: '25% Off Gift Cards',
+    paragraph: 'Get 25% off a gift card, if you buy today!'
+  }
+}, {
+  id: 'idle-trigger-id',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an IDLE_TIME',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+}];
 
 function isUndefined(o) {
   return typeof o === 'undefined';
@@ -1042,7 +1113,7 @@ function CollectorProvider(_ref) {
         return Promise.resolve(response.json()).then(function (payload) {
           log('Sent collector data, retrieved:', payload);
           setIdleTimeout(getIdleStatusDelay());
-          setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+          setPageTriggers(fakeTriggers);
           setConfigEntry(payload.config);
           var cohort = payload.intently ? 'intently' : 'fingerprint';
           if (visitor.cohort !== cohort) setVisitor({
@@ -2510,7 +2581,7 @@ var useSeenMutation = function useSeenMutation() {
       try {
         return Promise.resolve(res.json()).then(function (r) {
           log('Seen mutation: replacing triggers with:', r.pageTriggers);
-          setPageTriggers(r.pageTriggers);
+          setPageTriggers(fakeTriggers);
           return r;
         });
       } catch (e) {

@@ -1,14 +1,17 @@
 import React, { useState } from 'react'
-import { useTriggerConfig } from '../context/Config'
+
 import { useLogging } from '../context/LoggingContext'
+import { useTriggerConfig } from './useBrandConfig'
 
 export function useTriggerDelay() {
   const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState<
     number | null
   >(null)
 
-  const cooldownMs = useTriggerConfig().triggerCooldownSecs * 1000
-  const idleDelay = useTriggerConfig().userIdleThresholdSecs * 1000
+  const triggerConfig = useTriggerConfig()
+  const cooldownMs = triggerConfig.triggerCooldownSecs * 1000
+  const idleDelay = triggerConfig.userIdleThresholdSecs * 1000
+
   const { log } = useLogging()
 
   const startCooldown = React.useCallback(() => {

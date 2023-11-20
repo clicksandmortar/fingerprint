@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from 'react';
 import { Config } from '../client/types';
-declare const defaultColors: {
+export declare const defaultColors: {
     backgroundPrimary: string;
     backgroundPrimaryDimmed: string;
     backgroundSecondary: string;
@@ -15,15 +15,4 @@ declare type ConfigContextType = {
     setConfigEntry: (config: Partial<Config>) => void;
 };
 export declare const ConfigContext: React.Context<ConfigContextType>;
-export declare const useConfig: () => ConfigContextType;
-export declare const useBrand: () => import("../utils/brand").SupportedBrand;
-export declare const useTriggerConfig: () => {
-    userIdleThresholdSecs: number;
-    displayTriggerAfterSecs: number;
-    triggerCooldownSecs: number;
-};
-export declare const useScriptConfig: () => {
-    debugMode: boolean;
-};
-export declare const useBrandColors: () => typeof defaultColors;
 export {};

@@ -7,10 +7,10 @@ export const fakeTriggers: Trigger[] = [
     behaviour: 'BEHAVIOUR_MODAL',
     data: {
       backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-      buttonText: 'Click me',
+      buttonText: 'Purchase now (EXIT INTENT)',
       buttonURL: 'http://www.google.com',
-      heading: 'This is an EXIT_INTENT',
-      paragraph: 'And so is this'
+      heading: '25% Off Gift Cards',
+      paragraph: 'Get 25% off a gift card, if you buy today!'
     }
   },
   {

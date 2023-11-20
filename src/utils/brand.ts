@@ -1,5 +1,7 @@
 // Please dont let this become a pattern. This is a one off and should be moved to backend as soon as possible.
 
+import { Config } from '../client/types'
+
 ///.... and it is becoming a pattern. 🙈
 export type SupportedBrand =
   | 'Browns'
@@ -39,4 +41,19 @@ export const _LEGACY_getBrand = (): SupportedBrand | null => {
   if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One'
 
   return 'C&M'
+}
+
+/**
+ * By default all brand colors are set to #000000.
+ */
+export const haveBrandColorsBeenConfigured = (
+  colors: Config['brand']['colors']
+) => {
+  if (!colors) return false
+  if (typeof colors !== 'object') return false
+  if (Object.keys(colors).length === 0) return false
+  if (Object.values(colors).every((color) => color === '#000000')) return false
+
+  // being optimistic here.
+  return true
 }

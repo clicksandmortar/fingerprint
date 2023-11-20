@@ -1,8 +1,9 @@
 import React from 'react'
-import { useBrand } from '../../context/Config'
+
 import { useLogging } from '../../context/LoggingContext'
 import { useMixpanel } from '../../context/MixpanelContext'
 import { SupportedBrand } from '../../utils/brand'
+import { useBrand } from '../useBrandConfig'
 
 // if a brand is not present in this map, skip tracking via this method (other ones should pick it up)
 const collinBrandsPathConversionMap: Partial<{

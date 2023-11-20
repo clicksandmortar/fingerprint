@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect } from 'react'
-import { useConfig } from './Config'
+import { useConfig } from '../hooks/useBrandConfig'
 
 export type LoggingProviderProps = {
   debug?: boolean

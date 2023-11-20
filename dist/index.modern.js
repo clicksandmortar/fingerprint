@@ -124,15 +124,19 @@ function ConfigProvider({
           colors: shouldUpdateColors ? {
             ...(prev.brand.colors || defaultColors),
             ...((updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.brand) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.colors) || {})
-          } : prev.brand.colors
+          } : prev.brand.colors,
+          name: 'C&M'
         },
         trigger: {
           ...prev.trigger,
           ...objStringtoObjNum(updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : updatedConfigEntries.trigger)
+        },
+        script: {
+          debugMode: true
         }
       };
     });
-  }, []);
+  }, [setConfig]);
   const value = {
     config,
     setConfigEntry
@@ -147,14 +151,46 @@ const ConfigContext = createContext({
     console.error('ConfigContext: setConfigEntry not implemented');
   }
 });
+
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+const _LEGACY_getBrand = () => {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+const haveBrandColorsBeenConfigured = colors => {
+  if (!colors) return false;
+  if (typeof colors !== 'object') return false;
+  if (Object.keys(colors).length === 0) return false;
+  if (Object.values(colors).every(color => color === '#000000')) return false;
+  return true;
+};
+
 const useConfig = () => React__default.useContext(ConfigContext);
-const useBrand = () => useConfig().config.brand.name;
+const useBrand = () => {
+  const configBrandName = useConfig().config.brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
+};
 const useTriggerConfig = () => useConfig().config.trigger;
 const useBrandColors = () => {
   const colors = useConfig().config.brand.colors;
-  if (!colors) return defaultColors;
-  if (!Object.keys(colors).length) return defaultColors;
-  return colors;
+  return React__default.useMemo(() => {
+    if (!colors) return defaultColors;
+    if (!Object.keys(colors).length) return defaultColors;
+    if (haveBrandColorsBeenConfigured(colors)) return colors;
+    return defaultColors;
+  }, [colors]);
 };
 
 const LoggingProvider = ({
@@ -706,8 +742,9 @@ const useRunOnPathChange = (func, config) => {
 
 function useTriggerDelay() {
   const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
-  const cooldownMs = useTriggerConfig().triggerCooldownSecs * 1000;
-  const idleDelay = useTriggerConfig().userIdleThresholdSecs * 1000;
+  const triggerConfig = useTriggerConfig();
+  const cooldownMs = triggerConfig.triggerCooldownSecs * 1000;
+  const idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
   const {
     log
   } = useLogging();
@@ -738,6 +775,40 @@ function useTriggerDelay() {
     getIdleStatusDelay
   };
 }
+
+const fakeTriggers = [{
+  id: 'exit-trigger-id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Purchase now (EXIT INTENT)',
+    buttonURL: 'http://www.google.com',
+    heading: '25% Off Gift Cards',
+    paragraph: 'Get 25% off a gift card, if you buy today!'
+  }
+}, {
+  id: 'idle-trigger-id',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an IDLE_TIME',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+}];
 
 function isUndefined(o) {
   return typeof o === 'undefined';
@@ -977,7 +1048,7 @@ function CollectorProvider({
       const payload = await response.json();
       log('Sent collector data, retrieved:', payload);
       setIdleTimeout(getIdleStatusDelay());
-      setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+      setPageTriggers(fakeTriggers);
       setConfigEntry(payload.config);
       const cohort = payload.intently ? 'intently' : 'fingerprint';
       if (visitor.cohort !== cohort) setVisitor({
@@ -2421,7 +2492,7 @@ const useSeenMutation = () => {
     onSuccess: async res => {
       const r = await res.json();
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
-      setPageTriggers(r.pageTriggers);
+      setPageTriggers(fakeTriggers);
       return r;
     }
   });

@@ -1,7 +1,8 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
 import { Trigger } from '../../../client/types'
-import { useBrandColors } from '../../../context/Config'
+
+import { useBrandColors } from '../../../hooks/useBrandConfig'
 import {
   ButtonPosition,
   ModalSize,
