@@ -10,15 +10,16 @@ const stringIsSubstringOf = (a: string, b: string) => {
   return a.toLowerCase().includes(b.toLowerCase())
 }
 
+// scanning any deeper isn't necessary. The form fields and their values are picked up at submit-time.
 function isEqual(nodeList1: NodeList, nodeList2: NodeList) {
   if (nodeList1?.length !== nodeList2?.length) {
     return false
   }
-
-  // classic for loops are most performant 🤷🏻‍♀️
+  
   const largerList =
     nodeList1?.length > nodeList2?.length ? nodeList1 : nodeList2
 
+  // classic for loops are most performant 🤷🏻‍♀️
   for (let i = 0; i < largerList?.length; i++) {
     if (nodeList1[i] !== nodeList2[i]) {
       return false
