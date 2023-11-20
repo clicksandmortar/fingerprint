@@ -42,12 +42,12 @@ jobs:
         if: github.event_name == 'pull_request'
         # Output the following to the $GITHUB_STEP_SUMMARY:
         # ### Development URL
-        # https://cam-cdn-fingerprint-script-development-staging-origin.s3.amazonaws.com/${{github.event.pull_request.head.sha}}/fingerprint.js
+        # https://cdn.development.fingerprint-staging.host/${{github.event.pull_request.head.sha}}/fingerprint.js
         #
         # This can be used to test the `fingerprint` script before merging to production. For more information, see [How we test Fingerprint in Production](https://www.notion.so/clicksandmortar/How-we-test-Fingerprint-in-Production-8bc4b43a6d774aa6888a1cdfad271b91?pvs=4).
         run: |
           echo "### Development URL" >> $GITHUB_STEP_SUMMARY
-          echo "https://cam-cdn-fingerprint-script-development-staging-origin.s3.amazonaws.com/${{github.event.pull_request.head.sha}}/fingerprint.js" >> $GITHUB_STEP_SUMMARY
+          echo "https://cdn.development.fingerprint-staging.host/${{github.event.pull_request.head.sha}}/fingerprint.js" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "This can be used to test the \`fingerprint\` script before merging to production. For more information, see [How we test Fingerprint in Production](https://www.notion.so/clicksandmortar/How-we-test-Fingerprint-in-Production-8bc4b43a6d774aa6888a1cdfad271b91?pvs=4)." >> $GITHUB_STEP_SUMMARY
       - name: Configure AWS Credentials Staging
