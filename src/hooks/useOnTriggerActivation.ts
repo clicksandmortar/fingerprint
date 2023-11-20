@@ -4,15 +4,17 @@ import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { getBrand } from '../utils/brand'
-import { hostname, request } from '../utils/http'
+import { request } from '../utils/http'
 import { getPagePayload } from '../utils/page'
 import { useCollector } from './useCollector'
 import { useFingerprint } from './useFingerprint'
+import { useEnvVars } from './useEnvVars'
 
 const useOnTriggerActivation = (trigger: Trigger) => {
   const { trackEvent } = useMixpanel()
   const { appId } = useFingerprint()
   const { setPageTriggers } = useCollector()
+  const { FINGERPRINT_API_HOSTNAME } = useEnvVars()
   const { visitor } = useVisitor()
   const { log, error } = useLogging()
   const { id: visitorId } = visitor
@@ -20,11 +22,14 @@ const useOnTriggerActivation = (trigger: Trigger) => {
   return React.useCallback(() => {
     try {
       request
-        .put(`${hostname}/triggers/${appId}/${visitorId}/seen`, {
-          seenTriggerIDs: [trigger.id],
-          appId,
-          page: getPagePayload()
-        })
+        .put(
+          `${FINGERPRINT_API_HOSTNAME}/triggers/${appId}/${visitorId}/seen`,
+          {
+            seenTriggerIDs: [trigger.id],
+            appId,
+            page: getPagePayload()
+          }
+        )
         .then(async (r) => {
           const payload: CollectorVisitorResponse = await r.json()
 
