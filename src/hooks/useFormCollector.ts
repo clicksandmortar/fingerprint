@@ -15,7 +15,7 @@ function isEqual(nodeList1: NodeList, nodeList2: NodeList) {
   if (nodeList1?.length !== nodeList2?.length) {
     return false
   }
-  
+
   const largerList =
     nodeList1?.length > nodeList2?.length ? nodeList1 : nodeList2
 
@@ -108,6 +108,12 @@ export default function useFormCollector() {
       })
 
       const data = elements.reduce((result: any, item: any) => {
+        let fieldName = item.name
+        if (!fieldName) {
+          if (item.id) fieldName = item.id
+          else if (item.placeholder) fieldName = item.placeholder
+          else fieldName = item.type
+        }
         result[item.name] = item.value
         return result
       }, {})
