@@ -675,9 +675,18 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
   var _useLogging = useLogging(),
     log = _useLogging.log;
   React.useEffect(function () {
-    if (config !== null && config !== void 0 && config.skip) return;
-    if (!location.href) return;
-    if (location.href === lastCollected) return;
+    if (config !== null && config !== void 0 && config.skip) {
+      log('useRunOnPathChange: skip configured, not capturing');
+      return;
+    }
+    if (!location.href) {
+      log('useRunOnPathChange: no href on location object: ', location);
+      return;
+    }
+    if (location.href === lastCollected) {
+      log('useRunOnPathChange: location href and last collected are the same ', location.href, lastCollected);
+      return;
+    }
     var tId = setTimeout(function () {
       log('useRunOnPathChange: running for path: ', location.href);
       setLastCollected(location.href);
