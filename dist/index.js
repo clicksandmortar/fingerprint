@@ -828,11 +828,11 @@ function CollectorProvider(_ref) {
   var _useState2 = React.useState([]),
     pageTriggers = _useState2[0],
     setPageTriggersState = _useState2[1];
+  var _useIntently = useIntently(),
+    setIntently = _useIntently.setIntently;
   var _useState3 = React.useState([]),
     displayTriggers = _useState3[0],
     setDisplayedTriggers = _useState3[1];
-  var _useIntently = useIntently(),
-    setIntently = _useIntently.setIntently;
   var _useState4 = React.useState(new Map()),
     foundWatchers = _useState4[0],
     setFoundWatchers = _useState4[1];
@@ -895,14 +895,32 @@ function CollectorProvider(_ref) {
       return null;
     });
   }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  var getIsBehaviourVisible = React__default.useCallback(function (type) {
+    if (displayTriggers.length === 0) return false;
+    if (displayTriggers.find(function (triggerId) {
+      var _pageTriggers$find;
+      return ((_pageTriggers$find = pageTriggers.find(function (trigger) {
+        return trigger.id === triggerId;
+      })) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
+    })) return true;
+    return false;
+  }, [displayTriggers, pageTriggers]);
   var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
     var invokableTrigger = pageTriggers.find(function (trigger) {
       return trigger.invocation === invocation;
     });
-    if (invokableTrigger) setDisplayedTriggers(function (ts) {
+    if (!invokableTrigger) {
+      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
+      return;
+    }
+    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
+      return;
+    }
+    setDisplayedTriggers(function (ts) {
       return [].concat(ts, [invokableTrigger.id]);
     });
-  }, [pageTriggers, setDisplayedTriggers]);
+  }, [pageTriggers, setDisplayedTriggers, getIsBehaviourVisible]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');

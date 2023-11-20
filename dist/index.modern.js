@@ -776,10 +776,10 @@ function CollectorProvider({
   }, [configIdleDelay, getRemainingCooldownMs, log]);
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
   const [pageTriggers, setPageTriggersState] = useState([]);
-  const [displayTriggers, setDisplayedTriggers] = useState([]);
   const {
     setIntently
   } = useIntently();
+  const [displayTriggers, setDisplayedTriggers] = useState([]);
   const [foundWatchers, setFoundWatchers] = useState(new Map());
   const setPageTriggers = React__default.useCallback(triggers => {
     setPageTriggersState(prev => {
@@ -828,10 +828,26 @@ function CollectorProvider({
       return null;
     });
   }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  const getIsBehaviourVisible = React__default.useCallback(type => {
+    if (displayTriggers.length === 0) return false;
+    if (displayTriggers.find(triggerId => {
+      var _pageTriggers$find;
+      return ((_pageTriggers$find = pageTriggers.find(trigger => trigger.id === triggerId)) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
+    })) return true;
+    return false;
+  }, [displayTriggers, pageTriggers]);
   const setDisplayedTriggerByInvocation = React__default.useCallback(invocation => {
     const invokableTrigger = pageTriggers.find(trigger => trigger.invocation === invocation);
-    if (invokableTrigger) setDisplayedTriggers(ts => [...ts, invokableTrigger.id]);
-  }, [pageTriggers, setDisplayedTriggers]);
+    if (!invokableTrigger) {
+      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
+      return;
+    }
+    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
+      return;
+    }
+    setDisplayedTriggers(ts => [...ts, invokableTrigger.id]);
+  }, [pageTriggers, setDisplayedTriggers, getIsBehaviourVisible]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
