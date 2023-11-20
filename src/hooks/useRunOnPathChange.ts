@@ -13,9 +13,18 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
   const { log } = useLogging()
 
   useEffect(() => {
-    if (config?.skip) return
-    if (!location.href) return
-    if (location.href === lastCollected) return
+    if (config?.skip) {
+      log('useRunOnPathChange: skip configured, not capturing')
+      return
+    }
+    if (!location.href) {
+      log('useRunOnPathChange: no href on location object: ', location)
+      return
+    }
+    if (location.href === lastCollected) {
+      log('useRunOnPathChange: location href and last collected are the same ', location.href, lastCollected)
+      return
+    }
 
     // added timeout to prevent occasional double firing on page load
     const tId = setTimeout(() => {
