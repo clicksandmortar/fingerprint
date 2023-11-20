@@ -22,7 +22,11 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
       return
     }
     if (location.href === lastCollected) {
-      log('useRunOnPathChange: location href and last collected are the same ', location.href, lastCollected)
+      log(
+        'useRunOnPathChange: location href and last collected are the same ',
+        location.href,
+        lastCollected
+      )
       return
     }
 
@@ -32,9 +36,14 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
 
       setLastCollected(location.href)
       func()
-    }, config?.delay || 300)
+    }, 300)
 
     return () => {
+      log(
+        'useRunOnPathChange: clearing 300ms timeout',
+        location.href,
+        lastCollected
+      )
       clearTimeout(tId)
     }
   }, [location.href, func, setLastCollected, config])
