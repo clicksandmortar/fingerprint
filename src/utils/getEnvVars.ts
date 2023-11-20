@@ -20,18 +20,18 @@ export function getEnvVars(): EnvVars {
       isDev = false
   }
 
-  if (isDev)
-    return {
-      FINGERPRINT_API_HOSTNAME:
-        'https://target-engine-api.starship-staging.com',
-      MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-    }
-
+  console.log({ isDev })
+  // if (isDev)
   return {
-    FINGERPRINT_API_HOSTNAME:
-      'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
   }
+
+  // return {
+  //   FINGERPRINT_API_HOSTNAME:
+  //     'https://target-engine-api.starship-production.com',
+  //   MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  // }
 }
 
 // when we're ready to add it back, Sentry is setup with

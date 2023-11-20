@@ -84,13 +84,12 @@ function getEnvVars() {
     default:
       isDev = false;
   }
-  if (isDev) return {
+  console.log({
+    isDev: isDev
+  });
+  return {
     FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
     MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
   };
 }
 
@@ -792,23 +791,33 @@ function useIntently() {
 
 var useRunOnPathChange = function useRunOnPathChange(func, config) {
   var _useState = React.useState(''),
-    lastCollectedPath = _useState[0],
-    setLastCollectedPath = _useState[1];
+    lastCollected = _useState[0],
+    setLastCollected = _useState[1];
   var _useLogging = useLogging(),
     log = _useLogging.log;
   React.useEffect(function () {
-    if (config !== null && config !== void 0 && config.skip) return;
-    if (!location.pathname) return;
-    if (location.pathname === lastCollectedPath) return;
+    if (config !== null && config !== void 0 && config.skip) {
+      log('useRunOnPathChange: skip configured, not capturing');
+      return;
+    }
+    if (!location.href) {
+      log('useRunOnPathChange: no href on location object: ', location);
+      return;
+    }
+    if (location.href === lastCollected) {
+      log('useRunOnPathChange: location href and last collected are the same ', location.href, lastCollected);
+      return;
+    }
     var tId = setTimeout(function () {
-      log('useRunOnPathChange: running for path: ', location.pathname);
-      setLastCollectedPath(location.pathname);
+      log('useRunOnPathChange: running for path: ', location.href);
+      setLastCollected(location.href);
       func();
-    }, (config === null || config === void 0 ? void 0 : config.delay) || 300);
+    }, 300);
     return function () {
+      log('useRunOnPathChange: clearing 300ms timeout', location.href, lastCollected);
       clearTimeout(tId);
     };
-  }, [location.pathname, func, setLastCollectedPath, config]);
+  }, [location.href, func, setLastCollected, config]);
 };
 
 var defaultTriggerCooldown = 60 * 1000;
@@ -901,11 +910,11 @@ function CollectorProvider(_ref) {
   var _useState2 = React.useState([]),
     pageTriggers = _useState2[0],
     setPageTriggersState = _useState2[1];
+  var _useIntently = useIntently(),
+    setIntently = _useIntently.setIntently;
   var _useState3 = React.useState([]),
     displayTriggers = _useState3[0],
     setDisplayedTriggers = _useState3[1];
-  var _useIntently = useIntently(),
-    setIntently = _useIntently.setIntently;
   var _useState4 = React.useState(new Map()),
     foundWatchers = _useState4[0],
     setFoundWatchers = _useState4[1];
@@ -968,14 +977,32 @@ function CollectorProvider(_ref) {
       return null;
     });
   }, [displayTriggers, pageTriggers, log, handlers, error, getHandlerForTrigger]);
+  var getIsBehaviourVisible = React__default.useCallback(function (type) {
+    if (displayTriggers.length === 0) return false;
+    if (displayTriggers.find(function (triggerId) {
+      var _pageTriggers$find;
+      return ((_pageTriggers$find = pageTriggers.find(function (trigger) {
+        return trigger.id === triggerId;
+      })) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
+    })) return true;
+    return false;
+  }, [displayTriggers, pageTriggers]);
   var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
     var invokableTrigger = pageTriggers.find(function (trigger) {
       return trigger.invocation === invocation;
     });
-    if (invokableTrigger) setDisplayedTriggers(function (ts) {
+    if (!invokableTrigger) {
+      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
+      return;
+    }
+    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
+      return;
+    }
+    setDisplayedTriggers(function (ts) {
       return [].concat(ts, [invokableTrigger.id]);
     });
-  }, [pageTriggers, setDisplayedTriggers]);
+  }, [pageTriggers, setDisplayedTriggers, getIsBehaviourVisible]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
