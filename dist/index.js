@@ -818,11 +818,11 @@ function CollectorProvider(_ref) {
   var _useState2 = React.useState([]),
     pageTriggers = _useState2[0],
     setPageTriggersState = _useState2[1];
+  var _useIntently = useIntently(),
+    setIntently = _useIntently.setIntently;
   var _useState3 = React.useState([]),
     displayTriggers = _useState3[0],
     setDisplayedTriggers = _useState3[1];
-  var _useIntently = useIntently(),
-    setIntently = _useIntently.setIntently;
   var _useState4 = React.useState(new Map()),
     foundWatchers = _useState4[0],
     setFoundWatchers = _useState4[1];

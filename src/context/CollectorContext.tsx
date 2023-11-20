@@ -80,8 +80,8 @@ export function CollectorProvider({
     getIdleStatusDelay()
   )
   const [pageTriggers, setPageTriggersState] = useState<Trigger[]>([])
-  const [displayTriggers, setDisplayedTriggers] = useState<Trigger['id'][]>([])
   const { setIntently } = useIntently()
+  const [displayTriggers, setDisplayedTriggers] = useState<Trigger['id'][]>([])
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )

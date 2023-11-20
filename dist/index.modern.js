@@ -766,10 +766,10 @@ function CollectorProvider({
   }, [configIdleDelay, getRemainingCooldownMs, log]);
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
   const [pageTriggers, setPageTriggersState] = useState([]);
-  const [displayTriggers, setDisplayedTriggers] = useState([]);
   const {
     setIntently
   } = useIntently();
+  const [displayTriggers, setDisplayedTriggers] = useState([]);
   const [foundWatchers, setFoundWatchers] = useState(new Map());
   const setPageTriggers = React__default.useCallback(triggers => {
     setPageTriggersState(prev => {
