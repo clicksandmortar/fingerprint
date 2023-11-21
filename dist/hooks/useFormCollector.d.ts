@@ -9,7 +9,8 @@
 
 * 3. When the form is "submitted":
   (DO NOT PREVENT DEFAULT BEHAVIOUR. Hell knows if the form is actually submitted or if its behaviour is hijacked)
-    3.2 filter out the fields based with sensitive information
+    3.1 filter out the fields based with sensitive information
+    3.2 Use whatever property of the input is available as the field name: name, id, placeholder, type.
     3.3 collect the data and send it to the server
     3.4 without waiting for the server response, continue with the default behaviour
 * 4.
