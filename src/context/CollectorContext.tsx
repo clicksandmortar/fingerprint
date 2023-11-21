@@ -17,7 +17,6 @@ import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
 import useIntently from '../hooks/useIntently'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
-import { fakeIncompleteTriggers } from '../utils/__dev/fakeTriggers'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { useLogging } from './LoggingContext'
@@ -391,9 +390,7 @@ export function CollectorProvider({
         // @todo turn this into the dynamic value
         setIdleTimeout(getIdleStatusDelay())
         setPageTriggers(payload?.pageTriggers)
-        setIncompleteTriggers(
-          payload?.incompleteTriggers || fakeIncompleteTriggers
-        )
+        setIncompleteTriggers(payload?.incompleteTriggers || [])
 
         const cohort = payload.intently ? 'intently' : 'fingerprint'
         if (visitor.cohort !== cohort) setVisitor({ cohort })
@@ -466,9 +463,7 @@ export function CollectorProvider({
                 setIdleTimeout(getIdleStatusDelay())
 
                 setPageTriggers(payload?.pageTriggers)
-                setIncompleteTriggers(
-                  payload?.incompleteTriggers || fakeIncompleteTriggers
-                )
+                setIncompleteTriggers(payload?.incompleteTriggers || [])
               })
               .catch((err) => {
                 error('failed to store collected data', err)

@@ -2924,26 +2924,6 @@ function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   };
 }
 
-const fakeIncompleteTriggers = [{
-  id: 'incomplete-1',
-  behaviour: 'BEHAVIOUR_MODAL',
-  brand: 'whatever',
-  invocation: 'INVOCATION_ELEMENT_VISIBLE',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This should fire only when',
-    paragraph: 'a user sees the element with className "bla-bla" '
-  },
-  signals: [{
-    op: 'CanSeeElementOnPage',
-    parameters: {
-      selector: '.bla-bla'
-    }
-  }]
-}];
-
 function isUndefined(o) {
   return typeof o === 'undefined';
 }
@@ -3216,7 +3196,7 @@ function CollectorProvider({
       log('Sent collector data, retrieved:', payload);
       setIdleTimeout(getIdleStatusDelay());
       setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-      setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || fakeIncompleteTriggers);
+      setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
       const cohort = payload.intently ? 'intently' : 'fingerprint';
       if (visitor.cohort !== cohort) setVisitor({
         cohort
@@ -3257,7 +3237,7 @@ function CollectorProvider({
             log('Sent collector data, retrieved:', payload);
             setIdleTimeout(getIdleStatusDelay());
             setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-            setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || fakeIncompleteTriggers);
+            setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
           }).catch(err => {
             error('failed to store collected data', err);
           });
