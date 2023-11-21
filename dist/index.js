@@ -2934,12 +2934,15 @@ var useIncompleteTriggers = function useIncompleteTriggers() {
   var _useIsElementVisible = useIsElementVisible(),
     getIsVisible = _useIsElementVisible.getIsVisible;
   var visibilityQuerySelectors = React__default.useMemo(function () {
+    if (!(incompleteTriggers !== null && incompleteTriggers !== void 0 && incompleteTriggers.length)) return [];
     return incompleteTriggers.map(function (trigger) {
-      return trigger.signals.map(function (signal) {
-        if (signal.op !== 'CanSeeElementOnPage') return null;
+      var _trigger$signals;
+      return trigger === null || trigger === void 0 ? void 0 : (_trigger$signals = trigger.signals) === null || _trigger$signals === void 0 ? void 0 : _trigger$signals.map(function (signal) {
+        var _signal$parameters;
+        if ((signal === null || signal === void 0 ? void 0 : signal.op) !== 'CanSeeElementOnPage') return null;
         return {
           trigger: trigger,
-          selector: signal.parameters.selector
+          selector: signal === null || signal === void 0 ? void 0 : (_signal$parameters = signal.parameters) === null || _signal$parameters === void 0 ? void 0 : _signal$parameters.selector
         };
       });
     }).flat().filter(Boolean);
@@ -4022,7 +4025,7 @@ var useSeenMutation = function useSeenMutation() {
           log('Seen mutation: replacing triggers with:', r.pageTriggers);
           setPageTriggers(r.pageTriggers);
           log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
-          setIncompleteTriggers(r.incompleteTriggers);
+          setIncompleteTriggers(r.incompleteTriggers || []);
           return r;
         });
       } catch (e) {

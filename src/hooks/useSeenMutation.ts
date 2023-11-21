@@ -61,7 +61,7 @@ export const useSeenMutation = () => {
           'Seen mutation: replacing incomplete Triggers with:',
           r.incompleteTriggers
         )
-        setIncompleteTriggers(r.incompleteTriggers)
+        setIncompleteTriggers(r.incompleteTriggers || [])
         return r
       }
     }

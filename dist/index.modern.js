@@ -2873,13 +2873,18 @@ const useIncompleteTriggers = () => {
     getIsVisible
   } = useIsElementVisible();
   const visibilityQuerySelectors = React__default.useMemo(() => {
-    return incompleteTriggers.map(trigger => trigger.signals.map(signal => {
-      if (signal.op !== 'CanSeeElementOnPage') return null;
-      return {
-        trigger,
-        selector: signal.parameters.selector
-      };
-    })).flat().filter(Boolean);
+    if (!(incompleteTriggers !== null && incompleteTriggers !== void 0 && incompleteTriggers.length)) return [];
+    return incompleteTriggers.map(trigger => {
+      var _trigger$signals;
+      return trigger === null || trigger === void 0 ? void 0 : (_trigger$signals = trigger.signals) === null || _trigger$signals === void 0 ? void 0 : _trigger$signals.map(signal => {
+        var _signal$parameters;
+        if ((signal === null || signal === void 0 ? void 0 : signal.op) !== 'CanSeeElementOnPage') return null;
+        return {
+          trigger,
+          selector: signal === null || signal === void 0 ? void 0 : (_signal$parameters = signal.parameters) === null || _signal$parameters === void 0 ? void 0 : _signal$parameters.selector
+        };
+      });
+    }).flat().filter(Boolean);
   }, [incompleteTriggers]);
   useEffect(() => {
     if (!visibilityQuerySelectors.length) return;
@@ -3902,7 +3907,7 @@ const useSeenMutation = () => {
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
       setPageTriggers(r.pageTriggers);
       log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
-      setIncompleteTriggers(r.incompleteTriggers);
+      setIncompleteTriggers(r.incompleteTriggers || []);
       return r;
     }
   });

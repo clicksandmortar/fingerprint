@@ -10,6 +10,12 @@ export declare type CollectorUpdate = {
     elements?: PageElement[] | undefined;
     account?: Account | undefined;
     form?: Form | undefined;
+    button?: Button | undefined;
+};
+export declare type Button = {
+    id?: string;
+    selector?: string;
+    path?: string;
 };
 export declare type Form = {
     data: {
