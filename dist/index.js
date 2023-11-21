@@ -448,19 +448,6 @@ function useCollinsBookingComplete() {
   };
 }
 
-function areNodeListsEqual(nodeList1, nodeList2) {
-  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
-    return false;
-  }
-  var largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
-  for (var i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 function isUndefined(o) {
   return typeof o === 'undefined';
 }
@@ -593,14 +580,13 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
-var getPotentialButton = function getPotentialButton(el) {
+var getRecursivelyPotentialButton = function getRecursivelyPotentialButton(el) {
   var _el$nodeName;
   if (!el) return null;
   if (((_el$nodeName = el.nodeName) === null || _el$nodeName === void 0 ? void 0 : _el$nodeName.toLowerCase()) === 'button') return el;
-  if (el.parentElement) return getPotentialButton(el.parentElement);
+  if (el.parentElement) return getRecursivelyPotentialButton(el.parentElement);
   return null;
 };
-var scanIntervalMs = 1000;
 function useButtonCollector() {
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
@@ -608,30 +594,15 @@ function useButtonCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
-  var _useState = React.useState(),
-    nodeList = _useState[0],
-    setNodeList = _useState[1];
   React.useEffect(function () {
     if (isUndefined('document')) return;
-    var intId = setInterval(function () {
-      var buttons = document.querySelectorAll('button');
-      if (areNodeListsEqual(buttons, nodeList)) return;
-      setNodeList(buttons);
-    }, scanIntervalMs);
-    return function () {
-      return clearInterval(intId);
-    };
-  }, [setNodeList, nodeList]);
-  React.useEffect(function () {
-    if (isUndefined('document')) return;
-    if (!nodeList) return;
     if (!visitor.id) return;
     var buttonClickListener = function buttonClickListener(e) {
       if (!e.target) return;
       log('useButtonCollector: clicked element', {
         target: e.target
       });
-      var potentialButton = getPotentialButton(e.target);
+      var potentialButton = getRecursivelyPotentialButton(e.target);
       if (!potentialButton) return;
       var button = potentialButton;
       log('useButtonCollector: button clicked', {
@@ -648,7 +619,7 @@ function useButtonCollector() {
     return function () {
       document.removeEventListener('click', buttonClickListener);
     };
-  }, [visitor, nodeList]);
+  }, [visitor]);
 }
 
 var useExitIntentDelay = function useExitIntentDelay(delay) {
@@ -672,6 +643,19 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
+function areNodeListsEqual(nodeList1, nodeList2) {
+  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
+    return false;
+  }
+  var largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
+  for (var i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
+    if (nodeList1[i] !== nodeList2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
   if (a === b) return true;
   if (!a || !b) return false;
@@ -679,7 +663,7 @@ var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
 };
 var bannedTypes = ['password', 'submit'];
 var bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-var scanIntervalMs$1 = 1000;
+var scanIntervalMs = 1000;
 function useFormCollector() {
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
@@ -696,7 +680,7 @@ function useFormCollector() {
       var forms = document.querySelectorAll('form');
       if (areNodeListsEqual(forms, nodeList)) return;
       setNodeList(forms);
-    }, scanIntervalMs$1);
+    }, scanIntervalMs);
     return function () {
       return clearInterval(intId);
     };

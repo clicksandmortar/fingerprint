@@ -419,19 +419,6 @@ function useCollinsBookingComplete() {
   };
 }
 
-function areNodeListsEqual(nodeList1, nodeList2) {
-  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
-    return false;
-  }
-  const largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
-  for (let i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 function isUndefined(o) {
   return typeof o === 'undefined';
 }
@@ -546,14 +533,13 @@ const useCollectorMutation = () => {
   });
 };
 
-const getPotentialButton = el => {
+const getRecursivelyPotentialButton = el => {
   var _el$nodeName;
   if (!el) return null;
   if (((_el$nodeName = el.nodeName) === null || _el$nodeName === void 0 ? void 0 : _el$nodeName.toLowerCase()) === 'button') return el;
-  if (el.parentElement) return getPotentialButton(el.parentElement);
+  if (el.parentElement) return getRecursivelyPotentialButton(el.parentElement);
   return null;
 };
-const scanIntervalMs = 1000;
 function useButtonCollector() {
   const {
     mutateAsync: collect
@@ -564,26 +550,15 @@ function useButtonCollector() {
   const {
     log
   } = useLogging();
-  const [nodeList, setNodeList] = useState();
   useEffect(() => {
     if (isUndefined('document')) return;
-    const intId = setInterval(() => {
-      const buttons = document.querySelectorAll('button');
-      if (areNodeListsEqual(buttons, nodeList)) return;
-      setNodeList(buttons);
-    }, scanIntervalMs);
-    return () => clearInterval(intId);
-  }, [setNodeList, nodeList]);
-  useEffect(() => {
-    if (isUndefined('document')) return;
-    if (!nodeList) return;
     if (!visitor.id) return;
     const buttonClickListener = e => {
       if (!e.target) return;
       log('useButtonCollector: clicked element', {
         target: e.target
       });
-      const potentialButton = getPotentialButton(e.target);
+      const potentialButton = getRecursivelyPotentialButton(e.target);
       if (!potentialButton) return;
       const button = potentialButton;
       log('useButtonCollector: button clicked', {
@@ -600,7 +575,7 @@ function useButtonCollector() {
     return () => {
       document.removeEventListener('click', buttonClickListener);
     };
-  }, [visitor, nodeList]);
+  }, [visitor]);
 }
 
 const useExitIntentDelay = (delay = 0) => {
@@ -620,6 +595,19 @@ const useExitIntentDelay = (delay = 0) => {
   };
 };
 
+function areNodeListsEqual(nodeList1, nodeList2) {
+  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
+    return false;
+  }
+  const largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
+  for (let i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
+    if (nodeList1[i] !== nodeList2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 const stringIsSubstringOf = (a, b) => {
   if (a === b) return true;
   if (!a || !b) return false;
@@ -627,7 +615,7 @@ const stringIsSubstringOf = (a, b) => {
 };
 const bannedTypes = ['password', 'submit'];
 const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-const scanIntervalMs$1 = 1000;
+const scanIntervalMs = 1000;
 function useFormCollector() {
   const {
     mutateAsync: collect
@@ -645,7 +633,7 @@ function useFormCollector() {
       const forms = document.querySelectorAll('form');
       if (areNodeListsEqual(forms, nodeList)) return;
       setNodeList(forms);
-    }, scanIntervalMs$1);
+    }, scanIntervalMs);
     return () => clearInterval(intId);
   }, [setNodeList, nodeList]);
   useEffect(() => {

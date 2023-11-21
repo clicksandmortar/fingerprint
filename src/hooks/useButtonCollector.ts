@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useLogging } from '../context/LoggingContext'
 import { useVisitor } from '../context/VisitorContext'
-import { areNodeListsEqual } from '../utils/html'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
 
@@ -15,15 +14,13 @@ export const getButtonSelector = (el: HTMLButtonElement) => {
   return `button.${selectifiedClassName}`
 }
 
-const getPotentialButton = (el: Element): Element | null => {
+const getRecursivelyPotentialButton = (el: Element): Element | null => {
   if (!el) return null
   if (el.nodeName?.toLowerCase() === 'button') return el
-  if (el.parentElement) return getPotentialButton(el.parentElement)
+  if (el.parentElement) return getRecursivelyPotentialButton(el.parentElement)
 
   return null
 }
-
-const scanIntervalMs = 1000
 
 /**
  * Hook into buttons on the page and collect their data
@@ -35,32 +32,15 @@ export default function useButtonCollector() {
   const { visitor } = useVisitor()
   const { log } = useLogging()
 
-  // any, just because TS complains about NodeList not being iterable
-  const [nodeList, setNodeList] = useState<any>()
-
   useEffect(() => {
     if (isUndefined('document')) return
-
-    const intId = setInterval(() => {
-      const buttons = document.querySelectorAll('button')
-      if (areNodeListsEqual(buttons, nodeList)) return
-
-      setNodeList(buttons)
-    }, scanIntervalMs)
-
-    return () => clearInterval(intId)
-  }, [setNodeList, nodeList])
-
-  useEffect(() => {
-    if (isUndefined('document')) return
-    if (!nodeList) return
     if (!visitor.id) return
 
     const buttonClickListener = (e: any) => {
       if (!e.target) return
       log('useButtonCollector: clicked element', { target: e.target })
 
-      const potentialButton = getPotentialButton(e.target)
+      const potentialButton = getRecursivelyPotentialButton(e.target)
 
       // makes sure we fire this when clicking on a nested item inside a button
       if (!potentialButton) return
@@ -88,5 +68,5 @@ export default function useButtonCollector() {
     return () => {
       document.removeEventListener('click', buttonClickListener)
     }
-  }, [visitor, nodeList])
+  }, [visitor])
 }
