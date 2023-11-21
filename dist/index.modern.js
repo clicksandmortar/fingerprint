@@ -627,7 +627,7 @@ const useRunOnPathChange = (func, config) => {
   const {
     log
   } = useLogging();
-  useEffect(() => {
+  const run = React__default.useCallback(() => {
     if (config !== null && config !== void 0 && config.skip) {
       log('useRunOnPathChange: skip configured, not capturing');
       return;
@@ -648,7 +648,11 @@ const useRunOnPathChange = (func, config) => {
     return () => {
       log('useRunOnPathChange: clearing 300ms timeout', location.pathname, lastCollectedPath);
     };
-  }, [location.pathname, location.hash, location.search, func, setLastCollectedPath, setLastCollectedHash, setLastCollectedQuery, config]);
+  }, [func, config, lastCollectedPath, lastCollectedHash, lastCollectedQuery]);
+  useEffect(() => {
+    const iId = setInterval(run, 500);
+    return () => clearInterval(iId);
+  }, [run]);
 };
 
 const defaultTriggerCooldown = 60 * 1000;

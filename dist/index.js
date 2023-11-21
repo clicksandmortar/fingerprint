@@ -680,7 +680,7 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
     setLastCollectedQuery = _useState3[1];
   var _useLogging = useLogging(),
     log = _useLogging.log;
-  React.useEffect(function () {
+  var run = React__default.useCallback(function () {
     if (config !== null && config !== void 0 && config.skip) {
       log('useRunOnPathChange: skip configured, not capturing');
       return;
@@ -701,7 +701,13 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
     return function () {
       log('useRunOnPathChange: clearing 300ms timeout', location.pathname, lastCollectedPath);
     };
-  }, [location.pathname, location.hash, location.search, func, setLastCollectedPath, setLastCollectedHash, setLastCollectedQuery, config]);
+  }, [func, config, lastCollectedPath, lastCollectedHash, lastCollectedQuery]);
+  React.useEffect(function () {
+    var iId = setInterval(run, 500);
+    return function () {
+      return clearInterval(iId);
+    };
+  }, [run]);
 };
 
 var defaultTriggerCooldown = 60 * 1000;

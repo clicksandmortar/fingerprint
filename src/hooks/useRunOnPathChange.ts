@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLogging } from '../context/LoggingContext'
 
 type FuncProp = () => void
@@ -15,7 +15,7 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
 
   const { log } = useLogging()
 
-  useEffect(() => {
+  const run = React.useCallback(() => {
     if (config?.skip) {
       log('useRunOnPathChange: skip configured, not capturing')
       return
@@ -37,15 +37,12 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
       return
     }
 
-    // added timeout to prevent occasional double firing on page load
-    // const tId = setTimeout(() => {
     log('useRunOnPathChange: running for path: ', location.pathname)
 
     setLastCollectedPath(location.pathname)
     setLastCollectedHash(location.hash)
     setLastCollectedQuery(location.search)
     func()
-    // }, 50)
 
     return () => {
       log(
@@ -55,16 +52,29 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
       )
       // clearTimeout(tId)
     }
-  }, [
-    location.pathname,
-    location.hash,
-    location.search,
-    func,
-    setLastCollectedPath,
-    setLastCollectedHash,
-    setLastCollectedQuery,
-    config
-  ])
+  }, [func, config, lastCollectedPath, lastCollectedHash, lastCollectedQuery])
+
+  useEffect(() => {
+    const iId = setInterval(run, 500)
+
+    return () => clearInterval(iId)
+  }, [run])
+
+  // useEffect(() => {
+  //   // added timeout to prevent occasional double firing on page load
+  //   // const tId = setTimeout(() => {
+  //   run()
+  //   // }, 50)
+  // }, [
+  //   location.pathname,
+  //   location.hash,
+  //   location.search,
+  //   func,
+  //   setLastCollectedPath,
+  //   setLastCollectedHash,
+  //   setLastCollectedQuery,
+  //   config
+  // ])
 }
 
 export default useRunOnPathChange
