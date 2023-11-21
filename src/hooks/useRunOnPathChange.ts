@@ -38,14 +38,14 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
     }
 
     // added timeout to prevent occasional double firing on page load
-    const tId = setTimeout(() => {
-      log('useRunOnPathChange: running for path: ', location.pathname)
+    // const tId = setTimeout(() => {
+    log('useRunOnPathChange: running for path: ', location.pathname)
 
-      setLastCollectedPath(location.pathname)
-      setLastCollectedHash(location.hash)
-      setLastCollectedQuery(location.search)
-      func()
-    }, 300)
+    setLastCollectedPath(location.pathname)
+    setLastCollectedHash(location.hash)
+    setLastCollectedQuery(location.search)
+    func()
+    // }, 50)
 
     return () => {
       log(
@@ -53,7 +53,7 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
         location.pathname,
         lastCollectedPath
       )
-      clearTimeout(tId)
+      // clearTimeout(tId)
     }
   }, [
     location.pathname,
@@ -61,6 +61,8 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
     location.search,
     func,
     setLastCollectedPath,
+    setLastCollectedHash,
+    setLastCollectedQuery,
     config
   ])
 }

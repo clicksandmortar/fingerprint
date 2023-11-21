@@ -693,18 +693,15 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
       log('useRunOnPathChange: location pathname and last collected are the same ', location.pathname, lastCollectedPath);
       return;
     }
-    var tId = setTimeout(function () {
-      log('useRunOnPathChange: running for path: ', location.pathname);
-      setLastCollectedPath(location.pathname);
-      setLastCollectedHash(location.hash);
-      setLastCollectedQuery(location.search);
-      func();
-    }, 300);
+    log('useRunOnPathChange: running for path: ', location.pathname);
+    setLastCollectedPath(location.pathname);
+    setLastCollectedHash(location.hash);
+    setLastCollectedQuery(location.search);
+    func();
     return function () {
       log('useRunOnPathChange: clearing 300ms timeout', location.pathname, lastCollectedPath);
-      clearTimeout(tId);
     };
-  }, [location.pathname, location.hash, location.search, func, setLastCollectedPath, config]);
+  }, [location.pathname, location.hash, location.search, func, setLastCollectedPath, setLastCollectedHash, setLastCollectedQuery, config]);
 };
 
 var defaultTriggerCooldown = 60 * 1000;
