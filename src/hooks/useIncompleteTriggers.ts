@@ -22,14 +22,16 @@ const useIncompleteTriggers = () => {
   const { getIsVisible } = useIsElementVisible()
 
   const visibilityQuerySelectors = React.useMemo(() => {
+    if (!incompleteTriggers?.length) return []
+
     return incompleteTriggers
       .map((trigger) =>
-        trigger.signals.map((signal) => {
-          if (signal.op !== 'CanSeeElementOnPage') return null
+        trigger?.signals?.map((signal) => {
+          if (signal?.op !== 'CanSeeElementOnPage') return null
 
           return {
             trigger,
-            selector: signal.parameters.selector
+            selector: signal?.parameters?.selector
           }
         })
       )
