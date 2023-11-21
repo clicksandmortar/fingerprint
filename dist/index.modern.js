@@ -460,11 +460,8 @@ const request = {
 };
 
 const useHostname = () => {
-  var _window;
-  if (((_window = window) === null || _window === void 0 ? void 0 : _window.location) !== undefined) {
-    return window.location.hostname;
-  }
-  return '';
+  var _window, _window$location;
+  return ((_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : _window$location.hostname) || '';
 };
 
 const useCollectorMutation = () => {
@@ -515,6 +512,141 @@ const useExitIntentDelay = (delay = 0) => {
     hasDelayPassed
   };
 };
+
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+    const [key, value] = cur.split('=');
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  const params = getReducedSearchParams();
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    params
+  };
+}
+function getReferrer() {
+  const params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
+const stringIsSubstringOf = (a, b) => {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return a.toLowerCase().includes(b.toLowerCase());
+};
+function isEqual(nodeList1, nodeList2) {
+  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
+    return false;
+  }
+  const largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
+  for (let i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
+    if (nodeList1[i] !== nodeList2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+const bannedTypes = ['password', 'submit'];
+const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
+const scanIntervalMs = 1000;
+function useFormCollector() {
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  const [nodeList, setNodeList] = useState();
+  useEffect(() => {
+    if (isUndefined('document')) return;
+    const intId = setInterval(() => {
+      const forms = document.querySelectorAll('form');
+      if (isEqual(forms, nodeList)) return;
+      setNodeList(forms);
+    }, scanIntervalMs);
+    return () => clearInterval(intId);
+  }, [setNodeList, nodeList]);
+  useEffect(() => {
+    if (!nodeList) return;
+    if (!visitor.id) return;
+    if (isUndefined('document')) return;
+    const forms = document.querySelectorAll('form');
+    const formSubmitListener = e => {
+      const a = e === null || e === void 0 ? void 0 : e.target;
+      const elements = Array.from(a.elements).filter(b => {
+        if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;
+        if (bannedFieldPartialNames.find(partialName => {
+          if (stringIsSubstringOf(b.name, partialName)) return true;
+          if (stringIsSubstringOf(b.id, partialName)) return true;
+          if (stringIsSubstringOf(b.placeholder, partialName)) return true;
+          return false;
+        })) return false;
+        return true;
+      });
+      const data = elements.reduce((result, item) => {
+        let fieldName = item.name;
+        if (!fieldName) {
+          if (item.id) {
+            log('useFormCollector: form field has no name, falling back to id', {
+              item
+            });
+            fieldName = item.id;
+          } else if (item.placeholder) {
+            log('useFormCollector: form field has no name or id, falling back to placeholder', {
+              item
+            });
+            fieldName = item.placeholder;
+          } else {
+            log('useFormCollector: form field has no name, id or placeholder, fallback to type', {
+              item
+            });
+            fieldName = item.type;
+          }
+        }
+        result[fieldName] = item.value;
+        return result;
+      }, {});
+      log('useFormCollector: form submitted', {
+        data
+      });
+      collect({
+        visitor,
+        form: {
+          data
+        }
+      });
+    };
+    forms.forEach(f => f.removeEventListener('submit', formSubmitListener));
+    forms.forEach(f => f.addEventListener('submit', formSubmitListener));
+    return () => {
+      forms.forEach(f => f.removeEventListener('submit', formSubmitListener));
+    };
+  }, [visitor, nodeList]);
+}
 
 /**
  * Removes all key-value entries from the list cache.
@@ -2713,11 +2845,11 @@ var _baseIsEqual = baseIsEqual;
  * object === other;
  * // => false
  */
-function isEqual(value, other) {
+function isEqual$1(value, other) {
   return _baseIsEqual(value, other);
 }
 
-var isEqual_1 = isEqual;
+var isEqual_1 = isEqual$1;
 
 const useIsElementVisible = () => {
   const getIsVisible = React__default.useCallback(selector => {
@@ -2924,43 +3056,6 @@ function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   };
 }
 
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-    const [key, value] = cur.split('=');
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  const params = getReducedSearchParams();
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    params
-  };
-}
-function getReferrer() {
-  const params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
-
 const getVisitorId = () => {
   if (typeof window === 'undefined') return null;
   const urlParams = new URLSearchParams(window.location.search);
@@ -3147,6 +3242,7 @@ function CollectorProvider({
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
+  useFormCollector();
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return;
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;

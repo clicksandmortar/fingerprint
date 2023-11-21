@@ -13,6 +13,7 @@ import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplet
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
+import useFormCollector from '../hooks/useFormCollector'
 import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
 import useIntently from '../hooks/useIntently'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
@@ -319,6 +320,8 @@ export function CollectorProvider({
       handler: fireExitTrigger
     })
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
+
+  useFormCollector()
 
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return

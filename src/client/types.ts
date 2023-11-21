@@ -9,6 +9,13 @@ export type CollectorUpdate = {
   referrer?: Referrer | undefined
   elements?: PageElement[] | undefined
   account?: Account | undefined
+  form?: Form | undefined
+}
+
+export type Form = {
+  data: {
+    [key: string]: any
+  }
 }
 
 export type Account = {
