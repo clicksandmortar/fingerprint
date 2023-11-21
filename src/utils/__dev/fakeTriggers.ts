@@ -1,4 +1,4 @@
-import { Trigger } from '../../client/types'
+import { IncompleteTrigger, Trigger } from '../../client/types'
 
 export const fakeTriggers: Trigger[] = [
   {
@@ -36,5 +36,29 @@ export const fakeTriggers: Trigger[] = [
       marketingText:
         'You only have {{ countdownEndTime }} before the horse comes'
     }
+  }
+]
+
+export const fakeIncompleteTriggers: IncompleteTrigger[] = [
+  {
+    id: 'incomplete-1',
+    behaviour: 'BEHAVIOUR_MODAL',
+    brand: 'whatever',
+    invocation: 'INVOCATION_ELEMENT_VISIBLE',
+    data: {
+      backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+      buttonText: 'Click me',
+      buttonURL: 'http://www.google.com',
+      heading: 'This should fire only when',
+      paragraph: 'a user sees the element with className "bla-bla" '
+    },
+    signals: [
+      {
+        op: 'CanSeeElementOnPage',
+        parameters: {
+          selector: '.bla-bla'
+        }
+      }
+    ]
   }
 ]

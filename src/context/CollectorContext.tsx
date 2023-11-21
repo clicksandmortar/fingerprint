@@ -3,12 +3,18 @@ import React, { createContext, useCallback, useEffect, useState } from 'react'
 // import { isMobile } from 'react-device-detect' <= reminder where isMobile came from
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { CollectorVisitorResponse, Trigger } from '../client/types'
+
+import {
+  CollectorVisitorResponse,
+  IncompleteTrigger,
+  Trigger
+} from '../client/types'
 import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
 import useFormCollector from '../hooks/useFormCollector'
+import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
 import useIntently from '../hooks/useIntently'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
@@ -81,12 +87,25 @@ export function CollectorProvider({
     getIdleStatusDelay()
   )
   const [pageTriggers, setPageTriggersState] = useState<Trigger[]>([])
+
   const { setIntently } = useIntently()
   const [displayTriggers, setDisplayedTriggers] = useState<Trigger['id'][]>([])
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
 
+  // Passing the funcs down to other contexts from here. So please keep it until Collector
+  // is refactored
+  const { setIncompleteTriggers, visibleTriggers: visibleIncompleteTriggers } =
+    useIncompleteTriggers()
+
+  useEffect(() => {
+    if (!visibleIncompleteTriggers?.length) return
+
+    // TODO: eventually we may want support for multiple signals so this
+    // will need to be refactored / reworked
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
+  }, [visibleIncompleteTriggers, setPageTriggersState])
   /**
    * add triggers to existing ones, keep unique to prevent multi-firing
    */
@@ -96,6 +115,8 @@ export function CollectorProvider({
         const nonDismissed = prev.filter((tr) =>
           displayTriggers.includes(tr.id)
         )
+        // no pageTriggers = no triggers, rather than missing key.
+        // serverside omition. Means we set pagetriggers to nothing.
         return uniqueBy<Trigger>([...(triggers || []), ...nonDismissed], 'id')
       })
     },
@@ -120,13 +141,20 @@ export function CollectorProvider({
       const refreshedTriggers = displayTriggers.filter(
         (triggerId) => triggerId !== id
       )
-
       setDisplayedTriggers(refreshedTriggers)
+      setIncompleteTriggers((prev) =>
+        prev.filter((trigger) => trigger.id !== id)
+      )
       setPageTriggersState((prev) =>
         prev.filter((trigger) => trigger.id !== id)
       )
     },
     [displayTriggers, log, setPageTriggers]
+  )
+
+  const combinedTriggers = React.useMemo(
+    () => [...pageTriggers, ...visibleIncompleteTriggers],
+    [pageTriggers, visibleIncompleteTriggers]
   )
 
   const TriggerComponent = React.useCallback(():
@@ -135,7 +163,7 @@ export function CollectorProvider({
     if (!displayTriggers) return null
 
     // TODO: UNDO
-    const activeTriggers = pageTriggers.filter((trigger) =>
+    const activeTriggers = combinedTriggers.filter((trigger) =>
       displayTriggers.includes(trigger.id)
     )
 
@@ -177,12 +205,18 @@ export function CollectorProvider({
     })
   }, [
     displayTriggers,
-    pageTriggers,
     log,
     handlers,
     error,
-    getHandlerForTrigger
+    getHandlerForTrigger,
+    combinedTriggers
   ])
+
+  useEffect(() => {
+    if (!visibleIncompleteTriggers?.length) return
+
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
+  }, [visibleIncompleteTriggers])
 
   const getIsBehaviourVisible = React.useCallback(
     (type: Trigger['behaviour']) => {
@@ -203,7 +237,7 @@ export function CollectorProvider({
 
   const setDisplayedTriggerByInvocation = React.useCallback(
     (invocation: Trigger['invocation']) => {
-      const invokableTrigger = pageTriggers.find(
+      const invokableTrigger = combinedTriggers.find(
         (trigger) => trigger.invocation === invocation
       )
 
@@ -221,7 +255,7 @@ export function CollectorProvider({
 
       setDisplayedTriggers((ts) => [...ts, invokableTrigger.id])
     },
-    [pageTriggers, setDisplayedTriggers, getIsBehaviourVisible]
+    [combinedTriggers, setDisplayedTriggers, getIsBehaviourVisible]
   )
 
   const fireIdleTrigger = useCallback(() => {
@@ -358,11 +392,10 @@ export function CollectorProvider({
         // Set IdleTimer
         // @todo turn this into the dynamic value
         setIdleTimeout(getIdleStatusDelay())
-
         setPageTriggers(payload?.pageTriggers)
+        setIncompleteTriggers(payload?.incompleteTriggers || [])
 
         const cohort = payload.intently ? 'intently' : 'fingerprint'
-
         if (visitor.cohort !== cohort) setVisitor({ cohort })
 
         if (!payload.intently) {
@@ -387,6 +420,7 @@ export function CollectorProvider({
     visitor,
     handlers,
     getIdleStatusDelay,
+    setIncompleteTriggers,
     setIdleTimeout,
     trackEvent,
     setPageTriggers
@@ -432,6 +466,7 @@ export function CollectorProvider({
                 setIdleTimeout(getIdleStatusDelay())
 
                 setPageTriggers(payload?.pageTriggers)
+                setIncompleteTriggers(payload?.incompleteTriggers || [])
               })
               .catch((err) => {
                 error('failed to store collected data', err)
@@ -481,15 +516,23 @@ export function CollectorProvider({
       setPageTriggers,
       removeActiveTrigger,
       setActiveTrigger,
+      setIncompleteTriggers,
       trackEvent
     }),
-    [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent]
+    [
+      setPageTriggers,
+      removeActiveTrigger,
+      setActiveTrigger,
+      trackEvent,
+      setIncompleteTriggers
+    ]
   )
 
   useEffect(() => {
     fireOnLoadTriggers()
   }, [fireOnLoadTriggers])
 
+  // @TODO: this will be scrapped / reworked soon
   useRunOnPathChange(checkCollinsBookingComplete, {
     skip: !booted,
     delay: initialDelay
@@ -524,6 +567,7 @@ export function CollectorProvider({
 
 export type CollectorContextInterface = {
   setPageTriggers: (triggers: Trigger[]) => void
+  setIncompleteTriggers: (triggers: IncompleteTrigger[]) => void
   removeActiveTrigger: (id: Trigger['id']) => void
   setActiveTrigger: (trigger: Trigger) => void
   // @NOTE: please keep it here. THis makes sure that context mixup doesn't
@@ -537,6 +581,9 @@ export const CollectorContext = createContext<CollectorContextInterface>({
   },
   removeActiveTrigger: () => {
     console.error('removeActiveTrigger not implemented correctly')
+  },
+  setIncompleteTriggers: () => {
+    console.error('setIncompleteTriggers not implemented correctly')
   },
   setActiveTrigger: () => {
     console.error('setActiveTrigger not implemented correctly')
