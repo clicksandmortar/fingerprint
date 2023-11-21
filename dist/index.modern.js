@@ -573,7 +573,7 @@ function useButtonCollector() {
     const buttonClickListener = e => {
       if (!e.target) return;
       if (!('type' in e.target)) return;
-      if (e.target.type !== 'button' && e.target.type !== 'submit') return;
+      if (e.target.type !== 'button') return;
       const button = e.target;
       log('useButtonCollector: button clicked', {
         button

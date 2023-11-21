@@ -70,8 +70,8 @@ export default function useButtonCollector() {
     const buttonClickListener = (e: any) => {
       if (!e.target) return
       if (!('type' in e.target)) return
-      // track both button and submit types
-      if (e.target.type !== 'button' && e.target.type !== 'submit') return
+      // no, we don't want submit/reset types
+      if (e.target.type !== 'button') return
 
       const button = e.target as HTMLButtonElement
 
@@ -89,7 +89,8 @@ export default function useButtonCollector() {
       })
     }
 
-    // setting one listener on the entire doc rather than for each button -
+    // setting one listener on the entire doc rather than for each button
+    // TODO: See if the same can be applied to simplify the form collector logic
     document.addEventListener('click', buttonClickListener)
 
     return () => {
