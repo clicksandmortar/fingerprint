@@ -69,6 +69,7 @@ export default function useButtonCollector() {
 
     const buttonClickListener = (e: any) => {
       if (!e.target) return
+      log('useButtonCollector: clicked element', { target: e.target })
       if (!('type' in e.target)) return
       // no, we don't want submit/reset types
       if (e.target.type !== 'button') return

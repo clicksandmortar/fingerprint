@@ -620,6 +620,9 @@ function useButtonCollector() {
     if (!visitor.id) return;
     var buttonClickListener = function buttonClickListener(e) {
       if (!e.target) return;
+      log('useButtonCollector: clicked element', {
+        target: e.target
+      });
       if (!('type' in e.target)) return;
       if (e.target.type !== 'button') return;
       var button = e.target;
