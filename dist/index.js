@@ -668,42 +668,24 @@ function useIntently() {
   };
 }
 
+var reattemptIntervalMs = 2000;
 var useRunOnPathChange = function useRunOnPathChange(func, config) {
-  var _useState = React.useState(),
-    lastCollectedPath = _useState[0],
-    setLastCollectedPath = _useState[1];
-  var _useState2 = React.useState(''),
-    lastCollectedHash = _useState2[0],
-    setLastCollectedHash = _useState2[1];
-  var _useState3 = React.useState(''),
-    lastCollectedQuery = _useState3[0],
-    setLastCollectedQuery = _useState3[1];
+  var _useState = React.useState(''),
+    lastCollectedHref = _useState[0],
+    setLastCollectedHref = _useState[1];
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var run = React__default.useCallback(function () {
-    if (config !== null && config !== void 0 && config.skip) {
-      log('useRunOnPathChange: skip configured, not capturing');
-      return;
-    }
-    if (!location.pathname) {
-      log('useRunOnPathChange: no pathname on location object: ', location);
-      return;
-    }
-    if (location.pathname === lastCollectedPath && location.hash === lastCollectedHash && location.search === lastCollectedQuery) {
-      log('useRunOnPathChange: location pathname and last collected are the same ', location.pathname, lastCollectedPath);
-      return;
-    }
-    log('useRunOnPathChange: running for path: ', location.pathname);
-    setLastCollectedPath(location.pathname);
-    setLastCollectedHash(location.hash);
-    setLastCollectedQuery(location.search);
+    if (config !== null && config !== void 0 && config.skip) return;
+    if (!location.href) return;
+    if (location.href === lastCollectedHref) return;
+    log('useRunOnPathChange: running for path: ', location.href);
+    setLastCollectedHref(location.href);
     func();
-    return function () {
-      log('useRunOnPathChange: clearing 300ms timeout', location.pathname, lastCollectedPath);
-    };
-  }, [func, config, lastCollectedPath, lastCollectedHash, lastCollectedQuery]);
+  }, [func, config, lastCollectedHref]);
   React.useEffect(function () {
-    var iId = setInterval(run, 500);
+    log("useRunOnPathChange: running for every path change with " + reattemptIntervalMs + " MS");
+    var iId = setInterval(run, reattemptIntervalMs);
     return function () {
       return clearInterval(iId);
     };

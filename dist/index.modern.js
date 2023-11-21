@@ -620,37 +620,23 @@ function useIntently() {
   };
 }
 
+const reattemptIntervalMs = 2000;
 const useRunOnPathChange = (func, config) => {
-  const [lastCollectedPath, setLastCollectedPath] = useState();
-  const [lastCollectedHash, setLastCollectedHash] = useState('');
-  const [lastCollectedQuery, setLastCollectedQuery] = useState('');
+  const [lastCollectedHref, setLastCollectedHref] = useState('');
   const {
     log
   } = useLogging();
   const run = React__default.useCallback(() => {
-    if (config !== null && config !== void 0 && config.skip) {
-      log('useRunOnPathChange: skip configured, not capturing');
-      return;
-    }
-    if (!location.pathname) {
-      log('useRunOnPathChange: no pathname on location object: ', location);
-      return;
-    }
-    if (location.pathname === lastCollectedPath && location.hash === lastCollectedHash && location.search === lastCollectedQuery) {
-      log('useRunOnPathChange: location pathname and last collected are the same ', location.pathname, lastCollectedPath);
-      return;
-    }
-    log('useRunOnPathChange: running for path: ', location.pathname);
-    setLastCollectedPath(location.pathname);
-    setLastCollectedHash(location.hash);
-    setLastCollectedQuery(location.search);
+    if (config !== null && config !== void 0 && config.skip) return;
+    if (!location.href) return;
+    if (location.href === lastCollectedHref) return;
+    log('useRunOnPathChange: running for path: ', location.href);
+    setLastCollectedHref(location.href);
     func();
-    return () => {
-      log('useRunOnPathChange: clearing 300ms timeout', location.pathname, lastCollectedPath);
-    };
-  }, [func, config, lastCollectedPath, lastCollectedHash, lastCollectedQuery]);
+  }, [func, config, lastCollectedHref]);
   useEffect(() => {
-    const iId = setInterval(run, 500);
+    log(`useRunOnPathChange: running for every path change with ${reattemptIntervalMs} MS`);
+    const iId = setInterval(run, reattemptIntervalMs);
     return () => clearInterval(iId);
   }, [run]);
 };

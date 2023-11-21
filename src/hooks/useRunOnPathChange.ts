@@ -6,75 +6,37 @@ type Config = {
   skip?: boolean
   delay?: number
 }
+
+const reattemptIntervalMs = 2000
 // takes a function and runs it when the path changes
 // optionally takes a skip condition and init delay
+// @TODO: add support for multiple funcs so we can contain all of them in a single listener if needed
 const useRunOnPathChange = (func: FuncProp, config?: Config) => {
-  const [lastCollectedPath, setLastCollectedPath] = useState<string>()
-  const [lastCollectedHash, setLastCollectedHash] = useState<string>('')
-  const [lastCollectedQuery, setLastCollectedQuery] = useState<string>('')
+  const [lastCollectedHref, setLastCollectedHref] = useState<string>('')
 
   const { log } = useLogging()
 
   const run = React.useCallback(() => {
-    if (config?.skip) {
-      log('useRunOnPathChange: skip configured, not capturing')
-      return
-    }
-    if (!location.pathname) {
-      log('useRunOnPathChange: no pathname on location object: ', location)
-      return
-    }
-    if (
-      location.pathname === lastCollectedPath &&
-      location.hash === lastCollectedHash &&
-      location.search === lastCollectedQuery
-    ) {
-      log(
-        'useRunOnPathChange: location pathname and last collected are the same ',
-        location.pathname,
-        lastCollectedPath
-      )
-      return
-    }
+    if (config?.skip) return
 
-    log('useRunOnPathChange: running for path: ', location.pathname)
+    if (!location.href) return
 
-    setLastCollectedPath(location.pathname)
-    setLastCollectedHash(location.hash)
-    setLastCollectedQuery(location.search)
+    if (location.href === lastCollectedHref) return
+
+    log('useRunOnPathChange: running for path: ', location.href)
+    setLastCollectedHref(location.href)
+
     func()
-
-    return () => {
-      log(
-        'useRunOnPathChange: clearing 300ms timeout',
-        location.pathname,
-        lastCollectedPath
-      )
-      // clearTimeout(tId)
-    }
-  }, [func, config, lastCollectedPath, lastCollectedHash, lastCollectedQuery])
+  }, [func, config, lastCollectedHref])
 
   useEffect(() => {
-    const iId = setInterval(run, 500)
+    log(
+      `useRunOnPathChange: running for every path change with ${reattemptIntervalMs} MS`
+    )
+    const iId = setInterval(run, reattemptIntervalMs)
 
     return () => clearInterval(iId)
   }, [run])
-
-  // useEffect(() => {
-  //   // added timeout to prevent occasional double firing on page load
-  //   // const tId = setTimeout(() => {
-  //   run()
-  //   // }, 50)
-  // }, [
-  //   location.pathname,
-  //   location.hash,
-  //   location.search,
-  //   func,
-  //   setLastCollectedPath,
-  //   setLastCollectedHash,
-  //   setLastCollectedQuery,
-  //   config
-  // ])
 }
 
 export default useRunOnPathChange

@@ -487,6 +487,7 @@ export function CollectorProvider({
     fireOnLoadTriggers()
   }, [fireOnLoadTriggers])
 
+  // @TODO: this will be scrapped / reworked soon
   useRunOnPathChange(checkCollinsBookingComplete, {
     skip: !booted,
     delay: initialDelay
