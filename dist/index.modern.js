@@ -575,8 +575,8 @@ function useButtonCollector() {
       log('useButtonCollector: clicked element', {
         target: e.target
       });
-      if (!('type' in e.target)) return;
-      if (e.target.type !== 'button') return;
+      if (!e.target.nodeName) return;
+      if (e.target.nodeName.toLowerCase() !== 'button') return;
       const button = e.target;
       log('useButtonCollector: button clicked', {
         button
