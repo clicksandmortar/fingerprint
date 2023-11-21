@@ -419,6 +419,43 @@ function useCollinsBookingComplete() {
   };
 }
 
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+    const [key, value] = cur.split('=');
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  const params = getReducedSearchParams();
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    params
+  };
+}
+function getReferrer() {
+  const params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
 const headers = {
   'Content-Type': 'application/json'
 };
@@ -496,6 +533,65 @@ const useCollectorMutation = () => {
   });
 };
 
+function isEqual(nodeList1, nodeList2) {
+  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
+    return false;
+  }
+  const largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
+  for (let i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
+    if (nodeList1[i] !== nodeList2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+const scanIntervalMs = 1000;
+function useButtonCollector() {
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  const [nodeList, setNodeList] = useState();
+  useEffect(() => {
+    if (isUndefined('document')) return;
+    const intId = setInterval(() => {
+      const buttons = document.querySelectorAll('button');
+      if (isEqual(buttons, nodeList)) return;
+      setNodeList(buttons);
+    }, scanIntervalMs);
+    return () => clearInterval(intId);
+  }, [setNodeList, nodeList]);
+  useEffect(() => {
+    if (isUndefined('document')) return;
+    if (!nodeList) return;
+    if (!visitor.id) return;
+    const buttonClickListener = e => {
+      if (!e.target) return;
+      if (!('type' in e.target)) return;
+      if (e.target.type !== 'button' && e.target.type !== 'submit') return;
+      const button = e.target;
+      log('useButtonCollector: button clicked', {
+        button
+      });
+      collect({
+        button: {
+          id: button.id,
+          selector: button.innerText
+        }
+      });
+    };
+    document.addEventListener('click', buttonClickListener);
+    return () => {
+      document.removeEventListener('click', buttonClickListener);
+    };
+  }, [visitor, nodeList]);
+}
+
 const useExitIntentDelay = (delay = 0) => {
   const {
     log
@@ -513,49 +609,12 @@ const useExitIntentDelay = (delay = 0) => {
   };
 };
 
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-    const [key, value] = cur.split('=');
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  const params = getReducedSearchParams();
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    params
-  };
-}
-function getReferrer() {
-  const params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
-
 const stringIsSubstringOf = (a, b) => {
   if (a === b) return true;
   if (!a || !b) return false;
   return a.toLowerCase().includes(b.toLowerCase());
 };
-function isEqual(nodeList1, nodeList2) {
+function isEqual$1(nodeList1, nodeList2) {
   if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
     return false;
   }
@@ -569,7 +628,7 @@ function isEqual(nodeList1, nodeList2) {
 }
 const bannedTypes = ['password', 'submit'];
 const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-const scanIntervalMs = 1000;
+const scanIntervalMs$1 = 1000;
 function useFormCollector() {
   const {
     mutateAsync: collect
@@ -585,9 +644,9 @@ function useFormCollector() {
     if (isUndefined('document')) return;
     const intId = setInterval(() => {
       const forms = document.querySelectorAll('form');
-      if (isEqual(forms, nodeList)) return;
+      if (isEqual$1(forms, nodeList)) return;
       setNodeList(forms);
-    }, scanIntervalMs);
+    }, scanIntervalMs$1);
     return () => clearInterval(intId);
   }, [setNodeList, nodeList]);
   useEffect(() => {
@@ -634,7 +693,6 @@ function useFormCollector() {
         data
       });
       collect({
-        visitor,
         form: {
           data
         }
@@ -2845,11 +2903,11 @@ var _baseIsEqual = baseIsEqual;
  * object === other;
  * // => false
  */
-function isEqual$1(value, other) {
+function isEqual$2(value, other) {
   return _baseIsEqual(value, other);
 }
 
-var isEqual_1 = isEqual$1;
+var isEqual_1 = isEqual$2;
 
 const useIsElementVisible = () => {
   const getIsVisible = React__default.useCallback(selector => {
@@ -3242,7 +3300,6 @@ function CollectorProvider({
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
-  useFormCollector();
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return;
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
@@ -3373,6 +3430,8 @@ function CollectorProvider({
     skip: !booted,
     delay: initialDelay
   });
+  useFormCollector();
+  useButtonCollector();
   const onPresenseChange = React__default.useCallback(presence => {
     log('presence changed', presence);
   }, [log]);

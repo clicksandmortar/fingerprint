@@ -448,6 +448,45 @@ function useCollinsBookingComplete() {
   };
 }
 
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+    var _cur$split = cur.split('='),
+      key = _cur$split[0],
+      value = _cur$split[1];
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  var params = getReducedSearchParams();
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    params: params
+  };
+}
+function getReferrer() {
+  var params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
 var headers = {
   'Content-Type': 'application/json'
 };
@@ -541,6 +580,66 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
+function isEqual(nodeList1, nodeList2) {
+  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
+    return false;
+  }
+  var largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
+  for (var i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
+    if (nodeList1[i] !== nodeList2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+var scanIntervalMs = 1000;
+function useButtonCollector() {
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = React.useState(),
+    nodeList = _useState[0],
+    setNodeList = _useState[1];
+  React.useEffect(function () {
+    if (isUndefined('document')) return;
+    var intId = setInterval(function () {
+      var buttons = document.querySelectorAll('button');
+      if (isEqual(buttons, nodeList)) return;
+      setNodeList(buttons);
+    }, scanIntervalMs);
+    return function () {
+      return clearInterval(intId);
+    };
+  }, [setNodeList, nodeList]);
+  React.useEffect(function () {
+    if (isUndefined('document')) return;
+    if (!nodeList) return;
+    if (!visitor.id) return;
+    var buttonClickListener = function buttonClickListener(e) {
+      if (!e.target) return;
+      if (!('type' in e.target)) return;
+      if (e.target.type !== 'button' && e.target.type !== 'submit') return;
+      var button = e.target;
+      log('useButtonCollector: button clicked', {
+        button: button
+      });
+      collect({
+        button: {
+          id: button.id,
+          selector: button.innerText
+        }
+      });
+    };
+    document.addEventListener('click', buttonClickListener);
+    return function () {
+      document.removeEventListener('click', buttonClickListener);
+    };
+  }, [visitor, nodeList]);
+}
+
 var useExitIntentDelay = function useExitIntentDelay(delay) {
   if (delay === void 0) {
     delay = 0;
@@ -562,51 +661,12 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-    var _cur$split = cur.split('='),
-      key = _cur$split[0],
-      value = _cur$split[1];
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  var params = getReducedSearchParams();
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    params: params
-  };
-}
-function getReferrer() {
-  var params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
-
 var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
   if (a === b) return true;
   if (!a || !b) return false;
   return a.toLowerCase().includes(b.toLowerCase());
 };
-function isEqual(nodeList1, nodeList2) {
+function isEqual$1(nodeList1, nodeList2) {
   if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
     return false;
   }
@@ -620,7 +680,7 @@ function isEqual(nodeList1, nodeList2) {
 }
 var bannedTypes = ['password', 'submit'];
 var bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-var scanIntervalMs = 1000;
+var scanIntervalMs$1 = 1000;
 function useFormCollector() {
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
@@ -635,9 +695,9 @@ function useFormCollector() {
     if (isUndefined('document')) return;
     var intId = setInterval(function () {
       var forms = document.querySelectorAll('form');
-      if (isEqual(forms, nodeList)) return;
+      if (isEqual$1(forms, nodeList)) return;
       setNodeList(forms);
-    }, scanIntervalMs);
+    }, scanIntervalMs$1);
     return function () {
       return clearInterval(intId);
     };
@@ -686,7 +746,6 @@ function useFormCollector() {
         data: data
       });
       collect({
-        visitor: visitor,
         form: {
           data: data
         }
@@ -2903,11 +2962,11 @@ var _baseIsEqual = baseIsEqual;
  * object === other;
  * // => false
  */
-function isEqual$1(value, other) {
+function isEqual$2(value, other) {
   return _baseIsEqual(value, other);
 }
 
-var isEqual_1 = isEqual$1;
+var isEqual_1 = isEqual$2;
 
 var useIsElementVisible = function useIsElementVisible() {
   var getIsVisible = React__default.useCallback(function (selector) {
@@ -3332,7 +3391,6 @@ function CollectorProvider(_ref) {
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
-  useFormCollector();
   var fireOnLoadTriggers = React.useCallback(function () {
     if (!pageLoadTriggers) return;
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
@@ -3482,6 +3540,8 @@ function CollectorProvider(_ref) {
     skip: !booted,
     delay: initialDelay
   });
+  useFormCollector();
+  useButtonCollector();
   var onPresenseChange = React__default.useCallback(function (presence) {
     log('presence changed', presence);
   }, [log]);

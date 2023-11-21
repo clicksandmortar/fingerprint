@@ -138,7 +138,6 @@ export default function useFormCollector() {
       log('useFormCollector: form submitted', { data })
 
       collect({
-        visitor,
         form: {
           data
         }
