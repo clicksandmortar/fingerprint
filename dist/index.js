@@ -605,6 +605,7 @@ function useButtonCollector() {
       var potentialButton = getRecursivelyPotentialButton(e.target);
       if (!potentialButton) return;
       var button = potentialButton;
+      if (button.type === 'submit') return;
       log('useButtonCollector: button clicked', {
         button: button
       });
@@ -661,11 +662,11 @@ function useFormCollector() {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
     var formSubmitListener = function formSubmitListener(e) {
-      var _e$nodeName;
+      var _e$target$nodeName;
       log('useFormCollector: submitted', {
         e: e
       });
-      if (((_e$nodeName = e.nodeName) === null || _e$nodeName === void 0 ? void 0 : _e$nodeName.toLowerCase()) !== 'form') return;
+      if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
       var a = e === null || e === void 0 ? void 0 : e.target;
       var elements = Array.from(a.elements).filter(function (b) {
         if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;

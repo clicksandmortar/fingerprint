@@ -52,7 +52,8 @@ export default function useFormCollector() {
 
     const formSubmitListener = (e: any) => {
       log('useFormCollector: submitted', { e })
-      if (e.nodeName?.toLowerCase() !== 'form') return
+
+      if (e.target.nodeName?.toLowerCase() !== 'form') return
 
       const a = e?.target as HTMLFormElement
 

@@ -561,6 +561,7 @@ function useButtonCollector() {
       const potentialButton = getRecursivelyPotentialButton(e.target);
       if (!potentialButton) return;
       const button = potentialButton;
+      if (button.type === 'submit') return;
       log('useButtonCollector: button clicked', {
         button
       });
@@ -616,11 +617,11 @@ function useFormCollector() {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
     const formSubmitListener = e => {
-      var _e$nodeName;
+      var _e$target$nodeName;
       log('useFormCollector: submitted', {
         e
       });
-      if (((_e$nodeName = e.nodeName) === null || _e$nodeName === void 0 ? void 0 : _e$nodeName.toLowerCase()) !== 'form') return;
+      if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
       const a = e === null || e === void 0 ? void 0 : e.target;
       const elements = Array.from(a.elements).filter(b => {
         if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;

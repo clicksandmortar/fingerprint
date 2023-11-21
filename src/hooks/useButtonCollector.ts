@@ -47,6 +47,9 @@ export default function useButtonCollector() {
 
       const button = potentialButton as HTMLButtonElement
 
+      // we dont want to track submitions. useFormCollector is responsible for that
+      if (button.type === 'submit') return
+
       log('useButtonCollector: button clicked', { button })
       collect({
         button: {
