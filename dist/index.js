@@ -2932,25 +2932,28 @@ function useIntently() {
   };
 }
 
+var reattemptIntervalMs = 2000;
 var useRunOnPathChange = function useRunOnPathChange(func, config) {
   var _useState = React.useState(''),
-    lastCollectedPath = _useState[0],
-    setLastCollectedPath = _useState[1];
+    lastCollectedHref = _useState[0],
+    setLastCollectedHref = _useState[1];
   var _useLogging = useLogging(),
     log = _useLogging.log;
-  React.useEffect(function () {
+  var run = React__default.useCallback(function () {
     if (config !== null && config !== void 0 && config.skip) return;
-    if (!location.pathname) return;
-    if (location.pathname === lastCollectedPath) return;
-    var tId = setTimeout(function () {
-      log('useRunOnPathChange: running for path: ', location.pathname);
-      setLastCollectedPath(location.pathname);
-      func();
-    }, (config === null || config === void 0 ? void 0 : config.delay) || 300);
+    if (!location.href) return;
+    if (location.href === lastCollectedHref) return;
+    log('useRunOnPathChange: running for path: ', location.href);
+    setLastCollectedHref(location.href);
+    func();
+  }, [func, config, lastCollectedHref]);
+  React.useEffect(function () {
+    log("useRunOnPathChange: running for every path change with " + reattemptIntervalMs + " MS");
+    var iId = setInterval(run, reattemptIntervalMs);
     return function () {
-      clearTimeout(tId);
+      return clearInterval(iId);
     };
-  }, [location.pathname, func, setLastCollectedPath, config]);
+  }, [run]);
 };
 
 var defaultTriggerCooldown = 60 * 1000;
@@ -3102,11 +3105,11 @@ function CollectorProvider(_ref) {
   var _useState2 = React.useState([]),
     pageTriggers = _useState2[0],
     setPageTriggersState = _useState2[1];
+  var _useIntently = useIntently(),
+    setIntently = _useIntently.setIntently;
   var _useState3 = React.useState([]),
     displayTriggers = _useState3[0],
     setDisplayedTriggers = _useState3[1];
-  var _useIntently = useIntently(),
-    setIntently = _useIntently.setIntently;
   var _useState4 = React.useState(new Map()),
     foundWatchers = _useState4[0],
     setFoundWatchers = _useState4[1];
@@ -3188,14 +3191,32 @@ function CollectorProvider(_ref) {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [visibleIncompleteTriggers]);
+  var getIsBehaviourVisible = React__default.useCallback(function (type) {
+    if (displayTriggers.length === 0) return false;
+    if (displayTriggers.find(function (triggerId) {
+      var _pageTriggers$find;
+      return ((_pageTriggers$find = pageTriggers.find(function (trigger) {
+        return trigger.id === triggerId;
+      })) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
+    })) return true;
+    return false;
+  }, [displayTriggers, pageTriggers]);
   var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
     var invokableTrigger = combinedTriggers.find(function (trigger) {
       return trigger.invocation === invocation;
     });
-    if (invokableTrigger) setDisplayedTriggers(function (ts) {
+    if (!invokableTrigger) {
+      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
+      return;
+    }
+    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
+      return;
+    }
+    setDisplayedTriggers(function (ts) {
       return [].concat(ts, [invokableTrigger.id]);
     });
-  }, [combinedTriggers, setDisplayedTriggers]);
+  }, [combinedTriggers, setDisplayedTriggers, getIsBehaviourVisible]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');

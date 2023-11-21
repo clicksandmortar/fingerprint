@@ -2879,24 +2879,25 @@ function useIntently() {
   };
 }
 
+const reattemptIntervalMs = 2000;
 const useRunOnPathChange = (func, config) => {
-  const [lastCollectedPath, setLastCollectedPath] = useState('');
+  const [lastCollectedHref, setLastCollectedHref] = useState('');
   const {
     log
   } = useLogging();
-  useEffect(() => {
+  const run = React__default.useCallback(() => {
     if (config !== null && config !== void 0 && config.skip) return;
-    if (!location.pathname) return;
-    if (location.pathname === lastCollectedPath) return;
-    const tId = setTimeout(() => {
-      log('useRunOnPathChange: running for path: ', location.pathname);
-      setLastCollectedPath(location.pathname);
-      func();
-    }, (config === null || config === void 0 ? void 0 : config.delay) || 300);
-    return () => {
-      clearTimeout(tId);
-    };
-  }, [location.pathname, func, setLastCollectedPath, config]);
+    if (!location.href) return;
+    if (location.href === lastCollectedHref) return;
+    log('useRunOnPathChange: running for path: ', location.href);
+    setLastCollectedHref(location.href);
+    func();
+  }, [func, config, lastCollectedHref]);
+  useEffect(() => {
+    log(`useRunOnPathChange: running for every path change with ${reattemptIntervalMs} MS`);
+    const iId = setInterval(run, reattemptIntervalMs);
+    return () => clearInterval(iId);
+  }, [run]);
 };
 
 const defaultTriggerCooldown = 60 * 1000;
@@ -3045,10 +3046,10 @@ function CollectorProvider({
   }, [configIdleDelay, getRemainingCooldownMs, log]);
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
   const [pageTriggers, setPageTriggersState] = useState([]);
-  const [displayTriggers, setDisplayedTriggers] = useState([]);
   const {
     setIntently
   } = useIntently();
+  const [displayTriggers, setDisplayedTriggers] = useState([]);
   const [foundWatchers, setFoundWatchers] = useState(new Map());
   const {
     setIncompleteTriggers,
@@ -3111,10 +3112,26 @@ function CollectorProvider({
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [visibleIncompleteTriggers]);
+  const getIsBehaviourVisible = React__default.useCallback(type => {
+    if (displayTriggers.length === 0) return false;
+    if (displayTriggers.find(triggerId => {
+      var _pageTriggers$find;
+      return ((_pageTriggers$find = pageTriggers.find(trigger => trigger.id === triggerId)) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
+    })) return true;
+    return false;
+  }, [displayTriggers, pageTriggers]);
   const setDisplayedTriggerByInvocation = React__default.useCallback(invocation => {
     const invokableTrigger = combinedTriggers.find(trigger => trigger.invocation === invocation);
-    if (invokableTrigger) setDisplayedTriggers(ts => [...ts, invokableTrigger.id]);
-  }, [combinedTriggers, setDisplayedTriggers]);
+    if (!invokableTrigger) {
+      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
+      return;
+    }
+    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
+      return;
+    }
+    setDisplayedTriggers(ts => [...ts, invokableTrigger.id]);
+  }, [combinedTriggers, setDisplayedTriggers, getIsBehaviourVisible]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
