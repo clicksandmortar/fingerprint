@@ -14,7 +14,8 @@ export const useSeenMutation = () => {
   const { log, error } = useLogging()
   const { appId } = useFingerprint()
   const { trackEvent } = useMixpanel()
-  const { setPageTriggers } = useCollector()
+  const { setPageTriggers, setIncompleteTriggers } = useCollector()
+
   const { visitor } = useVisitor()
 
   const trackTriggerSeen = React.useCallback(
@@ -50,13 +51,17 @@ export const useSeenMutation = () => {
         })
     },
     {
-      mutationKey: ['seen'],
       onSuccess: async (res) => {
         const r = await res.json()
 
         log('Seen mutation: replacing triggers with:', r.pageTriggers)
-        // no pageTriggers = no triggers, rather than missing key. serverside omition. Means we set pagetriggers to nothing.
         setPageTriggers(r.pageTriggers)
+
+        log(
+          'Seen mutation: replacing incomplete Triggers with:',
+          r.incompleteTriggers
+        )
+        setIncompleteTriggers(r.incompleteTriggers)
         return r
       }
     }
