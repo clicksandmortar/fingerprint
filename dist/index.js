@@ -669,9 +669,15 @@ function useIntently() {
 }
 
 var useRunOnPathChange = function useRunOnPathChange(func, config) {
-  var _useState = React.useState(''),
-    lastCollected = _useState[0],
-    setLastCollected = _useState[1];
+  var _useState = React.useState(),
+    lastCollectedPath = _useState[0],
+    setLastCollectedPath = _useState[1];
+  var _useState2 = React.useState(''),
+    lastCollectedHash = _useState2[0],
+    setLastCollectedHash = _useState2[1];
+  var _useState3 = React.useState(''),
+    lastCollectedQuery = _useState3[0],
+    setLastCollectedQuery = _useState3[1];
   var _useLogging = useLogging(),
     log = _useLogging.log;
   React.useEffect(function () {
@@ -679,24 +685,26 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
       log('useRunOnPathChange: skip configured, not capturing');
       return;
     }
-    if (!location.href) {
-      log('useRunOnPathChange: no href on location object: ', location);
+    if (!location.pathname) {
+      log('useRunOnPathChange: no pathname on location object: ', location);
       return;
     }
-    if (location.href === lastCollected) {
-      log('useRunOnPathChange: location href and last collected are the same ', location.href, lastCollected);
+    if (location.pathname === lastCollectedPath && location.hash === lastCollectedHash && location.search === lastCollectedQuery) {
+      log('useRunOnPathChange: location pathname and last collected are the same ', location.pathname, lastCollectedPath);
       return;
     }
     var tId = setTimeout(function () {
-      log('useRunOnPathChange: running for path: ', location.href);
-      setLastCollected(location.href);
+      log('useRunOnPathChange: running for path: ', location.pathname);
+      setLastCollectedPath(location.pathname);
+      setLastCollectedHash(location.hash);
+      setLastCollectedQuery(location.search);
       func();
     }, 300);
     return function () {
-      log('useRunOnPathChange: clearing 300ms timeout', location.href, lastCollected);
+      log('useRunOnPathChange: clearing 300ms timeout', location.pathname, lastCollectedPath);
       clearTimeout(tId);
     };
-  }, [location.href, func, setLastCollected, config]);
+  }, [location.pathname, location.hash, location.search, func, setLastCollectedPath, config]);
 };
 
 var defaultTriggerCooldown = 60 * 1000;

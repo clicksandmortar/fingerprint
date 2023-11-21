@@ -9,7 +9,10 @@ type Config = {
 // takes a function and runs it when the path changes
 // optionally takes a skip condition and init delay
 const useRunOnPathChange = (func: FuncProp, config?: Config) => {
-  const [lastCollected, setLastCollected] = useState<string>('')
+  const [lastCollectedPath, setLastCollectedPath] = useState<string>()
+  const [lastCollectedHash, setLastCollectedHash] = useState<string>('')
+  const [lastCollectedQuery, setLastCollectedQuery] = useState<string>('')
+
   const { log } = useLogging()
 
   useEffect(() => {
@@ -17,36 +20,49 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
       log('useRunOnPathChange: skip configured, not capturing')
       return
     }
-    if (!location.href) {
-      log('useRunOnPathChange: no href on location object: ', location)
+    if (!location.pathname) {
+      log('useRunOnPathChange: no pathname on location object: ', location)
       return
     }
-    if (location.href === lastCollected) {
+    if (
+      location.pathname === lastCollectedPath &&
+      location.hash === lastCollectedHash &&
+      location.search === lastCollectedQuery
+    ) {
       log(
-        'useRunOnPathChange: location href and last collected are the same ',
-        location.href,
-        lastCollected
+        'useRunOnPathChange: location pathname and last collected are the same ',
+        location.pathname,
+        lastCollectedPath
       )
       return
     }
 
     // added timeout to prevent occasional double firing on page load
     const tId = setTimeout(() => {
-      log('useRunOnPathChange: running for path: ', location.href)
+      log('useRunOnPathChange: running for path: ', location.pathname)
 
-      setLastCollected(location.href)
+      setLastCollectedPath(location.pathname)
+      setLastCollectedHash(location.hash)
+      setLastCollectedQuery(location.search)
       func()
     }, 300)
 
     return () => {
       log(
         'useRunOnPathChange: clearing 300ms timeout',
-        location.href,
-        lastCollected
+        location.pathname,
+        lastCollectedPath
       )
       clearTimeout(tId)
     }
-  }, [location.href, func, setLastCollected, config])
+  }, [
+    location.pathname,
+    location.hash,
+    location.search,
+    func,
+    setLastCollectedPath,
+    config
+  ])
 }
 
 export default useRunOnPathChange

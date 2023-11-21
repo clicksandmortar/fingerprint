@@ -621,7 +621,9 @@ function useIntently() {
 }
 
 const useRunOnPathChange = (func, config) => {
-  const [lastCollected, setLastCollected] = useState('');
+  const [lastCollectedPath, setLastCollectedPath] = useState();
+  const [lastCollectedHash, setLastCollectedHash] = useState('');
+  const [lastCollectedQuery, setLastCollectedQuery] = useState('');
   const {
     log
   } = useLogging();
@@ -630,24 +632,26 @@ const useRunOnPathChange = (func, config) => {
       log('useRunOnPathChange: skip configured, not capturing');
       return;
     }
-    if (!location.href) {
-      log('useRunOnPathChange: no href on location object: ', location);
+    if (!location.pathname) {
+      log('useRunOnPathChange: no pathname on location object: ', location);
       return;
     }
-    if (location.href === lastCollected) {
-      log('useRunOnPathChange: location href and last collected are the same ', location.href, lastCollected);
+    if (location.pathname === lastCollectedPath && location.hash === lastCollectedHash && location.search === lastCollectedQuery) {
+      log('useRunOnPathChange: location pathname and last collected are the same ', location.pathname, lastCollectedPath);
       return;
     }
     const tId = setTimeout(() => {
-      log('useRunOnPathChange: running for path: ', location.href);
-      setLastCollected(location.href);
+      log('useRunOnPathChange: running for path: ', location.pathname);
+      setLastCollectedPath(location.pathname);
+      setLastCollectedHash(location.hash);
+      setLastCollectedQuery(location.search);
       func();
     }, 300);
     return () => {
-      log('useRunOnPathChange: clearing 300ms timeout', location.href, lastCollected);
+      log('useRunOnPathChange: clearing 300ms timeout', location.pathname, lastCollectedPath);
       clearTimeout(tId);
     };
-  }, [location.href, func, setLastCollected, config]);
+  }, [location.pathname, location.hash, location.search, func, setLastCollectedPath, config]);
 };
 
 const defaultTriggerCooldown = 60 * 1000;
