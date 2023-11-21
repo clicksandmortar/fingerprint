@@ -14,12 +14,12 @@ import { useCollectorMutation } from './useCollectorMutation'
 
 //   return `button.${selectifiedClassName}`
 // }
-const isPartOfButton = (el: Element): boolean => {
-  if (!el) return false
-  if (el.nodeName.toLowerCase() === 'button') return true
-  if (el.parentElement) return isPartOfButton(el.parentElement)
+const getPotentialButton = (el: Element): Element | null => {
+  if (!el) return null
+  if (el.nodeName.toLowerCase() === 'button') return el
+  if (el.parentElement) return getPotentialButton(el.parentElement)
 
-  return false
+  return null
 }
 
 // scanning any deeper isn't necessary. The button fields and their values are picked up at submit-time.
@@ -80,10 +80,12 @@ export default function useButtonCollector() {
 
       if (!e.target.nodeName) return
 
-      // makes sure we fire this when clicking on a nested item inside a button
-      if (!isPartOfButton(e.target)) return
+      const potentialButton = getPotentialButton(e.target)
 
-      const button = e.target as HTMLButtonElement
+      // makes sure we fire this when clicking on a nested item inside a button
+      if (!potentialButton) return
+
+      const button = potentialButton as HTMLButtonElement
 
       log('useButtonCollector: button clicked', { button })
       collect({

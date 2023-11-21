@@ -580,11 +580,11 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
-var isPartOfButton = function isPartOfButton(el) {
-  if (!el) return false;
-  if (el.nodeName.toLowerCase() === 'button') return true;
-  if (el.parentElement) return isPartOfButton(el.parentElement);
-  return false;
+var getPotentialButton = function getPotentialButton(el) {
+  if (!el) return null;
+  if (el.nodeName.toLowerCase() === 'button') return el;
+  if (el.parentElement) return getPotentialButton(el.parentElement);
+  return null;
 };
 function isEqual(nodeList1, nodeList2) {
   if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
@@ -630,8 +630,9 @@ function useButtonCollector() {
         target: e.target
       });
       if (!e.target.nodeName) return;
-      if (!isPartOfButton(e.target)) return;
-      var button = e.target;
+      var potentialButton = getPotentialButton(e.target);
+      if (!potentialButton) return;
+      var button = potentialButton;
       log('useButtonCollector: button clicked', {
         button: button
       });
