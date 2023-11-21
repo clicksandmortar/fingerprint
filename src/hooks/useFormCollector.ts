@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLogging } from '../context/LoggingContext'
 import { useVisitor } from '../context/VisitorContext'
+import { areNodeListsEqual } from '../utils/html'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
 
@@ -9,25 +10,6 @@ const stringIsSubstringOf = (a: string, b: string) => {
   if (!a || !b) return false
 
   return a.toLowerCase().includes(b.toLowerCase())
-}
-
-// scanning any deeper isn't necessary. The form fields and their values are picked up at submit-time.
-function isEqual(nodeList1: NodeList, nodeList2: NodeList) {
-  if (nodeList1?.length !== nodeList2?.length) {
-    return false
-  }
-
-  const largerList =
-    nodeList1?.length > nodeList2?.length ? nodeList1 : nodeList2
-
-  // classic for loops are most performant 🤷🏻‍♀️
-  for (let i = 0; i < largerList?.length; i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false
-    }
-  }
-
-  return true
 }
 
 const bannedTypes = ['password', 'submit']
@@ -73,7 +55,9 @@ export default function useFormCollector() {
 
     const intId = setInterval(() => {
       const forms = document.querySelectorAll('form')
-      if (isEqual(forms, nodeList)) return
+
+      // scanning any deeper isn't necessary. The form fields and their values are picked up at submit-time.
+      if (areNodeListsEqual(forms, nodeList)) return
 
       setNodeList(forms)
     }, scanIntervalMs)

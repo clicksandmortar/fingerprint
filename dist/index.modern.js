@@ -419,6 +419,19 @@ function useCollinsBookingComplete() {
   };
 }
 
+function areNodeListsEqual(nodeList1, nodeList2) {
+  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
+    return false;
+  }
+  const largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
+  for (let i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
+    if (nodeList1[i] !== nodeList2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function isUndefined(o) {
   return typeof o === 'undefined';
 }
@@ -540,18 +553,6 @@ const getPotentialButton = el => {
   if (el.parentElement) return getPotentialButton(el.parentElement);
   return null;
 };
-function isEqual(nodeList1, nodeList2) {
-  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
-    return false;
-  }
-  const largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
-  for (let i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
 const scanIntervalMs = 1000;
 function useButtonCollector() {
   const {
@@ -568,7 +569,7 @@ function useButtonCollector() {
     if (isUndefined('document')) return;
     const intId = setInterval(() => {
       const buttons = document.querySelectorAll('button');
-      if (isEqual(buttons, nodeList)) return;
+      if (areNodeListsEqual(buttons, nodeList)) return;
       setNodeList(buttons);
     }, scanIntervalMs);
     return () => clearInterval(intId);
@@ -624,18 +625,6 @@ const stringIsSubstringOf = (a, b) => {
   if (!a || !b) return false;
   return a.toLowerCase().includes(b.toLowerCase());
 };
-function isEqual$1(nodeList1, nodeList2) {
-  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
-    return false;
-  }
-  const largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
-  for (let i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
 const bannedTypes = ['password', 'submit'];
 const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
 const scanIntervalMs$1 = 1000;
@@ -654,7 +643,7 @@ function useFormCollector() {
     if (isUndefined('document')) return;
     const intId = setInterval(() => {
       const forms = document.querySelectorAll('form');
-      if (isEqual$1(forms, nodeList)) return;
+      if (areNodeListsEqual(forms, nodeList)) return;
       setNodeList(forms);
     }, scanIntervalMs$1);
     return () => clearInterval(intId);
@@ -2913,11 +2902,11 @@ var _baseIsEqual = baseIsEqual;
  * object === other;
  * // => false
  */
-function isEqual$2(value, other) {
+function isEqual(value, other) {
   return _baseIsEqual(value, other);
 }
 
-var isEqual_1 = isEqual$2;
+var isEqual_1 = isEqual;
 
 const useIsElementVisible = () => {
   const getIsVisible = React__default.useCallback(selector => {

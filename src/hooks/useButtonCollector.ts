@@ -1,44 +1,26 @@
 import { useEffect, useState } from 'react'
 import { useLogging } from '../context/LoggingContext'
 import { useVisitor } from '../context/VisitorContext'
+import { areNodeListsEqual } from '../utils/html'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
 
 // prepends a dot to the class name and joins multiple classes with dots to make a valid CSS selector
-// const getButtonSelector = (el: HTMLButtonElement) => {
-//   if (!el.className) return ''
+export const getButtonSelector = (el: HTMLButtonElement) => {
+  if (!el.className) return ''
 
-//   const selectifiedClassName = el.className.split(' ').join('.')
+  const selectifiedClassName = el.className.split(' ').join('.')
 
-//   // we could also append an id to the selector, but we're already sending the id as a separate field
+  // we could also append an id to the selector, but we're already sending the id as a separate field
+  return `button.${selectifiedClassName}`
+}
 
-//   return `button.${selectifiedClassName}`
-// }
 const getPotentialButton = (el: Element): Element | null => {
   if (!el) return null
   if (el.nodeName?.toLowerCase() === 'button') return el
   if (el.parentElement) return getPotentialButton(el.parentElement)
 
   return null
-}
-
-// scanning any deeper isn't necessary. The button fields and their values are picked up at submit-time.
-function isEqual(nodeList1: NodeList, nodeList2: NodeList) {
-  if (nodeList1?.length !== nodeList2?.length) {
-    return false
-  }
-
-  const largerList =
-    nodeList1?.length > nodeList2?.length ? nodeList1 : nodeList2
-
-  // classic for loops are most peformant 🤷🏻‍♀️
-  for (let i = 0; i < largerList?.length; i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false
-    }
-  }
-
-  return true
 }
 
 const scanIntervalMs = 1000
@@ -61,7 +43,7 @@ export default function useButtonCollector() {
 
     const intId = setInterval(() => {
       const buttons = document.querySelectorAll('button')
-      if (isEqual(buttons, nodeList)) return
+      if (areNodeListsEqual(buttons, nodeList)) return
 
       setNodeList(buttons)
     }, scanIntervalMs)
@@ -89,8 +71,8 @@ export default function useButtonCollector() {
       collect({
         button: {
           id: button.id,
-          // selector not used currently so providing a redundant
-          // selector which we may use in the future
+          // adding button inner text as selector for now
+          // in case we need it to make sure we're targeting the right button
           selector: button.innerText
           // might want to use the class name as a selector in the future, but
           // for the current implementation inner text is more valuable
