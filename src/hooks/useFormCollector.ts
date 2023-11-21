@@ -43,7 +43,6 @@ const bannedFieldPartialNames = [
 ]
 
 const scanIntervalMs = 1000
-const submitionDelay = 200
 
 /**
  * Hook into forms on the page and collect their data
@@ -54,12 +53,12 @@ const submitionDelay = 200
 * 2.1 Continue looking for forms. If more forms are found (or if fewer) remove all listeners
 *     and add them again - to make sure we are listening to each form only once.
 
-* 3. When the form is submitted:
-    3.1 prevent the default behaviour
-    3.2 filter out the fields based with sensitive information
+* 3. When the form is "submitted":
+  (DO NOT PREVENT DEFAULT BEHAVIOUR. Hell knows if the form is actually submitted or if its behaviour is hijacked)
+    3.1 filter out the fields based with sensitive information
+    3.2 Use whatever property of the input is available as the field name: name, id, placeholder, type.
     3.3 collect the data and send it to the server
-    3.4 without waiting for the server response, optimistically submit the form after a 
-    delay of `submitionDelay` ms
+    3.4 without waiting for the server response, continue with the default behaviour
 * 4. 
  */
 export default function useFormCollector() {
@@ -144,12 +143,9 @@ export default function useFormCollector() {
           data
         }
       })
-
-      setTimeout(() => {
-        // e.target?.dispatchEvent(e)
-      }, submitionDelay)
     }
 
+    // reset listeners, so we never end up listening to the same form twice
     forms.forEach((f) => f.removeEventListener('submit', formSubmitListener))
     forms.forEach((f) => f.addEventListener('submit', formSubmitListener))
 
