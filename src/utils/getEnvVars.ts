@@ -5,33 +5,32 @@ type EnvVars = {
 
 export function getEnvVars(): EnvVars {
   // TODO: temp hack for managing prod and dev env.
-  let isDev = false
+  // let isDev = false
 
-  switch (true) {
-    case typeof window === 'undefined':
-    case window?.location?.host?.includes('localhost'):
-    case window?.location?.host?.includes('clicksandmortar.tech'):
-    case window?.location?.host.startsWith('stage65-az'):
-    case window?.location?.host.startsWith('test65-az'):
-    case window?.location?.host.includes('vercel.app'): // Assuming all vercel apps are our staging
-      isDev = true
-      break
-    default:
-      isDev = false
-  }
+  // switch (true) {
+  //   case typeof window === 'undefined':
+  //   case window?.location?.host?.includes('localhost'):
+  //   case window?.location?.host?.includes('clicksandmortar.tech'):
+  //   case window?.location?.host.startsWith('stage65-az'):
+  //   case window?.location?.host.startsWith('test65-az'):
+  //   case window?.location?.host.includes('vercel.app'): // Assuming all vercel apps are our staging
+  //     isDev = true
+  //     break
+  //   default:
+  //     isDev = false
+  // }
 
-  if (isDev)
-    return {
-      FINGERPRINT_API_HOSTNAME:
-        'https://target-engine-api.starship-staging.com',
-      MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-    }
-
+  // if (isDev)
   return {
-    FINGERPRINT_API_HOSTNAME:
-      'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
   }
+
+  // return {
+  //   FINGERPRINT_API_HOSTNAME:
+  //     'https://target-engine-api.starship-production.com',
+  //   MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  // }
 }
 
 // when we're ready to add it back, Sentry is setup with

@@ -391,9 +391,10 @@ export function CollectorProvider({
         // @todo turn this into the dynamic value
         setIdleTimeout(getIdleStatusDelay())
         setPageTriggers(payload?.pageTriggers)
-        setIncompleteTriggers(
-          payload?.incompleteTriggers || fakeIncompleteTriggers
-        )
+        // @ED: FIX THIS
+        // setIncompleteTriggers(
+        //   payload?.incompleteTriggers);
+        setIncompleteTriggers(fakeIncompleteTriggers)
 
         const cohort = payload.intently ? 'intently' : 'fingerprint'
         if (visitor.cohort !== cohort) setVisitor({ cohort })
@@ -466,9 +467,8 @@ export function CollectorProvider({
                 setIdleTimeout(getIdleStatusDelay())
 
                 setPageTriggers(payload?.pageTriggers)
-                setIncompleteTriggers(
-                  payload?.incompleteTriggers || fakeIncompleteTriggers
-                )
+                // @ED: FIX THIS
+                setIncompleteTriggers(fakeIncompleteTriggers)
               })
               .catch((err) => {
                 error('failed to store collected data', err)

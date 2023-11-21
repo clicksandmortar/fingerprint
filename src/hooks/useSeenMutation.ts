@@ -4,6 +4,7 @@ import { Trigger } from '../client/types'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
+import { fakeIncompleteTriggers } from '../utils/__dev/fakeTriggers'
 import { getBrand } from '../utils/brand'
 import { hostname, request } from '../utils/http'
 import { getPagePayload } from '../utils/page'
@@ -61,7 +62,9 @@ export const useSeenMutation = () => {
           'Seen mutation: replacing incomplete Triggers with:',
           r.incompleteTriggers
         )
-        setIncompleteTriggers(r.incompleteTriggers)
+        // @ED: FIX THIS
+        // setIncompleteTriggers(r.incompleteTriggers)
+        setIncompleteTriggers(fakeIncompleteTriggers)
         return r
       }
     }
