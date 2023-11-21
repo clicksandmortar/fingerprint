@@ -596,7 +596,6 @@ function useFormCollector() {
     if (isUndefined('document')) return;
     const forms = document.querySelectorAll('form');
     const formSubmitListener = e => {
-      e.preventDefault();
       const a = e === null || e === void 0 ? void 0 : e.target;
       const elements = Array.from(a.elements).filter(b => {
         if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;
@@ -631,15 +630,16 @@ function useFormCollector() {
         result[fieldName] = item.value;
         return result;
       }, {});
+      log('useFormCollector: form submitted', {
+        data
+      });
       collect({
         visitor,
         form: {
           data
         }
       });
-      setTimeout(() => {
-        e.target.submit();
-      }, submitionDelay);
+      setTimeout(() => {}, submitionDelay);
     };
     forms.forEach(f => f.removeEventListener('submit', formSubmitListener));
     forms.forEach(f => f.addEventListener('submit', formSubmitListener));

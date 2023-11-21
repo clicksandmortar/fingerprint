@@ -90,7 +90,6 @@ export default function useFormCollector() {
     const forms = document.querySelectorAll('form')
 
     const formSubmitListener = (e: any) => {
-      e.preventDefault()
       const a = e?.target as HTMLFormElement
 
       const elements = Array.from(a.elements).filter((b: HTMLFormElement) => {
@@ -137,6 +136,8 @@ export default function useFormCollector() {
         return result
       }, {})
 
+      log('useFormCollector: form submitted', { data })
+
       collect({
         visitor,
         form: {
@@ -145,7 +146,7 @@ export default function useFormCollector() {
       })
 
       setTimeout(() => {
-        e.target.submit()
+        // e.target?.dispatchEvent(e)
       }, submitionDelay)
     }
 
