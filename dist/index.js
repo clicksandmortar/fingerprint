@@ -581,8 +581,9 @@ var useCollectorMutation = function useCollectorMutation() {
 };
 
 var getPotentialButton = function getPotentialButton(el) {
+  var _el$nodeName;
   if (!el) return null;
-  if (el.nodeName.toLowerCase() === 'button') return el;
+  if (((_el$nodeName = el.nodeName) === null || _el$nodeName === void 0 ? void 0 : _el$nodeName.toLowerCase()) === 'button') return el;
   if (el.parentElement) return getPotentialButton(el.parentElement);
   return null;
 };
@@ -629,7 +630,6 @@ function useButtonCollector() {
       log('useButtonCollector: clicked element', {
         target: e.target
       });
-      if (!e.target.nodeName) return;
       var potentialButton = getPotentialButton(e.target);
       if (!potentialButton) return;
       var button = potentialButton;

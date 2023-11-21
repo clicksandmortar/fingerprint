@@ -16,7 +16,7 @@ import { useCollectorMutation } from './useCollectorMutation'
 // }
 const getPotentialButton = (el: Element): Element | null => {
   if (!el) return null
-  if (el.nodeName.toLowerCase() === 'button') return el
+  if (el.nodeName?.toLowerCase() === 'button') return el
   if (el.parentElement) return getPotentialButton(el.parentElement)
 
   return null
@@ -77,8 +77,6 @@ export default function useButtonCollector() {
     const buttonClickListener = (e: any) => {
       if (!e.target) return
       log('useButtonCollector: clicked element', { target: e.target })
-
-      if (!e.target.nodeName) return
 
       const potentialButton = getPotentialButton(e.target)
 
