@@ -20,9 +20,7 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
 
   const run = React.useCallback(() => {
     if (config?.skip) return
-
     if (!location.href) return
-
     if (location.href === lastCollectedHref) return
 
     log('useRunOnPathChange: running for path: ', location.href)
