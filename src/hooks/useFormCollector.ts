@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useLogging } from '../context/LoggingContext'
 import { useVisitor } from '../context/VisitorContext'
-import { areNodeListsEqual } from '../utils/html'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
 
@@ -24,8 +23,6 @@ const bannedFieldPartialNames = [
   'card'
 ]
 
-const scanIntervalMs = 1000
-
 /**
  * Hook into forms on the page and collect their data
 * Principle:
@@ -47,32 +44,16 @@ export default function useFormCollector() {
   const { mutateAsync: collect } = useCollectorMutation()
   const { visitor } = useVisitor()
   const { log } = useLogging()
-  // any, just because TS complains about NodeList not being iterable
-  const [nodeList, setNodeList] = useState<any>()
 
   useEffect(() => {
     if (isUndefined('document')) return
 
-    const intId = setInterval(() => {
-      const forms = document.querySelectorAll('form')
-
-      // scanning any deeper isn't necessary. The form fields and their values are picked up at submit-time.
-      if (areNodeListsEqual(forms, nodeList)) return
-
-      setNodeList(forms)
-    }, scanIntervalMs)
-
-    return () => clearInterval(intId)
-  }, [setNodeList, nodeList])
-
-  useEffect(() => {
-    if (!nodeList) return
     if (!visitor.id) return
-    if (isUndefined('document')) return
-
-    const forms = document.querySelectorAll('form')
 
     const formSubmitListener = (e: any) => {
+      log('useFormCollector: submitted', { e })
+      if (e.nodeName?.toLowerCase() !== 'form') return
+
       const a = e?.target as HTMLFormElement
 
       const elements = Array.from(a.elements).filter((b: HTMLFormElement) => {
@@ -129,11 +110,11 @@ export default function useFormCollector() {
     }
 
     // reset listeners, so we never end up listening to the same form twice
-    forms.forEach((f) => f.removeEventListener('submit', formSubmitListener))
-    forms.forEach((f) => f.addEventListener('submit', formSubmitListener))
+    document.removeEventListener('submit', formSubmitListener)
+    document.addEventListener('submit', formSubmitListener)
 
     return () => {
-      forms.forEach((f) => f.removeEventListener('submit', formSubmitListener))
+      document.removeEventListener('submit', formSubmitListener)
     }
-  }, [visitor, nodeList])
+  }, [visitor])
 }

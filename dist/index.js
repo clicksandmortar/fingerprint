@@ -643,19 +643,6 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
-function areNodeListsEqual(nodeList1, nodeList2) {
-  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
-    return false;
-  }
-  var largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
-  for (var i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
   if (a === b) return true;
   if (!a || !b) return false;
@@ -663,7 +650,6 @@ var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
 };
 var bannedTypes = ['password', 'submit'];
 var bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-var scanIntervalMs = 1000;
 function useFormCollector() {
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
@@ -671,26 +657,15 @@ function useFormCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
-  var _useState = React.useState(),
-    nodeList = _useState[0],
-    setNodeList = _useState[1];
   React.useEffect(function () {
     if (isUndefined('document')) return;
-    var intId = setInterval(function () {
-      var forms = document.querySelectorAll('form');
-      if (areNodeListsEqual(forms, nodeList)) return;
-      setNodeList(forms);
-    }, scanIntervalMs);
-    return function () {
-      return clearInterval(intId);
-    };
-  }, [setNodeList, nodeList]);
-  React.useEffect(function () {
-    if (!nodeList) return;
     if (!visitor.id) return;
-    if (isUndefined('document')) return;
-    var forms = document.querySelectorAll('form');
     var formSubmitListener = function formSubmitListener(e) {
+      var _e$nodeName;
+      log('useFormCollector: submitted', {
+        e: e
+      });
+      if (((_e$nodeName = e.nodeName) === null || _e$nodeName === void 0 ? void 0 : _e$nodeName.toLowerCase()) !== 'form') return;
       var a = e === null || e === void 0 ? void 0 : e.target;
       var elements = Array.from(a.elements).filter(function (b) {
         if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;
@@ -734,18 +709,12 @@ function useFormCollector() {
         }
       });
     };
-    forms.forEach(function (f) {
-      return f.removeEventListener('submit', formSubmitListener);
-    });
-    forms.forEach(function (f) {
-      return f.addEventListener('submit', formSubmitListener);
-    });
+    document.removeEventListener('submit', formSubmitListener);
+    document.addEventListener('submit', formSubmitListener);
     return function () {
-      forms.forEach(function (f) {
-        return f.removeEventListener('submit', formSubmitListener);
-      });
+      document.removeEventListener('submit', formSubmitListener);
     };
-  }, [visitor, nodeList]);
+  }, [visitor]);
 }
 
 /**

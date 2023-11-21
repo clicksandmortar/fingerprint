@@ -595,19 +595,6 @@ const useExitIntentDelay = (delay = 0) => {
   };
 };
 
-function areNodeListsEqual(nodeList1, nodeList2) {
-  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
-    return false;
-  }
-  const largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
-  for (let i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 const stringIsSubstringOf = (a, b) => {
   if (a === b) return true;
   if (!a || !b) return false;
@@ -615,7 +602,6 @@ const stringIsSubstringOf = (a, b) => {
 };
 const bannedTypes = ['password', 'submit'];
 const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-const scanIntervalMs = 1000;
 function useFormCollector() {
   const {
     mutateAsync: collect
@@ -626,22 +612,15 @@ function useFormCollector() {
   const {
     log
   } = useLogging();
-  const [nodeList, setNodeList] = useState();
   useEffect(() => {
     if (isUndefined('document')) return;
-    const intId = setInterval(() => {
-      const forms = document.querySelectorAll('form');
-      if (areNodeListsEqual(forms, nodeList)) return;
-      setNodeList(forms);
-    }, scanIntervalMs);
-    return () => clearInterval(intId);
-  }, [setNodeList, nodeList]);
-  useEffect(() => {
-    if (!nodeList) return;
     if (!visitor.id) return;
-    if (isUndefined('document')) return;
-    const forms = document.querySelectorAll('form');
     const formSubmitListener = e => {
+      var _e$nodeName;
+      log('useFormCollector: submitted', {
+        e
+      });
+      if (((_e$nodeName = e.nodeName) === null || _e$nodeName === void 0 ? void 0 : _e$nodeName.toLowerCase()) !== 'form') return;
       const a = e === null || e === void 0 ? void 0 : e.target;
       const elements = Array.from(a.elements).filter(b => {
         if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;
@@ -685,12 +664,12 @@ function useFormCollector() {
         }
       });
     };
-    forms.forEach(f => f.removeEventListener('submit', formSubmitListener));
-    forms.forEach(f => f.addEventListener('submit', formSubmitListener));
+    document.removeEventListener('submit', formSubmitListener);
+    document.addEventListener('submit', formSubmitListener);
     return () => {
-      forms.forEach(f => f.removeEventListener('submit', formSubmitListener));
+      document.removeEventListener('submit', formSubmitListener);
     };
-  }, [visitor, nodeList]);
+  }, [visitor]);
 }
 
 /**
