@@ -38,7 +38,6 @@ export default function useButtonCollector() {
 
     const buttonClickListener = (e: any) => {
       if (!e.target) return
-      log('useButtonCollector: clicked element', { target: e.target })
 
       const potentialButton = getRecursivelyPotentialButton(e.target)
 

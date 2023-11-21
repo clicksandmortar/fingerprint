@@ -599,9 +599,6 @@ function useButtonCollector() {
     if (!visitor.id) return;
     var buttonClickListener = function buttonClickListener(e) {
       if (!e.target) return;
-      log('useButtonCollector: clicked element', {
-        target: e.target
-      });
       var potentialButton = getRecursivelyPotentialButton(e.target);
       if (!potentialButton) return;
       var button = potentialButton;
@@ -663,9 +660,6 @@ function useFormCollector() {
     if (!visitor.id) return;
     var formSubmitListener = function formSubmitListener(e) {
       var _e$target$nodeName;
-      log('useFormCollector: submitted', {
-        e: e
-      });
       if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
       var a = e === null || e === void 0 ? void 0 : e.target;
       var elements = Array.from(a.elements).filter(function (b) {

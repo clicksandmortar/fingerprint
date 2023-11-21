@@ -555,9 +555,6 @@ function useButtonCollector() {
     if (!visitor.id) return;
     const buttonClickListener = e => {
       if (!e.target) return;
-      log('useButtonCollector: clicked element', {
-        target: e.target
-      });
       const potentialButton = getRecursivelyPotentialButton(e.target);
       if (!potentialButton) return;
       const button = potentialButton;
@@ -618,9 +615,6 @@ function useFormCollector() {
     if (!visitor.id) return;
     const formSubmitListener = e => {
       var _e$target$nodeName;
-      log('useFormCollector: submitted', {
-        e
-      });
       if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
       const a = e === null || e === void 0 ? void 0 : e.target;
       const elements = Array.from(a.elements).filter(b => {
