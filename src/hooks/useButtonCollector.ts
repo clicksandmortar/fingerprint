@@ -14,6 +14,13 @@ import { useCollectorMutation } from './useCollectorMutation'
 
 //   return `button.${selectifiedClassName}`
 // }
+const isPartOfButton = (el: Element): boolean => {
+  if (!el) return false
+  if (el.nodeName.toLowerCase() === 'button') return true
+  if (el.parentElement) return isPartOfButton(el.parentElement)
+
+  return false
+}
 
 // scanning any deeper isn't necessary. The button fields and their values are picked up at submit-time.
 function isEqual(nodeList1: NodeList, nodeList2: NodeList) {
@@ -70,9 +77,11 @@ export default function useButtonCollector() {
     const buttonClickListener = (e: any) => {
       if (!e.target) return
       log('useButtonCollector: clicked element', { target: e.target })
+
       if (!e.target.nodeName) return
-      // no, we don't want submit/reset types
-      if (e.target.nodeName.toLowerCase() !== 'button') return
+
+      // makes sure we fire this when clicking on a nested item inside a button
+      if (!isPartOfButton(e.target)) return
 
       const button = e.target as HTMLButtonElement
 

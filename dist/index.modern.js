@@ -533,6 +533,12 @@ const useCollectorMutation = () => {
   });
 };
 
+const isPartOfButton = el => {
+  if (!el) return false;
+  if (el.nodeName.toLowerCase() === 'button') return true;
+  if (el.parentElement) return isPartOfButton(el.parentElement);
+  return false;
+};
 function isEqual(nodeList1, nodeList2) {
   if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
     return false;
@@ -576,7 +582,7 @@ function useButtonCollector() {
         target: e.target
       });
       if (!e.target.nodeName) return;
-      if (e.target.nodeName.toLowerCase() !== 'button') return;
+      if (!isPartOfButton(e.target)) return;
       const button = e.target;
       log('useButtonCollector: button clicked', {
         button
