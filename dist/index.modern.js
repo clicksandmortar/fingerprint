@@ -620,7 +620,7 @@ function useIntently() {
   };
 }
 
-const reattemptIntervalMs = 2000;
+const reattemptIntervalMs = 500;
 const useRunOnPathChange = (func, config) => {
   const [lastCollectedHref, setLastCollectedHref] = useState('');
   const {

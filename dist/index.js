@@ -668,7 +668,7 @@ function useIntently() {
   };
 }
 
-var reattemptIntervalMs = 2000;
+var reattemptIntervalMs = 500;
 var useRunOnPathChange = function useRunOnPathChange(func, config) {
   var _useState = React.useState(''),
     lastCollectedHref = _useState[0],
