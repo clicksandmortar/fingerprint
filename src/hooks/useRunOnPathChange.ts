@@ -7,10 +7,12 @@ type Config = {
   delay?: number
 }
 
+const reattemptIntervalMs = 500
+
 // takes a function and runs it when the path changes
 // optionally takes a skip condition and init delay
 // @TODO: add support for multiple funcs so we can contain all of them in a single listener if needed
-const reattemptIntervalMs = 500
+
 const useRunOnPathChange = (func: FuncProp, config?: Config) => {
   const [lastCollectedHref, setLastCollectedHref] = useState<string>('')
 
