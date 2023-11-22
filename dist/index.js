@@ -116,6 +116,13 @@ var defaultConfig = {
     colors: defaultColors
   }
 };
+var LEGACY_merge_config = function LEGACY_merge_config(config, legacy_config) {
+  return {
+    displayTriggerAfterSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || 0) / 1000 || config.trigger.displayTriggerAfterSecs,
+    triggerCooldownSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || 0) / 1000 || config.trigger.triggerCooldownSecs,
+    userIdleThresholdSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || 0) / 1000 || config.trigger.userIdleThresholdSecs
+  };
+};
 var objStringtoObjNum = function objStringtoObjNum(obj) {
   var newObj = {};
   Object.keys(obj).forEach(function (key) {
@@ -124,10 +131,12 @@ var objStringtoObjNum = function objStringtoObjNum(obj) {
   return newObj;
 };
 function ConfigProvider(_ref) {
-  var children = _ref.children;
+  var children = _ref.children,
+    legacy_config = _ref.legacy_config;
   var _useState = React.useState(defaultConfig),
     config = _useState[0],
     setConfig = _useState[1];
+  var triggerConfig = LEGACY_merge_config(config, legacy_config);
   var setConfigEntry = React__default.useCallback(function (updatedConfigEntries) {
     var _updatedConfigEntries;
     var shouldUpdateColors = Object.keys((updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors) || {}).length > 0;
@@ -135,16 +144,15 @@ function ConfigProvider(_ref) {
       var _updatedConfigEntries2;
       return _extends({}, prev, updatedConfigEntries, {
         brand: _extends({}, prev.brand, updatedConfigEntries.brand, {
-          colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.brand) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.colors) || {}) : prev.brand.colors,
-          name: 'C&M'
+          colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.brand) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.colors) || {}) : prev.brand.colors
         }),
-        trigger: _extends({}, prev.trigger, objStringtoObjNum(updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : updatedConfigEntries.trigger)),
+        trigger: _extends({}, prev.trigger, objStringtoObjNum(triggerConfig)),
         script: {
           debugMode: true
         }
       });
     });
-  }, [setConfig]);
+  }, [setConfig, triggerConfig]);
   var value = {
     config: config,
     setConfigEntry: setConfigEntry
@@ -3268,7 +3276,6 @@ function CollectorProvider(_ref) {
     config = _useConfig.config.trigger;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
-    session = _useVisitor.session,
     setVisitor = _useVisitor.setVisitor;
   var _useTriggerDelay = useTriggerDelay(),
     canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
@@ -3306,10 +3313,39 @@ function CollectorProvider(_ref) {
   var _useIncompleteTrigger = useIncompleteTriggers(),
     setIncompleteTriggers = _useIncompleteTrigger.setIncompleteTriggers,
     visibleIncompleteTriggers = _useIncompleteTrigger.visibleTriggers;
+  var combinedTriggers = React__default.useMemo(function () {
+    return [].concat(pageTriggers, visibleIncompleteTriggers);
+  }, [pageTriggers, visibleIncompleteTriggers]);
+  var getIsBehaviourVisible = React__default.useCallback(function (type) {
+    if (displayTriggers.length === 0) return false;
+    if (displayTriggers.find(function (triggerId) {
+      var _pageTriggers$find;
+      return ((_pageTriggers$find = pageTriggers.find(function (trigger) {
+        return trigger.id === triggerId;
+      })) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
+    })) return true;
+    return false;
+  }, [displayTriggers, pageTriggers]);
+  var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
+    var invokableTrigger = combinedTriggers.find(function (trigger) {
+      return trigger.invocation === invocation;
+    });
+    if (!invokableTrigger) {
+      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
+      return;
+    }
+    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
+      return;
+    }
+    setDisplayedTriggers(function (ts) {
+      return [].concat(ts, [invokableTrigger.id]);
+    });
+  }, [combinedTriggers, getIsBehaviourVisible, log]);
   React.useEffect(function () {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [visibleIncompleteTriggers, setPageTriggersState]);
+  }, [visibleIncompleteTriggers, setPageTriggersState, setDisplayedTriggerByInvocation]);
   var setPageTriggers = React__default.useCallback(function (triggers) {
     setPageTriggersState(function (prev) {
       var nonDismissed = prev.filter(function (tr) {
@@ -3341,10 +3377,7 @@ function CollectorProvider(_ref) {
         return trigger.id !== id;
       });
     });
-  }, [displayTriggers, log, setPageTriggers]);
-  var combinedTriggers = React__default.useMemo(function () {
-    return [].concat(pageTriggers, visibleIncompleteTriggers);
-  }, [pageTriggers, visibleIncompleteTriggers]);
+  }, [displayTriggers, log, setIncompleteTriggers]);
   var TriggerComponent = React__default.useCallback(function () {
     if (!displayTriggers) return null;
     var activeTriggers = combinedTriggers.filter(function (trigger) {
@@ -3380,33 +3413,7 @@ function CollectorProvider(_ref) {
   React.useEffect(function () {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [visibleIncompleteTriggers]);
-  var getIsBehaviourVisible = React__default.useCallback(function (type) {
-    if (displayTriggers.length === 0) return false;
-    if (displayTriggers.find(function (triggerId) {
-      var _pageTriggers$find;
-      return ((_pageTriggers$find = pageTriggers.find(function (trigger) {
-        return trigger.id === triggerId;
-      })) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
-    })) return true;
-    return false;
-  }, [displayTriggers, pageTriggers]);
-  var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
-    var invokableTrigger = combinedTriggers.find(function (trigger) {
-      return trigger.invocation === invocation;
-    });
-    if (!invokableTrigger) {
-      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
-      return;
-    }
-    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
-      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
-      return;
-    }
-    setDisplayedTriggers(function (ts) {
-      return [].concat(ts, [invokableTrigger.id]);
-    });
-  }, [combinedTriggers, setDisplayedTriggers, getIsBehaviourVisible]);
+  }, [setDisplayedTriggerByInvocation, visibleIncompleteTriggers]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
@@ -3431,7 +3438,7 @@ function CollectorProvider(_ref) {
     log('CollectorProvider: attempting to fire exit trigger');
     setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
-  }, [displayTriggers === null || displayTriggers === void 0 ? void 0 : displayTriggers.length, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
+  }, [hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   React.useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -3445,7 +3452,32 @@ function CollectorProvider(_ref) {
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
-  }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
+  }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation]);
+  var collectorCallback = React__default.useCallback(function (response) {
+    try {
+      return Promise.resolve(response.json()).then(function (payload) {
+        log('Sent collector data, retrieved:', payload);
+        setIdleTimeout(getIdleStatusDelay());
+        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+        setConfigEntry(payload.config);
+        setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
+        var cohort = payload.intently ? 'intently' : 'fingerprint';
+        if (visitor.cohort !== cohort) setVisitor({
+          cohort: cohort
+        });
+        log('CollectorProvider: collected data');
+        if (!payload.intently) {
+          log('CollectorProvider: user is in Fingerprint cohort');
+          setIntently(false);
+        } else {
+          log('CollectorProvider: user is in Intently cohort');
+          setIntently(true);
+        }
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }, [log, getIdleStatusDelay, setPageTriggers, setConfigEntry, setIncompleteTriggers, visitor.cohort, setVisitor, setIntently]);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
@@ -3491,32 +3523,15 @@ function CollectorProvider(_ref) {
           setIntently(true);
           return Promise.resolve();
         }
-        return Promise.resolve(response.json()).then(function (payload) {
-          log('Sent collector data, retrieved:', payload);
-          setIdleTimeout(getIdleStatusDelay());
-          setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-          setConfigEntry(payload.config);
-          setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
-          var cohort = payload.intently ? 'intently' : 'fingerprint';
-          if (visitor.cohort !== cohort) setVisitor({
-            cohort: cohort
-          });
-          if (!payload.intently) {
-            log('CollectorProvider: user is in Fingerprint cohort');
-            setIntently(false);
-          } else {
-            log('CollectorProvider: user is in Intently cohort');
-            setIntently(true);
-          }
-        });
+        collectorCallback(response);
+        return Promise.resolve();
       } catch (e) {
         return Promise.reject(e);
       }
     })["catch"](function (err) {
       error('failed to store collected data', err);
     });
-    log('CollectorProvider: collected data');
-  }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIncompleteTriggers, setIdleTimeout, trackEvent, setPageTriggers, setConfigEntry]);
+  }, [visitor.id, log, collect, trackEvent, error, collectorCallback, setIntently]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
@@ -3536,19 +3551,7 @@ function CollectorProvider(_ref) {
               path: window.location.pathname,
               selector: configuredSelector
             }]
-          }).then(function (response) {
-            try {
-              return Promise.resolve(response.json()).then(function (payload) {
-                log('Sent collector data, retrieved:', payload);
-                setIdleTimeout(getIdleStatusDelay());
-                setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-                setConfigEntry(payload.config);
-                setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
-              });
-            } catch (e) {
-              return Promise.reject(e);
-            }
-          })["catch"](function (err) {
+          }).then(collectorCallback)["catch"](function (err) {
             error('failed to store collected data', err);
           });
           clearInterval(intervalId);
@@ -3556,7 +3559,7 @@ function CollectorProvider(_ref) {
       });
     }, 500);
     return intervalId;
-  }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+  }, [collect, collectorCallback, error, foundWatchers, trackEvent]);
   React.useEffect(function () {
     if (!visitor.id) return;
     var intervalIds = [registerWatcher('.stage-5', '')];
@@ -5139,7 +5142,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers,
     _ref$pageLoadTriggers = _ref.pageLoadTriggers,
     pageLoadTriggers = _ref$pageLoadTriggers === void 0 ? true : _ref$pageLoadTriggers,
-    config = _ref.config;
+    legacy_config = _ref.config;
   var _useState2 = React.useState(false),
     booted = _useState2[0],
     setBooted = _useState2[1];
@@ -5172,7 +5175,9 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
   if (!consentGiven) {
     return children;
   }
-  return React__default.createElement(ConfigProvider, null, React__default.createElement(LoggingProvider, {
+  return React__default.createElement(ConfigProvider, {
+    legacy_config: legacy_config
+  }, React__default.createElement(LoggingProvider, {
     debug: debug
   }, React__default.createElement(reactQuery.QueryClientProvider, {
     client: queryClient
@@ -5194,8 +5199,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       initialDelay: initialDelay,
       idleTriggers: idleTriggers,
       pageLoadTriggers: pageLoadTriggers,
-      exitIntentTriggers: exitIntentTriggers,
-      config: config
+      exitIntentTriggers: exitIntentTriggers
     }
   }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
@@ -5218,12 +5222,7 @@ var defaultFingerprintState = {
   registerHandler: function registerHandler() {},
   trackEvent: function trackEvent() {},
   trackPageView: function trackPageView() {},
-  unregisterHandler: function unregisterHandler() {},
-  config: {
-    idleDelay: undefined,
-    triggerCooldown: 60 * 1000,
-    exitIntentDelay: 0
-  }
+  unregisterHandler: function unregisterHandler() {}
 };
 var FingerprintContext = React.createContext(_extends({}, defaultFingerprintState));
 

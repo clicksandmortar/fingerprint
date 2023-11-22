@@ -1,5 +1,6 @@
 import React, { PropsWithChildren, createContext, useState } from 'react'
 import { Config } from '../client/types'
+import { FingerprintProviderProps } from './FingerprintContext'
 
 // 27 233 237 - dimmed, 41 100 249 - main, 13 14 49 - text Secondary, white primary, 226 226 226 greyBg, some dark grey text ?
 
@@ -28,7 +29,28 @@ const defaultConfig: Config = {
   }
 }
 
-type Props = PropsWithChildren<{}>
+// Treat legacy config as a priority if there is a value in the legacy config
+// otherwise, use the one from the portal
+//
+// Also note that the Portal config uses seconds, while the LEGACY config uses milliseconds, so /1000
+const LEGACY_merge_config = (
+  config: Config,
+  legacy_config: Props['legacy_config']
+): Config['trigger'] => ({
+  displayTriggerAfterSecs:
+    (legacy_config?.exitIntentDelay || 0) / 1000 ||
+    config.trigger.displayTriggerAfterSecs,
+  triggerCooldownSecs:
+    (legacy_config?.triggerCooldown || 0) / 1000 ||
+    config.trigger.triggerCooldownSecs,
+  userIdleThresholdSecs:
+    (legacy_config?.idleDelay || 0) / 1000 ||
+    config.trigger.userIdleThresholdSecs
+})
+
+type Props = PropsWithChildren<{
+  legacy_config?: FingerprintProviderProps['config']
+}>
 
 // having to do this because the config is stored as a string
 // in the database.
@@ -44,8 +66,10 @@ const objStringtoObjNum = (obj: any) => {
 
 // NOTE that this is the top level wrapper
 // so log along with some other stuff won't work here.
-export function ConfigProvider({ children }: Props) {
+export function ConfigProvider({ children, legacy_config }: Props) {
   const [config, setConfig] = useState<Config>(defaultConfig)
+
+  const triggerConfig = LEGACY_merge_config(config, legacy_config)
 
   const setConfigEntry = React.useCallback(
     (updatedConfigEntries: Partial<Config>) => {
@@ -67,13 +91,12 @@ export function ConfigProvider({ children }: Props) {
                   ...(prev.brand.colors || defaultColors),
                   ...(updatedConfigEntries?.brand?.colors || {})
                 }
-              : prev.brand.colors,
-            name: 'C&M'
+              : prev.brand.colors
           },
           trigger: {
             ...prev.trigger,
             // the stars aligned in the shittiest-most way making it so that the BE returns these as strings
-            ...objStringtoObjNum(updatedConfigEntries?.trigger)
+            ...objStringtoObjNum(triggerConfig)
           },
           script: {
             debugMode: true
@@ -81,7 +104,7 @@ export function ConfigProvider({ children }: Props) {
         }
       })
     },
-    [setConfig]
+    [setConfig, triggerConfig]
   )
 
   const value: ConfigContextType = {

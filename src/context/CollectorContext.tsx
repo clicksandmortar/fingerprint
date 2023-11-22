@@ -55,7 +55,7 @@ export function CollectorProvider({
     setConfigEntry,
     config: { trigger: config }
   } = useConfig()
-  const { visitor, session, setVisitor } = useVisitor()
+  const { visitor, setVisitor } = useVisitor()
   const {
     canNextTriggerOccur,
     startCooldown,
@@ -88,13 +88,61 @@ export function CollectorProvider({
   const { setIncompleteTriggers, visibleTriggers: visibleIncompleteTriggers } =
     useIncompleteTriggers()
 
+  const combinedTriggers = React.useMemo(
+    () => [...pageTriggers, ...visibleIncompleteTriggers],
+    [pageTriggers, visibleIncompleteTriggers]
+  )
+
+  const getIsBehaviourVisible = React.useCallback(
+    (type: Trigger['behaviour']) => {
+      if (displayTriggers.length === 0) return false
+      if (
+        displayTriggers.find(
+          (triggerId) =>
+            pageTriggers.find((trigger) => trigger.id === triggerId)
+              ?.behaviour === type
+        )
+      )
+        return true
+
+      return false
+    },
+    [displayTriggers, pageTriggers]
+  )
+
+  const setDisplayedTriggerByInvocation = React.useCallback(
+    (invocation: Trigger['invocation']) => {
+      const invokableTrigger = combinedTriggers.find(
+        (trigger) => trigger.invocation === invocation
+      )
+
+      if (!invokableTrigger) {
+        log('CollectorProvider: Trigger not invokable ', invokableTrigger)
+        return
+      }
+      if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+        log(
+          'CollectorProvider: Behaviour already visible, not showing trigger',
+          invokableTrigger
+        )
+        return
+      }
+
+      setDisplayedTriggers((ts) => [...ts, invokableTrigger.id])
+    },
+    [combinedTriggers, getIsBehaviourVisible, log]
+  )
   useEffect(() => {
     if (!visibleIncompleteTriggers?.length) return
 
     // TODO: eventually we may want support for multiple signals so this
     // will need to be refactored / reworked
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
-  }, [visibleIncompleteTriggers, setPageTriggersState])
+  }, [
+    visibleIncompleteTriggers,
+    setPageTriggersState,
+    setDisplayedTriggerByInvocation
+  ])
   /**
    * add triggers to existing ones, keep unique to prevent multi-firing
    */
@@ -138,12 +186,7 @@ export function CollectorProvider({
         prev.filter((trigger) => trigger.id !== id)
       )
     },
-    [displayTriggers, log, setPageTriggers]
-  )
-
-  const combinedTriggers = React.useMemo(
-    () => [...pageTriggers, ...visibleIncompleteTriggers],
-    [pageTriggers, visibleIncompleteTriggers]
+    [displayTriggers, log, setIncompleteTriggers]
   )
 
   const TriggerComponent = React.useCallback(():
@@ -205,47 +248,7 @@ export function CollectorProvider({
     if (!visibleIncompleteTriggers?.length) return
 
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
-  }, [visibleIncompleteTriggers])
-
-  const getIsBehaviourVisible = React.useCallback(
-    (type: Trigger['behaviour']) => {
-      if (displayTriggers.length === 0) return false
-      if (
-        displayTriggers.find(
-          (triggerId) =>
-            pageTriggers.find((trigger) => trigger.id === triggerId)
-              ?.behaviour === type
-        )
-      )
-        return true
-
-      return false
-    },
-    [displayTriggers, pageTriggers]
-  )
-
-  const setDisplayedTriggerByInvocation = React.useCallback(
-    (invocation: Trigger['invocation']) => {
-      const invokableTrigger = combinedTriggers.find(
-        (trigger) => trigger.invocation === invocation
-      )
-
-      if (!invokableTrigger) {
-        log('CollectorProvider: Trigger not invokable ', invokableTrigger)
-        return
-      }
-      if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
-        log(
-          'CollectorProvider: Behaviour already visible, not showing trigger',
-          invokableTrigger
-        )
-        return
-      }
-
-      setDisplayedTriggers((ts) => [...ts, invokableTrigger.id])
-    },
-    [combinedTriggers, setDisplayedTriggers, getIsBehaviourVisible]
-  )
+  }, [setDisplayedTriggerByInvocation, visibleIncompleteTriggers])
 
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return
@@ -288,7 +291,6 @@ export function CollectorProvider({
     setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT')
     startCooldown()
   }, [
-    displayTriggers?.length,
     hasDelayPassed,
     canNextTriggerOccur,
     log,
@@ -322,7 +324,47 @@ export function CollectorProvider({
      */
     log('CollectorProvider: attempting to fire on-page-load trigger')
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD')
-  }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation])
+  }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation])
+
+  const collectorCallback = React.useCallback(
+    async (response: Response) => {
+      const payload: CollectorVisitorResponse = await response.json()
+
+      log('Sent collector data, retrieved:', payload)
+
+      // Set IdleTimer
+      // @todo turn this into the dynamic value
+
+      setIdleTimeout(getIdleStatusDelay())
+      setPageTriggers(payload?.pageTriggers)
+      setConfigEntry(payload.config)
+      setIncompleteTriggers(payload?.incompleteTriggers || [])
+
+      const cohort = payload.intently ? 'intently' : 'fingerprint'
+      if (visitor.cohort !== cohort) setVisitor({ cohort })
+
+      log('CollectorProvider: collected data')
+      if (!payload.intently) {
+        // remove intently overlay here
+        log('CollectorProvider: user is in Fingerprint cohort')
+        setIntently(false)
+      } else {
+        // show intently overlay here
+        log('CollectorProvider: user is in Intently cohort')
+        setIntently(true)
+      }
+    },
+    [
+      log,
+      getIdleStatusDelay,
+      setPageTriggers,
+      setConfigEntry,
+      setIncompleteTriggers,
+      visitor.cohort,
+      setVisitor,
+      setIntently
+    ]
+  )
 
   const collectAndApplyVisitorInfo = React.useCallback(() => {
     if (!visitor.id) {
@@ -373,49 +415,20 @@ export function CollectorProvider({
           setIntently(true)
           return
         }
-
-        const payload: CollectorVisitorResponse = await response.json()
-
-        log('Sent collector data, retrieved:', payload)
-
-        // Set IdleTimer
-        // @todo turn this into the dynamic value
-        // @ED
-        setIdleTimeout(getIdleStatusDelay())
-        setPageTriggers(payload?.pageTriggers)
-        setConfigEntry(payload.config)
-        setIncompleteTriggers(payload?.incompleteTriggers || [])
-
-        const cohort = payload.intently ? 'intently' : 'fingerprint'
-        if (visitor.cohort !== cohort) setVisitor({ cohort })
-
-        if (!payload.intently) {
-          // remove intently overlay here
-          log('CollectorProvider: user is in Fingerprint cohort')
-          setIntently(false)
-        } else {
-          // show intently overlay here
-          log('CollectorProvider: user is in Intently cohort')
-          setIntently(true)
-        }
+        collectorCallback(response)
       })
+
       .catch((err) => {
         error('failed to store collected data', err)
       })
-    log('CollectorProvider: collected data')
   }, [
-    collect,
+    visitor.id,
     log,
-    error,
-    setVisitor,
-    visitor,
-    handlers,
-    getIdleStatusDelay,
-    setIncompleteTriggers,
-    setIdleTimeout,
+    collect,
     trackEvent,
-    setPageTriggers,
-    setConfigEntry
+    error,
+    collectorCallback,
+    setIntently
   ])
 
   const registerWatcher = React.useCallback(
@@ -448,19 +461,7 @@ export function CollectorProvider({
                 }
               ]
             })
-              .then(async (response: Response) => {
-                const payload: CollectorVisitorResponse = await response.json()
-
-                log('Sent collector data, retrieved:', payload)
-
-                // Set IdleTimer
-                // @todo turn this into the dynamic value
-                // @ED
-                setIdleTimeout(getIdleStatusDelay())
-                setPageTriggers(payload?.pageTriggers)
-                setConfigEntry(payload.config)
-                setIncompleteTriggers(payload?.incompleteTriggers || [])
-              })
+              .then(collectorCallback)
               .catch((err) => {
                 error('failed to store collected data', err)
               })
@@ -472,17 +473,7 @@ export function CollectorProvider({
 
       return intervalId
     },
-    [
-      collect,
-      error,
-      foundWatchers,
-      getIdleStatusDelay,
-      log,
-      session,
-      setIdleTimeout,
-      trackEvent,
-      visitor
-    ]
+    [collect, collectorCallback, error, foundWatchers, trackEvent]
   )
 
   useEffect(() => {

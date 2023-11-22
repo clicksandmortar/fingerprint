@@ -59,6 +59,10 @@ export type FingerprintProviderProps = {
   exitIntentTriggers?: boolean
   idleTriggers?: boolean
   pageLoadTriggers?: boolean
+  /**
+   * @deprecated
+   * Please use the portal to configure these values
+   */
   config?: FingerprintConfig
 }
 
@@ -75,7 +79,7 @@ export const FingerprintProvider = ({
   exitIntentTriggers = true,
   idleTriggers = true,
   pageLoadTriggers = true,
-  config
+  config: legacy_config
 }: FingerprintProviderProps) => {
   const [booted, setBooted] = useState(false)
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
@@ -118,7 +122,7 @@ export const FingerprintProvider = ({
   }
 
   return (
-    <ConfigProvider>
+    <ConfigProvider legacy_config={legacy_config}>
       <LoggingProvider debug={debug}>
         <QueryClientProvider client={queryClient}>
           <FingerprintContext.Provider
@@ -139,8 +143,7 @@ export const FingerprintProvider = ({
               initialDelay,
               idleTriggers,
               pageLoadTriggers,
-              exitIntentTriggers,
-              config
+              exitIntentTriggers
             }}
           >
             <VisitorProvider>
@@ -175,7 +178,6 @@ export interface FingerprintContextInterface {
   trackEvent: (event: Event) => void
   trackPageView: (pageView: PageView) => void
   unregisterHandler: (trigger: Trigger) => void
-  config?: FingerprintConfig
 }
 
 const defaultFingerprintState: FingerprintContextInterface = {
@@ -190,12 +192,7 @@ const defaultFingerprintState: FingerprintContextInterface = {
   registerHandler: () => {},
   trackEvent: () => {},
   trackPageView: () => {},
-  unregisterHandler: () => {},
-  config: {
-    idleDelay: undefined,
-    triggerCooldown: 60 * 1000,
-    exitIntentDelay: 0
-  }
+  unregisterHandler: () => {}
 }
 
 export const FingerprintContext = createContext<FingerprintContextInterface>({

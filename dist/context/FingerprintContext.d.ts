@@ -12,9 +12,13 @@ export declare type FingerprintProviderProps = {
     exitIntentTriggers?: boolean;
     idleTriggers?: boolean;
     pageLoadTriggers?: boolean;
+    /**
+     * @deprecated
+     * Please use the portal to configure these values
+     */
     config?: FingerprintConfig;
 };
-export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, config }: FingerprintProviderProps) => {} | null | undefined;
+export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, config: legacy_config }: FingerprintProviderProps) => {} | null | undefined;
 export interface FingerprintContextInterface {
     appId: string;
     booted: boolean;
@@ -28,6 +32,5 @@ export interface FingerprintContextInterface {
     trackEvent: (event: Event) => void;
     trackPageView: (pageView: PageView) => void;
     unregisterHandler: (trigger: Trigger) => void;
-    config?: FingerprintConfig;
 }
 export declare const FingerprintContext: React.Context<FingerprintContextInterface>;
