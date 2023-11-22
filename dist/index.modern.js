@@ -419,6 +419,43 @@ function useCollinsBookingComplete() {
   };
 }
 
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+    const [key, value] = cur.split('=');
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  const params = getReducedSearchParams();
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    params
+  };
+}
+function getReferrer() {
+  const params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
 const headers = {
   'Content-Type': 'application/json'
 };
@@ -496,6 +533,49 @@ const useCollectorMutation = () => {
   });
 };
 
+const getRecursivelyPotentialButton = el => {
+  var _el$nodeName;
+  if (!el) return null;
+  if (((_el$nodeName = el.nodeName) === null || _el$nodeName === void 0 ? void 0 : _el$nodeName.toLowerCase()) === 'button') return el;
+  if (el.parentElement) return getRecursivelyPotentialButton(el.parentElement);
+  return null;
+};
+function useButtonCollector() {
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  useEffect(() => {
+    if (isUndefined('document')) return;
+    if (!visitor.id) return;
+    const buttonClickListener = e => {
+      if (!e.target) return;
+      const potentialButton = getRecursivelyPotentialButton(e.target);
+      if (!potentialButton) return;
+      const button = potentialButton;
+      if (button.type === 'submit') return;
+      log('useButtonCollector: button clicked', {
+        button
+      });
+      collect({
+        button: {
+          id: button.id,
+          selector: button.innerText
+        }
+      });
+    };
+    document.addEventListener('click', buttonClickListener);
+    return () => {
+      document.removeEventListener('click', buttonClickListener);
+    };
+  }, [visitor]);
+}
+
 const useExitIntentDelay = (delay = 0) => {
   const {
     log
@@ -513,63 +593,13 @@ const useExitIntentDelay = (delay = 0) => {
   };
 };
 
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-    const [key, value] = cur.split('=');
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  const params = getReducedSearchParams();
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    params
-  };
-}
-function getReferrer() {
-  const params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
-
 const stringIsSubstringOf = (a, b) => {
   if (a === b) return true;
   if (!a || !b) return false;
   return a.toLowerCase().includes(b.toLowerCase());
 };
-function isEqual(nodeList1, nodeList2) {
-  if ((nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) !== (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length)) {
-    return false;
-  }
-  const largerList = (nodeList1 === null || nodeList1 === void 0 ? void 0 : nodeList1.length) > (nodeList2 === null || nodeList2 === void 0 ? void 0 : nodeList2.length) ? nodeList1 : nodeList2;
-  for (let i = 0; i < (largerList === null || largerList === void 0 ? void 0 : largerList.length); i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
 const bannedTypes = ['password', 'submit'];
 const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-const scanIntervalMs = 1000;
 function useFormCollector() {
   const {
     mutateAsync: collect
@@ -580,22 +610,12 @@ function useFormCollector() {
   const {
     log
   } = useLogging();
-  const [nodeList, setNodeList] = useState();
   useEffect(() => {
     if (isUndefined('document')) return;
-    const intId = setInterval(() => {
-      const forms = document.querySelectorAll('form');
-      if (isEqual(forms, nodeList)) return;
-      setNodeList(forms);
-    }, scanIntervalMs);
-    return () => clearInterval(intId);
-  }, [setNodeList, nodeList]);
-  useEffect(() => {
-    if (!nodeList) return;
     if (!visitor.id) return;
-    if (isUndefined('document')) return;
-    const forms = document.querySelectorAll('form');
     const formSubmitListener = e => {
+      var _e$target$nodeName;
+      if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
       const a = e === null || e === void 0 ? void 0 : e.target;
       const elements = Array.from(a.elements).filter(b => {
         if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;
@@ -634,18 +654,17 @@ function useFormCollector() {
         data
       });
       collect({
-        visitor,
         form: {
           data
         }
       });
     };
-    forms.forEach(f => f.removeEventListener('submit', formSubmitListener));
-    forms.forEach(f => f.addEventListener('submit', formSubmitListener));
+    document.removeEventListener('submit', formSubmitListener);
+    document.addEventListener('submit', formSubmitListener);
     return () => {
-      forms.forEach(f => f.removeEventListener('submit', formSubmitListener));
+      document.removeEventListener('submit', formSubmitListener);
     };
-  }, [visitor, nodeList]);
+  }, [visitor]);
 }
 
 /**
@@ -2845,11 +2864,11 @@ var _baseIsEqual = baseIsEqual;
  * object === other;
  * // => false
  */
-function isEqual$1(value, other) {
+function isEqual(value, other) {
   return _baseIsEqual(value, other);
 }
 
-var isEqual_1 = isEqual$1;
+var isEqual_1 = isEqual;
 
 const useIsElementVisible = () => {
   const getIsVisible = React__default.useCallback(selector => {
@@ -3247,7 +3266,6 @@ function CollectorProvider({
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
-  useFormCollector();
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return;
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
@@ -3378,6 +3396,8 @@ function CollectorProvider({
     skip: !booted,
     delay: initialDelay
   });
+  useFormCollector();
+  useButtonCollector();
   const onPresenseChange = React__default.useCallback(presence => {
     log('presence changed', presence);
   }, [log]);

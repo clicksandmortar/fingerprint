@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useLogging } from '../context/LoggingContext'
 import { useVisitor } from '../context/VisitorContext'
 import { isUndefined } from '../utils/page'
@@ -9,25 +9,6 @@ const stringIsSubstringOf = (a: string, b: string) => {
   if (!a || !b) return false
 
   return a.toLowerCase().includes(b.toLowerCase())
-}
-
-// scanning any deeper isn't necessary. The form fields and their values are picked up at submit-time.
-function isEqual(nodeList1: NodeList, nodeList2: NodeList) {
-  if (nodeList1?.length !== nodeList2?.length) {
-    return false
-  }
-
-  const largerList =
-    nodeList1?.length > nodeList2?.length ? nodeList1 : nodeList2
-
-  // classic for loops are most performant 🤷🏻‍♀️
-  for (let i = 0; i < largerList?.length; i++) {
-    if (nodeList1[i] !== nodeList2[i]) {
-      return false
-    }
-  }
-
-  return true
 }
 
 const bannedTypes = ['password', 'submit']
@@ -41,8 +22,6 @@ const bannedFieldPartialNames = [
   'pass',
   'card'
 ]
-
-const scanIntervalMs = 1000
 
 /**
  * Hook into forms on the page and collect their data
@@ -65,30 +44,15 @@ export default function useFormCollector() {
   const { mutateAsync: collect } = useCollectorMutation()
   const { visitor } = useVisitor()
   const { log } = useLogging()
-  // any, just because TS complains about NodeList not being iterable
-  const [nodeList, setNodeList] = useState<any>()
 
   useEffect(() => {
     if (isUndefined('document')) return
 
-    const intId = setInterval(() => {
-      const forms = document.querySelectorAll('form')
-      if (isEqual(forms, nodeList)) return
-
-      setNodeList(forms)
-    }, scanIntervalMs)
-
-    return () => clearInterval(intId)
-  }, [setNodeList, nodeList])
-
-  useEffect(() => {
-    if (!nodeList) return
     if (!visitor.id) return
-    if (isUndefined('document')) return
-
-    const forms = document.querySelectorAll('form')
 
     const formSubmitListener = (e: any) => {
+      if (e.target.nodeName?.toLowerCase() !== 'form') return
+
       const a = e?.target as HTMLFormElement
 
       const elements = Array.from(a.elements).filter((b: HTMLFormElement) => {
@@ -138,7 +102,6 @@ export default function useFormCollector() {
       log('useFormCollector: form submitted', { data })
 
       collect({
-        visitor,
         form: {
           data
         }
@@ -146,11 +109,11 @@ export default function useFormCollector() {
     }
 
     // reset listeners, so we never end up listening to the same form twice
-    forms.forEach((f) => f.removeEventListener('submit', formSubmitListener))
-    forms.forEach((f) => f.addEventListener('submit', formSubmitListener))
+    document.removeEventListener('submit', formSubmitListener)
+    document.addEventListener('submit', formSubmitListener)
 
     return () => {
-      forms.forEach((f) => f.removeEventListener('submit', formSubmitListener))
+      document.removeEventListener('submit', formSubmitListener)
     }
-  }, [visitor, nodeList])
+  }, [visitor])
 }

@@ -10,6 +10,7 @@ import {
   Trigger
 } from '../client/types'
 import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
+import useButtonCollector from '../hooks/useButtonCollector'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
@@ -321,8 +322,6 @@ export function CollectorProvider({
     })
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
 
-  useFormCollector()
-
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return
     if (!pageTriggers?.length) return
@@ -542,6 +541,9 @@ export function CollectorProvider({
     skip: !booted,
     delay: initialDelay
   })
+
+  useFormCollector()
+  useButtonCollector()
 
   const onPresenseChange = React.useCallback(
     (presence: PresenceType) => {
