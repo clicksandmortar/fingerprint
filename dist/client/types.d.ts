@@ -88,7 +88,6 @@ export declare type FingerprintConfig = {
     exitIntentDelay?: number;
     idleDelay?: number;
     triggerCooldown?: number;
-    triggerConfig?: TriggerConfig;
 };
 declare type ScriptConfig = {
     debugMode: boolean;

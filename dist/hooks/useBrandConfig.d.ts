@@ -2,7 +2,7 @@ import { Config } from '../client/types';
 import { SupportedBrand } from '../utils/brand';
 export declare const useConfig: () => {
     config: Config;
-    setConfigEntry: (config: Partial<Config>) => void;
+    setConfig: (config: Partial<Config>) => void;
 };
 export declare const useBrand: () => SupportedBrand | null;
 export declare const useTriggerConfig: () => {
