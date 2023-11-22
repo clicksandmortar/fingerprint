@@ -14,6 +14,9 @@ export const getButtonSelector = (el: HTMLButtonElement) => {
   return `button.${selectifiedClassName}`
 }
 
+// When a user clicks an element inside a button, it will be the target of the click event
+// To make sure we target the actual button, we need to recursively check the parent elements
+// until we find a button. If one isn't located - we return null
 const getRecursivelyPotentialButton = (el: Element): Element | null => {
   if (!el) return null
   if (el.nodeName?.toLowerCase() === 'button') return el
