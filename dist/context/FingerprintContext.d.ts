@@ -8,7 +8,7 @@ export declare type FingerprintProviderProps = {
     consentCallback?: () => boolean;
     /**
      * @deprecated
-     * Please use the portal to configure these values
+     * Please use the portal to configure these values. Until then this will act as override
      */
     debug?: boolean;
     defaultHandlers?: Trigger[];
@@ -18,7 +18,7 @@ export declare type FingerprintProviderProps = {
     pageLoadTriggers?: boolean;
     /**
      * @deprecated
-     * Please use the portal to configure these values
+     * Please use the portal to configure these values. Until then this will act as override
      */
     config?: FingerprintConfig;
 };
