@@ -163,7 +163,7 @@ function ConfigProvider(_ref) {
     config = _useState[0],
     setConfigState = _useState[1];
   var log = React__default.useCallback(function () {
-    if (config.script.debugMode || legacy_config !== null && legacy_config !== void 0 && legacy_config.debugMode) {
+    if (config.script.debugMode) {
       var _console;
       for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
         params[_key] = arguments[_key];
@@ -177,15 +177,11 @@ function ConfigProvider(_ref) {
     var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
     if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
     setConfigState(function (prev) {
-      var _updatedConfigEntries2;
       return _extends({}, prev, updatedConfigEntries, {
         brand: _extends({}, prev.brand, updatedConfigEntries.brand, {
           colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, argColors || {}) : prev.brand.colors
         }),
-        trigger: _extends({}, prev.trigger, objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))),
-        script: _extends({}, prev.script, {
-          debugMode: (legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.debugMode) || (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.script) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.debugMode)
-        })
+        trigger: _extends({}, prev.trigger, objStringtoObjNum(LEGACY_merge_config(prev, legacy_config)))
       });
     });
   }, [setConfigState]);
@@ -5139,7 +5135,6 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     _ref$consent = _ref.consent,
     consent = _ref$consent === void 0 ? false : _ref$consent,
     consentCallback = _ref.consentCallback,
-    legacy_debug = _ref.debug,
     defaultHandlers = _ref.defaultHandlers,
     _ref$initialDelay = _ref.initialDelay,
     initialDelay = _ref$initialDelay === void 0 ? 0 : _ref$initialDelay,
@@ -5183,9 +5178,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     return children;
   }
   return React__default.createElement(ConfigProvider, {
-    legacy_config: _extends({}, legacy_config, {
-      debugMode: legacy_debug
-    })
+    legacy_config: legacy_config
   }, React__default.createElement(LoggingProvider, null, React__default.createElement(reactQuery.QueryClientProvider, {
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {

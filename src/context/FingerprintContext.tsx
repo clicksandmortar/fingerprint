@@ -55,9 +55,10 @@ export type FingerprintProviderProps = {
   consentCallback?: () => boolean
   /**
    * @deprecated
-   * Please use the portal to configure these values. Until then this will act as override
+   * This debug param is no longer used.
+   * Please use the portal to configure these values.
    */
-  debug?: boolean
+  debug: never
   defaultHandlers?: Trigger[]
   initialDelay?: number
   exitIntentTriggers?: boolean
@@ -77,7 +78,6 @@ export const FingerprintProvider = ({
   children,
   consent = false,
   consentCallback,
-  debug: legacy_debug,
   defaultHandlers,
   initialDelay = 0,
   exitIntentTriggers = true,
@@ -106,11 +106,8 @@ export const FingerprintProvider = ({
     if (!consentGiven) return
 
     const performBoot = async () => {
-      // @todo this should be invoked when booted.
-      // It will call out to the API to confirm the
-      // appId is valid and return the app configuration.
-
-      // gonna fetch some nice configs here bruv
+      // TODO: since all the config is being retrieve on any API call including /collect
+      // we can probably remove this TODO. It is redundant.
       setBooted(true)
     }
 
@@ -126,12 +123,7 @@ export const FingerprintProvider = ({
   }
 
   return (
-    <ConfigProvider
-      legacy_config={{
-        ...legacy_config,
-        debugMode: legacy_debug
-      }}
-    >
+    <ConfigProvider legacy_config={legacy_config}>
       <LoggingProvider>
         <QueryClientProvider client={queryClient}>
           <FingerprintContext.Provider

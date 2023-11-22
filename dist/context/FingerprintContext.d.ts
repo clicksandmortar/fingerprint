@@ -8,9 +8,10 @@ export declare type FingerprintProviderProps = {
     consentCallback?: () => boolean;
     /**
      * @deprecated
-     * Please use the portal to configure these values. Until then this will act as override
+     * This debug param is no longer used.
+     * Please use the portal to configure these values.
      */
-    debug?: boolean;
+    debug: never;
     defaultHandlers?: Trigger[];
     initialDelay?: number;
     exitIntentTriggers?: boolean;
@@ -22,7 +23,7 @@ export declare type FingerprintProviderProps = {
      */
     config?: FingerprintConfig;
 };
-export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug: legacy_debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, config: legacy_config }: FingerprintProviderProps) => {} | null | undefined;
+export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, config: legacy_config }: FingerprintProviderProps) => {} | null | undefined;
 export interface FingerprintContextInterface {
     appId: string;
     booted: boolean;

@@ -141,7 +141,7 @@ function ConfigProvider({
 }) {
   const [config, setConfigState] = useState(defaultConfig);
   const log = React__default.useCallback((...params) => {
-    if (config.script.debugMode || legacy_config !== null && legacy_config !== void 0 && legacy_config.debugMode) {
+    if (config.script.debugMode) {
       console.log('[ConfigProvider]', ...params);
     }
   }, [config, legacy_config]);
@@ -151,7 +151,6 @@ function ConfigProvider({
     const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
     if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
     setConfigState(prev => {
-      var _updatedConfigEntries2;
       return {
         ...prev,
         ...updatedConfigEntries,
@@ -166,10 +165,6 @@ function ConfigProvider({
         trigger: {
           ...prev.trigger,
           ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
-        },
-        script: {
-          ...prev.script,
-          debugMode: (legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.debugMode) || (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.script) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.debugMode)
         }
       };
     });
@@ -5628,7 +5623,6 @@ const FingerprintProvider = ({
   children,
   consent: _consent = false,
   consentCallback,
-  debug: legacy_debug,
   defaultHandlers,
   initialDelay: _initialDelay = 0,
   exitIntentTriggers: _exitIntentTriggers = true,
@@ -5660,10 +5654,7 @@ const FingerprintProvider = ({
     return children;
   }
   return React__default.createElement(ConfigProvider, {
-    legacy_config: {
-      ...legacy_config,
-      debugMode: legacy_debug
-    }
+    legacy_config: legacy_config
   }, React__default.createElement(LoggingProvider, null, React__default.createElement(QueryClientProvider, {
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {

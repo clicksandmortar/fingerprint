@@ -55,7 +55,7 @@ const LEGACY_merge_config = (
 })
 
 type Props = PropsWithChildren<{
-  legacy_config?: FingerprintProviderProps['config'] & { debugMode?: boolean }
+  legacy_config?: FingerprintProviderProps['config']
 }>
 
 // having to do this because the config is stored as a string
@@ -76,7 +76,7 @@ export function ConfigProvider({ children, legacy_config }: Props) {
   // so log along with some other stuff won't work here.
   const log = React.useCallback(
     (...params) => {
-      if (config.script.debugMode || legacy_config?.debugMode) {
+      if (config.script.debugMode) {
         console.log('[ConfigProvider]', ...params)
       } else () => {}
     },
@@ -118,12 +118,6 @@ export function ConfigProvider({ children, legacy_config }: Props) {
             ...prev.trigger,
             // the stars aligned in the shittiest-most way making it so that the BE returns these as strings
             ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
-          },
-          script: {
-            ...prev.script,
-            debugMode:
-              legacy_config?.debugMode ||
-              updatedConfigEntries?.script?.debugMode
           }
         }
       })
