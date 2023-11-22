@@ -1,6 +1,1 @@
-export const useHostname = (): string => {
-  if (window?.location !== undefined) {
-    return window.location.hostname;
-  }
-  return '';
-}
+export const useHostname = (): string => window?.location?.hostname || ''

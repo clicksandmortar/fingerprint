@@ -9,6 +9,20 @@ export type CollectorUpdate = {
   referrer?: Referrer | undefined
   elements?: PageElement[] | undefined
   account?: Account | undefined
+  form?: Form | undefined
+  button?: Button | undefined
+}
+
+export type Button = {
+  id?: string
+  selector?: string
+  path?: string
+}
+
+export type Form = {
+  data: {
+    [key: string]: any
+  }
 }
 
 export type Account = {
@@ -44,20 +58,35 @@ export type Referrer = {
   }
 }
 
+export type IncompleteTrigger = Trigger & {
+  signals: [
+    {
+      // @TODO: there will be more of these, extract to a type
+      op: 'CanSeeElementOnPage'
+      parameters: {
+        selector: string
+      }
+    }
+  ]
+}
+
 export type CollectorVisitorResponse = {
   firstSeen: Date
   lastSeen: Date
   visits: number
   pageTriggers: Trigger[]
   config: Config
+  incompleteTriggers?: IncompleteTrigger[]
   // @todo remove this temp hack once split testing with Intently is complete
   intently: boolean
 }
+
 export type Invocation =
   | 'INVOCATION_UNSPECIFIED'
   | 'INVOCATION_IDLE_TIME'
   | 'INVOCATION_EXIT_INTENT'
   | 'INVOCATION_PAGE_LOAD'
+  | 'INVOCATION_ELEMENT_VISIBLE'
 
 export type Trigger = {
   id: string

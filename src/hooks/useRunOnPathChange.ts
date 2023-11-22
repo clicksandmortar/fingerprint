@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLogging } from '../context/LoggingContext'
 
 type FuncProp = () => void
@@ -6,29 +6,37 @@ type Config = {
   skip?: boolean
   delay?: number
 }
+
+const reattemptIntervalMs = 500
+
 // takes a function and runs it when the path changes
 // optionally takes a skip condition and init delay
+// @TODO: add support for multiple funcs so we can contain all of them in a single listener if needed
+
 const useRunOnPathChange = (func: FuncProp, config?: Config) => {
-  const [lastCollectedPath, setLastCollectedPath] = useState<string>('')
+  const [lastCollectedHref, setLastCollectedHref] = useState<string>('')
+
   const { log } = useLogging()
 
-  useEffect(() => {
+  const run = React.useCallback(() => {
     if (config?.skip) return
-    if (!location.pathname) return
-    if (location.pathname === lastCollectedPath) return
+    if (!location.href) return
+    if (location.href === lastCollectedHref) return
 
-    // added timeout to prevent occasional double firing on page load
-    const tId = setTimeout(() => {
-      log('useRunOnPathChange: running for path: ', location.pathname)
+    log('useRunOnPathChange: running for path: ', location.href)
+    setLastCollectedHref(location.href)
 
-      setLastCollectedPath(location.pathname)
-      func()
-    }, config?.delay || 300)
+    func()
+  }, [func, config, lastCollectedHref])
 
-    return () => {
-      clearTimeout(tId)
-    }
-  }, [location.pathname, func, setLastCollectedPath, config])
+  useEffect(() => {
+    log(
+      `useRunOnPathChange: running for every path change with ${reattemptIntervalMs} MS`
+    )
+    const iId = setInterval(run, reattemptIntervalMs)
+
+    return () => clearInterval(iId)
+  }, [run])
 }
 
 export default useRunOnPathChange

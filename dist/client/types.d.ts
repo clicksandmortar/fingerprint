@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { TriggerConfig } from '../components/modals/StandardModal/helpers';
+import { SupportedBrand } from '../utils/brand';
 import { Visitor } from '../visitors/types';
 export declare type CollectorUpdate = {
     appId?: string;
@@ -10,6 +10,12 @@ export declare type CollectorUpdate = {
     elements?: PageElement[] | undefined;
     account?: Account | undefined;
     form?: Form | undefined;
+    button?: Button | undefined;
+};
+export declare type Button = {
+    id?: string;
+    selector?: string;
+    path?: string;
 };
 export declare type Form = {
     data: {
@@ -45,14 +51,24 @@ export declare type Referrer = {
         term?: string;
     };
 };
+export declare type IncompleteTrigger = Trigger & {
+    signals: [{
+        op: 'CanSeeElementOnPage';
+        parameters: {
+            selector: string;
+        };
+    }];
+};
 export declare type CollectorVisitorResponse = {
     firstSeen: Date;
     lastSeen: Date;
     visits: number;
     pageTriggers: Trigger[];
+    config: Config;
+    incompleteTriggers?: IncompleteTrigger[];
     intently: boolean;
 };
-export declare type Invocation = 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD';
+export declare type Invocation = 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD' | 'INVOCATION_ELEMENT_VISIBLE';
 export declare type Trigger = {
     id: string;
     invocation?: Invocation;
@@ -74,3 +90,28 @@ export declare type FingerprintConfig = {
     triggerCooldown?: number;
     triggerConfig?: TriggerConfig;
 };
+declare type ScriptConfig = {
+    debugMode: boolean;
+};
+declare type TriggerConfig = {
+    userIdleThresholdSecs: number;
+    displayTriggerAfterSecs: number;
+    triggerCooldownSecs: number;
+};
+declare type BrandConfig = {
+    name: SupportedBrand;
+    colors?: {
+        backgroundPrimary: string;
+        backgroundPrimaryDimmed: string;
+        backgroundSecondary: string;
+        shadeOfGrey: string;
+        textPrimary: string;
+        greyText: string;
+    };
+};
+export declare type Config = {
+    script: ScriptConfig;
+    trigger: TriggerConfig;
+    brand: BrandConfig;
+};
+export {};
