@@ -162,8 +162,15 @@ function ConfigProvider(_ref) {
   var _useState = React.useState(defaultConfig),
     config = _useState[0],
     setConfigState = _useState[1];
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
+  var log = React__default.useCallback(function () {
+    if (config.script.debugMode || legacy_config !== null && legacy_config !== void 0 && legacy_config.debugMode) {
+      var _console;
+      for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+        params[_key] = arguments[_key];
+      }
+      (_console = console).log.apply(_console, ['[ConfigProvider]'].concat(params));
+    }
+  }, [config, legacy_config]);
   var setConfig = React__default.useCallback(function (updatedConfigEntries) {
     var _updatedConfigEntries;
     var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
@@ -187,7 +194,7 @@ function ConfigProvider(_ref) {
     setConfig: setConfig
   };
   React.useEffect(function () {
-    log('ConfigProvider: config in use:', config);
+    log('config in use:', config);
   }, [config]);
   return React__default.createElement(ConfigContext.Provider, {
     value: value

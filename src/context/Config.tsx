@@ -7,7 +7,6 @@ import React, {
 import { Config } from '../client/types'
 import { haveBrandColorsBeenConfigured } from '../utils/brand'
 import { FingerprintProviderProps } from './FingerprintContext'
-import { useLogging } from './LoggingContext'
 
 // 27 233 237 - dimmed, 41 100 249 - main, 13 14 49 - text Secondary, white primary, 226 226 226 greyBg, some dark grey text ?
 
@@ -70,12 +69,19 @@ const objStringtoObjNum = (obj: any) => {
 
   return newObj
 }
-
-// NOTE that this is the top level wrapper
-// so log along with some other stuff won't work here.
 export function ConfigProvider({ children, legacy_config }: Props) {
   const [config, setConfigState] = useState<Config>(defaultConfig)
-  const { log } = useLogging()
+
+  // NOTE that this is the top level wrapper
+  // so log along with some other stuff won't work here.
+  const log = React.useCallback(
+    (...params) => {
+      if (config.script.debugMode || legacy_config?.debugMode) {
+        console.log('[ConfigProvider]', ...params)
+      } else () => {}
+    },
+    [config, legacy_config]
+  )
 
   // This is super messy. I know. Once we get rid of the legacy behaviour this should become
   //  much clearer
@@ -131,7 +137,7 @@ export function ConfigProvider({ children, legacy_config }: Props) {
   }
 
   useEffect(() => {
-    log('ConfigProvider: config in use:', config)
+    log('config in use:', config)
   }, [config])
 
   return (
