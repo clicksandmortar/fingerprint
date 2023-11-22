@@ -1,6 +1,5 @@
 import React from 'react';
 export declare type LoggingProviderProps = {
-    debug?: boolean;
     children?: React.ReactNode;
 };
 export declare type LoggingContextInterface = {

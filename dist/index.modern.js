@@ -139,16 +139,17 @@ function ConfigProvider({
   children,
   legacy_config
 }) {
-  const [config, setConfig] = useState(defaultConfig);
+  const [config, setConfigState] = useState(defaultConfig);
   const {
     log
   } = useLogging();
-  const setConfigEntry = React__default.useCallback(updatedConfigEntries => {
+  const setConfig = React__default.useCallback(updatedConfigEntries => {
     var _updatedConfigEntries;
     const argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
     const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
-    if (shouldUpdateColors) log('setConfigEntry: setting brand colors from portal config', argColors);else log('setConfigEntry: keeping colors in state || fallback to default');
-    setConfig(prev => {
+    if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
+    setConfigState(prev => {
+      var _updatedConfigEntries2;
       return {
         ...prev,
         ...updatedConfigEntries,
@@ -165,23 +166,27 @@ function ConfigProvider({
           ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
         },
         script: {
-          debugMode: true
+          ...prev.script,
+          debugMode: (legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.debugMode) || (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.script) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.debugMode)
         }
       };
     });
-  }, [setConfig]);
+  }, [setConfigState]);
   const value = {
     config,
-    setConfigEntry
+    setConfig
   };
+  useEffect(() => {
+    log('ConfigProvider: config in use:', config);
+  }, [config]);
   return React__default.createElement(ConfigContext.Provider, {
     value: value
   }, children);
 }
 const ConfigContext = createContext({
   config: defaultConfig,
-  setConfigEntry: () => {
-    console.error('ConfigContext: setConfigEntry not implemented');
+  setConfig: () => {
+    console.error('ConfigContext: setConfig not implemented');
   }
 });
 
@@ -3221,7 +3226,7 @@ function CollectorProvider({
     pageLoadTriggers
   } = useFingerprint();
   const {
-    setConfigEntry,
+    setConfig,
     config: {
       trigger: config
     }
@@ -3388,7 +3393,7 @@ function CollectorProvider({
     log('Sent collector data, retrieved:', payload);
     setIdleTimeout(getIdleStatusDelay());
     setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-    setConfigEntry(payload.config);
+    setConfig(payload.config);
     setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
     const cohort = payload.intently ? 'intently' : 'fingerprint';
     if (visitor.cohort !== cohort) setVisitor({
@@ -3402,7 +3407,7 @@ function CollectorProvider({
       log('CollectorProvider: user is in Intently cohort');
       setIntently(true);
     }
-  }, [log, getIdleStatusDelay, setPageTriggers, setConfigEntry, setIncompleteTriggers, visitor.cohort, setVisitor, setIntently]);
+  }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setVisitor, setIntently]);
   const collectAndApplyVisitorInfo = React__default.useCallback(() => {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
@@ -5621,7 +5626,7 @@ const FingerprintProvider = ({
   children,
   consent: _consent = false,
   consentCallback,
-  debug,
+  debug: legacy_debug,
   defaultHandlers,
   initialDelay: _initialDelay = 0,
   exitIntentTriggers: _exitIntentTriggers = true,
@@ -5653,10 +5658,11 @@ const FingerprintProvider = ({
     return children;
   }
   return React__default.createElement(ConfigProvider, {
-    legacy_config: legacy_config
-  }, React__default.createElement(LoggingProvider, {
-    debug: debug
-  }, React__default.createElement(QueryClientProvider, {
+    legacy_config: {
+      ...legacy_config,
+      debugMode: legacy_debug
+    }
+  }, React__default.createElement(LoggingProvider, null, React__default.createElement(QueryClientProvider, {
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {
     value: {

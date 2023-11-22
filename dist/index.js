@@ -161,38 +161,42 @@ function ConfigProvider(_ref) {
     legacy_config = _ref.legacy_config;
   var _useState = React.useState(defaultConfig),
     config = _useState[0],
-    setConfig = _useState[1];
+    setConfigState = _useState[1];
   var _useLogging = useLogging(),
     log = _useLogging.log;
-  var setConfigEntry = React__default.useCallback(function (updatedConfigEntries) {
+  var setConfig = React__default.useCallback(function (updatedConfigEntries) {
     var _updatedConfigEntries;
     var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
     var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
-    if (shouldUpdateColors) log('setConfigEntry: setting brand colors from portal config', argColors);else log('setConfigEntry: keeping colors in state || fallback to default');
-    setConfig(function (prev) {
+    if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
+    setConfigState(function (prev) {
+      var _updatedConfigEntries2;
       return _extends({}, prev, updatedConfigEntries, {
         brand: _extends({}, prev.brand, updatedConfigEntries.brand, {
           colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, argColors || {}) : prev.brand.colors
         }),
         trigger: _extends({}, prev.trigger, objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))),
-        script: {
-          debugMode: true
-        }
+        script: _extends({}, prev.script, {
+          debugMode: (legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.debugMode) || (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.script) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.debugMode)
+        })
       });
     });
-  }, [setConfig]);
+  }, [setConfigState]);
   var value = {
     config: config,
-    setConfigEntry: setConfigEntry
+    setConfig: setConfig
   };
+  React.useEffect(function () {
+    log('ConfigProvider: config in use:', config);
+  }, [config]);
   return React__default.createElement(ConfigContext.Provider, {
     value: value
   }, children);
 }
 var ConfigContext = React.createContext({
   config: defaultConfig,
-  setConfigEntry: function setConfigEntry() {
-    console.error('ConfigContext: setConfigEntry not implemented');
+  setConfig: function setConfig() {
+    console.error('ConfigContext: setConfig not implemented');
   }
 });
 
@@ -3268,7 +3272,7 @@ function CollectorProvider(_ref) {
     idleTriggers = _useFingerprint.idleTriggers,
     pageLoadTriggers = _useFingerprint.pageLoadTriggers;
   var _useConfig = useConfig(),
-    setConfigEntry = _useConfig.setConfigEntry,
+    setConfig = _useConfig.setConfig,
     config = _useConfig.config.trigger;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
@@ -3455,7 +3459,7 @@ function CollectorProvider(_ref) {
         log('Sent collector data, retrieved:', payload);
         setIdleTimeout(getIdleStatusDelay());
         setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-        setConfigEntry(payload.config);
+        setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         var cohort = payload.intently ? 'intently' : 'fingerprint';
         if (visitor.cohort !== cohort) setVisitor({
@@ -3473,7 +3477,7 @@ function CollectorProvider(_ref) {
     } catch (e) {
       return Promise.reject(e);
     }
-  }, [log, getIdleStatusDelay, setPageTriggers, setConfigEntry, setIncompleteTriggers, visitor.cohort, setVisitor, setIntently]);
+  }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setVisitor, setIntently]);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
@@ -5128,7 +5132,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     _ref$consent = _ref.consent,
     consent = _ref$consent === void 0 ? false : _ref$consent,
     consentCallback = _ref.consentCallback,
-    debug = _ref.debug,
+    legacy_debug = _ref.debug,
     defaultHandlers = _ref.defaultHandlers,
     _ref$initialDelay = _ref.initialDelay,
     initialDelay = _ref$initialDelay === void 0 ? 0 : _ref$initialDelay,
@@ -5172,10 +5176,10 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     return children;
   }
   return React__default.createElement(ConfigProvider, {
-    legacy_config: legacy_config
-  }, React__default.createElement(LoggingProvider, {
-    debug: debug
-  }, React__default.createElement(reactQuery.QueryClientProvider, {
+    legacy_config: _extends({}, legacy_config, {
+      debugMode: legacy_debug
+    })
+  }, React__default.createElement(LoggingProvider, null, React__default.createElement(reactQuery.QueryClientProvider, {
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {
     value: {

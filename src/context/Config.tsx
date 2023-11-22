@@ -1,4 +1,9 @@
-import React, { PropsWithChildren, createContext, useState } from 'react'
+import React, {
+  PropsWithChildren,
+  createContext,
+  useEffect,
+  useState
+} from 'react'
 import { Config } from '../client/types'
 import { haveBrandColorsBeenConfigured } from '../utils/brand'
 import { FingerprintProviderProps } from './FingerprintContext'
@@ -51,7 +56,7 @@ const LEGACY_merge_config = (
 })
 
 type Props = PropsWithChildren<{
-  legacy_config?: FingerprintProviderProps['config']
+  legacy_config?: FingerprintProviderProps['config'] & { debugMode?: boolean }
 }>
 
 // having to do this because the config is stored as a string
@@ -69,12 +74,12 @@ const objStringtoObjNum = (obj: any) => {
 // NOTE that this is the top level wrapper
 // so log along with some other stuff won't work here.
 export function ConfigProvider({ children, legacy_config }: Props) {
-  const [config, setConfig] = useState<Config>(defaultConfig)
+  const [config, setConfigState] = useState<Config>(defaultConfig)
   const { log } = useLogging()
 
   // This is super messy. I know. Once we get rid of the legacy behaviour this should become
   //  much clearer
-  const setConfigEntry = React.useCallback(
+  const setConfig = React.useCallback(
     (updatedConfigEntries: Config) => {
       // if the colors have been configured, we want to use the colors from the portal
       // if not - keep the default ones
@@ -82,13 +87,10 @@ export function ConfigProvider({ children, legacy_config }: Props) {
       const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors)
 
       if (shouldUpdateColors)
-        log(
-          'setConfigEntry: setting brand colors from portal config',
-          argColors
-        )
-      else log('setConfigEntry: keeping colors in state || fallback to default')
+        log('setConfig: setting brand colors from portal config', argColors)
+      else log('setConfig: keeping colors in state || fallback to default')
 
-      setConfig((prev) => {
+      setConfigState((prev) => {
         return {
           ...prev,
           ...updatedConfigEntries,
@@ -112,18 +114,25 @@ export function ConfigProvider({ children, legacy_config }: Props) {
             ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
           },
           script: {
-            debugMode: true
+            ...prev.script,
+            debugMode:
+              legacy_config?.debugMode ||
+              updatedConfigEntries?.script?.debugMode
           }
         }
       })
     },
-    [setConfig]
+    [setConfigState]
   )
 
   const value: ConfigContextType = {
     config,
-    setConfigEntry
+    setConfig
   }
+
+  useEffect(() => {
+    log('ConfigProvider: config in use:', config)
+  }, [config])
 
   return (
     <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>
@@ -132,12 +141,12 @@ export function ConfigProvider({ children, legacy_config }: Props) {
 
 type ConfigContextType = {
   config: Config
-  setConfigEntry: (config: Partial<Config>) => void
+  setConfig: (config: Partial<Config>) => void
 }
 
 export const ConfigContext = createContext<ConfigContextType>({
   config: defaultConfig,
-  setConfigEntry: () => {
-    console.error('ConfigContext: setConfigEntry not implemented')
+  setConfig: () => {
+    console.error('ConfigContext: setConfig not implemented')
   }
 })

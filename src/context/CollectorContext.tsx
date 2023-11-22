@@ -52,7 +52,7 @@ export function CollectorProvider({
     pageLoadTriggers
   } = useFingerprint()
   const {
-    setConfigEntry,
+    setConfig,
     config: { trigger: config }
   } = useConfig()
   const { visitor, setVisitor } = useVisitor()
@@ -337,7 +337,7 @@ export function CollectorProvider({
 
       setIdleTimeout(getIdleStatusDelay())
       setPageTriggers(payload?.pageTriggers)
-      setConfigEntry(payload.config)
+      setConfig(payload.config)
       setIncompleteTriggers(payload?.incompleteTriggers || [])
 
       const cohort = payload.intently ? 'intently' : 'fingerprint'
@@ -358,7 +358,7 @@ export function CollectorProvider({
       log,
       getIdleStatusDelay,
       setPageTriggers,
-      setConfigEntry,
+      setConfig,
       setIncompleteTriggers,
       visitor.cohort,
       setVisitor,

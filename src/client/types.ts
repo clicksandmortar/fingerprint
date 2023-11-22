@@ -115,8 +115,6 @@ export type FingerprintConfig = {
   exitIntentDelay?: number
   idleDelay?: number
   triggerCooldown?: number
-  // only applies to C&M Standard Modal
-  triggerConfig?: TriggerConfig
 }
 
 type ScriptConfig = {

@@ -6,6 +6,10 @@ export declare type FingerprintProviderProps = {
     children?: React.ReactNode;
     consent?: boolean;
     consentCallback?: () => boolean;
+    /**
+     * @deprecated
+     * Please use the portal to configure these values
+     */
     debug?: boolean;
     defaultHandlers?: Trigger[];
     initialDelay?: number;
@@ -18,7 +22,7 @@ export declare type FingerprintProviderProps = {
      */
     config?: FingerprintConfig;
 };
-export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, config: legacy_config }: FingerprintProviderProps) => {} | null | undefined;
+export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, debug: legacy_debug, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, config: legacy_config }: FingerprintProviderProps) => {} | null | undefined;
 export interface FingerprintContextInterface {
     appId: string;
     booted: boolean;

@@ -53,6 +53,10 @@ export type FingerprintProviderProps = {
   children?: React.ReactNode
   consent?: boolean
   consentCallback?: () => boolean
+  /**
+   * @deprecated
+   * Please use the portal to configure these values
+   */
   debug?: boolean
   defaultHandlers?: Trigger[]
   initialDelay?: number
@@ -73,7 +77,7 @@ export const FingerprintProvider = ({
   children,
   consent = false,
   consentCallback,
-  debug,
+  debug: legacy_debug,
   defaultHandlers,
   initialDelay = 0,
   exitIntentTriggers = true,
@@ -122,8 +126,13 @@ export const FingerprintProvider = ({
   }
 
   return (
-    <ConfigProvider legacy_config={legacy_config}>
-      <LoggingProvider debug={debug}>
+    <ConfigProvider
+      legacy_config={{
+        ...legacy_config,
+        debugMode: legacy_debug
+      }}
+    >
+      <LoggingProvider>
         <QueryClientProvider client={queryClient}>
           <FingerprintContext.Provider
             value={{
