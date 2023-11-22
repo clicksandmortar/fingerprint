@@ -366,6 +366,7 @@ export function CollectorProvider({
       })
         .then(async (response: Response) => {
           const payload: CollectorVisitorResponse = await response.json()
+          setPageTriggers(payload?.pageTriggers)
 
           log('Sent login collector data, retrieved:', payload)
         })
@@ -538,6 +539,11 @@ export function CollectorProvider({
   })
 
   useRunOnPathChange(collectAndApplyVisitorInfo, {
+    skip: !booted,
+    delay: initialDelay
+  })
+
+  useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
     delay: initialDelay
   })
