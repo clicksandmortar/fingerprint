@@ -94,6 +94,32 @@ function getEnvVars() {
   };
 }
 
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+var _LEGACY_getBrand = function _LEGACY_getBrand() {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+var haveBrandColorsBeenConfigured = function haveBrandColorsBeenConfigured(colors) {
+  if (!colors) return false;
+  if (typeof colors !== 'object') return false;
+  if (Object.keys(colors).length === 0) return false;
+  if (Object.values(colors).every(function (color) {
+    return color === '#000000';
+  })) return false;
+  return true;
+};
+
 var defaultColors = {
   backgroundPrimary: '#2a3d6d',
   backgroundPrimaryDimmed: 'rgb(27,233,237)',
@@ -136,23 +162,25 @@ function ConfigProvider(_ref) {
   var _useState = React.useState(defaultConfig),
     config = _useState[0],
     setConfig = _useState[1];
-  var triggerConfig = LEGACY_merge_config(config, legacy_config);
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
   var setConfigEntry = React__default.useCallback(function (updatedConfigEntries) {
     var _updatedConfigEntries;
-    var shouldUpdateColors = Object.keys((updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors) || {}).length > 0;
+    var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
+    var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
+    if (shouldUpdateColors) log('setConfigEntry: setting brand colors from portal config', argColors);else log('setConfigEntry: keeping colors in state || fallback to default');
     setConfig(function (prev) {
-      var _updatedConfigEntries2;
       return _extends({}, prev, updatedConfigEntries, {
         brand: _extends({}, prev.brand, updatedConfigEntries.brand, {
-          colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, (updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.brand) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.colors) || {}) : prev.brand.colors
+          colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, argColors || {}) : prev.brand.colors
         }),
-        trigger: _extends({}, prev.trigger, objStringtoObjNum(triggerConfig)),
+        trigger: _extends({}, prev.trigger, objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))),
         script: {
           debugMode: true
         }
       });
     });
-  }, [setConfig, triggerConfig]);
+  }, [setConfig]);
   var value = {
     config: config,
     setConfigEntry: setConfigEntry
@@ -168,32 +196,6 @@ var ConfigContext = React.createContext({
   }
 });
 
-var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
-  if (typeof window === 'undefined') return false;
-  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-var _LEGACY_getBrand = function _LEGACY_getBrand() {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
-  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
-  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
-  return 'C&M';
-};
-var haveBrandColorsBeenConfigured = function haveBrandColorsBeenConfigured(colors) {
-  if (!colors) return false;
-  if (typeof colors !== 'object') return false;
-  if (Object.keys(colors).length === 0) return false;
-  if (Object.values(colors).every(function (color) {
-    return color === '#000000';
-  })) return false;
-  return true;
-};
-
 var useConfig = function useConfig() {
   return React__default.useContext(ConfigContext);
 };
@@ -206,13 +208,7 @@ var useTriggerConfig = function useTriggerConfig() {
   return useConfig().config.trigger;
 };
 var useBrandColors = function useBrandColors() {
-  var colors = useConfig().config.brand.colors;
-  return React__default.useMemo(function () {
-    if (!colors) return defaultColors;
-    if (!Object.keys(colors).length) return defaultColors;
-    if (haveBrandColorsBeenConfigured(colors)) return colors;
-    return defaultColors;
-  }, [colors]);
+  return useConfig().config.brand.colors || defaultColors;
 };
 
 var LoggingProvider = function LoggingProvider(_ref) {

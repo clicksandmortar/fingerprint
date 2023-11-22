@@ -1,11 +1,13 @@
 import React, { PropsWithChildren, createContext, useState } from 'react'
 import { Config } from '../client/types'
+import { haveBrandColorsBeenConfigured } from '../utils/brand'
 import { FingerprintProviderProps } from './FingerprintContext'
+import { useLogging } from './LoggingContext'
 
 // 27 233 237 - dimmed, 41 100 249 - main, 13 14 49 - text Secondary, white primary, 226 226 226 greyBg, some dark grey text ?
 
 // follows the colors of the C&M logo. Mostly
-export const defaultColors = {
+export const defaultColors: NonNullable<Config['brand']['colors']> = {
   backgroundPrimary: '#2a3d6d', // the original C&M one was too bright - 'rgb(144, 175, 255)',
   backgroundPrimaryDimmed: 'rgb(27,233,237)',
   backgroundSecondary: 'rgb(226,226,226)',
@@ -68,13 +70,23 @@ const objStringtoObjNum = (obj: any) => {
 // so log along with some other stuff won't work here.
 export function ConfigProvider({ children, legacy_config }: Props) {
   const [config, setConfig] = useState<Config>(defaultConfig)
+  const { log } = useLogging()
 
-  const triggerConfig = LEGACY_merge_config(config, legacy_config)
-
+  // This is super messy. I know. Once we get rid of the legacy behaviour this should become
+  //  much clearer
   const setConfigEntry = React.useCallback(
-    (updatedConfigEntries: Partial<Config>) => {
-      const shouldUpdateColors =
-        Object.keys(updatedConfigEntries?.brand?.colors || {}).length > 0
+    (updatedConfigEntries: Config) => {
+      // if the colors have been configured, we want to use the colors from the portal
+      // if not - keep the default ones
+      const argColors = updatedConfigEntries?.brand?.colors
+      const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors)
+
+      if (shouldUpdateColors)
+        log(
+          'setConfigEntry: setting brand colors from portal config',
+          argColors
+        )
+      else log('setConfigEntry: keeping colors in state || fallback to default')
 
       setConfig((prev) => {
         return {
@@ -88,15 +100,16 @@ export function ConfigProvider({ children, legacy_config }: Props) {
             // in the config state, or the default colors
             colors: shouldUpdateColors
               ? {
+                  // defaultColors here are just a fallback to keep TS happy. No need for them realistically. @TODO: look into
                   ...(prev.brand.colors || defaultColors),
-                  ...(updatedConfigEntries?.brand?.colors || {})
+                  ...(argColors || {})
                 }
               : prev.brand.colors
           },
           trigger: {
             ...prev.trigger,
             // the stars aligned in the shittiest-most way making it so that the BE returns these as strings
-            ...objStringtoObjNum(triggerConfig)
+            ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
           },
           script: {
             debugMode: true
@@ -104,7 +117,7 @@ export function ConfigProvider({ children, legacy_config }: Props) {
         }
       })
     },
-    [setConfig, triggerConfig]
+    [setConfig]
   )
 
   const value: ConfigContextType = {

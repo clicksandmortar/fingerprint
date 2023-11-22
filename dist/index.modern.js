@@ -77,6 +77,30 @@ function getEnvVars() {
   };
 }
 
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+const _LEGACY_getBrand = () => {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+const haveBrandColorsBeenConfigured = colors => {
+  if (!colors) return false;
+  if (typeof colors !== 'object') return false;
+  if (Object.keys(colors).length === 0) return false;
+  if (Object.values(colors).every(color => color === '#000000')) return false;
+  return true;
+};
+
 const defaultColors = {
   backgroundPrimary: '#2a3d6d',
   backgroundPrimaryDimmed: 'rgb(27,233,237)',
@@ -116,12 +140,15 @@ function ConfigProvider({
   legacy_config
 }) {
   const [config, setConfig] = useState(defaultConfig);
-  const triggerConfig = LEGACY_merge_config(config, legacy_config);
+  const {
+    log
+  } = useLogging();
   const setConfigEntry = React__default.useCallback(updatedConfigEntries => {
     var _updatedConfigEntries;
-    const shouldUpdateColors = Object.keys((updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors) || {}).length > 0;
+    const argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
+    const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
+    if (shouldUpdateColors) log('setConfigEntry: setting brand colors from portal config', argColors);else log('setConfigEntry: keeping colors in state || fallback to default');
     setConfig(prev => {
-      var _updatedConfigEntries2;
       return {
         ...prev,
         ...updatedConfigEntries,
@@ -130,19 +157,19 @@ function ConfigProvider({
           ...updatedConfigEntries.brand,
           colors: shouldUpdateColors ? {
             ...(prev.brand.colors || defaultColors),
-            ...((updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries2 = updatedConfigEntries.brand) === null || _updatedConfigEntries2 === void 0 ? void 0 : _updatedConfigEntries2.colors) || {})
+            ...(argColors || {})
           } : prev.brand.colors
         },
         trigger: {
           ...prev.trigger,
-          ...objStringtoObjNum(triggerConfig)
+          ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
         },
         script: {
           debugMode: true
         }
       };
     });
-  }, [setConfig, triggerConfig]);
+  }, [setConfig]);
   const value = {
     config,
     setConfigEntry
@@ -158,30 +185,6 @@ const ConfigContext = createContext({
   }
 });
 
-const TEMP_isCNMBrand = () => {
-  if (typeof window === 'undefined') return false;
-  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-const _LEGACY_getBrand = () => {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
-  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
-  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
-  return 'C&M';
-};
-const haveBrandColorsBeenConfigured = colors => {
-  if (!colors) return false;
-  if (typeof colors !== 'object') return false;
-  if (Object.keys(colors).length === 0) return false;
-  if (Object.values(colors).every(color => color === '#000000')) return false;
-  return true;
-};
-
 const useConfig = () => React__default.useContext(ConfigContext);
 const useBrand = () => {
   const configBrandName = useConfig().config.brand.name;
@@ -190,13 +193,7 @@ const useBrand = () => {
 };
 const useTriggerConfig = () => useConfig().config.trigger;
 const useBrandColors = () => {
-  const colors = useConfig().config.brand.colors;
-  return React__default.useMemo(() => {
-    if (!colors) return defaultColors;
-    if (!Object.keys(colors).length) return defaultColors;
-    if (haveBrandColorsBeenConfigured(colors)) return colors;
-    return defaultColors;
-  }, [colors]);
+  return useConfig().config.brand.colors || defaultColors;
 };
 
 const LoggingProvider = ({
