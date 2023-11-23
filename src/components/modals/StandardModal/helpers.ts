@@ -1,20 +1,9 @@
 import { CSSProperties } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { Trigger } from '../../../client/types'
 
 export type ModalSize = 'small' | 'medium' | 'large' | 'full'
 export type ButtonPosition = 'left' | 'center' | 'right'
-
-export type TriggerConfig = {
-  modal?: {
-    size?: ModalSize
-    textShadow?: boolean
-    textColor?: string
-    buttonPosition?: ButtonPosition
-  }
-  banner?: {}
-  youtube?: {}
-  inverseFlow?: {}
-}
 
 export const getModalStylesBySize = (size: ModalSize): CSSProperties => {
   switch (size) {
@@ -79,3 +68,8 @@ export const getModalButtonFlexPosition = (
 export const randomHash = 'f' + uuidv4().split('-')[0]
 
 export const prependClass = (className: string) => `f${randomHash}-${className}`
+
+// if no button text provided, make the entire modal clickable and dont render the button
+export const getIsModalFullyClickable = ({ trigger }: { trigger: Trigger }) => {
+  return !trigger?.data?.buttonText
+}

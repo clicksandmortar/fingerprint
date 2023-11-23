@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect } from 'react'
+import { useConfig } from '../hooks/useBrandConfig'
 
 export type LoggingProviderProps = {
-  debug?: boolean
   children?: React.ReactNode
 }
 
@@ -14,7 +14,9 @@ export type LoggingContextInterface = {
 
 // @todo have this provider log pre-boot and post-boot with
 // context around the App ID, session, visitor, etc.
-export const LoggingProvider = ({ debug, children }: LoggingProviderProps) => {
+export const LoggingProvider = ({ children }: LoggingProviderProps) => {
+  const debug = useConfig().config.script.debugMode
+
   const log = (...message: any) => {
     if (debug) {
       console.log(...message)

@@ -1,17 +1,20 @@
 import { v4 as uuidv4 } from 'uuid'
 import { cookieAccountJWT } from '../context/FingerprintContext'
 import { Session } from '../sessions/types'
-import { getCookie } from '../utils/cookies'
+import { getCookie, setCookie } from '../utils/cookies'
+import { uuidValidateV4 } from '../utils/uuid'
 import { Visitor } from './types'
 import { validVisitorId } from './utils'
 
+export const CnMCookie = '_cm_id'
+
 export const buildCookie = ({ visitorId }: { visitorId: string }) => {
-  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie('_cm_id'))
+  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
 
   return `${visitorId}|${sessionId}|${endTime.toISOString()}`
 }
 
-const updateUUID = (
+const updateCookieUUID = (
   cookieData: string | undefined,
   uuid: string
 ): string | null => {
@@ -28,6 +31,17 @@ const updateUUID = (
   const endTime = cookieSplit[2]
 
   return `${uuid}|${sessionId}|${endTime}`
+}
+
+export const updateCookie = (uuid: string) => {
+  if (!uuidValidateV4(uuid)) return
+
+  const cookie = getCookie(CnMCookie)
+  const newCookie = updateCookieUUID(cookie, uuid)
+  if (!newCookie) return
+
+  console.log('NEW COOKIES SET!!!', newCookie)
+  setCookie(CnMCookie, newCookie, 365)
 }
 
 export const bootstrapVisitor = ({
@@ -57,22 +71,23 @@ export const bootstrapVisitor = ({
   }
 
   if (
-    (!visitor.id && !getCookie('_cm_id')) ||
-    !validVisitorId(getCookie('_cm_id') as string)
+    (!visitor.id && !getCookie(CnMCookie)) ||
+    !validVisitorId(getCookie(CnMCookie) as string)
   ) {
     const visitorId = uuidv4()
     visitor.id = visitorId
   }
 
-  if (!visitor.id && getCookie('_cm_id')) {
-    const c = getCookie('_cm_id') as string
+  if (!visitor.id && getCookie(CnMCookie)) {
+    const c = getCookie(CnMCookie) as string
     const [visitorId] = c.split('|')
     visitor.id = visitorId
   }
 
-  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie('_cm_id'))
+  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
 
   const combinedCookie = buildCookie({ visitorId: visitor.id as string })
+  setCookie(CnMCookie, combinedCookie, 365)
 
   session.id = sessionId
   session.endTime = endTime

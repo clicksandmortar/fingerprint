@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import ReactDOM from 'react-dom'
 import { Trigger } from '../client/types'
-import FullyClickableModal from '../components/modals/FullyClickableModal'
 import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
+
 import { useMixpanel } from '../context/MixpanelContext'
+import { useBrand } from '../hooks/useBrandConfig'
 import { useCollector } from '../hooks/useCollector'
 import { useSeenMutation } from '../hooks/useSeenMutation'
-import { getBrand } from '../utils/brand'
 
 type Props = {
   trigger: Trigger
@@ -21,9 +21,7 @@ const Modal = ({ trigger }: Props) => {
   const [open, setOpen] = useState(true)
   const [hasFired, setHasFired] = useState(false)
 
-  const brand = React.useMemo(() => {
-    return getBrand()
-  }, [])
+  const brand = useBrand()
   const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
 
   useEffect(() => {
@@ -82,11 +80,18 @@ const Modal = ({ trigger }: Props) => {
           ? `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg`
           : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`
 
-      const style = isMobile
-        ? { height: 1000, width: 640 } // 1.56x
-        : { width: 813, height: 490 } // original image is { width: 1381, height: 828 }, scaled down to 490w
       return (
-        <FullyClickableModal {...modalProps} style={style} imageURL={image} />
+        <CnMStandardModal
+          {...modalProps}
+          trigger={{
+            ...trigger,
+            // override.... because branding.
+            data: {
+              ...trigger.data,
+              backgroundURL: image
+            }
+          }}
+        />
       )
     }
     case 'Sizzling': {
@@ -101,11 +106,15 @@ const Modal = ({ trigger }: Props) => {
           ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg`
           : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`
 
-      const style = isMobile
-        ? { height: 1000, width: 640 } // 1.56x
-        : { width: 819, height: 490 } // original image is { width: 1246, height: 747 }, scaled down to 490w
       return (
-        <FullyClickableModal {...modalProps} style={style} imageURL={image} />
+        <CnMStandardModal
+          {...modalProps}
+          trigger={{
+            ...trigger,
+            // override.... because branding.
+            data: { ...trigger.data, backgroundURL: image }
+          }}
+        />
       )
     }
     case 'Stonehouse':

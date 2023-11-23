@@ -32,8 +32,6 @@ export const useCollectorMutation = () => {
           return err
         })
     },
-    {
-      onSuccess: () => {}
-    }
+    {}
   )
 }

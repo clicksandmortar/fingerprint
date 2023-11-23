@@ -9,22 +9,76 @@ import CloseButton from '../CloseButton'
 import { prependClass } from './StandardModal/helpers'
 
 type Props = {
-  trigger: Trigger
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
-  style: { width: number; height: number }
-  imageURL: string
+  trigger: Trigger
+}
+
+// sizes taken from Sizzling campaign. Decent enough to work with
+// the rest of the assets for other brands.
+const scaleDownFactorMap = () => {
+  return isMobile
+    ? { vertical: 1000, horizontal: 640 }
+    : { vertical: 490, horizontal: 813 }
+}
+
+const useFullyClickableModalDimensions = ({ image }: { image: string }) => {
+  const [imageDimensions, setImageDimensions] = useState({
+    width: 0,
+    height: 0
+  })
+
+  useEffect(() => {
+    // Load the image dynamically
+    const img = new Image()
+    img.src = image || ''
+
+    setTimeout(() => {
+      const { vertical, horizontal } = scaleDownFactorMap()
+
+      const verticalScaleDownFactor = img.height / vertical
+      const horizontalScaleDownFactor = img.width / horizontal
+
+      console.log({
+        verticalScaleDownFactor,
+        horizontalScaleDownFactor,
+        h: img.height,
+        w: img.width
+      })
+      const scaleDownFactor = Math.max(
+        verticalScaleDownFactor,
+        horizontalScaleDownFactor
+      )
+
+      setImageDimensions({
+        width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),
+        height: Math.min(
+          img.height / scaleDownFactor,
+          window.innerHeight * 0.95
+        )
+      })
+    }, 300)
+  }, [image])
+
+  return {
+    imageDimensions
+  }
 }
 
 const FullyClickableModal = ({
-  // trigger,
   handleClickCallToAction,
   handleCloseModal,
-  style,
-  imageURL
+  trigger
 }: Props) => {
+  const imageURL = trigger?.data?.backgroundURL || ''
+
+  const {
+    imageDimensions: { height, width }
+  } = useFullyClickableModalDimensions({
+    image: imageURL
+  })
+
   const [stylesLoaded, setStylesLoaded] = useState(false)
-  const { height, width } = style
 
   const appendResponsiveBehaviour = React.useCallback(() => {
     return isMobile
@@ -55,7 +109,7 @@ const FullyClickableModal = ({
 }
 
 `
-  }, [style])
+  }, [height, width])
 
   // TODO:reminder:
   const isEntireModalClickable = true
@@ -196,7 +250,7 @@ const FullyClickableModal = ({
     return () => {
       document.head.removeChild(styles)
     }
-  }, [style, appendResponsiveBehaviour])
+  }, [height, width, appendResponsiveBehaviour])
 
   const handleModalAction = React.useCallback(
     (e: any) => {
