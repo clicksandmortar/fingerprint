@@ -4,12 +4,11 @@
  */
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { Trigger } from '../../client/types'
 import CloseButton from '../CloseButton'
 import { prependClass } from './StandardModal/helpers'
 
 type Props = {
-  trigger: Trigger
+  // trigger: Trigger
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
   style: { width: number; height: number }

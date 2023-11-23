@@ -3,9 +3,7 @@
  * the standard modal soon
  */
 import React from 'react';
-import { Trigger } from '../../client/types';
 declare type Props = {
-    trigger: Trigger;
     handleClickCallToAction: (e: any) => void;
     handleCloseModal: (e: any) => void;
     style: {
