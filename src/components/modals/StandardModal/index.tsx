@@ -1,13 +1,10 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
 import { Trigger } from '../../../client/types'
-<<<<<<< HEAD
-import { useFingerprint } from '../../../hooks/useFingerprint'
+
 import FullyClickableModal from '../FullyClickableModal'
-=======
 
 import { useBrandColors } from '../../../hooks/useBrandConfig'
->>>>>>> main
 import {
   ButtonPosition,
   ModalSize,
