@@ -323,7 +323,6 @@ const updateCookie = uuid => {
   const cookie = getCookie(CnMCookie);
   const newCookie = updateCookieUUID(cookie, uuid);
   if (!newCookie) return;
-  console.log('NEW COOKIES SET!!!', newCookie);
   setCookie(CnMCookie, newCookie, 365);
 };
 const bootstrapVisitor = ({

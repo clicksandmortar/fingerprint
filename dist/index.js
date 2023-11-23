@@ -346,7 +346,6 @@ var updateCookie = function updateCookie(uuid) {
   var cookie = getCookie(CnMCookie);
   var newCookie = updateCookieUUID(cookie, uuid);
   if (!newCookie) return;
-  console.log('NEW COOKIES SET!!!', newCookie);
   setCookie(CnMCookie, newCookie, 365);
 };
 var bootstrapVisitor = function bootstrapVisitor(_ref2) {

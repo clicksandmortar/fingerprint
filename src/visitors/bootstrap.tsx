@@ -40,7 +40,6 @@ export const updateCookie = (uuid: string) => {
   const newCookie = updateCookieUUID(cookie, uuid)
   if (!newCookie) return
 
-  console.log('NEW COOKIES SET!!!', newCookie)
   setCookie(CnMCookie, newCookie, 365)
 }
 
