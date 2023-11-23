@@ -5021,7 +5021,7 @@ var Modal = function Modal(_ref) {
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
           trigger: _extends({}, trigger, {
             data: _extends({}, trigger.data, {
-              backgroundUrl: image
+              backgroundURL: image
             })
           })
         }));
@@ -5033,7 +5033,7 @@ var Modal = function Modal(_ref) {
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
           trigger: _extends({}, trigger, {
             data: _extends({}, trigger.data, {
-              backgroundUrl: _image
+              backgroundURL: _image
             })
           })
         }));

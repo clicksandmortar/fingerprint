@@ -87,7 +87,10 @@ const Modal = ({ trigger }: Props) => {
           trigger={{
             ...trigger,
             // override.... because branding.
-            data: { ...trigger.data, backgroundUrl: image }
+            data: {
+              ...trigger.data,
+              backgroundURL: image
+            }
           }}
         />
       )
@@ -110,7 +113,7 @@ const Modal = ({ trigger }: Props) => {
           trigger={{
             ...trigger,
             // override.... because branding.
-            data: { ...trigger.data, backgroundUrl: image }
+            data: { ...trigger.data, backgroundURL: image }
           }}
         />
       )

@@ -5525,7 +5525,7 @@ const Modal = ({
             ...trigger,
             data: {
               ...trigger.data,
-              backgroundUrl: image
+              backgroundURL: image
             }
           }
         }));
@@ -5539,7 +5539,7 @@ const Modal = ({
             ...trigger,
             data: {
               ...trigger.data,
-              backgroundUrl: image
+              backgroundURL: image
             }
           }
         }));
