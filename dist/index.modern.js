@@ -298,6 +298,33 @@ const validVisitorId = id => {
   return uuidValidateV4(splitCookie[0]);
 };
 
+const CnMCookie = '_cm_id';
+const buildCookie = ({
+  visitorId
+}) => {
+  const {
+    sessionId,
+    endTime
+  } = getSessionIdAndEndTime(getCookie(CnMCookie));
+  return `${visitorId}|${sessionId}|${endTime.toISOString()}`;
+};
+const updateCookieUUID = (cookieData, uuid) => {
+  if (!cookieData) return null;
+  const cookieSplit = cookieData.split('|');
+  if (cookieSplit.length <= 2) return null;
+  const visitorId = cookieSplit[0];
+  if (visitorId === uuid) return null;
+  const sessionId = cookieSplit[1];
+  const endTime = cookieSplit[2];
+  return `${uuid}|${sessionId}|${endTime}`;
+};
+const updateCookie = uuid => {
+  if (!uuidValidateV4(uuid)) return;
+  const cookie = getCookie(CnMCookie);
+  const newCookie = updateCookieUUID(cookie, uuid);
+  if (!newCookie) return;
+  setCookie(CnMCookie, newCookie, 365);
+};
 const bootstrapVisitor = ({
   setVisitor,
   session,
@@ -316,20 +343,23 @@ const bootstrapVisitor = ({
       visitor.id = vid;
     }
   }
-  if (!visitor.id && !getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
+  if (!visitor.id && !getCookie(CnMCookie) || !validVisitorId(getCookie(CnMCookie))) {
     const visitorId = v4();
     visitor.id = visitorId;
   }
-  if (!visitor.id && getCookie('_cm_id')) {
-    const c = getCookie('_cm_id');
+  if (!visitor.id && getCookie(CnMCookie)) {
+    const c = getCookie(CnMCookie);
     const [visitorId] = c.split('|');
     visitor.id = visitorId;
   }
   const {
     sessionId,
     endTime
-  } = getSessionIdAndEndTime(getCookie('_cm_id'));
-  setCookie('_cm_id', `${visitor.id}|${sessionId}|${endTime.toISOString()}`, 365);
+  } = getSessionIdAndEndTime(getCookie(CnMCookie));
+  const combinedCookie = buildCookie({
+    visitorId: visitor.id
+  });
+  setCookie(CnMCookie, combinedCookie, 365);
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);
@@ -3389,8 +3419,16 @@ function CollectorProvider({
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
   }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation]);
   const collectorCallback = React__default.useCallback(async response => {
+    var _payload$identifiers;
     const payload = await response.json();
     log('Sent collector data, retrieved:', payload);
+    const retrievedUserId = (_payload$identifiers = payload.identifiers) === null || _payload$identifiers === void 0 ? void 0 : _payload$identifiers.main;
+    if (retrievedUserId) {
+      updateCookie(retrievedUserId);
+      setVisitor({
+        id: retrievedUserId
+      });
+    }
     setIdleTimeout(getIdleStatusDelay());
     setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
     setConfig(payload.config);
@@ -3433,8 +3471,7 @@ function CollectorProvider({
           token: hashParams.id_token
         }
       }).then(async response => {
-        const payload = await response.json();
-        log('Sent login collector data, retrieved:', payload);
+        collectorCallback(response);
       }).catch(err => {
         error('failed to store collected data', err);
       });
@@ -4015,7 +4052,8 @@ const useSeenMutation = () => {
     setIncompleteTriggers
   } = useCollector();
   const {
-    visitor
+    visitor,
+    setVisitor
   } = useVisitor();
   const brand = useBrand();
   const trackTriggerSeen = React__default.useCallback(trigger => {
@@ -4042,9 +4080,17 @@ const useSeenMutation = () => {
     });
   }, {
     onSuccess: async res => {
+      var _r$identifiers;
       const r = await res.json();
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
       setPageTriggers(r.pageTriggers);
+      const retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
+      if (retrievedUserId) {
+        updateCookie(retrievedUserId);
+        setVisitor({
+          id: retrievedUserId
+        });
+      }
       log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
       setIncompleteTriggers(r.incompleteTriggers || []);
       return r;

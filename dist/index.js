@@ -323,10 +323,35 @@ var validVisitorId = function validVisitorId(id) {
   return uuidValidateV4(splitCookie[0]);
 };
 
-var bootstrapVisitor = function bootstrapVisitor(_ref) {
-  var setVisitor = _ref.setVisitor,
-    session = _ref.session,
-    setSession = _ref.setSession;
+var CnMCookie = '_cm_id';
+var buildCookie = function buildCookie(_ref) {
+  var visitorId = _ref.visitorId;
+  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie(CnMCookie)),
+    sessionId = _getSessionIdAndEndTi.sessionId,
+    endTime = _getSessionIdAndEndTi.endTime;
+  return visitorId + "|" + sessionId + "|" + endTime.toISOString();
+};
+var updateCookieUUID = function updateCookieUUID(cookieData, uuid) {
+  if (!cookieData) return null;
+  var cookieSplit = cookieData.split('|');
+  if (cookieSplit.length <= 2) return null;
+  var visitorId = cookieSplit[0];
+  if (visitorId === uuid) return null;
+  var sessionId = cookieSplit[1];
+  var endTime = cookieSplit[2];
+  return uuid + "|" + sessionId + "|" + endTime;
+};
+var updateCookie = function updateCookie(uuid) {
+  if (!uuidValidateV4(uuid)) return;
+  var cookie = getCookie(CnMCookie);
+  var newCookie = updateCookieUUID(cookie, uuid);
+  if (!newCookie) return;
+  setCookie(CnMCookie, newCookie, 365);
+};
+var bootstrapVisitor = function bootstrapVisitor(_ref2) {
+  var setVisitor = _ref2.setVisitor,
+    session = _ref2.session,
+    setSession = _ref2.setSession;
   var visitor = {
     id: undefined
   };
@@ -340,20 +365,23 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
       visitor.id = vid;
     }
   }
-  if (!visitor.id && !getCookie('_cm_id') || !validVisitorId(getCookie('_cm_id'))) {
+  if (!visitor.id && !getCookie(CnMCookie) || !validVisitorId(getCookie(CnMCookie))) {
     var visitorId = uuid.v4();
     visitor.id = visitorId;
   }
-  if (!visitor.id && getCookie('_cm_id')) {
-    var c = getCookie('_cm_id');
+  if (!visitor.id && getCookie(CnMCookie)) {
+    var c = getCookie(CnMCookie);
     var _c$split = c.split('|'),
       _visitorId = _c$split[0];
     visitor.id = _visitorId;
   }
-  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie('_cm_id')),
-    sessionId = _getSessionIdAndEndTi.sessionId,
-    endTime = _getSessionIdAndEndTi.endTime;
-  setCookie('_cm_id', visitor.id + "|" + sessionId + "|" + endTime.toISOString(), 365);
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
+    sessionId = _getSessionIdAndEndTi2.sessionId,
+    endTime = _getSessionIdAndEndTi2.endTime;
+  var combinedCookie = buildCookie({
+    visitorId: visitor.id
+  });
+  setCookie(CnMCookie, combinedCookie, 365);
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);
@@ -3463,7 +3491,15 @@ function CollectorProvider(_ref) {
   var collectorCallback = React__default.useCallback(function (response) {
     try {
       return Promise.resolve(response.json()).then(function (payload) {
+        var _payload$identifiers;
         log('Sent collector data, retrieved:', payload);
+        var retrievedUserId = (_payload$identifiers = payload.identifiers) === null || _payload$identifiers === void 0 ? void 0 : _payload$identifiers.main;
+        if (retrievedUserId) {
+          updateCookie(retrievedUserId);
+          setVisitor({
+            id: retrievedUserId
+          });
+        }
         setIdleTimeout(getIdleStatusDelay());
         setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         setConfig(payload.config);
@@ -3511,9 +3547,8 @@ function CollectorProvider(_ref) {
         }
       }).then(function (response) {
         try {
-          return Promise.resolve(response.json()).then(function (payload) {
-            log('Sent login collector data, retrieved:', payload);
-          });
+          collectorCallback(response);
+          return Promise.resolve();
         } catch (e) {
           return Promise.reject(e);
         }
@@ -4117,7 +4152,8 @@ var useSeenMutation = function useSeenMutation() {
     setPageTriggers = _useCollector.setPageTriggers,
     setIncompleteTriggers = _useCollector.setIncompleteTriggers;
   var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
+    visitor = _useVisitor.visitor,
+    setVisitor = _useVisitor.setVisitor;
   var brand = useBrand();
   var trackTriggerSeen = React__default.useCallback(function (trigger) {
     trackEvent('trigger_displayed', {
@@ -4145,8 +4181,16 @@ var useSeenMutation = function useSeenMutation() {
     onSuccess: function (res) {
       try {
         return Promise.resolve(res.json()).then(function (r) {
+          var _r$identifiers;
           log('Seen mutation: replacing triggers with:', r.pageTriggers);
           setPageTriggers(r.pageTriggers);
+          var retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
+          if (retrievedUserId) {
+            updateCookie(retrievedUserId);
+            setVisitor({
+              id: retrievedUserId
+            });
+          }
           log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
           setIncompleteTriggers(r.incompleteTriggers || []);
           return r;
