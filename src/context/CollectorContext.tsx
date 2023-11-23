@@ -23,7 +23,6 @@ import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 
 import { useConfig } from '../hooks/useBrandConfig'
-import { updateCookie } from '../visitors/bootstrap'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
@@ -339,17 +338,13 @@ export function CollectorProvider({
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true)
   }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation])
 
+  // TODO: merge this and /seen callback into one thing when we no longer require
+  // setting intently - thats the only differentiator between the callbacks
   const collectorCallback = React.useCallback(
     async (response: Response) => {
       const payload: CollectorVisitorResponse = await response.json()
 
       log('Sent collector data, retrieved:', payload)
-
-      const potentialNewVisitorId = payload.identifiers?.main
-      if (potentialNewVisitorId) {
-        updateCookie(potentialNewVisitorId)
-        setVisitor({ id: potentialNewVisitorId })
-      }
 
       // Set IdleTimer
       // @todo turn this into the dynamic value

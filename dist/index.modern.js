@@ -663,7 +663,9 @@ const useCollectorMutation = () => {
       error('Collector API error', err);
       return err;
     });
-  }, {});
+  }, {
+    onSuccess: () => {}
+  });
 };
 
 const getRecursivelyPotentialButton = el => {
@@ -3418,16 +3420,8 @@ function CollectorProvider({
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
   }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation]);
   const collectorCallback = React__default.useCallback(async response => {
-    var _payload$identifiers;
     const payload = await response.json();
     log('Sent collector data, retrieved:', payload);
-    const potentialNewVisitorId = (_payload$identifiers = payload.identifiers) === null || _payload$identifiers === void 0 ? void 0 : _payload$identifiers.main;
-    if (potentialNewVisitorId) {
-      updateCookie(potentialNewVisitorId);
-      setVisitor({
-        id: potentialNewVisitorId
-      });
-    }
     setIdleTimeout(getIdleStatusDelay());
     setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
     setConfig(payload.config);
@@ -4051,7 +4045,8 @@ const useSeenMutation = () => {
     setIncompleteTriggers
   } = useCollector();
   const {
-    visitor
+    visitor,
+    setVisitor
   } = useVisitor();
   const brand = useBrand();
   const trackTriggerSeen = React__default.useCallback(trigger => {
@@ -4078,9 +4073,17 @@ const useSeenMutation = () => {
     });
   }, {
     onSuccess: async res => {
+      var _r$identifiers;
       const r = await res.json();
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
       setPageTriggers(r.pageTriggers);
+      const potentialNewVisitorId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
+      if (potentialNewVisitorId) {
+        updateCookie(potentialNewVisitorId);
+        setVisitor({
+          id: potentialNewVisitorId
+        });
+      }
       log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
       setIncompleteTriggers(r.incompleteTriggers || []);
       return r;
