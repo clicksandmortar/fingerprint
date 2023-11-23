@@ -526,6 +526,11 @@ export function CollectorProvider({
     delay: initialDelay
   })
 
+  useRunOnPathChange(fireOnLoadTriggers, {
+    skip: !booted,
+    delay: initialDelay
+  })
+
   useFormCollector()
   useButtonCollector()
 

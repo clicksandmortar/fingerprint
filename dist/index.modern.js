@@ -3507,6 +3507,10 @@ function CollectorProvider({
     skip: !booted,
     delay: initialDelay
   });
+  useRunOnPathChange(fireOnLoadTriggers, {
+    skip: !booted,
+    delay: initialDelay
+  });
   useFormCollector();
   useButtonCollector();
   const onPresenseChange = React__default.useCallback(presence => {
