@@ -11,6 +11,7 @@ export type CollectorUpdate = {
   account?: Account | undefined
   form?: Form | undefined
   button?: Button | undefined
+  conversion?: { id: string }
 }
 
 export type Button = {

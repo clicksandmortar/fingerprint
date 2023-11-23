@@ -3207,6 +3207,86 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
+const getFuncByOperator = (operator, compareWith) => {
+  switch (operator) {
+    case 'starts_with':
+      return comparison => {
+        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
+      };
+    case 'contains':
+      return comparison => {
+        return comparison.toLowerCase().includes(compareWith.toLowerCase());
+      };
+    case 'ends_with':
+      return comparison => {
+        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
+      };
+    case 'eq':
+      return comparison => {
+        return comparison.toLowerCase() === compareWith.toLowerCase();
+      };
+    default:
+      return () => {
+        console.error('getOperator: unknown operator', operator);
+        return false;
+      };
+  }
+};
+const validateConversion = conversion => {
+  const signalPattern = conversion.signals.map(signal => {
+    if (signal.op === 'IsOnPath') {
+      const [operator, route] = signal.parameters;
+      return getFuncByOperator(operator, route)(window.location.pathname);
+    }
+    if (signal.op === 'CanSeeElementOnPage') {
+      const [itemQuerySelector, operator, route] = signal.parameters;
+      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
+      if (!isSignalOnCorrectRoute) return false;
+      const element = document.querySelector(itemQuerySelector);
+      return !!element;
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0];
+    }
+    return false;
+  });
+  return signalPattern.every(Boolean);
+};
+const scanInterval = 500;
+const useConversions = () => {
+  const [conversions, setConversions] = useState([]);
+  const {
+    mutate: collect
+  } = useCollectorMutation();
+  const removeById = React__default.useCallback(id => {
+    setConversions(prev => {
+      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
+      return prev.filter(conversion => conversion.identifier !== id);
+    });
+  }, [setConversions]);
+  const scan = React__default.useCallback(() => {
+    conversions.forEach(conversion => {
+      const hasHappened = validateConversion(conversion);
+      if (!hasHappened) return;
+      collect({
+        conversion: {
+          id: conversion.identifier
+        }
+      });
+      removeById(conversion.identifier);
+    });
+  }, [collect, conversions, removeById]);
+  useEffect(() => {
+    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
+    const intId = setInterval(scan, scanInterval);
+    return () => clearInterval(intId);
+  }, [scan]);
+  return {
+    conversions,
+    setConversions
+  };
+};
+
 function CollectorProvider({
   children,
   handlers = []
@@ -3516,6 +3596,7 @@ function CollectorProvider({
   });
   useFormCollector();
   useButtonCollector();
+  useConversions();
   const onPresenseChange = React__default.useCallback(presence => {
     log('presence changed', presence);
   }, [log]);

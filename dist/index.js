@@ -3261,6 +3261,96 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
+var getFuncByOperator = function getFuncByOperator(operator, compareWith) {
+  switch (operator) {
+    case 'starts_with':
+      return function (comparison) {
+        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
+      };
+    case 'contains':
+      return function (comparison) {
+        return comparison.toLowerCase().includes(compareWith.toLowerCase());
+      };
+    case 'ends_with':
+      return function (comparison) {
+        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
+      };
+    case 'eq':
+      return function (comparison) {
+        return comparison.toLowerCase() === compareWith.toLowerCase();
+      };
+    default:
+      return function () {
+        console.error('getOperator: unknown operator', operator);
+        return false;
+      };
+  }
+};
+var validateConversion = function validateConversion(conversion) {
+  var signalPattern = conversion.signals.map(function (signal) {
+    if (signal.op === 'IsOnPath') {
+      var _signal$parameters = signal.parameters,
+        operator = _signal$parameters[0],
+        route = _signal$parameters[1];
+      return getFuncByOperator(operator, route)(window.location.pathname);
+    }
+    if (signal.op === 'CanSeeElementOnPage') {
+      var _signal$parameters2 = signal.parameters,
+        itemQuerySelector = _signal$parameters2[0],
+        _operator = _signal$parameters2[1],
+        _route = _signal$parameters2[2];
+      var isSignalOnCorrectRoute = getFuncByOperator(_operator, _route)(window.location.pathname);
+      if (!isSignalOnCorrectRoute) return false;
+      var element = document.querySelector(itemQuerySelector);
+      return !!element;
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0];
+    }
+    return false;
+  });
+  return signalPattern.every(Boolean);
+};
+var scanInterval = 500;
+var useConversions = function useConversions() {
+  var _useState = React.useState([]),
+    conversions = _useState[0],
+    setConversions = _useState[1];
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutate;
+  var removeById = React__default.useCallback(function (id) {
+    setConversions(function (prev) {
+      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
+      return prev.filter(function (conversion) {
+        return conversion.identifier !== id;
+      });
+    });
+  }, [setConversions]);
+  var scan = React__default.useCallback(function () {
+    conversions.forEach(function (conversion) {
+      var hasHappened = validateConversion(conversion);
+      if (!hasHappened) return;
+      collect({
+        conversion: {
+          id: conversion.identifier
+        }
+      });
+      removeById(conversion.identifier);
+    });
+  }, [collect, conversions, removeById]);
+  React.useEffect(function () {
+    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
+    var intId = setInterval(scan, scanInterval);
+    return function () {
+      return clearInterval(intId);
+    };
+  }, [scan]);
+  return {
+    conversions: conversions,
+    setConversions: setConversions
+  };
+};
+
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -3607,6 +3697,7 @@ function CollectorProvider(_ref) {
   });
   useFormCollector();
   useButtonCollector();
+  useConversions();
   var onPresenseChange = React__default.useCallback(function (presence) {
     log('presence changed', presence);
   }, [log]);

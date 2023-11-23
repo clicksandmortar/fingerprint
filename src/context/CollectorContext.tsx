@@ -23,6 +23,7 @@ import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 
 import { useConfig } from '../hooks/useBrandConfig'
+import useConversions from '../hooks/useConversions'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
@@ -545,6 +546,7 @@ export function CollectorProvider({
 
   useFormCollector()
   useButtonCollector()
+  useConversions()
 
   const onPresenseChange = React.useCallback(
     (presence: PresenceType) => {
