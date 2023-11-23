@@ -58,6 +58,42 @@ export type Referrer = {
   }
 }
 
+export type Operator = 'starts_with' | 'contains' | 'ends_with' | 'eq'
+export type ComparisonFunc = (comparison: string) => boolean
+
+export type IsOnPathConversionSignal = {
+  // will have more later
+  op: 'IsOnPath'
+  parameters: [Operator, string]
+}
+export type IsOnDomainConversionSignal = {
+  // will have more later
+  op: 'IsOnDomain'
+  parameters: [
+    string // domain
+  ]
+}
+
+export type CanSeeElementOnPageConversionSignal = {
+  // will have more later
+  op: 'CanSeeElementOnPage'
+  parameters: [
+    string, // selector
+    Operator, // operator
+    string // value
+  ]
+}
+export type ConversionSignal =
+  | IsOnPathConversionSignal
+  | IsOnDomainConversionSignal
+  | CanSeeElementOnPageConversionSignal
+
+export type Conversion = {
+  identifier: string
+  signals: ConversionSignal[]
+  analyticsEvent: string
+}
+
 export type IncompleteTrigger = Trigger & {
   signals: [
     {
@@ -79,6 +115,7 @@ export type CollectorVisitorResponse = {
   incompleteTriggers?: IncompleteTrigger[]
   // @todo remove this temp hack once split testing with Intently is complete
   intently: boolean
+  conversions: Conversion[]
 }
 
 export type Invocation =
