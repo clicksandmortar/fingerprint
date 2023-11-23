@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import ReactDOM from 'react-dom'
 import { Trigger } from '../client/types'
-import FullyClickableModal from '../components/modals/FullyClickableModal'
 import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
@@ -82,7 +81,7 @@ const Modal = ({ trigger }: Props) => {
           : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`
 
       return (
-        <FullyClickableModal
+        <CnMStandardModal
           {...modalProps}
           trigger={{
             ...trigger,
@@ -108,7 +107,7 @@ const Modal = ({ trigger }: Props) => {
           : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`
 
       return (
-        <FullyClickableModal
+        <CnMStandardModal
           {...modalProps}
           trigger={{
             ...trigger,

@@ -5018,7 +5018,7 @@ var Modal = function Modal(_ref) {
       {
         var image = reactDeviceDetect.isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
         if (window.location.href.includes('nationalsearch')) image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg";
-        return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
+        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
           trigger: _extends({}, trigger, {
             data: _extends({}, trigger.data, {
               backgroundURL: image
@@ -5030,7 +5030,7 @@ var Modal = function Modal(_ref) {
       {
         var _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg";
         if (window.location.href.includes('signup')) _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg";
-        return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
+        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
           trigger: _extends({}, trigger, {
             data: _extends({}, trigger.data, {
               backgroundURL: _image

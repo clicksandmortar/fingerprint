@@ -5520,7 +5520,7 @@ const Modal = ({
       {
         let image = isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
         if (window.location.href.includes('nationalsearch')) image = isMobile ? `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`;
-        return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
+        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
           trigger: {
             ...trigger,
             data: {
@@ -5534,7 +5534,7 @@ const Modal = ({
       {
         let image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg`;
         if (window.location.href.includes('signup')) image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`;
-        return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
+        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
           trigger: {
             ...trigger,
             data: {
