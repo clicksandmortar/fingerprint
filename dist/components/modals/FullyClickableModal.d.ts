@@ -5,14 +5,9 @@
 import React from 'react';
 import { Trigger } from '../../client/types';
 declare type Props = {
-    trigger: Trigger;
     handleClickCallToAction: (e: any) => void;
     handleCloseModal: (e: any) => void;
-    style: {
-        width: number;
-        height: number;
-    };
-    imageURL: string;
+    trigger: Trigger;
 };
-declare const FullyClickableModal: ({ handleClickCallToAction, handleCloseModal, style, imageURL }: Props) => React.JSX.Element | null;
+declare const FullyClickableModal: ({ handleClickCallToAction, handleCloseModal, trigger }: Props) => React.JSX.Element | null;
 export default FullyClickableModal;

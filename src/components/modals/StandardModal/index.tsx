@@ -2,10 +2,13 @@
 import React, { useEffect, useState } from 'react'
 import { Trigger } from '../../../client/types'
 
+import FullyClickableModal from '../FullyClickableModal'
+
 import { useBrandColors } from '../../../hooks/useBrandConfig'
 import {
   ButtonPosition,
   ModalSize,
+  getIsModalFullyClickable,
   getModalButtonFlexPosition,
   getModalButtonStylesBySize,
   getModalStylesBySize,
@@ -21,7 +24,7 @@ type Props = {
 const defaultElementSize: ModalSize = 'medium'
 const defaultButtonPosition: ButtonPosition = 'right'
 
-const CnMStandardModal = ({
+const BasicModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
@@ -31,6 +34,7 @@ const CnMStandardModal = ({
   // const modalConfig = useTriggerConfig();
   const elementSize = defaultElementSize
 
+  const isModalFullyClickable = getIsModalFullyClickable({ trigger })
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
   const modalSizeStyle = getModalStylesBySize(elementSize)
@@ -77,8 +81,15 @@ const CnMStandardModal = ({
     }
     
     .${prependClass('modal')} {
-      width: 80%;
-      height: 500px;
+      ${
+        isModalFullyClickable
+          ? 'cursor: pointer; '
+          : `
+        width: 80%;
+        height: 500px;
+      `
+      }
+    
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -266,4 +277,17 @@ const CnMStandardModal = ({
     </div>
   )
 }
-export default CnMStandardModal
+
+const StandardModal = (props: Props) => {
+  const isModalFullyClickable = getIsModalFullyClickable({
+    trigger: props.trigger
+  })
+
+  if (isModalFullyClickable)
+    // this is the one that follows the typical scale behaviour of assets so far
+    return <FullyClickableModal {...props} />
+
+  return <BasicModal {...props} />
+}
+
+export default StandardModal
