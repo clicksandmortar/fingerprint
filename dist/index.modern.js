@@ -177,6 +177,15 @@ const validVisitorId = id => {
   return uuidValidateV4(splitCookie[0]);
 };
 
+const buildCookie = ({
+  visitorId
+}) => {
+  const {
+    sessionId,
+    endTime
+  } = getSessionIdAndEndTime(getCookie('_cm_id'));
+  return `${visitorId}|${sessionId}|${endTime.toISOString()}`;
+};
 const bootstrapVisitor = ({
   setVisitor,
   session,
@@ -208,7 +217,10 @@ const bootstrapVisitor = ({
     sessionId,
     endTime
   } = getSessionIdAndEndTime(getCookie('_cm_id'));
-  setCookie('_cm_id', `${visitor.id}|${sessionId}|${endTime.toISOString()}`, 365);
+  const combinedCookie = buildCookie({
+    visitorId: visitor.id
+  });
+  setCookie('_cm_id', combinedCookie, 365);
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);

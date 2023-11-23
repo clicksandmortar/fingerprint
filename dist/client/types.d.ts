@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { TriggerConfig } from '../components/modals/StandardModal/helpers';
+import { SupportedBrand } from '../utils/brand';
 import { Visitor } from '../visitors/types';
 export declare type CollectorUpdate = {
     appId?: string;
@@ -64,6 +64,7 @@ export declare type CollectorVisitorResponse = {
     lastSeen: Date;
     visits: number;
     pageTriggers: Trigger[];
+    config: Config;
     incompleteTriggers?: IncompleteTrigger[];
     intently: boolean;
 };
@@ -87,5 +88,29 @@ export declare type FingerprintConfig = {
     exitIntentDelay?: number;
     idleDelay?: number;
     triggerCooldown?: number;
-    triggerConfig?: TriggerConfig;
 };
+declare type ScriptConfig = {
+    debugMode: boolean;
+};
+declare type TriggerConfig = {
+    userIdleThresholdSecs: number;
+    displayTriggerAfterSecs: number;
+    triggerCooldownSecs: number;
+};
+declare type BrandConfig = {
+    name: SupportedBrand;
+    colors?: {
+        backgroundPrimary: string;
+        backgroundPrimaryDimmed: string;
+        backgroundSecondary: string;
+        shadeOfGrey: string;
+        textPrimary: string;
+        greyText: string;
+    };
+};
+export declare type Config = {
+    script: ScriptConfig;
+    trigger: TriggerConfig;
+    brand: BrandConfig;
+};
+export {};

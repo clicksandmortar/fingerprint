@@ -1,9 +1,34 @@
 import { v4 as uuidv4 } from 'uuid'
+import { cookieAccountJWT } from '../context/FingerprintContext'
+import { Session } from '../sessions/types'
+import { getCookie } from '../utils/cookies'
 import { Visitor } from './types'
 import { validVisitorId } from './utils'
-import { getCookie, setCookie } from '../utils/cookies'
-import { Session } from '../sessions/types'
-import { cookieAccountJWT } from '../context/FingerprintContext'
+
+export const buildCookie = ({ visitorId }: { visitorId: string }) => {
+  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie('_cm_id'))
+
+  return `${visitorId}|${sessionId}|${endTime.toISOString()}`
+}
+
+const updateUUID = (
+  cookieData: string | undefined,
+  uuid: string
+): string | null => {
+  if (!cookieData) return null
+
+  const cookieSplit = cookieData.split('|')
+
+  if (cookieSplit.length <= 2) return null
+
+  const visitorId = cookieSplit[0]
+  if (visitorId === uuid) return null
+
+  const sessionId = cookieSplit[1]
+  const endTime = cookieSplit[2]
+
+  return `${uuid}|${sessionId}|${endTime}`
+}
 
 export const bootstrapVisitor = ({
   setVisitor,
@@ -47,11 +72,7 @@ export const bootstrapVisitor = ({
 
   const { sessionId, endTime } = getSessionIdAndEndTime(getCookie('_cm_id'))
 
-  setCookie(
-    '_cm_id',
-    `${visitor.id}|${sessionId}|${endTime.toISOString()}`,
-    365
-  )
+  const combinedCookie = buildCookie({ visitorId: visitor.id as string })
 
   session.id = sessionId
   session.endTime = endTime

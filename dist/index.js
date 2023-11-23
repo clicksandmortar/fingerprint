@@ -199,10 +199,17 @@ var validVisitorId = function validVisitorId(id) {
   return uuidValidateV4(splitCookie[0]);
 };
 
-var bootstrapVisitor = function bootstrapVisitor(_ref) {
-  var setVisitor = _ref.setVisitor,
-    session = _ref.session,
-    setSession = _ref.setSession;
+var buildCookie = function buildCookie(_ref) {
+  var visitorId = _ref.visitorId;
+  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie('_cm_id')),
+    sessionId = _getSessionIdAndEndTi.sessionId,
+    endTime = _getSessionIdAndEndTi.endTime;
+  return visitorId + "|" + sessionId + "|" + endTime.toISOString();
+};
+var bootstrapVisitor = function bootstrapVisitor(_ref2) {
+  var setVisitor = _ref2.setVisitor,
+    session = _ref2.session,
+    setSession = _ref2.setSession;
   var visitor = {
     id: undefined
   };
@@ -226,10 +233,13 @@ var bootstrapVisitor = function bootstrapVisitor(_ref) {
       _visitorId = _c$split[0];
     visitor.id = _visitorId;
   }
-  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie('_cm_id')),
-    sessionId = _getSessionIdAndEndTi.sessionId,
-    endTime = _getSessionIdAndEndTi.endTime;
-  setCookie('_cm_id', visitor.id + "|" + sessionId + "|" + endTime.toISOString(), 365);
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie('_cm_id')),
+    sessionId = _getSessionIdAndEndTi2.sessionId,
+    endTime = _getSessionIdAndEndTi2.endTime;
+  var combinedCookie = buildCookie({
+    visitorId: visitor.id
+  });
+  setCookie('_cm_id', combinedCookie, 365);
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);
