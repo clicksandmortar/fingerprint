@@ -1,4 +1,4 @@
-import { TriggerConfig } from '../components/modals/StandardModal/helpers'
+import { SupportedBrand } from '../utils/brand'
 import { Visitor } from '../visitors/types'
 
 export type CollectorUpdate = {
@@ -75,6 +75,7 @@ export type CollectorVisitorResponse = {
   lastSeen: Date
   visits: number
   pageTriggers: Trigger[]
+  config: Config
   incompleteTriggers?: IncompleteTrigger[]
   // @todo remove this temp hack once split testing with Intently is complete
   intently: boolean
@@ -114,6 +115,30 @@ export type FingerprintConfig = {
   exitIntentDelay?: number
   idleDelay?: number
   triggerCooldown?: number
-  // only applies to C&M Standard Modal
-  triggerConfig?: TriggerConfig
+}
+
+type ScriptConfig = {
+  debugMode: boolean
+}
+type TriggerConfig = {
+  userIdleThresholdSecs: number
+  displayTriggerAfterSecs: number
+  triggerCooldownSecs: number
+}
+type BrandConfig = {
+  name: SupportedBrand
+  colors?: {
+    backgroundPrimary: string
+    backgroundPrimaryDimmed: string
+    backgroundSecondary: string
+    shadeOfGrey: string
+    textPrimary: string
+    greyText: string
+  }
+}
+
+export type Config = {
+  script: ScriptConfig
+  trigger: TriggerConfig
+  brand: BrandConfig
 }

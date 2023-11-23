@@ -4,6 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { clientHandlers } from '../client/handler'
 import { FingerprintConfig, PageView, Trigger } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
+import { ConfigProvider } from './Config'
 import { LoggingProvider, useLogging } from './LoggingContext'
 import { MixpanelProvider } from './MixpanelContext'
 import { VisitorProvider } from './VisitorContext'
@@ -52,12 +53,21 @@ export type FingerprintProviderProps = {
   children?: React.ReactNode
   consent?: boolean
   consentCallback?: () => boolean
-  debug?: boolean
+  /**
+   * @deprecated
+   * This debug param is no longer used.
+   * Please use the portal to configure these values.
+   */
+  debug: never
   defaultHandlers?: Trigger[]
   initialDelay?: number
   exitIntentTriggers?: boolean
   idleTriggers?: boolean
   pageLoadTriggers?: boolean
+  /**
+   * @deprecated
+   * Please use the portal to configure these values. Until then this will act as override
+   */
   config?: FingerprintConfig
 }
 
@@ -68,13 +78,12 @@ export const FingerprintProvider = ({
   children,
   consent = false,
   consentCallback,
-  debug,
   defaultHandlers,
   initialDelay = 0,
   exitIntentTriggers = true,
   idleTriggers = true,
   pageLoadTriggers = true,
-  config
+  config: legacy_config
 }: FingerprintProviderProps) => {
   const [booted, setBooted] = useState(false)
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
@@ -97,11 +106,8 @@ export const FingerprintProvider = ({
     if (!consentGiven) return
 
     const performBoot = async () => {
-      // @todo this should be invoked when booted.
-      // It will call out to the API to confirm the
-      // appId is valid and return the app configuration.
-
-      // gonna fetch some nice configs here bruv
+      // TODO: since all the config is being retrieve on any API call including /collect
+      // we can probably remove this TODO. It is redundant.
       setBooted(true)
     }
 
@@ -117,45 +123,46 @@ export const FingerprintProvider = ({
   }
 
   return (
-    <LoggingProvider debug={debug}>
-      <QueryClientProvider client={queryClient}>
-        <FingerprintContext.Provider
-          value={{
-            appId,
-            booted,
-            currentTrigger: null,
-            registerHandler: addAnotherHandler,
-            trackEvent: () => {
-              alert('trackEvent not implemented')
-            },
-            trackPageView: () => {
-              alert('trackPageView not implemented')
-            },
-            unregisterHandler: () => {
-              alert('unregisterHandler not implemented')
-            },
-            initialDelay,
-            idleTriggers,
-            pageLoadTriggers,
-            exitIntentTriggers,
-            config
-          }}
-        >
-          <VisitorProvider>
-            <MixpanelProvider>
-              <CollectorProvider handlers={handlers}>
-                <ErrorBoundary
-                  onError={(error, info) => console.error(error, info)}
-                  fallback={<div>An application error occurred.</div>}
-                >
-                  {children}
-                </ErrorBoundary>
-              </CollectorProvider>
-            </MixpanelProvider>
-          </VisitorProvider>
-        </FingerprintContext.Provider>
-      </QueryClientProvider>
-    </LoggingProvider>
+    <ConfigProvider legacy_config={legacy_config}>
+      <LoggingProvider>
+        <QueryClientProvider client={queryClient}>
+          <FingerprintContext.Provider
+            value={{
+              appId,
+              booted,
+              currentTrigger: null,
+              registerHandler: addAnotherHandler,
+              trackEvent: () => {
+                alert('trackEvent not implemented')
+              },
+              trackPageView: () => {
+                alert('trackPageView not implemented')
+              },
+              unregisterHandler: () => {
+                alert('unregisterHandler not implemented')
+              },
+              initialDelay,
+              idleTriggers,
+              pageLoadTriggers,
+              exitIntentTriggers
+            }}
+          >
+            <VisitorProvider>
+              <MixpanelProvider>
+                <CollectorProvider handlers={handlers}>
+                  <ErrorBoundary
+                    onError={(error, info) => console.error(error, info)}
+                    fallback={<div>An application error occurred.</div>}
+                  >
+                    {children}
+                  </ErrorBoundary>
+                </CollectorProvider>
+              </MixpanelProvider>
+            </VisitorProvider>
+          </FingerprintContext.Provider>
+        </QueryClientProvider>
+      </LoggingProvider>
+    </ConfigProvider>
   )
 }
 
@@ -172,7 +179,6 @@ export interface FingerprintContextInterface {
   trackEvent: (event: Event) => void
   trackPageView: (pageView: PageView) => void
   unregisterHandler: (trigger: Trigger) => void
-  config?: FingerprintConfig
 }
 
 const defaultFingerprintState: FingerprintContextInterface = {
@@ -187,12 +193,7 @@ const defaultFingerprintState: FingerprintContextInterface = {
   registerHandler: () => {},
   trackEvent: () => {},
   trackPageView: () => {},
-  unregisterHandler: () => {},
-  config: {
-    idleDelay: undefined,
-    triggerCooldown: 60 * 1000,
-    exitIntentDelay: 0
-  }
+  unregisterHandler: () => {}
 }
 
 export const FingerprintContext = createContext<FingerprintContextInterface>({

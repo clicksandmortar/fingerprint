@@ -4,9 +4,9 @@ import { Trigger } from '../client/types'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
-import { getBrand } from '../utils/brand'
 import { hostname, request } from '../utils/http'
 import { getPagePayload } from '../utils/page'
+import { useBrand } from './useBrandConfig'
 import { useCollector } from './useCollector'
 import { useFingerprint } from './useFingerprint'
 
@@ -17,6 +17,7 @@ export const useSeenMutation = () => {
   const { setPageTriggers, setIncompleteTriggers } = useCollector()
 
   const { visitor } = useVisitor()
+  const brand = useBrand()
 
   const trackTriggerSeen = React.useCallback(
     (trigger: Trigger) => {
@@ -25,10 +26,10 @@ export const useSeenMutation = () => {
         triggerType: trigger.invocation,
         triggerBehaviour: trigger.behaviour,
         time: new Date().toISOString(),
-        brand: getBrand()
+        brand
       })
     },
-    [trackEvent]
+    [trackEvent, brand]
   )
 
   return useMutation<Response, {}, unknown, unknown>(

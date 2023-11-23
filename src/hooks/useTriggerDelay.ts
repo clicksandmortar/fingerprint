@@ -1,11 +1,18 @@
 import React, { useState } from 'react'
 
-export const defaultTriggerCooldown = 60 * 1000
+import { useLogging } from '../context/LoggingContext'
+import { useTriggerConfig } from './useBrandConfig'
 
-export function useTriggerDelay(cooldownMs: number = defaultTriggerCooldown) {
+export function useTriggerDelay() {
   const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState<
     number | null
   >(null)
+
+  const triggerConfig = useTriggerConfig()
+  const cooldownMs = triggerConfig.triggerCooldownSecs * 1000
+  const idleDelay = triggerConfig.userIdleThresholdSecs * 1000
+
+  const { log } = useLogging()
 
   const startCooldown = React.useCallback(() => {
     const currentTimeStamp = Number(new Date())
@@ -28,9 +35,25 @@ export function useTriggerDelay(cooldownMs: number = defaultTriggerCooldown) {
     return getRemainingCooldownMs() === 0
   }, [getRemainingCooldownMs])
 
+  /**
+   * Recalculate the idle delay based on config / default val and cooldown.
+   */
+  const getIdleStatusDelay = React.useCallback((): number => {
+    const cooldownDelay = getRemainingCooldownMs()
+
+    const delayAdjustedForCooldown = idleDelay + cooldownDelay
+
+    log(
+      `Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + idleDelay ${idleDelay}ms)`
+    )
+
+    return delayAdjustedForCooldown
+  }, [idleDelay, getRemainingCooldownMs, log])
+
   return {
     startCooldown,
     canNextTriggerOccur,
-    getRemainingCooldownMs
+    getRemainingCooldownMs,
+    getIdleStatusDelay
   }
 }

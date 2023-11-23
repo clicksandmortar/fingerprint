@@ -1,5 +1,5 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useContext, createContext, useEffect, useState, useCallback, useMemo, useRef, createElement } from 'react';
+import React__default, { useContext, createContext, useState, useEffect, useCallback, useMemo, useRef, createElement } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactDOM from 'react-dom';
 import mixpanel from 'mixpanel-browser';
@@ -77,10 +77,138 @@ function getEnvVars() {
   };
 }
 
+<<<<<<< HEAD
 const LoggingProvider = ({
   debug,
   children
 }) => {
+=======
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+const _LEGACY_getBrand = () => {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+const haveBrandColorsBeenConfigured = colors => {
+  if (!colors) return false;
+  if (typeof colors !== 'object') return false;
+  if (Object.keys(colors).length === 0) return false;
+  if (Object.values(colors).every(color => color === '#000000')) return false;
+  return true;
+};
+
+const defaultColors = {
+  backgroundPrimary: '#2a3d6d',
+  backgroundPrimaryDimmed: 'rgb(27,233,237)',
+  backgroundSecondary: 'rgb(226,226,226)',
+  shadeOfGrey: 'rgb(13,14,49)',
+  textPrimary: '#ffffff',
+  greyText: '#40404b'
+};
+const defaultConfig = {
+  script: {
+    debugMode: false
+  },
+  trigger: {
+    userIdleThresholdSecs: 5,
+    displayTriggerAfterSecs: 5,
+    triggerCooldownSecs: 60
+  },
+  brand: {
+    name: 'C&M',
+    colors: defaultColors
+  }
+};
+const LEGACY_merge_config = (config, legacy_config) => ({
+  displayTriggerAfterSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || 0) / 1000 || config.trigger.displayTriggerAfterSecs,
+  triggerCooldownSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || 0) / 1000 || config.trigger.triggerCooldownSecs,
+  userIdleThresholdSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || 0) / 1000 || config.trigger.userIdleThresholdSecs
+});
+const objStringtoObjNum = obj => {
+  const newObj = {};
+  Object.keys(obj).forEach(key => {
+    newObj[key] = Number(obj[key]);
+  });
+  return newObj;
+};
+function ConfigProvider({
+  children,
+  legacy_config
+}) {
+  const [config, setConfigState] = useState(defaultConfig);
+  const log = React__default.useCallback((...params) => {
+    if (config.script.debugMode) {
+      console.log('[ConfigProvider]', ...params);
+    }
+  }, [config, legacy_config]);
+  const setConfig = React__default.useCallback(updatedConfigEntries => {
+    var _updatedConfigEntries;
+    const argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
+    const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
+    if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
+    setConfigState(prev => {
+      return {
+        ...prev,
+        ...updatedConfigEntries,
+        brand: {
+          ...prev.brand,
+          ...updatedConfigEntries.brand,
+          colors: shouldUpdateColors ? {
+            ...(prev.brand.colors || defaultColors),
+            ...(argColors || {})
+          } : prev.brand.colors
+        },
+        trigger: {
+          ...prev.trigger,
+          ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
+        }
+      };
+    });
+  }, [setConfigState]);
+  const value = {
+    config,
+    setConfig
+  };
+  useEffect(() => {
+    log('config in use:', config);
+  }, [config]);
+  return React__default.createElement(ConfigContext.Provider, {
+    value: value
+  }, children);
+}
+const ConfigContext = createContext({
+  config: defaultConfig,
+  setConfig: () => {
+    console.error('ConfigContext: setConfig not implemented');
+  }
+});
+
+const useConfig = () => React__default.useContext(ConfigContext);
+const useBrand = () => {
+  const configBrandName = useConfig().config.brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
+};
+const useTriggerConfig = () => useConfig().config.trigger;
+const useBrandColors = () => {
+  return useConfig().config.brand.colors || defaultColors;
+};
+
+const LoggingProvider = ({
+  children
+}) => {
+  const debug = useConfig().config.script.debugMode;
+>>>>>>> main
   const log = (...message) => {
     if (debug) {
       console.log(...message);
@@ -374,6 +502,7 @@ const useMixpanel = () => {
   return useContext(MixpanelContext);
 };
 
+<<<<<<< HEAD
 const TEMP_isCNMBrand = () => {
   if (typeof window === 'undefined') return false;
   const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
@@ -391,6 +520,8 @@ const getBrand = () => {
   return 'C&M';
 };
 
+=======
+>>>>>>> main
 const collinBrandsPathConversionMap = {
   Stonehouse: '/tablebooking/enquiry-form-completed',
   'All Bar One': '/bookings/dmnc-complete',
@@ -404,8 +535,13 @@ function useCollinsBookingComplete() {
   const {
     log
   } = useLogging();
+<<<<<<< HEAD
   const checkCollinsBookingComplete = React__default.useCallback(() => {
     const brand = getBrand();
+=======
+  const brand = useBrand();
+  const checkCollinsBookingComplete = React__default.useCallback(() => {
+>>>>>>> main
     if (!brand) return;
     const conversionPathForBrand = collinBrandsPathConversionMap[brand];
     if (!conversionPathForBrand) return;
@@ -413,7 +549,7 @@ function useCollinsBookingComplete() {
     if (!isConversionPath) return;
     log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
     trackEvent('booking_complete', {});
-  }, [trackEvent, log]);
+  }, [trackEvent, log, brand]);
   return {
     checkCollinsBookingComplete
   };
@@ -2946,6 +3082,10 @@ function useTrackIntentlyModal({
     log,
     error
   } = useLogging();
+<<<<<<< HEAD
+=======
+  const brand = useBrand();
+>>>>>>> main
   useEffect(() => {
     if (!initiated) return;
     if (!intently) return;
@@ -2969,14 +3109,18 @@ function useTrackIntentlyModal({
         triggerType: 'INVOCATION_EXIT_INTENT',
         triggerBehaviour: 'BEHAVIOUR_MODAL',
         time: new Date().toISOString(),
-        brand: getBrand()
+        brand
       });
       clearInterval(id);
     }, selectorRateMs);
     return () => {
       clearInterval(id);
     };
+<<<<<<< HEAD
   }, [intently, log, setIsVisible, trackEvent, initiated]);
+=======
+  }, [intently, log, setIsVisible, trackEvent, initiated, brand]);
+>>>>>>> main
   const getHandleTrackAction = action => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`);
     trackEvent(`user_clicked_${action}_button`, {});
@@ -3056,9 +3200,20 @@ const useRunOnPathChange = (func, config) => {
   }, [run]);
 };
 
+<<<<<<< HEAD
 const defaultTriggerCooldown = 60 * 1000;
 function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
+=======
+function useTriggerDelay() {
+  const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
+  const triggerConfig = useTriggerConfig();
+  const cooldownMs = triggerConfig.triggerCooldownSecs * 1000;
+  const idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
+  const {
+    log
+  } = useLogging();
+>>>>>>> main
   const startCooldown = React__default.useCallback(() => {
     const currentTimeStamp = Number(new Date());
     setLastTriggerTimeStamp(currentTimeStamp);
@@ -3073,10 +3228,21 @@ function useTriggerDelay(cooldownMs = defaultTriggerCooldown) {
   const canNextTriggerOccur = React__default.useCallback(() => {
     return getRemainingCooldownMs() === 0;
   }, [getRemainingCooldownMs]);
+  const getIdleStatusDelay = React__default.useCallback(() => {
+    const cooldownDelay = getRemainingCooldownMs();
+    const delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log(`Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + idleDelay ${idleDelay}ms)`);
+    return delayAdjustedForCooldown;
+  }, [idleDelay, getRemainingCooldownMs, log]);
   return {
     startCooldown,
     canNextTriggerOccur,
+<<<<<<< HEAD
     getRemainingCooldownMs
+=======
+    getRemainingCooldownMs,
+    getIdleStatusDelay
+>>>>>>> main
   };
 }
 
@@ -3090,7 +3256,10 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
+<<<<<<< HEAD
 const defaultIdleStatusDelay = 5 * 1000;
+=======
+>>>>>>> main
 function CollectorProvider({
   children,
   handlers = []
@@ -3104,6 +3273,7 @@ function CollectorProvider({
     initialDelay,
     exitIntentTriggers,
     idleTriggers,
+<<<<<<< HEAD
     pageLoadTriggers,
     config
   } = useFingerprint();
@@ -3211,6 +3381,56 @@ function CollectorProvider({
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [visibleIncompleteTriggers]);
+=======
+    pageLoadTriggers
+  } = useFingerprint();
+  const {
+    setConfig,
+    config: {
+      trigger: config
+    }
+  } = useConfig();
+  const {
+    visitor,
+    setVisitor
+  } = useVisitor();
+  const {
+    canNextTriggerOccur,
+    startCooldown,
+    getRemainingCooldownMs,
+    getIdleStatusDelay
+  } = useTriggerDelay();
+  const {
+    trackEvent
+  } = useMixpanel();
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const {
+    checkCollinsBookingComplete
+  } = useCollinsBookingComplete();
+  const {
+    registerHandler,
+    resetState: reRegisterExitIntent
+  } = useExitIntent({
+    cookie: {
+      key: '_cm_exit',
+      daysToExpire: 0
+    }
+  });
+  const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
+  const [pageTriggers, setPageTriggersState] = useState([]);
+  const {
+    setIntently
+  } = useIntently();
+  const [displayTriggers, setDisplayedTriggers] = useState([]);
+  const [foundWatchers, setFoundWatchers] = useState(new Map());
+  const {
+    setIncompleteTriggers,
+    visibleTriggers: visibleIncompleteTriggers
+  } = useIncompleteTriggers();
+  const combinedTriggers = React__default.useMemo(() => [...pageTriggers, ...visibleIncompleteTriggers], [pageTriggers, visibleIncompleteTriggers]);
+>>>>>>> main
   const getIsBehaviourVisible = React__default.useCallback(type => {
     if (displayTriggers.length === 0) return false;
     if (displayTriggers.find(triggerId => {
@@ -3230,7 +3450,67 @@ function CollectorProvider({
       return;
     }
     setDisplayedTriggers(ts => [...ts, invokableTrigger.id]);
+<<<<<<< HEAD
   }, [combinedTriggers, setDisplayedTriggers, getIsBehaviourVisible]);
+=======
+  }, [combinedTriggers, getIsBehaviourVisible, log]);
+  useEffect(() => {
+    if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
+  }, [visibleIncompleteTriggers, setPageTriggersState, setDisplayedTriggerByInvocation]);
+  const setPageTriggers = React__default.useCallback(triggers => {
+    setPageTriggersState(prev => {
+      const nonDismissed = prev.filter(tr => displayTriggers.includes(tr.id));
+      return uniqueBy([...(triggers || []), ...nonDismissed], 'id');
+    });
+  }, [setPageTriggersState, displayTriggers]);
+  const getHandlerForTrigger = React__default.useCallback(_trigger => {
+    const potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === _trigger.behaviour);
+    if (!potentialHandler) return null;
+    return potentialHandler;
+  }, [handlers]);
+  const removeActiveTrigger = useCallback(id => {
+    log(`CollectorProvider: removing id:${id} from displayTriggers`);
+    const refreshedTriggers = displayTriggers.filter(triggerId => triggerId !== id);
+    setDisplayedTriggers(refreshedTriggers);
+    setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
+    setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
+  }, [displayTriggers, log, setIncompleteTriggers]);
+  const TriggerComponent = React__default.useCallback(() => {
+    if (!displayTriggers) return null;
+    const activeTriggers = combinedTriggers.filter(trigger => displayTriggers.includes(trigger.id));
+    if (!activeTriggers) {
+      error(`No trigger found for displayTriggers`, displayTriggers);
+      return null;
+    }
+    log('CollectorProvider: available handlers include: ', handlers);
+    log('CollectorProvider: activeTriggers to match are: ', activeTriggers);
+    log('CollectorProvider: attempting to show trigger', activeTriggers);
+    return activeTriggers.map(trigger => {
+      var _handler$invoke;
+      const handler = getHandlerForTrigger(trigger);
+      if (!handler) {
+        log('No handler found for trigger', trigger);
+        return null;
+      }
+      if (!handler.invoke) {
+        log('No invoke method found for handler', handler);
+        return null;
+      }
+      const potentialComponent = (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
+      if (potentialComponent && React__default.isValidElement(potentialComponent)) {
+        log('CollectorProvider: Potential component for trigger is valid. Mounting');
+        return potentialComponent;
+      }
+      log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
+      return null;
+    });
+  }, [displayTriggers, log, handlers, error, getHandlerForTrigger, combinedTriggers]);
+  useEffect(() => {
+    if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
+  }, [setDisplayedTriggerByInvocation, visibleIncompleteTriggers]);
+>>>>>>> main
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
@@ -3239,7 +3519,11 @@ function CollectorProvider({
   }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
   const {
     hasDelayPassed
+<<<<<<< HEAD
   } = useExitIntentDelay(config === null || config === void 0 ? void 0 : config.exitIntentDelay);
+=======
+  } = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.displayTriggerAfterSecs) * 1000);
+>>>>>>> main
   const fireExitTrigger = React__default.useCallback(() => {
     if (!hasDelayPassed) {
       log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
@@ -3257,7 +3541,11 @@ function CollectorProvider({
     log('CollectorProvider: attempting to fire exit trigger');
     setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
+<<<<<<< HEAD
   }, [displayTriggers === null || displayTriggers === void 0 ? void 0 : displayTriggers.length, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
+=======
+  }, [hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
+>>>>>>> main
   useEffect(() => {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
@@ -3271,7 +3559,31 @@ function CollectorProvider({
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
+<<<<<<< HEAD
   }, [pageLoadTriggers, log, setDisplayedTriggerByInvocation]);
+=======
+  }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation]);
+  const collectorCallback = React__default.useCallback(async response => {
+    const payload = await response.json();
+    log('Sent collector data, retrieved:', payload);
+    setIdleTimeout(getIdleStatusDelay());
+    setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+    setConfig(payload.config);
+    setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
+    const cohort = payload.intently ? 'intently' : 'fingerprint';
+    if (visitor.cohort !== cohort) setVisitor({
+      cohort
+    });
+    log('CollectorProvider: collected data');
+    if (!payload.intently) {
+      log('CollectorProvider: user is in Fingerprint cohort');
+      setIntently(false);
+    } else {
+      log('CollectorProvider: user is in Intently cohort');
+      setIntently(true);
+    }
+  }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setVisitor, setIntently]);
+>>>>>>> main
   const collectAndApplyVisitorInfo = React__default.useCallback(() => {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
@@ -3311,6 +3623,7 @@ function CollectorProvider({
         setIntently(true);
         return;
       }
+<<<<<<< HEAD
       const payload = await response.json();
       log('Sent collector data, retrieved:', payload);
       setIdleTimeout(getIdleStatusDelay());
@@ -3332,6 +3645,13 @@ function CollectorProvider({
     });
     log('CollectorProvider: collected data');
   }, [collect, log, error, setVisitor, visitor, handlers, getIdleStatusDelay, setIncompleteTriggers, setIdleTimeout, trackEvent, setPageTriggers]);
+=======
+      collectorCallback(response);
+    }).catch(err => {
+      error('failed to store collected data', err);
+    });
+  }, [visitor.id, log, collect, trackEvent, error, collectorCallback, setIntently]);
+>>>>>>> main
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
@@ -3351,6 +3671,7 @@ function CollectorProvider({
               path: window.location.pathname,
               selector: configuredSelector
             }]
+<<<<<<< HEAD
           }).then(async response => {
             const payload = await response.json();
             log('Sent collector data, retrieved:', payload);
@@ -3358,6 +3679,9 @@ function CollectorProvider({
             setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
             setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
           }).catch(err => {
+=======
+          }).then(collectorCallback).catch(err => {
+>>>>>>> main
             error('failed to store collected data', err);
           });
           clearInterval(intervalId);
@@ -3365,7 +3689,11 @@ function CollectorProvider({
       });
     }, 500);
     return intervalId;
+<<<<<<< HEAD
   }, [collect, error, foundWatchers, getIdleStatusDelay, log, session, setIdleTimeout, trackEvent, visitor]);
+=======
+  }, [collect, collectorCallback, error, foundWatchers, trackEvent]);
+>>>>>>> main
   useEffect(() => {
     if (!visitor.id) return;
     const intervalIds = [registerWatcher('.stage-5', '')];
@@ -3903,15 +4231,23 @@ const useSeenMutation = () => {
   const {
     visitor
   } = useVisitor();
+<<<<<<< HEAD
+=======
+  const brand = useBrand();
+>>>>>>> main
   const trackTriggerSeen = React__default.useCallback(trigger => {
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
       time: new Date().toISOString(),
-      brand: getBrand()
+      brand
     });
+<<<<<<< HEAD
   }, [trackEvent]);
+=======
+  }, [trackEvent, brand]);
+>>>>>>> main
   return useMutation(trigger => {
     trackTriggerSeen(trigger);
     return request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
@@ -4347,6 +4683,7 @@ const getModalButtonFlexPosition = position => {
 };
 const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;
+<<<<<<< HEAD
 const getIsModalFullyClickable = ({
   trigger
 }) => {
@@ -4413,6 +4750,20 @@ const FullyClickableModal = ({
     image: imageURL
   });
   const [stylesLoaded, setStylesLoaded] = useState(false);
+=======
+
+const FullyClickableModal = ({
+  handleClickCallToAction,
+  handleCloseModal,
+  style,
+  imageURL
+}) => {
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const {
+    height,
+    width
+  } = style;
+>>>>>>> main
   const appendResponsiveBehaviour = React__default.useCallback(() => {
     return isMobile ? `.${prependClass('modal')} {
       max-width: 95%;
@@ -4440,7 +4791,11 @@ const FullyClickableModal = ({
 }
 
 `;
+<<<<<<< HEAD
   }, [height, width]);
+=======
+  }, [style]);
+>>>>>>> main
   useEffect(() => {
     const cssToApply = `
   
@@ -4568,7 +4923,11 @@ const FullyClickableModal = ({
     return () => {
       document.head.removeChild(styles);
     };
+<<<<<<< HEAD
   }, [height, width, appendResponsiveBehaviour]);
+=======
+  }, [style, appendResponsiveBehaviour]);
+>>>>>>> main
   const handleModalAction = React__default.useCallback(e => {
     e.stopPropagation();
     return handleClickCallToAction(e);
@@ -4601,11 +4960,16 @@ const FullyClickableModal = ({
 
 const defaultElementSize = 'medium';
 const defaultButtonPosition = 'right';
+<<<<<<< HEAD
 const BasicModal = ({
+=======
+const CnMStandardModal = ({
+>>>>>>> main
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }) => {
+<<<<<<< HEAD
   var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   const modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
   const elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
@@ -4620,6 +4984,20 @@ const BasicModal = ({
     :root {
       --primary: white;
       --secondary: grey;
+=======
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  const elementSize = defaultElementSize;
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const modalSizeStyle = getModalStylesBySize(elementSize);
+  const buttonSizeStyle = getModalButtonStylesBySize(elementSize);
+  const {
+    textPrimary,
+    backgroundPrimary
+  } = useBrandColors();
+  useEffect(() => {
+    const cssToApply = `
+    :root {
+>>>>>>> main
       --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     }
     
@@ -4653,11 +5031,16 @@ const BasicModal = ({
     }
     
     .${prependClass('modal')} {
+<<<<<<< HEAD
       ${isModalFullyClickable ? 'cursor: pointer; ' : `
         width: 80%;
         height: 500px;
       `}
     
+=======
+      width: 80%;
+      height: 500px;
+>>>>>>> main
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -4688,7 +5071,11 @@ const BasicModal = ({
       font-style: normal;
       text-align: center;
       margin-bottom: 1rem;
+<<<<<<< HEAD
       fill: var(--secondary);
+=======
+      fill: ${backgroundPrimary};
+>>>>>>> main
       text-shadow: var(--text-shadow);
       max-width: 400px;
       margin-left: auto;
@@ -4707,11 +5094,19 @@ const BasicModal = ({
     
     .${prependClass('cta')} {
       cursor: pointer;
+<<<<<<< HEAD
       background-color: var(--secondary);
       border-radius: 2px;
       display: block;
       font-size: 1.3rem;
       color: var(--primary);
+=======
+      background-color: ${backgroundPrimary};
+      border-radius: 2px;
+      display: block;
+      font-size: 1.3rem;
+      color: ${textPrimary};
+>>>>>>> main
       text-align: center;
       text-transform: uppercase;
       margin: 0 auto;
@@ -4811,7 +5206,11 @@ const BasicModal = ({
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
     style: {
       display: 'flex',
+<<<<<<< HEAD
       ...getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition)
+=======
+      ...getModalButtonFlexPosition(defaultButtonPosition)
+>>>>>>> main
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
@@ -5361,9 +5760,13 @@ const Modal = ({
   } = useMixpanel();
   const [open, setOpen] = useState(true);
   const [hasFired, setHasFired] = useState(false);
+<<<<<<< HEAD
   const brand = React__default.useMemo(() => {
     return getBrand();
   }, []);
+=======
+  const brand = useBrand();
+>>>>>>> main
   const {
     mutate: runSeen,
     isSuccess,
@@ -5406,6 +5809,16 @@ const Modal = ({
       {
         let image = isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
         if (window.location.href.includes('nationalsearch')) image = isMobile ? `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`;
+<<<<<<< HEAD
+=======
+        const style = isMobile ? {
+          height: 1000,
+          width: 640
+        } : {
+          width: 813,
+          height: 490
+        };
+>>>>>>> main
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
           trigger: {
             ...trigger,
@@ -5420,6 +5833,7 @@ const Modal = ({
       {
         let image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg`;
         if (window.location.href.includes('signup')) image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`;
+<<<<<<< HEAD
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
           trigger: {
             ...trigger,
@@ -5428,6 +5842,18 @@ const Modal = ({
               backgroundUrl: image
             }
           }
+=======
+        const style = isMobile ? {
+          height: 1000,
+          width: 640
+        } : {
+          width: 819,
+          height: 490
+        };
+        return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
+          style: style,
+          imageURL: image
+>>>>>>> main
         }));
       }
     case 'Stonehouse':
@@ -5579,13 +6005,20 @@ const FingerprintProvider = ({
   children,
   consent: _consent = false,
   consentCallback,
+<<<<<<< HEAD
   debug,
+=======
+>>>>>>> main
   defaultHandlers,
   initialDelay: _initialDelay = 0,
   exitIntentTriggers: _exitIntentTriggers = true,
   idleTriggers: _idleTriggers = true,
   pageLoadTriggers: _pageLoadTriggers = true,
+<<<<<<< HEAD
   config
+=======
+  config: legacy_config
+>>>>>>> main
 }) => {
   const [booted, setBooted] = useState(false);
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers);
@@ -5610,9 +6043,9 @@ const FingerprintProvider = ({
   if (!consentGiven) {
     return children;
   }
-  return React__default.createElement(LoggingProvider, {
-    debug: debug
-  }, React__default.createElement(QueryClientProvider, {
+  return React__default.createElement(ConfigProvider, {
+    legacy_config: legacy_config
+  }, React__default.createElement(LoggingProvider, null, React__default.createElement(QueryClientProvider, {
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {
     value: {
@@ -5632,15 +6065,19 @@ const FingerprintProvider = ({
       initialDelay: _initialDelay,
       idleTriggers: _idleTriggers,
       pageLoadTriggers: _pageLoadTriggers,
+<<<<<<< HEAD
       exitIntentTriggers: _exitIntentTriggers,
       config
+=======
+      exitIntentTriggers: _exitIntentTriggers
+>>>>>>> main
     }
   }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
   }, React__default.createElement(ErrorBoundary, {
     onError: (error, info) => console.error(error, info),
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children)))))));
+  }, children))))))));
 };
 const defaultFingerprintState = {
   appId: '',
@@ -5654,12 +6091,16 @@ const defaultFingerprintState = {
   registerHandler: () => {},
   trackEvent: () => {},
   trackPageView: () => {},
+<<<<<<< HEAD
   unregisterHandler: () => {},
   config: {
     idleDelay: undefined,
     triggerCooldown: 60 * 1000,
     exitIntentDelay: 0
   }
+=======
+  unregisterHandler: () => {}
+>>>>>>> main
 };
 const FingerprintContext = createContext({
   ...defaultFingerprintState

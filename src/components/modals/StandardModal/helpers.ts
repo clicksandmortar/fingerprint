@@ -5,18 +5,6 @@ import { Trigger } from '../../../client/types'
 export type ModalSize = 'small' | 'medium' | 'large' | 'full'
 export type ButtonPosition = 'left' | 'center' | 'right'
 
-export type TriggerConfig = {
-  modal?: {
-    size?: ModalSize
-    textShadow?: boolean
-    textColor?: string
-    buttonPosition?: ButtonPosition
-  }
-  banner?: {}
-  youtube?: {}
-  inverseFlow?: {}
-}
-
 export const getModalStylesBySize = (size: ModalSize): CSSProperties => {
   switch (size) {
     case 'small': {
