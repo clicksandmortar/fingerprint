@@ -116,6 +116,7 @@ export type CollectorVisitorResponse = {
   incompleteTriggers?: IncompleteTrigger[]
   // @todo remove this temp hack once split testing with Intently is complete
   intently: boolean
+  identifiers?: { main?: string }
   conversions: Conversion[]
 }
 

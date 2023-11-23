@@ -23,7 +23,10 @@ import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 
 import { useConfig } from '../hooks/useBrandConfig'
+
 import useConversions from '../hooks/useConversions'
+
+import { updateCookie } from '../visitors/bootstrap'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
@@ -345,6 +348,13 @@ export function CollectorProvider({
 
       log('Sent collector data, retrieved:', payload)
 
+      const retrievedUserId = payload.identifiers?.main
+
+      if (retrievedUserId) {
+        updateCookie(retrievedUserId)
+        setVisitor({ id: retrievedUserId })
+      }
+
       // Set IdleTimer
       // @todo turn this into the dynamic value
       setIdleTimeout(getIdleStatusDelay())
@@ -409,9 +419,7 @@ export function CollectorProvider({
         }
       })
         .then(async (response: Response) => {
-          const payload: CollectorVisitorResponse = await response.json()
-
-          log('Sent login collector data, retrieved:', payload)
+          collectorCallback(response)
         })
         .catch((err) => {
           error('failed to store collected data', err)
