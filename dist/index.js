@@ -11,8 +11,8 @@ var uuid = require('uuid');
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
-var reactHookForm = require('react-hook-form');
 var reactDeviceDetect = require('react-device-detect');
+var reactHookForm = require('react-hook-form');
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -594,6 +594,10 @@ function getReferrer() {
   };
 }
 
+var deviceInfo = {
+  type: reactDeviceDetect.isMobile ? 'mobile' : 'desktop'
+};
+
 var headers = {
   'Content-Type': 'application/json'
 };
@@ -674,7 +678,8 @@ var useCollectorMutation = function useCollectorMutation() {
       appId: appId,
       visitor: visitor,
       sessionId: session === null || session === void 0 ? void 0 : session.id,
-      hostname: requestHost
+      hostname: requestHost,
+      device: deviceInfo
     })).then(function (response) {
       log('Collector API response', response);
       return response;
@@ -4133,7 +4138,8 @@ var useSeenMutation = function useSeenMutation() {
     return request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
       seenTriggerIDs: [trigger.id],
       visitor: visitor,
-      page: getPagePayload()
+      page: getPagePayload(),
+      device: deviceInfo
     }).then(function (response) {
       log('Seen mutation: response', response);
       return response;

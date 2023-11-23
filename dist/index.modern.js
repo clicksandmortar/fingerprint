@@ -8,8 +8,8 @@ import { validate, version, v4 } from 'uuid';
 import uniqueBy from 'lodash.uniqby';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
-import { useForm } from 'react-hook-form';
 import { isMobile } from 'react-device-detect';
+import { useForm } from 'react-hook-form';
 
 const closeButtonStyles = {
   borderRadius: '100%',
@@ -560,6 +560,10 @@ function getReferrer() {
   };
 }
 
+const deviceInfo = {
+  type: isMobile ? 'mobile' : 'desktop'
+};
+
 const headers = {
   'Content-Type': 'application/json'
 };
@@ -624,7 +628,8 @@ const useCollectorMutation = () => {
       appId,
       visitor,
       sessionId: session === null || session === void 0 ? void 0 : session.id,
-      hostname: requestHost
+      hostname: requestHost,
+      device: deviceInfo
     }).then(response => {
       log('Collector API response', response);
       return response;
@@ -4032,7 +4037,8 @@ const useSeenMutation = () => {
     return request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
       seenTriggerIDs: [trigger.id],
       visitor,
-      page: getPagePayload()
+      page: getPagePayload(),
+      device: deviceInfo
     }).then(response => {
       log('Seen mutation: response', response);
       return response;
