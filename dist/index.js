@@ -3329,7 +3329,10 @@ function CollectorProvider(_ref) {
     })) return true;
     return false;
   }, [displayTriggers, pageTriggers]);
-  var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation) {
+  var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation, shouldAllowMultipleSimultaneous) {
+    if (shouldAllowMultipleSimultaneous === void 0) {
+      shouldAllowMultipleSimultaneous = false;
+    }
     var invokableTrigger = combinedTriggers.find(function (trigger) {
       return trigger.invocation === invocation;
     });
@@ -3337,12 +3340,13 @@ function CollectorProvider(_ref) {
       log('CollectorProvider: Trigger not invokable ', invokableTrigger);
       return;
     }
-    if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+    if (!shouldAllowMultipleSimultaneous && getIsBehaviourVisible(invokableTrigger.behaviour)) {
       log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
       return;
     }
-    setDisplayedTriggers(function (ts) {
-      return [].concat(ts, [invokableTrigger.id]);
+    setDisplayedTriggers(function (prev) {
+      if (prev.includes(invokableTrigger.id)) return prev;
+      return [].concat(prev, [invokableTrigger.id]);
     });
   }, [combinedTriggers, getIsBehaviourVisible, log]);
   React.useEffect(function () {
@@ -3454,7 +3458,7 @@ function CollectorProvider(_ref) {
     if (!pageLoadTriggers) return;
     if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
     log('CollectorProvider: attempting to fire on-page-load trigger');
-    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD');
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
   }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation]);
   var collectorCallback = React__default.useCallback(function (response) {
     try {
