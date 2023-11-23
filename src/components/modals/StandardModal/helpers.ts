@@ -4,18 +4,6 @@ import { v4 as uuidv4 } from 'uuid'
 export type ModalSize = 'small' | 'medium' | 'large' | 'full'
 export type ButtonPosition = 'left' | 'center' | 'right'
 
-export type TriggerConfig = {
-  modal?: {
-    size?: ModalSize
-    textShadow?: boolean
-    textColor?: string
-    buttonPosition?: ButtonPosition
-  }
-  banner?: {}
-  youtube?: {}
-  inverseFlow?: {}
-}
-
 export const getModalStylesBySize = (size: ModalSize): CSSProperties => {
   switch (size) {
     case 'small': {

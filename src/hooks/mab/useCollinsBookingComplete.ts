@@ -1,7 +1,9 @@
 import React from 'react'
+
 import { useLogging } from '../../context/LoggingContext'
 import { useMixpanel } from '../../context/MixpanelContext'
-import { SupportedBrand, getBrand } from '../../utils/brand'
+import { SupportedBrand } from '../../utils/brand'
+import { useBrand } from '../useBrandConfig'
 
 // if a brand is not present in this map, skip tracking via this method (other ones should pick it up)
 const collinBrandsPathConversionMap: Partial<{
@@ -20,10 +22,11 @@ const collinBrandsPathConversionMap: Partial<{
 export function useCollinsBookingComplete() {
   const { trackEvent } = useMixpanel()
   const { log } = useLogging()
+  const brand = useBrand()
 
   const checkCollinsBookingComplete = React.useCallback(() => {
     // might want to add these checks as part of skip condition in `useRunOnPathChange`
-    const brand = getBrand()
+
     if (!brand) return
 
     const conversionPathForBrand = collinBrandsPathConversionMap[brand]
@@ -39,7 +42,7 @@ export function useCollinsBookingComplete() {
     )
 
     trackEvent('booking_complete', {})
-  }, [trackEvent, log])
+  }, [trackEvent, log, brand])
 
   return { checkCollinsBookingComplete }
 }

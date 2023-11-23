@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
+
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
-import { getBrand } from '../utils/brand'
+import { useBrand } from './useBrandConfig'
 
 const selectorRateMs = 100
 
@@ -19,6 +20,8 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
     state: { initiated }
   } = useMixpanel()
   const { log, error } = useLogging()
+
+  const brand = useBrand()
 
   useEffect(() => {
     // prevents the occasional race condition
@@ -58,7 +61,7 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
         triggerType: 'INVOCATION_EXIT_INTENT',
         triggerBehaviour: 'BEHAVIOUR_MODAL',
         time: new Date().toISOString(),
-        brand: getBrand()
+        brand
       })
 
       clearInterval(id)
@@ -67,7 +70,7 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
     return () => {
       clearInterval(id)
     }
-  }, [intently, log, setIsVisible, trackEvent, initiated])
+  }, [intently, log, setIsVisible, trackEvent, initiated, brand])
 
   const getHandleTrackAction = (action: 'exit' | 'CTA') => () => {
     log(`useTrackIntentlyModal: user clicked ${action} button`)

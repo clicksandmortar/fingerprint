@@ -1,7 +1,8 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
 import { Trigger } from '../../../client/types'
-import { useFingerprint } from '../../../hooks/useFingerprint'
+
+import { useBrandColors } from '../../../hooks/useBrandConfig'
 import {
   ButtonPosition,
   ModalSize,
@@ -25,13 +26,17 @@ const CnMStandardModal = ({
   handleClickCallToAction,
   handleCloseModal
 }: Props) => {
-  const modalConfig = useFingerprint().config?.triggerConfig?.modal
-  const elementSize = modalConfig?.size || defaultElementSize
+  // TODO: we can eventually make this configurable via portal / endpoint
+  // when thats teh case - hook this up
+  // const modalConfig = useTriggerConfig();
+  const elementSize = defaultElementSize
 
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
   const modalSizeStyle = getModalStylesBySize(elementSize)
   const buttonSizeStyle = getModalButtonStylesBySize(elementSize)
+
+  const { textPrimary, backgroundPrimary } = useBrandColors()
 
   useEffect(() => {
     // @todo: note that because of the font being screwed up a bit on all of these host urls,
@@ -39,8 +44,6 @@ const CnMStandardModal = ({
     // The other alternatives were either CORS-blocked, or would require a diff packager (in case of local file)
     const cssToApply = `
     :root {
-      --primary: white;
-      --secondary: grey;
       --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     }
     
@@ -106,7 +109,7 @@ const CnMStandardModal = ({
       font-style: normal;
       text-align: center;
       margin-bottom: 1rem;
-      fill: var(--secondary);
+      fill: ${backgroundPrimary};
       text-shadow: var(--text-shadow);
       max-width: 400px;
       margin-left: auto;
@@ -125,11 +128,11 @@ const CnMStandardModal = ({
     
     .${prependClass('cta')} {
       cursor: pointer;
-      background-color: var(--secondary);
+      background-color: ${backgroundPrimary};
       border-radius: 2px;
       display: block;
       font-size: 1.3rem;
-      color: var(--primary);
+      color: ${textPrimary};
       text-align: center;
       text-transform: uppercase;
       margin: 0 auto;
@@ -242,7 +245,8 @@ const CnMStandardModal = ({
             style={{
               display: 'flex',
               ...getModalButtonFlexPosition(
-                modalConfig?.buttonPosition || defaultButtonPosition
+                // modalConfig?.buttonPosition ||
+                defaultButtonPosition
               )
             }}
           >
