@@ -111,7 +111,10 @@ export function CollectorProvider({
   )
 
   const setDisplayedTriggerByInvocation = React.useCallback(
-    (invocation: Trigger['invocation']) => {
+    (
+      invocation: Trigger['invocation'],
+      shouldAllowMultipleSimultaneous = false
+    ) => {
       const invokableTrigger = combinedTriggers.find(
         (trigger) => trigger.invocation === invocation
       )
@@ -120,7 +123,11 @@ export function CollectorProvider({
         log('CollectorProvider: Trigger not invokable ', invokableTrigger)
         return
       }
-      if (getIsBehaviourVisible(invokableTrigger.behaviour)) {
+
+      if (
+        !shouldAllowMultipleSimultaneous &&
+        getIsBehaviourVisible(invokableTrigger.behaviour)
+      ) {
         log(
           'CollectorProvider: Behaviour already visible, not showing trigger',
           invokableTrigger
@@ -128,7 +135,12 @@ export function CollectorProvider({
         return
       }
 
-      setDisplayedTriggers((ts) => [...ts, invokableTrigger.id])
+      // if the trigger is already in the list, don't add it again
+      setDisplayedTriggers((ts) => {
+        if (ts.includes(invokableTrigger.id)) return ts
+
+        return [...ts, invokableTrigger.id]
+      })
     },
     [combinedTriggers, getIsBehaviourVisible, log]
   )
@@ -323,7 +335,7 @@ export function CollectorProvider({
      * the diff elsewhere
      */
     log('CollectorProvider: attempting to fire on-page-load trigger')
-    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD')
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true)
   }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation])
 
   const collectorCallback = React.useCallback(
