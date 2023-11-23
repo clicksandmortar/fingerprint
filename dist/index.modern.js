@@ -3419,8 +3419,16 @@ function CollectorProvider({
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
   }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation]);
   const collectorCallback = React__default.useCallback(async response => {
+    var _payload$identifiers;
     const payload = await response.json();
     log('Sent collector data, retrieved:', payload);
+    const retrievedUserId = (_payload$identifiers = payload.identifiers) === null || _payload$identifiers === void 0 ? void 0 : _payload$identifiers.main;
+    if (retrievedUserId) {
+      updateCookie(retrievedUserId);
+      setVisitor({
+        id: retrievedUserId
+      });
+    }
     setIdleTimeout(getIdleStatusDelay());
     setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
     setConfig(payload.config);
@@ -4076,11 +4084,11 @@ const useSeenMutation = () => {
       const r = await res.json();
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
       setPageTriggers(r.pageTriggers);
-      const potentialNewVisitorId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
-      if (potentialNewVisitorId) {
-        updateCookie(potentialNewVisitorId);
+      const retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
+      if (retrievedUserId) {
+        updateCookie(retrievedUserId);
         setVisitor({
-          id: potentialNewVisitorId
+          id: retrievedUserId
         });
       }
       log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);

@@ -61,10 +61,10 @@ export const useSeenMutation = () => {
         log('Seen mutation: replacing triggers with:', r.pageTriggers)
         setPageTriggers(r.pageTriggers)
 
-        const potentialNewVisitorId = r.identifiers?.main
-        if (potentialNewVisitorId) {
-          updateCookie(potentialNewVisitorId)
-          setVisitor({ id: potentialNewVisitorId })
+        const retrievedUserId = r.identifiers?.main
+        if (retrievedUserId) {
+          updateCookie(retrievedUserId)
+          setVisitor({ id: retrievedUserId })
         }
 
         log(
