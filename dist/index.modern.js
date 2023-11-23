@@ -4347,18 +4347,72 @@ const getModalButtonFlexPosition = position => {
 };
 const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;
+const getIsModalFullyClickable = ({
+  trigger
+}) => {
+  var _trigger$data;
+  return !(trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonText);
+};
 
+const scaleDownFactorMap = () => {
+  return isMobile ? {
+    vertical: 1000,
+    horizontal: 640
+  } : {
+    vertical: 490,
+    horizontal: 813
+  };
+};
+const useFullyClickableModalDimensions = ({
+  image
+}) => {
+  const [imageDimensions, setImageDimensions] = useState({
+    width: 0,
+    height: 0
+  });
+  useEffect(() => {
+    const img = new Image();
+    img.src = image || '';
+    setTimeout(() => {
+      const {
+        vertical,
+        horizontal
+      } = scaleDownFactorMap();
+      const verticalScaleDownFactor = img.height / vertical;
+      const horizontalScaleDownFactor = img.width / horizontal;
+      console.log({
+        verticalScaleDownFactor,
+        horizontalScaleDownFactor,
+        h: img.height,
+        w: img.width
+      });
+      const scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
+      setImageDimensions({
+        width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),
+        height: Math.min(img.height / scaleDownFactor, window.innerHeight * 0.95)
+      });
+    }, 300);
+  }, [image]);
+  return {
+    imageDimensions
+  };
+};
 const FullyClickableModal = ({
   handleClickCallToAction,
   handleCloseModal,
-  style,
-  imageURL
+  trigger
 }) => {
-  const [stylesLoaded, setStylesLoaded] = useState(false);
+  var _trigger$data;
+  const imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
   const {
-    height,
-    width
-  } = style;
+    imageDimensions: {
+      height,
+      width
+    }
+  } = useFullyClickableModalDimensions({
+    image: imageURL
+  });
+  const [stylesLoaded, setStylesLoaded] = useState(false);
   const appendResponsiveBehaviour = React__default.useCallback(() => {
     return isMobile ? `.${prependClass('modal')} {
       max-width: 95%;
@@ -4386,7 +4440,7 @@ const FullyClickableModal = ({
 }
 
 `;
-  }, [style]);
+  }, [height, width]);
   useEffect(() => {
     const cssToApply = `
   
@@ -4514,7 +4568,7 @@ const FullyClickableModal = ({
     return () => {
       document.head.removeChild(styles);
     };
-  }, [style, appendResponsiveBehaviour]);
+  }, [height, width, appendResponsiveBehaviour]);
   const handleModalAction = React__default.useCallback(e => {
     e.stopPropagation();
     return handleClickCallToAction(e);
@@ -4545,62 +4599,19 @@ const FullyClickableModal = ({
   }))));
 };
 
-const scaleDownFactorMap = () => {
-  return isMobile ? {
-    vertical: 1000,
-    horizontal: 640
-  } : {
-    vertical: 490,
-    horizontal: 813
-  };
-};
-const useFullyClickableModalDimensions = ({
-  trigger
-}) => {
-  const isModalFullyClickable = true;
-  const [imageDimensions, setImageDimensions] = useState({
-    width: 0,
-    height: 0
-  });
-  useEffect(() => {
-    var _trigger$data;
-    const img = new Image();
-    img.src = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
-    setTimeout(() => {
-      const {
-        vertical,
-        horizontal
-      } = scaleDownFactorMap();
-      const verticalScaleDownFactor = img.height / vertical;
-      const horizontalScaleDownFactor = img.width / horizontal;
-      console.log({
-        verticalScaleDownFactor,
-        horizontalScaleDownFactor,
-        h: img.height,
-        w: img.width
-      });
-      const scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
-      setImageDimensions({
-        width: img.width / scaleDownFactor,
-        height: img.height / scaleDownFactor
-      });
-    }, 200);
-  }, [trigger, isModalFullyClickable]);
-  return {
-    isModalFullyClickable,
-    imageDimensions
-  };
-};
 const defaultElementSize = 'medium';
 const defaultButtonPosition = 'right';
-const CnMStandardModal = ({
+const BasicModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }) => {
-  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6, _trigger$data7;
+  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   const modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
   const elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
+  const isModalFullyClickable = getIsModalFullyClickable({
+    trigger
+  });
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const modalSizeStyle = getModalStylesBySize(elementSize);
   const buttonSizeStyle = getModalButtonStylesBySize(elementSize);
@@ -4762,21 +4773,6 @@ const CnMStandardModal = ({
       setStylesLoaded(true);
     }, 500);
   }, []);
-  const {
-    imageDimensions,
-    isModalFullyClickable
-  } = useFullyClickableModalDimensions({
-    trigger
-  });
-  if (isModalFullyClickable) {
-    var _trigger$data2;
-    return React__default.createElement(FullyClickableModal, {
-      handleClickCallToAction: handleClickCallToAction,
-      handleCloseModal: handleCloseModal,
-      imageURL: (trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.backgroundURL) || '',
-      style: imageDimensions
-    });
-  }
   if (!stylesLoaded) {
     return null;
   }
@@ -4785,7 +4781,7 @@ const CnMStandardModal = ({
   }, React__default.createElement("div", {
     className: prependClass('modal'),
     style: {
-      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.backgroundURL})`,
+      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'cover',
@@ -4810,19 +4806,26 @@ const CnMStandardModal = ({
     className: prependClass('text-container')
   }, React__default.createElement("h1", {
     className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading), React__default.createElement("p", {
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
     className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.paragraph)), React__default.createElement("div", {
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
     style: {
       display: 'flex',
       ...getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition)
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonURL,
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
     className: prependClass('cta'),
     onClick: handleClickCallToAction,
     style: buttonSizeStyle
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonText))))));
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+const StandardModal = props => {
+  const isModalFullyClickable = getIsModalFullyClickable({
+    trigger: props.trigger
+  });
+  if (isModalFullyClickable) return React__default.createElement(FullyClickableModal, Object.assign({}, props));
+  return React__default.createElement(BasicModal, Object.assign({}, props));
 };
 
 const CurlyText = ({
@@ -5403,32 +5406,28 @@ const Modal = ({
       {
         let image = isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
         if (window.location.href.includes('nationalsearch')) image = isMobile ? `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`;
-        const style = isMobile ? {
-          height: 1000,
-          width: 640
-        } : {
-          width: 813,
-          height: 490
-        };
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
-          style: style,
-          imageURL: image
+          trigger: {
+            ...trigger,
+            data: {
+              ...trigger.data,
+              backgroundUrl: image
+            }
+          }
         }));
       }
     case 'Sizzling':
       {
         let image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg`;
         if (window.location.href.includes('signup')) image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`;
-        const style = isMobile ? {
-          height: 1000,
-          width: 640
-        } : {
-          width: 819,
-          height: 490
-        };
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
-          style: style,
-          imageURL: image
+          trigger: {
+            ...trigger,
+            data: {
+              ...trigger.data,
+              backgroundUrl: image
+            }
+          }
         }));
       }
     case 'Stonehouse':
@@ -5437,7 +5436,7 @@ const Modal = ({
       return React__default.createElement(BrownsModal, Object.assign({}, modalProps));
     case 'C&M':
     default:
-      return React__default.createElement(CnMStandardModal, Object.assign({}, modalProps));
+      return React__default.createElement(StandardModal, Object.assign({}, modalProps));
   }
 };
 const TriggerModal = ({

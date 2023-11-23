@@ -4390,24 +4390,160 @@ var TriggerInverse = function TriggerInverse(_ref3) {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
+var getModalStylesBySize = function getModalStylesBySize(size) {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          width: '90%',
+          maxWidth: 400,
+          minHeight: 300
+        };
+      }
+    case 'medium':
+      {
+        return {
+          width: '90%',
+          maxWidth: 800,
+          minHeight: 400
+        };
+      }
+    case 'large':
+      {
+        return {
+          width: '90%',
+          maxWidth: 1200,
+          minHeight: 400
+        };
+      }
+    case 'full':
+      {
+        return {
+          width: '100vw',
+          height: '100vh'
+        };
+      }
+  }
+};
+var getModalButtonStylesBySize = function getModalButtonStylesBySize(size) {
+  switch (size) {
+    case 'small':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'medium':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'large':
+      {
+        return {
+          fontSize: '1.3rem',
+          padding: '0.3rem 1rem'
+        };
+      }
+    case 'full':
+      {
+        return {
+          fontSize: '1.5rem',
+          padding: '0.5rem 1.2rem'
+        };
+      }
+  }
+};
+var getModalButtonFlexPosition = function getModalButtonFlexPosition(position) {
+  switch (position) {
+    case 'left':
+      return {
+        justifyContent: 'flex-start'
+      };
+    case 'right':
+      return {
+        justifyContent: 'flex-end'
+      };
+    case 'center':
+      return {
+        justifyContent: 'center'
+      };
+  }
+};
 var randomHash = 'f' + uuid.v4().split('-')[0];
 var prependClass = function prependClass(className) {
   return "f" + randomHash + "-" + className;
 };
+var getIsModalFullyClickable = function getIsModalFullyClickable(_ref) {
+  var _trigger$data;
+  var trigger = _ref.trigger;
+  return !(trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonText);
+};
 
-var FullyClickableModal = function FullyClickableModal(_ref) {
-  var handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal,
-    style = _ref.style,
-    imageURL = _ref.imageURL;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var height = style.height,
-    width = style.width;
+var scaleDownFactorMap = function scaleDownFactorMap() {
+  return reactDeviceDetect.isMobile ? {
+    vertical: 1000,
+    horizontal: 640
+  } : {
+    vertical: 490,
+    horizontal: 813
+  };
+};
+var useFullyClickableModalDimensions = function useFullyClickableModalDimensions(_ref) {
+  var image = _ref.image;
+  var _useState = React.useState({
+      width: 0,
+      height: 0
+    }),
+    imageDimensions = _useState[0],
+    setImageDimensions = _useState[1];
+  React.useEffect(function () {
+    var img = new Image();
+    img.src = image || '';
+    setTimeout(function () {
+      var _scaleDownFactorMap = scaleDownFactorMap(),
+        vertical = _scaleDownFactorMap.vertical,
+        horizontal = _scaleDownFactorMap.horizontal;
+      var verticalScaleDownFactor = img.height / vertical;
+      var horizontalScaleDownFactor = img.width / horizontal;
+      console.log({
+        verticalScaleDownFactor: verticalScaleDownFactor,
+        horizontalScaleDownFactor: horizontalScaleDownFactor,
+        h: img.height,
+        w: img.width
+      });
+      var scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
+      setImageDimensions({
+        width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),
+        height: Math.min(img.height / scaleDownFactor, window.innerHeight * 0.95)
+      });
+    }, 300);
+  }, [image]);
+  return {
+    imageDimensions: imageDimensions
+  };
+};
+var FullyClickableModal = function FullyClickableModal(_ref2) {
+  var _trigger$data;
+  var handleClickCallToAction = _ref2.handleClickCallToAction,
+    handleCloseModal = _ref2.handleCloseModal,
+    trigger = _ref2.trigger;
+  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  var _useFullyClickableMod = useFullyClickableModalDimensions({
+      image: imageURL
+    }),
+    _useFullyClickableMod2 = _useFullyClickableMod.imageDimensions,
+    height = _useFullyClickableMod2.height,
+    width = _useFullyClickableMod2.width;
+  var _useState2 = React.useState(false),
+    stylesLoaded = _useState2[0],
+    setStylesLoaded = _useState2[1];
   var appendResponsiveBehaviour = React__default.useCallback(function () {
     return reactDeviceDetect.isMobile ? "." + prependClass('modal') + " {\n      max-width: 95%;\n      max-height: 95%;\n    }" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.8 * height + "px;\n    width: " + 0.8 * width + "px;\n  }\n}\n@media screen and (max-width: 1100px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n\n";
-  }, [style]);
+  }, [height, width]);
   React.useEffect(function () {
     var cssToApply = "\n  \n    ." + prependClass('overlay') + " {\n      background-color: rgba(0, 0, 0, 0.7);\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + ( 'transition: all 0.3s ease-in-out;' ) + "\n      " + ( 'cursor: pointer;' ) + "\n    }\n\n    " + ( "." + prependClass('modal') + ":hover {\n      filter: brightness(1.05);\n      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n    }" ) + "\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n\n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n\n    " + appendResponsiveBehaviour() + "\n    ";
     var styles = document.createElement('style');
@@ -4420,7 +4556,7 @@ var FullyClickableModal = function FullyClickableModal(_ref) {
     return function () {
       document.head.removeChild(styles);
     };
-  }, [style, appendResponsiveBehaviour]);
+  }, [height, width, appendResponsiveBehaviour]);
   var handleModalAction = React__default.useCallback(function (e) {
     e.stopPropagation();
     return handleClickCallToAction(e);
@@ -4451,62 +4587,25 @@ var FullyClickableModal = function FullyClickableModal(_ref) {
   }))));
 };
 
-var scaleDownFactorMap = function scaleDownFactorMap() {
-  return reactDeviceDetect.isMobile ? {
-    vertical: 1000,
-    horizontal: 640
-  } : {
-    vertical: 490,
-    horizontal: 813
-  };
-};
-var useFullyClickableModalDimensions = function useFullyClickableModalDimensions(_ref) {
-  var trigger = _ref.trigger;
-  var isModalFullyClickable = true;
-  var _useState = React.useState({
-      width: 0,
-      height: 0
-    }),
-    imageDimensions = _useState[0],
-    setImageDimensions = _useState[1];
-  React.useEffect(function () {
-    var _trigger$data;
-    var img = new Image();
-    img.src = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
-    setTimeout(function () {
-      var _scaleDownFactorMap = scaleDownFactorMap(),
-        vertical = _scaleDownFactorMap.vertical,
-        horizontal = _scaleDownFactorMap.horizontal;
-      var verticalScaleDownFactor = img.height / vertical;
-      var horizontalScaleDownFactor = img.width / horizontal;
-      console.log({
-        verticalScaleDownFactor: verticalScaleDownFactor,
-        horizontalScaleDownFactor: horizontalScaleDownFactor,
-        h: img.height,
-        w: img.width
-      });
-      var scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
-      setImageDimensions({
-        width: img.width / scaleDownFactor,
-        height: img.height / scaleDownFactor
-      });
-    }, 200);
-  }, [trigger, isModalFullyClickable]);
-  return {
-    isModalFullyClickable: isModalFullyClickable,
-    imageDimensions: imageDimensions
-  };
-};
-var CnMStandardModal = function CnMStandardModal(_ref2) {
-  var _useFingerprint$confi, _useFingerprint$confi2;
-  var trigger = _ref2.trigger,
-    handleClickCallToAction = _ref2.handleClickCallToAction,
-    handleCloseModal = _ref2.handleCloseModal;
+var defaultElementSize = 'medium';
+var defaultButtonPosition = 'right';
+var BasicModal = function BasicModal(_ref) {
+  var _useFingerprint$confi, _useFingerprint$confi2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
   var modalConfig = (_useFingerprint$confi = useFingerprint().config) === null || _useFingerprint$confi === void 0 ? void 0 : (_useFingerprint$confi2 = _useFingerprint$confi.triggerConfig) === null || _useFingerprint$confi2 === void 0 ? void 0 : _useFingerprint$confi2.modal;
-  var _useState2 = React.useState(false),
-    setStylesLoaded = _useState2[1];
+  var elementSize = (modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.size) || defaultElementSize;
+  var isModalFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
+  });
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var modalSizeStyle = getModalStylesBySize(elementSize);
+  var buttonSizeStyle = getModalButtonStylesBySize(elementSize);
   React.useEffect(function () {
-    var cssToApply = "\n    :root {\n      --primary: white;\n      --secondary: grey;\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      " + ( 'cursor: pointer; ' ) + "\n    \n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: var(--secondary);\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: var(--primary);\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
+    var cssToApply = "\n    :root {\n      --primary: white;\n      --secondary: grey;\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer; ' : "\n        width: 80%;\n        height: 500px;\n      ") + "\n    \n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: var(--secondary);\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: var(--primary);\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
@@ -4515,19 +4614,57 @@ var CnMStandardModal = function CnMStandardModal(_ref2) {
       setStylesLoaded(true);
     }, 500);
   }, []);
-  var _useFullyClickableMod = useFullyClickableModalDimensions({
-      trigger: trigger
-    }),
-    imageDimensions = _useFullyClickableMod.imageDimensions;
-  {
-    var _trigger$data2;
-    return React__default.createElement(FullyClickableModal, {
-      handleClickCallToAction: handleClickCallToAction,
-      handleCloseModal: handleCloseModal,
-      imageURL: (trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.backgroundURL) || '',
-      style: imageDimensions
-    });
+  if (!stylesLoaded) {
+    return null;
   }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: _extends({
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }, modalSizeStyle)
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("button", {
+    className: prependClass('close-button'),
+    onClick: handleCloseModal
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '20',
+    height: '20',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: '#000',
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  }))), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    style: _extends({
+      display: 'flex'
+    }, getModalButtonFlexPosition((modalConfig === null || modalConfig === void 0 ? void 0 : modalConfig.buttonPosition) || defaultButtonPosition))
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction,
+    style: buttonSizeStyle
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+var StandardModal = function StandardModal(props) {
+  var isModalFullyClickable = getIsModalFullyClickable({
+    trigger: props.trigger
+  });
+  if (isModalFullyClickable) return React__default.createElement(FullyClickableModal, Object.assign({}, props));
+  return React__default.createElement(BasicModal, Object.assign({}, props));
 };
 
 var CurlyText = function CurlyText(_ref) {
@@ -4769,32 +4906,24 @@ var Modal = function Modal(_ref) {
       {
         var image = reactDeviceDetect.isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
         if (window.location.href.includes('nationalsearch')) image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg";
-        var style = reactDeviceDetect.isMobile ? {
-          height: 1000,
-          width: 640
-        } : {
-          width: 813,
-          height: 490
-        };
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
-          style: style,
-          imageURL: image
+          trigger: _extends({}, trigger, {
+            data: _extends({}, trigger.data, {
+              backgroundUrl: image
+            })
+          })
         }));
       }
     case 'Sizzling':
       {
         var _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg";
         if (window.location.href.includes('signup')) _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg";
-        var _style = reactDeviceDetect.isMobile ? {
-          height: 1000,
-          width: 640
-        } : {
-          width: 819,
-          height: 490
-        };
         return React__default.createElement(FullyClickableModal, Object.assign({}, modalProps, {
-          style: _style,
-          imageURL: _image
+          trigger: _extends({}, trigger, {
+            data: _extends({}, trigger.data, {
+              backgroundUrl: _image
+            })
+          })
         }));
       }
     case 'Stonehouse':
@@ -4803,7 +4932,7 @@ var Modal = function Modal(_ref) {
       return React__default.createElement(BrownsModal, Object.assign({}, modalProps));
     case 'C&M':
     default:
-      return React__default.createElement(CnMStandardModal, Object.assign({}, modalProps));
+      return React__default.createElement(StandardModal, Object.assign({}, modalProps));
   }
 };
 var TriggerModal = function TriggerModal(_ref2) {

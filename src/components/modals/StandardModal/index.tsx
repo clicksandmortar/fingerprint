@@ -1,12 +1,12 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
-import { isMobile } from 'react-device-detect'
 import { Trigger } from '../../../client/types'
 import { useFingerprint } from '../../../hooks/useFingerprint'
 import FullyClickableModal from '../FullyClickableModal'
 import {
   ButtonPosition,
   ModalSize,
+  getIsModalFullyClickable,
   getModalButtonFlexPosition,
   getModalButtonStylesBySize,
   getModalStylesBySize,
@@ -19,67 +19,10 @@ type Props = {
   handleCloseModal: (e: any) => void
 }
 
-// this has been taken from other campaigns.
-const scaleDownFactorMap = () => {
-  return isMobile
-    ? { vertical: 1000, horizontal: 640 }
-    : { vertical: 490, horizontal: 813 }
-}
-
-const useFullyClickableModalDimensions = ({
-  trigger
-}: {
-  trigger: Trigger
-}) => {
-  // const isModalFullyClickable = !trigger?.data?.buttonText
-  const isModalFullyClickable = true
-
-  const [imageDimensions, setImageDimensions] = useState({
-    width: 0,
-    height: 0
-  })
-
-  useEffect(() => {
-    if (!isModalFullyClickable) return
-
-    // Load the image dynamically
-    const img = new Image()
-    img.src = trigger?.data?.backgroundURL || ''
-
-    setTimeout(() => {
-      const { vertical, horizontal } = scaleDownFactorMap()
-
-      const verticalScaleDownFactor = img.height / vertical
-      const horizontalScaleDownFactor = img.width / horizontal
-
-      console.log({
-        verticalScaleDownFactor,
-        horizontalScaleDownFactor,
-        h: img.height,
-        w: img.width
-      })
-      const scaleDownFactor = Math.max(
-        verticalScaleDownFactor,
-        horizontalScaleDownFactor
-      )
-
-      setImageDimensions({
-        width: img.width / scaleDownFactor,
-        height: img.height / scaleDownFactor
-      })
-    }, 200)
-  }, [trigger, isModalFullyClickable])
-
-  return {
-    isModalFullyClickable,
-    imageDimensions
-  }
-}
-
 const defaultElementSize: ModalSize = 'medium'
 const defaultButtonPosition: ButtonPosition = 'right'
 
-const CnMStandardModal = ({
+const BasicModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
@@ -87,6 +30,7 @@ const CnMStandardModal = ({
   const modalConfig = useFingerprint().config?.triggerConfig?.modal
   const elementSize = modalConfig?.size || defaultElementSize
 
+  const isModalFullyClickable = getIsModalFullyClickable({ trigger })
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
   const modalSizeStyle = getModalStylesBySize(elementSize)
@@ -259,21 +203,6 @@ const CnMStandardModal = ({
     }, 500)
   }, [])
 
-  const { imageDimensions, isModalFullyClickable } =
-    useFullyClickableModalDimensions({ trigger })
-
-  if (isModalFullyClickable) {
-    // this is the one that follows the typical scale behaviour of assets so far
-    return (
-      <FullyClickableModal
-        handleClickCallToAction={handleClickCallToAction}
-        handleCloseModal={handleCloseModal}
-        imageURL={trigger?.data?.backgroundURL || ''}
-        style={imageDimensions}
-      />
-    )
-  }
-
   if (!stylesLoaded) {
     return null
   }
@@ -343,4 +272,17 @@ const CnMStandardModal = ({
     </div>
   )
 }
-export default CnMStandardModal
+
+const StandardModal = (props: Props) => {
+  const isModalFullyClickable = getIsModalFullyClickable({
+    trigger: props.trigger
+  })
+
+  if (isModalFullyClickable)
+    // this is the one that follows the typical scale behaviour of assets so far
+    return <FullyClickableModal {...props} />
+
+  return <BasicModal {...props} />
+}
+
+export default StandardModal
