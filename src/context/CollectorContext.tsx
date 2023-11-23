@@ -136,10 +136,10 @@ export function CollectorProvider({
       }
 
       // if the trigger is already in the list, don't add it again
-      setDisplayedTriggers((ts) => {
-        if (ts.includes(invokableTrigger.id)) return ts
+      setDisplayedTriggers((prev) => {
+        if (prev.includes(invokableTrigger.id)) return prev
 
-        return [...ts, invokableTrigger.id]
+        return [...prev, invokableTrigger.id]
       })
     },
     [combinedTriggers, getIsBehaviourVisible, log]

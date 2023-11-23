@@ -3286,9 +3286,9 @@ function CollectorProvider({
       log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
       return;
     }
-    setDisplayedTriggers(ts => {
-      if (ts.includes(invokableTrigger.id)) return ts;
-      return [...ts, invokableTrigger.id];
+    setDisplayedTriggers(prev => {
+      if (prev.includes(invokableTrigger.id)) return prev;
+      return [...prev, invokableTrigger.id];
     });
   }, [combinedTriggers, getIsBehaviourVisible, log]);
   useEffect(() => {
