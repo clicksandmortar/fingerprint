@@ -1,5 +1,6 @@
 /// <reference types="react" />
 import { SupportedBrand } from '../utils/brand';
+import { DeviceInfo } from '../utils/device';
 import { Visitor } from '../visitors/types';
 export declare type CollectorUpdate = {
     appId?: string;
@@ -11,6 +12,7 @@ export declare type CollectorUpdate = {
     account?: Account | undefined;
     form?: Form | undefined;
     button?: Button | undefined;
+    device?: DeviceInfo | undefined;
 };
 export declare type Button = {
     id?: string;
@@ -67,6 +69,9 @@ export declare type CollectorVisitorResponse = {
     config: Config;
     incompleteTriggers?: IncompleteTrigger[];
     intently: boolean;
+    identifiers?: {
+        main?: string;
+    };
 };
 export declare type Invocation = 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD' | 'INVOCATION_ELEMENT_VISIBLE';
 export declare type Trigger = {
