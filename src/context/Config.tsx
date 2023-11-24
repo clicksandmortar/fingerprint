@@ -114,6 +114,9 @@ export function ConfigProvider({ children, legacy_config }: Props) {
                 }
               : prev.brand.colors
           },
+          script: {
+            debugMode: false
+          },
           trigger: {
             ...prev.trigger,
             // the stars aligned in the shittiest-most way making it so that the BE returns these as strings

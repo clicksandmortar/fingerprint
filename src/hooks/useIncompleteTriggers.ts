@@ -1,17 +1,47 @@
-import isEqual from 'lodash/isEqual'
-
 import React, { useEffect, useState } from 'react'
-import { IncompleteTrigger, Trigger } from '../client/types'
+import { Conversion, IncompleteTrigger, Trigger } from '../client/types'
+
+import { getFuncByOperator } from './useConversions'
 import getIsVisible from './useIsElementVisible'
+
+/*
+  Scans through the conversion signals and returns true if all of them are true
+*/
+export const validateSignals = (signals: Conversion['signals']) => {
+  const signalPattern = signals.map((signal) => {
+    if (signal.op === 'IsOnPath') {
+      const [route] = signal.parameters
+
+      //HARDCODING TO CONTAINS FOR NOW UNTIL FIXED
+      return getFuncByOperator('contains', route)(window.location.pathname)
+    }
+
+    if (signal.op === 'CanSeeElementOnPage') {
+      const [itemQuerySelector, operator, route] = signal.parameters
+      const isSignalOnCorrectRoute = getFuncByOperator(
+        operator,
+        route
+      )(window.location.pathname)
+
+      if (!isSignalOnCorrectRoute) return false
+
+      const isVisible = getIsVisible(itemQuerySelector)
+      return isVisible
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0]
+    }
+
+    // in case the signal is mis-configured
+    return false
+  })
+
+  console.log('signalPattern', signalPattern)
+  return signalPattern.every(Boolean)
+}
 
 const interval = 250
 
-// @TODO: come up with a better name
-type ReducedTrigger = { trigger: Trigger; selector: string }
-/**
- * Some triggers rely on Frontend signals (like visibility of an element) to determine whether they should be invoked or not.
- * This hook drives the logic for those triggers inside (currently) the Collector.
- */
 const useIncompleteTriggers = () => {
   const [incompleteTriggers, setIncompleteTriggers] = useState<
     IncompleteTrigger[]
@@ -19,60 +49,29 @@ const useIncompleteTriggers = () => {
 
   const [visibleTriggers, setVisibleTriggers] = useState<Trigger[]>([])
 
-  const visibilityQuerySelectors = React.useMemo(() => {
-    if (!incompleteTriggers?.length) return []
+  const scan = React.useCallback(() => {
+    const validTriggers = incompleteTriggers.filter((trigger) => {
+      const shouldTrigger = validateSignals(trigger.signals)
+      if (!shouldTrigger) return false
+      return true
+    })
 
-    return incompleteTriggers
-      .map((trigger) =>
-        trigger?.signals?.map((signal) => {
-          if (signal?.op !== 'CanSeeElementOnPage') return null
+    setVisibleTriggers((prev) => {
+      if (!validTriggers.length) return prev
 
-          return {
-            trigger,
-            selector: signal?.parameters?.selector
-          }
-        })
-      )
-      .flat()
-      .filter(Boolean) as ReducedTrigger[]
-    // @TODO: ^ there is a proper type to eliminate nulls
-  }, [incompleteTriggers])
+      return validTriggers
+    })
+  }, [setVisibleTriggers, incompleteTriggers])
 
   useEffect(() => {
-    if (!visibilityQuerySelectors.length) return
+    if (!incompleteTriggers.length) return
 
-    const intId = setInterval(() => {
-      const visibleItems = visibilityQuerySelectors
-        .map((reducedTrigger) => {
-          const isElementVisible = getIsVisible(reducedTrigger.selector)
-
-          if (isElementVisible) return reducedTrigger.trigger
-          return null
-        })
-        .filter(Boolean) as Trigger[]
-
-      // these next few lines are a bit of a hack, it
-      // prevents unnecessary re-renders in the Collector
-      // though still unclear how performant object comparison
-      if (!visibleItems.length) return
-      setVisibleTriggers((prev) => {
-        // this likely performs like shit.
-        const areSame = isEqual(visibleItems, prev)
-        if (areSame) return prev
-
-        return visibleItems
-      })
-    }, interval)
+    const intId = setInterval(scan, interval)
 
     return () => {
       clearInterval(intId)
     }
-  }, [
-    incompleteTriggers,
-    getIsVisible,
-    setVisibleTriggers,
-    visibilityQuerySelectors
-  ])
+  }, [incompleteTriggers, getIsVisible, setVisibleTriggers])
 
   return {
     incompleteTriggers,

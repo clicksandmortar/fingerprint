@@ -64,12 +64,12 @@ export type Referrer = {
 export type Operator = 'starts_with' | 'contains' | 'ends_with' | 'eq'
 export type ComparisonFunc = (comparison: string) => boolean
 
-export type IsOnPathConversionSignal = {
+export type IsOnPathSignal = {
   // will have more later
   op: 'IsOnPath'
   parameters: [Operator, string]
 }
-export type IsOnDomainConversionSignal = {
+export type IsOnDomainSignal = {
   // will have more later
   op: 'IsOnDomain'
   parameters: [
@@ -77,7 +77,7 @@ export type IsOnDomainConversionSignal = {
   ]
 }
 
-export type CanSeeElementOnPageConversionSignal = {
+export type CanSeeElementOnPageSignal = {
   // will have more later
   op: 'CanSeeElementOnPage'
   parameters: [
@@ -86,27 +86,19 @@ export type CanSeeElementOnPageConversionSignal = {
     string // value
   ]
 }
-export type ConversionSignal =
-  | IsOnPathConversionSignal
-  | IsOnDomainConversionSignal
-  | CanSeeElementOnPageConversionSignal
+export type FESignal =
+  | IsOnPathSignal
+  | IsOnDomainSignal
+  | CanSeeElementOnPageSignal
 
 export type Conversion = {
   identifier: string
-  signals: ConversionSignal[]
+  signals: FESignal[]
   analyticsEvent: string
 }
 
 export type IncompleteTrigger = Trigger & {
-  signals: [
-    {
-      // @TODO: there will be more of these, extract to a type
-      op: 'CanSeeElementOnPage'
-      parameters: {
-        selector: string
-      }
-    }
-  ]
+  signals: FESignal[]
 }
 
 export type CollectorVisitorResponse = {

@@ -26,7 +26,7 @@ export const testConversion: Conversion = {
 /**
  * Returns a function that compares a string with the signal parameter
  */
-const getFuncByOperator = (
+export const getFuncByOperator = (
   operator: Operator,
   compareWith: string
 ): ComparisonFunc => {
@@ -58,8 +58,8 @@ const getFuncByOperator = (
 /*
   Scans through the conversion signals and returns true if all of them are true
 */
-const validateConversion = (conversion: Conversion) => {
-  const signalPattern = conversion.signals.map((signal) => {
+export const validateConversion = (signals: Conversion['signals']) => {
+  const signalPattern = signals.map((signal) => {
     if (signal.op === 'IsOnPath') {
       const [operator, route] = signal.parameters
 
@@ -111,7 +111,7 @@ const useConversions = () => {
 
   const scan = React.useCallback(() => {
     conversions.forEach((conversion) => {
-      const hasHappened = validateConversion(conversion)
+      const hasHappened = validateConversion(conversion.signals)
       if (!hasHappened) return
 
       collect({
