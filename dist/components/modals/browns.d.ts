@@ -5,5 +5,6 @@ declare type Props = {
     handleClickCallToAction: (e: any) => void;
     handleCloseModal: (e: any) => void;
 };
-export declare const BrownsModal: ({ trigger, handleClickCallToAction, handleCloseModal }: Props) => React.JSX.Element | null;
+export declare const BrownsCustomModal: (props: Props) => React.JSX.Element | null;
+export declare const BrownsModal: (props: Props) => React.JSX.Element;
 export {};

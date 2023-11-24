@@ -8,8 +8,8 @@ import { validate, version, v4 } from 'uuid';
 import uniqueBy from 'lodash.uniqby';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
-import { useForm } from 'react-hook-form';
 import { isMobile } from 'react-device-detect';
+import { useForm } from 'react-hook-form';
 
 const closeButtonStyles = {
   borderRadius: '100%',
@@ -590,6 +590,10 @@ function getReferrer() {
   };
 }
 
+const deviceInfo = {
+  type: isMobile ? 'mobile' : 'desktop'
+};
+
 const headers = {
   'Content-Type': 'application/json'
 };
@@ -654,7 +658,8 @@ const useCollectorMutation = () => {
       appId,
       visitor,
       sessionId: session === null || session === void 0 ? void 0 : session.id,
-      hostname: requestHost
+      hostname: requestHost,
+      device: deviceInfo
     }).then(response => {
       log('Collector API response', response);
       return response;
@@ -4149,7 +4154,8 @@ const useSeenMutation = () => {
     return request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
       seenTriggerIDs: [trigger.id],
       visitor,
-      page: getPagePayload()
+      page: getPagePayload(),
+      device: deviceInfo
     }).then(response => {
       log('Seen mutation: response', response);
       return response;
@@ -5093,12 +5099,13 @@ const CurlyText = ({
     startOffset: '50%'
   }, text)));
 };
-const BrownsModal = ({
-  trigger,
-  handleClickCallToAction,
-  handleCloseModal
-}) => {
+const BrownsCustomModal = props => {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  const {
+    trigger,
+    handleClickCallToAction,
+    handleCloseModal
+  } = props;
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const randomHash = useMemo(() => {
     return v4().split('-')[0];
@@ -5336,6 +5343,16 @@ const BrownsModal = ({
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
+const BrownsModal = props => {
+  const {
+    trigger
+  } = props;
+  const isFullyClickable = getIsModalFullyClickable({
+    trigger
+  });
+  if (!isFullyClickable) return React__default.createElement(BrownsCustomModal, Object.assign({}, props));
+  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
+};
 
 const primaryColor = `rgb(33,147,174)`;
 const secondaryColor = `#e0aa00`;
@@ -5349,7 +5366,7 @@ const scaleBg = scale => {
     width: imageWidth * scale
   };
 };
-const StonehouseModal = ({
+const StonehouseCustomModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
@@ -5590,6 +5607,18 @@ const StonehouseModal = ({
     className: prependClass('cta'),
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+const StonehouseModal = props => {
+  const {
+    trigger
+  } = props;
+  const isFullyClickable = getIsModalFullyClickable({
+    trigger
+  });
+  if (!isFullyClickable) {
+    return React__default.createElement(StonehouseCustomModal, Object.assign({}, props));
+  }
+  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
 };
 
 const Modal = ({

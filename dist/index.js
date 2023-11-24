@@ -11,8 +11,8 @@ var uuid = require('uuid');
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
-var reactHookForm = require('react-hook-form');
 var reactDeviceDetect = require('react-device-detect');
+var reactHookForm = require('react-hook-form');
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -622,6 +622,10 @@ function getReferrer() {
   };
 }
 
+var deviceInfo = {
+  type: reactDeviceDetect.isMobile ? 'mobile' : 'desktop'
+};
+
 var headers = {
   'Content-Type': 'application/json'
 };
@@ -702,7 +706,8 @@ var useCollectorMutation = function useCollectorMutation() {
       appId: appId,
       visitor: visitor,
       sessionId: session === null || session === void 0 ? void 0 : session.id,
-      hostname: requestHost
+      hostname: requestHost,
+      device: deviceInfo
     })).then(function (response) {
       log('Collector API response', response);
       return response;
@@ -4248,7 +4253,8 @@ var useSeenMutation = function useSeenMutation() {
     return request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
       seenTriggerIDs: [trigger.id],
       visitor: visitor,
-      page: getPagePayload()
+      page: getPagePayload(),
+      device: deviceInfo
     }).then(function (response) {
       log('Seen mutation: response', response);
       return response;
@@ -4927,11 +4933,11 @@ var CurlyText = function CurlyText(_ref) {
     startOffset: '50%'
   }, text)));
 };
-var BrownsModal = function BrownsModal(_ref2) {
+var BrownsCustomModal = function BrownsCustomModal(props) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref2.trigger,
-    handleClickCallToAction = _ref2.handleClickCallToAction,
-    handleCloseModal = _ref2.handleCloseModal;
+  var trigger = props.trigger,
+    handleClickCallToAction = props.handleClickCallToAction,
+    handleCloseModal = props.handleCloseModal;
   var _useState = React.useState(false),
     stylesLoaded = _useState[0],
     setStylesLoaded = _useState[1];
@@ -4993,6 +4999,14 @@ var BrownsModal = function BrownsModal(_ref2) {
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
+var BrownsModal = function BrownsModal(props) {
+  var trigger = props.trigger;
+  var isFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
+  });
+  if (!isFullyClickable) return React__default.createElement(BrownsCustomModal, Object.assign({}, props));
+  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
+};
 
 var primaryColor = "rgb(33,147,174)";
 var secondaryColor = "#e0aa00";
@@ -5006,7 +5020,7 @@ var scaleBg = function scaleBg(scale) {
     width: imageWidth * scale
   };
 };
-var StonehouseModal = function StonehouseModal(_ref) {
+var StonehouseCustomModal = function StonehouseCustomModal(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   var trigger = _ref.trigger,
     handleClickCallToAction = _ref.handleClickCallToAction,
@@ -5086,6 +5100,16 @@ var StonehouseModal = function StonehouseModal(_ref) {
     className: prependClass('cta'),
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+var StonehouseModal = function StonehouseModal(props) {
+  var trigger = props.trigger;
+  var isFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
+  });
+  if (!isFullyClickable) {
+    return React__default.createElement(StonehouseCustomModal, Object.assign({}, props));
+  }
+  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
 };
 
 var Modal = function Modal(_ref) {

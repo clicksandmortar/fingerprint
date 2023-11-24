@@ -4,6 +4,7 @@ import { Trigger } from '../client/types'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
+import { deviceInfo } from '../utils/device'
 import { hostname, request } from '../utils/http'
 import { getPagePayload } from '../utils/page'
 import { updateCookie } from '../visitors/bootstrap'
@@ -42,7 +43,8 @@ export const useSeenMutation = () => {
         .put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
           seenTriggerIDs: [trigger.id],
           visitor,
-          page: getPagePayload()
+          page: getPagePayload(),
+          device: deviceInfo
         })
         .then((response) => {
           log('Seen mutation: response', response)
