@@ -117,6 +117,7 @@ const Modal = ({ trigger }: Props) => {
         />
       )
     }
+    // we can soon phase out these 2 brand specific ones
     case 'Stonehouse':
       return <StonehouseModal {...modalProps} />
     case 'Browns':
