@@ -1,5 +1,6 @@
 /// <reference types="react" />
 import { SupportedBrand } from '../utils/brand';
+import { DeviceInfo } from '../utils/device';
 import { Visitor } from '../visitors/types';
 export declare type CollectorUpdate = {
     appId?: string;
@@ -14,6 +15,7 @@ export declare type CollectorUpdate = {
     conversion?: {
         id: string;
     };
+    device?: DeviceInfo | undefined;
 };
 export declare type Button = {
     id?: string;
