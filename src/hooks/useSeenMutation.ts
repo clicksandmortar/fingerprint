@@ -16,7 +16,8 @@ export const useSeenMutation = () => {
   const { log, error } = useLogging()
   const { appId } = useFingerprint()
   const { trackEvent } = useMixpanel()
-  const { setPageTriggers, setIncompleteTriggers } = useCollector()
+  const { setPageTriggers, setIncompleteTriggers, setConversions } =
+    useCollector()
 
   const { visitor, setVisitor } = useVisitor()
   const brand = useBrand()
@@ -62,6 +63,7 @@ export const useSeenMutation = () => {
 
         log('Seen mutation: replacing triggers with:', r.pageTriggers)
         setPageTriggers(r.pageTriggers)
+        setConversions(r.conversions || [])
 
         const retrievedUserId = r.identifiers?.main
         if (retrievedUserId) {

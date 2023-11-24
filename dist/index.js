@@ -3055,18 +3055,13 @@ function isEqual(value, other) {
 
 var isEqual_1 = isEqual;
 
-var useIsElementVisible = function useIsElementVisible() {
-  var getIsVisible = React__default.useCallback(function (selector) {
-    var element = document.querySelector(selector);
-    if (!element) return false;
-    if (window.getComputedStyle(element).visibility === 'hidden') return false;
-    if (window.getComputedStyle(element).display === 'none') return false;
-    if (window.getComputedStyle(element).opacity === '0') return false;
-    return true;
-  }, []);
-  return {
-    getIsVisible: getIsVisible
-  };
+var getIsVisible = function getIsVisible(selector) {
+  var element = document.querySelector(selector);
+  if (!element) return false;
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  if (window.getComputedStyle(element).display === 'none') return false;
+  if (window.getComputedStyle(element).opacity === '0') return false;
+  return true;
 };
 
 var interval = 250;
@@ -3077,8 +3072,6 @@ var useIncompleteTriggers = function useIncompleteTriggers() {
   var _useState2 = React.useState([]),
     visibleTriggers = _useState2[0],
     setVisibleTriggers = _useState2[1];
-  var _useIsElementVisible = useIsElementVisible(),
-    getIsVisible = _useIsElementVisible.getIsVisible;
   var visibilityQuerySelectors = React__default.useMemo(function () {
     if (!(incompleteTriggers !== null && incompleteTriggers !== void 0 && incompleteTriggers.length)) return [];
     return incompleteTriggers.map(function (trigger) {
@@ -3294,6 +3287,96 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
+var getFuncByOperator = function getFuncByOperator(operator, compareWith) {
+  switch (operator) {
+    case 'starts_with':
+      return function (comparison) {
+        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
+      };
+    case 'contains':
+      return function (comparison) {
+        return comparison.toLowerCase().includes(compareWith.toLowerCase());
+      };
+    case 'ends_with':
+      return function (comparison) {
+        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
+      };
+    case 'eq':
+      return function (comparison) {
+        return comparison.toLowerCase() === compareWith.toLowerCase();
+      };
+    default:
+      return function () {
+        console.error('getOperator: unknown operator', operator);
+        return false;
+      };
+  }
+};
+var validateConversion = function validateConversion(conversion) {
+  var signalPattern = conversion.signals.map(function (signal) {
+    if (signal.op === 'IsOnPath') {
+      var _signal$parameters = signal.parameters,
+        operator = _signal$parameters[0],
+        route = _signal$parameters[1];
+      return getFuncByOperator(operator, route)(window.location.pathname);
+    }
+    if (signal.op === 'CanSeeElementOnPage') {
+      var _signal$parameters2 = signal.parameters,
+        itemQuerySelector = _signal$parameters2[0],
+        _operator = _signal$parameters2[1],
+        _route = _signal$parameters2[2];
+      var isSignalOnCorrectRoute = getFuncByOperator(_operator, _route)(window.location.pathname);
+      if (!isSignalOnCorrectRoute) return false;
+      var isVisible = getIsVisible(itemQuerySelector);
+      return isVisible;
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0];
+    }
+    return false;
+  });
+  return signalPattern.every(Boolean);
+};
+var scanInterval = 500;
+var useConversions = function useConversions() {
+  var _useState = React.useState([]),
+    conversions = _useState[0],
+    setConversions = _useState[1];
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutate;
+  var removeById = React__default.useCallback(function (id) {
+    setConversions(function (prev) {
+      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
+      return prev.filter(function (conversion) {
+        return conversion.identifier !== id;
+      });
+    });
+  }, [setConversions]);
+  var scan = React__default.useCallback(function () {
+    conversions.forEach(function (conversion) {
+      var hasHappened = validateConversion(conversion);
+      if (!hasHappened) return;
+      collect({
+        conversion: {
+          id: conversion.identifier
+        }
+      });
+      removeById(conversion.identifier);
+    });
+  }, [collect, conversions, removeById]);
+  React.useEffect(function () {
+    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
+    var intId = setInterval(scan, scanInterval);
+    return function () {
+      return clearInterval(intId);
+    };
+  }, [scan]);
+  return {
+    conversions: conversions,
+    setConversions: setConversions
+  };
+};
+
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -3346,6 +3429,8 @@ function CollectorProvider(_ref) {
   var _useState4 = React.useState(new Map()),
     foundWatchers = _useState4[0],
     setFoundWatchers = _useState4[1];
+  var _useConversions = useConversions(),
+    setConversions = _useConversions.setConversions;
   var _useIncompleteTrigger = useIncompleteTriggers(),
     setIncompleteTriggers = _useIncompleteTrigger.setIncompleteTriggers,
     visibleIncompleteTriggers = _useIncompleteTrigger.visibleTriggers;
@@ -3509,6 +3594,7 @@ function CollectorProvider(_ref) {
         setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
+        setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
         var cohort = payload.intently ? 'intently' : 'fingerprint';
         if (visitor.cohort !== cohort) setVisitor({
           cohort: cohort
@@ -3525,7 +3611,7 @@ function CollectorProvider(_ref) {
     } catch (e) {
       return Promise.reject(e);
     }
-  }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setVisitor, setIntently]);
+  }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
@@ -3550,14 +3636,7 @@ function CollectorProvider(_ref) {
         account: {
           token: hashParams.id_token
         }
-      }).then(function (response) {
-        try {
-          collectorCallback(response);
-          return Promise.resolve();
-        } catch (e) {
-          return Promise.reject(e);
-        }
-      })["catch"](function (err) {
+      }).then(collectorCallback)["catch"](function (err) {
         error('failed to store collected data', err);
       });
     }
@@ -3565,16 +3644,11 @@ function CollectorProvider(_ref) {
       page: getPagePayload() || undefined,
       referrer: getReferrer() || undefined
     }).then(function (response) {
-      try {
-        if (response.status === 204) {
-          setIntently(true);
-          return Promise.resolve();
-        }
-        collectorCallback(response);
-        return Promise.resolve();
-      } catch (e) {
-        return Promise.reject(e);
+      if (response.status === 204) {
+        setIntently(true);
+        return;
       }
+      collectorCallback(response);
     })["catch"](function (err) {
       error('failed to store collected data', err);
     });
@@ -3627,9 +3701,10 @@ function CollectorProvider(_ref) {
       removeActiveTrigger: removeActiveTrigger,
       setActiveTrigger: setActiveTrigger,
       setIncompleteTriggers: setIncompleteTriggers,
-      trackEvent: trackEvent
+      trackEvent: trackEvent,
+      setConversions: setConversions
     };
-  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers]);
+  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers, setConversions]);
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
@@ -3670,6 +3745,9 @@ var CollectorContext = React.createContext({
   },
   setActiveTrigger: function setActiveTrigger() {
     console.error('setActiveTrigger not implemented correctly');
+  },
+  setConversions: function setConversions() {
+    console.error('setConversions not implemented correctly');
   },
   trackEvent: function trackEvent() {
     console.error('trackEvent not implemented correctly');
@@ -4155,7 +4233,8 @@ var useSeenMutation = function useSeenMutation() {
     trackEvent = _useMixpanel.trackEvent;
   var _useCollector = useCollector(),
     setPageTriggers = _useCollector.setPageTriggers,
-    setIncompleteTriggers = _useCollector.setIncompleteTriggers;
+    setIncompleteTriggers = _useCollector.setIncompleteTriggers,
+    setConversions = _useCollector.setConversions;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
     setVisitor = _useVisitor.setVisitor;
@@ -4190,6 +4269,7 @@ var useSeenMutation = function useSeenMutation() {
           var _r$identifiers;
           log('Seen mutation: replacing triggers with:', r.pageTriggers);
           setPageTriggers(r.pageTriggers);
+          setConversions(r.conversions || []);
           var retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
           if (retrievedUserId) {
             updateCookie(retrievedUserId);
@@ -4769,7 +4849,7 @@ var BasicModal = function BasicModal(_ref) {
     textPrimary = _useBrandColors.textPrimary,
     backgroundPrimary = _useBrandColors.backgroundPrimary;
   React.useEffect(function () {
-    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer; ' : "\n        width: 80%;\n        height: 500px;\n      ") + "\n    \n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: " + backgroundPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
+    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer; ' : "\n        width: 80%;\n        height: 500px;\n      ") + "\n    \n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n      color: " + textPrimary + ";\n\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));

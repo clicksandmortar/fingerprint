@@ -6,6 +6,7 @@ import { useExitIntent } from 'use-exit-intent'
 
 import {
   CollectorVisitorResponse,
+  Conversion,
   IncompleteTrigger,
   Trigger
 } from '../client/types'
@@ -23,6 +24,9 @@ import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 
 import { useConfig } from '../hooks/useBrandConfig'
+
+import useConversions from '../hooks/useConversions'
+
 import { updateCookie } from '../visitors/bootstrap'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -83,6 +87,8 @@ export function CollectorProvider({
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
+
+  const { setConversions } = useConversions()
 
   // Passing the funcs down to other contexts from here. So please keep it until Collector
   // is refactored
@@ -358,6 +364,7 @@ export function CollectorProvider({
       setPageTriggers(payload?.pageTriggers)
       setConfig(payload.config)
       setIncompleteTriggers(payload?.incompleteTriggers || [])
+      setConversions(payload?.conversions || [])
 
       const cohort = payload.intently ? 'intently' : 'fingerprint'
       if (visitor.cohort !== cohort) setVisitor({ cohort })
@@ -380,6 +387,7 @@ export function CollectorProvider({
       setConfig,
       setIncompleteTriggers,
       visitor.cohort,
+      setConversions,
       setVisitor,
       setIntently
     ]
@@ -415,9 +423,7 @@ export function CollectorProvider({
           token: hashParams.id_token
         }
       })
-        .then(async (response: Response) => {
-          collectorCallback(response)
-        })
+        .then(collectorCallback)
         .catch((err) => {
           error('failed to store collected data', err)
         })
@@ -427,7 +433,7 @@ export function CollectorProvider({
       page: getPagePayload() || undefined,
       referrer: getReferrer() || undefined
     })
-      .then(async (response: Response) => {
+      .then((response: Response) => {
         if (response.status === 204) {
           setIntently(true)
           return
@@ -518,14 +524,16 @@ export function CollectorProvider({
       removeActiveTrigger,
       setActiveTrigger,
       setIncompleteTriggers,
-      trackEvent
+      trackEvent,
+      setConversions
     }),
     [
       setPageTriggers,
       removeActiveTrigger,
       setActiveTrigger,
       trackEvent,
-      setIncompleteTriggers
+      setIncompleteTriggers,
+      setConversions
     ]
   )
 
@@ -579,6 +587,7 @@ export type CollectorContextInterface = {
   setIncompleteTriggers: (triggers: IncompleteTrigger[]) => void
   removeActiveTrigger: (id: Trigger['id']) => void
   setActiveTrigger: (trigger: Trigger) => void
+  setConversions: (conversion: Conversion[]) => void
   // @NOTE: please keep it here. THis makes sure that context mixup doesn't
   // impact the usage of the tracking function
   trackEvent: (event: string, properties?: any) => void
@@ -596,6 +605,9 @@ export const CollectorContext = createContext<CollectorContextInterface>({
   },
   setActiveTrigger: () => {
     console.error('setActiveTrigger not implemented correctly')
+  },
+  setConversions: () => {
+    console.error('setConversions not implemented correctly')
   },
   trackEvent: () => {
     console.error('trackEvent not implemented correctly')

@@ -3009,27 +3009,19 @@ function isEqual(value, other) {
 
 var isEqual_1 = isEqual;
 
-const useIsElementVisible = () => {
-  const getIsVisible = React__default.useCallback(selector => {
-    const element = document.querySelector(selector);
-    if (!element) return false;
-    if (window.getComputedStyle(element).visibility === 'hidden') return false;
-    if (window.getComputedStyle(element).display === 'none') return false;
-    if (window.getComputedStyle(element).opacity === '0') return false;
-    return true;
-  }, []);
-  return {
-    getIsVisible
-  };
+const getIsVisible = selector => {
+  const element = document.querySelector(selector);
+  if (!element) return false;
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  if (window.getComputedStyle(element).display === 'none') return false;
+  if (window.getComputedStyle(element).opacity === '0') return false;
+  return true;
 };
 
 const interval = 250;
 const useIncompleteTriggers = () => {
   const [incompleteTriggers, setIncompleteTriggers] = useState([]);
   const [visibleTriggers, setVisibleTriggers] = useState([]);
-  const {
-    getIsVisible
-  } = useIsElementVisible();
   const visibilityQuerySelectors = React__default.useMemo(() => {
     if (!(incompleteTriggers !== null && incompleteTriggers !== void 0 && incompleteTriggers.length)) return [];
     return incompleteTriggers.map(trigger => {
@@ -3242,6 +3234,86 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
+const getFuncByOperator = (operator, compareWith) => {
+  switch (operator) {
+    case 'starts_with':
+      return comparison => {
+        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
+      };
+    case 'contains':
+      return comparison => {
+        return comparison.toLowerCase().includes(compareWith.toLowerCase());
+      };
+    case 'ends_with':
+      return comparison => {
+        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
+      };
+    case 'eq':
+      return comparison => {
+        return comparison.toLowerCase() === compareWith.toLowerCase();
+      };
+    default:
+      return () => {
+        console.error('getOperator: unknown operator', operator);
+        return false;
+      };
+  }
+};
+const validateConversion = conversion => {
+  const signalPattern = conversion.signals.map(signal => {
+    if (signal.op === 'IsOnPath') {
+      const [operator, route] = signal.parameters;
+      return getFuncByOperator(operator, route)(window.location.pathname);
+    }
+    if (signal.op === 'CanSeeElementOnPage') {
+      const [itemQuerySelector, operator, route] = signal.parameters;
+      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
+      if (!isSignalOnCorrectRoute) return false;
+      const isVisible = getIsVisible(itemQuerySelector);
+      return isVisible;
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0];
+    }
+    return false;
+  });
+  return signalPattern.every(Boolean);
+};
+const scanInterval = 500;
+const useConversions = () => {
+  const [conversions, setConversions] = useState([]);
+  const {
+    mutate: collect
+  } = useCollectorMutation();
+  const removeById = React__default.useCallback(id => {
+    setConversions(prev => {
+      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
+      return prev.filter(conversion => conversion.identifier !== id);
+    });
+  }, [setConversions]);
+  const scan = React__default.useCallback(() => {
+    conversions.forEach(conversion => {
+      const hasHappened = validateConversion(conversion);
+      if (!hasHappened) return;
+      collect({
+        conversion: {
+          id: conversion.identifier
+        }
+      });
+      removeById(conversion.identifier);
+    });
+  }, [collect, conversions, removeById]);
+  useEffect(() => {
+    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
+    const intId = setInterval(scan, scanInterval);
+    return () => clearInterval(intId);
+  }, [scan]);
+  return {
+    conversions,
+    setConversions
+  };
+};
+
 function CollectorProvider({
   children,
   handlers = []
@@ -3298,6 +3370,9 @@ function CollectorProvider({
   } = useIntently();
   const [displayTriggers, setDisplayedTriggers] = useState([]);
   const [foundWatchers, setFoundWatchers] = useState(new Map());
+  const {
+    setConversions
+  } = useConversions();
   const {
     setIncompleteTriggers,
     visibleTriggers: visibleIncompleteTriggers
@@ -3438,6 +3513,7 @@ function CollectorProvider({
     setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
     setConfig(payload.config);
     setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
+    setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
     const cohort = payload.intently ? 'intently' : 'fingerprint';
     if (visitor.cohort !== cohort) setVisitor({
       cohort
@@ -3450,7 +3526,7 @@ function CollectorProvider({
       log('CollectorProvider: user is in Intently cohort');
       setIntently(true);
     }
-  }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setVisitor, setIntently]);
+  }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
   const collectAndApplyVisitorInfo = React__default.useCallback(() => {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
@@ -3475,16 +3551,14 @@ function CollectorProvider({
         account: {
           token: hashParams.id_token
         }
-      }).then(async response => {
-        collectorCallback(response);
-      }).catch(err => {
+      }).then(collectorCallback).catch(err => {
         error('failed to store collected data', err);
       });
     }
     collect({
       page: getPagePayload() || undefined,
       referrer: getReferrer() || undefined
-    }).then(async response => {
+    }).then(response => {
       if (response.status === 204) {
         setIntently(true);
         return;
@@ -3539,8 +3613,9 @@ function CollectorProvider({
     removeActiveTrigger,
     setActiveTrigger,
     setIncompleteTriggers,
-    trackEvent
-  }), [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers]);
+    trackEvent,
+    setConversions
+  }), [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers, setConversions]);
   useEffect(() => {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
@@ -3581,6 +3656,9 @@ const CollectorContext = createContext({
   },
   setActiveTrigger: () => {
     console.error('setActiveTrigger not implemented correctly');
+  },
+  setConversions: () => {
+    console.error('setConversions not implemented correctly');
   },
   trackEvent: () => {
     console.error('trackEvent not implemented correctly');
@@ -4054,7 +4132,8 @@ const useSeenMutation = () => {
   } = useMixpanel();
   const {
     setPageTriggers,
-    setIncompleteTriggers
+    setIncompleteTriggers,
+    setConversions
   } = useCollector();
   const {
     visitor,
@@ -4090,6 +4169,7 @@ const useSeenMutation = () => {
       const r = await res.json();
       log('Seen mutation: replacing triggers with:', r.pageTriggers);
       setPageTriggers(r.pageTriggers);
+      setConversions(r.conversions || []);
       const retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
       if (retrievedUserId) {
         updateCookie(retrievedUserId);
@@ -4856,7 +4936,7 @@ const BasicModal = ({
       font-style: normal;
       text-align: center;
       margin-bottom: 1rem;
-      fill: ${backgroundPrimary};
+      color: ${textPrimary};
       text-shadow: var(--text-shadow);
       max-width: 400px;
       margin-left: auto;
@@ -4868,7 +4948,8 @@ const BasicModal = ({
       margin: auto;
       font-weight: 600;
       font-size: 1.2rem;
-    
+      color: ${textPrimary};
+
       text-align: center;
       text-transform: uppercase;
     }
