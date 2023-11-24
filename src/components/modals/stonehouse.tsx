@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react'
 import { Trigger } from '../../client/types'
 import CloseButton from '../CloseButton'
-import { prependClass } from './StandardModal/helpers'
+import FullyClickableModal from './FullyClickableModal'
+import { getIsModalFullyClickable, prependClass } from './StandardModal/helpers'
 
 type Props = {
   trigger: Trigger
@@ -26,7 +27,7 @@ const scaleBg = (scale: number) => {
   }
 }
 
-const StonehouseModal = ({
+const StonehouseCustomModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
@@ -294,4 +295,17 @@ const StonehouseModal = ({
     </div>
   )
 }
+
+export const StonehouseModal = (props: Props) => {
+  const { trigger } = props
+
+  const isFullyClickable = getIsModalFullyClickable({ trigger })
+
+  if (!isFullyClickable) {
+    return <StonehouseCustomModal {...props} />
+  }
+
+  return <FullyClickableModal {...props} />
+}
+
 export default StonehouseModal

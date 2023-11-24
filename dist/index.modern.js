@@ -5013,12 +5013,13 @@ const CurlyText = ({
     startOffset: '50%'
   }, text)));
 };
-const BrownsModal = ({
-  trigger,
-  handleClickCallToAction,
-  handleCloseModal
-}) => {
+const BrownsCustomModal = props => {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  const {
+    trigger,
+    handleClickCallToAction,
+    handleCloseModal
+  } = props;
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const randomHash = useMemo(() => {
     return v4().split('-')[0];
@@ -5256,6 +5257,16 @@ const BrownsModal = ({
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
+const BrownsModal = props => {
+  const {
+    trigger
+  } = props;
+  const isFullyClickable = getIsModalFullyClickable({
+    trigger
+  });
+  if (!isFullyClickable) return React__default.createElement(BrownsCustomModal, Object.assign({}, props));
+  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
+};
 
 const primaryColor = `rgb(33,147,174)`;
 const secondaryColor = `#e0aa00`;
@@ -5269,7 +5280,7 @@ const scaleBg = scale => {
     width: imageWidth * scale
   };
 };
-const StonehouseModal = ({
+const StonehouseCustomModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
@@ -5510,6 +5521,18 @@ const StonehouseModal = ({
     className: prependClass('cta'),
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+const StonehouseModal = props => {
+  const {
+    trigger
+  } = props;
+  const isFullyClickable = getIsModalFullyClickable({
+    trigger
+  });
+  if (!isFullyClickable) {
+    return React__default.createElement(StonehouseCustomModal, Object.assign({}, props));
+  }
+  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
 };
 
 const Modal = ({

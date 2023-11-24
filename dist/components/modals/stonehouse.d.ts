@@ -5,5 +5,5 @@ declare type Props = {
     handleClickCallToAction: (e: any) => void;
     handleCloseModal: (e: any) => void;
 };
-declare const StonehouseModal: ({ trigger, handleClickCallToAction, handleCloseModal }: Props) => React.JSX.Element | null;
+export declare const StonehouseModal: (props: Props) => React.JSX.Element;
 export default StonehouseModal;

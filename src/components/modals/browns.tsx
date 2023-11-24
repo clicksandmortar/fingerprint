@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../../client/types'
 import CloseButton from '../CloseButton'
+import FullyClickableModal from './FullyClickableModal'
+import { getIsModalFullyClickable } from './StandardModal/helpers'
 
 type Props = {
   trigger: Trigger
@@ -31,11 +33,8 @@ const CurlyText = ({ randomHash, text }: { randomHash: string; text: any }) => {
   )
 }
 
-export const BrownsModal = ({
-  trigger,
-  handleClickCallToAction,
-  handleCloseModal
-}: Props) => {
+export const BrownsCustomModal = (props: Props) => {
+  const { trigger, handleClickCallToAction, handleCloseModal } = props
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
   // TODO: replace with `prependClass` from helpers
@@ -318,4 +317,14 @@ export const BrownsModal = ({
       </div>
     </div>
   )
+}
+
+export const BrownsModal = (props: Props) => {
+  const { trigger } = props
+
+  const isFullyClickable = getIsModalFullyClickable({ trigger })
+
+  if (!isFullyClickable) return <BrownsCustomModal {...props} />
+
+  return <FullyClickableModal {...props} />
 }
