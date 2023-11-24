@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ComparisonFunc, Conversion, Operator } from '../client/types'
 import { useCollectorMutation } from './useCollectorMutation'
+import getIsVisible from './useIsElementVisible'
 
 // TODO: keeping here fo now in case we want to demo this. nuke it after
 export const testConversion: Conversion = {
@@ -74,8 +75,8 @@ const validateConversion = (conversion: Conversion) => {
 
       if (!isSignalOnCorrectRoute) return false
 
-      const element = document.querySelector(itemQuerySelector)
-      return !!element
+      const isVisible = getIsVisible(itemQuerySelector)
+      return isVisible
     }
     if (signal.op === 'IsOnDomain') {
       return window.location.hostname === signal.parameters[0]

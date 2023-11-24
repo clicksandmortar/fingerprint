@@ -2,7 +2,7 @@ import isEqual from 'lodash/isEqual'
 
 import React, { useEffect, useState } from 'react'
 import { IncompleteTrigger, Trigger } from '../client/types'
-import useIsElementVisible from './useIsElementVisible'
+import getIsVisible from './useIsElementVisible'
 
 const interval = 250
 
@@ -18,8 +18,6 @@ const useIncompleteTriggers = () => {
   >([])
 
   const [visibleTriggers, setVisibleTriggers] = useState<Trigger[]>([])
-
-  const { getIsVisible } = useIsElementVisible()
 
   const visibilityQuerySelectors = React.useMemo(() => {
     if (!incompleteTriggers?.length) return []
