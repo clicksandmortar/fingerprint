@@ -120,7 +120,7 @@ const BasicModal = ({
       font-style: normal;
       text-align: center;
       margin-bottom: 1rem;
-      fill: ${backgroundPrimary};
+      color: ${textPrimary};
       text-shadow: var(--text-shadow);
       max-width: 400px;
       margin-left: auto;
@@ -132,7 +132,8 @@ const BasicModal = ({
       margin: auto;
       font-weight: 600;
       font-size: 1.2rem;
-    
+      color: ${textPrimary};
+
       text-align: center;
       text-transform: uppercase;
     }
