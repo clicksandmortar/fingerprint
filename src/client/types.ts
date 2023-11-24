@@ -1,4 +1,5 @@
 import { SupportedBrand } from '../utils/brand'
+import { DeviceInfo } from '../utils/device'
 import { Visitor } from '../visitors/types'
 
 export type CollectorUpdate = {
@@ -11,6 +12,7 @@ export type CollectorUpdate = {
   account?: Account | undefined
   form?: Form | undefined
   button?: Button | undefined
+  device?: DeviceInfo | undefined
 }
 
 export type Button = {
