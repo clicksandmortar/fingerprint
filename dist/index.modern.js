@@ -3141,7 +3141,7 @@ const useRemoveIntently = ({
   const brand = useBrand();
   useEffect(() => {
     if (intently) return;
-    if (brand && brandsThatSupportIntentlyRemoval.includes(brand)) {
+    if (brand && !brandsThatSupportIntentlyRemoval.includes(brand)) {
       log(`useRemoveIntently: Intently is ${intently}, but skipping overlay removal for brand`, {
         brand
       });
