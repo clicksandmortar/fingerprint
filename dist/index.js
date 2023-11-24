@@ -3050,18 +3050,13 @@ function isEqual(value, other) {
 
 var isEqual_1 = isEqual;
 
-var useIsElementVisible = function useIsElementVisible() {
-  var getIsVisible = React__default.useCallback(function (selector) {
-    var element = document.querySelector(selector);
-    if (!element) return false;
-    if (window.getComputedStyle(element).visibility === 'hidden') return false;
-    if (window.getComputedStyle(element).display === 'none') return false;
-    if (window.getComputedStyle(element).opacity === '0') return false;
-    return true;
-  }, []);
-  return {
-    getIsVisible: getIsVisible
-  };
+var getIsVisible = function getIsVisible(selector) {
+  var element = document.querySelector(selector);
+  if (!element) return false;
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  if (window.getComputedStyle(element).display === 'none') return false;
+  if (window.getComputedStyle(element).opacity === '0') return false;
+  return true;
 };
 
 var interval = 250;
@@ -3072,8 +3067,6 @@ var useIncompleteTriggers = function useIncompleteTriggers() {
   var _useState2 = React.useState([]),
     visibleTriggers = _useState2[0],
     setVisibleTriggers = _useState2[1];
-  var _useIsElementVisible = useIsElementVisible(),
-    getIsVisible = _useIsElementVisible.getIsVisible;
   var visibilityQuerySelectors = React__default.useMemo(function () {
     if (!(incompleteTriggers !== null && incompleteTriggers !== void 0 && incompleteTriggers.length)) return [];
     return incompleteTriggers.map(function (trigger) {
@@ -3329,8 +3322,8 @@ var validateConversion = function validateConversion(conversion) {
         _route = _signal$parameters2[2];
       var isSignalOnCorrectRoute = getFuncByOperator(_operator, _route)(window.location.pathname);
       if (!isSignalOnCorrectRoute) return false;
-      var element = document.querySelector(itemQuerySelector);
-      return !!element;
+      var isVisible = getIsVisible(itemQuerySelector);
+      return isVisible;
     }
     if (signal.op === 'IsOnDomain') {
       return window.location.hostname === signal.parameters[0];
@@ -3431,6 +3424,8 @@ function CollectorProvider(_ref) {
   var _useState4 = React.useState(new Map()),
     foundWatchers = _useState4[0],
     setFoundWatchers = _useState4[1];
+  var _useConversions = useConversions(),
+    setConversions = _useConversions.setConversions;
   var _useIncompleteTrigger = useIncompleteTriggers(),
     setIncompleteTriggers = _useIncompleteTrigger.setIncompleteTriggers,
     visibleIncompleteTriggers = _useIncompleteTrigger.visibleTriggers;
@@ -3594,6 +3589,7 @@ function CollectorProvider(_ref) {
         setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
+        setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
         var cohort = payload.intently ? 'intently' : 'fingerprint';
         if (visitor.cohort !== cohort) setVisitor({
           cohort: cohort
@@ -3610,7 +3606,7 @@ function CollectorProvider(_ref) {
     } catch (e) {
       return Promise.reject(e);
     }
-  }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setVisitor, setIntently]);
+  }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
@@ -3635,14 +3631,7 @@ function CollectorProvider(_ref) {
         account: {
           token: hashParams.id_token
         }
-      }).then(function (response) {
-        try {
-          collectorCallback(response);
-          return Promise.resolve();
-        } catch (e) {
-          return Promise.reject(e);
-        }
-      })["catch"](function (err) {
+      }).then(collectorCallback)["catch"](function (err) {
         error('failed to store collected data', err);
       });
     }
@@ -3650,16 +3639,11 @@ function CollectorProvider(_ref) {
       page: getPagePayload() || undefined,
       referrer: getReferrer() || undefined
     }).then(function (response) {
-      try {
-        if (response.status === 204) {
-          setIntently(true);
-          return Promise.resolve();
-        }
-        collectorCallback(response);
-        return Promise.resolve();
-      } catch (e) {
-        return Promise.reject(e);
+      if (response.status === 204) {
+        setIntently(true);
+        return;
       }
+      collectorCallback(response);
     })["catch"](function (err) {
       error('failed to store collected data', err);
     });
@@ -3712,9 +3696,10 @@ function CollectorProvider(_ref) {
       removeActiveTrigger: removeActiveTrigger,
       setActiveTrigger: setActiveTrigger,
       setIncompleteTriggers: setIncompleteTriggers,
-      trackEvent: trackEvent
+      trackEvent: trackEvent,
+      setConversions: setConversions
     };
-  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers]);
+  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers, setConversions]);
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
@@ -3732,7 +3717,6 @@ function CollectorProvider(_ref) {
   });
   useFormCollector();
   useButtonCollector();
-  useConversions();
   var onPresenseChange = React__default.useCallback(function (presence) {
     log('presence changed', presence);
   }, [log]);
@@ -3756,6 +3740,9 @@ var CollectorContext = React.createContext({
   },
   setActiveTrigger: function setActiveTrigger() {
     console.error('setActiveTrigger not implemented correctly');
+  },
+  setConversions: function setConversions() {
+    console.error('setConversions not implemented correctly');
   },
   trackEvent: function trackEvent() {
     console.error('trackEvent not implemented correctly');
@@ -4241,7 +4228,8 @@ var useSeenMutation = function useSeenMutation() {
     trackEvent = _useMixpanel.trackEvent;
   var _useCollector = useCollector(),
     setPageTriggers = _useCollector.setPageTriggers,
-    setIncompleteTriggers = _useCollector.setIncompleteTriggers;
+    setIncompleteTriggers = _useCollector.setIncompleteTriggers,
+    setConversions = _useCollector.setConversions;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
     setVisitor = _useVisitor.setVisitor;
@@ -4275,6 +4263,7 @@ var useSeenMutation = function useSeenMutation() {
           var _r$identifiers;
           log('Seen mutation: replacing triggers with:', r.pageTriggers);
           setPageTriggers(r.pageTriggers);
+          setConversions(r.conversions || []);
           var retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
           if (retrievedUserId) {
             updateCookie(retrievedUserId);

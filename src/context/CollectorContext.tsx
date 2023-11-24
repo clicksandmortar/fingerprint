@@ -88,7 +88,7 @@ export function CollectorProvider({
     new Map()
   )
 
-  const { conversions, setConversions } = useConversions()
+  const { setConversions } = useConversions()
 
   // Passing the funcs down to other contexts from here. So please keep it until Collector
   // is refactored
