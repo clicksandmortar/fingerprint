@@ -1,6 +1,5 @@
 /// <reference types="react" />
 import { SupportedBrand } from '../utils/brand';
-import { DeviceInfo } from '../utils/device';
 import { Visitor } from '../visitors/types';
 export declare type CollectorUpdate = {
     appId?: string;
@@ -12,7 +11,9 @@ export declare type CollectorUpdate = {
     account?: Account | undefined;
     form?: Form | undefined;
     button?: Button | undefined;
-    device?: DeviceInfo | undefined;
+    conversion?: {
+        id: string;
+    };
 };
 export declare type Button = {
     id?: string;
@@ -53,6 +54,28 @@ export declare type Referrer = {
         term?: string;
     };
 };
+export declare type Operator = 'starts_with' | 'contains' | 'ends_with' | 'eq';
+export declare type ComparisonFunc = (comparison: string) => boolean;
+export declare type IsOnPathConversionSignal = {
+    op: 'IsOnPath';
+    parameters: [Operator, string];
+};
+export declare type IsOnDomainConversionSignal = {
+    op: 'IsOnDomain';
+    parameters: [string];
+};
+export declare type CanSeeElementOnPageConversionSignal = {
+    op: 'CanSeeElementOnPage';
+    parameters: [string, // selector
+    Operator, // operator
+    string];
+};
+export declare type ConversionSignal = IsOnPathConversionSignal | IsOnDomainConversionSignal | CanSeeElementOnPageConversionSignal;
+export declare type Conversion = {
+    identifier: string;
+    signals: ConversionSignal[];
+    analyticsEvent: string;
+};
 export declare type IncompleteTrigger = Trigger & {
     signals: [{
         op: 'CanSeeElementOnPage';
@@ -72,6 +95,7 @@ export declare type CollectorVisitorResponse = {
     identifiers?: {
         main?: string;
     };
+    conversions: Conversion[];
 };
 export declare type Invocation = 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIME' | 'INVOCATION_EXIT_INTENT' | 'INVOCATION_PAGE_LOAD' | 'INVOCATION_ELEMENT_VISIBLE';
 export declare type Trigger = {
