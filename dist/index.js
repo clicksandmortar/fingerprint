@@ -3188,7 +3188,7 @@ var useRemoveIntently = function useRemoveIntently(_ref2) {
   var brand = useBrand();
   React.useEffect(function () {
     if (intently) return;
-    if (brand && brandsThatSupportIntentlyRemoval.includes(brand)) {
+    if (brand && !brandsThatSupportIntentlyRemoval.includes(brand)) {
       log("useRemoveIntently: Intently is " + intently + ", but skipping overlay removal for brand", {
         brand: brand
       });
