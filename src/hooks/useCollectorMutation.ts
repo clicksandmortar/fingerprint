@@ -35,6 +35,8 @@ export const useCollectorMutation = () => {
         })
     },
     {
+      // TODO: merge this and collecor callback into one thing when we no longer require
+      // setting intently - thats the only differentiator between the callbacks
       onSuccess: () => {}
     }
   )

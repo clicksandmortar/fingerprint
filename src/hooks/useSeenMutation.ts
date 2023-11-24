@@ -7,6 +7,7 @@ import { useVisitor } from '../context/VisitorContext'
 import { deviceInfo } from '../utils/device'
 import { hostname, request } from '../utils/http'
 import { getPagePayload } from '../utils/page'
+import { updateCookie } from '../visitors/bootstrap'
 import { useBrand } from './useBrandConfig'
 import { useCollector } from './useCollector'
 import { useFingerprint } from './useFingerprint'
@@ -17,7 +18,7 @@ export const useSeenMutation = () => {
   const { trackEvent } = useMixpanel()
   const { setPageTriggers, setIncompleteTriggers } = useCollector()
 
-  const { visitor } = useVisitor()
+  const { visitor, setVisitor } = useVisitor()
   const brand = useBrand()
 
   const trackTriggerSeen = React.useCallback(
@@ -54,16 +55,25 @@ export const useSeenMutation = () => {
         })
     },
     {
+      // TODO: merge this and collecor callback into one thing when we no longer require
+      // setting intently - thats the only differentiator between the callbacks
       onSuccess: async (res) => {
         const r = await res.json()
 
         log('Seen mutation: replacing triggers with:', r.pageTriggers)
         setPageTriggers(r.pageTriggers)
 
+        const retrievedUserId = r.identifiers?.main
+        if (retrievedUserId) {
+          updateCookie(retrievedUserId)
+          setVisitor({ id: retrievedUserId })
+        }
+
         log(
           'Seen mutation: replacing incomplete Triggers with:',
           r.incompleteTriggers
         )
+
         setIncompleteTriggers(r.incompleteTriggers || [])
         return r
       }
