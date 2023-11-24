@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
+import { SupportedBrand } from '../utils/brand'
 import { useBrand } from './useBrandConfig'
 
 const selectorRateMs = 100
@@ -108,12 +109,24 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
   return { isVisible, setIsVisible }
 }
 
+// Skip if the brand is NOT  Browns - we're running A/B tests on it
+const brandsThatSupportIntentlyRemoval: SupportedBrand[] = ['Browns']
+
 const useRemoveIntently = ({ intently }: IntentlyProps) => {
   const { log } = useLogging()
-
+  const brand = useBrand()
   // Removes the intently overlay, if intently is false
   useEffect(() => {
     if (intently) return
+    if (brand && brandsThatSupportIntentlyRemoval.includes(brand)) {
+      log(
+        `useRemoveIntently: Intently is ${intently}, but skipping overlay removal for brand`,
+        {
+          brand
+        }
+      )
+      return
+    }
 
     log('useRemoveIntently: removing intently overlay')
 
@@ -134,7 +147,7 @@ const useRemoveIntently = ({ intently }: IntentlyProps) => {
     return () => {
       clearInterval(runningInterval)
     }
-  }, [intently, log])
+  }, [intently, brand, log])
 }
 
 export function useIntently() {
