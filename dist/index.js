@@ -954,31 +954,6 @@ var useConversions = function useConversions() {
   };
 };
 
-var validateSignals = function validateSignals(signals) {
-  var signalPattern = signals.map(function (signal) {
-    if (signal.op === 'IsOnPath') {
-      var _signal$parameters = signal.parameters,
-        route = _signal$parameters[0];
-      return getFuncByOperator('contains', route)(window.location.pathname);
-    }
-    if (signal.op === 'CanSeeElementOnPage') {
-      var _signal$parameters2 = signal.parameters,
-        itemQuerySelector = _signal$parameters2[0],
-        operator = _signal$parameters2[1],
-        _route = _signal$parameters2[2];
-      var isSignalOnCorrectRoute = getFuncByOperator(operator, _route)(window.location.pathname);
-      if (!isSignalOnCorrectRoute) return false;
-      var isVisible = getIsVisible(itemQuerySelector);
-      return isVisible;
-    }
-    if (signal.op === 'IsOnDomain') {
-      return window.location.hostname === signal.parameters[0];
-    }
-    return false;
-  });
-  console.log('signalPattern', signalPattern);
-  return signalPattern.every(Boolean);
-};
 var interval = 250;
 var useIncompleteTriggers = function useIncompleteTriggers() {
   var _useState = React.useState([]),
@@ -989,7 +964,7 @@ var useIncompleteTriggers = function useIncompleteTriggers() {
     setVisibleTriggers = _useState2[1];
   var scan = React__default.useCallback(function () {
     var validTriggers = incompleteTriggers.filter(function (trigger) {
-      var shouldTrigger = validateSignals(trigger.signals);
+      var shouldTrigger = validateConversion(trigger.signals);
       if (!shouldTrigger) return false;
       return true;
     });

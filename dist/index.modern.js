@@ -898,34 +898,13 @@ const useConversions = () => {
   };
 };
 
-const validateSignals = signals => {
-  const signalPattern = signals.map(signal => {
-    if (signal.op === 'IsOnPath') {
-      const [route] = signal.parameters;
-      return getFuncByOperator('contains', route)(window.location.pathname);
-    }
-    if (signal.op === 'CanSeeElementOnPage') {
-      const [itemQuerySelector, operator, route] = signal.parameters;
-      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
-      if (!isSignalOnCorrectRoute) return false;
-      const isVisible = getIsVisible(itemQuerySelector);
-      return isVisible;
-    }
-    if (signal.op === 'IsOnDomain') {
-      return window.location.hostname === signal.parameters[0];
-    }
-    return false;
-  });
-  console.log('signalPattern', signalPattern);
-  return signalPattern.every(Boolean);
-};
 const interval = 250;
 const useIncompleteTriggers = () => {
   const [incompleteTriggers, setIncompleteTriggers] = useState([]);
   const [visibleTriggers, setVisibleTriggers] = useState([]);
   const scan = React__default.useCallback(() => {
     const validTriggers = incompleteTriggers.filter(trigger => {
-      const shouldTrigger = validateSignals(trigger.signals);
+      const shouldTrigger = validateConversion(trigger.signals);
       if (!shouldTrigger) return false;
       return true;
     });
