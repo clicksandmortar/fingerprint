@@ -61,6 +61,7 @@ export type Referrer = {
   }
 }
 
+// TODO: move these into a separate file. They have to do wit triggers and signals, not so much the colletor
 export type Operator = 'starts_with' | 'contains' | 'ends_with' | 'eq'
 export type ComparisonFunc = (comparison: string) => boolean
 

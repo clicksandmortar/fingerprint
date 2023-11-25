@@ -855,15 +855,6 @@ function useFormCollector() {
   }, [visitor]);
 }
 
-var getIsVisible = function getIsVisible(selector) {
-  var element = document.querySelector(selector);
-  if (!element) return false;
-  if (window.getComputedStyle(element).visibility === 'hidden') return false;
-  if (window.getComputedStyle(element).display === 'none') return false;
-  if (window.getComputedStyle(element).opacity === '0') return false;
-  return true;
-};
-
 var getFuncByOperator = function getFuncByOperator(operator, compareWith) {
   switch (operator) {
     case 'starts_with':
@@ -889,7 +880,56 @@ var getFuncByOperator = function getFuncByOperator(operator, compareWith) {
       };
   }
 };
-var validateConversion = function validateConversion(signals) {
+var scanInterval = 500;
+var useConversions = function useConversions() {
+  var _useState = React.useState([]),
+    conversions = _useState[0],
+    setConversions = _useState[1];
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutate;
+  var removeById = React__default.useCallback(function (id) {
+    setConversions(function (prev) {
+      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
+      return prev.filter(function (conversion) {
+        return conversion.identifier !== id;
+      });
+    });
+  }, [setConversions]);
+  var scan = React__default.useCallback(function () {
+    conversions.forEach(function (conversion) {
+      var hasHappened = validateSignalChain(conversion.signals);
+      if (!hasHappened) return;
+      collect({
+        conversion: {
+          id: conversion.identifier
+        }
+      });
+      removeById(conversion.identifier);
+    });
+  }, [collect, conversions, removeById]);
+  React.useEffect(function () {
+    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
+    var intId = setInterval(scan, scanInterval);
+    return function () {
+      return clearInterval(intId);
+    };
+  }, [scan]);
+  return {
+    conversions: conversions,
+    setConversions: setConversions
+  };
+};
+
+var getIsVisible = function getIsVisible(selector) {
+  var element = document.querySelector(selector);
+  if (!element) return false;
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  if (window.getComputedStyle(element).display === 'none') return false;
+  if (window.getComputedStyle(element).opacity === '0') return false;
+  return true;
+};
+
+var validateSignalChain = function validateSignalChain(signals) {
   var signalPattern = signals.map(function (signal) {
     if (signal.op === 'IsOnPath') {
       var _signal$parameters = signal.parameters,
@@ -914,45 +954,6 @@ var validateConversion = function validateConversion(signals) {
   });
   return signalPattern.every(Boolean);
 };
-var scanInterval = 500;
-var useConversions = function useConversions() {
-  var _useState = React.useState([]),
-    conversions = _useState[0],
-    setConversions = _useState[1];
-  var _useCollectorMutation = useCollectorMutation(),
-    collect = _useCollectorMutation.mutate;
-  var removeById = React__default.useCallback(function (id) {
-    setConversions(function (prev) {
-      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
-      return prev.filter(function (conversion) {
-        return conversion.identifier !== id;
-      });
-    });
-  }, [setConversions]);
-  var scan = React__default.useCallback(function () {
-    conversions.forEach(function (conversion) {
-      var hasHappened = validateConversion(conversion.signals);
-      if (!hasHappened) return;
-      collect({
-        conversion: {
-          id: conversion.identifier
-        }
-      });
-      removeById(conversion.identifier);
-    });
-  }, [collect, conversions, removeById]);
-  React.useEffect(function () {
-    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
-    var intId = setInterval(scan, scanInterval);
-    return function () {
-      return clearInterval(intId);
-    };
-  }, [scan]);
-  return {
-    conversions: conversions,
-    setConversions: setConversions
-  };
-};
 
 var interval = 250;
 var useIncompleteTriggers = function useIncompleteTriggers() {
@@ -964,7 +965,7 @@ var useIncompleteTriggers = function useIncompleteTriggers() {
     setVisibleTriggers = _useState2[1];
   var scan = React__default.useCallback(function () {
     var validTriggers = incompleteTriggers.filter(function (trigger) {
-      var shouldTrigger = validateConversion(trigger.signals);
+      var shouldTrigger = validateSignalChain(trigger.signals);
       if (!shouldTrigger) return false;
       return true;
     });

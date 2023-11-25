@@ -809,15 +809,6 @@ function useFormCollector() {
   }, [visitor]);
 }
 
-const getIsVisible = selector => {
-  const element = document.querySelector(selector);
-  if (!element) return false;
-  if (window.getComputedStyle(element).visibility === 'hidden') return false;
-  if (window.getComputedStyle(element).display === 'none') return false;
-  if (window.getComputedStyle(element).opacity === '0') return false;
-  return true;
-};
-
 const getFuncByOperator = (operator, compareWith) => {
   switch (operator) {
     case 'starts_with':
@@ -843,26 +834,6 @@ const getFuncByOperator = (operator, compareWith) => {
       };
   }
 };
-const validateConversion = signals => {
-  const signalPattern = signals.map(signal => {
-    if (signal.op === 'IsOnPath') {
-      const [operator, route] = signal.parameters;
-      return getFuncByOperator(operator, route)(window.location.pathname);
-    }
-    if (signal.op === 'CanSeeElementOnPage') {
-      const [itemQuerySelector, operator, route] = signal.parameters;
-      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
-      if (!isSignalOnCorrectRoute) return false;
-      const isVisible = getIsVisible(itemQuerySelector);
-      return isVisible;
-    }
-    if (signal.op === 'IsOnDomain') {
-      return window.location.hostname === signal.parameters[0];
-    }
-    return false;
-  });
-  return signalPattern.every(Boolean);
-};
 const scanInterval = 500;
 const useConversions = () => {
   const [conversions, setConversions] = useState([]);
@@ -877,7 +848,7 @@ const useConversions = () => {
   }, [setConversions]);
   const scan = React__default.useCallback(() => {
     conversions.forEach(conversion => {
-      const hasHappened = validateConversion(conversion.signals);
+      const hasHappened = validateSignalChain(conversion.signals);
       if (!hasHappened) return;
       collect({
         conversion: {
@@ -898,13 +869,43 @@ const useConversions = () => {
   };
 };
 
+const getIsVisible = selector => {
+  const element = document.querySelector(selector);
+  if (!element) return false;
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  if (window.getComputedStyle(element).display === 'none') return false;
+  if (window.getComputedStyle(element).opacity === '0') return false;
+  return true;
+};
+
+const validateSignalChain = signals => {
+  const signalPattern = signals.map(signal => {
+    if (signal.op === 'IsOnPath') {
+      const [operator, route] = signal.parameters;
+      return getFuncByOperator(operator, route)(window.location.pathname);
+    }
+    if (signal.op === 'CanSeeElementOnPage') {
+      const [itemQuerySelector, operator, route] = signal.parameters;
+      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
+      if (!isSignalOnCorrectRoute) return false;
+      const isVisible = getIsVisible(itemQuerySelector);
+      return isVisible;
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0];
+    }
+    return false;
+  });
+  return signalPattern.every(Boolean);
+};
+
 const interval = 250;
 const useIncompleteTriggers = () => {
   const [incompleteTriggers, setIncompleteTriggers] = useState([]);
   const [visibleTriggers, setVisibleTriggers] = useState([]);
   const scan = React__default.useCallback(() => {
     const validTriggers = incompleteTriggers.filter(trigger => {
-      const shouldTrigger = validateConversion(trigger.signals);
+      const shouldTrigger = validateSignalChain(trigger.signals);
       if (!shouldTrigger) return false;
       return true;
     });
