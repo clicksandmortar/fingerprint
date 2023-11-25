@@ -47,6 +47,9 @@ const useIncompleteTriggers = () => {
     IncompleteTrigger[]
   >([])
 
+  // @TODO: think if this can insteqd be a derived value somehow.
+  // note that shoving the interval into a memo or callback is not the way.
+  // IMHO we should aim to NOT update state here to reduce the amount of rerenders if possible.
   const [visibleTriggers, setVisibleTriggers] = useState<Trigger[]>([])
 
   const scan = React.useCallback(() => {

@@ -996,14 +996,22 @@ function useTrackIntentlyModal({
     setIsVisible
   };
 }
+const brandsThatSupportIntentlyRemoval = ['Browns'];
 const useRemoveIntently = ({
   intently
 }) => {
   const {
     log
   } = useLogging();
+  const brand = useBrand();
   useEffect(() => {
     if (intently) return;
+    if (brand && !brandsThatSupportIntentlyRemoval.includes(brand)) {
+      log(`useRemoveIntently: Intently is ${intently}, but skipping overlay removal for brand`, {
+        brand
+      });
+      return;
+    }
     log('useRemoveIntently: removing intently overlay');
     const runningInterval = setInterval(() => {
       const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
@@ -1016,7 +1024,7 @@ const useRemoveIntently = ({
     return () => {
       clearInterval(runningInterval);
     };
-  }, [intently, log]);
+  }, [intently, brand, log]);
 };
 function useIntently() {
   const [intently, setIntently] = useState(true);
