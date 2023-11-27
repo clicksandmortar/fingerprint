@@ -39,12 +39,6 @@ const useFullyClickableModalDimensions = ({ image }: { image: string }) => {
       const verticalScaleDownFactor = img.height / vertical
       const horizontalScaleDownFactor = img.width / horizontal
 
-      console.log({
-        verticalScaleDownFactor,
-        horizontalScaleDownFactor,
-        h: img.height,
-        w: img.width
-      })
       const scaleDownFactor = Math.max(
         verticalScaleDownFactor,
         horizontalScaleDownFactor

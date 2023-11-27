@@ -162,9 +162,6 @@ function ConfigProvider({
             ...(argColors || {})
           } : prev.brand.colors
         },
-        script: {
-          debugMode: false
-        },
         trigger: {
           ...prev.trigger,
           ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
@@ -924,6 +921,7 @@ const useIncompleteTriggers = () => {
   return {
     incompleteTriggers,
     setIncompleteTriggers,
+    setVisibleTriggers,
     visibleTriggers
   };
 };
@@ -1169,6 +1167,7 @@ function CollectorProvider({
   } = useConversions();
   const {
     setIncompleteTriggers,
+    setVisibleTriggers,
     visibleTriggers: visibleIncompleteTriggers
   } = useIncompleteTriggers();
   const combinedTriggers = React__default.useMemo(() => [...pageTriggers, ...visibleIncompleteTriggers], [pageTriggers, visibleIncompleteTriggers]);
@@ -1215,8 +1214,9 @@ function CollectorProvider({
     const refreshedTriggers = displayTriggers.filter(triggerId => triggerId !== id);
     setDisplayedTriggers(refreshedTriggers);
     setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
+    setVisibleTriggers(prev => prev.filter(trigger => trigger.id !== id));
     setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
-  }, [displayTriggers, log, setIncompleteTriggers]);
+  }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, setPageTriggersState, combinedTriggers]);
   const TriggerComponent = React__default.useCallback(() => {
     if (!displayTriggers) return null;
     const activeTriggers = combinedTriggers.filter(trigger => displayTriggers.includes(trigger.id));
@@ -3260,12 +3260,6 @@ const useFullyClickableModalDimensions = ({
       } = scaleDownFactorMap();
       const verticalScaleDownFactor = img.height / vertical;
       const horizontalScaleDownFactor = img.width / horizontal;
-      console.log({
-        verticalScaleDownFactor,
-        horizontalScaleDownFactor,
-        h: img.height,
-        w: img.width
-      });
       const scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
       setImageDimensions({
         width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),

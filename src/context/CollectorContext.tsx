@@ -92,8 +92,11 @@ export function CollectorProvider({
 
   // Passing the funcs down to other contexts from here. So please keep it until Collector
   // is refactored
-  const { setIncompleteTriggers, visibleTriggers: visibleIncompleteTriggers } =
-    useIncompleteTriggers()
+  const {
+    setIncompleteTriggers,
+    setVisibleTriggers,
+    visibleTriggers: visibleIncompleteTriggers
+  } = useIncompleteTriggers()
 
   const combinedTriggers = React.useMemo(
     () => [...pageTriggers, ...visibleIncompleteTriggers],
@@ -201,11 +204,19 @@ export function CollectorProvider({
       setIncompleteTriggers((prev) =>
         prev.filter((trigger) => trigger.id !== id)
       )
+      setVisibleTriggers((prev) => prev.filter((trigger) => trigger.id !== id))
       setPageTriggersState((prev) =>
         prev.filter((trigger) => trigger.id !== id)
       )
     },
-    [displayTriggers, log, setIncompleteTriggers]
+    [
+      displayTriggers,
+      log,
+      setIncompleteTriggers,
+      setVisibleTriggers,
+      setPageTriggersState,
+      combinedTriggers
+    ]
   )
 
   const TriggerComponent = React.useCallback(():
