@@ -966,6 +966,10 @@ var useIncompleteTriggers = function useIncompleteTriggers() {
       if (!shouldTrigger) return false;
       return true;
     });
+    console.log({
+      visibleTriggers: visibleTriggers,
+      validTriggers: validTriggers
+    });
     setVisibleTriggers(function (prev) {
       if (!validTriggers.length) return prev;
       return validTriggers;
