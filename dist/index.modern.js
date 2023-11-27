@@ -906,10 +906,6 @@ const useIncompleteTriggers = () => {
       if (!shouldTrigger) return false;
       return true;
     });
-    console.log({
-      visibleTriggers,
-      validTriggers
-    });
     setVisibleTriggers(prev => {
       if (!validTriggers.length) return prev;
       return validTriggers;
