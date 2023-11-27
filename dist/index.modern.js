@@ -901,7 +901,16 @@ const validateSignalChain = signals => {
 
 const interval = 250;
 const useIncompleteTriggers = () => {
-  const [incompleteTriggers, setIncompleteTriggers] = useState([]);
+  const [incompleteTriggers, setIncompleteTriggersState] = useState([]);
+  const setIncompleteTriggers = triggers => {
+    setIncompleteTriggersState(prev => {
+      console.log({
+        prev,
+        triggers
+      });
+      return triggers;
+    });
+  };
   const [visibleTriggers, setVisibleTriggers] = useState([]);
   const scan = React__default.useCallback(() => {
     const validTriggers = incompleteTriggers.filter(trigger => {
@@ -3260,12 +3269,6 @@ const useFullyClickableModalDimensions = ({
       } = scaleDownFactorMap();
       const verticalScaleDownFactor = img.height / vertical;
       const horizontalScaleDownFactor = img.width / horizontal;
-      console.log({
-        verticalScaleDownFactor,
-        horizontalScaleDownFactor,
-        h: img.height,
-        w: img.width
-      });
       const scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
       setImageDimensions({
         width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),

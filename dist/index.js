@@ -959,7 +959,16 @@ var interval = 250;
 var useIncompleteTriggers = function useIncompleteTriggers() {
   var _useState = React.useState([]),
     incompleteTriggers = _useState[0],
-    setIncompleteTriggers = _useState[1];
+    setIncompleteTriggersState = _useState[1];
+  var setIncompleteTriggers = function setIncompleteTriggers(triggers) {
+    setIncompleteTriggersState(function (prev) {
+      console.log({
+        prev: prev,
+        triggers: triggers
+      });
+      return triggers;
+    });
+  };
   var _useState2 = React.useState([]),
     visibleTriggers = _useState2[0],
     setVisibleTriggers = _useState2[1];
@@ -3384,12 +3393,6 @@ var useFullyClickableModalDimensions = function useFullyClickableModalDimensions
         horizontal = _scaleDownFactorMap.horizontal;
       var verticalScaleDownFactor = img.height / vertical;
       var horizontalScaleDownFactor = img.width / horizontal;
-      console.log({
-        verticalScaleDownFactor: verticalScaleDownFactor,
-        horizontalScaleDownFactor: horizontalScaleDownFactor,
-        h: img.height,
-        w: img.width
-      });
       var scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
       setImageDimensions({
         width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),

@@ -1,8 +1,7 @@
-import React from 'react';
 import { IncompleteTrigger, Trigger } from '../client/types';
 declare const useIncompleteTriggers: () => {
     incompleteTriggers: IncompleteTrigger[];
-    setIncompleteTriggers: React.Dispatch<React.SetStateAction<IncompleteTrigger[]>>;
+    setIncompleteTriggers: (triggers: IncompleteTrigger[]) => void;
     visibleTriggers: Trigger[];
 };
 export default useIncompleteTriggers;
