@@ -181,9 +181,6 @@ function ConfigProvider(_ref) {
         brand: _extends({}, prev.brand, updatedConfigEntries.brand, {
           colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, argColors || {}) : prev.brand.colors
         }),
-        script: {
-          debugMode: false
-        },
         trigger: _extends({}, prev.trigger, objStringtoObjNum(LEGACY_merge_config(prev, legacy_config)))
       });
     });
@@ -1287,14 +1284,9 @@ function CollectorProvider(_ref) {
     });
     setDisplayedTriggers(refreshedTriggers);
     setIncompleteTriggers(function (prev) {
-      var newTriggers = prev.filter(function (trigger) {
+      return prev.filter(function (trigger) {
         return trigger.id !== id;
       });
-      console.log({
-        prev: prev,
-        newTriggers: newTriggers
-      });
-      return newTriggers;
     });
     setPageTriggersState(function (prev) {
       return prev.filter(function (trigger) {

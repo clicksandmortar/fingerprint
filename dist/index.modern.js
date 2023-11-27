@@ -162,9 +162,6 @@ function ConfigProvider({
             ...(argColors || {})
           } : prev.brand.colors
         },
-        script: {
-          debugMode: false
-        },
         trigger: {
           ...prev.trigger,
           ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
@@ -1214,14 +1211,7 @@ function CollectorProvider({
     log(`CollectorProvider: removing id:${id} from displayTriggers`);
     const refreshedTriggers = displayTriggers.filter(triggerId => triggerId !== id);
     setDisplayedTriggers(refreshedTriggers);
-    setIncompleteTriggers(prev => {
-      const newTriggers = prev.filter(trigger => trigger.id !== id);
-      console.log({
-        prev,
-        newTriggers
-      });
-      return newTriggers;
-    });
+    setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
     setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
   }, [displayTriggers, log, setIncompleteTriggers]);
   const TriggerComponent = React__default.useCallback(() => {

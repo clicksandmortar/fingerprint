@@ -198,11 +198,9 @@ export function CollectorProvider({
         (triggerId) => triggerId !== id
       )
       setDisplayedTriggers(refreshedTriggers)
-      setIncompleteTriggers((prev) => {
-        const newTriggers = prev.filter((trigger) => trigger.id !== id)
-        console.log({ prev, newTriggers })
-        return newTriggers
-      })
+      setIncompleteTriggers((prev) =>
+        prev.filter((trigger) => trigger.id !== id)
+      )
       setPageTriggersState((prev) =>
         prev.filter((trigger) => trigger.id !== id)
       )
