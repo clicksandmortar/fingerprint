@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ComparisonFunc, Conversion, Operator } from '../client/types'
+import { validateSignalChain } from '../utils/signals'
 import { useCollectorMutation } from './useCollectorMutation'
-import getIsVisible from './useIsElementVisible'
 
 // TODO: keeping here fo now in case we want to demo this. nuke it after
 export const testConversion: Conversion = {
@@ -26,7 +26,7 @@ export const testConversion: Conversion = {
 /**
  * Returns a function that compares a string with the signal parameter
  */
-const getFuncByOperator = (
+export const getFuncByOperator = (
   operator: Operator,
   compareWith: string
 ): ComparisonFunc => {
@@ -55,40 +55,6 @@ const getFuncByOperator = (
   }
 }
 
-/*
-  Scans through the conversion signals and returns true if all of them are true
-*/
-const validateConversion = (conversion: Conversion) => {
-  const signalPattern = conversion.signals.map((signal) => {
-    if (signal.op === 'IsOnPath') {
-      const [operator, route] = signal.parameters
-
-      return getFuncByOperator(operator, route)(window.location.pathname)
-    }
-
-    if (signal.op === 'CanSeeElementOnPage') {
-      const [itemQuerySelector, operator, route] = signal.parameters
-      const isSignalOnCorrectRoute = getFuncByOperator(
-        operator,
-        route
-      )(window.location.pathname)
-
-      if (!isSignalOnCorrectRoute) return false
-
-      const isVisible = getIsVisible(itemQuerySelector)
-      return isVisible
-    }
-    if (signal.op === 'IsOnDomain') {
-      return window.location.hostname === signal.parameters[0]
-    }
-
-    // in case the signal is mis-configured
-    return false
-  })
-
-  return signalPattern.every(Boolean)
-}
-
 const scanInterval = 500
 
 const useConversions = () => {
@@ -111,7 +77,7 @@ const useConversions = () => {
 
   const scan = React.useCallback(() => {
     conversions.forEach((conversion) => {
-      const hasHappened = validateConversion(conversion)
+      const hasHappened = validateSignalChain(conversion.signals)
       if (!hasHappened) return
 
       collect({
