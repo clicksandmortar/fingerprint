@@ -985,6 +985,7 @@ var useIncompleteTriggers = function useIncompleteTriggers() {
   return {
     incompleteTriggers: incompleteTriggers,
     setIncompleteTriggers: setIncompleteTriggers,
+    setVisibleTriggers: setVisibleTriggers,
     visibleTriggers: visibleTriggers
   };
 };
@@ -1228,6 +1229,7 @@ function CollectorProvider(_ref) {
     setConversions = _useConversions.setConversions;
   var _useIncompleteTrigger = useIncompleteTriggers(),
     setIncompleteTriggers = _useIncompleteTrigger.setIncompleteTriggers,
+    setVisibleTriggers = _useIncompleteTrigger.setVisibleTriggers,
     visibleIncompleteTriggers = _useIncompleteTrigger.visibleTriggers;
   var combinedTriggers = React__default.useMemo(function () {
     return [].concat(pageTriggers, visibleIncompleteTriggers);
@@ -1292,12 +1294,17 @@ function CollectorProvider(_ref) {
         return trigger.id !== id;
       });
     });
+    setVisibleTriggers(function (prev) {
+      return prev.filter(function (trigger) {
+        return trigger.id !== id;
+      });
+    });
     setPageTriggersState(function (prev) {
       return prev.filter(function (trigger) {
         return trigger.id !== id;
       });
     });
-  }, [displayTriggers, log, setIncompleteTriggers]);
+  }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, setPageTriggersState, combinedTriggers]);
   var TriggerComponent = React__default.useCallback(function () {
     if (!displayTriggers) return null;
     var activeTriggers = combinedTriggers.filter(function (trigger) {

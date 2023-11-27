@@ -925,6 +925,7 @@ const useIncompleteTriggers = () => {
   return {
     incompleteTriggers,
     setIncompleteTriggers,
+    setVisibleTriggers,
     visibleTriggers
   };
 };
@@ -1170,6 +1171,7 @@ function CollectorProvider({
   } = useConversions();
   const {
     setIncompleteTriggers,
+    setVisibleTriggers,
     visibleTriggers: visibleIncompleteTriggers
   } = useIncompleteTriggers();
   const combinedTriggers = React__default.useMemo(() => [...pageTriggers, ...visibleIncompleteTriggers], [pageTriggers, visibleIncompleteTriggers]);
@@ -1216,8 +1218,9 @@ function CollectorProvider({
     const refreshedTriggers = displayTriggers.filter(triggerId => triggerId !== id);
     setDisplayedTriggers(refreshedTriggers);
     setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
+    setVisibleTriggers(prev => prev.filter(trigger => trigger.id !== id));
     setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
-  }, [displayTriggers, log, setIncompleteTriggers]);
+  }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, setPageTriggersState, combinedTriggers]);
   const TriggerComponent = React__default.useCallback(() => {
     if (!displayTriggers) return null;
     const activeTriggers = combinedTriggers.filter(trigger => displayTriggers.includes(trigger.id));

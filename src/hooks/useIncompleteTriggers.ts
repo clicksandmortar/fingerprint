@@ -46,6 +46,7 @@ const useIncompleteTriggers = () => {
   return {
     incompleteTriggers,
     setIncompleteTriggers,
+    setVisibleTriggers,
     visibleTriggers
   }
 }
