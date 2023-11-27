@@ -1234,13 +1234,13 @@ function CollectorProvider(_ref) {
   var getIsBehaviourVisible = React__default.useCallback(function (type) {
     if (displayTriggers.length === 0) return false;
     if (displayTriggers.find(function (triggerId) {
-      var _pageTriggers$find;
-      return ((_pageTriggers$find = pageTriggers.find(function (trigger) {
+      var _combinedTriggers$fin;
+      return ((_combinedTriggers$fin = combinedTriggers.find(function (trigger) {
         return trigger.id === triggerId;
-      })) === null || _pageTriggers$find === void 0 ? void 0 : _pageTriggers$find.behaviour) === type;
+      })) === null || _combinedTriggers$fin === void 0 ? void 0 : _combinedTriggers$fin.behaviour) === type;
     })) return true;
     return false;
-  }, [displayTriggers, pageTriggers]);
+  }, [displayTriggers, combinedTriggers]);
   var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation, shouldAllowMultipleSimultaneous) {
     if (shouldAllowMultipleSimultaneous === void 0) {
       shouldAllowMultipleSimultaneous = false;
@@ -1368,10 +1368,10 @@ function CollectorProvider(_ref) {
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
   var fireOnLoadTriggers = React.useCallback(function () {
     if (!pageLoadTriggers) return;
-    if (!(pageTriggers !== null && pageTriggers !== void 0 && pageTriggers.length)) return;
+    if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
-  }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation]);
+  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation]);
   var collectorCallback = React__default.useCallback(function (response) {
     try {
       return Promise.resolve(response.json()).then(function (payload) {
