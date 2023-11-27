@@ -959,16 +959,7 @@ var interval = 250;
 var useIncompleteTriggers = function useIncompleteTriggers() {
   var _useState = React.useState([]),
     incompleteTriggers = _useState[0],
-    setIncompleteTriggersState = _useState[1];
-  var setIncompleteTriggers = function setIncompleteTriggers(triggers) {
-    setIncompleteTriggersState(function (prev) {
-      console.log({
-        prev: prev,
-        triggers: triggers
-      });
-      return triggers;
-    });
-  };
+    setIncompleteTriggers = _useState[1];
   var _useState2 = React.useState([]),
     visibleTriggers = _useState2[0],
     setVisibleTriggers = _useState2[1];
@@ -1296,9 +1287,14 @@ function CollectorProvider(_ref) {
     });
     setDisplayedTriggers(refreshedTriggers);
     setIncompleteTriggers(function (prev) {
-      return prev.filter(function (trigger) {
+      var newTriggers = prev.filter(function (trigger) {
         return trigger.id !== id;
       });
+      console.log({
+        prev: prev,
+        newTriggers: newTriggers
+      });
+      return newTriggers;
     });
     setPageTriggersState(function (prev) {
       return prev.filter(function (trigger) {

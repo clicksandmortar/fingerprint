@@ -58,33 +58,28 @@ export declare type Referrer = {
 };
 export declare type Operator = 'starts_with' | 'contains' | 'ends_with' | 'eq';
 export declare type ComparisonFunc = (comparison: string) => boolean;
-export declare type IsOnPathConversionSignal = {
+export declare type IsOnPathSignal = {
     op: 'IsOnPath';
     parameters: [Operator, string];
 };
-export declare type IsOnDomainConversionSignal = {
+export declare type IsOnDomainSignal = {
     op: 'IsOnDomain';
     parameters: [string];
 };
-export declare type CanSeeElementOnPageConversionSignal = {
+export declare type CanSeeElementOnPageSignal = {
     op: 'CanSeeElementOnPage';
     parameters: [string, // selector
     Operator, // operator
     string];
 };
-export declare type ConversionSignal = IsOnPathConversionSignal | IsOnDomainConversionSignal | CanSeeElementOnPageConversionSignal;
+export declare type FESignal = IsOnPathSignal | IsOnDomainSignal | CanSeeElementOnPageSignal;
 export declare type Conversion = {
     identifier: string;
-    signals: ConversionSignal[];
+    signals: FESignal[];
     analyticsEvent: string;
 };
 export declare type IncompleteTrigger = Trigger & {
-    signals: [{
-        op: 'CanSeeElementOnPage';
-        parameters: {
-            selector: string;
-        };
-    }];
+    signals: FESignal[];
 };
 export declare type CollectorVisitorResponse = {
     firstSeen: Date;

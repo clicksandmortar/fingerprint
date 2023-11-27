@@ -7,17 +7,9 @@ import getIsVisible from './useIsElementVisible'
 const interval = 250
 
 const useIncompleteTriggers = () => {
-  const [incompleteTriggers, setIncompleteTriggersState] = useState<
+  const [incompleteTriggers, setIncompleteTriggers] = useState<
     IncompleteTrigger[]
   >([])
-
-  const setIncompleteTriggers = (triggers: IncompleteTrigger[]) => {
-    setIncompleteTriggersState((prev) => {
-      console.log({ prev, triggers })
-      return triggers
-      // triggers
-    })
-  }
 
   // @TODO: think if this can insteqd be a derived value somehow.
   // note that shoving the interval into a memo or callback is not the way.

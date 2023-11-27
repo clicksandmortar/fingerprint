@@ -901,16 +901,7 @@ const validateSignalChain = signals => {
 
 const interval = 250;
 const useIncompleteTriggers = () => {
-  const [incompleteTriggers, setIncompleteTriggersState] = useState([]);
-  const setIncompleteTriggers = triggers => {
-    setIncompleteTriggersState(prev => {
-      console.log({
-        prev,
-        triggers
-      });
-      return triggers;
-    });
-  };
+  const [incompleteTriggers, setIncompleteTriggers] = useState([]);
   const [visibleTriggers, setVisibleTriggers] = useState([]);
   const scan = React__default.useCallback(() => {
     const validTriggers = incompleteTriggers.filter(trigger => {
@@ -1223,7 +1214,14 @@ function CollectorProvider({
     log(`CollectorProvider: removing id:${id} from displayTriggers`);
     const refreshedTriggers = displayTriggers.filter(triggerId => triggerId !== id);
     setDisplayedTriggers(refreshedTriggers);
-    setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
+    setIncompleteTriggers(prev => {
+      const newTriggers = prev.filter(trigger => trigger.id !== id);
+      console.log({
+        prev,
+        newTriggers
+      });
+      return newTriggers;
+    });
     setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
   }, [displayTriggers, log, setIncompleteTriggers]);
   const TriggerComponent = React__default.useCallback(() => {
