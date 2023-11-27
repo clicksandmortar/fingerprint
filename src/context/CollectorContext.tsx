@@ -106,7 +106,7 @@ export function CollectorProvider({
       if (
         displayTriggers.find(
           (triggerId) =>
-            pageTriggers.find((trigger) => trigger.id === triggerId)
+            combinedTriggers.find((trigger) => trigger.id === triggerId)
               ?.behaviour === type
         )
       )
@@ -114,7 +114,7 @@ export function CollectorProvider({
 
       return false
     },
-    [displayTriggers, pageTriggers]
+    [displayTriggers, combinedTriggers]
   )
 
   const setDisplayedTriggerByInvocation = React.useCallback(
@@ -335,7 +335,7 @@ export function CollectorProvider({
 
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return
-    if (!pageTriggers?.length) return
+    if (!combinedTriggers?.length) return
 
     /**
      * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
@@ -343,7 +343,7 @@ export function CollectorProvider({
      */
     log('CollectorProvider: attempting to fire on-page-load trigger')
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true)
-  }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation])
+  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation])
 
   const collectorCallback = React.useCallback(
     async (response: Response) => {
