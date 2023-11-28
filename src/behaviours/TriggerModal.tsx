@@ -6,9 +6,11 @@ import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
 
+import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useBrand } from '../hooks/useBrandConfig'
 import { useCollector } from '../hooks/useCollector'
+import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useSeenMutation } from '../hooks/useSeenMutation'
 
 type Props = {
@@ -19,14 +21,33 @@ const Modal = ({ trigger }: Props) => {
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
-  const [hasFired, setHasFired] = useState(false)
+  const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
+    null
+  )
+  const { error } = useLogging()
+  const { mutate: collect } = useCollectorMutation()
+
+  const track = (event: 'user_clicked_button' | 'user_closed_trigger') => {
+    trackEvent(event, trigger)
+    const type = event === 'user_clicked_button' ? 'cta' : 'exit'
+    if (!invocationTimeStamp) {
+      error('TriggerModal: invocationTimeStamp is null')
+      return
+    }
+    collect({
+      trackThing: {
+        type,
+        triggerInvocationTime: invocationTimeStamp
+      }
+    })
+  }
 
   const brand = useBrand()
   const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
 
   useEffect(() => {
     if (!open) return
-    if (hasFired) return
+    if (!!invocationTimeStamp) return
     if (isSuccess) return
     if (isLoading) return
 
@@ -34,7 +55,7 @@ const Modal = ({ trigger }: Props) => {
     // like to over-rerender componets. This timeout prevents from firing a ton
     const tId = setTimeout(() => {
       runSeen(trigger)
-      setHasFired(true)
+      setInvocationTimeStamp(new Date().toISOString())
     }, 1500)
 
     return () => {
@@ -48,13 +69,13 @@ const Modal = ({ trigger }: Props) => {
 
   const handleClickCallToAction = (e: any) => {
     e.preventDefault()
-    trackEvent('user_clicked_button', trigger)
+    track('user_clicked_button')
 
     trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
   }
 
   const handleCloseModal = () => {
-    trackEvent('user_closed_trigger', trigger)
+    track('user_closed_trigger')
     removeActiveTrigger(trigger.id)
     setOpen(false)
   }

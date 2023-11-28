@@ -3752,9 +3752,27 @@ var Modal = function Modal(_ref) {
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
-  var _useState2 = React.useState(false),
-    hasFired = _useState2[0],
-    setHasFired = _useState2[1];
+  var _useState2 = React.useState(null),
+    invocationTimeStamp = _useState2[0],
+    setInvocationTimeStamp = _useState2[1];
+  var _useLogging = useLogging(),
+    error = _useLogging.error;
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutate;
+  var track = function track(event) {
+    trackEvent(event, trigger);
+    var type = event === 'user_clicked_button' ? 'cta' : 'exit';
+    if (!invocationTimeStamp) {
+      error('TriggerModal: invocationTimeStamp is null');
+      return;
+    }
+    collect({
+      trackThing: {
+        type: type,
+        triggerInvocationTime: invocationTimeStamp
+      }
+    });
+  };
   var brand = useBrand();
   var _useSeenMutation = useSeenMutation(),
     runSeen = _useSeenMutation.mutate,
@@ -3762,12 +3780,12 @@ var Modal = function Modal(_ref) {
     isLoading = _useSeenMutation.isLoading;
   React.useEffect(function () {
     if (!open) return;
-    if (hasFired) return;
+    if (!!invocationTimeStamp) return;
     if (isSuccess) return;
     if (isLoading) return;
     var tId = setTimeout(function () {
       runSeen(trigger);
-      setHasFired(true);
+      setInvocationTimeStamp(new Date().toISOString());
     }, 1500);
     return function () {
       clearTimeout(tId);
@@ -3779,11 +3797,11 @@ var Modal = function Modal(_ref) {
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
-    trackEvent('user_clicked_button', trigger);
+    track('user_clicked_button');
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
   var handleCloseModal = function handleCloseModal() {
-    trackEvent('user_closed_trigger', trigger);
+    track('user_closed_trigger');
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };

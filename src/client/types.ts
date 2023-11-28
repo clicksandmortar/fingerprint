@@ -14,6 +14,10 @@ export type CollectorUpdate = {
   button?: Button | undefined
   conversion?: { id: string }
   device?: DeviceInfo | undefined
+  trackThing?: {
+    type: 'cta' | 'exit'
+    triggerInvocationTime: string
+  }
 }
 
 export type Button = {

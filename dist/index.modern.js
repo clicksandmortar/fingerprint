@@ -4259,7 +4259,27 @@ const Modal = ({
     trackEvent
   } = useMixpanel();
   const [open, setOpen] = useState(true);
-  const [hasFired, setHasFired] = useState(false);
+  const [invocationTimeStamp, setInvocationTimeStamp] = useState(null);
+  const {
+    error
+  } = useLogging();
+  const {
+    mutate: collect
+  } = useCollectorMutation();
+  const track = event => {
+    trackEvent(event, trigger);
+    const type = event === 'user_clicked_button' ? 'cta' : 'exit';
+    if (!invocationTimeStamp) {
+      error('TriggerModal: invocationTimeStamp is null');
+      return;
+    }
+    collect({
+      trackThing: {
+        type,
+        triggerInvocationTime: invocationTimeStamp
+      }
+    });
+  };
   const brand = useBrand();
   const {
     mutate: runSeen,
@@ -4268,12 +4288,12 @@ const Modal = ({
   } = useSeenMutation();
   useEffect(() => {
     if (!open) return;
-    if (hasFired) return;
+    if (!!invocationTimeStamp) return;
     if (isSuccess) return;
     if (isLoading) return;
     const tId = setTimeout(() => {
       runSeen(trigger);
-      setHasFired(true);
+      setInvocationTimeStamp(new Date().toISOString());
     }, 1500);
     return () => {
       clearTimeout(tId);
@@ -4285,11 +4305,11 @@ const Modal = ({
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
-    trackEvent('user_clicked_button', trigger);
+    track('user_clicked_button');
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
   const handleCloseModal = () => {
-    trackEvent('user_closed_trigger', trigger);
+    track('user_closed_trigger');
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };
