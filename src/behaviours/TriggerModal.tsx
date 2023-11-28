@@ -9,6 +9,7 @@ import StonehouseModal from '../components/modals/stonehouse'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useBrand } from '../hooks/useBrandConfig'
 import { useCollector } from '../hooks/useCollector'
+import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import { useSeenMutation } from '../hooks/useSeenMutation'
 
 type Props = {
@@ -19,14 +20,18 @@ const Modal = ({ trigger }: Props) => {
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
-  const [hasFired, setHasFired] = useState(false)
+  const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
+    null
+  )
+
+  const { mutate: collect } = useCollectorMutation()
 
   const brand = useBrand()
   const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
 
   useEffect(() => {
     if (!open) return
-    if (hasFired) return
+    if (invocationTimeStamp) return
     if (isSuccess) return
     if (isLoading) return
 
@@ -34,7 +39,7 @@ const Modal = ({ trigger }: Props) => {
     // like to over-rerender componets. This timeout prevents from firing a ton
     const tId = setTimeout(() => {
       runSeen(trigger)
-      setHasFired(true)
+      setInvocationTimeStamp(new Date().toISOString())
     }, 1500)
 
     return () => {
@@ -48,13 +53,24 @@ const Modal = ({ trigger }: Props) => {
 
   const handleClickCallToAction = (e: any) => {
     e.preventDefault()
+    collect({
+      cta: {
+        variantID: trigger.id,
+        shownAt: invocationTimeStamp || ''
+      }
+    })
     trackEvent('user_clicked_button', trigger)
-
     trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
   }
 
   const handleCloseModal = () => {
     trackEvent('user_closed_trigger', trigger)
+    // collect({
+    //   exit: {
+    //     variantID: trigger.id,
+    //     shownAt: invocationTimeStamp || ''
+    //   }
+    // })
     removeActiveTrigger(trigger.id)
     setOpen(false)
   }
