@@ -6,7 +6,6 @@ import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
 import StonehouseModal from '../components/modals/stonehouse'
 
-import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useBrand } from '../hooks/useBrandConfig'
 import { useCollector } from '../hooks/useCollector'
@@ -24,30 +23,15 @@ const Modal = ({ trigger }: Props) => {
   const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
     null
   )
-  const { error } = useLogging()
-  const { mutate: collect } = useCollectorMutation()
 
-  const track = (event: 'user_clicked_button' | 'user_closed_trigger') => {
-    trackEvent(event, trigger)
-    const type = event === 'user_clicked_button' ? 'cta' : 'exit'
-    if (!invocationTimeStamp) {
-      error('TriggerModal: invocationTimeStamp is null')
-      return
-    }
-    collect({
-      cta: {
-        interactionType: type,
-        elementShownAt: invocationTimeStamp
-      }
-    })
-  }
+  const { mutate: collect } = useCollectorMutation()
 
   const brand = useBrand()
   const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
 
   useEffect(() => {
     if (!open) return
-    if (!!invocationTimeStamp) return
+    if (invocationTimeStamp) return
     if (isSuccess) return
     if (isLoading) return
 
@@ -69,13 +53,24 @@ const Modal = ({ trigger }: Props) => {
 
   const handleClickCallToAction = (e: any) => {
     e.preventDefault()
-    track('user_clicked_button')
-
+    collect({
+      cta: {
+        variantID: trigger.id,
+        shownAt: invocationTimeStamp || ''
+      }
+    })
+    trackEvent('user_clicked_button', trigger)
     trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
   }
 
   const handleCloseModal = () => {
-    track('user_closed_trigger')
+    trackEvent('user_closed_trigger', trigger)
+    collect({
+      exit: {
+        variantID: trigger.id,
+        shownAt: invocationTimeStamp || ''
+      }
+    })
     removeActiveTrigger(trigger.id)
     setOpen(false)
   }

@@ -4261,25 +4261,8 @@ const Modal = ({
   const [open, setOpen] = useState(true);
   const [invocationTimeStamp, setInvocationTimeStamp] = useState(null);
   const {
-    error
-  } = useLogging();
-  const {
     mutate: collect
   } = useCollectorMutation();
-  const track = event => {
-    trackEvent(event, trigger);
-    const type = event === 'user_clicked_button' ? 'cta' : 'exit';
-    if (!invocationTimeStamp) {
-      error('TriggerModal: invocationTimeStamp is null');
-      return;
-    }
-    collect({
-      cta: {
-        interactionType: type,
-        elementShownAt: invocationTimeStamp
-      }
-    });
-  };
   const brand = useBrand();
   const {
     mutate: runSeen,
@@ -4288,7 +4271,7 @@ const Modal = ({
   } = useSeenMutation();
   useEffect(() => {
     if (!open) return;
-    if (!!invocationTimeStamp) return;
+    if (invocationTimeStamp) return;
     if (isSuccess) return;
     if (isLoading) return;
     const tId = setTimeout(() => {
@@ -4305,11 +4288,23 @@ const Modal = ({
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
-    track('user_clicked_button');
+    collect({
+      cta: {
+        variantID: trigger.id,
+        shownAt: invocationTimeStamp || ''
+      }
+    });
+    trackEvent('user_clicked_button', trigger);
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
   const handleCloseModal = () => {
-    track('user_closed_trigger');
+    trackEvent('user_closed_trigger', trigger);
+    collect({
+      exit: {
+        variantID: trigger.id,
+        shownAt: invocationTimeStamp || ''
+      }
+    });
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };

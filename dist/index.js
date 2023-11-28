@@ -3755,24 +3755,8 @@ var Modal = function Modal(_ref) {
   var _useState2 = React.useState(null),
     invocationTimeStamp = _useState2[0],
     setInvocationTimeStamp = _useState2[1];
-  var _useLogging = useLogging(),
-    error = _useLogging.error;
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutate;
-  var track = function track(event) {
-    trackEvent(event, trigger);
-    var type = event === 'user_clicked_button' ? 'cta' : 'exit';
-    if (!invocationTimeStamp) {
-      error('TriggerModal: invocationTimeStamp is null');
-      return;
-    }
-    collect({
-      cta: {
-        interactionType: type,
-        elementShownAt: invocationTimeStamp
-      }
-    });
-  };
   var brand = useBrand();
   var _useSeenMutation = useSeenMutation(),
     runSeen = _useSeenMutation.mutate,
@@ -3780,7 +3764,7 @@ var Modal = function Modal(_ref) {
     isLoading = _useSeenMutation.isLoading;
   React.useEffect(function () {
     if (!open) return;
-    if (!!invocationTimeStamp) return;
+    if (invocationTimeStamp) return;
     if (isSuccess) return;
     if (isLoading) return;
     var tId = setTimeout(function () {
@@ -3797,11 +3781,23 @@ var Modal = function Modal(_ref) {
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
-    track('user_clicked_button');
+    collect({
+      cta: {
+        variantID: trigger.id,
+        shownAt: invocationTimeStamp || ''
+      }
+    });
+    trackEvent('user_clicked_button', trigger);
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
   var handleCloseModal = function handleCloseModal() {
-    track('user_closed_trigger');
+    trackEvent('user_closed_trigger', trigger);
+    collect({
+      exit: {
+        variantID: trigger.id,
+        shownAt: invocationTimeStamp || ''
+      }
+    });
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };

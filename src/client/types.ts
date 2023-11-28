@@ -2,6 +2,11 @@ import { SupportedBrand } from '../utils/brand'
 import { DeviceInfo } from '../utils/device'
 import { Visitor } from '../visitors/types'
 
+export type Interaction = {
+  variantID: string
+  shownAt: string
+}
+
 export type CollectorUpdate = {
   appId?: string
   visitor?: Visitor
@@ -14,10 +19,8 @@ export type CollectorUpdate = {
   button?: Button | undefined
   conversion?: { id: string }
   device?: DeviceInfo | undefined
-  cta?: {
-    interactionType: 'cta' | 'exit'
-    elementShownAt: string
-  }
+  cta?: Interaction
+  exit?: Interaction
 }
 
 export type Button = {
