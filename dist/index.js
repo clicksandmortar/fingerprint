@@ -3787,11 +3787,15 @@ var Modal = function Modal(_ref) {
         shownAt: invocationTimeStamp || ''
       }
     });
-    trackEvent('user_clicked_button', trigger);
+    trackEvent('user_clicked_button', _extends({}, trigger, {
+      variantName: 'MODAL'
+    }));
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
   var handleCloseModal = function handleCloseModal() {
-    trackEvent('user_closed_trigger', trigger);
+    trackEvent('user_closed_trigger', _extends({}, trigger, {
+      variantName: 'MODAL'
+    }));
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };

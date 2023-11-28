@@ -59,12 +59,12 @@ const Modal = ({ trigger }: Props) => {
         shownAt: invocationTimeStamp || ''
       }
     })
-    trackEvent('user_clicked_button', trigger)
+    trackEvent('user_clicked_button', { ...trigger, variantName: 'MODAL' })
     trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
   }
 
   const handleCloseModal = () => {
-    trackEvent('user_closed_trigger', trigger)
+    trackEvent('user_closed_trigger', { ...trigger, variantName: 'MODAL' })
     // collect({
     //   exit: {
     //     variantID: trigger.id,
