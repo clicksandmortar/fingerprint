@@ -16,6 +16,10 @@ export declare type CollectorUpdate = {
         id: string;
     };
     device?: DeviceInfo | undefined;
+    cta?: {
+        interactionType: 'cta' | 'exit';
+        elementShownAt: string;
+    };
 };
 export declare type Button = {
     id?: string;
