@@ -14,9 +14,9 @@ export type CollectorUpdate = {
   button?: Button | undefined
   conversion?: { id: string }
   device?: DeviceInfo | undefined
-  trackThing?: {
-    type: 'cta' | 'exit'
-    triggerInvocationTime: string
+  cta?: {
+    interactionType: 'cta' | 'exit'
+    elementShownAt: string
   }
 }
 

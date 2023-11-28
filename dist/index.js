@@ -3767,9 +3767,9 @@ var Modal = function Modal(_ref) {
       return;
     }
     collect({
-      trackThing: {
-        type: type,
-        triggerInvocationTime: invocationTimeStamp
+      cta: {
+        interactionType: type,
+        elementShownAt: invocationTimeStamp
       }
     });
   };

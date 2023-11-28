@@ -35,9 +35,9 @@ const Modal = ({ trigger }: Props) => {
       return
     }
     collect({
-      trackThing: {
-        type,
-        triggerInvocationTime: invocationTimeStamp
+      cta: {
+        interactionType: type,
+        elementShownAt: invocationTimeStamp
       }
     })
   }
