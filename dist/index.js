@@ -3780,6 +3780,9 @@ var Modal = function Modal(_ref) {
   if (!open) {
     return null;
   }
+  var trackingPayload = _extends({}, trigger, {
+    variantName: 'MODAL'
+  });
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
@@ -3789,15 +3792,11 @@ var Modal = function Modal(_ref) {
         shownAt: invocationTimeStamp || ''
       }
     });
-    trackEvent('user_clicked_button', _extends({}, trigger, {
-      variantName: 'MODAL'
-    }));
+    trackEvent('user_clicked_button', trackingPayload);
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
   var handleCloseModal = function handleCloseModal() {
-    trackEvent('user_closed_trigger', _extends({}, trigger, {
-      variantName: 'MODAL'
-    }));
+    trackEvent('user_closed_trigger', trackingPayload);
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };

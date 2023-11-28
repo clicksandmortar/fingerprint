@@ -51,6 +51,11 @@ const Modal = ({ trigger }: Props) => {
     return null
   }
 
+  const trackingPayload = {
+    ...trigger,
+    variantName: 'MODAL'
+  }
+
   const handleClickCallToAction = (e: any) => {
     e.preventDefault()
     collect({
@@ -59,12 +64,12 @@ const Modal = ({ trigger }: Props) => {
         shownAt: invocationTimeStamp || ''
       }
     })
-    trackEvent('user_clicked_button', { ...trigger, variantName: 'MODAL' })
+    trackEvent('user_clicked_button', trackingPayload)
     trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
   }
 
   const handleCloseModal = () => {
-    trackEvent('user_closed_trigger', { ...trigger, variantName: 'MODAL' })
+    trackEvent('user_closed_trigger', trackingPayload)
     // collect({
     //   exit: {
     //     variantID: trigger.id,

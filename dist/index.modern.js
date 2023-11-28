@@ -4287,6 +4287,10 @@ const Modal = ({
   if (!open) {
     return null;
   }
+  const trackingPayload = {
+    ...trigger,
+    variantName: 'MODAL'
+  };
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
@@ -4296,17 +4300,11 @@ const Modal = ({
         shownAt: invocationTimeStamp || ''
       }
     });
-    trackEvent('user_clicked_button', {
-      ...trigger,
-      variantName: 'MODAL'
-    });
+    trackEvent('user_clicked_button', trackingPayload);
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
   const handleCloseModal = () => {
-    trackEvent('user_closed_trigger', {
-      ...trigger,
-      variantName: 'MODAL'
-    });
+    trackEvent('user_closed_trigger', trackingPayload);
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };
