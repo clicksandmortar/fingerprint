@@ -65,12 +65,12 @@ const Modal = ({ trigger }: Props) => {
 
   const handleCloseModal = () => {
     trackEvent('user_closed_trigger', trigger)
-    collect({
-      exit: {
-        variantID: trigger.id,
-        shownAt: invocationTimeStamp || ''
-      }
-    })
+    // collect({
+    //   exit: {
+    //     variantID: trigger.id,
+    //     shownAt: invocationTimeStamp || ''
+    //   }
+    // })
     removeActiveTrigger(trigger.id)
     setOpen(false)
   }
