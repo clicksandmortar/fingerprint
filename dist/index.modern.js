@@ -962,6 +962,7 @@ function useTrackIntentlyModal({
       setIsVisible(true);
       trackEvent('trigger_displayed', {
         triggerId: 'Intently',
+        variantID: 'Intently',
         triggerType: 'INVOCATION_EXIT_INTENT',
         triggerBehaviour: 'BEHAVIOUR_MODAL',
         time: new Date().toISOString(),
@@ -2778,6 +2779,7 @@ const useSeenMutation = () => {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      variantID: trigger.variantID,
       time: new Date().toISOString(),
       brand
     });

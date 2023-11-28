@@ -59,6 +59,7 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
       setIsVisible(true)
       trackEvent('trigger_displayed', {
         triggerId: 'Intently',
+        variantID: 'Intently',
         triggerType: 'INVOCATION_EXIT_INTENT',
         triggerBehaviour: 'BEHAVIOUR_MODAL',
         time: new Date().toISOString(),

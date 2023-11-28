@@ -28,6 +28,7 @@ export const useSeenMutation = () => {
         triggerId: trigger.id,
         triggerType: trigger.invocation,
         triggerBehaviour: trigger.behaviour,
+        variantID: trigger.variantID,
         time: new Date().toISOString(),
         brand
       })
