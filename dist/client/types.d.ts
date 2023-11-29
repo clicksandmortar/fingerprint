@@ -104,7 +104,6 @@ export declare type Invocation = 'INVOCATION_UNSPECIFIED' | 'INVOCATION_IDLE_TIM
 export declare type Trigger = {
     id: string;
     invocation?: Invocation;
-    variantID?: string;
     data?: {
         [key: string]: string;
     };

@@ -1223,6 +1223,7 @@ function CollectorProvider(_ref) {
     setFoundWatchers = _useState4[1];
   var _useConversions = useConversions(),
     setConversions = _useConversions.setConversions;
+  var brand = useBrand();
   var _useIncompleteTrigger = useIncompleteTriggers(),
     setIncompleteTriggers = _useIncompleteTrigger.setIncompleteTriggers,
     setVisibleTriggers = _useIncompleteTrigger.setVisibleTriggers,
@@ -1429,7 +1430,9 @@ function CollectorProvider(_ref) {
     }, {});
     if (hashParams.id_token) {
       log('CollectorProvider: user logged in event fired');
-      trackEvent('user_logged_in', {});
+      trackEvent('user_logged_in', {
+        brand: brand
+      });
       collect({
         account: {
           token: hashParams.id_token
@@ -1450,7 +1453,7 @@ function CollectorProvider(_ref) {
     })["catch"](function (err) {
       error('failed to store collected data', err);
     });
-  }, [visitor.id, log, collect, trackEvent, error, collectorCallback, setIntently]);
+  }, [visitor.id, brand, log, collect, trackEvent, error, collectorCallback, setIntently]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);
