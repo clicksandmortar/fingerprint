@@ -2,6 +2,11 @@ import { SupportedBrand } from '../utils/brand'
 import { DeviceInfo } from '../utils/device'
 import { Visitor } from '../visitors/types'
 
+export type Interaction = {
+  variantID: string
+  shownAt: string
+}
+
 export type CollectorUpdate = {
   appId?: string
   visitor?: Visitor
@@ -14,6 +19,8 @@ export type CollectorUpdate = {
   button?: Button | undefined
   conversion?: { id: string }
   device?: DeviceInfo | undefined
+  cta?: Interaction
+  exit?: Interaction
 }
 
 export type Button = {
@@ -61,15 +68,16 @@ export type Referrer = {
   }
 }
 
+// TODO: move these into a separate file. They have to do wit triggers and signals, not so much the colletor
 export type Operator = 'starts_with' | 'contains' | 'ends_with' | 'eq'
 export type ComparisonFunc = (comparison: string) => boolean
 
-export type IsOnPathConversionSignal = {
+export type IsOnPathSignal = {
   // will have more later
   op: 'IsOnPath'
   parameters: [Operator, string]
 }
-export type IsOnDomainConversionSignal = {
+export type IsOnDomainSignal = {
   // will have more later
   op: 'IsOnDomain'
   parameters: [
@@ -77,7 +85,7 @@ export type IsOnDomainConversionSignal = {
   ]
 }
 
-export type CanSeeElementOnPageConversionSignal = {
+export type CanSeeElementOnPageSignal = {
   // will have more later
   op: 'CanSeeElementOnPage'
   parameters: [
@@ -86,27 +94,19 @@ export type CanSeeElementOnPageConversionSignal = {
     string // value
   ]
 }
-export type ConversionSignal =
-  | IsOnPathConversionSignal
-  | IsOnDomainConversionSignal
-  | CanSeeElementOnPageConversionSignal
+export type FESignal =
+  | IsOnPathSignal
+  | IsOnDomainSignal
+  | CanSeeElementOnPageSignal
 
 export type Conversion = {
   identifier: string
-  signals: ConversionSignal[]
+  signals: FESignal[]
   analyticsEvent: string
 }
 
 export type IncompleteTrigger = Trigger & {
-  signals: [
-    {
-      // @TODO: there will be more of these, extract to a type
-      op: 'CanSeeElementOnPage'
-      parameters: {
-        selector: string
-      }
-    }
-  ]
+  signals: FESignal[]
 }
 
 export type CollectorVisitorResponse = {

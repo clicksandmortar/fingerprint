@@ -23,7 +23,7 @@ import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 
-import { useConfig } from '../hooks/useBrandConfig'
+import { useBrand, useConfig } from '../hooks/useBrandConfig'
 
 import useConversions from '../hooks/useConversions'
 
@@ -89,11 +89,14 @@ export function CollectorProvider({
   )
 
   const { setConversions } = useConversions()
-
+  const brand = useBrand()
   // Passing the funcs down to other contexts from here. So please keep it until Collector
   // is refactored
-  const { setIncompleteTriggers, visibleTriggers: visibleIncompleteTriggers } =
-    useIncompleteTriggers()
+  const {
+    setIncompleteTriggers,
+    setVisibleTriggers,
+    visibleTriggers: visibleIncompleteTriggers
+  } = useIncompleteTriggers()
 
   const combinedTriggers = React.useMemo(
     () => [...pageTriggers, ...visibleIncompleteTriggers],
@@ -106,7 +109,7 @@ export function CollectorProvider({
       if (
         displayTriggers.find(
           (triggerId) =>
-            pageTriggers.find((trigger) => trigger.id === triggerId)
+            combinedTriggers.find((trigger) => trigger.id === triggerId)
               ?.behaviour === type
         )
       )
@@ -114,7 +117,7 @@ export function CollectorProvider({
 
       return false
     },
-    [displayTriggers, pageTriggers]
+    [displayTriggers, combinedTriggers]
   )
 
   const setDisplayedTriggerByInvocation = React.useCallback(
@@ -201,11 +204,19 @@ export function CollectorProvider({
       setIncompleteTriggers((prev) =>
         prev.filter((trigger) => trigger.id !== id)
       )
+      setVisibleTriggers((prev) => prev.filter((trigger) => trigger.id !== id))
       setPageTriggersState((prev) =>
         prev.filter((trigger) => trigger.id !== id)
       )
     },
-    [displayTriggers, log, setIncompleteTriggers]
+    [
+      displayTriggers,
+      log,
+      setIncompleteTriggers,
+      setVisibleTriggers,
+      setPageTriggersState,
+      combinedTriggers
+    ]
   )
 
   const TriggerComponent = React.useCallback(():
@@ -335,7 +346,7 @@ export function CollectorProvider({
 
   const fireOnLoadTriggers = useCallback(() => {
     if (!pageLoadTriggers) return
-    if (!pageTriggers?.length) return
+    if (!combinedTriggers?.length) return
 
     /**
      * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
@@ -343,7 +354,7 @@ export function CollectorProvider({
      */
     log('CollectorProvider: attempting to fire on-page-load trigger')
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true)
-  }, [pageLoadTriggers, pageTriggers, log, setDisplayedTriggerByInvocation])
+  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation])
 
   const collectorCallback = React.useCallback(
     async (response: Response) => {
@@ -416,7 +427,9 @@ export function CollectorProvider({
 
     if (hashParams.id_token) {
       log('CollectorProvider: user logged in event fired')
-      trackEvent('user_logged_in', {})
+      trackEvent('user_logged_in', {
+        brand
+      })
 
       collect({
         account: {
@@ -446,6 +459,7 @@ export function CollectorProvider({
       })
   }, [
     visitor.id,
+    brand,
     log,
     collect,
     trackEvent,
