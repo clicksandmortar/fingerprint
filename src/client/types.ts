@@ -110,11 +110,11 @@ export type IncompleteTrigger = Trigger & {
 }
 
 export type CollectorVisitorResponse = {
-  firstSeen: string
-  lastSeen: string
+  firstSeen: string // date
+  lastSeen: string // date
   visits: {
-    host: 3
-    path: 3
+    host: number
+    path: number
   }
   pageTriggers: Trigger[]
   config: ConfigResponseIBlameBlixenkrone
