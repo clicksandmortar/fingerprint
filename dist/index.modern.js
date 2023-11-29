@@ -3237,17 +3237,34 @@ const getIsModalFullyClickable = ({
   return !(trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonText);
 };
 
-const scaleDownFactorMap = () => {
-  return isMobile ? {
-    vertical: 1000,
-    horizontal: 640
+const getModalSizing = img => {
+  let widthToUse, heightToUse;
+  const imageRealHeight = img.height;
+  const imageRealWidth = img.width;
+  const aspectRatio = imageRealWidth / imageRealHeight;
+  console.log(img.src, {
+    imageRealHeight,
+    imageRealWidth,
+    aspectRatio
+  });
+  const getMaxWidth = num => window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9;
+  const getMaxHeight = num => window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9;
+  const deviceSizeLimits = isMobile ? {
+    height: getMaxHeight(1000),
+    width: getMaxWidth(640)
   } : {
-    vertical: 490,
-    horizontal: 813
+    height: getMaxHeight(490),
+    width: getMaxWidth(819)
+  };
+  widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
+  heightToUse = widthToUse / aspectRatio;
+  return {
+    height: heightToUse,
+    width: widthToUse
   };
 };
-const useFullyClickableModalDimensions = ({
-  image
+const useModalDimensionsBasedOnImage = ({
+  imageURL
 }) => {
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,
@@ -3255,21 +3272,15 @@ const useFullyClickableModalDimensions = ({
   });
   useEffect(() => {
     const img = new Image();
-    img.src = image || '';
-    setTimeout(() => {
-      const {
-        vertical,
-        horizontal
-      } = scaleDownFactorMap();
-      const verticalScaleDownFactor = img.height / vertical;
-      const horizontalScaleDownFactor = img.width / horizontal;
-      const scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
-      setImageDimensions({
-        width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),
-        height: Math.min(img.height / scaleDownFactor, window.innerHeight * 0.95)
-      });
-    }, 300);
-  }, [image]);
+    img.src = imageURL;
+    const id = setInterval(() => {
+      const wnh = getModalSizing(img);
+      if (wnh.height && wnh.width) {
+        setImageDimensions(wnh);
+        clearInterval(id);
+      }
+    }, 50);
+  }, [imageURL]);
   return {
     imageDimensions
   };
@@ -3279,30 +3290,30 @@ const FullyClickableModal = ({
   handleCloseModal,
   trigger
 }) => {
-  var _trigger$data;
-  const imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  console.log(trigger);
+  const imageURL = 'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png';
   const {
     imageDimensions: {
       height,
       width
     }
-  } = useFullyClickableModalDimensions({
-    image: imageURL
+  } = useModalDimensionsBasedOnImage({
+    imageURL
   });
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const appendResponsiveBehaviour = React__default.useCallback(() => {
     return isMobile ? `.${prependClass('modal')} {
-      max-width: 95%;
-      max-height: 95%;
+
     }` : `
 
-@media screen and (max-width: 1400px) {
-  .${prependClass('modal')} {
-    height: ${0.8 * height}px;
-    width: ${0.8 * width}px;
-  }
-}
-@media screen and (max-width: 1100px) {
+      @media screen and (max-width: 1400px) {
+        .${prependClass('modal')} {
+          height: ${1 * height}px;
+          width: ${1 * width}px;
+        }
+      }
+
+@media screen and (max-width: 850px) {
   .${prependClass('modal')} {
     height: ${0.6 * height}px;
     width: ${0.6 * width}px;
@@ -3432,8 +3443,8 @@ const FullyClickableModal = ({
     .${prependClass('box-shadow')} {
       box-shadow: var(--text-shadow);
     }
-
     ${appendResponsiveBehaviour()}
+
     `;
     const styles = document.createElement('style');
     styles.type = 'text/css';
@@ -3447,7 +3458,6 @@ const FullyClickableModal = ({
     };
   }, [height, width, appendResponsiveBehaviour]);
   const handleModalAction = React__default.useCallback(e => {
-    e.stopPropagation();
     return handleClickCallToAction(e);
   }, [handleClickCallToAction]);
   const handleClickClose = React__default.useCallback(e => {

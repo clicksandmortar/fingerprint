@@ -8,51 +8,61 @@ import { Trigger } from '../../client/types'
 import CloseButton from '../CloseButton'
 import { prependClass } from './StandardModal/helpers'
 
+const getModalSizing = (img: HTMLImageElement) => {
+  let widthToUse, heightToUse
+
+  const imageRealHeight = img.height
+  const imageRealWidth = img.width
+
+  const aspectRatio = imageRealWidth / imageRealHeight
+  console.log(img.src, { imageRealHeight, imageRealWidth, aspectRatio })
+
+  // chose an arbitrary 5% side margins
+  const getMaxWidth = (num: number) =>
+    window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9
+  const getMaxHeight = (num: number) =>
+    window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9
+
+  const deviceSizeLimits = isMobile
+    ? { height: getMaxHeight(1000), width: getMaxWidth(640) }
+    : { height: getMaxHeight(490), width: getMaxWidth(819) }
+
+  widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width)
+  heightToUse = widthToUse / aspectRatio
+
+  return {
+    height: heightToUse,
+    width: widthToUse
+  }
+}
+
 type Props = {
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
   trigger: Trigger
 }
 
-// sizes taken from Sizzling campaign. Decent enough to work with
-// the rest of the assets for other brands.
-const scaleDownFactorMap = () => {
-  return isMobile
-    ? { vertical: 1000, horizontal: 640 }
-    : { vertical: 490, horizontal: 813 }
-}
-
-const useFullyClickableModalDimensions = ({ image }: { image: string }) => {
+const useModalDimensionsBasedOnImage = ({ imageURL }: { imageURL: string }) => {
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,
     height: 0
   })
 
   useEffect(() => {
-    // Load the image dynamically
     const img = new Image()
-    img.src = image || ''
+    img.src = imageURL
 
-    setTimeout(() => {
-      const { vertical, horizontal } = scaleDownFactorMap()
+    // repeatedly attempt to get the bloody image size. Once it loads and we get a proper value,
+    // remove the interval. No, image.onload() is not predictable enough to be considered
+    const id = setInterval(() => {
+      const wnh = getModalSizing(img)
 
-      const verticalScaleDownFactor = img.height / vertical
-      const horizontalScaleDownFactor = img.width / horizontal
-
-      const scaleDownFactor = Math.max(
-        verticalScaleDownFactor,
-        horizontalScaleDownFactor
-      )
-
-      setImageDimensions({
-        width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),
-        height: Math.min(
-          img.height / scaleDownFactor,
-          window.innerHeight * 0.95
-        )
-      })
-    }, 300)
-  }, [image])
+      if (wnh.height && wnh.width) {
+        setImageDimensions(wnh)
+        clearInterval(id)
+      }
+    }, 50)
+  }, [imageURL])
 
   return {
     imageDimensions
@@ -64,12 +74,15 @@ const FullyClickableModal = ({
   handleCloseModal,
   trigger
 }: Props) => {
-  const imageURL = trigger?.data?.backgroundURL || ''
+  console.log(trigger)
+  const imageURL =
+    'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png'
+  // const imageURL = trigger?.data?.backgroundURL || ''
 
   const {
     imageDimensions: { height, width }
-  } = useFullyClickableModalDimensions({
-    image: imageURL
+  } = useModalDimensionsBasedOnImage({
+    imageURL
   })
 
   const [stylesLoaded, setStylesLoaded] = useState(false)
@@ -77,18 +90,18 @@ const FullyClickableModal = ({
   const appendResponsiveBehaviour = React.useCallback(() => {
     return isMobile
       ? `.${prependClass('modal')} {
-      max-width: 95%;
-      max-height: 95%;
+
     }`
       : `
 
-@media screen and (max-width: 1400px) {
-  .${prependClass('modal')} {
-    height: ${0.8 * height}px;
-    width: ${0.8 * width}px;
-  }
-}
-@media screen and (max-width: 1100px) {
+      @media screen and (max-width: 1400px) {
+        .${prependClass('modal')} {
+          height: ${1 * height}px;
+          width: ${1 * width}px;
+        }
+      }
+
+@media screen and (max-width: 850px) {
   .${prependClass('modal')} {
     height: ${0.6 * height}px;
     width: ${0.6 * width}px;
@@ -229,8 +242,8 @@ const FullyClickableModal = ({
     .${prependClass('box-shadow')} {
       box-shadow: var(--text-shadow);
     }
-
     ${appendResponsiveBehaviour()}
+
     `
 
     const styles = document.createElement('style')
@@ -248,7 +261,6 @@ const FullyClickableModal = ({
 
   const handleModalAction = React.useCallback(
     (e: any) => {
-      e.stopPropagation()
       return handleClickCallToAction(e)
     },
     [handleClickCallToAction]

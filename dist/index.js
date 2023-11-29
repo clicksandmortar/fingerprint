@@ -3365,17 +3365,38 @@ var getIsModalFullyClickable = function getIsModalFullyClickable(_ref) {
   return !(trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonText);
 };
 
-var scaleDownFactorMap = function scaleDownFactorMap() {
-  return reactDeviceDetect.isMobile ? {
-    vertical: 1000,
-    horizontal: 640
+var getModalSizing = function getModalSizing(img) {
+  var widthToUse, heightToUse;
+  var imageRealHeight = img.height;
+  var imageRealWidth = img.width;
+  var aspectRatio = imageRealWidth / imageRealHeight;
+  console.log(img.src, {
+    imageRealHeight: imageRealHeight,
+    imageRealWidth: imageRealWidth,
+    aspectRatio: aspectRatio
+  });
+  var getMaxWidth = function getMaxWidth(num) {
+    return window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9;
+  };
+  var getMaxHeight = function getMaxHeight(num) {
+    return window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9;
+  };
+  var deviceSizeLimits = reactDeviceDetect.isMobile ? {
+    height: getMaxHeight(1000),
+    width: getMaxWidth(640)
   } : {
-    vertical: 490,
-    horizontal: 813
+    height: getMaxHeight(490),
+    width: getMaxWidth(819)
+  };
+  widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
+  heightToUse = widthToUse / aspectRatio;
+  return {
+    height: heightToUse,
+    width: widthToUse
   };
 };
-var useFullyClickableModalDimensions = function useFullyClickableModalDimensions(_ref) {
-  var image = _ref.image;
+var useModalDimensionsBasedOnImage = function useModalDimensionsBasedOnImage(_ref) {
+  var imageURL = _ref.imageURL;
   var _useState = React.useState({
       width: 0,
       height: 0
@@ -3384,44 +3405,39 @@ var useFullyClickableModalDimensions = function useFullyClickableModalDimensions
     setImageDimensions = _useState[1];
   React.useEffect(function () {
     var img = new Image();
-    img.src = image || '';
-    setTimeout(function () {
-      var _scaleDownFactorMap = scaleDownFactorMap(),
-        vertical = _scaleDownFactorMap.vertical,
-        horizontal = _scaleDownFactorMap.horizontal;
-      var verticalScaleDownFactor = img.height / vertical;
-      var horizontalScaleDownFactor = img.width / horizontal;
-      var scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
-      setImageDimensions({
-        width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),
-        height: Math.min(img.height / scaleDownFactor, window.innerHeight * 0.95)
-      });
-    }, 300);
-  }, [image]);
+    img.src = imageURL;
+    var id = setInterval(function () {
+      var wnh = getModalSizing(img);
+      if (wnh.height && wnh.width) {
+        setImageDimensions(wnh);
+        clearInterval(id);
+      }
+    }, 50);
+  }, [imageURL]);
   return {
     imageDimensions: imageDimensions
   };
 };
 var FullyClickableModal = function FullyClickableModal(_ref2) {
-  var _trigger$data;
   var handleClickCallToAction = _ref2.handleClickCallToAction,
     handleCloseModal = _ref2.handleCloseModal,
     trigger = _ref2.trigger;
-  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
-  var _useFullyClickableMod = useFullyClickableModalDimensions({
-      image: imageURL
+  console.log(trigger);
+  var imageURL = 'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png';
+  var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
+      imageURL: imageURL
     }),
-    _useFullyClickableMod2 = _useFullyClickableMod.imageDimensions,
-    height = _useFullyClickableMod2.height,
-    width = _useFullyClickableMod2.width;
+    _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
+    height = _useModalDimensionsBa2.height,
+    width = _useModalDimensionsBa2.width;
   var _useState2 = React.useState(false),
     stylesLoaded = _useState2[0],
     setStylesLoaded = _useState2[1];
   var appendResponsiveBehaviour = React__default.useCallback(function () {
-    return reactDeviceDetect.isMobile ? "." + prependClass('modal') + " {\n      max-width: 95%;\n      max-height: 95%;\n    }" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.8 * height + "px;\n    width: " + 0.8 * width + "px;\n  }\n}\n@media screen and (max-width: 1100px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n\n";
+    return reactDeviceDetect.isMobile ? "." + prependClass('modal') + " {\n\n    }" : "\n\n      @media screen and (max-width: 1400px) {\n        ." + prependClass('modal') + " {\n          height: " + 1 * height + "px;\n          width: " + 1 * width + "px;\n        }\n      }\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n\n";
   }, [height, width]);
   React.useEffect(function () {
-    var cssToApply = "\n  \n    ." + prependClass('overlay') + " {\n      background-color: rgba(0, 0, 0, 0.7);\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + ( 'transition: all 0.3s ease-in-out;' ) + "\n      " + ( 'cursor: pointer;' ) + "\n    }\n\n    " + ( "." + prependClass('modal') + ":hover {\n      filter: brightness(1.05);\n      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n    }" ) + "\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n\n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n\n    " + appendResponsiveBehaviour() + "\n    ";
+    var cssToApply = "\n  \n    ." + prependClass('overlay') + " {\n      background-color: rgba(0, 0, 0, 0.7);\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + ( 'transition: all 0.3s ease-in-out;' ) + "\n      " + ( 'cursor: pointer;' ) + "\n    }\n\n    " + ( "." + prependClass('modal') + ":hover {\n      filter: brightness(1.05);\n      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n    }" ) + "\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n\n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
@@ -3434,7 +3450,6 @@ var FullyClickableModal = function FullyClickableModal(_ref2) {
     };
   }, [height, width, appendResponsiveBehaviour]);
   var handleModalAction = React__default.useCallback(function (e) {
-    e.stopPropagation();
     return handleClickCallToAction(e);
   }, [handleClickCallToAction]);
   var handleClickClose = React__default.useCallback(function (e) {
