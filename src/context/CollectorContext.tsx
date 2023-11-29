@@ -23,7 +23,7 @@ import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 
-import { useConfig } from '../hooks/useBrandConfig'
+import { useBrand, useConfig } from '../hooks/useBrandConfig'
 
 import useConversions from '../hooks/useConversions'
 
@@ -89,7 +89,7 @@ export function CollectorProvider({
   )
 
   const { setConversions } = useConversions()
-
+  const brand = useBrand()
   // Passing the funcs down to other contexts from here. So please keep it until Collector
   // is refactored
   const {
@@ -427,7 +427,9 @@ export function CollectorProvider({
 
     if (hashParams.id_token) {
       log('CollectorProvider: user logged in event fired')
-      trackEvent('user_logged_in', {})
+      trackEvent('user_logged_in', {
+        brand
+      })
 
       collect({
         account: {
@@ -457,6 +459,7 @@ export function CollectorProvider({
       })
   }, [
     visitor.id,
+    brand,
     log,
     collect,
     trackEvent,

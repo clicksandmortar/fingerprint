@@ -1165,6 +1165,7 @@ function CollectorProvider({
   const {
     setConversions
   } = useConversions();
+  const brand = useBrand();
   const {
     setIncompleteTriggers,
     setVisibleTriggers,
@@ -1340,7 +1341,9 @@ function CollectorProvider({
     }, {});
     if (hashParams.id_token) {
       log('CollectorProvider: user logged in event fired');
-      trackEvent('user_logged_in', {});
+      trackEvent('user_logged_in', {
+        brand
+      });
       collect({
         account: {
           token: hashParams.id_token
@@ -1361,7 +1364,7 @@ function CollectorProvider({
     }).catch(err => {
       error('failed to store collected data', err);
     });
-  }, [visitor.id, log, collect, trackEvent, error, collectorCallback, setIntently]);
+  }, [visitor.id, brand, log, collect, trackEvent, error, collectorCallback, setIntently]);
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
