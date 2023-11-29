@@ -2,6 +2,10 @@
 import { SupportedBrand } from '../utils/brand';
 import { DeviceInfo } from '../utils/device';
 import { Visitor } from '../visitors/types';
+export declare type Interaction = {
+    variantID: string;
+    shownAt: string;
+};
 export declare type CollectorUpdate = {
     appId?: string;
     visitor?: Visitor;
@@ -16,10 +20,8 @@ export declare type CollectorUpdate = {
         id: string;
     };
     device?: DeviceInfo | undefined;
-    cta?: {
-        interactionType: 'cta' | 'exit';
-        elementShownAt: string;
-    };
+    cta?: Interaction;
+    exit?: Interaction;
 };
 export declare type Button = {
     id?: string;
