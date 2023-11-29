@@ -3242,11 +3242,6 @@ const getModalSizing = img => {
   const imageRealHeight = img.height;
   const imageRealWidth = img.width;
   const aspectRatio = imageRealWidth / imageRealHeight;
-  console.log(img.src, {
-    imageRealHeight,
-    imageRealWidth,
-    aspectRatio
-  });
   const getMaxWidth = num => window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9;
   const getMaxHeight = num => window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9;
   const deviceSizeLimits = isMobile ? {
@@ -3290,8 +3285,8 @@ const FullyClickableModal = ({
   handleCloseModal,
   trigger
 }) => {
-  console.log(trigger);
-  const imageURL = 'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png';
+  var _trigger$data;
+  const imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
   const {
     imageDimensions: {
       height,
@@ -3305,13 +3300,12 @@ const FullyClickableModal = ({
     return isMobile ? `.${prependClass('modal')} {
 
     }` : `
-
-      @media screen and (max-width: 1400px) {
-        .${prependClass('modal')} {
-          height: ${1 * height}px;
-          width: ${1 * width}px;
-        }
-      }
+@media screen and (max-width: 1400px) {
+  .${prependClass('modal')} {
+    height: ${1 * height}px;
+    width: ${1 * width}px;
+  }
+}
 
 @media screen and (max-width: 850px) {
   .${prependClass('modal')} {
@@ -3326,7 +3320,6 @@ const FullyClickableModal = ({
     width: ${0.4 * width}px;
   }
 }
-
 `;
   }, [height, width]);
   useEffect(() => {

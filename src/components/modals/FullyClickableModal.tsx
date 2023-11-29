@@ -15,7 +15,6 @@ const getModalSizing = (img: HTMLImageElement) => {
   const imageRealWidth = img.width
 
   const aspectRatio = imageRealWidth / imageRealHeight
-  console.log(img.src, { imageRealHeight, imageRealWidth, aspectRatio })
 
   // chose an arbitrary 5% side margins
   const getMaxWidth = (num: number) =>
@@ -74,10 +73,7 @@ const FullyClickableModal = ({
   handleCloseModal,
   trigger
 }: Props) => {
-  console.log(trigger)
-  const imageURL =
-    'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png'
-  // const imageURL = trigger?.data?.backgroundURL || ''
+  const imageURL = trigger?.data?.backgroundURL || ''
 
   const {
     imageDimensions: { height, width }
@@ -93,13 +89,12 @@ const FullyClickableModal = ({
 
     }`
       : `
-
-      @media screen and (max-width: 1400px) {
-        .${prependClass('modal')} {
-          height: ${1 * height}px;
-          width: ${1 * width}px;
-        }
-      }
+@media screen and (max-width: 1400px) {
+  .${prependClass('modal')} {
+    height: ${1 * height}px;
+    width: ${1 * width}px;
+  }
+}
 
 @media screen and (max-width: 850px) {
   .${prependClass('modal')} {
@@ -114,7 +109,6 @@ const FullyClickableModal = ({
     width: ${0.4 * width}px;
   }
 }
-
 `
   }, [height, width])
 
