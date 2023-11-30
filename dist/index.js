@@ -361,9 +361,9 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   if (typeof window !== 'undefined') {
     var urlParams = new URLSearchParams(window.location.search);
     var vid = urlParams.get('v_id');
-    if (vid) {
-      visitor.id = vid;
-    }
+    if (vid) visitor.id = vid;
+    var sourceId = urlParams.get('source_id');
+    if (sourceId) visitor.sourceId = sourceId;
   }
   if (!visitor.id && !getCookie(CnMCookie) || !validVisitorId(getCookie(CnMCookie))) {
     var visitorId = uuid.v4();

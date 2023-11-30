@@ -339,9 +339,9 @@ const bootstrapVisitor = ({
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
     const vid = urlParams.get('v_id');
-    if (vid) {
-      visitor.id = vid;
-    }
+    if (vid) visitor.id = vid;
+    const sourceId = urlParams.get('source_id');
+    if (sourceId) visitor.sourceId = sourceId;
   }
   if (!visitor.id && !getCookie(CnMCookie) || !validVisitorId(getCookie(CnMCookie))) {
     const visitorId = v4();
