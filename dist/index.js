@@ -361,9 +361,9 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   if (typeof window !== 'undefined') {
     var urlParams = new URLSearchParams(window.location.search);
     var vid = urlParams.get('v_id');
-    if (vid) {
-      visitor.id = vid;
-    }
+    if (vid) visitor.id = vid;
+    var sourceId = urlParams.get('source_id');
+    if (sourceId) visitor.sourceId = sourceId;
   }
   if (!visitor.id && !getCookie(CnMCookie) || !validVisitorId(getCookie(CnMCookie))) {
     var visitorId = uuid.v4();
@@ -375,13 +375,13 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
       _visitorId = _c$split[0];
     visitor.id = _visitorId;
   }
-  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
-    sessionId = _getSessionIdAndEndTi2.sessionId,
-    endTime = _getSessionIdAndEndTi2.endTime;
   var combinedCookie = buildCookie({
     visitorId: visitor.id
   });
   setCookie(CnMCookie, combinedCookie, 365);
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
+    sessionId = _getSessionIdAndEndTi2.sessionId,
+    endTime = _getSessionIdAndEndTi2.endTime;
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);

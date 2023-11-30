@@ -339,9 +339,9 @@ const bootstrapVisitor = ({
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
     const vid = urlParams.get('v_id');
-    if (vid) {
-      visitor.id = vid;
-    }
+    if (vid) visitor.id = vid;
+    const sourceId = urlParams.get('source_id');
+    if (sourceId) visitor.sourceId = sourceId;
   }
   if (!visitor.id && !getCookie(CnMCookie) || !validVisitorId(getCookie(CnMCookie))) {
     const visitorId = v4();
@@ -352,14 +352,14 @@ const bootstrapVisitor = ({
     const [visitorId] = c.split('|');
     visitor.id = visitorId;
   }
-  const {
-    sessionId,
-    endTime
-  } = getSessionIdAndEndTime(getCookie(CnMCookie));
   const combinedCookie = buildCookie({
     visitorId: visitor.id
   });
   setCookie(CnMCookie, combinedCookie, 365);
+  const {
+    sessionId,
+    endTime
+  } = getSessionIdAndEndTime(getCookie(CnMCookie));
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);
