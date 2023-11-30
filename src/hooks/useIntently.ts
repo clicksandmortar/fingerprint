@@ -60,6 +60,7 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
       trackEvent('trigger_displayed', {
         triggerId: 'Intently',
         variantID: 'Intently',
+        variantName: 'Intently',
         triggerType: 'INVOCATION_EXIT_INTENT',
         triggerBehaviour: 'BEHAVIOUR_MODAL',
         time: new Date().toISOString(),

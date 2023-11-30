@@ -133,6 +133,7 @@ export type Trigger = {
   id: string
   invocation?: Invocation
   variantID?: string
+  variantName?: string
   // invoke:(trigger: Trigger) => void;
   // @todo: commented out, out of date?
   data?: {

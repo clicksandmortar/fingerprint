@@ -963,6 +963,7 @@ function useTrackIntentlyModal({
       trackEvent('trigger_displayed', {
         triggerId: 'Intently',
         variantID: 'Intently',
+        variantName: 'Intently',
         triggerType: 'INVOCATION_EXIT_INTENT',
         triggerBehaviour: 'BEHAVIOUR_MODAL',
         time: new Date().toISOString(),
@@ -2783,6 +2784,7 @@ const useSeenMutation = () => {
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
       variantID: trigger.variantID,
+      variantName: trigger.variantName,
       time: new Date().toISOString(),
       brand
     });
@@ -4290,10 +4292,6 @@ const Modal = ({
   if (!open) {
     return null;
   }
-  const trackingPayload = {
-    ...trigger,
-    variantName: 'MODAL'
-  };
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
@@ -4303,11 +4301,11 @@ const Modal = ({
         shownAt: invocationTimeStamp || ''
       }
     });
-    trackEvent('user_clicked_button', trackingPayload);
+    trackEvent('user_clicked_button', trigger);
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
   const handleCloseModal = () => {
-    trackEvent('user_closed_trigger', trackingPayload);
+    trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };
