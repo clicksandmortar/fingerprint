@@ -3366,7 +3366,6 @@ var getIsModalFullyClickable = function getIsModalFullyClickable(_ref) {
 };
 
 var getModalSizing = function getModalSizing(img) {
-  var widthToUse, heightToUse;
   var imageRealHeight = img.height;
   var imageRealWidth = img.width;
   var aspectRatio = imageRealWidth / imageRealHeight;
@@ -3383,8 +3382,8 @@ var getModalSizing = function getModalSizing(img) {
     height: getMaxHeight(490),
     width: getMaxWidth(819)
   };
-  widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
-  heightToUse = widthToUse / aspectRatio;
+  var widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
+  var heightToUse = widthToUse / aspectRatio;
   return {
     height: heightToUse,
     width: widthToUse

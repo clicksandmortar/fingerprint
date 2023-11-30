@@ -9,8 +9,6 @@ import CloseButton from '../CloseButton'
 import { prependClass } from './StandardModal/helpers'
 
 const getModalSizing = (img: HTMLImageElement) => {
-  let widthToUse, heightToUse
-
   const imageRealHeight = img.height
   const imageRealWidth = img.width
 
@@ -23,11 +21,12 @@ const getModalSizing = (img: HTMLImageElement) => {
     window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9
 
   const deviceSizeLimits = isMobile
-    ? { height: getMaxHeight(1000), width: getMaxWidth(640) }
+    ? // also somewhat arbitrary, based on historic assets for both device types
+      { height: getMaxHeight(1000), width: getMaxWidth(640) }
     : { height: getMaxHeight(490), width: getMaxWidth(819) }
 
-  widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width)
-  heightToUse = widthToUse / aspectRatio
+  const widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width)
+  const heightToUse = widthToUse / aspectRatio
 
   return {
     height: heightToUse,

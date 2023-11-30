@@ -3238,7 +3238,6 @@ const getIsModalFullyClickable = ({
 };
 
 const getModalSizing = img => {
-  let widthToUse, heightToUse;
   const imageRealHeight = img.height;
   const imageRealWidth = img.width;
   const aspectRatio = imageRealWidth / imageRealHeight;
@@ -3251,8 +3250,8 @@ const getModalSizing = img => {
     height: getMaxHeight(490),
     width: getMaxWidth(819)
   };
-  widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
-  heightToUse = widthToUse / aspectRatio;
+  const widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
+  const heightToUse = widthToUse / aspectRatio;
   return {
     height: heightToUse,
     width: widthToUse
