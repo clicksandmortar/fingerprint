@@ -3272,41 +3272,6 @@ var TriggerInverse = function TriggerInverse(_ref3) {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
-var getModalStylesBySize = function getModalStylesBySize(size) {
-  switch (size) {
-    case 'small':
-      {
-        return {
-          width: '90%',
-          maxWidth: 400,
-          minHeight: 300
-        };
-      }
-    case 'medium':
-      {
-        return {
-          width: '90%',
-          maxWidth: 800,
-          minHeight: 400
-        };
-      }
-    case 'large':
-      {
-        return {
-          width: '90%',
-          maxWidth: 1200,
-          minHeight: 400
-        };
-      }
-    case 'full':
-      {
-        return {
-          width: '100vw',
-          height: '100vh'
-        };
-      }
-  }
-};
 var getModalButtonStylesBySize = function getModalButtonStylesBySize(size) {
   switch (size) {
     case 'small':
@@ -3364,7 +3329,6 @@ var getIsModalFullyClickable = function getIsModalFullyClickable(_ref) {
   var trigger = _ref.trigger;
   return !(trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonText);
 };
-
 var getModalSizing = function getModalSizing(img) {
   var imageRealHeight = img.height;
   var imageRealWidth = img.width;
@@ -3389,8 +3353,8 @@ var getModalSizing = function getModalSizing(img) {
     width: widthToUse
   };
 };
-var useModalDimensionsBasedOnImage = function useModalDimensionsBasedOnImage(_ref) {
-  var imageURL = _ref.imageURL;
+var useModalDimensionsBasedOnImage = function useModalDimensionsBasedOnImage(_ref2) {
+  var imageURL = _ref2.imageURL;
   var _useState = React.useState({
       width: 0,
       height: 0
@@ -3401,9 +3365,10 @@ var useModalDimensionsBasedOnImage = function useModalDimensionsBasedOnImage(_re
     var img = new Image();
     img.src = imageURL;
     var id = setInterval(function () {
-      var wnh = getModalSizing(img);
-      if (wnh.height && wnh.width) {
-        setImageDimensions(wnh);
+      var modalSize = getModalSizing(img);
+      if (modalSize.height || modalSize.width) {
+        setImageDimensions(modalSize);
+        console.log('setting...', modalSize);
         clearInterval(id);
       }
     }, 50);
@@ -3412,11 +3377,24 @@ var useModalDimensionsBasedOnImage = function useModalDimensionsBasedOnImage(_re
     imageDimensions: imageDimensions
   };
 };
-var FullyClickableModal = function FullyClickableModal(_ref2) {
-  var _trigger$data;
-  var handleClickCallToAction = _ref2.handleClickCallToAction,
-    handleCloseModal = _ref2.handleCloseModal,
-    trigger = _ref2.trigger;
+
+var defaultElementSize = 'medium';
+var defaultButtonPosition = 'right';
+var BasicModal = function BasicModal(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var isModalFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
+  });
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var buttonSizeStyle = getModalButtonStylesBySize(defaultElementSize);
+  var _useBrandColors = useBrandColors(),
+    textPrimary = _useBrandColors.textPrimary,
+    backgroundPrimary = _useBrandColors.backgroundPrimary;
   var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
   var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
       imageURL: imageURL
@@ -3424,9 +3402,86 @@ var FullyClickableModal = function FullyClickableModal(_ref2) {
     _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
     height = _useModalDimensionsBa2.height,
     width = _useModalDimensionsBa2.width;
-  var _useState2 = React.useState(false),
-    stylesLoaded = _useState2[0],
-    setStylesLoaded = _useState2[1];
+  var appendResponsiveBehaviour = React__default.useCallback(function () {
+    return reactDeviceDetect.isMobile ? "" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 2.4rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 1.3rem;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 1.6rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 0.9rem;\n  }\n}\n\n";
+  }, [height, width]);
+  React.useEffect(function () {
+    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : "") + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: all 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+  }, [isModalFullyClickable, height, width, appendResponsiveBehaviour]);
+  var getHandleModalActionFinal = React__default.useCallback(function () {
+    if (!isModalFullyClickable) return undefined;
+    return function (e) {
+      return handleClickCallToAction(e);
+    };
+  }, [handleClickCallToAction]);
+  var handleClickCloseFinal = React__default.useCallback(function (e) {
+    e.stopPropagation();
+    return handleCloseModal(e);
+  }, [handleCloseModal]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    onClick: getHandleModalActionFinal(),
+    className: prependClass('modal'),
+    style: {
+      background: "url(" + imageURL + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleClickCloseFinal
+  })), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
+    style: _extends({
+      display: 'flex'
+    }, getModalButtonFlexPosition(defaultButtonPosition))
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction,
+    style: buttonSizeStyle
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+var StandardModal = function StandardModal(props) {
+  return React__default.createElement(BasicModal, Object.assign({}, props));
+};
+
+var FullyClickableModal = function FullyClickableModal(_ref) {
+  var _trigger$data;
+  var handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal,
+    trigger = _ref.trigger;
+  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
+      imageURL: imageURL
+    }),
+    _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
+    height = _useModalDimensionsBa2.height,
+    width = _useModalDimensionsBa2.width;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
   var appendResponsiveBehaviour = React__default.useCallback(function () {
     return reactDeviceDetect.isMobile ? "." + prependClass('modal') + " {\n\n    }" : "\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n";
   }, [height, width]);
@@ -3470,88 +3525,6 @@ var FullyClickableModal = function FullyClickableModal(_ref2) {
   }, React__default.createElement(CloseButton, {
     onClick: handleClickClose
   }))));
-};
-
-var defaultElementSize = 'medium';
-var defaultButtonPosition = 'right';
-var BasicModal = function BasicModal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref.trigger,
-    handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal;
-  var elementSize = defaultElementSize;
-  var isModalFullyClickable = getIsModalFullyClickable({
-    trigger: trigger
-  });
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var modalSizeStyle = getModalStylesBySize(elementSize);
-  var buttonSizeStyle = getModalButtonStylesBySize(elementSize);
-  var _useBrandColors = useBrandColors(),
-    textPrimary = _useBrandColors.textPrimary,
-    backgroundPrimary = _useBrandColors.backgroundPrimary;
-  React.useEffect(function () {
-    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    \n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer; ' : "\n        width: 80%;\n        height: 500px;\n      ") + "\n    \n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n    }\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n      color: " + textPrimary + ";\n\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 0 auto;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      background: rgba(0, 0, 0, 0.1);\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-  }, []);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    style: _extends({
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }, modalSizeStyle)
-  }, React__default.createElement("div", {
-    className: prependClass('image-darken')
-  }, React__default.createElement("button", {
-    className: prependClass('close-button'),
-    onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '20',
-    height: '20',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    style: _extends({
-      display: 'flex'
-    }, getModalButtonFlexPosition(defaultButtonPosition))
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction,
-    style: buttonSizeStyle
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-var StandardModal = function StandardModal(props) {
-  var isModalFullyClickable = getIsModalFullyClickable({
-    trigger: props.trigger
-  });
-  if (isModalFullyClickable) return React__default.createElement(FullyClickableModal, Object.assign({}, props));
-  return React__default.createElement(BasicModal, Object.assign({}, props));
 };
 
 var CurlyText = function CurlyText(_ref) {

@@ -10,3 +10,11 @@ export declare const prependClass: (className: string) => string;
 export declare const getIsModalFullyClickable: ({ trigger }: {
     trigger: Trigger;
 }) => boolean;
+export declare const useModalDimensionsBasedOnImage: ({ imageURL }: {
+    imageURL: string;
+}) => {
+    imageDimensions: {
+        width: number;
+        height: number;
+    };
+};

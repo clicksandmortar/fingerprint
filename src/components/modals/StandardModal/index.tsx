@@ -1,18 +1,18 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
+import { isMobile } from 'react-device-detect'
 import { Trigger } from '../../../client/types'
 
-import FullyClickableModal from '../FullyClickableModal'
-
 import { useBrandColors } from '../../../hooks/useBrandConfig'
+import CloseButton from '../../CloseButton'
 import {
   ButtonPosition,
   ModalSize,
   getIsModalFullyClickable,
   getModalButtonFlexPosition,
   getModalButtonStylesBySize,
-  getModalStylesBySize,
-  prependClass
+  prependClass,
+  useModalDimensionsBasedOnImage
 } from './helpers'
 
 type Props = {
@@ -29,18 +29,58 @@ const BasicModal = ({
   handleClickCallToAction,
   handleCloseModal
 }: Props) => {
-  // TODO: we can eventually make this configurable via portal / endpoint
-  // when thats teh case - hook this up
-  // const modalConfig = useTriggerConfig();
-  const elementSize = defaultElementSize
-
   const isModalFullyClickable = getIsModalFullyClickable({ trigger })
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
-  const modalSizeStyle = getModalStylesBySize(elementSize)
-  const buttonSizeStyle = getModalButtonStylesBySize(elementSize)
-
+  const buttonSizeStyle = getModalButtonStylesBySize(defaultElementSize)
   const { textPrimary, backgroundPrimary } = useBrandColors()
+  const imageURL = trigger?.data?.backgroundURL || ''
+  const {
+    imageDimensions: { height, width }
+  } = useModalDimensionsBasedOnImage({
+    imageURL
+  })
+
+  const appendResponsiveBehaviour = React.useCallback(() => {
+    return isMobile
+      ? ``
+      : `
+
+@media screen and (max-width: 1400px) {
+  .${prependClass('modal')} {
+    height: ${1 * height}px;
+    width: ${1 * width}px;
+  }
+}
+
+@media screen and (max-width: 850px) {
+  .${prependClass('modal')} {
+    height: ${0.6 * height}px;
+    width: ${0.6 * width}px;
+  }
+  .${prependClass('main-text')} {
+    font-size: 2.4rem;
+  }
+  .${prependClass('sub-text')} {
+    font-size: 1.3rem;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .${prependClass('modal')} {
+    height: ${0.4 * height}px;
+    width: ${0.4 * width}px;
+  }
+  .${prependClass('main-text')} {
+    font-size: 1.6rem;
+  }
+  .${prependClass('sub-text')} {
+    font-size: 0.9rem;
+  }
+}
+
+`
+  }, [height, width])
 
   useEffect(() => {
     // @todo: note that because of the font being screwed up a bit on all of these host urls,
@@ -62,7 +102,6 @@ const BasicModal = ({
     span {
       line-height: 1.2;
       font-family: Arial, Helvetica, sans-serif;
-    
     }
     
     .${prependClass('overlay')} {
@@ -77,30 +116,35 @@ const BasicModal = ({
       justify-content: center;
       align-items: center;
       font-weight: 500;
-      font-style: normal;
+      font-style: normal;      
     }
     
     .${prependClass('modal')} {
-      ${
-        isModalFullyClickable
-          ? 'cursor: pointer; '
-          : `
-        width: 80%;
-        height: 500px;
-      `
-      }
-    
+      ${isModalFullyClickable ? 'cursor: pointer;' : ``}
+      height: ${height}px;
+      width: ${width}px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       background-repeat: no-repeat;
-      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
       box-shadow: var(--text-shadow);
+      ${isModalFullyClickable ? 'transition: all 0.3s ease-in-out;' : ''}
+      ${isModalFullyClickable ? 'cursor: pointer;' : ''}
     }
     
+    .${prependClass('modal')}:hover {
+      ${
+        isModalFullyClickable
+          ? `
+        filter: brightness(1.05);
+        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;
+      `
+          : ''
+      }
+    }
     
     .${prependClass('text-center')} {
       text-align: center;
@@ -116,24 +160,21 @@ const BasicModal = ({
     
     .${prependClass('main-text')} {
       font-weight: 500;
-      font-size: 2rem;
+      font-size: 4rem;
       font-style: normal;
       text-align: center;
-      margin-bottom: 1rem;
       color: ${textPrimary};
       text-shadow: var(--text-shadow);
       max-width: 400px;
       margin-left: auto;
       margin-right: auto;
-    
     }
     
     .${prependClass('sub-text')} {
       margin: auto;
       font-weight: 600;
-      font-size: 1.2rem;
+      font-size: 2.2rem;
       color: ${textPrimary};
-
       text-align: center;
       text-transform: uppercase;
     }
@@ -147,7 +188,7 @@ const BasicModal = ({
       color: ${textPrimary};
       text-align: center;
       text-transform: uppercase;
-      margin: 0 auto;
+      margin: 1rem;
       text-decoration: none;
       box-shadow: 0.3rem 0.3rem white;
     }
@@ -168,7 +209,7 @@ const BasicModal = ({
       top: 0px;
       right: 0px;
       color: black;
-      font-size: 1.2rem;
+      font-size: 2rem;
       font-weight: 300;
       cursor: pointer;
       display: grid;
@@ -181,13 +222,12 @@ const BasicModal = ({
     }
     
     .${prependClass('image-darken')} {
-      background: rgba(0, 0, 0, 0.1);
+      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);'}
       height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       width: 100%;
-      padding: 2rem 1.5rem 1.5rem 1.5rem;
     }
     
     .${prependClass('text-shadow')} {
@@ -197,6 +237,7 @@ const BasicModal = ({
     .${prependClass('box-shadow')} {
       box-shadow: var(--text-shadow);
     }
+    ${appendResponsiveBehaviour()}
     `
 
     const styles = document.createElement('style')
@@ -206,7 +247,23 @@ const BasicModal = ({
     setTimeout(() => {
       setStylesLoaded(true)
     }, 500)
-  }, [])
+  }, [isModalFullyClickable, height, width, appendResponsiveBehaviour])
+
+  const getHandleModalActionFinal = React.useCallback(() => {
+    if (!isModalFullyClickable) return undefined
+
+    return (e: any) => {
+      return handleClickCallToAction(e)
+    }
+  }, [handleClickCallToAction])
+
+  const handleClickCloseFinal = React.useCallback(
+    (e: any) => {
+      e.stopPropagation()
+      return handleCloseModal(e)
+    },
+    [handleCloseModal]
+  )
 
   if (!stylesLoaded) {
     return null
@@ -215,34 +272,20 @@ const BasicModal = ({
   return (
     <div className={prependClass('overlay')}>
       <div
+        onClick={getHandleModalActionFinal()}
         className={prependClass('modal')}
         style={{
-          background: `url(${trigger?.data?.backgroundURL})`,
+          background: `url(${imageURL})`,
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
-          position: 'relative',
-          ...modalSizeStyle
+          position: 'relative'
         }}
       >
         <div className={prependClass('image-darken')}>
-          <button
-            className={prependClass('close-button')}
-            onClick={handleCloseModal}
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='20'
-              height='20'
-              viewBox='0 0 16 16'
-            >
-              <path
-                fill='#000'
-                fillRule='evenodd'
-                d='M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-              />
-            </svg>
-          </button>
+          <div className={prependClass('close-button')}>
+            <CloseButton onClick={handleClickCloseFinal} />
+          </div>
 
           <div className={prependClass('text-container')}>
             <h1 className={prependClass('main-text')}>
@@ -253,26 +296,25 @@ const BasicModal = ({
             </p>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              ...getModalButtonFlexPosition(
-                // modalConfig?.buttonPosition ||
-                defaultButtonPosition
-              )
-            }}
-          >
-            <div>
-              <a
-                href={trigger?.data?.buttonURL}
-                className={prependClass('cta')}
-                onClick={handleClickCallToAction}
-                style={buttonSizeStyle}
-              >
-                {trigger?.data?.buttonText}
-              </a>
+          {!isModalFullyClickable && (
+            <div
+              style={{
+                display: 'flex',
+                ...getModalButtonFlexPosition(defaultButtonPosition)
+              }}
+            >
+              <div>
+                <a
+                  href={trigger?.data?.buttonURL}
+                  className={prependClass('cta')}
+                  onClick={handleClickCallToAction}
+                  style={buttonSizeStyle}
+                >
+                  {trigger?.data?.buttonText}
+                </a>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
@@ -280,14 +322,6 @@ const BasicModal = ({
 }
 
 const StandardModal = (props: Props) => {
-  const isModalFullyClickable = getIsModalFullyClickable({
-    trigger: props.trigger
-  })
-
-  if (isModalFullyClickable)
-    // this is the one that follows the typical scale behaviour of assets so far
-    return <FullyClickableModal {...props} />
-
   return <BasicModal {...props} />
 }
 

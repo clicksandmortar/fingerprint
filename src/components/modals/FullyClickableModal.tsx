@@ -1,70 +1,23 @@
 /**
- * Didnt spend too much time makeing this proper, since it will get merged with
- * the standard modal soon
+ * @deprecated
+ *
+ * This file is used by a few campaigns. Once they are over, use the StdModal and delete this file
+ *
  */
+
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { Trigger } from '../../client/types'
 import CloseButton from '../CloseButton'
-import { prependClass } from './StandardModal/helpers'
-
-const getModalSizing = (img: HTMLImageElement) => {
-  const imageRealHeight = img.height
-  const imageRealWidth = img.width
-
-  const aspectRatio = imageRealWidth / imageRealHeight
-
-  // chose an arbitrary 5% side margins
-  const getMaxWidth = (num: number) =>
-    window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9
-  const getMaxHeight = (num: number) =>
-    window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9
-
-  const deviceSizeLimits = isMobile
-    ? // also somewhat arbitrary, based on historic assets for both device types
-      { height: getMaxHeight(1000), width: getMaxWidth(640) }
-    : { height: getMaxHeight(490), width: getMaxWidth(819) }
-
-  const widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width)
-  const heightToUse = widthToUse / aspectRatio
-
-  return {
-    height: heightToUse,
-    width: widthToUse
-  }
-}
+import {
+  prependClass,
+  useModalDimensionsBasedOnImage
+} from './StandardModal/helpers'
 
 type Props = {
   handleClickCallToAction: (e: any) => void
   handleCloseModal: (e: any) => void
   trigger: Trigger
-}
-
-const useModalDimensionsBasedOnImage = ({ imageURL }: { imageURL: string }) => {
-  const [imageDimensions, setImageDimensions] = useState({
-    width: 0,
-    height: 0
-  })
-
-  useEffect(() => {
-    const img = new Image()
-    img.src = imageURL
-
-    // repeatedly attempt to get the bloody image size. Once it loads and we get a proper value,
-    // remove the interval. No, image.onload() is not predictable enough to be considered
-    const id = setInterval(() => {
-      const wnh = getModalSizing(img)
-
-      if (wnh.height && wnh.width) {
-        setImageDimensions(wnh)
-        clearInterval(id)
-      }
-    }, 50)
-  }, [imageURL])
-
-  return {
-    imageDimensions
-  }
 }
 
 const FullyClickableModal = ({
