@@ -110,11 +110,14 @@ export type IncompleteTrigger = Trigger & {
 }
 
 export type CollectorVisitorResponse = {
-  firstSeen: Date
-  lastSeen: Date
-  visits: number
+  firstSeen: string
+  lastSeen: string
+  visits: {
+    host: 3
+    path: 3
+  }
   pageTriggers: Trigger[]
-  config: Config
+  config: ConfigResponseIBlameBlixenkrone
   incompleteTriggers?: IncompleteTrigger[]
   // @todo remove this temp hack once split testing with Intently is complete
   intently: boolean
@@ -144,6 +147,8 @@ export type Trigger = {
     | 'BEHAVIOUR_INVERSE_FLOW'
     | 'BEHAVIOUR_BANNER'
   brand?: any
+  variantID?: string
+  variantName?: string
 }
 
 export type PageView = {
@@ -178,8 +183,19 @@ type BrandConfig = {
   }
 }
 
+// TODO: make as part of shared lib, @David
+type ObjectMap<T, F, W> = {
+  [K in keyof T]: T[K] extends F ? W : T[K]
+}
+
 export type Config = {
   script: ScriptConfig
   trigger: TriggerConfig
+  brand: BrandConfig
+}
+
+export type ConfigResponseIBlameBlixenkrone = {
+  script: ScriptConfig
+  trigger: ObjectMap<TriggerConfig, number, string>
   brand: BrandConfig
 }

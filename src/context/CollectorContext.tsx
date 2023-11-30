@@ -1,6 +1,5 @@
 import uniqueBy from 'lodash.uniqby'
 import React, { createContext, useCallback, useEffect, useState } from 'react'
-// import { isMobile } from 'react-device-detect' <= reminder where isMobile came from
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
 
@@ -27,6 +26,11 @@ import { useBrand, useConfig } from '../hooks/useBrandConfig'
 
 import useConversions from '../hooks/useConversions'
 
+import {
+  DifiStore,
+  useDifiStore,
+  usePageTriggers
+} from '../beautifulSugar/store'
 import { updateCookie } from '../visitors/bootstrap'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -60,6 +64,8 @@ export function CollectorProvider({
     setConfig,
     config: { trigger: config }
   } = useConfig()
+  const fuk = useConfig()
+  console.log({ fuk })
   const { visitor, setVisitor } = useVisitor()
   const {
     canNextTriggerOccur,
@@ -80,7 +86,11 @@ export function CollectorProvider({
   const [idleTimeout, setIdleTimeout] = useState<number | undefined>(
     getIdleStatusDelay()
   )
-  const [pageTriggers, setPageTriggersState] = useState<Trigger[]>([])
+
+  const pageTriggers = usePageTriggers()
+  const { removePageTrigger } = useDifiStore((s: DifiStore) => s.setters)
+  // const setPageTriggersState = useDifiStore(s => s.set)
+  const set = useDifiStore((state: DifiStore) => state.set)
 
   const { setIntently } = useIntently()
   const [displayTriggers, setDisplayedTriggers] = useState<Trigger['id'][]>([])
@@ -154,32 +164,35 @@ export function CollectorProvider({
     },
     [combinedTriggers, getIsBehaviourVisible, log]
   )
+
+  console.log('rerender', pageTriggers, config)
   useEffect(() => {
     if (!visibleIncompleteTriggers?.length) return
 
     // TODO: eventually we may want support for multiple signals so this
     // will need to be refactored / reworked
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
-  }, [
-    visibleIncompleteTriggers,
-    setPageTriggersState,
-    setDisplayedTriggerByInvocation
-  ])
+  }, [visibleIncompleteTriggers, setDisplayedTriggerByInvocation])
   /**
    * add triggers to existing ones, keep unique to prevent multi-firing
    */
   const setPageTriggers = React.useCallback(
     (triggers: Trigger[]) => {
-      setPageTriggersState((prev) => {
-        const nonDismissed = prev.filter((tr) =>
+      set((prev: DifiStore) => {
+        const nonDismissed = prev.pageTriggers.filter((tr) =>
           displayTriggers.includes(tr.id)
         )
         // no pageTriggers = no triggers, rather than missing key.
         // serverside omition. Means we set pagetriggers to nothing.
-        return uniqueBy<Trigger>([...(triggers || []), ...nonDismissed], 'id')
+        return {
+          pageTriggers: uniqueBy<Trigger>(
+            [...(triggers || []), ...nonDismissed],
+            'id'
+          )
+        }
       })
     },
-    [setPageTriggersState, displayTriggers]
+    [set, displayTriggers]
   )
 
   const getHandlerForTrigger = React.useCallback(
@@ -205,16 +218,14 @@ export function CollectorProvider({
         prev.filter((trigger) => trigger.id !== id)
       )
       setVisibleTriggers((prev) => prev.filter((trigger) => trigger.id !== id))
-      setPageTriggersState((prev) =>
-        prev.filter((trigger) => trigger.id !== id)
-      )
+      removePageTrigger(id)
     },
     [
       displayTriggers,
       log,
       setIncompleteTriggers,
       setVisibleTriggers,
-      setPageTriggersState,
+      set,
       combinedTriggers
     ]
   )

@@ -4,9 +4,11 @@ import React, {
   useEffect,
   useState
 } from 'react'
-import { Config } from '../client/types'
+import { Config, ConfigResponseIBlameBlixenkrone } from '../client/types'
 import { haveBrandColorsBeenConfigured } from '../utils/brand'
 import { FingerprintProviderProps } from './FingerprintContext'
+
+type ConfigInBothFormats = Config | ConfigResponseIBlameBlixenkrone
 
 // 27 233 237 - dimmed, 41 100 249 - main, 13 14 49 - text Secondary, white primary, 226 226 226 greyBg, some dark grey text ?
 
@@ -86,7 +88,7 @@ export function ConfigProvider({ children, legacy_config }: Props) {
   // This is super messy. I know. Once we get rid of the legacy behaviour this should become
   //  much clearer
   const setConfig = React.useCallback(
-    (updatedConfigEntries: Config) => {
+    (updatedConfigEntries: ConfigInBothFormats) => {
       // if the colors have been configured, we want to use the colors from the portal
       // if not - keep the default ones
       const argColors = updatedConfigEntries?.brand?.colors
@@ -141,7 +143,7 @@ export function ConfigProvider({ children, legacy_config }: Props) {
 
 type ConfigContextType = {
   config: Config
-  setConfig: (config: Partial<Config>) => void
+  setConfig: (config: Partial<ConfigInBothFormats>) => void
 }
 
 export const ConfigContext = createContext<ConfigContextType>({

@@ -1,0 +1,94 @@
+{
+  "collect": {
+    "firstSeen": "2023-11-29T19:40:11.02767255Z",
+    "lastSeen": "2023-11-29T19:40:30.408919942Z",
+    "visits": {
+      "host": 3,
+      "path": 3
+    },
+    "pageTriggers": [
+      {
+        "id": "9a3de8ef-9331-4ca5-893c-d307a259fab4",
+        "invocation": "INVOCATION_IDLE_TIME",
+        "behaviour": "BEHAVIOUR_MODAL",
+        "data": {
+          "buttonText": "IDLE",
+          "buttonURL": "iDLe",
+          "heading": "IDLE",
+          "paragraph": "IDLE"
+        },
+        "variantID": "15071b2b-d667-47eb-9c78-eafdc6b60e32",
+        "variantName": ""
+      },
+      {
+        "id": "170f7308-2aaa-4f9d-8148-00260022fecd",
+        "invocation": "INVOCATION_EXIT_INTENT",
+        "behaviour": "BEHAVIOUR_MODAL",
+        "data": {
+          "backgroundURL": "https://buffer.com/cdn-cgi/image/w=1000,fit=contain,q=90,f=auto/library/content/images/size/w1200/2023/10/free-images.jpg",
+          "buttonText": "Click me!",
+          "buttonURL": "http://www.google.com/",
+          "heading": "Hello",
+          "paragraph": "Hello there again!"
+        },
+        "variantID": "52d5fe24-fc27-44bd-962a-6d8e9f6eb3d9",
+        "variantName": ""
+      }
+    ],
+    "config": {
+      "script": {
+        "debugMode": true
+      },
+      "trigger": {
+        "userIdleThresholdSecs": "30",
+        "displayTriggerAfterSecs": "5",
+        "triggerCooldownSecs": "300"
+      },
+      "brand": {
+        "name": "Harvester",
+        "colors": {
+          "backgroundPrimary": "#006614",
+          "backgroundPrimaryDimmed": "#00fff8",
+          "backgroundSecondary": "#00ffe7",
+          "shadeOfGrey": "#000000",
+          "textPrimary": "#ffffff",
+          "greyText": "#000000"
+        }
+      }
+    },
+    "conversions": [
+      {
+        "identifier": "1842e390-fb0b-415c-842e-bf30a8783786",
+        "signals": [
+          {
+            "op": "CanSeeElementOnPage",
+            "parameters": [
+              ".stage-5",
+              "starts_with",
+              "/tablebooking"
+            ]
+          }
+        ],
+        "analyticsEvent": "test_event"
+      },
+      {
+        "identifier": "c317e593-e436-4424-bb1a-89809ae55066",
+        "signals": [
+          {
+            "op": "CanSeeElementOnPage",
+            "parameters": [
+              ".stage-5",
+              "contains",
+              "/tablebooking"
+            ]
+          }
+        ],
+        "analyticsEvent": "eds-test-config"
+      }
+    ],
+    "identifiers": {
+      "main": "028243d7-3036-4d89-a05e-c0a6012f5688"
+    },
+    "intently": false
+  }
+}

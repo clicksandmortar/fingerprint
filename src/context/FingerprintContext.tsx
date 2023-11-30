@@ -85,7 +85,7 @@ export const FingerprintProvider = ({
   pageLoadTriggers = true,
   config: legacy_config
 }: FingerprintProviderProps) => {
-  const [booted, setBooted] = useState(false)
+  const [booted, setBooted] = useState(true)
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
 
   const consentGiven = useConsentCheck(consent, consentCallback)

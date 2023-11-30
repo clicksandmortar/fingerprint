@@ -12,6 +12,7 @@ var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
 var reactDeviceDetect = require('react-device-detect');
+var zustand = require('zustand');
 var reactHookForm = require('react-hook-form');
 
 function _extends() {
@@ -1169,6 +1170,36 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
+var useDifiStore = zustand.create(function (set) {
+  return {
+    visitor: {},
+    config: {},
+    conversions: [],
+    displayTriggers: [],
+    incompleteTriggers: [],
+    intently: true,
+    pageTriggers: [],
+    session: {},
+    set: set,
+    setters: {
+      removePageTrigger: function removePageTrigger(id) {
+        set(function (prev) {
+          return {
+            pageTriggers: prev.pageTriggers.filter(function (trigger) {
+              return trigger.id !== id;
+            })
+          };
+        });
+      }
+    }
+  };
+});
+var usePageTriggers = function usePageTriggers() {
+  return useDifiStore(function (state) {
+    return state.pageTriggers;
+  });
+};
+
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -1185,6 +1216,10 @@ function CollectorProvider(_ref) {
   var _useConfig = useConfig(),
     setConfig = _useConfig.setConfig,
     config = _useConfig.config.trigger;
+  var fuk = useConfig();
+  console.log({
+    fuk: fuk
+  });
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
     setVisitor = _useVisitor.setVisitor;
@@ -1210,17 +1245,22 @@ function CollectorProvider(_ref) {
   var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
-  var _useState2 = React.useState([]),
-    pageTriggers = _useState2[0],
-    setPageTriggersState = _useState2[1];
+  var pageTriggers = usePageTriggers();
+  var _useDifiStore = useDifiStore(function (s) {
+      return s.setters;
+    }),
+    removePageTrigger = _useDifiStore.removePageTrigger;
+  var set = useDifiStore(function (state) {
+    return state.set;
+  });
   var _useIntently = useIntently(),
     setIntently = _useIntently.setIntently;
-  var _useState3 = React.useState([]),
-    displayTriggers = _useState3[0],
-    setDisplayedTriggers = _useState3[1];
-  var _useState4 = React.useState(new Map()),
-    foundWatchers = _useState4[0],
-    setFoundWatchers = _useState4[1];
+  var _useState2 = React.useState([]),
+    displayTriggers = _useState2[0],
+    setDisplayedTriggers = _useState2[1];
+  var _useState3 = React.useState(new Map()),
+    foundWatchers = _useState3[0],
+    setFoundWatchers = _useState3[1];
   var _useConversions = useConversions(),
     setConversions = _useConversions.setConversions;
   var brand = useBrand();
@@ -1261,18 +1301,21 @@ function CollectorProvider(_ref) {
       return [].concat(prev, [invokableTrigger.id]);
     });
   }, [combinedTriggers, getIsBehaviourVisible, log]);
+  console.log('rerender', pageTriggers, config);
   React.useEffect(function () {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [visibleIncompleteTriggers, setPageTriggersState, setDisplayedTriggerByInvocation]);
+  }, [visibleIncompleteTriggers, setDisplayedTriggerByInvocation]);
   var setPageTriggers = React__default.useCallback(function (triggers) {
-    setPageTriggersState(function (prev) {
-      var nonDismissed = prev.filter(function (tr) {
+    set(function (prev) {
+      var nonDismissed = prev.pageTriggers.filter(function (tr) {
         return displayTriggers.includes(tr.id);
       });
-      return uniqueBy([].concat(triggers || [], nonDismissed), 'id');
+      return {
+        pageTriggers: uniqueBy([].concat(triggers || [], nonDismissed), 'id')
+      };
     });
-  }, [setPageTriggersState, displayTriggers]);
+  }, [set, displayTriggers]);
   var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
     var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
       return handler.behaviour === _trigger.behaviour;
@@ -1296,12 +1339,8 @@ function CollectorProvider(_ref) {
         return trigger.id !== id;
       });
     });
-    setPageTriggersState(function (prev) {
-      return prev.filter(function (trigger) {
-        return trigger.id !== id;
-      });
-    });
-  }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, setPageTriggersState, combinedTriggers]);
+    removePageTrigger(id);
+  }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, set, combinedTriggers]);
   var TriggerComponent = React__default.useCallback(function () {
     if (!displayTriggers) return null;
     var activeTriggers = combinedTriggers.filter(function (trigger) {
@@ -4002,7 +4041,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
     _ref$pageLoadTriggers = _ref.pageLoadTriggers,
     pageLoadTriggers = _ref$pageLoadTriggers === void 0 ? true : _ref$pageLoadTriggers,
     legacy_config = _ref.config;
-  var _useState2 = React.useState(false),
+  var _useState2 = React.useState(true),
     booted = _useState2[0],
     setBooted = _useState2[1];
   var _useState3 = React.useState(defaultHandlers || clientHandlers),

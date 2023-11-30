@@ -9,6 +9,7 @@ import uniqueBy from 'lodash.uniqby';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 import { isMobile } from 'react-device-detect';
+import { create } from 'zustand';
 import { useForm } from 'react-hook-form';
 
 const closeButtonStyles = {
@@ -1106,6 +1107,28 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
+const useDifiStore = create(set => {
+  return {
+    visitor: {},
+    config: {},
+    conversions: [],
+    displayTriggers: [],
+    incompleteTriggers: [],
+    intently: true,
+    pageTriggers: [],
+    session: {},
+    set,
+    setters: {
+      removePageTrigger: id => {
+        set(prev => ({
+          pageTriggers: prev.pageTriggers.filter(trigger => trigger.id !== id)
+        }));
+      }
+    }
+  };
+});
+const usePageTriggers = () => useDifiStore(state => state.pageTriggers);
+
 function CollectorProvider({
   children,
   handlers = []
@@ -1127,6 +1150,10 @@ function CollectorProvider({
       trigger: config
     }
   } = useConfig();
+  const fuk = useConfig();
+  console.log({
+    fuk
+  });
   const {
     visitor,
     setVisitor
@@ -1156,7 +1183,11 @@ function CollectorProvider({
     }
   });
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
-  const [pageTriggers, setPageTriggersState] = useState([]);
+  const pageTriggers = usePageTriggers();
+  const {
+    removePageTrigger
+  } = useDifiStore(s => s.setters);
+  const set = useDifiStore(state => state.set);
   const {
     setIntently
   } = useIntently();
@@ -1195,16 +1226,19 @@ function CollectorProvider({
       return [...prev, invokableTrigger.id];
     });
   }, [combinedTriggers, getIsBehaviourVisible, log]);
+  console.log('rerender', pageTriggers, config);
   useEffect(() => {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [visibleIncompleteTriggers, setPageTriggersState, setDisplayedTriggerByInvocation]);
+  }, [visibleIncompleteTriggers, setDisplayedTriggerByInvocation]);
   const setPageTriggers = React__default.useCallback(triggers => {
-    setPageTriggersState(prev => {
-      const nonDismissed = prev.filter(tr => displayTriggers.includes(tr.id));
-      return uniqueBy([...(triggers || []), ...nonDismissed], 'id');
+    set(prev => {
+      const nonDismissed = prev.pageTriggers.filter(tr => displayTriggers.includes(tr.id));
+      return {
+        pageTriggers: uniqueBy([...(triggers || []), ...nonDismissed], 'id')
+      };
     });
-  }, [setPageTriggersState, displayTriggers]);
+  }, [set, displayTriggers]);
   const getHandlerForTrigger = React__default.useCallback(_trigger => {
     const potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === _trigger.behaviour);
     if (!potentialHandler) return null;
@@ -1216,8 +1250,8 @@ function CollectorProvider({
     setDisplayedTriggers(refreshedTriggers);
     setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
     setVisibleTriggers(prev => prev.filter(trigger => trigger.id !== id));
-    setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
-  }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, setPageTriggersState, combinedTriggers]);
+    removePageTrigger(id);
+  }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, set, combinedTriggers]);
   const TriggerComponent = React__default.useCallback(() => {
     if (!displayTriggers) return null;
     const activeTriggers = combinedTriggers.filter(trigger => displayTriggers.includes(trigger.id));
@@ -4501,7 +4535,7 @@ const FingerprintProvider = ({
   pageLoadTriggers: _pageLoadTriggers = true,
   config: legacy_config
 }) => {
-  const [booted, setBooted] = useState(false);
+  const [booted, setBooted] = useState(true);
   const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers);
   const consentGiven = useConsentCheck(_consent, consentCallback);
   const addAnotherHandler = React__default.useCallback(trigger => {
