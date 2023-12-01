@@ -375,13 +375,13 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
       _visitorId = _c$split[0];
     visitor.id = _visitorId;
   }
-  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
-    sessionId = _getSessionIdAndEndTi2.sessionId,
-    endTime = _getSessionIdAndEndTi2.endTime;
   var combinedCookie = buildCookie({
     visitorId: visitor.id
   });
   setCookie(CnMCookie, combinedCookie, 365);
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
+    sessionId = _getSessionIdAndEndTi2.sessionId,
+    endTime = _getSessionIdAndEndTi2.endTime;
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);
@@ -1411,17 +1411,19 @@ function CollectorProvider(_ref) {
       return Promise.reject(e);
     }
   }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
+  React.useEffect(function () {
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      });
+    }
+  }, []);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
       return;
     }
     log('CollectorProvider: collecting data');
-    if (hasVisitorIDInURL()) {
-      trackEvent('abandoned_journey_landing', {
-        from_email: true
-      });
-    }
     var hash = window.location.hash.substring(3);
     var hashParams = hash.split('&').reduce(function (result, item) {
       var parts = item.split('=');
