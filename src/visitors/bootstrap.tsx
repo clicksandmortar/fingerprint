@@ -19,6 +19,12 @@ export function interceptFixCookieForSubdomains() {
   const cookieSiteName =
     '.' + splitHostname.splice(splitHostname.length - 2, Infinity).join('.')
 
+  console.log('BOOT: setting cookie to ', {
+    CnMCookie,
+    cookie,
+    domain: cookieSiteName
+  })
+
   return setCookie(CnMCookie, cookie, 365, { domain: cookieSiteName })
 }
 
@@ -55,6 +61,8 @@ export const updateCookie = (uuid: string) => {
   if (!newCookie) return
 
   setCookie(CnMCookie, newCookie, 365)
+  console.log('BOOT: in updateCookie')
+  interceptFixCookieForSubdomains()
 }
 
 export const bootstrapVisitor = ({
@@ -101,6 +109,7 @@ export const bootstrapVisitor = ({
 
   const combinedCookie = buildCookie({ visitorId: visitor.id as string })
   setCookie(CnMCookie, combinedCookie, 365)
+  // backwards compatibility baby!
   interceptFixCookieForSubdomains()
 
   const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))

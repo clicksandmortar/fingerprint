@@ -272,24 +272,6 @@ const onCookieChanged = (callback, interval = 1000) => {
   }, interval);
 };
 
-const bootstrapSession = ({
-  appId,
-  setSession
-}) => {
-  const session = {
-    firstVisit: undefined
-  };
-  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
-    setCookie('_cm', appId, 365);
-    setSession(session);
-    return;
-  }
-  if (getCookie('_cm') && getCookie('_cm') === appId) {
-    session.firstVisit = false;
-    setSession(session);
-  }
-};
-
 const uuidValidateV4 = uuid => {
   return validate(uuid) && version(uuid) === 4;
 };
@@ -305,6 +287,11 @@ function interceptFixCookieForSubdomains() {
   if (!cookie) return;
   const splitHostname = location.host.split('.');
   const cookieSiteName = '.' + splitHostname.splice(splitHostname.length - 2, Infinity).join('.');
+  console.log('BOOT: setting cookie to ', {
+    CnMCookie,
+    cookie,
+    domain: cookieSiteName
+  });
   return setCookie(CnMCookie, cookie, 365, {
     domain: cookieSiteName
   });
@@ -334,6 +321,8 @@ const updateCookie = uuid => {
   const newCookie = updateCookieUUID(cookie, uuid);
   if (!newCookie) return;
   setCookie(CnMCookie, newCookie, 365);
+  console.log('BOOT: in updateCookie');
+  interceptFixCookieForSubdomains();
 };
 const bootstrapVisitor = ({
   setVisitor,
@@ -410,6 +399,25 @@ const hasCookieValueExpired = cookieData => {
     }
   }
   return false;
+};
+
+const bootstrapSession = ({
+  appId,
+  setSession
+}) => {
+  const session = {
+    firstVisit: undefined
+  };
+  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
+    setCookie('_cm', appId, 365);
+    interceptFixCookieForSubdomains();
+    setSession(session);
+    return;
+  }
+  if (getCookie('_cm') && getCookie('_cm') === appId) {
+    session.firstVisit = false;
+    setSession(session);
+  }
 };
 
 const VisitorProvider = ({

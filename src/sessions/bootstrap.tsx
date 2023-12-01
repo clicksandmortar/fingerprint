@@ -1,5 +1,6 @@
-import { Session } from './types'
 import { getCookie, setCookie } from '../utils/cookies'
+import { interceptFixCookieForSubdomains } from '../visitors/bootstrap'
+import { Session } from './types'
 
 export const bootstrapSession = ({
   appId,
@@ -14,6 +15,7 @@ export const bootstrapSession = ({
 
   if (!getCookie('_cm') || getCookie('_cm') !== appId) {
     setCookie('_cm', appId, 365)
+    interceptFixCookieForSubdomains()
 
     setSession(session)
 

@@ -297,23 +297,6 @@ var onCookieChanged = function onCookieChanged(callback, interval) {
   }, interval);
 };
 
-var bootstrapSession = function bootstrapSession(_ref) {
-  var appId = _ref.appId,
-    setSession = _ref.setSession;
-  var session = {
-    firstVisit: undefined
-  };
-  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
-    setCookie('_cm', appId, 365);
-    setSession(session);
-    return;
-  }
-  if (getCookie('_cm') && getCookie('_cm') === appId) {
-    session.firstVisit = false;
-    setSession(session);
-  }
-};
-
 var uuidValidateV4 = function uuidValidateV4(uuid$1) {
   return uuid.validate(uuid$1) && uuid.version(uuid$1) === 4;
 };
@@ -329,6 +312,11 @@ function interceptFixCookieForSubdomains() {
   if (!cookie) return;
   var splitHostname = location.host.split('.');
   var cookieSiteName = '.' + splitHostname.splice(splitHostname.length - 2, Infinity).join('.');
+  console.log('BOOT: setting cookie to ', {
+    CnMCookie: CnMCookie,
+    cookie: cookie,
+    domain: cookieSiteName
+  });
   return setCookie(CnMCookie, cookie, 365, {
     domain: cookieSiteName
   });
@@ -356,6 +344,8 @@ var updateCookie = function updateCookie(uuid) {
   var newCookie = updateCookieUUID(cookie, uuid);
   if (!newCookie) return;
   setCookie(CnMCookie, newCookie, 365);
+  console.log('BOOT: in updateCookie');
+  interceptFixCookieForSubdomains();
 };
 var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   var setVisitor = _ref2.setVisitor,
@@ -432,6 +422,24 @@ var hasCookieValueExpired = function hasCookieValueExpired(cookieData) {
     }
   }
   return false;
+};
+
+var bootstrapSession = function bootstrapSession(_ref) {
+  var appId = _ref.appId,
+    setSession = _ref.setSession;
+  var session = {
+    firstVisit: undefined
+  };
+  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
+    setCookie('_cm', appId, 365);
+    interceptFixCookieForSubdomains();
+    setSession(session);
+    return;
+  }
+  if (getCookie('_cm') && getCookie('_cm') === appId) {
+    session.firstVisit = false;
+    setSession(session);
+  }
 };
 
 var VisitorProvider = function VisitorProvider(_ref) {
