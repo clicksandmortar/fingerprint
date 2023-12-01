@@ -410,7 +410,7 @@ export function CollectorProvider({
         from_email: true
       })
     }
-  }, [])
+  }, [trackEvent])
 
   const collectAndApplyVisitorInfo = React.useCallback(() => {
     if (!visitor.id) {
