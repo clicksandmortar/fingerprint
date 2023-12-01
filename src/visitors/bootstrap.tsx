@@ -8,28 +8,34 @@ import { uuidValidateV4 } from '../utils/uuid'
 import { Visitor } from './types'
 import { validVisitorId } from './utils'
 
-export const CnMCookie = '_cm_id'
+export const cookieValidDays = 365
+export const CnMCookie = '_cm'
+export const CnMIDCookie = '_cm_id'
+
+export function getCookieDomain(): string | null {
+  const parsedUrl = psl.parse(location.host)
+
+  let cookieDomain = null
+
+  // discriminantly type safe. nice.
+  if (!parsedUrl.error) cookieDomain = parsedUrl.domain || null
+  return cookieDomain
+}
 
 // sort of temporary. We can remove this once all cookies have been updated with domains
 // one.two.three. ... .site.com => .site.com
-export function interceptFixCookieForSubdomains() {
-  const cookie = getCookie(CnMCookie)
+export function correctCookieSubdomain() {
+  const cookie = getCookie(CnMIDCookie)
   if (!cookie) return
 
-  const parsedUrl = psl.parse(location.host)
+  Cookies.remove(CnMIDCookie)
+  setCookie(CnMIDCookie, cookie, cookieValidDays)
 
-  let cookieDomain = undefined
-
-  // discriminantly type safe. nice.
-  if (!parsedUrl.error) cookieDomain = parsedUrl.domain || undefined
-
-  Cookies.remove(CnMCookie)
-
-  return setCookie(CnMCookie, cookie, 365, { domain: cookieDomain })
+  return cookie
 }
 
 export const buildCookie = ({ visitorId }: { visitorId: string }) => {
-  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
+  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMIDCookie))
 
   return `${visitorId}|${sessionId}|${endTime.toISOString()}`
 }
@@ -56,14 +62,12 @@ const updateCookieUUID = (
 export const updateCookie = (uuid: string) => {
   if (!uuidValidateV4(uuid)) return
 
-  const cookie = getCookie(CnMCookie)
+  const cookie = getCookie(CnMIDCookie)
   const newCookie = updateCookieUUID(cookie, uuid)
-  interceptFixCookieForSubdomains()
 
   if (!newCookie) return
 
-  setCookie(CnMCookie, newCookie, 365)
-  console.log('BOOT: in updateCookie')
+  setCookie(CnMIDCookie, newCookie, cookieValidDays)
 }
 
 export const bootstrapVisitor = ({
@@ -95,25 +99,23 @@ export const bootstrapVisitor = ({
   }
 
   if (
-    (!visitor.id && !getCookie(CnMCookie)) ||
-    !validVisitorId(getCookie(CnMCookie) as string)
+    (!visitor.id && !getCookie(CnMIDCookie)) ||
+    !validVisitorId(getCookie(CnMIDCookie) as string)
   ) {
     const visitorId = uuidv4()
     visitor.id = visitorId
   }
 
-  if (!visitor.id && getCookie(CnMCookie)) {
-    const c = getCookie(CnMCookie) as string
+  if (!visitor.id && getCookie(CnMIDCookie)) {
+    const c = getCookie(CnMIDCookie) as string
     const [visitorId] = c.split('|')
     visitor.id = visitorId
   }
 
   const combinedCookie = buildCookie({ visitorId: visitor.id as string })
-  setCookie(CnMCookie, combinedCookie, 365)
-  // backwards compatibility baby!
-  interceptFixCookieForSubdomains()
+  setCookie(CnMIDCookie, combinedCookie, cookieValidDays)
 
-  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
+  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMIDCookie))
   session.id = sessionId
   session.endTime = endTime
   setSession(session)
@@ -147,9 +149,24 @@ const getSessionIdAndEndTime = (
   }
 }
 
+// function differenceInDays(startDate: Date, endDate: Date): number {
+//   // Calculate the difference in milliseconds
+//   const differenceMs = endDate.getTime() - startDate.getTime()
+
+//   // Convert milliseconds to days (1 day = 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
+//   const differenceDays = Math.floor(differenceMs / (1000 * 60 * 60 * 24))
+
+//   return differenceDays
+// }
+
+// export const getDateFromCookie = () => {
+//   cookieSplit[cookieSplit.length - 1]
+// }
+
 const hasCookieValueExpired = (cookieData: string | undefined): Boolean => {
   if (!cookieData) return true
   const cookieSplit = cookieData.split('|')
+
   if (cookieSplit.length > 1) {
     const timestampString = cookieSplit[cookieSplit.length - 1]
     const expiryTimeEpoch = Date.parse(timestampString)

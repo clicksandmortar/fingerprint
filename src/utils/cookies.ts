@@ -1,4 +1,5 @@
 import Cookies, { CookieAttributes } from 'js-cookie'
+import { getCookieDomain } from '../visitors/bootstrap'
 
 export const setCookie = (
   name: string,
@@ -9,6 +10,7 @@ export const setCookie = (
   return Cookies.set(name, value, {
     expires: expires,
     sameSite: 'strict',
+    domain: getCookieDomain() || undefined,
     ...options
   })
 }

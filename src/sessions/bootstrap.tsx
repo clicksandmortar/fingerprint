@@ -1,5 +1,5 @@
 import { getCookie, setCookie } from '../utils/cookies'
-import { interceptFixCookieForSubdomains } from '../visitors/bootstrap'
+import { CnMCookie, cookieValidDays } from '../visitors/bootstrap'
 import { Session } from './types'
 
 export const bootstrapSession = ({
@@ -13,17 +13,15 @@ export const bootstrapSession = ({
     firstVisit: undefined
   }
 
-  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
-    console.log('BOOT: strapping session')
-    setCookie('_cm', appId, 365)
-    interceptFixCookieForSubdomains()
+  if (!getCookie(CnMCookie) || getCookie(CnMCookie) !== appId) {
+    setCookie(CnMCookie, appId, cookieValidDays)
 
     setSession(session)
 
     return
   }
 
-  if (getCookie('_cm') && getCookie('_cm') === appId) {
+  if (getCookie(CnMCookie) && getCookie(CnMCookie) === appId) {
     session.firstVisit = false
 
     setSession(session)

@@ -269,35 +269,6 @@ var useLogging = function useLogging() {
   return React.useContext(LoggingContext);
 };
 
-var setCookie = function setCookie(name, value, expires, options) {
-  return Cookies.set(name, value, _extends({
-    expires: expires,
-    sameSite: 'strict'
-  }, options));
-};
-var getCookie = function getCookie(name) {
-  return Cookies.get(name);
-};
-var onCookieChanged = function onCookieChanged(callback, interval) {
-  if (interval === void 0) {
-    interval = 1000;
-  }
-  var lastCookie = document.cookie;
-  setInterval(function () {
-    var cookie = document.cookie;
-    if (cookie !== lastCookie) {
-      try {
-        callback({
-          oldValue: lastCookie,
-          newValue: cookie
-        });
-      } finally {
-        lastCookie = cookie;
-      }
-    }
-  }, interval);
-};
-
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function createCommonjsModule(fn, module) {
@@ -9971,21 +9942,25 @@ var validVisitorId = function validVisitorId(id) {
   return uuidValidateV4(splitCookie[0]);
 };
 
-var CnMCookie = '_cm_id';
-function interceptFixCookieForSubdomains() {
-  var cookie = getCookie(CnMCookie);
-  if (!cookie) return;
+var cookieValidDays = 365;
+var CnMCookie = '_cm';
+var CnMIDCookie = '_cm_id';
+function getCookieDomain() {
   var parsedUrl = psl.parse(location.host);
-  var cookieDomain = undefined;
-  if (!parsedUrl.error) cookieDomain = parsedUrl.domain || undefined;
-  Cookies.remove(CnMCookie);
-  return setCookie(CnMCookie, cookie, 365, {
-    domain: cookieDomain
-  });
+  var cookieDomain = null;
+  if (!parsedUrl.error) cookieDomain = parsedUrl.domain || null;
+  return cookieDomain;
+}
+function correctCookieSubdomain() {
+  var cookie = getCookie(CnMIDCookie);
+  if (!cookie) return;
+  Cookies.remove(CnMIDCookie);
+  setCookie(CnMIDCookie, cookie, cookieValidDays);
+  return cookie;
 }
 var buildCookie = function buildCookie(_ref) {
   var visitorId = _ref.visitorId;
-  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie(CnMCookie)),
+  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie(CnMIDCookie)),
     sessionId = _getSessionIdAndEndTi.sessionId,
     endTime = _getSessionIdAndEndTi.endTime;
   return visitorId + "|" + sessionId + "|" + endTime.toISOString();
@@ -10002,12 +9977,10 @@ var updateCookieUUID = function updateCookieUUID(cookieData, uuid) {
 };
 var updateCookie = function updateCookie(uuid) {
   if (!uuidValidateV4(uuid)) return;
-  var cookie = getCookie(CnMCookie);
+  var cookie = getCookie(CnMIDCookie);
   var newCookie = updateCookieUUID(cookie, uuid);
-  interceptFixCookieForSubdomains();
   if (!newCookie) return;
-  setCookie(CnMCookie, newCookie, 365);
-  console.log('BOOT: in updateCookie');
+  setCookie(CnMIDCookie, newCookie, cookieValidDays);
 };
 var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   var setVisitor = _ref2.setVisitor,
@@ -10026,12 +9999,12 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
     var sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
-  if (!visitor.id && !getCookie(CnMCookie) || !validVisitorId(getCookie(CnMCookie))) {
+  if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie))) {
     var visitorId = uuid.v4();
     visitor.id = visitorId;
   }
-  if (!visitor.id && getCookie(CnMCookie)) {
-    var c = getCookie(CnMCookie);
+  if (!visitor.id && getCookie(CnMIDCookie)) {
+    var c = getCookie(CnMIDCookie);
     var _c$split = c.split('|'),
       _visitorId = _c$split[0];
     visitor.id = _visitorId;
@@ -10039,9 +10012,8 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   var combinedCookie = buildCookie({
     visitorId: visitor.id
   });
-  setCookie(CnMCookie, combinedCookie, 365);
-  interceptFixCookieForSubdomains();
-  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
+  setCookie(CnMIDCookie, combinedCookie, cookieValidDays);
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMIDCookie)),
     sessionId = _getSessionIdAndEndTi2.sessionId,
     endTime = _getSessionIdAndEndTi2.endTime;
   session.id = sessionId;
@@ -10086,20 +10058,48 @@ var hasCookieValueExpired = function hasCookieValueExpired(cookieData) {
   return false;
 };
 
+var setCookie = function setCookie(name, value, expires, options) {
+  return Cookies.set(name, value, _extends({
+    expires: expires,
+    sameSite: 'strict',
+    domain: getCookieDomain() || undefined
+  }, options));
+};
+var getCookie = function getCookie(name) {
+  return Cookies.get(name);
+};
+var onCookieChanged = function onCookieChanged(callback, interval) {
+  if (interval === void 0) {
+    interval = 1000;
+  }
+  var lastCookie = document.cookie;
+  setInterval(function () {
+    var cookie = document.cookie;
+    if (cookie !== lastCookie) {
+      try {
+        callback({
+          oldValue: lastCookie,
+          newValue: cookie
+        });
+      } finally {
+        lastCookie = cookie;
+      }
+    }
+  }, interval);
+};
+
 var bootstrapSession = function bootstrapSession(_ref) {
   var appId = _ref.appId,
     setSession = _ref.setSession;
   var session = {
     firstVisit: undefined
   };
-  if (!getCookie('_cm') || getCookie('_cm') !== appId) {
-    console.log('BOOT: strapping session');
-    setCookie('_cm', appId, 365);
-    interceptFixCookieForSubdomains();
+  if (!getCookie(CnMCookie) || getCookie(CnMCookie) !== appId) {
+    setCookie(CnMCookie, appId, cookieValidDays);
     setSession(session);
     return;
   }
-  if (getCookie('_cm') && getCookie('_cm') === appId) {
+  if (getCookie(CnMCookie) && getCookie(CnMCookie) === appId) {
     session.firstVisit = false;
     setSession(session);
   }
@@ -10134,7 +10134,10 @@ var VisitorProvider = function VisitorProvider(_ref) {
             setVisitor: setVisitor,
             session: session,
             setSession: setSession
-          })).then(function () {});
+          })).then(function () {
+            var updatedCookie = correctCookieSubdomain();
+            log('FingerprintContext: Correcting cookie domain to', updatedCookie);
+          });
         });
       } catch (e) {
         return Promise.reject(e);
