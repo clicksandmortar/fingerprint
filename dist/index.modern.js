@@ -9953,6 +9953,7 @@ function interceptFixCookieForSubdomains() {
   const parsedUrl = psl.parse(location.host);
   let cookieDomain = undefined;
   if (!parsedUrl.error) cookieDomain = parsedUrl.domain || undefined;
+  Cookies.remove(CnMCookie);
   return setCookie(CnMCookie, cookie, 365, {
     domain: cookieDomain
   });
@@ -9980,10 +9981,10 @@ const updateCookie = uuid => {
   if (!uuidValidateV4(uuid)) return;
   const cookie = getCookie(CnMCookie);
   const newCookie = updateCookieUUID(cookie, uuid);
+  interceptFixCookieForSubdomains();
   if (!newCookie) return;
   setCookie(CnMCookie, newCookie, 365);
   console.log('BOOT: in updateCookie');
-  interceptFixCookieForSubdomains();
 };
 const bootstrapVisitor = ({
   setVisitor,

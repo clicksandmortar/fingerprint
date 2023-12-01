@@ -9978,6 +9978,7 @@ function interceptFixCookieForSubdomains() {
   var parsedUrl = psl.parse(location.host);
   var cookieDomain = undefined;
   if (!parsedUrl.error) cookieDomain = parsedUrl.domain || undefined;
+  Cookies.remove(CnMCookie);
   return setCookie(CnMCookie, cookie, 365, {
     domain: cookieDomain
   });
@@ -10003,10 +10004,10 @@ var updateCookie = function updateCookie(uuid) {
   if (!uuidValidateV4(uuid)) return;
   var cookie = getCookie(CnMCookie);
   var newCookie = updateCookieUUID(cookie, uuid);
+  interceptFixCookieForSubdomains();
   if (!newCookie) return;
   setCookie(CnMCookie, newCookie, 365);
   console.log('BOOT: in updateCookie');
-  interceptFixCookieForSubdomains();
 };
 var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   var setVisitor = _ref2.setVisitor,

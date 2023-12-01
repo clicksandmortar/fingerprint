@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie'
 import psl from 'psl'
 import { v4 as uuidv4 } from 'uuid'
 import { cookieAccountJWT } from '../context/FingerprintContext'
@@ -21,6 +22,8 @@ export function interceptFixCookieForSubdomains() {
 
   // discriminantly type safe. nice.
   if (!parsedUrl.error) cookieDomain = parsedUrl.domain || undefined
+
+  Cookies.remove(CnMCookie)
 
   return setCookie(CnMCookie, cookie, 365, { domain: cookieDomain })
 }
@@ -55,11 +58,12 @@ export const updateCookie = (uuid: string) => {
 
   const cookie = getCookie(CnMCookie)
   const newCookie = updateCookieUUID(cookie, uuid)
+  interceptFixCookieForSubdomains()
+
   if (!newCookie) return
 
   setCookie(CnMCookie, newCookie, 365)
   console.log('BOOT: in updateCookie')
-  interceptFixCookieForSubdomains()
 }
 
 export const bootstrapVisitor = ({
