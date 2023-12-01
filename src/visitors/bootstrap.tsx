@@ -25,7 +25,7 @@ export function getCookieDomain(): string | null {
 // sort of temporary. We can remove this once all cookies have been updated with domains
 // one.two.three. ... .site.com => .site.com
 export function correctCookieSubdomain() {
-  const cookie = getCookie(CnMIDCookie)
+  let cookie = getCookie(CnMIDCookie)
   if (!cookie) return
 
   Cookies.remove(CnMIDCookie)
@@ -148,20 +148,6 @@ const getSessionIdAndEndTime = (
     endTime
   }
 }
-
-// function differenceInDays(startDate: Date, endDate: Date): number {
-//   // Calculate the difference in milliseconds
-//   const differenceMs = endDate.getTime() - startDate.getTime()
-
-//   // Convert milliseconds to days (1 day = 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
-//   const differenceDays = Math.floor(differenceMs / (1000 * 60 * 60 * 24))
-
-//   return differenceDays
-// }
-
-// export const getDateFromCookie = () => {
-//   cookieSplit[cookieSplit.length - 1]
-// }
 
 const hasCookieValueExpired = (cookieData: string | undefined): Boolean => {
   if (!cookieData) return true

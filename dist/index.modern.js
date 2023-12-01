@@ -9929,7 +9929,7 @@ function getCookieDomain() {
   return cookieDomain;
 }
 function correctCookieSubdomain() {
-  const cookie = getCookie(CnMIDCookie);
+  let cookie = getCookie(CnMIDCookie);
   if (!cookie) return;
   Cookies.remove(CnMIDCookie);
   setCookie(CnMIDCookie, cookie, cookieValidDays);
