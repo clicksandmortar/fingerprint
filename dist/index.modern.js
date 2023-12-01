@@ -511,19 +511,25 @@ const MixpanelProvider = ({
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  const registerUserData = React__default.useCallback(properties => {
+    log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
+    mixpanel.people.set(properties);
+  }, [log]);
   useEffect(() => {
-    if (!(visitor !== null && visitor !== void 0 && visitor.cohort)) {
+    if (!visitor.cohort) {
       log('Able to register user cohort, but none provided. ');
       return;
     }
     registerUserData({
       u_cohort: visitor.cohort
     });
-  }, [visitor, setInitiated]);
-  const registerUserData = React__default.useCallback(properties => {
-    log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
-    mixpanel.people.set(properties);
-  }, [log]);
+  }, [visitor, registerUserData]);
+  useEffect(() => {
+    if (!visitor.sourceId) return;
+    registerUserData({
+      sourceId: visitor.sourceId
+    });
+  }, [visitor, registerUserData]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent,
@@ -1342,17 +1348,19 @@ function CollectorProvider({
       setIntently(true);
     }
   }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
+  useEffect(() => {
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      });
+    }
+  }, [trackEvent]);
   const collectAndApplyVisitorInfo = React__default.useCallback(() => {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
       return;
     }
     log('CollectorProvider: collecting data');
-    if (hasVisitorIDInURL()) {
-      trackEvent('abandoned_journey_landing', {
-        from_email: true
-      });
-    }
     const hash = window.location.hash.substring(3);
     const hashParams = hash.split('&').reduce((result, item) => {
       const parts = item.split('=');
