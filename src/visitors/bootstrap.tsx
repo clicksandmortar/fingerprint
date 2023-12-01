@@ -1,3 +1,4 @@
+import psl from 'psl'
 import { v4 as uuidv4 } from 'uuid'
 import { cookieAccountJWT } from '../context/FingerprintContext'
 import { Session } from '../sessions/types'
@@ -9,23 +10,19 @@ import { validVisitorId } from './utils'
 export const CnMCookie = '_cm_id'
 
 // sort of temporary. We can remove this once all cookies have been updated with domains
+// one.two.three. ... .site.com => .site.com
 export function interceptFixCookieForSubdomains() {
   const cookie = getCookie(CnMCookie)
   if (!cookie) return
 
-  const splitHostname = location.host.split('.')
+  const parsedUrl = psl.parse(location.host)
 
-  // one.two.three. ... .site.com => .site.com
-  const cookieSiteName =
-    '.' + splitHostname.splice(splitHostname.length - 2, Infinity).join('.')
+  let cookieDomain = undefined
 
-  console.log('BOOT: setting cookie to ', {
-    CnMCookie,
-    cookie,
-    domain: cookieSiteName
-  })
+  // discriminantly type safe. nice.
+  if (!parsedUrl.error) cookieDomain = parsedUrl.domain || undefined
 
-  return setCookie(CnMCookie, cookie, 365, { domain: cookieSiteName })
+  return setCookie(CnMCookie, cookie, 365, { domain: cookieDomain })
 }
 
 export const buildCookie = ({ visitorId }: { visitorId: string }) => {
