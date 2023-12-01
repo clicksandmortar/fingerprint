@@ -375,13 +375,13 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
       _visitorId = _c$split[0];
     visitor.id = _visitorId;
   }
-  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
-    sessionId = _getSessionIdAndEndTi2.sessionId,
-    endTime = _getSessionIdAndEndTi2.endTime;
   var combinedCookie = buildCookie({
     visitorId: visitor.id
   });
   setCookie(CnMCookie, combinedCookie, 365);
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
+    sessionId = _getSessionIdAndEndTi2.sessionId,
+    endTime = _getSessionIdAndEndTi2.endTime;
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);
@@ -519,19 +519,25 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  var registerUserData = React__default.useCallback(function (properties) {
+    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
+    mixpanel.people.set(properties);
+  }, [log]);
   React.useEffect(function () {
-    if (!(visitor !== null && visitor !== void 0 && visitor.cohort)) {
+    if (!visitor.cohort) {
       log('Able to register user cohort, but none provided. ');
       return;
     }
     registerUserData({
       u_cohort: visitor.cohort
     });
-  }, [visitor, setInitiated]);
-  var registerUserData = React__default.useCallback(function (properties) {
-    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
-    mixpanel.people.set(properties);
-  }, [log]);
+  }, [visitor, registerUserData]);
+  React.useEffect(function () {
+    if (!visitor.sourceId) return;
+    registerUserData({
+      sourceId: visitor.sourceId
+    });
+  }, [visitor, registerUserData]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent: trackEvent,
