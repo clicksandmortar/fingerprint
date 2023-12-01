@@ -1328,17 +1328,19 @@ function CollectorProvider({
       setIntently(true);
     }
   }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
+  useEffect(() => {
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      });
+    }
+  }, []);
   const collectAndApplyVisitorInfo = React__default.useCallback(() => {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
       return;
     }
     log('CollectorProvider: collecting data');
-    if (hasVisitorIDInURL()) {
-      trackEvent('abandoned_journey_landing', {
-        from_email: true
-      });
-    }
     const hash = window.location.hash.substring(3);
     const hashParams = hash.split('&').reduce((result, item) => {
       const parts = item.split('=');

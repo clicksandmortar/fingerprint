@@ -1417,17 +1417,19 @@ function CollectorProvider(_ref) {
       return Promise.reject(e);
     }
   }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
+  React.useEffect(function () {
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      });
+    }
+  }, []);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
       return;
     }
     log('CollectorProvider: collecting data');
-    if (hasVisitorIDInURL()) {
-      trackEvent('abandoned_journey_landing', {
-        from_email: true
-      });
-    }
     var hash = window.location.hash.substring(3);
     var hashParams = hash.split('&').reduce(function (result, item) {
       var parts = item.split('=');
