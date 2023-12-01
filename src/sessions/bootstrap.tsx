@@ -14,6 +14,7 @@ export const bootstrapSession = ({
   }
 
   if (!getCookie('_cm') || getCookie('_cm') !== appId) {
+    console.log('BOOT: strapping session')
     setCookie('_cm', appId, 365)
     interceptFixCookieForSubdomains()
 
