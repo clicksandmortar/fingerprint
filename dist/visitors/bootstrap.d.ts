@@ -1,6 +1,7 @@
 import { Session } from '../sessions/types';
 import { Visitor } from './types';
 export declare const CnMCookie = "_cm_id";
+export declare function interceptFixCookieForSubdomains(): string | undefined;
 export declare const buildCookie: ({ visitorId }: {
     visitorId: string;
 }) => string;

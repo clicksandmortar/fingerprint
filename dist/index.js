@@ -268,11 +268,11 @@ var useLogging = function useLogging() {
   return React.useContext(LoggingContext);
 };
 
-var setCookie = function setCookie(name, value, expires) {
-  return Cookies.set(name, value, {
+var setCookie = function setCookie(name, value, expires, options) {
+  return Cookies.set(name, value, _extends({
     expires: expires,
     sameSite: 'strict'
-  });
+  }, options));
 };
 var getCookie = function getCookie(name) {
   return Cookies.get(name);
@@ -324,6 +324,15 @@ var validVisitorId = function validVisitorId(id) {
 };
 
 var CnMCookie = '_cm_id';
+function interceptFixCookieForSubdomains() {
+  var cookie = getCookie(CnMCookie);
+  if (!cookie) return;
+  var splitHostname = location.host.split('.');
+  var cookieSiteName = '.' + splitHostname.splice(splitHostname.length - 2, Infinity).join('.');
+  return setCookie(CnMCookie, cookie, 365, {
+    domain: cookieSiteName
+  });
+}
 var buildCookie = function buildCookie(_ref) {
   var visitorId = _ref.visitorId;
   var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie(CnMCookie)),
@@ -375,13 +384,14 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
       _visitorId = _c$split[0];
     visitor.id = _visitorId;
   }
-  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
-    sessionId = _getSessionIdAndEndTi2.sessionId,
-    endTime = _getSessionIdAndEndTi2.endTime;
   var combinedCookie = buildCookie({
     visitorId: visitor.id
   });
   setCookie(CnMCookie, combinedCookie, 365);
+  interceptFixCookieForSubdomains();
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
+    sessionId = _getSessionIdAndEndTi2.sessionId,
+    endTime = _getSessionIdAndEndTi2.endTime;
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);

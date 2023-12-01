@@ -1,13 +1,15 @@
-import Cookies from 'js-cookie'
+import Cookies, { CookieAttributes } from 'js-cookie'
 
 export const setCookie = (
   name: string,
   value: string,
-  expires: number | undefined
+  expires: number | undefined,
+  options?: CookieAttributes
 ) => {
   return Cookies.set(name, value, {
     expires: expires,
-    sameSite: 'strict'
+    sameSite: 'strict',
+    ...options
   })
 }
 

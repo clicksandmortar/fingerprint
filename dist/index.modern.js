@@ -245,10 +245,11 @@ const useLogging = () => {
   return useContext(LoggingContext);
 };
 
-const setCookie = (name, value, expires) => {
+const setCookie = (name, value, expires, options) => {
   return Cookies.set(name, value, {
     expires: expires,
-    sameSite: 'strict'
+    sameSite: 'strict',
+    ...options
   });
 };
 const getCookie = name => {
@@ -299,6 +300,15 @@ const validVisitorId = id => {
 };
 
 const CnMCookie = '_cm_id';
+function interceptFixCookieForSubdomains() {
+  const cookie = getCookie(CnMCookie);
+  if (!cookie) return;
+  const splitHostname = location.host.split('.');
+  const cookieSiteName = '.' + splitHostname.splice(splitHostname.length - 2, Infinity).join('.');
+  return setCookie(CnMCookie, cookie, 365, {
+    domain: cookieSiteName
+  });
+}
 const buildCookie = ({
   visitorId
 }) => {
@@ -352,14 +362,15 @@ const bootstrapVisitor = ({
     const [visitorId] = c.split('|');
     visitor.id = visitorId;
   }
-  const {
-    sessionId,
-    endTime
-  } = getSessionIdAndEndTime(getCookie(CnMCookie));
   const combinedCookie = buildCookie({
     visitorId: visitor.id
   });
   setCookie(CnMCookie, combinedCookie, 365);
+  interceptFixCookieForSubdomains();
+  const {
+    sessionId,
+    endTime
+  } = getSessionIdAndEndTime(getCookie(CnMCookie));
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);

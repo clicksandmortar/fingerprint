@@ -8,6 +8,20 @@ import { validVisitorId } from './utils'
 
 export const CnMCookie = '_cm_id'
 
+// sort of temporary. We can remove this once all cookies have been updated with domains
+export function interceptFixCookieForSubdomains() {
+  const cookie = getCookie(CnMCookie)
+  if (!cookie) return
+
+  const splitHostname = location.host.split('.')
+
+  // one.two.three. ... .site.com => .site.com
+  const cookieSiteName =
+    '.' + splitHostname.splice(splitHostname.length - 2, Infinity).join('.')
+
+  return setCookie(CnMCookie, cookie, 365, { domain: cookieSiteName })
+}
+
 export const buildCookie = ({ visitorId }: { visitorId: string }) => {
   const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
 
@@ -85,9 +99,9 @@ export const bootstrapVisitor = ({
     visitor.id = visitorId
   }
 
-
   const combinedCookie = buildCookie({ visitorId: visitor.id as string })
   setCookie(CnMCookie, combinedCookie, 365)
+  interceptFixCookieForSubdomains()
 
   const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
   session.id = sessionId
