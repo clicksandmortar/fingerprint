@@ -3795,7 +3795,7 @@ var Modal = function Modal(_ref) {
     var tId = setTimeout(function () {
       runSeen(trigger);
       setInvocationTimeStamp(new Date().toISOString());
-    }, 1500);
+    }, 500);
     return function () {
       clearTimeout(tId);
     };

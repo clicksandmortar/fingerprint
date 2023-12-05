@@ -40,7 +40,7 @@ const Modal = ({ trigger }: Props) => {
     const tId = setTimeout(() => {
       runSeen(trigger)
       setInvocationTimeStamp(new Date().toISOString())
-    }, 1500)
+    }, 500)
 
     return () => {
       clearTimeout(tId)
