@@ -375,13 +375,13 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
       _visitorId = _c$split[0];
     visitor.id = _visitorId;
   }
-  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
-    sessionId = _getSessionIdAndEndTi2.sessionId,
-    endTime = _getSessionIdAndEndTi2.endTime;
   var combinedCookie = buildCookie({
     visitorId: visitor.id
   });
   setCookie(CnMCookie, combinedCookie, 365);
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMCookie)),
+    sessionId = _getSessionIdAndEndTi2.sessionId,
+    endTime = _getSessionIdAndEndTi2.endTime;
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);
@@ -519,19 +519,25 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  var registerUserData = React__default.useCallback(function (properties) {
+    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
+    mixpanel.people.set(properties);
+  }, [log]);
   React.useEffect(function () {
-    if (!(visitor !== null && visitor !== void 0 && visitor.cohort)) {
+    if (!visitor.cohort) {
       log('Able to register user cohort, but none provided. ');
       return;
     }
     registerUserData({
       u_cohort: visitor.cohort
     });
-  }, [visitor, setInitiated]);
-  var registerUserData = React__default.useCallback(function (properties) {
-    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
-    mixpanel.people.set(properties);
-  }, [log]);
+  }, [visitor, registerUserData]);
+  React.useEffect(function () {
+    if (!visitor.sourceId) return;
+    registerUserData({
+      sourceId: visitor.sourceId
+    });
+  }, [visitor, registerUserData]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent: trackEvent,
@@ -1412,17 +1418,19 @@ function CollectorProvider(_ref) {
       return Promise.reject(e);
     }
   }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
+  React.useEffect(function () {
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      });
+    }
+  }, []);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
       return;
     }
     log('CollectorProvider: collecting data');
-    if (hasVisitorIDInURL()) {
-      trackEvent('abandoned_journey_landing', {
-        from_email: true
-      });
-    }
     var hash = window.location.hash.substring(3);
     var hashParams = hash.split('&').reduce(function (result, item) {
       var parts = item.split('=');

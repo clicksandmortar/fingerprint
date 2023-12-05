@@ -85,11 +85,11 @@ export const bootstrapVisitor = ({
     visitor.id = visitorId
   }
 
-  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
 
   const combinedCookie = buildCookie({ visitorId: visitor.id as string })
   setCookie(CnMCookie, combinedCookie, 365)
 
+  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
   session.id = sessionId
   session.endTime = endTime
   setSession(session)

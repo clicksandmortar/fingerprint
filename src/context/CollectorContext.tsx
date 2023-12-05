@@ -405,18 +405,20 @@ export function CollectorProvider({
     ]
   )
 
+  useEffect(() => {
+    if (hasVisitorIDInURL()) {
+      trackEvent('abandoned_journey_landing', {
+        from_email: true
+      })
+    }
+  }, [trackEvent])
+
   const collectAndApplyVisitorInfo = React.useCallback(() => {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID')
       return
     }
     log('CollectorProvider: collecting data')
-
-    if (hasVisitorIDInURL()) {
-      trackEvent('abandoned_journey_landing', {
-        from_email: true
-      })
-    }
 
     const hash: string = window.location.hash.substring(3)
 

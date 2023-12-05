@@ -43,15 +43,6 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     mixpanel.identify(visitor.id)
   }, [appId, visitor?.id])
 
-  useEffect(() => {
-    if (!visitor?.cohort) {
-      log('Able to register user cohort, but none provided. ')
-      return
-    }
-
-    registerUserData({ u_cohort: visitor.cohort })
-  }, [visitor, setInitiated])
-
   const registerUserData = React.useCallback(
     (properties: RegistrableUserProperties) => {
       log(
@@ -64,6 +55,24 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     },
     [log]
   )
+  useEffect(() => {
+    if (!visitor.cohort) {
+      log('Able to register user cohort, but none provided. ')
+      return
+    }
+
+    registerUserData({
+      u_cohort: visitor.cohort
+    })
+  }, [visitor, registerUserData])
+
+  useEffect(() => {
+    if (!visitor.sourceId) return
+
+    registerUserData({
+      sourceId: visitor.sourceId
+    })
+  }, [visitor, registerUserData])
 
   return (
     <MixpanelContext.Provider
