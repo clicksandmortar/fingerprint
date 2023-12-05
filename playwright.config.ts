@@ -4,7 +4,7 @@ const PORT = process.env.PORT || 8000;
 const baseURL = `http://localhost:${PORT}`;
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
@@ -14,7 +14,7 @@ export default defineConfig({
     baseURL: baseURL,
     trace: 'retain-on-failure',
     video: 'on',
-    permissions: ['geolocation'],
+    permissions: [],
   },
 
   projects: [
@@ -33,13 +33,4 @@ export default defineConfig({
       use: { ...devices['Pixel 5'] },
     },
   ],
-
-  webServer: {
-    command: 'npm run start',
-    url: baseURL,
-    timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
 });

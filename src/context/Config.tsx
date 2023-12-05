@@ -86,7 +86,7 @@ export function ConfigProvider({ children, legacy_config }: Props) {
   // This is super messy. I know. Once we get rid of the legacy behaviour this should become
   //  much clearer
   const setConfig = React.useCallback(
-    (updatedConfigEntries: Config) => {
+    (updatedConfigEntries: Partial<Config>) => {
       // if the colors have been configured, we want to use the colors from the portal
       // if not - keep the default ones
       const argColors = updatedConfigEntries?.brand?.colors

@@ -1334,7 +1334,7 @@ function CollectorProvider({
         from_email: true
       });
     }
-  }, []);
+  }, [trackEvent]);
   const collectAndApplyVisitorInfo = React__default.useCallback(() => {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
