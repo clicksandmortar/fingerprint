@@ -5,5 +5,5 @@ declare type Props = {
     handleClickCallToAction: (e: any) => void;
     handleCloseModal: (e: any) => void;
 };
-declare const StandardModal: (props: Props) => React.JSX.Element;
+declare const StandardModal: ({ trigger, handleClickCallToAction, handleCloseModal }: Props) => React.JSX.Element | null;
 export default StandardModal;

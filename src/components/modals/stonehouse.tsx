@@ -302,9 +302,10 @@ export const StonehouseModal = (props: Props) => {
   const isFullyClickable = getIsModalFullyClickable({ trigger })
 
   if (!isFullyClickable) {
+    // Once the campaign is over, kill both of these and use StdModal
     return <StonehouseCustomModal {...props} />
   }
-
+  // Once the campaign is over, kill both of these and use StdModal
   return <FullyClickableModal {...props} />
 }
 
