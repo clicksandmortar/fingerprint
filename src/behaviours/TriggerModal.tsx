@@ -56,7 +56,7 @@ const Modal = ({ trigger }: Props) => {
     collect({
       cta: {
         variantID: trigger.id,
-        shownAt: invocationTimeStamp || ''
+        shownAt: invocationTimeStamp || new Date().toISOString()
       }
     })
     trackEvent('user_clicked_button', { ...trigger, variantName: 'MODAL' })
