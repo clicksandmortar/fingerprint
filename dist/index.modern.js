@@ -1196,6 +1196,7 @@ function CollectorProvider({
       log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
       return;
     }
+    log('CollectorProvider: Triggering behaviour', invokableTrigger);
     setDisplayedTriggers(prev => {
       if (prev.includes(invokableTrigger.id)) return prev;
       return [...prev, invokableTrigger.id];
@@ -1334,7 +1335,7 @@ function CollectorProvider({
         from_email: true
       });
     }
-  }, []);
+  }, [trackEvent]);
   const collectAndApplyVisitorInfo = React__default.useCallback(() => {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
@@ -3153,41 +3154,6 @@ const TriggerInverse = ({}) => {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
-const getModalStylesBySize = size => {
-  switch (size) {
-    case 'small':
-      {
-        return {
-          width: '90%',
-          maxWidth: 400,
-          minHeight: 300
-        };
-      }
-    case 'medium':
-      {
-        return {
-          width: '90%',
-          maxWidth: 800,
-          minHeight: 400
-        };
-      }
-    case 'large':
-      {
-        return {
-          width: '90%',
-          maxWidth: 1200,
-          minHeight: 400
-        };
-      }
-    case 'full':
-      {
-        return {
-          width: '100vw',
-          height: '100vh'
-        };
-      }
-  }
-};
 const getModalButtonStylesBySize = size => {
   switch (size) {
     case 'small':
@@ -3244,18 +3210,28 @@ const getIsModalFullyClickable = ({
   var _trigger$data;
   return !(trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonText);
 };
-
-const scaleDownFactorMap = () => {
-  return isMobile ? {
-    vertical: 1000,
-    horizontal: 640
+const getModalSizing = img => {
+  const imageRealHeight = img.height;
+  const imageRealWidth = img.width;
+  const aspectRatio = imageRealWidth / imageRealHeight;
+  const getMaxWidth = num => window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9;
+  const getMaxHeight = num => window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9;
+  const deviceSizeLimits = isMobile ? {
+    height: getMaxHeight(1000),
+    width: getMaxWidth(640)
   } : {
-    vertical: 490,
-    horizontal: 813
+    height: getMaxHeight(490),
+    width: getMaxWidth(819)
+  };
+  const widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
+  const heightToUse = widthToUse / aspectRatio;
+  return {
+    height: heightToUse,
+    width: widthToUse
   };
 };
-const useFullyClickableModalDimensions = ({
-  image
+const useModalDimensionsBasedOnImage = ({
+  imageURL
 }) => {
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,
@@ -3263,25 +3239,311 @@ const useFullyClickableModalDimensions = ({
   });
   useEffect(() => {
     const img = new Image();
-    img.src = image || '';
-    setTimeout(() => {
-      const {
-        vertical,
-        horizontal
-      } = scaleDownFactorMap();
-      const verticalScaleDownFactor = img.height / vertical;
-      const horizontalScaleDownFactor = img.width / horizontal;
-      const scaleDownFactor = Math.max(verticalScaleDownFactor, horizontalScaleDownFactor);
-      setImageDimensions({
-        width: Math.min(img.width / scaleDownFactor, window.innerWidth * 0.95),
-        height: Math.min(img.height / scaleDownFactor, window.innerHeight * 0.95)
-      });
-    }, 300);
-  }, [image]);
+    img.src = imageURL;
+    const id = setInterval(() => {
+      const modalSize = getModalSizing(img);
+      if (modalSize.height || modalSize.width) {
+        setImageDimensions(modalSize);
+        clearInterval(id);
+      }
+    }, 50);
+    return () => {
+      clearInterval(id);
+    };
+  }, [imageURL]);
   return {
-    imageDimensions
+    imageDimensions,
+    setImageDimensions
   };
 };
+
+const defaultElementSize = 'medium';
+const defaultButtonPosition = 'right';
+const StandardModal = ({
+  trigger,
+  handleClickCallToAction,
+  handleCloseModal
+}) => {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  const {
+    error
+  } = useLogging();
+  const isModalFullyClickable = getIsModalFullyClickable({
+    trigger
+  });
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const buttonSizeStyle = getModalButtonStylesBySize(defaultElementSize);
+  const {
+    textPrimary,
+    backgroundPrimary
+  } = useBrandColors();
+  const imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  const {
+    imageDimensions: {
+      height,
+      width
+    },
+    setImageDimensions
+  } = useModalDimensionsBasedOnImage({
+    imageURL
+  });
+  const appendResponsiveBehaviour = React__default.useCallback(() => {
+    return isMobile ? `` : `
+
+@media screen and (max-width: 1400px) {
+  .${prependClass('modal')} {
+    height: ${1 * height}px;
+    width: ${1 * width}px;
+  }
+}
+
+@media screen and (max-width: 850px) {
+  .${prependClass('modal')} {
+    height: ${0.6 * height}px;
+    width: ${0.6 * width}px;
+  }
+  .${prependClass('main-text')} {
+    font-size: 2.4rem;
+  }
+  .${prependClass('sub-text')} {
+    font-size: 1.3rem;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .${prependClass('modal')} {
+    height: ${0.4 * height}px;
+    width: ${0.4 * width}px;
+  }
+  .${prependClass('main-text')} {
+    font-size: 1.6rem;
+  }
+  .${prependClass('sub-text')} {
+    font-size: 0.9rem;
+  }
+}
+
+`;
+  }, [height, width, imageURL, isMobile]);
+  useEffect(() => {
+    const cssToApply = `
+    :root {
+      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+    
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    a,
+    span {
+      line-height: 1.2;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    
+    .${prependClass('overlay')} {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 500;
+      font-style: normal;      
+    }
+    
+    .${prependClass('modal')} {
+      ${isModalFullyClickable ? 'cursor: pointer;' : ``}
+      height: ${height}px;
+      width: ${width}px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-repeat: no-repeat;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--text-shadow);
+      ${isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : ''}
+      ${isModalFullyClickable ? 'cursor: pointer;' : ''}
+    }
+    
+    .${prependClass('modal')}:hover {
+      ${isModalFullyClickable ? `
+        filter: brightness(1.05);
+        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;
+      ` : ''}
+    }
+    
+    .${prependClass('text-center')} {
+      text-align: center;
+    }
+  
+    .${prependClass('text-container')} {
+      flex-direction: column;
+      flex: 1;
+      text-shadow: var(--text-shadow);
+      display: grid;
+      place-content: center;
+    }
+    
+    .${prependClass('main-text')} {
+      font-weight: 500;
+      font-size: 4rem;
+      font-style: normal;
+      text-align: center;
+      color: ${textPrimary};
+      text-shadow: var(--text-shadow);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .${prependClass('sub-text')} {
+      margin: auto;
+      font-weight: 600;
+      font-size: 2.2rem;
+      color: ${textPrimary};
+      text-align: center;
+      text-transform: uppercase;
+    }
+    
+    .${prependClass('cta')} {
+      cursor: pointer;
+      background-color: ${backgroundPrimary};
+      border-radius: 2px;
+      display: block;
+      font-size: 1.3rem;
+      color: ${textPrimary};
+      text-align: center;
+      text-transform: uppercase;
+      margin: 1rem;
+      text-decoration: none;
+      box-shadow: 0.3rem 0.3rem white;
+    }
+    
+    .${prependClass('cta:hover')} {
+      transition: all 0.3s;
+      filter: brightness(0.95);
+    }
+    
+    .${prependClass('close-button')} {
+      border-radius: 100%;
+      background-color: white;
+      width: 2rem;
+      border: none;
+      height: 2rem;
+      position: absolute;
+      margin: 10px;
+      top: 0px;
+      right: 0px;
+      color: black;
+      font-size: 2rem;
+      font-weight: 300;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+    }
+    
+    .${prependClass('close-button:hover')} {
+      transition: all 0.3s;
+      filter: brightness(0.95);
+    }
+    
+    .${prependClass('image-darken')} {
+      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);'}
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 100%;
+    }
+    
+    .${prependClass('text-shadow')} {
+      text-shadow: var(--text-shadow);
+    }
+    
+    .${prependClass('box-shadow')} {
+      box-shadow: var(--text-shadow);
+    }
+    ${appendResponsiveBehaviour()}
+    `;
+    const styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(() => {
+      setStylesLoaded(true);
+    }, 500);
+    return () => {
+      document.head.removeChild(styles);
+    };
+  }, [isModalFullyClickable, height, width, appendResponsiveBehaviour]);
+  const getHandleModalActionFinal = React__default.useCallback(() => {
+    if (!isModalFullyClickable) return undefined;
+    return e => {
+      setImageDimensions({
+        width: 0,
+        height: 0
+      });
+      handleClickCallToAction(e);
+    };
+  }, [handleClickCallToAction]);
+  const handleClickCloseFinal = React__default.useCallback(e => {
+    e.stopPropagation();
+    return handleCloseModal(e);
+  }, [handleCloseModal]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  if (!width || !height) {
+    error("StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate.");
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    onClick: getHandleModalActionFinal(),
+    className: prependClass('modal'),
+    style: {
+      background: `url(${imageURL})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleClickCloseFinal
+  })), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
+    style: {
+      display: 'flex',
+      ...getModalButtonFlexPosition(defaultButtonPosition)
+    }
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction,
+    style: buttonSizeStyle
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
 const FullyClickableModal = ({
   handleClickCallToAction,
   handleCloseModal,
@@ -3294,23 +3556,22 @@ const FullyClickableModal = ({
       height,
       width
     }
-  } = useFullyClickableModalDimensions({
-    image: imageURL
+  } = useModalDimensionsBasedOnImage({
+    imageURL
   });
   const [stylesLoaded, setStylesLoaded] = useState(false);
   const appendResponsiveBehaviour = React__default.useCallback(() => {
     return isMobile ? `.${prependClass('modal')} {
-      max-width: 95%;
-      max-height: 95%;
-    }` : `
 
+    }` : `
 @media screen and (max-width: 1400px) {
   .${prependClass('modal')} {
-    height: ${0.8 * height}px;
-    width: ${0.8 * width}px;
+    height: ${1 * height}px;
+    width: ${1 * width}px;
   }
 }
-@media screen and (max-width: 1100px) {
+
+@media screen and (max-width: 850px) {
   .${prependClass('modal')} {
     height: ${0.6 * height}px;
     width: ${0.6 * width}px;
@@ -3323,7 +3584,6 @@ const FullyClickableModal = ({
     width: ${0.4 * width}px;
   }
 }
-
 `;
   }, [height, width]);
   useEffect(() => {
@@ -3440,8 +3700,8 @@ const FullyClickableModal = ({
     .${prependClass('box-shadow')} {
       box-shadow: var(--text-shadow);
     }
-
     ${appendResponsiveBehaviour()}
+
     `;
     const styles = document.createElement('style');
     styles.type = 'text/css';
@@ -3455,7 +3715,6 @@ const FullyClickableModal = ({
     };
   }, [height, width, appendResponsiveBehaviour]);
   const handleModalAction = React__default.useCallback(e => {
-    e.stopPropagation();
     return handleClickCallToAction(e);
   }, [handleClickCallToAction]);
   const handleClickClose = React__default.useCallback(e => {
@@ -3482,237 +3741,6 @@ const FullyClickableModal = ({
   }, React__default.createElement(CloseButton, {
     onClick: handleClickClose
   }))));
-};
-
-const defaultElementSize = 'medium';
-const defaultButtonPosition = 'right';
-const BasicModal = ({
-  trigger,
-  handleClickCallToAction,
-  handleCloseModal
-}) => {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  const elementSize = defaultElementSize;
-  const isModalFullyClickable = getIsModalFullyClickable({
-    trigger
-  });
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  const modalSizeStyle = getModalStylesBySize(elementSize);
-  const buttonSizeStyle = getModalButtonStylesBySize(elementSize);
-  const {
-    textPrimary,
-    backgroundPrimary
-  } = useBrandColors();
-  useEffect(() => {
-    const cssToApply = `
-    :root {
-      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    }
-    
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    p,
-    a,
-    span {
-      line-height: 1.2;
-      font-family: Arial, Helvetica, sans-serif;
-    
-    }
-    
-    .${prependClass('overlay')} {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: 500;
-      font-style: normal;
-    }
-    
-    .${prependClass('modal')} {
-      ${isModalFullyClickable ? 'cursor: pointer; ' : `
-        width: 80%;
-        height: 500px;
-      `}
-    
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background-repeat: no-repeat;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--text-shadow);
-    }
-    
-    
-    .${prependClass('text-center')} {
-      text-align: center;
-    }
-  
-    .${prependClass('text-container')} {
-      flex-direction: column;
-      flex: 1;
-      text-shadow: var(--text-shadow);
-      display: grid;
-      place-content: center;
-    }
-    
-    .${prependClass('main-text')} {
-      font-weight: 500;
-      font-size: 2rem;
-      font-style: normal;
-      text-align: center;
-      margin-bottom: 1rem;
-      color: ${textPrimary};
-      text-shadow: var(--text-shadow);
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-    
-    }
-    
-    .${prependClass('sub-text')} {
-      margin: auto;
-      font-weight: 600;
-      font-size: 1.2rem;
-      color: ${textPrimary};
-
-      text-align: center;
-      text-transform: uppercase;
-    }
-    
-    .${prependClass('cta')} {
-      cursor: pointer;
-      background-color: ${backgroundPrimary};
-      border-radius: 2px;
-      display: block;
-      font-size: 1.3rem;
-      color: ${textPrimary};
-      text-align: center;
-      text-transform: uppercase;
-      margin: 0 auto;
-      text-decoration: none;
-      box-shadow: 0.3rem 0.3rem white;
-    }
-    
-    .${prependClass('cta:hover')} {
-      transition: all 0.3s;
-      filter: brightness(0.95);
-    }
-    
-    .${prependClass('close-button')} {
-      border-radius: 100%;
-      background-color: white;
-      width: 2rem;
-      border: none;
-      height: 2rem;
-      position: absolute;
-      margin: 10px;
-      top: 0px;
-      right: 0px;
-      color: black;
-      font-size: 1.2rem;
-      font-weight: 300;
-      cursor: pointer;
-      display: grid;
-      place-content: center;
-    }
-    
-    .${prependClass('close-button:hover')} {
-      transition: all 0.3s;
-      filter: brightness(0.95);
-    }
-    
-    .${prependClass('image-darken')} {
-      background: rgba(0, 0, 0, 0.1);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 100%;
-      padding: 2rem 1.5rem 1.5rem 1.5rem;
-    }
-    
-    .${prependClass('text-shadow')} {
-      text-shadow: var(--text-shadow);
-    }
-    
-    .${prependClass('box-shadow')} {
-      box-shadow: var(--text-shadow);
-    }
-    `;
-    const styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(() => {
-      setStylesLoaded(true);
-    }, 500);
-  }, []);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    style: {
-      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative',
-      ...modalSizeStyle
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('image-darken')
-  }, React__default.createElement("button", {
-    className: prependClass('close-button'),
-    onClick: handleCloseModal
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '20',
-    height: '20',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: '#000',
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  }))), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    style: {
-      display: 'flex',
-      ...getModalButtonFlexPosition(defaultButtonPosition)
-    }
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction,
-    style: buttonSizeStyle
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-const StandardModal = props => {
-  const isModalFullyClickable = getIsModalFullyClickable({
-    trigger: props.trigger
-  });
-  if (isModalFullyClickable) return React__default.createElement(FullyClickableModal, Object.assign({}, props));
-  return React__default.createElement(BasicModal, Object.assign({}, props));
 };
 
 const CurlyText = ({
