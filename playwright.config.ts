@@ -33,4 +33,13 @@ export default defineConfig({
       use: { ...devices['Pixel 5'] },
     },
   ],
+
+  // webServer: {
+  //   command: 'npm run start',
+  //   url: baseURL,
+  //   timeout: 120 * 1000,
+  //   reuseExistingServer: !process.env.CI,
+  //   stdout: 'pipe',
+  //   stderr: 'pipe',
+  // },
 });
