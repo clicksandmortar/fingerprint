@@ -1,6 +1,8 @@
 /**
- * Didnt spend too much time makeing this proper, since it will get merged with
- * the standard modal soon
+ * @deprecated
+ *
+ * This file is used by a few campaigns. Once they are over, use the StdModal and delete this file
+ *
  */
 import React from 'react';
 import { Trigger } from '../../client/types';

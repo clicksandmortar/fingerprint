@@ -323,8 +323,8 @@ export const BrownsModal = (props: Props) => {
   const { trigger } = props
 
   const isFullyClickable = getIsModalFullyClickable({ trigger })
-
+  // Once the campaign is over, kill both of these and use StdModal
   if (!isFullyClickable) return <BrownsCustomModal {...props} />
-
+  // Once the campaign is over, kill both of these and use StdModal
   return <FullyClickableModal {...props} />
 }
