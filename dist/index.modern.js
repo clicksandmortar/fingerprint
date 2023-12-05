@@ -3240,14 +3240,10 @@ const useModalDimensionsBasedOnImage = ({
   useEffect(() => {
     const img = new Image();
     img.src = imageURL;
-    console.log({
-      imageURL
-    });
     const id = setInterval(() => {
       const modalSize = getModalSizing(img);
       if (modalSize.height || modalSize.width) {
         setImageDimensions(modalSize);
-        console.log('setting...', modalSize);
         clearInterval(id);
       }
     }, 50);
