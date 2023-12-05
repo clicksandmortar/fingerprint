@@ -39,8 +39,10 @@ const Modal = ({ trigger }: Props) => {
     // like to over-rerender componets. This timeout prevents from firing a ton
     const tId = setTimeout(() => {
       runSeen(trigger)
-      setInvocationTimeStamp(new Date().toISOString())
-    }, 1500)
+      if (!invocationTimeStamp) {
+        setInvocationTimeStamp(new Date().toISOString())
+      }
+    }, 500)
 
     return () => {
       clearTimeout(tId)
@@ -56,7 +58,7 @@ const Modal = ({ trigger }: Props) => {
     collect({
       cta: {
         variantID: trigger.id,
-        shownAt: invocationTimeStamp || ''
+        shownAt: invocationTimeStamp || new Date().toISOString()
       }
     })
     trackEvent('user_clicked_button', { ...trigger, variantName: 'MODAL' })
