@@ -3797,7 +3797,9 @@ var Modal = function Modal(_ref) {
     if (isLoading) return;
     var tId = setTimeout(function () {
       runSeen(trigger);
-      setInvocationTimeStamp(new Date().toISOString());
+      if (!invocationTimeStamp) {
+        setInvocationTimeStamp(new Date().toISOString());
+      }
     }, 500);
     return function () {
       clearTimeout(tId);
