@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { Trigger } from '../../../client/types'
 
+import { useLogging } from '../../../context/LoggingContext'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
 import CloseButton from '../../CloseButton'
 import {
@@ -24,11 +25,12 @@ type Props = {
 const defaultElementSize: ModalSize = 'medium'
 const defaultButtonPosition: ButtonPosition = 'right'
 
-const BasicModal = ({
+const StandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }: Props) => {
+  const { error } = useLogging()
   const isModalFullyClickable = getIsModalFullyClickable({ trigger })
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
@@ -36,7 +38,8 @@ const BasicModal = ({
   const { textPrimary, backgroundPrimary } = useBrandColors()
   const imageURL = trigger?.data?.backgroundURL || ''
   const {
-    imageDimensions: { height, width }
+    imageDimensions: { height, width },
+    setImageDimensions
   } = useModalDimensionsBasedOnImage({
     imageURL
   })
@@ -80,7 +83,7 @@ const BasicModal = ({
 }
 
 `
-  }, [height, width])
+  }, [height, width, imageURL, isMobile])
 
   useEffect(() => {
     // @todo: note that because of the font being screwed up a bit on all of these host urls,
@@ -131,7 +134,7 @@ const BasicModal = ({
       align-items: center;
       justify-content: space-between;
       box-shadow: var(--text-shadow);
-      ${isModalFullyClickable ? 'transition: all 0.3s ease-in-out;' : ''}
+      ${isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : ''}
       ${isModalFullyClickable ? 'cursor: pointer;' : ''}
     }
     
@@ -247,13 +250,17 @@ const BasicModal = ({
     setTimeout(() => {
       setStylesLoaded(true)
     }, 500)
+    return () => {
+      document.head.removeChild(styles)
+    }
   }, [isModalFullyClickable, height, width, appendResponsiveBehaviour])
 
   const getHandleModalActionFinal = React.useCallback(() => {
     if (!isModalFullyClickable) return undefined
 
     return (e: any) => {
-      return handleClickCallToAction(e)
+      setImageDimensions({ width: 0, height: 0 })
+      handleClickCallToAction(e)
     }
   }, [handleClickCallToAction])
 
@@ -266,6 +273,13 @@ const BasicModal = ({
   )
 
   if (!stylesLoaded) {
+    return null
+  }
+
+  if (!width || !height) {
+    error(
+      "StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate."
+    )
     return null
   }
 
@@ -319,10 +333,6 @@ const BasicModal = ({
       </div>
     </div>
   )
-}
-
-const StandardModal = (props: Props) => {
-  return <BasicModal {...props} />
 }
 
 export default StandardModal

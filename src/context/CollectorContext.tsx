@@ -145,6 +145,7 @@ export function CollectorProvider({
         return
       }
 
+      log('CollectorProvider: Triggering behaviour', invokableTrigger)
       // if the trigger is already in the list, don't add it again
       setDisplayedTriggers((prev) => {
         if (prev.includes(invokableTrigger.id)) return prev

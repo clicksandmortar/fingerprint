@@ -115,17 +115,23 @@ export const useModalDimensionsBasedOnImage = ({
     const img = new Image()
     img.src = imageURL
 
+    console.log({ imageURL })
     // repeatedly attempt to get the bloody image size. Once it loads and we get a proper value,
     // remove the interval. No, image.onload() is not predictable enough to be considered
     const id = setInterval(() => {
       const modalSize = getModalSizing(img)
+
       if (modalSize.height || modalSize.width) {
         setImageDimensions(modalSize)
         console.log('setting...', modalSize)
         clearInterval(id)
       }
     }, 50)
+
+    return () => {
+      clearInterval(id)
+    }
   }, [imageURL])
 
-  return { imageDimensions }
+  return { imageDimensions, setImageDimensions }
 }

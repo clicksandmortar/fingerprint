@@ -17,4 +17,8 @@ export declare const useModalDimensionsBasedOnImage: ({ imageURL }: {
         width: number;
         height: number;
     };
+    setImageDimensions: import("react").Dispatch<import("react").SetStateAction<{
+        width: number;
+        height: number;
+    }>>;
 };

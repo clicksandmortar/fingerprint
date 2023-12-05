@@ -1190,6 +1190,7 @@ function CollectorProvider({
       log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
       return;
     }
+    log('CollectorProvider: Triggering behaviour', invokableTrigger);
     setDisplayedTriggers(prev => {
       if (prev.includes(invokableTrigger.id)) return prev;
       return [...prev, invokableTrigger.id];
@@ -3231,6 +3232,9 @@ const useModalDimensionsBasedOnImage = ({
   useEffect(() => {
     const img = new Image();
     img.src = imageURL;
+    console.log({
+      imageURL
+    });
     const id = setInterval(() => {
       const modalSize = getModalSizing(img);
       if (modalSize.height || modalSize.width) {
@@ -3239,20 +3243,27 @@ const useModalDimensionsBasedOnImage = ({
         clearInterval(id);
       }
     }, 50);
+    return () => {
+      clearInterval(id);
+    };
   }, [imageURL]);
   return {
-    imageDimensions
+    imageDimensions,
+    setImageDimensions
   };
 };
 
 const defaultElementSize = 'medium';
 const defaultButtonPosition = 'right';
-const BasicModal = ({
+const StandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }) => {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  const {
+    error
+  } = useLogging();
   const isModalFullyClickable = getIsModalFullyClickable({
     trigger
   });
@@ -3267,7 +3278,8 @@ const BasicModal = ({
     imageDimensions: {
       height,
       width
-    }
+    },
+    setImageDimensions
   } = useModalDimensionsBasedOnImage({
     imageURL
   });
@@ -3308,7 +3320,7 @@ const BasicModal = ({
 }
 
 `;
-  }, [height, width]);
+  }, [height, width, imageURL, isMobile]);
   useEffect(() => {
     const cssToApply = `
     :root {
@@ -3355,7 +3367,7 @@ const BasicModal = ({
       align-items: center;
       justify-content: space-between;
       box-shadow: var(--text-shadow);
-      ${isModalFullyClickable ? 'transition: all 0.3s ease-in-out;' : ''}
+      ${isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : ''}
       ${isModalFullyClickable ? 'cursor: pointer;' : ''}
     }
     
@@ -3466,11 +3478,18 @@ const BasicModal = ({
     setTimeout(() => {
       setStylesLoaded(true);
     }, 500);
+    return () => {
+      document.head.removeChild(styles);
+    };
   }, [isModalFullyClickable, height, width, appendResponsiveBehaviour]);
   const getHandleModalActionFinal = React__default.useCallback(() => {
     if (!isModalFullyClickable) return undefined;
     return e => {
-      return handleClickCallToAction(e);
+      setImageDimensions({
+        width: 0,
+        height: 0
+      });
+      handleClickCallToAction(e);
     };
   }, [handleClickCallToAction]);
   const handleClickCloseFinal = React__default.useCallback(e => {
@@ -3478,6 +3497,10 @@ const BasicModal = ({
     return handleCloseModal(e);
   }, [handleCloseModal]);
   if (!stylesLoaded) {
+    return null;
+  }
+  if (!width || !height) {
+    error("StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate.");
     return null;
   }
   return React__default.createElement("div", {
@@ -3515,9 +3538,6 @@ const BasicModal = ({
     onClick: handleClickCallToAction,
     style: buttonSizeStyle
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-const StandardModal = props => {
-  return React__default.createElement(BasicModal, Object.assign({}, props));
 };
 
 const FullyClickableModal = ({
