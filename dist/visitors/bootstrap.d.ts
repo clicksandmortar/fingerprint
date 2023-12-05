@@ -1,6 +1,10 @@
 import { Session } from '../sessions/types';
 import { Visitor } from './types';
-export declare const CnMCookie = "_cm_id";
+export declare const cookieValidDays = 365;
+export declare const CnMCookie = "_cm";
+export declare const CnMIDCookie = "_cm_id";
+export declare function getCookieDomain(): string | null;
+export declare function correctCookieSubdomain(): string | undefined;
 export declare const buildCookie: ({ visitorId }: {
     visitorId: string;
 }) => string;
