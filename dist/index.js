@@ -331,7 +331,13 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   if (typeof window !== 'undefined') {
     var urlParams = new URLSearchParams(window.location.search);
     var vid = urlParams.get('v_id');
-    if (vid) visitor.id = vid;
+    if (vid) {
+      if (vid.includes('?')) {
+        var _vid$split = vid.split('?');
+        vid = _vid$split[0];
+      }
+      visitor.id = vid;
+    }
     var sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
