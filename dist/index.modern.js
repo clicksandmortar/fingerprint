@@ -570,13 +570,17 @@ const collinBrandsPathConversionMap = {
 };
 function useCollinsBookingComplete() {
   const {
-    trackEvent
+    trackEvent,
+    state: {
+      initiated
+    }
   } = useMixpanel();
   const {
     log
   } = useLogging();
   const brand = useBrand();
   const checkCollinsBookingComplete = React__default.useCallback(() => {
+    if (!initiated) return;
     if (!brand) return;
     const conversionPathForBrand = collinBrandsPathConversionMap[brand];
     if (!conversionPathForBrand) return;
@@ -584,7 +588,7 @@ function useCollinsBookingComplete() {
     if (!isConversionPath) return;
     log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
     trackEvent('booking_complete', {});
-  }, [trackEvent, log, brand]);
+  }, [trackEvent, log, brand, initiated]);
   return {
     checkCollinsBookingComplete
   };
