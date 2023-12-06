@@ -310,16 +310,17 @@ const bootstrapVisitor = ({
   }
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
-    let vidParam = urlParams.get('v_id');
-    let visitorId = vidParam || undefined;
-    if (vidParam && vidParam.includes('?')) {
-      visitorId = vidParam.split('?')[0];
+    let vid = urlParams.get('v_id');
+    if (vid) {
+      if (vid.includes('?')) {
+        [vid] = vid.split('?');
+      }
+      visitor.id = vid;
     }
-    visitor.id = visitorId;
     const sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
-  if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie))) {
+  if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie) || '')) {
     const visitorId = v4();
     visitor.id = visitorId;
   }
