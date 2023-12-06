@@ -573,13 +573,26 @@ function useCollinsBookingComplete() {
   } = useLogging();
   const brand = useBrand();
   const checkCollinsBookingComplete = React__default.useCallback(() => {
-    if (!initiated) return;
-    if (!brand) return;
+    console.log('useCollinsBookingComplete: checking for Collins booking complete');
+    if (!initiated) {
+      console.log('useCollinsBookingComplete, no init');
+      return;
+    }
+    if (!brand) {
+      console.log('useCollinsBookingComplete, no brand');
+      return;
+    }
     const conversionPathForBrand = collinBrandsPathConversionMap[brand];
-    if (!conversionPathForBrand) return;
+    if (!conversionPathForBrand) {
+      console.log('useCollinsBookingComplete: no path for brand variable');
+      return;
+    }
     const isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
-    if (!isConversionPath) return;
-    log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
+    if (!isConversionPath) {
+      console.log('useCollinsBookingComplete: not a conversion path');
+      return;
+    }
+    console.log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
     trackEvent('booking_complete', {});
   }, [trackEvent, log, brand, initiated]);
   return {
@@ -1083,7 +1096,7 @@ const useRunOnPathChange = (func, config) => {
     if (config !== null && config !== void 0 && config.skip) return;
     if (!location.href) return;
     if (location.href === lastCollectedHref) return;
-    log('useRunOnPathChange: running for path: ', location.href);
+    console.log('useRunOnPathChange: running' + (config === null || config === void 0 ? void 0 : config.name));
     setLastCollectedHref(location.href);
     func();
   }, [func, config, lastCollectedHref]);
@@ -1460,15 +1473,18 @@ function CollectorProvider({
   }, [fireOnLoadTriggers]);
   useRunOnPathChange(checkCollinsBookingComplete, {
     skip: !booted,
-    delay: initialDelay
+    delay: 0,
+    name: 'checkCollinsBookingComplete'
   });
   useRunOnPathChange(collectAndApplyVisitorInfo, {
     skip: !booted,
-    delay: initialDelay
+    delay: initialDelay,
+    name: 'collectAndApplyVisitorInfo'
   });
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
-    delay: initialDelay
+    delay: initialDelay,
+    name: 'fireOnLoadTriggers'
   });
   useFormCollector();
   useButtonCollector();
