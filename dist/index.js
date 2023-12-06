@@ -336,7 +336,6 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
       visitorId = vidParam.split('?')[0];
     }
     visitor.id = visitorId;
-    console.log('VID', visitor.id);
     var sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
@@ -747,9 +746,6 @@ var useCollectorMutation = function useCollectorMutation() {
     visitor = _useVisitor.visitor,
     session = _useVisitor.session;
   var requestHost = useHostname();
-  console.log('VID', {
-    visitor: visitor
-  });
   return reactQuery.useMutation(function (data) {
     return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), _extends({}, data, {
       appId: appId,

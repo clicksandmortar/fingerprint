@@ -316,7 +316,6 @@ const bootstrapVisitor = ({
       visitorId = vidParam.split('?')[0];
     }
     visitor.id = visitorId;
-    console.log('VID', visitor.id);
     const sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
@@ -698,9 +697,6 @@ const useCollectorMutation = () => {
     session
   } = useVisitor();
   const requestHost = useHostname();
-  console.log('VID', {
-    visitor
-  });
   return useMutation(data => {
     return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), {
       ...data,

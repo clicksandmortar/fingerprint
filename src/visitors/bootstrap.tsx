@@ -100,7 +100,6 @@ export const bootstrapVisitor = ({
     }
 
     visitor.id = visitorId
-    console.log('VID', visitor.id)
 
     const sourceId = urlParams.get('source_id')
     if (sourceId) visitor.sourceId = sourceId
