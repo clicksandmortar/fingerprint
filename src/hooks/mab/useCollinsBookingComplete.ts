@@ -28,30 +28,29 @@ export function useCollinsBookingComplete() {
   const brand = useBrand()
 
   const checkCollinsBookingComplete = React.useCallback(() => {
-    console.log(
-      'useCollinsBookingComplete: checking for Collins booking complete'
-    )
+    log('useCollinsBookingComplete: checking for Collins booking complete')
     // might want to add these checks as part of skip condition in `useRunOnPathChange`
     if (!initiated) {
-      console.log('useCollinsBookingComplete, no init')
+      log('useCollinsBookingComplete, mixpanel not initiated')
       return
     }
     if (!brand) {
-      console.log('useCollinsBookingComplete, no brand')
+      log('useCollinsBookingComplete, no brand')
       return
     }
 
     const conversionPathForBrand = collinBrandsPathConversionMap[brand]
     if (!conversionPathForBrand) {
-      console.log('useCollinsBookingComplete: no path for brand variable')
+      log('useCollinsBookingComplete: no path for brand variable')
       return
     }
 
     const isConversionPath = window.location.pathname
       .toLowerCase()
       .includes(conversionPathForBrand.toLowerCase())
+
     if (!isConversionPath) {
-      console.log('useCollinsBookingComplete: not a conversion path')
+      log('useCollinsBookingComplete: not a conversion path')
       return
     }
 
