@@ -12,7 +12,25 @@ import { useExitIntent } from 'use-exit-intent';
 import { isMobile } from 'react-device-detect';
 import { useForm } from 'react-hook-form';
 
-const closeButtonStyles = {
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+function _objectDestructuringEmpty(obj) {
+  if (obj == null) throw new TypeError("Cannot destructure " + obj);
+}
+
+var closeButtonStyles = {
   borderRadius: '100%',
   backgroundColor: 'white',
   width: '2rem',
@@ -26,14 +44,10 @@ const closeButtonStyles = {
   display: 'grid',
   placeContent: 'center'
 };
-const CloseButton = ({
-  onClick,
-  style
-}) => {
-  const buttonStyle = {
-    ...closeButtonStyles,
-    ...style
-  };
+var CloseButton = function CloseButton(_ref) {
+  var onClick = _ref.onClick,
+    style = _ref.style;
+  var buttonStyle = _extends({}, closeButtonStyles, style);
   return React__default.createElement("button", {
     style: buttonStyle,
     onClick: onClick
@@ -49,13 +63,13 @@ const CloseButton = ({
   })));
 };
 
-const useFingerprint = () => {
+var useFingerprint = function useFingerprint() {
   return useContext(FingerprintContext);
 };
 
 function getEnvVars() {
   var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
-  let isDev = false;
+  var isDev = false;
   switch (true) {
     case typeof window === 'undefined':
     case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
@@ -78,12 +92,12 @@ function getEnvVars() {
   };
 }
 
-const TEMP_isCNMBrand = () => {
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
   if (typeof window === 'undefined') return false;
-  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
   return isCnMBookingDomain;
 };
-const _LEGACY_getBrand = () => {
+var _LEGACY_getBrand = function _LEGACY_getBrand() {
   if (typeof window === 'undefined') return null;
   if (TEMP_isCNMBrand()) return 'C&M';
   if (window.location.host.startsWith('localhost')) return 'C&M';
@@ -94,15 +108,17 @@ const _LEGACY_getBrand = () => {
   if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
   return 'C&M';
 };
-const haveBrandColorsBeenConfigured = colors => {
+var haveBrandColorsBeenConfigured = function haveBrandColorsBeenConfigured(colors) {
   if (!colors) return false;
   if (typeof colors !== 'object') return false;
   if (Object.keys(colors).length === 0) return false;
-  if (Object.values(colors).every(color => color === '#000000')) return false;
+  if (Object.values(colors).every(function (color) {
+    return color === '#000000';
+  })) return false;
   return true;
 };
 
-const defaultColors = {
+var defaultColors = {
   backgroundPrimary: '#2a3d6d',
   backgroundPrimaryDimmed: 'rgb(27,233,237)',
   backgroundSecondary: 'rgb(226,226,226)',
@@ -110,7 +126,7 @@ const defaultColors = {
   textPrimary: '#ffffff',
   greyText: '#40404b'
 };
-const defaultConfig = {
+var defaultConfig = {
   script: {
     debugMode: false
   },
@@ -124,248 +140,256 @@ const defaultConfig = {
     colors: defaultColors
   }
 };
-const LEGACY_merge_config = (config, legacy_config) => ({
-  displayTriggerAfterSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || 0) / 1000 || config.trigger.displayTriggerAfterSecs,
-  triggerCooldownSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || 0) / 1000 || config.trigger.triggerCooldownSecs,
-  userIdleThresholdSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || 0) / 1000 || config.trigger.userIdleThresholdSecs
-});
-const objStringtoObjNum = obj => {
-  const newObj = {};
-  Object.keys(obj).forEach(key => {
+var LEGACY_merge_config = function LEGACY_merge_config(config, legacy_config) {
+  return {
+    displayTriggerAfterSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || 0) / 1000 || config.trigger.displayTriggerAfterSecs,
+    triggerCooldownSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || 0) / 1000 || config.trigger.triggerCooldownSecs,
+    userIdleThresholdSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || 0) / 1000 || config.trigger.userIdleThresholdSecs
+  };
+};
+var objStringtoObjNum = function objStringtoObjNum(obj) {
+  var newObj = {};
+  Object.keys(obj).forEach(function (key) {
     newObj[key] = Number(obj[key]);
   });
   return newObj;
 };
-function ConfigProvider({
-  children,
-  legacy_config
-}) {
-  const [config, setConfigState] = useState(defaultConfig);
-  const log = React__default.useCallback((...params) => {
+function ConfigProvider(_ref) {
+  var children = _ref.children,
+    legacy_config = _ref.legacy_config;
+  var _useState = useState(defaultConfig),
+    config = _useState[0],
+    setConfigState = _useState[1];
+  var log = React__default.useCallback(function () {
     if (config.script.debugMode) {
-      console.log('[ConfigProvider]', ...params);
+      var _console;
+      for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+        params[_key] = arguments[_key];
+      }
+      (_console = console).log.apply(_console, ['[ConfigProvider]'].concat(params));
     }
   }, [config, legacy_config]);
-  const setConfig = React__default.useCallback(updatedConfigEntries => {
+  var setConfig = React__default.useCallback(function (updatedConfigEntries) {
     var _updatedConfigEntries;
-    const argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
-    const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
+    var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
+    var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
     if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
-    setConfigState(prev => {
-      return {
-        ...prev,
-        ...updatedConfigEntries,
-        brand: {
-          ...prev.brand,
-          ...updatedConfigEntries.brand,
-          colors: shouldUpdateColors ? {
-            ...(prev.brand.colors || defaultColors),
-            ...(argColors || {})
-          } : prev.brand.colors
-        },
-        trigger: {
-          ...prev.trigger,
-          ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
-        }
-      };
+    setConfigState(function (prev) {
+      return _extends({}, prev, updatedConfigEntries, {
+        brand: _extends({}, prev.brand, updatedConfigEntries.brand, {
+          colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, argColors || {}) : prev.brand.colors
+        }),
+        trigger: _extends({}, prev.trigger, objStringtoObjNum(LEGACY_merge_config(prev, legacy_config)))
+      });
     });
   }, [setConfigState]);
-  const value = {
-    config,
-    setConfig
+  var value = {
+    config: config,
+    setConfig: setConfig
   };
-  useEffect(() => {
+  useEffect(function () {
     log('config in use:', config);
   }, [config]);
   return React__default.createElement(ConfigContext.Provider, {
     value: value
   }, children);
 }
-const ConfigContext = createContext({
+var ConfigContext = createContext({
   config: defaultConfig,
-  setConfig: () => {
+  setConfig: function setConfig() {
     console.error('ConfigContext: setConfig not implemented');
   }
 });
 
-const useConfig = () => React__default.useContext(ConfigContext);
-const useBrand = () => {
-  const configBrandName = useConfig().config.brand.name;
+var useConfig = function useConfig() {
+  return React__default.useContext(ConfigContext);
+};
+var useBrand = function useBrand() {
+  var configBrandName = useConfig().config.brand.name;
   if (configBrandName) return configBrandName;
   return _LEGACY_getBrand();
 };
-const useTriggerConfig = () => useConfig().config.trigger;
-const useBrandColors = () => {
+var useTriggerConfig = function useTriggerConfig() {
+  return useConfig().config.trigger;
+};
+var useBrandColors = function useBrandColors() {
   return useConfig().config.brand.colors || defaultColors;
 };
 
-const LoggingProvider = ({
-  children
-}) => {
-  const debug = useConfig().config.script.debugMode;
-  const log = (...message) => {
+var LoggingProvider = function LoggingProvider(_ref) {
+  var children = _ref.children;
+  var debug = useConfig().config.script.debugMode;
+  var log = function log() {
     if (debug) {
-      console.log(...message);
+      var _console;
+      (_console = console).log.apply(_console, arguments);
     }
   };
-  const warn = (...message) => {
+  var warn = function warn() {
     if (debug) {
-      console.warn(...message);
+      var _console2;
+      (_console2 = console).warn.apply(_console2, arguments);
     }
   };
-  const error = (...message) => {
+  var error = function error() {
     if (debug) {
-      console.error(...message);
+      var _console3;
+      (_console3 = console).error.apply(_console3, arguments);
     }
   };
-  const info = (...message) => {
+  var info = function info() {
     if (debug) {
-      console.info(...message);
+      var _console4;
+      (_console4 = console).info.apply(_console4, arguments);
     }
   };
-  useEffect(() => {
+  useEffect(function () {
     if (!debug) return;
     log('LoggingProvider: In Debug Mode');
   });
   return React__default.createElement(LoggingContext.Provider, {
     value: {
-      log,
-      warn,
-      error,
-      info
+      log: log,
+      warn: warn,
+      error: error,
+      info: info
     }
   }, children);
 };
-const LoggingContext = createContext({
-  log: () => {},
-  warn: () => {},
-  error: () => {},
-  info: () => {}
+var LoggingContext = createContext({
+  log: function log() {},
+  warn: function warn() {},
+  error: function error() {},
+  info: function info() {}
 });
-const useLogging = () => {
+var useLogging = function useLogging() {
   return useContext(LoggingContext);
 };
 
-const uuidValidateV4 = uuid => {
+var uuidValidateV4 = function uuidValidateV4(uuid) {
   return validate(uuid) && version(uuid) === 4;
 };
 
-const validVisitorId = id => {
-  const splitCookie = id.split('|');
+var validVisitorId = function validVisitorId(id) {
+  var splitCookie = id.split('|');
   return uuidValidateV4(splitCookie[0]);
 };
 
-const cookieValidDays = 365;
-const CnMCookie = '_cm';
-const CnMIDCookie = '_cm_id';
+var cookieValidDays = 365;
+var CnMCookie = '_cm';
+var CnMIDCookie = '_cm_id';
 function getCookieDomain() {
-  const parsedUrl = psl.parse(location.host);
-  let cookieDomain = null;
+  var parsedUrl = psl.parse(location.host);
+  var cookieDomain = null;
   if (!parsedUrl.error) cookieDomain = parsedUrl.domain || null;
   return cookieDomain;
 }
 function correctCookieSubdomain() {
-  let cookie = getCookie(CnMIDCookie);
+  var cookie = getCookie(CnMIDCookie);
   if (!cookie) return;
   Cookies.remove(CnMIDCookie);
   setCookie(CnMIDCookie, cookie, cookieValidDays);
   return cookie;
 }
-const buildCookie = ({
-  visitorId
-}) => {
-  const {
-    sessionId,
-    endTime
-  } = getSessionIdAndEndTime(getCookie(CnMIDCookie));
-  return `${visitorId}|${sessionId}|${endTime.toISOString()}`;
+var buildCookie = function buildCookie(_ref) {
+  var visitorId = _ref.visitorId;
+  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie(CnMIDCookie)),
+    sessionId = _getSessionIdAndEndTi.sessionId,
+    endTime = _getSessionIdAndEndTi.endTime;
+  return visitorId + "|" + sessionId + "|" + endTime.toISOString();
 };
-const updateCookieUUID = (cookieData, uuid) => {
+var updateCookieUUID = function updateCookieUUID(cookieData, uuid) {
   if (!cookieData) return null;
-  const cookieSplit = cookieData.split('|');
+  var cookieSplit = cookieData.split('|');
   if (cookieSplit.length <= 2) return null;
-  const visitorId = cookieSplit[0];
+  var visitorId = cookieSplit[0];
   if (visitorId === uuid) return null;
-  const sessionId = cookieSplit[1];
-  const endTime = cookieSplit[2];
-  return `${uuid}|${sessionId}|${endTime}`;
+  var sessionId = cookieSplit[1];
+  var endTime = cookieSplit[2];
+  return uuid + "|" + sessionId + "|" + endTime;
 };
-const updateCookie = uuid => {
+var updateCookie = function updateCookie(uuid) {
   if (!uuidValidateV4(uuid)) return;
-  const cookie = getCookie(CnMIDCookie);
-  const newCookie = updateCookieUUID(cookie, uuid);
+  var cookie = getCookie(CnMIDCookie);
+  var newCookie = updateCookieUUID(cookie, uuid);
   if (!newCookie) return;
   setCookie(CnMIDCookie, newCookie, cookieValidDays);
 };
-const bootstrapVisitor = ({
-  setVisitor,
-  session,
-  setSession
-}) => {
-  const visitor = {
+var bootstrapVisitor = function bootstrapVisitor(_ref2) {
+  var setVisitor = _ref2.setVisitor,
+    session = _ref2.session,
+    setSession = _ref2.setSession;
+  var visitor = {
     id: undefined
   };
   if (getCookie(cookieAccountJWT)) {
     visitor.jwt = getCookie(cookieAccountJWT);
   }
   if (typeof window !== 'undefined') {
-    const urlParams = new URLSearchParams(window.location.search);
-    const vid = urlParams.get('v_id');
-    if (vid) visitor.id = vid;
-    const sourceId = urlParams.get('source_id');
+    var urlParams = new URLSearchParams(window.location.search);
+    var vid = urlParams.get('v_id');
+    if (vid) {
+      if (vid.includes('?')) {
+        var _vid$split = vid.split('?');
+        vid = _vid$split[0];
+      }
+      visitor.id = vid;
+    }
+    var sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
   if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie))) {
-    const visitorId = v4();
+    var visitorId = v4();
     visitor.id = visitorId;
   }
   if (!visitor.id && getCookie(CnMIDCookie)) {
-    const c = getCookie(CnMIDCookie);
-    const [visitorId] = c.split('|');
-    visitor.id = visitorId;
+    var c = getCookie(CnMIDCookie);
+    var _c$split = c.split('|'),
+      _visitorId = _c$split[0];
+    visitor.id = _visitorId;
   }
-  const combinedCookie = buildCookie({
+  var combinedCookie = buildCookie({
     visitorId: visitor.id
   });
   setCookie(CnMIDCookie, combinedCookie, cookieValidDays);
-  const {
-    sessionId,
-    endTime
-  } = getSessionIdAndEndTime(getCookie(CnMIDCookie));
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMIDCookie)),
+    sessionId = _getSessionIdAndEndTi2.sessionId,
+    endTime = _getSessionIdAndEndTi2.endTime;
   session.id = sessionId;
   session.endTime = endTime;
   setSession(session);
   setVisitor(visitor);
 };
-const getSessionIdAndEndTime = cookieData => {
-  const t = new Date();
+var getSessionIdAndEndTime = function getSessionIdAndEndTime(cookieData) {
+  var t = new Date();
   t.setMinutes(t.getMinutes() + 30);
-  let sessionId;
-  const endTime = t;
+  var sessionId;
+  var endTime = t;
   if (!cookieData || hasCookieValueExpired(cookieData)) {
     sessionId = v4();
   } else {
-    const c = cookieData;
-    let [, sessId] = c.split('|');
+    var c = cookieData;
+    var _c$split2 = c.split('|'),
+      sessId = _c$split2[1];
     if (sessId === 'undefined' || sessId === undefined) {
       sessId = v4();
     }
     sessionId = sessId;
   }
   return {
-    sessionId,
-    endTime
+    sessionId: sessionId,
+    endTime: endTime
   };
 };
-const hasCookieValueExpired = cookieData => {
+var hasCookieValueExpired = function hasCookieValueExpired(cookieData) {
   if (!cookieData) return true;
-  const cookieSplit = cookieData.split('|');
+  var cookieSplit = cookieData.split('|');
   if (cookieSplit.length > 1) {
-    const timestampString = cookieSplit[cookieSplit.length - 1];
-    const expiryTimeEpoch = Date.parse(timestampString);
-    const expiryTime = new Date();
+    var timestampString = cookieSplit[cookieSplit.length - 1];
+    var expiryTimeEpoch = Date.parse(timestampString);
+    var expiryTime = new Date();
     expiryTime.setTime(expiryTimeEpoch);
-    const n = new Date();
+    var n = new Date();
     if (n > expiryTime) {
       return true;
     }
@@ -373,21 +397,23 @@ const hasCookieValueExpired = cookieData => {
   return false;
 };
 
-const setCookie = (name, value, expires, options) => {
-  return Cookies.set(name, value, {
+var setCookie = function setCookie(name, value, expires, options) {
+  return Cookies.set(name, value, _extends({
     expires: expires,
     sameSite: 'strict',
-    domain: getCookieDomain() || undefined,
-    ...options
-  });
+    domain: getCookieDomain() || undefined
+  }, options));
 };
-const getCookie = name => {
+var getCookie = function getCookie(name) {
   return Cookies.get(name);
 };
-const onCookieChanged = (callback, interval = 1000) => {
-  let lastCookie = document.cookie;
-  setInterval(() => {
-    const cookie = document.cookie;
+var onCookieChanged = function onCookieChanged(callback, interval) {
+  if (interval === void 0) {
+    interval = 1000;
+  }
+  var lastCookie = document.cookie;
+  setInterval(function () {
+    var cookie = document.cookie;
     if (cookie !== lastCookie) {
       try {
         callback({
@@ -401,11 +427,10 @@ const onCookieChanged = (callback, interval = 1000) => {
   }, interval);
 };
 
-const bootstrapSession = ({
-  appId,
-  setSession
-}) => {
-  const session = {
+var bootstrapSession = function bootstrapSession(_ref) {
+  var appId = _ref.appId,
+    setSession = _ref.setSession;
+  var session = {
     firstVisit: undefined
   };
   if (!getCookie(CnMCookie) || getCookie(CnMCookie) !== appId) {
@@ -419,93 +444,101 @@ const bootstrapSession = ({
   }
 };
 
-const VisitorProvider = ({
-  children
-}) => {
-  const {
-    appId,
-    booted
-  } = useFingerprint();
-  const {
-    log
-  } = useLogging();
-  const [session, setSession] = useState({});
-  const [visitor, setVisitor] = useState({});
-  useEffect(() => {
+var VisitorProvider = function VisitorProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId,
+    booted = _useFingerprint.booted;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = useState({}),
+    session = _useState[0],
+    setSession = _useState[1];
+  var _useState2 = useState({}),
+    visitor = _useState2[0],
+    setVisitor = _useState2[1];
+  useEffect(function () {
     if (!booted) {
       log('VisitorProvider: not booted');
       return;
     }
     log('VisitorProvider: booting');
-    const boot = async () => {
-      await bootstrapSession({
-        appId,
-        setSession
-      });
-      await bootstrapVisitor({
-        setVisitor,
-        session,
-        setSession
-      });
-      const updatedCookie = correctCookieSubdomain();
-      log('FingerprintContext: Correcting cookie domain to', updatedCookie);
+    var boot = function boot() {
+      try {
+        return Promise.resolve(bootstrapSession({
+          appId: appId,
+          setSession: setSession
+        })).then(function () {
+          return Promise.resolve(bootstrapVisitor({
+            setVisitor: setVisitor,
+            session: session,
+            setSession: setSession
+          })).then(function () {
+            var updatedCookie = correctCookieSubdomain();
+            log('FingerprintContext: Correcting cookie domain to', updatedCookie);
+          });
+        });
+      } catch (e) {
+        return Promise.reject(e);
+      }
     };
     boot();
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
-  const setVisitorData = React__default.useCallback(prop => {
-    setVisitor(visitor => ({
-      ...visitor,
-      ...prop
-    }));
+  var setVisitorData = React__default.useCallback(function (prop) {
+    setVisitor(function (visitor) {
+      return _extends({}, visitor, prop);
+    });
   }, [setVisitor]);
   return React__default.createElement(VisitorContext.Provider, {
     value: {
-      session,
-      visitor,
+      session: session,
+      visitor: visitor,
       setVisitor: setVisitorData
     }
   }, children);
 };
-const VisitorContext = createContext({
+var VisitorContext = createContext({
   session: {},
   visitor: {},
-  setVisitor: () => console.error('VisitorContext: setVisitor not setup properly. Check your Context order.')
+  setVisitor: function setVisitor() {
+    return console.error('VisitorContext: setVisitor not setup properly. Check your Context order.');
+  }
 });
-const useVisitor = () => {
+var useVisitor = function useVisitor() {
   return useContext(VisitorContext);
 };
 
-const init = cfg => {
+var init = function init(cfg) {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
     debug: cfg.debug,
     track_pageview: true,
     persistence: 'localStorage'
   });
 };
-const getTrackEvent = state => (event, props, callback) => {
-  if (!state.initiated) {
-    const errorMsg = `Mixpanel: Attempting to send ${event} event data before initialization.`;
-    console.error(errorMsg);
-    throw new Error(errorMsg);
-  } else {
-    return mixpanel.track(event, props, callback);
-  }
+var getTrackEvent = function getTrackEvent(state) {
+  return function (event, props, callback) {
+    if (!state.initiated) {
+      var errorMsg = "Mixpanel: Attempting to send " + event + " event data before initialization.";
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    } else {
+      return mixpanel.track(event, props, callback);
+    }
+  };
 };
-const MixpanelProvider = ({
-  children
-}) => {
-  const {
-    appId
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    log
-  } = useLogging();
-  const [initiated, setInitiated] = useState(false);
-  useEffect(() => {
+var MixpanelProvider = function MixpanelProvider(_ref) {
+  var children = _ref.children;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = useState(false),
+    initiated = _useState[0],
+    setInitiated = _useState[1];
+  useEffect(function () {
     if (!appId || !visitor.id) {
       return;
     }
@@ -517,11 +550,11 @@ const MixpanelProvider = ({
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
-  const registerUserData = React__default.useCallback(properties => {
-    log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
+  var registerUserData = React__default.useCallback(function (properties) {
+    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
     mixpanel.people.set(properties);
   }, [log]);
-  useEffect(() => {
+  useEffect(function () {
     if (!visitor.cohort) {
       log('Able to register user cohort, but none provided. ');
       return;
@@ -530,67 +563,67 @@ const MixpanelProvider = ({
       u_cohort: visitor.cohort
     });
   }, [visitor, registerUserData]);
-  useEffect(() => {
+  useEffect(function () {
     if (!visitor.sourceId) return;
     registerUserData({
       sourceId: visitor.sourceId
     });
   }, [visitor, registerUserData]);
-  const trackEvent = React__default.useCallback(() => {
+  var trackEvent = React__default.useCallback(function () {
     return getTrackEvent({
-      initiated
+      initiated: initiated
     });
   }, [initiated]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
-      trackEvent,
-      registerUserData,
+      trackEvent: trackEvent,
+      registerUserData: registerUserData,
       state: {
-        initiated
+        initiated: initiated
       }
     }
   }, children);
 };
-const MixpanelContext = createContext({
-  trackEvent: () => console.error('Mixpanel: trackEvent not setup properly. Check your Context order.'),
-  registerUserData: () => console.error('Mixpanel: registerUserData not setup properly. Check your Context order.'),
+var MixpanelContext = createContext({
+  trackEvent: function trackEvent() {
+    return console.error('Mixpanel: trackEvent not setup properly. Check your Context order.');
+  },
+  registerUserData: function registerUserData() {
+    return console.error('Mixpanel: registerUserData not setup properly. Check your Context order.');
+  },
   state: {
     initiated: false
   }
 });
-const useMixpanel = () => {
+var useMixpanel = function useMixpanel() {
   return useContext(MixpanelContext);
 };
 
-const collinBrandsPathConversionMap = {
+var collinBrandsPathConversionMap = {
   Stonehouse: '/tablebooking/enquiry-form-completed',
   'All Bar One': '/bookings/dmnc-complete',
   Sizzling: '/tablebooking/enquiry-form-completed',
   Ember: '/tablebooking/enquiry-form-completed'
 };
 function useCollinsBookingComplete() {
-  const {
-    trackEvent,
-    state: {
-      initiated
-    }
-  } = useMixpanel();
-  const {
-    log
-  } = useLogging();
-  const brand = useBrand();
-  const checkCollinsBookingComplete = React__default.useCallback(() => {
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent,
+    initiated = _useMixpanel.state.initiated;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var brand = useBrand();
+  var checkCollinsBookingComplete = React__default.useCallback(function () {
     if (!initiated) return;
     if (!brand) return;
-    const conversionPathForBrand = collinBrandsPathConversionMap[brand];
+    var conversionPathForBrand = collinBrandsPathConversionMap[brand];
     if (!conversionPathForBrand) return;
-    const isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
+    var isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
     if (!isConversionPath) return;
-    log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
+    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
     trackEvent('booking_complete', {});
   }, [trackEvent, log, brand, initiated]);
   return {
-    checkCollinsBookingComplete
+    checkCollinsBookingComplete: checkCollinsBookingComplete
   };
 }
 
@@ -599,8 +632,10 @@ function isUndefined(o) {
 }
 function getReducedSearchParams() {
   if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-    const [key, value] = cur.split('=');
+  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+    var _cur$split = cur.split('='),
+      key = _cur$split[0],
+      value = _cur$split[1];
     if (!key) return acc;
     acc[key] = value;
     return acc;
@@ -608,16 +643,16 @@ function getReducedSearchParams() {
 }
 function getPagePayload() {
   if (isUndefined(window)) return null;
-  const params = getReducedSearchParams();
+  var params = getReducedSearchParams();
   return {
     url: window.location.href,
     path: window.location.pathname,
     title: document.title,
-    params
+    params: params
   };
 }
 function getReferrer() {
-  const params = getReducedSearchParams();
+  var params = getReducedSearchParams();
   return {
     url: document.referrer,
     title: '',
@@ -631,89 +666,105 @@ function getReferrer() {
   };
 }
 
-const deviceInfo = {
+var deviceInfo = {
   type: isMobile ? 'mobile' : 'desktop'
 };
 
-const headers = {
+var headers = {
   'Content-Type': 'application/json'
 };
-const hostname = getEnvVars().FINGERPRINT_API_HOSTNAME;
-const request = {
-  get: async (url, params) => {
-    return await fetch(url + '?' + new URLSearchParams(params), {
-      method: 'GET',
-      headers
-    });
+var hostname = getEnvVars().FINGERPRINT_API_HOSTNAME;
+var request = {
+  get: function (url, params) {
+    try {
+      return Promise.resolve(fetch(url + '?' + new URLSearchParams(params), {
+        method: 'GET',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
   },
-  post: async (url, body) => {
-    return await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    });
+  post: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
   },
-  patch: async (url, body) => {
-    return await fetch(url, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify(body)
-    });
+  patch: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PATCH',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
   },
-  put: async (url, body) => {
-    return await fetch(url, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(body)
-    });
+  put: function (url, body) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(body)
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
   },
-  delete: async url => {
-    return await fetch(url, {
-      method: 'DELETE',
-      headers
-    });
+  "delete": function (url) {
+    try {
+      return Promise.resolve(fetch(url, {
+        method: 'DELETE',
+        headers: headers
+      }));
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
 };
 
-const useHostname = () => {
+var useHostname = function useHostname() {
   var _window, _window$location;
   return ((_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : _window$location.hostname) || '';
 };
 
-const useCollectorMutation = () => {
-  const {
-    log,
-    error
-  } = useLogging();
-  const {
-    appId
-  } = useFingerprint();
-  const {
-    visitor,
-    session
-  } = useVisitor();
-  const requestHost = useHostname();
-  return useMutation(data => {
-    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), {
-      ...data,
-      appId,
-      visitor,
+var useCollectorMutation = function useCollectorMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor,
+    session = _useVisitor.session;
+  var requestHost = useHostname();
+  return useMutation(function (data) {
+    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), _extends({}, data, {
+      appId: appId,
+      visitor: visitor,
       sessionId: session === null || session === void 0 ? void 0 : session.id,
       hostname: requestHost,
       device: deviceInfo
-    }).then(response => {
+    })).then(function (response) {
       log('Collector API response', response);
       return response;
-    }).catch(err => {
+    })["catch"](function (err) {
       error('Collector API error', err);
       return err;
     });
   }, {
-    onSuccess: () => {}
+    onSuccess: function onSuccess() {}
   });
 };
 
-const getRecursivelyPotentialButton = el => {
+var getRecursivelyPotentialButton = function getRecursivelyPotentialButton(el) {
   var _el$nodeName;
   if (!el) return null;
   if (((_el$nodeName = el.nodeName) === null || _el$nodeName === void 0 ? void 0 : _el$nodeName.toLowerCase()) === 'button') return el;
@@ -721,26 +772,23 @@ const getRecursivelyPotentialButton = el => {
   return null;
 };
 function useButtonCollector() {
-  const {
-    mutateAsync: collect
-  } = useCollectorMutation();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    log
-  } = useLogging();
-  useEffect(() => {
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  useEffect(function () {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
-    const buttonClickListener = e => {
+    var buttonClickListener = function buttonClickListener(e) {
       if (!e.target) return;
-      const potentialButton = getRecursivelyPotentialButton(e.target);
+      var potentialButton = getRecursivelyPotentialButton(e.target);
       if (!potentialButton) return;
-      const button = potentialButton;
+      var button = potentialButton;
       if (button.type === 'submit') return;
       log('useButtonCollector: button clicked', {
-        button
+        button: button
       });
       collect({
         button: {
@@ -750,56 +798,57 @@ function useButtonCollector() {
       });
     };
     document.addEventListener('click', buttonClickListener);
-    return () => {
+    return function () {
       document.removeEventListener('click', buttonClickListener);
     };
   }, [visitor]);
 }
 
-const useExitIntentDelay = (delay = 0) => {
-  const {
-    log
-  } = useLogging();
-  const [hasDelayPassed, setHasDelayPassed] = useState(false);
-  useEffect(() => {
-    log(`Exit intents are suspended because of initiation delay of ${delay}ms`);
-    setTimeout(() => {
+var useExitIntentDelay = function useExitIntentDelay(delay) {
+  if (delay === void 0) {
+    delay = 0;
+  }
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = useState(false),
+    hasDelayPassed = _useState[0],
+    setHasDelayPassed = _useState[1];
+  useEffect(function () {
+    log("Exit intents are suspended because of initiation delay of " + delay + "ms");
+    setTimeout(function () {
       setHasDelayPassed(true);
       log('Exit intents can be issued again.');
     }, delay);
   }, [delay]);
   return {
-    hasDelayPassed
+    hasDelayPassed: hasDelayPassed
   };
 };
 
-const stringIsSubstringOf = (a, b) => {
+var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
   if (a === b) return true;
   if (!a || !b) return false;
   return a.toLowerCase().includes(b.toLowerCase());
 };
-const bannedTypes = ['password', 'submit'];
-const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
+var bannedTypes = ['password', 'submit'];
+var bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
 function useFormCollector() {
-  const {
-    mutateAsync: collect
-  } = useCollectorMutation();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    log
-  } = useLogging();
-  useEffect(() => {
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  useEffect(function () {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
-    const formSubmitListener = e => {
+    var formSubmitListener = function formSubmitListener(e) {
       var _e$target$nodeName;
       if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
-      const a = e === null || e === void 0 ? void 0 : e.target;
-      const elements = Array.from(a.elements).filter(b => {
+      var a = e === null || e === void 0 ? void 0 : e.target;
+      var elements = Array.from(a.elements).filter(function (b) {
         if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;
-        if (bannedFieldPartialNames.find(partialName => {
+        if (bannedFieldPartialNames.find(function (partialName) {
           if (stringIsSubstringOf(b.name, partialName)) return true;
           if (stringIsSubstringOf(b.id, partialName)) return true;
           if (stringIsSubstringOf(b.placeholder, partialName)) return true;
@@ -807,22 +856,22 @@ function useFormCollector() {
         })) return false;
         return true;
       });
-      const data = elements.reduce((result, item) => {
-        let fieldName = item.name;
+      var data = elements.reduce(function (result, item) {
+        var fieldName = item.name;
         if (!fieldName) {
           if (item.id) {
             log('useFormCollector: form field has no name, falling back to id', {
-              item
+              item: item
             });
             fieldName = item.id;
           } else if (item.placeholder) {
             log('useFormCollector: form field has no name or id, falling back to placeholder', {
-              item
+              item: item
             });
             fieldName = item.placeholder;
           } else {
             log('useFormCollector: form field has no name, id or placeholder, fallback to type', {
-              item
+              item: item
             });
             fieldName = item.type;
           }
@@ -831,62 +880,65 @@ function useFormCollector() {
         return result;
       }, {});
       log('useFormCollector: form submitted', {
-        data
+        data: data
       });
       collect({
         form: {
-          data
+          data: data
         }
       });
     };
     document.removeEventListener('submit', formSubmitListener);
     document.addEventListener('submit', formSubmitListener);
-    return () => {
+    return function () {
       document.removeEventListener('submit', formSubmitListener);
     };
   }, [visitor]);
 }
 
-const getFuncByOperator = (operator, compareWith) => {
+var getFuncByOperator = function getFuncByOperator(operator, compareWith) {
   switch (operator) {
     case 'starts_with':
-      return comparison => {
+      return function (comparison) {
         return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
       };
     case 'contains':
-      return comparison => {
+      return function (comparison) {
         return comparison.toLowerCase().includes(compareWith.toLowerCase());
       };
     case 'ends_with':
-      return comparison => {
+      return function (comparison) {
         return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
       };
     case 'eq':
-      return comparison => {
+      return function (comparison) {
         return comparison.toLowerCase() === compareWith.toLowerCase();
       };
     default:
-      return () => {
+      return function () {
         console.error('getOperator: unknown operator', operator);
         return false;
       };
   }
 };
-const scanInterval = 500;
-const useConversions = () => {
-  const [conversions, setConversions] = useState([]);
-  const {
-    mutate: collect
-  } = useCollectorMutation();
-  const removeById = React__default.useCallback(id => {
-    setConversions(prev => {
+var scanInterval = 500;
+var useConversions = function useConversions() {
+  var _useState = useState([]),
+    conversions = _useState[0],
+    setConversions = _useState[1];
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutate;
+  var removeById = React__default.useCallback(function (id) {
+    setConversions(function (prev) {
       if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
-      return prev.filter(conversion => conversion.identifier !== id);
+      return prev.filter(function (conversion) {
+        return conversion.identifier !== id;
+      });
     });
   }, [setConversions]);
-  const scan = React__default.useCallback(() => {
-    conversions.forEach(conversion => {
-      const hasHappened = validateSignalChain(conversion.signals);
+  var scan = React__default.useCallback(function () {
+    conversions.forEach(function (conversion) {
+      var hasHappened = validateSignalChain(conversion.signals);
       if (!hasHappened) return;
       collect({
         conversion: {
@@ -896,19 +948,21 @@ const useConversions = () => {
       removeById(conversion.identifier);
     });
   }, [collect, conversions, removeById]);
-  useEffect(() => {
+  useEffect(function () {
     if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
-    const intId = setInterval(scan, scanInterval);
-    return () => clearInterval(intId);
+    var intId = setInterval(scan, scanInterval);
+    return function () {
+      return clearInterval(intId);
+    };
   }, [scan]);
   return {
-    conversions,
-    setConversions
+    conversions: conversions,
+    setConversions: setConversions
   };
 };
 
-const getIsVisible = selector => {
-  const element = document.querySelector(selector);
+var getIsVisible = function getIsVisible(selector) {
+  var element = document.querySelector(selector);
   if (!element) return false;
   if (window.getComputedStyle(element).visibility === 'hidden') return false;
   if (window.getComputedStyle(element).display === 'none') return false;
@@ -916,17 +970,22 @@ const getIsVisible = selector => {
   return true;
 };
 
-const validateSignalChain = signals => {
-  const signalPattern = signals.map(signal => {
+var validateSignalChain = function validateSignalChain(signals) {
+  var signalPattern = signals.map(function (signal) {
     if (signal.op === 'IsOnPath') {
-      const [operator, route] = signal.parameters;
+      var _signal$parameters = signal.parameters,
+        operator = _signal$parameters[0],
+        route = _signal$parameters[1];
       return getFuncByOperator(operator, route)(window.location.pathname);
     }
     if (signal.op === 'CanSeeElementOnPage') {
-      const [itemQuerySelector, operator, route] = signal.parameters;
-      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
+      var _signal$parameters2 = signal.parameters,
+        itemQuerySelector = _signal$parameters2[0],
+        _operator = _signal$parameters2[1],
+        _route = _signal$parameters2[2];
+      var isSignalOnCorrectRoute = getFuncByOperator(_operator, _route)(window.location.pathname);
       if (!isSignalOnCorrectRoute) return false;
-      const isVisible = getIsVisible(itemQuerySelector);
+      var isVisible = getIsVisible(itemQuerySelector);
       return isVisible;
     }
     if (signal.op === 'IsOnDomain') {
@@ -937,65 +996,66 @@ const validateSignalChain = signals => {
   return signalPattern.every(Boolean);
 };
 
-const interval = 250;
-const useIncompleteTriggers = () => {
-  const [incompleteTriggers, setIncompleteTriggers] = useState([]);
-  const [visibleTriggers, setVisibleTriggers] = useState([]);
-  const scan = React__default.useCallback(() => {
-    const validTriggers = incompleteTriggers.filter(trigger => {
-      const shouldTrigger = validateSignalChain(trigger.signals);
+var interval = 250;
+var useIncompleteTriggers = function useIncompleteTriggers() {
+  var _useState = useState([]),
+    incompleteTriggers = _useState[0],
+    setIncompleteTriggers = _useState[1];
+  var _useState2 = useState([]),
+    visibleTriggers = _useState2[0],
+    setVisibleTriggers = _useState2[1];
+  var scan = React__default.useCallback(function () {
+    var validTriggers = incompleteTriggers.filter(function (trigger) {
+      var shouldTrigger = validateSignalChain(trigger.signals);
       if (!shouldTrigger) return false;
       return true;
     });
-    setVisibleTriggers(prev => {
+    setVisibleTriggers(function (prev) {
       if (!validTriggers.length) return prev;
       return validTriggers;
     });
   }, [setVisibleTriggers, incompleteTriggers]);
-  useEffect(() => {
+  useEffect(function () {
     if (!incompleteTriggers.length) return;
-    const intId = setInterval(scan, interval);
-    return () => {
+    var intId = setInterval(scan, interval);
+    return function () {
       clearInterval(intId);
     };
   }, [incompleteTriggers, getIsVisible, setVisibleTriggers]);
   return {
-    incompleteTriggers,
-    setIncompleteTriggers,
-    setVisibleTriggers,
-    visibleTriggers
+    incompleteTriggers: incompleteTriggers,
+    setIncompleteTriggers: setIncompleteTriggers,
+    setVisibleTriggers: setVisibleTriggers,
+    visibleTriggers: visibleTriggers
   };
 };
 
-const selectorRateMs = 100;
-function useTrackIntentlyModal({
-  intently
-}) {
-  const [isVisible, setIsVisible] = useState(false);
-  const {
-    trackEvent,
-    state: {
-      initiated
-    }
-  } = useMixpanel();
-  const {
-    log,
-    error
-  } = useLogging();
-  const brand = useBrand();
-  useEffect(() => {
+var selectorRateMs = 100;
+function useTrackIntentlyModal(_ref) {
+  var intently = _ref.intently;
+  var _useState = useState(false),
+    isVisible = _useState[0],
+    setIsVisible = _useState[1];
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent,
+    initiated = _useMixpanel.state.initiated;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var brand = useBrand();
+  useEffect(function () {
     if (!initiated) return;
     if (!intently) return;
-    const id = setInterval(() => {
-      const intentlyOuterContainer = document.querySelector('smc-overlay-outer');
+    var id = setInterval(function () {
+      var intentlyOuterContainer = document.querySelector('smc-overlay-outer');
       if (!intentlyOuterContainer) {
         return;
       }
-      const isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
+      var isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
       if (!isIntentlyOuterVisible) {
         return;
       }
-      const intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
+      var intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
       if (!intentlyInnerOverlay) {
         return;
       }
@@ -1006,87 +1066,90 @@ function useTrackIntentlyModal({
         triggerType: 'INVOCATION_EXIT_INTENT',
         triggerBehaviour: 'BEHAVIOUR_MODAL',
         time: new Date().toISOString(),
-        brand
+        brand: brand
       });
       clearInterval(id);
     }, selectorRateMs);
-    return () => {
+    return function () {
       clearInterval(id);
     };
   }, [intently, log, setIsVisible, trackEvent, initiated, brand]);
-  const getHandleTrackAction = action => () => {
-    log(`useTrackIntentlyModal: user clicked ${action} button`);
-    trackEvent(`user_clicked_${action}_button`, {});
+  var getHandleTrackAction = function getHandleTrackAction(action) {
+    return function () {
+      log("useTrackIntentlyModal: user clicked " + action + " button");
+      trackEvent("user_clicked_" + action + "_button", {});
+    };
   };
-  useEffect(() => {
+  useEffect(function () {
     if (!isVisible) return;
-    const closeBtn = document.querySelector('[data-close-type="x_close"]');
-    const exitHandler = getHandleTrackAction('exit');
-    const ctaBtn = document.querySelector('smc-input-group > span');
-    const ctaHandler = getHandleTrackAction('CTA');
+    var closeBtn = document.querySelector('[data-close-type="x_close"]');
+    var exitHandler = getHandleTrackAction('exit');
+    var ctaBtn = document.querySelector('smc-input-group > span');
+    var ctaHandler = getHandleTrackAction('CTA');
     if (closeBtn) closeBtn.addEventListener('click', exitHandler);else error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
     if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
-    return () => {
+    return function () {
       ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
       closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
     };
   }, [error, getHandleTrackAction, isVisible]);
   return {
-    isVisible,
-    setIsVisible
+    isVisible: isVisible,
+    setIsVisible: setIsVisible
   };
 }
-const brandsThatSupportIntentlyRemoval = ['Browns'];
-const useRemoveIntently = ({
-  intently
-}) => {
-  const {
-    log
-  } = useLogging();
-  const brand = useBrand();
-  useEffect(() => {
+var brandsThatSupportIntentlyRemoval = ['Browns'];
+var useRemoveIntently = function useRemoveIntently(_ref2) {
+  var intently = _ref2.intently;
+  var _useLogging2 = useLogging(),
+    log = _useLogging2.log;
+  var brand = useBrand();
+  useEffect(function () {
     if (intently) return;
     if (brand && !brandsThatSupportIntentlyRemoval.includes(brand)) {
-      log(`useRemoveIntently: Intently is ${intently}, but skipping overlay removal for brand`, {
-        brand
+      log("useRemoveIntently: Intently is " + intently + ", but skipping overlay removal for brand", {
+        brand: brand
       });
       return;
     }
     log('useRemoveIntently: removing intently overlay');
-    const runningInterval = setInterval(() => {
-      const locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
-      Array.prototype.forEach.call(locatedIntentlyScript, node => {
+    var runningInterval = setInterval(function () {
+      var locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
+      Array.prototype.forEach.call(locatedIntentlyScript, function (node) {
         node.parentNode.removeChild(node);
         log('useRemoveIntently: successfully removed intently overlay');
         clearInterval(runningInterval);
       });
     }, selectorRateMs);
-    return () => {
+    return function () {
       clearInterval(runningInterval);
     };
   }, [intently, brand, log]);
 };
 function useIntently() {
-  const [intently, setIntently] = useState(true);
+  var _useState2 = useState(true),
+    intently = _useState2[0],
+    setIntently = _useState2[1];
   useRemoveIntently({
-    intently
+    intently: intently
   });
   useTrackIntentlyModal({
-    intently
+    intently: intently
   });
   return {
-    setIntently,
-    intently
+    setIntently: setIntently,
+    intently: intently
   };
 }
 
-const reattemptIntervalMs = 500;
-const useRunOnPathChange = (func, config) => {
-  const [lastCollectedHref, setLastCollectedHref] = useState('');
-  const {
-    log
-  } = useLogging();
-  const run = React__default.useCallback(() => {
+var reattemptIntervalMs = 500;
+var useRunOnPathChange = function useRunOnPathChange(func, config) {
+  var _useState = useState(''),
+    lastCollectedHref = _useState[0],
+    setLastCollectedHref = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var run = React__default.useCallback(function () {
     if (config !== null && config !== void 0 && config.skip) return;
     if (!location.href) return;
     if (location.href === lastCollectedHref) return;
@@ -1094,138 +1157,142 @@ const useRunOnPathChange = (func, config) => {
     setLastCollectedHref(location.href);
     func();
   }, [func, config, lastCollectedHref]);
-  useEffect(() => {
-    log(`useRunOnPathChange: running for every path change with ${reattemptIntervalMs} MS`);
-    const iId = setInterval(run, reattemptIntervalMs);
-    return () => clearInterval(iId);
+  useEffect(function () {
+    log("useRunOnPathChange: running for every path change with " + reattemptIntervalMs + " MS");
+    var iId = setInterval(run, reattemptIntervalMs);
+    return function () {
+      return clearInterval(iId);
+    };
   }, [run]);
 };
 
 function useTriggerDelay() {
-  const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
-  const triggerConfig = useTriggerConfig();
-  const cooldownMs = triggerConfig.triggerCooldownSecs * 1000;
-  const idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
-  const {
-    log
-  } = useLogging();
-  const startCooldown = React__default.useCallback(() => {
-    const currentTimeStamp = Number(new Date());
+  var _useState = useState(null),
+    lastTriggerTimeStamp = _useState[0],
+    setLastTriggerTimeStamp = _useState[1];
+  var triggerConfig = useTriggerConfig();
+  var cooldownMs = triggerConfig.triggerCooldownSecs * 1000;
+  var idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var startCooldown = React__default.useCallback(function () {
+    var currentTimeStamp = Number(new Date());
     setLastTriggerTimeStamp(currentTimeStamp);
   }, [setLastTriggerTimeStamp]);
-  const getRemainingCooldownMs = React__default.useCallback(() => {
+  var getRemainingCooldownMs = React__default.useCallback(function () {
     if (!lastTriggerTimeStamp) return 0;
-    const currentTime = Number(new Date());
-    const remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
+    var currentTime = Number(new Date());
+    var remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
     if (remainingMS < 0) return 0;
     return remainingMS;
   }, [lastTriggerTimeStamp, cooldownMs]);
-  const canNextTriggerOccur = React__default.useCallback(() => {
+  var canNextTriggerOccur = React__default.useCallback(function () {
     return getRemainingCooldownMs() === 0;
   }, [getRemainingCooldownMs]);
-  const getIdleStatusDelay = React__default.useCallback(() => {
-    const cooldownDelay = getRemainingCooldownMs();
-    const delayAdjustedForCooldown = idleDelay + cooldownDelay;
-    log(`Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + idleDelay ${idleDelay}ms)`);
+  var getIdleStatusDelay = React__default.useCallback(function () {
+    var cooldownDelay = getRemainingCooldownMs();
+    var delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log("Setting idle delay at " + delayAdjustedForCooldown + "ms (cooldown " + cooldownDelay + "ms + idleDelay " + idleDelay + "ms)");
     return delayAdjustedForCooldown;
   }, [idleDelay, getRemainingCooldownMs, log]);
   return {
-    startCooldown,
-    canNextTriggerOccur,
-    getRemainingCooldownMs,
-    getIdleStatusDelay
+    startCooldown: startCooldown,
+    canNextTriggerOccur: canNextTriggerOccur,
+    getRemainingCooldownMs: getRemainingCooldownMs,
+    getIdleStatusDelay: getIdleStatusDelay
   };
 }
 
-const getVisitorId = () => {
+var getVisitorId = function getVisitorId() {
   if (typeof window === 'undefined') return null;
-  const urlParams = new URLSearchParams(window.location.search);
-  const vid = urlParams.get('v_id');
+  var urlParams = new URLSearchParams(window.location.search);
+  var vid = urlParams.get('v_id');
   return vid;
 };
-const hasVisitorIDInURL = () => {
+var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
-function CollectorProvider({
-  children,
-  handlers = []
-}) {
-  const {
-    log,
-    error
-  } = useLogging();
-  const {
-    booted,
-    initialDelay,
-    exitIntentTriggers,
-    idleTriggers,
-    pageLoadTriggers
-  } = useFingerprint();
-  const {
-    setConfig,
-    config: {
-      trigger: config
-    }
-  } = useConfig();
-  const {
-    visitor,
-    setVisitor
-  } = useVisitor();
-  const {
-    canNextTriggerOccur,
-    startCooldown,
-    getRemainingCooldownMs,
-    getIdleStatusDelay
-  } = useTriggerDelay();
-  const {
-    trackEvent,
-    state: {
-      initiated: mixpanelBooted
-    }
-  } = useMixpanel();
-  const {
-    mutateAsync: collect
-  } = useCollectorMutation();
-  const {
-    checkCollinsBookingComplete
-  } = useCollinsBookingComplete();
-  const {
-    registerHandler,
-    resetState: reRegisterExitIntent
-  } = useExitIntent({
-    cookie: {
-      key: '_cm_exit',
-      daysToExpire: 0
-    }
-  });
-  const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
-  const [pageTriggers, setPageTriggersState] = useState([]);
-  const {
-    setIntently
-  } = useIntently();
-  const [displayTriggers, setDisplayedTriggers] = useState([]);
-  const [foundWatchers, setFoundWatchers] = useState(new Map());
-  const {
-    setConversions
-  } = useConversions();
-  const brand = useBrand();
-  const {
-    setIncompleteTriggers,
-    setVisibleTriggers,
-    visibleTriggers: visibleIncompleteTriggers
-  } = useIncompleteTriggers();
-  const combinedTriggers = React__default.useMemo(() => [...pageTriggers, ...visibleIncompleteTriggers], [pageTriggers, visibleIncompleteTriggers]);
-  const getIsBehaviourVisible = React__default.useCallback(type => {
+function CollectorProvider(_ref) {
+  var children = _ref.children,
+    _ref$handlers = _ref.handlers,
+    handlers = _ref$handlers === void 0 ? [] : _ref$handlers;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    booted = _useFingerprint.booted,
+    initialDelay = _useFingerprint.initialDelay,
+    exitIntentTriggers = _useFingerprint.exitIntentTriggers,
+    idleTriggers = _useFingerprint.idleTriggers,
+    pageLoadTriggers = _useFingerprint.pageLoadTriggers;
+  var _useConfig = useConfig(),
+    setConfig = _useConfig.setConfig,
+    config = _useConfig.config.trigger;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor,
+    setVisitor = _useVisitor.setVisitor;
+  var _useTriggerDelay = useTriggerDelay(),
+    canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
+    startCooldown = _useTriggerDelay.startCooldown,
+    getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs,
+    getIdleStatusDelay = _useTriggerDelay.getIdleStatusDelay;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent,
+    mixpanelBooted = _useMixpanel.state.initiated;
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useCollinsBookingCom = useCollinsBookingComplete(),
+    checkCollinsBookingComplete = _useCollinsBookingCom.checkCollinsBookingComplete;
+  var _useExitIntent = useExitIntent({
+      cookie: {
+        key: '_cm_exit',
+        daysToExpire: 0
+      }
+    }),
+    registerHandler = _useExitIntent.registerHandler,
+    reRegisterExitIntent = _useExitIntent.resetState;
+  var _useState = useState(getIdleStatusDelay()),
+    idleTimeout = _useState[0],
+    setIdleTimeout = _useState[1];
+  var _useState2 = useState([]),
+    pageTriggers = _useState2[0],
+    setPageTriggersState = _useState2[1];
+  var _useIntently = useIntently(),
+    setIntently = _useIntently.setIntently;
+  var _useState3 = useState([]),
+    displayTriggers = _useState3[0],
+    setDisplayedTriggers = _useState3[1];
+  var _useState4 = useState(new Map()),
+    foundWatchers = _useState4[0],
+    setFoundWatchers = _useState4[1];
+  var _useConversions = useConversions(),
+    setConversions = _useConversions.setConversions;
+  var brand = useBrand();
+  var _useIncompleteTrigger = useIncompleteTriggers(),
+    setIncompleteTriggers = _useIncompleteTrigger.setIncompleteTriggers,
+    setVisibleTriggers = _useIncompleteTrigger.setVisibleTriggers,
+    visibleIncompleteTriggers = _useIncompleteTrigger.visibleTriggers;
+  var combinedTriggers = React__default.useMemo(function () {
+    return [].concat(pageTriggers, visibleIncompleteTriggers);
+  }, [pageTriggers, visibleIncompleteTriggers]);
+  var getIsBehaviourVisible = React__default.useCallback(function (type) {
     if (displayTriggers.length === 0) return false;
-    if (displayTriggers.find(triggerId => {
+    if (displayTriggers.find(function (triggerId) {
       var _combinedTriggers$fin;
-      return ((_combinedTriggers$fin = combinedTriggers.find(trigger => trigger.id === triggerId)) === null || _combinedTriggers$fin === void 0 ? void 0 : _combinedTriggers$fin.behaviour) === type;
+      return ((_combinedTriggers$fin = combinedTriggers.find(function (trigger) {
+        return trigger.id === triggerId;
+      })) === null || _combinedTriggers$fin === void 0 ? void 0 : _combinedTriggers$fin.behaviour) === type;
     })) return true;
     return false;
   }, [displayTriggers, combinedTriggers]);
-  const setDisplayedTriggerByInvocation = React__default.useCallback((invocation, shouldAllowMultipleSimultaneous = false) => {
-    const invokableTrigger = combinedTriggers.find(trigger => trigger.invocation === invocation);
+  var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation, shouldAllowMultipleSimultaneous) {
+    if (shouldAllowMultipleSimultaneous === void 0) {
+      shouldAllowMultipleSimultaneous = false;
+    }
+    var invokableTrigger = combinedTriggers.find(function (trigger) {
+      return trigger.invocation === invocation;
+    });
     if (!invokableTrigger) {
       log('CollectorProvider: Trigger not invokable ', invokableTrigger);
       return;
@@ -1235,47 +1302,67 @@ function CollectorProvider({
       return;
     }
     log('CollectorProvider: Triggering behaviour', invokableTrigger);
-    setDisplayedTriggers(prev => {
+    setDisplayedTriggers(function (prev) {
       if (prev.includes(invokableTrigger.id)) return prev;
-      return [...prev, invokableTrigger.id];
+      return [].concat(prev, [invokableTrigger.id]);
     });
   }, [combinedTriggers, getIsBehaviourVisible, log]);
-  useEffect(() => {
+  useEffect(function () {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [visibleIncompleteTriggers, setPageTriggersState, setDisplayedTriggerByInvocation]);
-  const setPageTriggers = React__default.useCallback(triggers => {
-    setPageTriggersState(prev => {
-      const nonDismissed = prev.filter(tr => displayTriggers.includes(tr.id));
-      return uniqueBy([...(triggers || []), ...nonDismissed], 'id');
+  var setPageTriggers = React__default.useCallback(function (triggers) {
+    setPageTriggersState(function (prev) {
+      var nonDismissed = prev.filter(function (tr) {
+        return displayTriggers.includes(tr.id);
+      });
+      return uniqueBy([].concat(triggers || [], nonDismissed), 'id');
     });
   }, [setPageTriggersState, displayTriggers]);
-  const getHandlerForTrigger = React__default.useCallback(_trigger => {
-    const potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === _trigger.behaviour);
+  var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
+    var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
+      return handler.behaviour === _trigger.behaviour;
+    });
     if (!potentialHandler) return null;
     return potentialHandler;
   }, [handlers]);
-  const removeActiveTrigger = useCallback(id => {
-    log(`CollectorProvider: removing id:${id} from displayTriggers`);
-    const refreshedTriggers = displayTriggers.filter(triggerId => triggerId !== id);
+  var removeActiveTrigger = useCallback(function (id) {
+    log("CollectorProvider: removing id:" + id + " from displayTriggers");
+    var refreshedTriggers = displayTriggers.filter(function (triggerId) {
+      return triggerId !== id;
+    });
     setDisplayedTriggers(refreshedTriggers);
-    setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
-    setVisibleTriggers(prev => prev.filter(trigger => trigger.id !== id));
-    setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
+    setIncompleteTriggers(function (prev) {
+      return prev.filter(function (trigger) {
+        return trigger.id !== id;
+      });
+    });
+    setVisibleTriggers(function (prev) {
+      return prev.filter(function (trigger) {
+        return trigger.id !== id;
+      });
+    });
+    setPageTriggersState(function (prev) {
+      return prev.filter(function (trigger) {
+        return trigger.id !== id;
+      });
+    });
   }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, setPageTriggersState, combinedTriggers]);
-  const TriggerComponent = React__default.useCallback(() => {
+  var TriggerComponent = React__default.useCallback(function () {
     if (!displayTriggers) return null;
-    const activeTriggers = combinedTriggers.filter(trigger => displayTriggers.includes(trigger.id));
+    var activeTriggers = combinedTriggers.filter(function (trigger) {
+      return displayTriggers.includes(trigger.id);
+    });
     if (!activeTriggers) {
-      error(`No trigger found for displayTriggers`, displayTriggers);
+      error("No trigger found for displayTriggers", displayTriggers);
       return null;
     }
     log('CollectorProvider: available handlers include: ', handlers);
     log('CollectorProvider: activeTriggers to match are: ', activeTriggers);
     log('CollectorProvider: attempting to show trigger', activeTriggers);
-    return activeTriggers.map(trigger => {
+    return activeTriggers.map(function (trigger) {
       var _handler$invoke;
-      const handler = getHandlerForTrigger(trigger);
+      var handler = getHandlerForTrigger(trigger);
       if (!handler) {
         log('No handler found for trigger', trigger);
         return null;
@@ -1284,7 +1371,7 @@ function CollectorProvider({
         log('No invoke method found for handler', handler);
         return null;
       }
-      const potentialComponent = (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
+      var potentialComponent = (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
       if (potentialComponent && React__default.isValidElement(potentialComponent)) {
         log('CollectorProvider: Potential component for trigger is valid. Mounting');
         return potentialComponent;
@@ -1293,29 +1380,27 @@ function CollectorProvider({
       return null;
     });
   }, [displayTriggers, log, handlers, error, getHandlerForTrigger, combinedTriggers]);
-  useEffect(() => {
+  useEffect(function () {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [setDisplayedTriggerByInvocation, visibleIncompleteTriggers]);
-  const fireIdleTrigger = useCallback(() => {
+  var fireIdleTrigger = useCallback(function () {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
     setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
     startCooldown();
   }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
-  const {
-    hasDelayPassed
-  } = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.displayTriggerAfterSecs) * 1000);
-  const fireExitTrigger = React__default.useCallback(() => {
+  var _useExitIntentDelay = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.displayTriggerAfterSecs) * 1000),
+    hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
+  var fireExitTrigger = React__default.useCallback(function () {
     if (!hasDelayPassed) {
-      log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
+      log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
       log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
     if (!canNextTriggerOccur()) {
-      log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
-        I will attempt again when the same signal occurs after this passes.`);
+      log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. \n        I will attempt again when the same signal occurs after this passes.");
       log('Re-registering handler');
       reRegisterExitIntent();
       return;
@@ -1324,7 +1409,7 @@ function CollectorProvider({
     setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
   }, [hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
-  useEffect(() => {
+  useEffect(function () {
     if (!exitIntentTriggers) return;
     log('CollectorProvider: attempting to register exit trigger');
     registerHandler({
@@ -1332,42 +1417,47 @@ function CollectorProvider({
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
-  const fireOnLoadTriggers = useCallback(() => {
+  var fireOnLoadTriggers = useCallback(function () {
     if (!pageLoadTriggers) return;
     if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
   }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation]);
-  const collectorCallback = React__default.useCallback(async response => {
-    var _payload$identifiers;
-    const payload = await response.json();
-    log('Sent collector data, retrieved:', payload);
-    const retrievedUserId = (_payload$identifiers = payload.identifiers) === null || _payload$identifiers === void 0 ? void 0 : _payload$identifiers.main;
-    if (retrievedUserId) {
-      updateCookie(retrievedUserId);
-      setVisitor({
-        id: retrievedUserId
+  var collectorCallback = React__default.useCallback(function (response) {
+    try {
+      return Promise.resolve(response.json()).then(function (payload) {
+        var _payload$identifiers;
+        log('Sent collector data, retrieved:', payload);
+        var retrievedUserId = (_payload$identifiers = payload.identifiers) === null || _payload$identifiers === void 0 ? void 0 : _payload$identifiers.main;
+        if (retrievedUserId) {
+          updateCookie(retrievedUserId);
+          setVisitor({
+            id: retrievedUserId
+          });
+        }
+        setIdleTimeout(getIdleStatusDelay());
+        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+        setConfig(payload.config);
+        setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
+        setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
+        var cohort = payload.intently ? 'intently' : 'fingerprint';
+        if (visitor.cohort !== cohort) setVisitor({
+          cohort: cohort
+        });
+        log('CollectorProvider: collected data');
+        if (!payload.intently) {
+          log('CollectorProvider: user is in Fingerprint cohort');
+          setIntently(false);
+        } else {
+          log('CollectorProvider: user is in Intently cohort');
+          setIntently(true);
+        }
       });
-    }
-    setIdleTimeout(getIdleStatusDelay());
-    setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
-    setConfig(payload.config);
-    setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
-    setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
-    const cohort = payload.intently ? 'intently' : 'fingerprint';
-    if (visitor.cohort !== cohort) setVisitor({
-      cohort
-    });
-    log('CollectorProvider: collected data');
-    if (!payload.intently) {
-      log('CollectorProvider: user is in Fingerprint cohort');
-      setIntently(false);
-    } else {
-      log('CollectorProvider: user is in Intently cohort');
-      setIntently(true);
+    } catch (e) {
+      return Promise.reject(e);
     }
   }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
-  useEffect(() => {
+  useEffect(function () {
     if (!mixpanelBooted) return;
     if (hasVisitorIDInURL()) {
       log('CollectorProvider: visitor ID in URL, collecting data');
@@ -1376,49 +1466,49 @@ function CollectorProvider({
       });
     }
   }, [trackEvent, log, mixpanelBooted]);
-  const collectAndApplyVisitorInfo = React__default.useCallback(() => {
+  var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
       return;
     }
     log('CollectorProvider: collecting data');
-    const hash = window.location.hash.substring(3);
-    const hashParams = hash.split('&').reduce((result, item) => {
-      const parts = item.split('=');
+    var hash = window.location.hash.substring(3);
+    var hashParams = hash.split('&').reduce(function (result, item) {
+      var parts = item.split('=');
       result[parts[0]] = parts[1];
       return result;
     }, {});
     if (hashParams.id_token) {
       log('CollectorProvider: user logged in event fired');
       trackEvent('user_logged_in', {
-        brand
+        brand: brand
       });
       collect({
         account: {
           token: hashParams.id_token
         }
-      }).then(collectorCallback).catch(err => {
+      }).then(collectorCallback)["catch"](function (err) {
         error('failed to store collected data', err);
       });
     }
     collect({
       page: getPagePayload() || undefined,
       referrer: getReferrer() || undefined
-    }).then(response => {
+    }).then(function (response) {
       if (response.status === 204) {
         setIntently(true);
         return;
       }
       collectorCallback(response);
-    }).catch(err => {
+    })["catch"](function (err) {
       error('failed to store collected data', err);
     });
   }, [visitor.id, brand, log, collect, trackEvent, error, collectorCallback, setIntently]);
-  const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
-    const intervalId = setInterval(() => {
-      const inputs = document.querySelectorAll(configuredSelector);
-      let found = false;
-      inputs.forEach(element => {
+  var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
+    var intervalId = setInterval(function () {
+      var inputs = document.querySelectorAll(configuredSelector);
+      var found = false;
+      inputs.forEach(function (element) {
         if (configuredSearch === '' && window.getComputedStyle(element).display !== 'none') {
           found = true;
         } else if (element.textContent === configuredSearch) {
@@ -1433,7 +1523,7 @@ function CollectorProvider({
               path: window.location.pathname,
               selector: configuredSelector
             }]
-          }).then(collectorCallback).catch(err => {
+          }).then(collectorCallback)["catch"](function (err) {
             error('failed to store collected data', err);
           });
           clearInterval(intervalId);
@@ -1442,27 +1532,31 @@ function CollectorProvider({
     }, 500);
     return intervalId;
   }, [collect, collectorCallback, error, foundWatchers, trackEvent]);
-  useEffect(() => {
+  useEffect(function () {
     if (!visitor.id) return;
-    const intervalIds = [registerWatcher('.stage-5', '')];
-    return () => {
-      intervalIds.forEach(intervalId => clearInterval(intervalId));
+    var intervalIds = [registerWatcher('.stage-5', '')];
+    return function () {
+      intervalIds.forEach(function (intervalId) {
+        return clearInterval(intervalId);
+      });
     };
   }, [registerWatcher, visitor]);
-  const setActiveTrigger = React__default.useCallback(trigger => {
+  var setActiveTrigger = React__default.useCallback(function (trigger) {
     log('CollectorProvider: manually setting trigger', trigger);
     setPageTriggers([trigger]);
     setDisplayedTriggerByInvocation(trigger.invocation);
   }, [log, setDisplayedTriggerByInvocation, setPageTriggers]);
-  const collectorContextVal = React__default.useMemo(() => ({
-    setPageTriggers,
-    removeActiveTrigger,
-    setActiveTrigger,
-    setIncompleteTriggers,
-    trackEvent,
-    setConversions
-  }), [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers, setConversions]);
-  useEffect(() => {
+  var collectorContextVal = React__default.useMemo(function () {
+    return {
+      setPageTriggers: setPageTriggers,
+      removeActiveTrigger: removeActiveTrigger,
+      setActiveTrigger: setActiveTrigger,
+      setIncompleteTriggers: setIncompleteTriggers,
+      trackEvent: trackEvent,
+      setConversions: setConversions
+    };
+  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers, setConversions]);
+  useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
   useRunOnPathChange(checkCollinsBookingComplete, {
@@ -1479,7 +1573,7 @@ function CollectorProvider({
   });
   useFormCollector();
   useButtonCollector();
-  const onPresenseChange = React__default.useCallback(presence => {
+  var onPresenseChange = React__default.useCallback(function (presence) {
     log('presence changed', presence);
   }, [log]);
   return React__default.createElement(IdleTimerProvider, {
@@ -1490,28 +1584,28 @@ function CollectorProvider({
     value: collectorContextVal
   }, children, TriggerComponent()));
 }
-const CollectorContext = createContext({
-  setPageTriggers: () => {
+var CollectorContext = createContext({
+  setPageTriggers: function setPageTriggers() {
     console.error('setPageTriggers not implemented correctly');
   },
-  removeActiveTrigger: () => {
+  removeActiveTrigger: function removeActiveTrigger() {
     console.error('removeActiveTrigger not implemented correctly');
   },
-  setIncompleteTriggers: () => {
+  setIncompleteTriggers: function setIncompleteTriggers() {
     console.error('setIncompleteTriggers not implemented correctly');
   },
-  setActiveTrigger: () => {
+  setActiveTrigger: function setActiveTrigger() {
     console.error('setActiveTrigger not implemented correctly');
   },
-  setConversions: () => {
+  setConversions: function setConversions() {
     console.error('setConversions not implemented correctly');
   },
-  trackEvent: () => {
+  trackEvent: function trackEvent() {
     console.error('trackEvent not implemented correctly');
   }
 });
 
-const useCollector = () => {
+var useCollector = function useCollector() {
   return useContext(CollectorContext);
 };
 
@@ -2704,11 +2798,16 @@ function get(object, path, defaultValue) {
 
 var get_1 = get;
 
-const defualtFormatString = val => val;
-const getInterpolate = structure => {
-  const interpolate = (text, formatString = defualtFormatString) => {
-    const replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, (match, keys) => {
-      let value = get_1(structure, keys);
+var defualtFormatString = function defualtFormatString(val) {
+  return val;
+};
+var getInterpolate = function getInterpolate(structure) {
+  var interpolate = function interpolate(text, formatString) {
+    if (formatString === void 0) {
+      formatString = defualtFormatString;
+    }
+    var replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, function (match, keys) {
+      var value = get_1(structure, keys);
       if (formatString) value = formatString(value);
       return value !== undefined ? value : match;
     });
@@ -2717,27 +2816,27 @@ const getInterpolate = structure => {
   return interpolate;
 };
 
-const getPositiveDateDiffInSec = (date1, date2) => {
+var getPositiveDateDiffInSec = function getPositiveDateDiffInSec(date1, date2) {
   return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
 };
 function formatTimeStamp(targetDate) {
-  const durationInSeconds = getPositiveDateDiffInSec(new Date(), targetDate);
-  const days = Math.floor(durationInSeconds / (60 * 60 * 24));
-  const hours = Math.floor(durationInSeconds % (60 * 60 * 24) / (60 * 60));
-  const minutes = Math.floor(durationInSeconds % (60 * 60) / 60);
-  const seconds = durationInSeconds % 60;
-  const parts = [];
+  var durationInSeconds = getPositiveDateDiffInSec(new Date(), targetDate);
+  var days = Math.floor(durationInSeconds / (60 * 60 * 24));
+  var hours = Math.floor(durationInSeconds % (60 * 60 * 24) / (60 * 60));
+  var minutes = Math.floor(durationInSeconds % (60 * 60) / 60);
+  var seconds = durationInSeconds % 60;
+  var parts = [];
   if (days > 0) {
-    parts.push(`${days} day${days > 1 ? 's' : ''}`);
+    parts.push(days + " day" + (days > 1 ? 's' : ''));
   }
   if (hours > 0) {
-    parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+    parts.push(hours + " hour" + (hours > 1 ? 's' : ''));
   }
   if (minutes > 0) {
-    parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+    parts.push(minutes + " minute" + (minutes > 1 ? 's' : ''));
   }
   if (seconds > 0) {
-    parts.push(`${seconds} second${seconds > 1 ? 's' : ''}`);
+    parts.push(seconds + " second" + (seconds > 1 ? 's' : ''));
   }
   if (parts.length === 0) {
     return '0 sec';
@@ -2745,42 +2844,50 @@ function formatTimeStamp(targetDate) {
   if (parts.length === 1) {
     return parts[0];
   }
-  const lastPart = parts.pop();
-  const formattedDuration = parts.join(' ') + ` and ${lastPart}`;
+  var lastPart = parts.pop();
+  var formattedDuration = parts.join(' ') + (" and " + lastPart);
   return formattedDuration;
 }
-const useCountdown = ({
-  onZero,
-  initialTimestamp,
-  interpolate
-}) => {
-  const {
-    error
-  } = useLogging();
-  const [timestamp, setTimeStamp] = useState(initialTimestamp || null);
-  const [countdown, setCountdown] = useState('');
-  const [intId, setIntId] = useState();
-  useEffect(() => {
+var useCountdown = function useCountdown(_ref) {
+  var onZero = _ref.onZero,
+    initialTimestamp = _ref.initialTimestamp,
+    interpolate = _ref.interpolate;
+  var _useLogging = useLogging(),
+    error = _useLogging.error;
+  var _useState = useState(initialTimestamp || null),
+    timestamp = _useState[0],
+    setTimeStamp = _useState[1];
+  var _useState2 = useState(''),
+    countdown = _useState2[0],
+    setCountdown = _useState2[1];
+  var _useState3 = useState(),
+    intId = _useState3[0],
+    setIntId = _useState3[1];
+  useEffect(function () {
     if (timestamp === null) return;
-    const id = setInterval(() => {
-      const result = formatTimeStamp(new Date(timestamp));
+    var id = setInterval(function () {
+      var result = formatTimeStamp(new Date(timestamp));
       setCountdown(result);
     }, 1000);
     setIntId(id);
-    return () => clearInterval(id);
+    return function () {
+      return clearInterval(id);
+    };
   }, [timestamp]);
-  useEffect(() => {
+  useEffect(function () {
     if (!onZero) return;
     if (timestamp === null) return;
-    const currentDate = new Date();
-    const diff = getPositiveDateDiffInSec(currentDate, new Date(timestamp));
+    var currentDate = new Date();
+    var diff = getPositiveDateDiffInSec(currentDate, new Date(timestamp));
     if (diff <= 0) {
       onZero();
       clearInterval(intId);
     }
   }, [onZero, timestamp, intId]);
-  const interpolatefunc = useMemo(() => getInterpolate(interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure), [interpolate]);
-  const formattedCountdown = useMemo(() => {
+  var interpolatefunc = useMemo(function () {
+    return getInterpolate(interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure);
+  }, [interpolate]);
+  var formattedCountdown = useMemo(function () {
     if (!interpolate) {
       error('No interpolation provided to timer. Rendering just countdown.');
       return countdown;
@@ -2793,117 +2900,119 @@ const useCountdown = ({
       error('No text provided to timer interpolation. Rendering just countdown.');
       return countdown;
     }
-    const formatVal = val => formatTimeStamp(new Date(val));
-    const interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
+    var formatVal = function formatVal(val) {
+      return formatTimeStamp(new Date(val));
+    };
+    var interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
     return interpoaltedVal;
   }, [countdown, interpolate, interpolatefunc]);
   return {
-    countdown,
-    setTimeStamp,
-    formattedCountdown
+    countdown: countdown,
+    setTimeStamp: setTimeStamp,
+    formattedCountdown: formattedCountdown
   };
 };
 
-const useSeenMutation = () => {
-  const {
-    log,
-    error
-  } = useLogging();
-  const {
-    appId
-  } = useFingerprint();
-  const {
-    trackEvent
-  } = useMixpanel();
-  const {
-    setPageTriggers,
-    setIncompleteTriggers,
-    setConversions
-  } = useCollector();
-  const {
-    visitor,
-    setVisitor
-  } = useVisitor();
-  const brand = useBrand();
-  const trackTriggerSeen = React__default.useCallback(trigger => {
+var useSeenMutation = function useSeenMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useCollector = useCollector(),
+    setPageTriggers = _useCollector.setPageTriggers,
+    setIncompleteTriggers = _useCollector.setIncompleteTriggers,
+    setConversions = _useCollector.setConversions;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor,
+    setVisitor = _useVisitor.setVisitor;
+  var brand = useBrand();
+  var trackTriggerSeen = React__default.useCallback(function (trigger) {
     trackEvent('trigger_displayed', {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
       time: new Date().toISOString(),
-      brand
+      brand: brand
     });
   }, [trackEvent, brand]);
-  return useMutation(trigger => {
+  return useMutation(function (trigger) {
     trackTriggerSeen(trigger);
-    return request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
+    return request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
       seenTriggerIDs: [trigger.id],
-      visitor,
+      visitor: visitor,
       page: getPagePayload(),
       device: deviceInfo
-    }).then(response => {
+    }).then(function (response) {
       log('Seen mutation: response', response);
       return response;
-    }).catch(err => {
+    })["catch"](function (err) {
       error('Seen mutation: error', err);
       return err;
     });
   }, {
-    onSuccess: async res => {
-      var _r$identifiers;
-      const r = await res.json();
-      log('Seen mutation: replacing triggers with:', r.pageTriggers);
-      setPageTriggers(r.pageTriggers);
-      setConversions(r.conversions || []);
-      const retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
-      if (retrievedUserId) {
-        updateCookie(retrievedUserId);
-        setVisitor({
-          id: retrievedUserId
+    onSuccess: function (res) {
+      try {
+        return Promise.resolve(res.json()).then(function (r) {
+          var _r$identifiers;
+          log('Seen mutation: replacing triggers with:', r.pageTriggers);
+          setPageTriggers(r.pageTriggers);
+          setConversions(r.conversions || []);
+          var retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
+          if (retrievedUserId) {
+            updateCookie(retrievedUserId);
+            setVisitor({
+              id: retrievedUserId
+            });
+          }
+          log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
+          setIncompleteTriggers(r.incompleteTriggers || []);
+          return r;
         });
+      } catch (e) {
+        return Promise.reject(e);
       }
-      log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
-      setIncompleteTriggers(r.incompleteTriggers || []);
-      return r;
     }
   });
 };
 
-const resetPad = () => {
+var resetPad = function resetPad() {
   document.body.style.paddingTop = 'inherit';
 };
-const Banner = ({
-  trigger
-}) => {
+var Banner = function Banner(_ref) {
   var _trigger$data3, _trigger$data4, _trigger$data5;
-  const container = useRef(null);
-  const {
-    removeActiveTrigger
-  } = useCollector();
-  const {
-    trackEvent
-  } = useMixpanel();
-  const [open, setOpen] = useState(true);
-  const [hasFired, setHasFired] = useState(false);
-  const {
-    mutate: runSeen,
-    isSuccess,
-    isLoading
-  } = useSeenMutation();
-  useEffect(() => {
+  var trigger = _ref.trigger;
+  var container = useRef(null);
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useState = useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  var _useState2 = useState(false),
+    hasFired = _useState2[0],
+    setHasFired = _useState2[1];
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSuccess = _useSeenMutation.isSuccess,
+    isLoading = _useSeenMutation.isLoading;
+  useEffect(function () {
     if (!open) return;
     if (hasFired) return;
     if (isSuccess) return;
     if (isLoading) return;
-    const tId = setTimeout(() => {
+    var tId = setTimeout(function () {
       runSeen(trigger);
     }, 500);
     setHasFired(true);
-    return () => {
+    return function () {
       clearTimeout(tId);
     };
   }, [open, isSuccess, isLoading]);
-  const handleClickCallToAction = e => {
+  var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
     trackEvent('user_clicked_button', trigger);
@@ -2911,27 +3020,28 @@ const Banner = ({
     setOpen(false);
     resetPad();
   };
-  const handleClose = () => {
+  var handleClose = function handleClose() {
     trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
     resetPad();
   };
-  const {
-    formattedCountdown
-  } = useCountdown({
-    onZero: handleClose,
-    initialTimestamp: new Date(((_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.countdownEndTime) || ''),
-    interpolate: {
-      text: (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.marketingText,
-      structure: trigger.data
-    }
-  });
-  const interpolate = React__default.useMemo(() => getInterpolate(trigger.data || {}), [trigger.data]);
-  useEffect(() => {
+  var _useCountdown = useCountdown({
+      onZero: handleClose,
+      initialTimestamp: new Date(((_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.countdownEndTime) || ''),
+      interpolate: {
+        text: (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.marketingText,
+        structure: trigger.data
+      }
+    }),
+    formattedCountdown = _useCountdown.formattedCountdown;
+  var interpolate = React__default.useMemo(function () {
+    return getInterpolate(trigger.data || {});
+  }, [trigger.data]);
+  useEffect(function () {
     var _container$current;
-    const bannerHeight = (_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientHeight;
-    document.body.style.paddingTop = `${bannerHeight}px`;
+    var bannerHeight = (_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientHeight;
+    document.body.style.paddingTop = bannerHeight + "px";
     return resetPad;
   }, [container, formattedCountdown]);
   if (!open) return null;
@@ -2981,33 +3091,35 @@ const Banner = ({
     }
   }));
 };
-const TriggerBanner = ({
-  trigger
-}) => {
+var TriggerBanner = function TriggerBanner(_ref2) {
+  var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Banner, {
     trigger: trigger
   }), document.body);
 };
 
-const baseUrl = 'https://bookings-bff.starship-staging.com';
-const makeFullUrl = (resource, params = {}) => {
+var baseUrl = 'https://bookings-bff.starship-staging.com';
+var makeFullUrl = function makeFullUrl(resource, params) {
+  if (params === void 0) {
+    params = {};
+  }
   if (resource.startsWith('/')) {
     resource = resource.substring(1);
   }
-  const fullUri = `${baseUrl}/${resource}`;
+  var fullUri = baseUrl + "/" + resource;
   if (Object.keys(params).length === 0) {
     return fullUri;
   }
-  return `${fullUri}?${new URLSearchParams(params).toString()}`;
+  return fullUri + "?" + new URLSearchParams(params).toString();
 };
-const Button = ({
-  children,
-  className,
-  onClick,
-  disabled,
-  colour: _colour = 'primary'
-}) => {
-  let builtButtonClasses = `btn step-button bg-${_colour} border-${_colour} text-white hover:bg-${_colour}/80 disabled:text-${_colour}/50 disabled:border-${_colour}/50` + (className ? ' ' + className : '');
+var Button = function Button(_ref) {
+  var children = _ref.children,
+    className = _ref.className,
+    onClick = _ref.onClick,
+    disabled = _ref.disabled,
+    _ref$colour = _ref.colour,
+    colour = _ref$colour === void 0 ? 'primary' : _ref$colour;
+  var builtButtonClasses = "btn step-button bg-" + colour + " border-" + colour + " text-white hover:bg-" + colour + "/80 disabled:text-" + colour + "/50 disabled:border-" + colour + "/50" + (className ? ' ' + className : '');
   if (disabled) {
     builtButtonClasses += ' disabled';
   }
@@ -3017,81 +3129,91 @@ const Button = ({
     onClick: onClick
   }, children);
 };
-const Voucher = ({
-  details
-}) => {
+var Voucher = function Voucher(_ref2) {
+  var details = _ref2.details;
   return createElement("div", null, createElement("h3", null, "Terms of Voucher"), createElement("p", {
     className: 'text-sm'
   }, details.termsAndConditions));
 };
-const TriggerInverse = ({}) => {
-  const landingPage = {};
-  const form = {};
-  const location = {};
-  const [open, setOpen] = useState(true);
+var TriggerInverse = function TriggerInverse(_ref3) {
+  var onSubmit = function onSubmit(data) {
+    try {
+      setState({
+        busy: true
+      });
+      try {
+        if (form.campaign !== '') {
+          submitVoucher(data).then(function () {
+            var eventData = {
+              item_name: landingPage === null || landingPage === void 0 ? void 0 : landingPage.name,
+              affiliation: 'Booking Flow'
+            };
+            console.log(eventData);
+          });
+        }
+      } catch (e) {}
+      return Promise.resolve();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+  var submitVoucher = function submitVoucher(data) {
+    try {
+      var reqData = _extends({}, data, {
+        bookingLink: (location === null || location === void 0 ? void 0 : location.origin) + "/" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.slug)
+      });
+      return Promise.resolve(fetch(makeFullUrl("campaigns/" + (form === null || form === void 0 ? void 0 : form.campaign) + "/voucher?locationID=" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.identifier)), {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify(reqData)
+      })).then(function (response) {
+        response.json().then(function (responseData) {
+          if (response.ok) {
+            setState({
+              busy: false,
+              complete: true,
+              voucher: responseData.voucher
+            });
+          } else {
+            setState({
+              busy: false,
+              error: responseData,
+              responseStatusCode: response.status
+            });
+          }
+        });
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
+  _objectDestructuringEmpty(_ref3);
+  var landingPage = {};
+  var form = {};
+  var location = {};
+  var _React$useState = useState(true),
+    open = _React$useState[0],
+    setOpen = _React$useState[1];
   if (!open) {
     return null;
   }
-  const {
-    register,
-    handleSubmit,
-    formState: {
-      isSubmitting
-    }
-  } = useForm();
-  const initialState = {
+  var _useForm = useForm(),
+    register = _useForm.register,
+    handleSubmit = _useForm.handleSubmit,
+    isSubmitting = _useForm.formState.isSubmitting;
+  var initialState = {
     busy: false,
     complete: false,
     voucher: null,
     error: null,
     responseStatusCode: 0
   };
-  const [state, setState] = useState(initialState);
-  async function submitVoucher(data) {
-    const reqData = {
-      ...data,
-      bookingLink: `${location === null || location === void 0 ? void 0 : location.origin}/${landingPage === null || landingPage === void 0 ? void 0 : landingPage.slug}`
-    };
-    const response = await fetch(makeFullUrl(`campaigns/${form === null || form === void 0 ? void 0 : form.campaign}/voucher?locationID=${landingPage === null || landingPage === void 0 ? void 0 : landingPage.identifier}`), {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-type': 'application/json'
-      },
-      body: JSON.stringify(reqData)
-    });
-    response.json().then(responseData => {
-      if (response.ok) {
-        setState({
-          busy: false,
-          complete: true,
-          voucher: responseData.voucher
-        });
-      } else {
-        setState({
-          busy: false,
-          error: responseData,
-          responseStatusCode: response.status
-        });
-      }
-    });
-  }
-  async function onSubmit(data) {
-    setState({
-      busy: true
-    });
-    try {
-      if (form.campaign !== '') {
-        submitVoucher(data).then(() => {
-          const eventData = {
-            item_name: landingPage === null || landingPage === void 0 ? void 0 : landingPage.name,
-            affiliation: 'Booking Flow'
-          };
-          console.log(eventData);
-        });
-      }
-    } catch (e) {}
-  }
+  var _React$useState2 = useState(initialState),
+    state = _React$useState2[0],
+    setState = _React$useState2[1];
   if (state.complete === true) {
     return createElement("div", {
       className: 'container'
@@ -3108,10 +3230,12 @@ const TriggerInverse = ({}) => {
       className: 'container'
     }, createElement("h2", {
       className: 'mt-3'
-    }, "Uh-oh!"), createElement("p", null, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\u00A0", createElement("a", {
+    }, "Uh-oh!"), createElement("p", null, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\xA0", createElement("a", {
       href: '/help',
       className: 'underline font-serif tracking-wide',
-      onClick: () => setOpen(false)
+      onClick: function onClick() {
+        return setOpen(false);
+      }
     }, "contact us")));
   }
   return createElement("div", {
@@ -3131,7 +3255,7 @@ const TriggerInverse = ({}) => {
   }, createElement("div", {
     className: 'cms-content text-center md:text-left'
   }, createElement("h2", null, "Get Your Voucher"), createElement("p", null, "To receive your voucher, we just need a few details from you."), createElement("h3", {
-    className: `bar-title border-l-4 border-solid border-${landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour}`
+    className: "bar-title border-l-4 border-solid border-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour)
   }, "Contact Info"), createElement("form", {
     onSubmit: handleSubmit(onSubmit)
   }, createElement("div", {
@@ -3142,7 +3266,9 @@ const TriggerInverse = ({}) => {
     required: true,
     minLength: 2,
     maxLength: 30,
-    validate: value => value.trim().length >= 2
+    validate: function validate(value) {
+      return value.trim().length >= 2;
+    }
   }), {
     type: 'text',
     className: 'form-input',
@@ -3153,7 +3279,9 @@ const TriggerInverse = ({}) => {
     required: true,
     minLength: 2,
     maxLength: 30,
-    validate: value => value.trim().length >= 2
+    validate: function validate(value) {
+      return value.trim().length >= 2;
+    }
   }), {
     type: 'text',
     className: 'form-input',
@@ -3190,11 +3318,11 @@ const TriggerInverse = ({}) => {
     colour: landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour,
     disabled: state.busy || isSubmitting
   }, isSubmitting || state.busy ? 'Sending Voucher...' : 'Get My Voucher')), state.error && state.responseStatusCode !== 409 && createElement("div", {
-    className: `alert mt-5 bg-${landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour}/20`
+    className: "alert mt-5 bg-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour) + "/20"
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
-const getModalButtonStylesBySize = size => {
+var getModalButtonStylesBySize = function getModalButtonStylesBySize(size) {
   switch (size) {
     case 'small':
       {
@@ -3226,7 +3354,7 @@ const getModalButtonStylesBySize = size => {
       }
   }
 };
-const getModalButtonFlexPosition = position => {
+var getModalButtonFlexPosition = function getModalButtonFlexPosition(position) {
   switch (position) {
     case 'left':
       return {
@@ -3242,293 +3370,113 @@ const getModalButtonFlexPosition = position => {
       };
   }
 };
-const randomHash = 'f' + v4().split('-')[0];
-const prependClass = className => `f${randomHash}-${className}`;
-const getIsModalFullyClickable = ({
-  trigger
-}) => {
+var randomHash = 'f' + v4().split('-')[0];
+var prependClass = function prependClass(className) {
+  return "f" + randomHash + "-" + className;
+};
+var getIsModalFullyClickable = function getIsModalFullyClickable(_ref) {
   var _trigger$data;
+  var trigger = _ref.trigger;
   return !(trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonText);
 };
-const getModalSizing = img => {
-  const imageRealHeight = img.height;
-  const imageRealWidth = img.width;
-  const aspectRatio = imageRealWidth / imageRealHeight;
-  const getMaxWidth = num => window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9;
-  const getMaxHeight = num => window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9;
-  const deviceSizeLimits = isMobile ? {
+var getModalSizing = function getModalSizing(img) {
+  var imageRealHeight = img.height;
+  var imageRealWidth = img.width;
+  var aspectRatio = imageRealWidth / imageRealHeight;
+  var getMaxWidth = function getMaxWidth(num) {
+    return window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9;
+  };
+  var getMaxHeight = function getMaxHeight(num) {
+    return window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9;
+  };
+  var deviceSizeLimits = isMobile ? {
     height: getMaxHeight(1000),
     width: getMaxWidth(640)
   } : {
     height: getMaxHeight(490),
     width: getMaxWidth(819)
   };
-  const widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
-  const heightToUse = widthToUse / aspectRatio;
+  var widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
+  var heightToUse = widthToUse / aspectRatio;
   return {
     height: heightToUse,
     width: widthToUse
   };
 };
-const useModalDimensionsBasedOnImage = ({
-  imageURL
-}) => {
-  const [imageDimensions, setImageDimensions] = useState({
-    width: 0,
-    height: 0
-  });
-  useEffect(() => {
-    const img = new Image();
+var useModalDimensionsBasedOnImage = function useModalDimensionsBasedOnImage(_ref2) {
+  var imageURL = _ref2.imageURL;
+  var _useState = useState({
+      width: 0,
+      height: 0
+    }),
+    imageDimensions = _useState[0],
+    setImageDimensions = _useState[1];
+  useEffect(function () {
+    var img = new Image();
     img.src = imageURL;
-    const id = setInterval(() => {
-      const modalSize = getModalSizing(img);
+    var id = setInterval(function () {
+      var modalSize = getModalSizing(img);
       if (modalSize.height || modalSize.width) {
         setImageDimensions(modalSize);
         clearInterval(id);
       }
     }, 50);
-    return () => {
+    return function () {
       clearInterval(id);
     };
   }, [imageURL]);
   return {
-    imageDimensions,
-    setImageDimensions
+    imageDimensions: imageDimensions,
+    setImageDimensions: setImageDimensions
   };
 };
 
-const defaultElementSize = 'medium';
-const defaultButtonPosition = 'right';
-const StandardModal = ({
-  trigger,
-  handleClickCallToAction,
-  handleCloseModal
-}) => {
+var defaultElementSize = 'medium';
+var defaultButtonPosition = 'right';
+var StandardModal = function StandardModal(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  const {
-    error
-  } = useLogging();
-  const isModalFullyClickable = getIsModalFullyClickable({
-    trigger
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var _useLogging = useLogging(),
+    error = _useLogging.error;
+  var isModalFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
   });
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  const buttonSizeStyle = getModalButtonStylesBySize(defaultElementSize);
-  const {
-    textPrimary,
-    backgroundPrimary
-  } = useBrandColors();
-  const imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
-  const {
-    imageDimensions: {
-      height,
-      width
-    },
-    setImageDimensions
-  } = useModalDimensionsBasedOnImage({
-    imageURL
-  });
-  const appendResponsiveBehaviour = React__default.useCallback(() => {
-    return isMobile ? `` : `
-
-@media screen and (max-width: 1400px) {
-  .${prependClass('modal')} {
-    height: ${1 * height}px;
-    width: ${1 * width}px;
-  }
-}
-
-@media screen and (max-width: 850px) {
-  .${prependClass('modal')} {
-    height: ${0.6 * height}px;
-    width: ${0.6 * width}px;
-  }
-  .${prependClass('main-text')} {
-    font-size: 2.4rem;
-  }
-  .${prependClass('sub-text')} {
-    font-size: 1.3rem;
-  }
-}
-
-@media screen and (max-width: 450px) {
-  .${prependClass('modal')} {
-    height: ${0.4 * height}px;
-    width: ${0.4 * width}px;
-  }
-  .${prependClass('main-text')} {
-    font-size: 1.6rem;
-  }
-  .${prependClass('sub-text')} {
-    font-size: 0.9rem;
-  }
-}
-
-`;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var buttonSizeStyle = getModalButtonStylesBySize(defaultElementSize);
+  var _useBrandColors = useBrandColors(),
+    textPrimary = _useBrandColors.textPrimary,
+    backgroundPrimary = _useBrandColors.backgroundPrimary;
+  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
+      imageURL: imageURL
+    }),
+    _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
+    height = _useModalDimensionsBa2.height,
+    width = _useModalDimensionsBa2.width,
+    setImageDimensions = _useModalDimensionsBa.setImageDimensions;
+  var appendResponsiveBehaviour = React__default.useCallback(function () {
+    return isMobile ? "" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 2.4rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 1.3rem;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 1.6rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 0.9rem;\n  }\n}\n\n";
   }, [height, width, imageURL, isMobile]);
-  useEffect(() => {
-    const cssToApply = `
-    :root {
-      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    }
-    
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    p,
-    a,
-    span {
-      line-height: 1.2;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-    
-    .${prependClass('overlay')} {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: 500;
-      font-style: normal;      
-    }
-    
-    .${prependClass('modal')} {
-      ${isModalFullyClickable ? 'cursor: pointer;' : ``}
-      height: ${height}px;
-      width: ${width}px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background-repeat: no-repeat;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--text-shadow);
-      ${isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : ''}
-      ${isModalFullyClickable ? 'cursor: pointer;' : ''}
-    }
-    
-    .${prependClass('modal')}:hover {
-      ${isModalFullyClickable ? `
-        filter: brightness(1.05);
-        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;
-      ` : ''}
-    }
-    
-    .${prependClass('text-center')} {
-      text-align: center;
-    }
-  
-    .${prependClass('text-container')} {
-      flex-direction: column;
-      flex: 1;
-      text-shadow: var(--text-shadow);
-      display: grid;
-      place-content: center;
-    }
-    
-    .${prependClass('main-text')} {
-      font-weight: 500;
-      font-size: 4rem;
-      font-style: normal;
-      text-align: center;
-      color: ${textPrimary};
-      text-shadow: var(--text-shadow);
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    
-    .${prependClass('sub-text')} {
-      margin: auto;
-      font-weight: 600;
-      font-size: 2.2rem;
-      color: ${textPrimary};
-      text-align: center;
-      text-transform: uppercase;
-    }
-    
-    .${prependClass('cta')} {
-      cursor: pointer;
-      background-color: ${backgroundPrimary};
-      border-radius: 2px;
-      display: block;
-      font-size: 1.3rem;
-      color: ${textPrimary};
-      text-align: center;
-      text-transform: uppercase;
-      margin: 1rem;
-      text-decoration: none;
-      box-shadow: 0.3rem 0.3rem white;
-    }
-    
-    .${prependClass('cta:hover')} {
-      transition: all 0.3s;
-      filter: brightness(0.95);
-    }
-    
-    .${prependClass('close-button')} {
-      border-radius: 100%;
-      background-color: white;
-      width: 2rem;
-      border: none;
-      height: 2rem;
-      position: absolute;
-      margin: 10px;
-      top: 0px;
-      right: 0px;
-      color: black;
-      font-size: 2rem;
-      font-weight: 300;
-      cursor: pointer;
-      display: grid;
-      place-content: center;
-    }
-    
-    .${prependClass('close-button:hover')} {
-      transition: all 0.3s;
-      filter: brightness(0.95);
-    }
-    
-    .${prependClass('image-darken')} {
-      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);'}
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 100%;
-    }
-    
-    .${prependClass('text-shadow')} {
-      text-shadow: var(--text-shadow);
-    }
-    
-    .${prependClass('box-shadow')} {
-      box-shadow: var(--text-shadow);
-    }
-    ${appendResponsiveBehaviour()}
-    `;
-    const styles = document.createElement('style');
+  useEffect(function () {
+    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : "") + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
+    var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
     document.head.appendChild(styles);
-    setTimeout(() => {
+    setTimeout(function () {
       setStylesLoaded(true);
     }, 500);
-    return () => {
+    return function () {
       document.head.removeChild(styles);
     };
   }, [isModalFullyClickable, height, width, appendResponsiveBehaviour]);
-  const getHandleModalActionFinal = React__default.useCallback(() => {
+  var getHandleModalActionFinal = React__default.useCallback(function () {
     if (!isModalFullyClickable) return undefined;
-    return e => {
+    return function (e) {
       setImageDimensions({
         width: 0,
         height: 0
@@ -3536,7 +3484,7 @@ const StandardModal = ({
       handleClickCallToAction(e);
     };
   }, [handleClickCallToAction]);
-  const handleClickCloseFinal = React__default.useCallback(e => {
+  var handleClickCloseFinal = React__default.useCallback(function (e) {
     e.stopPropagation();
     return handleCloseModal(e);
   }, [handleCloseModal]);
@@ -3553,7 +3501,7 @@ const StandardModal = ({
     onClick: getHandleModalActionFinal(),
     className: prependClass('modal'),
     style: {
-      background: `url(${imageURL})`,
+      background: "url(" + imageURL + ")",
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'cover',
@@ -3572,10 +3520,9 @@ const StandardModal = ({
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
     className: prependClass('sub-text')
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
-    style: {
-      display: 'flex',
-      ...getModalButtonFlexPosition(defaultButtonPosition)
-    }
+    style: _extends({
+      display: 'flex'
+    }, getModalButtonFlexPosition(defaultButtonPosition))
   }, React__default.createElement("div", null, React__default.createElement("a", {
     href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
     className: prependClass('cta'),
@@ -3584,180 +3531,41 @@ const StandardModal = ({
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
 };
 
-const FullyClickableModal = ({
-  handleClickCallToAction,
-  handleCloseModal,
-  trigger
-}) => {
+var FullyClickableModal = function FullyClickableModal(_ref) {
   var _trigger$data;
-  const imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
-  const {
-    imageDimensions: {
-      height,
-      width
-    }
-  } = useModalDimensionsBasedOnImage({
-    imageURL
-  });
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  const appendResponsiveBehaviour = React__default.useCallback(() => {
-    return isMobile ? `.${prependClass('modal')} {
-
-    }` : `
-@media screen and (max-width: 1400px) {
-  .${prependClass('modal')} {
-    height: ${1 * height}px;
-    width: ${1 * width}px;
-  }
-}
-
-@media screen and (max-width: 850px) {
-  .${prependClass('modal')} {
-    height: ${0.6 * height}px;
-    width: ${0.6 * width}px;
-  }
-}
-
-@media screen and (max-width: 450px) {
-  .${prependClass('modal')} {
-    height: ${0.4 * height}px;
-    width: ${0.4 * width}px;
-  }
-}
-`;
+  var handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal,
+    trigger = _ref.trigger;
+  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
+      imageURL: imageURL
+    }),
+    _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
+    height = _useModalDimensionsBa2.height,
+    width = _useModalDimensionsBa2.width;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var appendResponsiveBehaviour = React__default.useCallback(function () {
+    return isMobile ? "." + prependClass('modal') + " {\n\n    }" : "\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n";
   }, [height, width]);
-  useEffect(() => {
-    const cssToApply = `
-  
-    .${prependClass('overlay')} {
-      background-color: rgba(0, 0, 0, 0.7);
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: 500;
-      font-style: normal;
-    }
-    
-    .${prependClass('modal')} {
-      height: ${height}px;
-      width: ${width}px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background-repeat: no-repeat;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--text-shadow);
-      ${ 'transition: all 0.3s ease-in-out;' }
-      ${ 'cursor: pointer;' }
-    }
-
-    ${ `.${prependClass('modal')}:hover {
-      filter: brightness(1.05);
-      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;
-    }` }
-    
-    
-    .${prependClass('text-center')} {
-      text-align: center;
-    }
-  
-    .${prependClass('text-container')} {
-      flex-direction: column;
-      flex: 1;
-      text-shadow: var(--text-shadow);
-      display: grid;
-      place-content: center;
-    }
-    
-    .${prependClass('main-text')} {
-      font-weight: 500;
-      font-size: 2rem;
-      font-style: normal;
-      text-align: center;
-      margin-bottom: 1rem;
-      fill: var(--secondary);
-      text-shadow: var(--text-shadow);
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-    
-    }
-    
-    .${prependClass('sub-text')} {
-      margin: auto;
-      font-weight: 600;
-      font-size: 1.2rem;
-    
-      text-align: center;
-      text-transform: uppercase;
-    }
-
-    .${prependClass('close-button')} {
-      border-radius: 100%;
-      background-color: white;
-      width: 2rem;
-      border: none;
-      height: 2rem;
-      position: absolute;
-      margin: 10px;
-      top: 0px;
-      right: 0px;
-      color: black;
-      font-size: 1.2rem;
-      font-weight: 300;
-      cursor: pointer;
-      display: grid;
-      place-content: center;
-    }
-    
-    .${prependClass('close-button:hover')} {
-      transition: all 0.3s;
-      filter: brightness(0.95);
-    }
-    
-    .${prependClass('image-darken')} {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 100%;
-      padding: 2rem 1.5rem 1.5rem 1.5rem;
-    }
-    
-    .${prependClass('text-shadow')} {
-      text-shadow: var(--text-shadow);
-    }
-    
-    .${prependClass('box-shadow')} {
-      box-shadow: var(--text-shadow);
-    }
-    ${appendResponsiveBehaviour()}
-
-    `;
-    const styles = document.createElement('style');
+  useEffect(function () {
+    var cssToApply = "\n  \n    ." + prependClass('overlay') + " {\n      background-color: rgba(0, 0, 0, 0.7);\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + ( 'transition: all 0.3s ease-in-out;' ) + "\n      " + ( 'cursor: pointer;' ) + "\n    }\n\n    " + ( "." + prependClass('modal') + ":hover {\n      filter: brightness(1.05);\n      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n    }" ) + "\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n\n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n\n    ";
+    var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
     document.head.appendChild(styles);
-    setTimeout(() => {
+    setTimeout(function () {
       setStylesLoaded(true);
     }, 500);
-    return () => {
+    return function () {
       document.head.removeChild(styles);
     };
   }, [height, width, appendResponsiveBehaviour]);
-  const handleModalAction = React__default.useCallback(e => {
+  var handleModalAction = React__default.useCallback(function (e) {
     return handleClickCallToAction(e);
   }, [handleClickCallToAction]);
-  const handleClickClose = React__default.useCallback(e => {
+  var handleClickClose = React__default.useCallback(function (e) {
     e.stopPropagation();
     return handleCloseModal(e);
   }, [handleCloseModal]);
@@ -3770,7 +3578,7 @@ const FullyClickableModal = ({
     className: prependClass('modal'),
     onClick: handleModalAction,
     style: {
-      background: `url(${imageURL})`,
+      background: "url(" + imageURL + ")",
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'cover',
@@ -3783,10 +3591,9 @@ const FullyClickableModal = ({
   }))));
 };
 
-const CurlyText = ({
-  randomHash,
-  text
-}) => {
+var CurlyText = function CurlyText(_ref) {
+  var randomHash = _ref.randomHash,
+    text = _ref.text;
   return React__default.createElement("svg", {
     xmlns: 'http://www.w3.org/2000/svg',
     xmlnsXlink: 'http://www.w3.org/1999/xlink',
@@ -3806,198 +3613,20 @@ const CurlyText = ({
     startOffset: '50%'
   }, text)));
 };
-const BrownsCustomModal = props => {
+var BrownsCustomModal = function BrownsCustomModal(props) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  const {
-    trigger,
-    handleClickCallToAction,
-    handleCloseModal
-  } = props;
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  const randomHash = useMemo(() => {
+  var trigger = props.trigger,
+    handleClickCallToAction = props.handleClickCallToAction,
+    handleCloseModal = props.handleCloseModal;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var randomHash = useMemo(function () {
     return v4().split('-')[0];
   }, []);
-  useEffect(() => {
-    const css = `
-      @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");
-
-@font-face {
-  font-family: "proxima-nova";
-  src: url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff2"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("opentype");
-  font-display: auto;
-  font-style: normal;
-  font-weight: 500;
-  font-stretch: normal;
-}
-
-:root {
-  --primary: #b6833f;
-  --secondary: white;
-  --text-shadow: 1px 1px 10px rgba(0,0,0,1);
-}
-
-.tk-proxima-nova {
-  font-family: "proxima-nova", sans-serif;
-}
-
-.f` + randomHash + `-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: "proxima-nova", sans-serif !important;
-  font-weight: 500;
-  font-style: normal;
-}
-
-.f` + randomHash + `-modal {
-  width: 80%;
-  max-width: 400px;
-  height: 500px;
-  overflow: hidden;
-  background-repeat: no-repeat;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
-}
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-modal {
-    width: 50%;
-    max-width: 600px;
-  }
-}
-
-.f` + randomHash + `-modalImage {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
-
-@media screen and (max-width:768px) {
-  .f` + randomHash + `-modal {
-    width: 100vw;
-  }
-}
-
-
-.f` + randomHash + `-curlyText {
-  font-family: "proxima-nova", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-  text-transform: uppercase;
-  text-align: center;
-  letter-spacing: 2pt;
-  fill: var(--secondary);
-  text-shadow: var(--text-shadow);
-  margin-top: -150px;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.f` + randomHash + `-curlyText text {
-  font-size: 1.3rem;
-}
-
-
-.f` + randomHash + `-mainText {
-  font-weight: 200;
-  font-family: "proxima-nova", sans-serif;
-  color: var(--secondary);
-  font-size: 2.1rem;
-  text-shadow: var(--text-shadow);
-  display: inline-block;
-  text-align: center;
-  margin-top: -4.5rem;
-}
-
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-}
-
-@media screen and (min-width: 1024px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-
-  .f` + randomHash + `-mainText {
-    font-size: 2.4rem;
-  }
-}
-
-@media screen and (min-width: 1150px) {
-  .f` + randomHash + `-mainText {
-    font-size: 2.7rem;
-  }
-}
-
-.f` + randomHash + `-cta {
-  font-family: "proxima-nova", sans-serif;
-  cursor: pointer;
-  background-color: var(--secondary);
-  padding: 0.75rem 3rem;
-  border-radius: 8px;
-  display: block;
-  font-size: 1.3rem;
-  color: var(--primary);
-  text-align: center;
-  text-transform: uppercase;
-  max-width: 400px;
-  margin: 0 auto;
-  text-decoration: none;
-}
-
-.f` + randomHash + `-cta:hover {
-  transition: all 0.3s;
-  filter: brightness(0.95);
-}
-
-.f` + randomHash + `-close-button {
-  position: absolute;
-  top: 0px;
-  right: 0px;
-}
-
-.f` + randomHash + `-close-button:hover {
-  transition: all 0.3s;
-  filter: brightness(0.95);
-}
-
-
-.f` + randomHash + `-button-container {
-  flex: 1;
-  display: grid;
-  place-content: center;
-}
-
-.f` + randomHash + `-image-darken {
-  background: rgba(0,0,0,0.2);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
-}
-    `;
-    const styles = document.createElement('style');
+  useEffect(function () {
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-close-button:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
+    var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(css));
     document.head.appendChild(styles);
@@ -4011,7 +3640,7 @@ const BrownsCustomModal = props => {
   }, React__default.createElement("div", {
     className: 'f' + randomHash + '-modal',
     style: {
-      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'cover',
@@ -4050,212 +3679,49 @@ const BrownsCustomModal = props => {
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
 };
-const BrownsModal = props => {
-  const {
-    trigger
-  } = props;
-  const isFullyClickable = getIsModalFullyClickable({
-    trigger
+var BrownsModal = function BrownsModal(props) {
+  var trigger = props.trigger;
+  var isFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
   });
   if (!isFullyClickable) return React__default.createElement(BrownsCustomModal, Object.assign({}, props));
   return React__default.createElement(FullyClickableModal, Object.assign({}, props));
 };
 
-const primaryColor = `rgb(33,147,174)`;
-const secondaryColor = `#e0aa00`;
-const callToActionColor = 'rgb(235,63,43)';
-const mainGrey = 'rgb(70,70,70)';
-const scaleBg = scale => {
-  const imageWidth = 800;
-  const imageHeight = 700;
+var primaryColor = "rgb(33,147,174)";
+var secondaryColor = "#e0aa00";
+var callToActionColor = 'rgb(235,63,43)';
+var mainGrey = 'rgb(70,70,70)';
+var scaleBg = function scaleBg(scale) {
+  var imageWidth = 800;
+  var imageHeight = 700;
   return {
     height: imageHeight * scale,
     width: imageWidth * scale
   };
 };
-const StonehouseCustomModal = ({
-  trigger,
-  handleClickCallToAction,
-  handleCloseModal
-}) => {
+var StonehouseCustomModal = function StonehouseCustomModal(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  useEffect(() => {
-    const cssToApply = `
-      @font-face{
-        font-family: "Gotham Bold";
-        src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix") format("embedded-opentype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff") format("woff"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2") format("woff2"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf") format("truetype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold") format("svg");
-            font-display: auto;
-            font-style: normal;
-            font-weight: 500;
-            font-stretch: normal;
-    }
-     
-
-      :root {
-        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-      }
-  
-
-      .${prependClass('overlay')} {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-family: 'Gotham Bold';
-        font-weight: 500;
-        font-style: normal;
-      }
-
-      .${prependClass('modal')} {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        background-repeat: no-repeat;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: var(--text-shadow);
-        height: ${scaleBg(0.7).height}px;
-        width: ${scaleBg(0.7).width}px;
-      }
-
-      .${prependClass('gotham-bold')} {
-        font-family: 'Gotham Bold';
-      }
-
-      .${prependClass('text-center')} {
-        text-align: center;
-      }
-
-      .${prependClass('main-text')} {
-        line-height: 1.2;
-        font-family: 'Gotham Bold';
-        font-weight: 500;
-        font-style: normal;
-        text-transform: uppercase;
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 0;
-        margin-bottom: -1.5rem;
-        font-size: 4.5rem;
-      }
-
-      .${prependClass('text-container')} {
-        display: grid;
-        place-content: center;
-        flex: 1;
-      }
-
-      .${prependClass('sub-text')} {
-        line-height: 1;
-        margin: auto;
-        font-weight: 600;
-        font-family: 'Gotham Bold';
-        color: ${secondaryColor};
-        letter-spacing: 2pt;
-        display: inline-block;
-        text-align: center;
-        font-size: 2.4rem;
-      }
-
-      .${prependClass('cta')} {
-        line-height: 1.2;
-        font-family: 'Gotham Bold';
-        cursor: pointer;
-        background-color: ${callToActionColor};
-        border-radius: 2px;
-        display: block;
-        color: white;
-        text-align: center;
-        text-transform: uppercase;
-        margin: 0 auto;
-        text-decoration: none;
-        box-shadow: -2px 2px 8px black;
-        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
-        font-size: 1.3rem;
-      }
-
-      .${prependClass('cta:hover')} {
-        transition: all 0.3s;
-        filter: brightness(0.95);
-      }
-
-      .${prependClass('close-button')} {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-      }
-      .${prependClass('close-button')}:hover {
-        transition: all 0.3s;
-        filter: brightness(0.95);
-      }
-      
-
-      .${prependClass('image-container')} {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 100%;
-        padding: 4rem 1.5rem 2rem 1.5rem;
-      }
-
-      .${prependClass('text-shadow')} {
-        text-shadow: var(--text-shadow);
-      }
-
-      .${prependClass('box-shadow')} {
-        box-shadow: var(--text-shadow);
-      }
-      
-      @media screen and (max-width: 550px) {
-        .${prependClass('modal')} {
-          height: ${scaleBg(0.4).height}px;
-          width: ${scaleBg(0.4).width}px;
-        }
-        .${prependClass('main-text')}{
-          font-size: 2.5rem;
-          margin-bottom: -0.6rem;
-        }
-        .${prependClass('sub-text')}{
-          font-size: 1.9rem;
-          letter-spacing: 1.2pt;
-
-        }
-        .${prependClass('cta')}{
-          padding: 0.8rem 0.8rem 0rem 0.8rem;  
-          font-size: 0.8rem;
-        }
-        .${prependClass('image-container')} {
-          padding: 2rem 1.5rem 1rem 1.5rem;
-        }
-      }
-    `;
-    const styles = document.createElement('style');
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var _useState = useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  useEffect(function () {
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        height: " + scaleBg(0.7).height + "px;\n        width: " + scaleBg(0.7).width + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        margin-left: auto;\n        margin-right: auto;\n        margin-top: 0;\n        margin-bottom: -1.5rem;\n        font-size: 4.5rem;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: grid;\n        place-content: center;\n        flex: 1;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n        font-size: 2.4rem;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        display: block;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n        font-size: 1.3rem;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 4rem 1.5rem 2rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2.5rem;\n          margin-bottom: -0.6rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.9rem;\n          letter-spacing: 1.2pt;\n\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 2rem 1.5rem 1rem 1.5rem;\n        }\n      }\n    ";
+    var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
     document.head.appendChild(styles);
-    setTimeout(() => {
+    setTimeout(function () {
       setStylesLoaded(true);
     }, 500);
-    return () => {
+    return function () {
       document.head.removeChild(styles);
     };
   }, []);
-  const textColorByRoute = React__default.useMemo(() => {
+  var textColorByRoute = React__default.useMemo(function () {
     if (location.href.includes('tablebooking')) return {
       heading: {
         color: 'white'
@@ -4267,7 +3733,7 @@ const StonehouseCustomModal = ({
     return {
       heading: {
         color: primaryColor,
-        WebkitTextStroke: `2px ${mainGrey}`
+        WebkitTextStroke: "2px " + mainGrey
       },
       paragraph: {
         color: mainGrey
@@ -4282,7 +3748,7 @@ const StonehouseCustomModal = ({
   }, React__default.createElement("div", {
     className: prependClass('modal'),
     style: {
-      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'cover',
@@ -4315,12 +3781,10 @@ const StonehouseCustomModal = ({
     onClick: handleClickCallToAction
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
 };
-const StonehouseModal = props => {
-  const {
-    trigger
-  } = props;
-  const isFullyClickable = getIsModalFullyClickable({
-    trigger
+var StonehouseModal = function StonehouseModal(props) {
+  var trigger = props.trigger;
+  var isFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
   });
   if (!isFullyClickable) {
     return React__default.createElement(StonehouseCustomModal, Object.assign({}, props));
@@ -4328,45 +3792,44 @@ const StonehouseModal = props => {
   return React__default.createElement(FullyClickableModal, Object.assign({}, props));
 };
 
-const Modal = ({
-  trigger
-}) => {
-  const {
-    removeActiveTrigger
-  } = useCollector();
-  const {
-    trackEvent
-  } = useMixpanel();
-  const [open, setOpen] = useState(true);
-  const [invocationTimeStamp, setInvocationTimeStamp] = useState(null);
-  const {
-    mutate: collect
-  } = useCollectorMutation();
-  const brand = useBrand();
-  const {
-    mutate: runSeen,
-    isSuccess,
-    isLoading
-  } = useSeenMutation();
-  useEffect(() => {
+var Modal = function Modal(_ref) {
+  var trigger = _ref.trigger;
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useState = useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  var _useState2 = useState(null),
+    invocationTimeStamp = _useState2[0],
+    setInvocationTimeStamp = _useState2[1];
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutate;
+  var brand = useBrand();
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSuccess = _useSeenMutation.isSuccess,
+    isLoading = _useSeenMutation.isLoading;
+  useEffect(function () {
     if (!open) return;
     if (invocationTimeStamp) return;
     if (isSuccess) return;
     if (isLoading) return;
-    const tId = setTimeout(() => {
+    var tId = setTimeout(function () {
       runSeen(trigger);
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString());
       }
     }, 500);
-    return () => {
+    return function () {
       clearTimeout(tId);
     };
   }, [open, isSuccess, isLoading]);
   if (!open) {
     return null;
   }
-  const handleClickCallToAction = e => {
+  var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
     collect({
@@ -4375,21 +3838,19 @@ const Modal = ({
         shownAt: invocationTimeStamp || new Date().toISOString()
       }
     });
-    trackEvent('user_clicked_button', {
-      ...trigger,
+    trackEvent('user_clicked_button', _extends({}, trigger, {
       variantName: 'MODAL'
-    });
+    }));
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
-  const handleCloseModal = () => {
-    trackEvent('user_closed_trigger', {
-      ...trigger,
+  var handleCloseModal = function handleCloseModal() {
+    trackEvent('user_closed_trigger', _extends({}, trigger, {
       variantName: 'MODAL'
-    });
+    }));
     removeActiveTrigger(trigger.id);
     setOpen(false);
   };
-  const modalProps = {
+  var modalProps = {
     trigger: trigger,
     handleClickCallToAction: handleClickCallToAction,
     handleCloseModal: handleCloseModal
@@ -4397,30 +3858,26 @@ const Modal = ({
   switch (brand) {
     case 'Ember':
       {
-        let image = isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
-        if (window.location.href.includes('nationalsearch')) image = isMobile ? `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`;
+        var image = isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
+        if (window.location.href.includes('nationalsearch')) image = isMobile ? "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg";
         return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
-          trigger: {
-            ...trigger,
-            data: {
-              ...trigger.data,
+          trigger: _extends({}, trigger, {
+            data: _extends({}, trigger.data, {
               backgroundURL: image
-            }
-          }
+            })
+          })
         }));
       }
     case 'Sizzling':
       {
-        let image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg`;
-        if (window.location.href.includes('signup')) image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`;
+        var _image = isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg";
+        if (window.location.href.includes('signup')) _image = isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg";
         return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
-          trigger: {
-            ...trigger,
-            data: {
-              ...trigger.data,
-              backgroundURL: image
-            }
-          }
+          trigger: _extends({}, trigger, {
+            data: _extends({}, trigger.data, {
+              backgroundURL: _image
+            })
+          })
         }));
       }
     case 'Stonehouse':
@@ -4432,19 +3889,19 @@ const Modal = ({
       return React__default.createElement(StandardModal, Object.assign({}, modalProps));
   }
 };
-const TriggerModal = ({
-  trigger
-}) => {
+var TriggerModal = function TriggerModal(_ref2) {
+  var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Modal, {
     trigger: trigger
   }), document.body);
 };
 
-const Youtube = ({
-  trigger
-}) => {
+var Youtube = function Youtube(_ref) {
   var _trigger$brand, _trigger$brand2, _trigger$brand3, _trigger$brand4, _trigger$data;
-  const [open, setOpen] = useState(true);
+  var trigger = _ref.trigger;
+  var _useState = useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
   if (!open) {
     return null;
   }
@@ -4480,7 +3937,7 @@ const Youtube = ({
       borderRadius: '0.5rem'
     }
   }, React__default.createElement("button", {
-    onClick: () => {
+    onClick: function onClick() {
       setOpen(false);
     },
     style: {
@@ -4494,7 +3951,7 @@ const Youtube = ({
       borderRadius: '0.5rem',
       padding: '0 1rem'
     }
-  }, "\u00D7"), React__default.createElement("iframe", {
+  }, "\xD7"), React__default.createElement("iframe", {
     src: trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.url,
     allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
     style: {
@@ -4504,95 +3961,118 @@ const Youtube = ({
     }
   }))));
 };
-const TriggerYoutube = ({
-  trigger
-}) => {
+var TriggerYoutube = function TriggerYoutube(_ref2) {
+  var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Youtube, {
     trigger: trigger
   }), document.body);
 };
 
-const clientHandlers = [{
+var clientHandlers = [{
   id: 'modal_v1',
   behaviour: 'BEHAVIOUR_MODAL',
-  invoke: trigger => React__default.createElement(TriggerModal, {
-    key: trigger.id,
-    trigger: trigger
-  })
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerModal, {
+      key: trigger.id,
+      trigger: trigger
+    });
+  }
 }, {
   id: 'youtube_v1',
   behaviour: 'BEHAVIOUR_YOUTUBE',
-  invoke: trigger => React__default.createElement(TriggerYoutube, {
-    key: trigger.id,
-    trigger: trigger
-  })
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerYoutube, {
+      key: trigger.id,
+      trigger: trigger
+    });
+  }
 }, {
   id: 'inverse_v1',
   behaviour: 'BEHAVIOUR_INVERSE_FLOW',
-  invoke: trigger => React__default.createElement(TriggerInverse, {
-    key: trigger.id,
-    trigger: trigger
-  })
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerInverse, {
+      key: trigger.id,
+      trigger: trigger
+    });
+  }
 }, {
   id: 'banner_v1',
   behaviour: 'BEHAVIOUR_BANNER',
-  invoke: trigger => React__default.createElement(TriggerBanner, {
-    key: trigger.id,
-    trigger: trigger
-  })
+  invoke: function invoke(trigger) {
+    return React__default.createElement(TriggerBanner, {
+      key: trigger.id,
+      trigger: trigger
+    });
+  }
 }];
 
-const queryClient = new QueryClient();
-const cookieAccountJWT = 'b2c_token';
-const useConsentCheck = (consent, consentCallback) => {
-  const [consentGiven, setConsentGiven] = useState(consent);
-  const {
-    log
-  } = useLogging();
-  useEffect(() => {
+var queryClient = new QueryClient();
+var cookieAccountJWT = 'b2c_token';
+var useConsentCheck = function useConsentCheck(consent, consentCallback) {
+  var _useState = useState(consent),
+    consentGiven = _useState[0],
+    setConsentGiven = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  useEffect(function () {
     if (consent) {
       setConsentGiven(consent);
       return;
     }
     log('Fingerprint Widget Consent: ', consent);
     if (!consentCallback) return;
-    const consentGivenViaCallback = consentCallback();
-    const interval = setInterval(() => {
+    var consentGivenViaCallback = consentCallback();
+    var interval = setInterval(function () {
       setConsentGiven(consent);
     }, 1000);
     if (consentGivenViaCallback) {
       clearInterval(interval);
     }
-    return () => clearInterval(interval);
+    return function () {
+      return clearInterval(interval);
+    };
   }, [consentCallback, consent]);
   return consentGiven;
 };
-const FingerprintProvider = ({
-  appId,
-  children,
-  consent: _consent = false,
-  consentCallback,
-  defaultHandlers,
-  initialDelay: _initialDelay = 0,
-  exitIntentTriggers: _exitIntentTriggers = true,
-  idleTriggers: _idleTriggers = true,
-  pageLoadTriggers: _pageLoadTriggers = true,
-  config: legacy_config
-}) => {
-  const [booted, setBooted] = useState(false);
-  const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers);
-  const consentGiven = useConsentCheck(_consent, consentCallback);
-  const addAnotherHandler = React__default.useCallback(trigger => {
-    setHandlers(handlers => {
-      return [...handlers, trigger];
+var FingerprintProvider = function FingerprintProvider(_ref) {
+  var appId = _ref.appId,
+    children = _ref.children,
+    _ref$consent = _ref.consent,
+    consent = _ref$consent === void 0 ? false : _ref$consent,
+    consentCallback = _ref.consentCallback,
+    defaultHandlers = _ref.defaultHandlers,
+    _ref$initialDelay = _ref.initialDelay,
+    initialDelay = _ref$initialDelay === void 0 ? 0 : _ref$initialDelay,
+    _ref$exitIntentTrigge = _ref.exitIntentTriggers,
+    exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
+    _ref$idleTriggers = _ref.idleTriggers,
+    idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers,
+    _ref$pageLoadTriggers = _ref.pageLoadTriggers,
+    pageLoadTriggers = _ref$pageLoadTriggers === void 0 ? true : _ref$pageLoadTriggers,
+    legacy_config = _ref.config;
+  var _useState2 = useState(false),
+    booted = _useState2[0],
+    setBooted = _useState2[1];
+  var _useState3 = useState(defaultHandlers || clientHandlers),
+    handlers = _useState3[0],
+    setHandlers = _useState3[1];
+  var consentGiven = useConsentCheck(consent, consentCallback);
+  var addAnotherHandler = React__default.useCallback(function (trigger) {
+    setHandlers(function (handlers) {
+      return [].concat(handlers, [trigger]);
     });
   }, [setHandlers]);
-  useEffect(() => {
+  useEffect(function () {
     if (!appId) throw new Error('C&M Fingerprint: appId is required');
     if (booted) return;
     if (!consentGiven) return;
-    const performBoot = async () => {
-      setBooted(true);
+    var performBoot = function performBoot() {
+      try {
+        setBooted(true);
+        return Promise.resolve();
+      } catch (e) {
+        return Promise.reject(e);
+      }
     };
     performBoot();
   }, [consentGiven]);
@@ -4608,32 +4088,34 @@ const FingerprintProvider = ({
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {
     value: {
-      appId,
-      booted,
+      appId: appId,
+      booted: booted,
       currentTrigger: null,
       registerHandler: addAnotherHandler,
-      trackEvent: () => {
+      trackEvent: function trackEvent() {
         alert('trackEvent not implemented');
       },
-      trackPageView: () => {
+      trackPageView: function trackPageView() {
         alert('trackPageView not implemented');
       },
-      unregisterHandler: () => {
+      unregisterHandler: function unregisterHandler() {
         alert('unregisterHandler not implemented');
       },
-      initialDelay: _initialDelay,
-      idleTriggers: _idleTriggers,
-      pageLoadTriggers: _pageLoadTriggers,
-      exitIntentTriggers: _exitIntentTriggers
+      initialDelay: initialDelay,
+      idleTriggers: idleTriggers,
+      pageLoadTriggers: pageLoadTriggers,
+      exitIntentTriggers: exitIntentTriggers
     }
   }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
   }, React__default.createElement(ErrorBoundary, {
-    onError: (error, info) => console.error(error, info),
+    onError: function onError(error, info) {
+      return console.error(error, info);
+    },
     fallback: React__default.createElement("div", null, "An application error occurred.")
   }, children))))))));
 };
-const defaultFingerprintState = {
+var defaultFingerprintState = {
   appId: '',
   booted: false,
   consent: false,
@@ -4642,14 +4124,12 @@ const defaultFingerprintState = {
   idleTriggers: false,
   pageLoadTriggers: false,
   initialDelay: 0,
-  registerHandler: () => {},
-  trackEvent: () => {},
-  trackPageView: () => {},
-  unregisterHandler: () => {}
+  registerHandler: function registerHandler() {},
+  trackEvent: function trackEvent() {},
+  trackPageView: function trackPageView() {},
+  unregisterHandler: function unregisterHandler() {}
 };
-const FingerprintContext = createContext({
-  ...defaultFingerprintState
-});
+var FingerprintContext = createContext(_extends({}, defaultFingerprintState));
 
 export { CollectorContext, CollectorProvider, FingerprintContext, FingerprintProvider, onCookieChanged, useCollector, useFingerprint };
 //# sourceMappingURL=index.modern.js.map
