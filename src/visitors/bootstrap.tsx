@@ -91,13 +91,14 @@ export const bootstrapVisitor = ({
     // Check if `v_id` is in the query parameters
     const urlParams = new URLSearchParams(window.location.search)
 
-    let vid = urlParams.get('v_id')
-    if (vid) {
-      if (vid.includes('?')) {
-        [vid] = vid.split('?')
-      }
-      visitor.id = vid
+    let vidParam = urlParams.get('v_id')
+
+    let visitorId = vidParam || undefined
+
+    if (vidParam && vidParam.includes('?')) {
+      visitorId = vidParam.split('?')[0]
     }
+    visitor.id = visitorId
 
     const sourceId = urlParams.get('source_id')
     if (sourceId) visitor.sourceId = sourceId
@@ -105,7 +106,7 @@ export const bootstrapVisitor = ({
 
   if (
     (!visitor.id && !getCookie(CnMIDCookie)) ||
-    !validVisitorId(getCookie(CnMIDCookie) as string)
+    !validVisitorId(getCookie(CnMIDCookie) || '')
   ) {
     const visitorId = uuidv4()
     visitor.id = visitorId
