@@ -54,7 +54,7 @@ export function useCollinsBookingComplete() {
       return
     }
 
-    log(
+    console.log(
       `useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`
     )
 

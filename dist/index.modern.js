@@ -592,7 +592,7 @@ function useCollinsBookingComplete() {
       log('useCollinsBookingComplete: not a conversion path');
       return;
     }
-    log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
+    console.log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
     trackEvent('booking_complete', {});
   }, [trackEvent, log, brand, initiated]);
   return {
