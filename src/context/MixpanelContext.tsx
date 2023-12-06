@@ -18,18 +18,9 @@ type TrackerState = {
   initiated: boolean
 }
 
-const getTrackEvent =
-  (state: TrackerState) =>
-  (event: string, props: any, callback?: Callback): void => {
-    if (!state.initiated) {
-      const errorMsg = `Mixpanel: Attempting to send ${event} event data before initialization.`
-
-      console.error(errorMsg)
-      throw new Error(errorMsg)
-    } else {
-      return mixpanel.track(event, props, callback)
-    }
-  }
+const trackEvent = (event: string, props: any, callback?: Callback): void => {
+  return mixpanel.track(event, props, callback)
+}
 
 export type MixpanelProviderProps = {
   children?: React.ReactNode
@@ -86,10 +77,6 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
       sourceId: visitor.sourceId
     })
   }, [visitor, registerUserData])
-
-  const trackEvent = React.useCallback(() => {
-    return getTrackEvent({ initiated })
-  }, [initiated])
 
   return (
     <MixpanelContext.Provider
