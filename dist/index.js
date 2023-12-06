@@ -513,8 +513,16 @@ var init = function init(cfg) {
     persistence: 'localStorage'
   });
 };
-var trackEvent = function trackEvent(event, props, callback) {
-  return mixpanel.track(event, props, callback);
+var getTrackEvent = function getTrackEvent(state) {
+  return function (event, props, callback) {
+    if (!state.initiated) {
+      var errorMsg = "Mixpanel: Attempting to send " + event + " event data before initialization.";
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    } else {
+      return mixpanel.track(event, props, callback);
+    }
+  };
 };
 var MixpanelProvider = function MixpanelProvider(_ref) {
   var children = _ref.children;
@@ -558,6 +566,11 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
       sourceId: visitor.sourceId
     });
   }, [visitor, registerUserData]);
+  var trackEvent = React__default.useCallback(function () {
+    return getTrackEvent({
+      initiated: initiated
+    });
+  }, [initiated]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent: trackEvent,
@@ -591,11 +604,13 @@ var collinBrandsPathConversionMap = {
 };
 function useCollinsBookingComplete() {
   var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+    trackEvent = _useMixpanel.trackEvent,
+    initiated = _useMixpanel.state.initiated;
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var brand = useBrand();
   var checkCollinsBookingComplete = React__default.useCallback(function () {
+    if (!initiated) return;
     if (!brand) return;
     var conversionPathForBrand = collinBrandsPathConversionMap[brand];
     if (!conversionPathForBrand) return;
@@ -603,7 +618,7 @@ function useCollinsBookingComplete() {
     if (!isConversionPath) return;
     log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
     trackEvent('booking_complete', {});
-  }, [trackEvent, log, brand]);
+  }, [trackEvent, log, brand, initiated]);
   return {
     checkCollinsBookingComplete: checkCollinsBookingComplete
   };
@@ -1220,7 +1235,8 @@ function CollectorProvider(_ref) {
     getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs,
     getIdleStatusDelay = _useTriggerDelay.getIdleStatusDelay;
   var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+    trackEvent = _useMixpanel.trackEvent,
+    mixpanelBooted = _useMixpanel.state.initiated;
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
   var _useCollinsBookingCom = useCollinsBookingComplete(),
@@ -1439,12 +1455,14 @@ function CollectorProvider(_ref) {
     }
   }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
   React.useEffect(function () {
+    if (!mixpanelBooted) return;
     if (hasVisitorIDInURL()) {
+      log('CollectorProvider: visitor ID in URL, collecting data');
       trackEvent('abandoned_journey_landing', {
         from_email: true
       });
     }
-  }, [trackEvent]);
+  }, [trackEvent, log, mixpanelBooted]);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');

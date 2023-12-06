@@ -20,13 +20,16 @@ const collinBrandsPathConversionMap: Partial<{
  * Necessary since registerWatcher doesn't work on Collins sites
  */
 export function useCollinsBookingComplete() {
-  const { trackEvent } = useMixpanel()
+  const {
+    trackEvent,
+    state: { initiated }
+  } = useMixpanel()
   const { log } = useLogging()
   const brand = useBrand()
 
   const checkCollinsBookingComplete = React.useCallback(() => {
     // might want to add these checks as part of skip condition in `useRunOnPathChange`
-
+    if (!initiated) return
     if (!brand) return
 
     const conversionPathForBrand = collinBrandsPathConversionMap[brand]
@@ -42,7 +45,7 @@ export function useCollinsBookingComplete() {
     )
 
     trackEvent('booking_complete', {})
-  }, [trackEvent, log, brand])
+  }, [trackEvent, log, brand, initiated])
 
   return { checkCollinsBookingComplete }
 }
