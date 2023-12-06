@@ -519,16 +519,8 @@ var init = function init(cfg) {
     persistence: 'localStorage'
   });
 };
-var getTrackEvent = function getTrackEvent(state) {
-  return function (event, props, callback) {
-    if (!state.initiated) {
-      var errorMsg = "Mixpanel: Attempting to send " + event + " event data before initialization.";
-      console.error(errorMsg);
-      throw new Error(errorMsg);
-    } else {
-      return mixpanel.track(event, props, callback);
-    }
-  };
+var trackEvent = function trackEvent(event, props, callback) {
+  return mixpanel.track(event, props, callback);
 };
 var MixpanelProvider = function MixpanelProvider(_ref) {
   var children = _ref.children;
@@ -572,11 +564,6 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
       sourceId: visitor.sourceId
     });
   }, [visitor, registerUserData]);
-  var trackEvent = React__default.useCallback(function () {
-    return getTrackEvent({
-      initiated: initiated
-    });
-  }, [initiated]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent: trackEvent,
