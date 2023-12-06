@@ -566,17 +566,20 @@ export function CollectorProvider({
   // @TODO: this will be scrapped / reworked soon
   useRunOnPathChange(checkCollinsBookingComplete, {
     skip: !booted,
-    delay: initialDelay
+    delay: 0,
+    name: 'checkCollinsBookingComplete'
   })
 
   useRunOnPathChange(collectAndApplyVisitorInfo, {
     skip: !booted,
-    delay: initialDelay
+    delay: initialDelay,
+    name: 'collectAndApplyVisitorInfo'
   })
 
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
-    delay: initialDelay
+    delay: initialDelay,
+    name: 'fireOnLoadTriggers'
   })
 
   useFormCollector()
