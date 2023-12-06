@@ -94,7 +94,7 @@ export const bootstrapVisitor = ({
     let vid = urlParams.get('v_id')
     if (vid) {
       if (vid.includes('?')) {
-        [vid,] = vid.split('?')
+        [vid] = vid.split('?')
       }
       visitor.id = vid
     }
