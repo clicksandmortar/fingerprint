@@ -1,10 +1,10 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
-const PORT = process.env.PORT || 8000;
-const baseURL = `http://localhost:${PORT}`;
+const PORT = process.env.PORT || 8000
+const baseURL = `http://localhost:${PORT}`
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: 'src',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
@@ -14,25 +14,25 @@ export default defineConfig({
     baseURL: baseURL,
     trace: 'retain-on-failure',
     video: 'on',
-    permissions: [],
+    permissions: []
   },
 
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'] }
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { ...devices['Desktop Firefox'] }
     },
 
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-  ],
+      use: { ...devices['Pixel 5'] }
+    }
+  ]
 
   // webServer: {
   //   command: 'npm run start',
@@ -42,4 +42,4 @@ export default defineConfig({
   //   stdout: 'pipe',
   //   stderr: 'pipe',
   // },
-});
+})

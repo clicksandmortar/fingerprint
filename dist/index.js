@@ -1444,7 +1444,7 @@ function CollectorProvider(_ref) {
         from_email: true
       });
     }
-  }, [trackEvent]);
+  }, []);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
