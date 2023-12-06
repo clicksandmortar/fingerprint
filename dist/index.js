@@ -330,26 +330,24 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   }
   if (typeof window !== 'undefined') {
     var urlParams = new URLSearchParams(window.location.search);
-    var vid = urlParams.get('v_id');
-    if (vid) {
-      if (vid.includes('?')) {
-        var _vid$split = vid.split('?');
-        vid = _vid$split[0];
-      }
-      visitor.id = vid;
+    var vidParam = urlParams.get('v_id');
+    var visitorId = vidParam || undefined;
+    if (vidParam && vidParam.includes('?')) {
+      visitorId = vidParam.split('?')[0];
     }
+    visitor.id = visitorId;
     var sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
-  if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie))) {
-    var visitorId = uuid.v4();
-    visitor.id = visitorId;
+  if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie) || '')) {
+    var _visitorId = uuid.v4();
+    visitor.id = _visitorId;
   }
   if (!visitor.id && getCookie(CnMIDCookie)) {
     var c = getCookie(CnMIDCookie);
     var _c$split = c.split('|'),
-      _visitorId = _c$split[0];
-    visitor.id = _visitorId;
+      _visitorId2 = _c$split[0];
+    visitor.id = _visitorId2;
   }
   var combinedCookie = buildCookie({
     visitorId: visitor.id
