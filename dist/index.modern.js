@@ -487,14 +487,8 @@ const init = cfg => {
     persistence: 'localStorage'
   });
 };
-const getTrackEvent = state => (event, props, callback) => {
-  if (!state.initiated) {
-    const errorMsg = `Mixpanel: Attempting to send ${event} event data before initialization.`;
-    console.error(errorMsg);
-    throw new Error(errorMsg);
-  } else {
-    return mixpanel.track(event, props, callback);
-  }
+const trackEvent = (event, props, callback) => {
+  return mixpanel.track(event, props, callback);
 };
 const MixpanelProvider = ({
   children
@@ -540,11 +534,6 @@ const MixpanelProvider = ({
       sourceId: visitor.sourceId
     });
   }, [visitor, registerUserData]);
-  const trackEvent = React__default.useCallback(() => {
-    return getTrackEvent({
-      initiated
-    });
-  }, [initiated]);
   return React__default.createElement(MixpanelContext.Provider, {
     value: {
       trackEvent,
