@@ -5,7 +5,7 @@ import React, {
   useState
 } from 'react'
 import { Config } from '../client/types'
-import { haveBrandColorsBeenConfigured } from '../utils/brand'
+import { _LEGACY_getBrand, haveBrandColorsBeenConfigured } from '../utils/brand'
 import { FingerprintProviderProps } from './FingerprintContext'
 
 // 27 233 237 - dimmed, 41 100 249 - main, 13 14 49 - text Secondary, white primary, 226 226 226 greyBg, some dark grey text ?
@@ -30,7 +30,7 @@ const defaultConfig: Config = {
     triggerCooldownSecs: 60
   },
   brand: {
-    name: 'C&M',
+    name: _LEGACY_getBrand() || 'C&M',
     colors: defaultColors
   }
 }

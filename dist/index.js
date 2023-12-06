@@ -139,7 +139,7 @@ var defaultConfig = {
     triggerCooldownSecs: 60
   },
   brand: {
-    name: 'C&M',
+    name: _LEGACY_getBrand() || 'C&M',
     colors: defaultColors
   }
 };
@@ -601,26 +601,26 @@ function useCollinsBookingComplete() {
     log = _useLogging.log;
   var brand = useBrand();
   var checkCollinsBookingComplete = React__default.useCallback(function () {
-    console.log('useCollinsBookingComplete: checking for Collins booking complete');
+    log('useCollinsBookingComplete: checking for Collins booking complete');
     if (!initiated) {
-      console.log('useCollinsBookingComplete, no init');
+      log('useCollinsBookingComplete, mixpanel not initiated');
       return;
     }
     if (!brand) {
-      console.log('useCollinsBookingComplete, no brand');
+      log('useCollinsBookingComplete, no brand');
       return;
     }
     var conversionPathForBrand = collinBrandsPathConversionMap[brand];
     if (!conversionPathForBrand) {
-      console.log('useCollinsBookingComplete: no path for brand variable');
+      log('useCollinsBookingComplete: no path for brand variable');
       return;
     }
     var isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
     if (!isConversionPath) {
-      console.log('useCollinsBookingComplete: not a conversion path');
+      log('useCollinsBookingComplete: not a conversion path');
       return;
     }
-    console.log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
+    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
     trackEvent('booking_complete', {});
   }, [trackEvent, log, brand, initiated]);
   return {
