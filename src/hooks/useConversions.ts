@@ -23,6 +23,7 @@ export const testConversion: Conversion = {
   analyticsEvent: 'unnecessary-event-ids'
 }
 
+// TODO: move into utils/signals
 /**
  * Returns a function that compares a string with the signal parameter
  */

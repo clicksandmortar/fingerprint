@@ -147,5 +147,6 @@ const Modal = ({ trigger }: Props) => {
 }
 
 export const TriggerModal = ({ trigger }: Props) => {
+  console.log({ 'triggering!!!': trigger })
   return ReactDOM.createPortal(<Modal trigger={trigger} />, document.body)
 }

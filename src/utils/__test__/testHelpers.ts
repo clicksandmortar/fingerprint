@@ -43,6 +43,7 @@ export const setDom = (url = 'http://localhost:3000/test') => {
   )
 
   global.document = dom.window.document
+  // @ts-ignore
   global.window = dom.window
 
   return dom

@@ -1,36 +1,39 @@
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>C&M Fingerprint Example</title>
-  </head>
-  <body>
-    <p>
-      Note: Embedded fingerprint should appear on the page. Refresh to change
-      behaviour.
-    </p>
 
-    <!-- C&M Fingerprint Embed Code -->
-    <script>
-      ;(function (f, i, n, g, e, rp, ri, nt) {
-        p = i.createElement(n)
-        r = i.getElementsByTagName(n)[0]
-        p.src = g
-        p.id = e
-        p.setAttribute('data-debug', rp)
-        p.setAttribute('data-consent', ri)
-        r.parentNode.insertBefore(p, r)
-      })(
-        window,
-        document,
-        'script',
-        '../dist/fingerprint.js',
-        '889b0839-965f-448c-b681-c0f49900ca99',
-        false, // Set to false to disable debug mode
-        false // Set to false to disable consent mode
-      )
-    </script>
-    <!-- End C&M Fingerprint Embed Code -->
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C&M Fingerprint Example</title>
+</head>
+
+<body>
+  <p>
+    Note: Embedded fingerprint should appear on the page. Refresh to change
+    behaviour.
+  </p>
+
+  <!-- C&M Fingerprint Embed Code -->
+  <script>
+    ; (function (f, i, n, g, e, rp, ri, nt) {
+      p = i.createElement(n)
+      r = i.getElementsByTagName(n)[0]
+      p.src = g
+      p.id = e
+      p.setAttribute('data-debug', rp)
+      p.setAttribute('data-consent', ri)
+      r.parentNode.insertBefore(p, r)
+    })(
+      window,
+      document,
+      'script',
+      '../dist/fingerprint.js',
+      '889b0839-965f-448c-b681-c0f49900ca99',
+      true, // Set to false to disable debug mode
+      true // Set to false to disable consent mode
+    )
+  </script>
+  <!-- End C&M Fingerprint Embed Code -->
+</body>
+
 </html>

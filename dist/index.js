@@ -3870,6 +3870,9 @@ var Modal = function Modal(_ref) {
 };
 var TriggerModal = function TriggerModal(_ref2) {
   var trigger = _ref2.trigger;
+  console.log({
+    'triggering!!!': trigger
+  });
   return ReactDOM.createPortal(React__default.createElement(Modal, {
     trigger: trigger
   }), document.body);

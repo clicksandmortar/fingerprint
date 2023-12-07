@@ -6,24 +6,16 @@ import { validateSignalChain } from '../signals'
 
 let browser: Browser
 
-import { setDom } from './testHelpers'
-
 test.beforeAll(async () => {
   browser = await chromium.launch()
-  setDom()
 })
 
 test.afterAll(async () => {
-  // await browser.close()
+  await browser.close()
 })
 
 test.describe('validateSignalChain', async () => {
   test('validateSignalChain - IsOnPath & IsOnDomain', async () => {
-    const page = await browser.newPage()
-
-    await page.goto('http://localhost:3000/test')
-    await page.waitForURL('http://localhost:3000/test')
-
     const correctSignals: FESignal[] = [
       {
         op: 'IsOnPath',
@@ -65,7 +57,7 @@ test.describe('validateSignalChain', async () => {
     const signal: FESignal[] = [
       {
         op: 'CanSeeElementOnPage',
-        parameters: ['body', 'contains', '/test']
+        parameters: ['html', 'contains', '/test']
       }
     ]
 
@@ -77,7 +69,7 @@ test.describe('validateSignalChain', async () => {
         op: 'CanSeeElementOnPage',
         parameters: [
           '#this_id_is_so_unlikely_to_exist_i_am_awkward_banana',
-          'contains',
+          'eq',
           ''
         ]
       }
@@ -85,7 +77,7 @@ test.describe('validateSignalChain', async () => {
     const incorrectSignalWrongPath: FESignal[] = [
       {
         op: 'CanSeeElementOnPage',
-        parameters: ['body', 'eq', '/whateverthehell']
+        parameters: ['html', 'eq', '/whateverthehell']
       }
     ]
 
