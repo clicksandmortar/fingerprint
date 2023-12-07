@@ -9,10 +9,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 2 : undefined,
-  reporter: 'html',
+  reporter: process.env.CI ? 'html' : 'line',
   use: {
     baseURL: baseURL,
-    trace: 'retain-on-failure',
+    trace: 'on-first-retry',
     video: 'on',
     permissions: []
   },
