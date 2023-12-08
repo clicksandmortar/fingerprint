@@ -15,6 +15,9 @@ export const CnMIDCookie = '_cm_id'
 export function getCookieDomain(): string | null {
   const parsedUrl = psl.parse(location.host)
 
+  // @FIXME: please check with the rest if this is a good idea
+  if (location.host.includes('localhost')) return 'localhost'
+
   let cookieDomain = null
 
   // discriminantly type safe. nice.

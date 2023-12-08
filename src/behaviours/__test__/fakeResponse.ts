@@ -51,7 +51,8 @@ export const fakeCollectorResp: CollectorVisitorResponse = {
   ],
   config: {
     script: {
-      debugMode: true
+      // debugMode: true
+      debugMode: false
     },
     trigger: {
       userIdleThresholdSecs: 30,
