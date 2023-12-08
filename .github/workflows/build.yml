@@ -13,13 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-      - uses: browser-actions/setup-chrome@v1
         with:
           node-version: 18
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-
       - name: Build
         run: yarn build:fingerprint
       - uses: actions/upload-artifact@v3
