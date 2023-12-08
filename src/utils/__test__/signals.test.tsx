@@ -39,7 +39,7 @@ test.describe('validateSignalChain', async () => {
     ]
 
     const location = window.location
-    expect(location.href).toEqual('http://localhost:3000/test')
+    expect(location.href).toEqual('http://localhost:4000/test')
 
     const areCorrectSignalsValid = validateSignalChain(correctSignals)
     expect(areCorrectSignalsValid).toEqual(true)
@@ -51,7 +51,7 @@ test.describe('validateSignalChain', async () => {
   test('validateSignalChain - CanSeeElementOnPage', async () => {
     const page = await browser.newPage()
 
-    await page.goto('http://localhost:3000/test', { waitUntil: 'networkidle' })
+    await page.goto('http://localhost:4000/test', { waitUntil: 'networkidle' })
     await page.pause()
 
     const signal: FESignal[] = [

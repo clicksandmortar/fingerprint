@@ -1,6 +1,5 @@
 import { CSSProperties, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../../../client/types'
 
 export type ModalSize = 'small' | 'medium' | 'large' | 'full'
@@ -66,9 +65,9 @@ export const getModalButtonFlexPosition = (
   }
 }
 
-export const randomHash = 'f' + uuidv4().split('-')[0]
+export const randomHash = 'cnm-behaviour'
 
-export const prependClass = (className: string) => `f${randomHash}-${className}`
+export const prependClass = (className: string) => `${randomHash}-${className}`
 
 // if no button text provided, make the entire modal clickable and dont render the button
 export const getIsModalFullyClickable = ({ trigger }: { trigger: Trigger }) => {

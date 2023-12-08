@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import ReactDOM from 'react-dom'
 import { Trigger } from '../client/types'
 import CnMStandardModal from '../components/modals/StandardModal'
 import { BrownsModal } from '../components/modals/browns'
@@ -147,6 +146,5 @@ const Modal = ({ trigger }: Props) => {
 }
 
 export const TriggerModal = ({ trigger }: Props) => {
-  console.log({ 'triggering!!!': trigger })
-  return ReactDOM.createPortal(<Modal trigger={trigger} />, document.body)
+  return <Modal trigger={trigger} />
 }

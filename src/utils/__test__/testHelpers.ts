@@ -12,7 +12,7 @@ export const getDocument = async (page: Page) => {
   })
 }
 
-export const setDom = (url = 'http://localhost:3000/test') => {
+export const setDom = (url = 'http://localhost:4000/test') => {
   const dom = new JSDOM(
     `
   <!doctype html>

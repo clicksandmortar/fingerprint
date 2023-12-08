@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
+import { resolve } from 'path'
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 4000
 const baseURL = `http://localhost:${PORT}`
 
 export default defineConfig({
@@ -32,14 +33,14 @@ export default defineConfig({
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] }
     }
-  ]
+  ],
 
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: baseURL,
-  //   timeout: 120 * 1000,
-  //   reuseExistingServer: !process.env.CI,
-  //   stdout: 'pipe',
-  //   stderr: 'pipe',
-  // },
+  webServer: {
+    command: `npx serve ${resolve(__dirname, 'example')} -l 4000`,
+    url: baseURL,
+    timeout: 120 * 1000,
+    reuseExistingServer: !process.env.CI,
+    stdout: 'pipe',
+    stderr: 'pipe'
+  }
 })

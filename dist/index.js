@@ -3349,9 +3349,9 @@ var getModalButtonFlexPosition = function getModalButtonFlexPosition(position) {
       };
   }
 };
-var randomHash = 'f' + uuid.v4().split('-')[0];
+var randomHash = 'cnm-behaviour';
 var prependClass = function prependClass(className) {
-  return "f" + randomHash + "-" + className;
+  return randomHash + "-" + className;
 };
 var getIsModalFullyClickable = function getIsModalFullyClickable(_ref) {
   var _trigger$data;
@@ -3870,12 +3870,9 @@ var Modal = function Modal(_ref) {
 };
 var TriggerModal = function TriggerModal(_ref2) {
   var trigger = _ref2.trigger;
-  console.log({
-    'triggering!!!': trigger
-  });
-  return ReactDOM.createPortal(React__default.createElement(Modal, {
+  return React__default.createElement(Modal, {
     trigger: trigger
-  }), document.body);
+  });
 };
 
 var Youtube = function Youtube(_ref) {
