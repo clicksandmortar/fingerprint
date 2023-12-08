@@ -42,6 +42,7 @@ const getCookie = async (name: string, browser) => {
 
 test.describe('Visitor stuff', async () => {
   test('get visitor id from the cookie', async () => {
+    await prepPage(browser)
     const cookie = await getCookie(CnMIDCookie, browser)
 
     const isVisitorIdValid = validVisitorId(cookie?.value || '')
