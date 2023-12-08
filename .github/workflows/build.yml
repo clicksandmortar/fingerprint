@@ -18,6 +18,8 @@ jobs:
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1.4.0
       - name: Build
         run: yarn build:fingerprint
       - uses: actions/upload-artifact@v3
