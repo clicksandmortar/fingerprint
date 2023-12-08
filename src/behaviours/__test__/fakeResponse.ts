@@ -2,8 +2,7 @@ import { CollectorVisitorResponse } from '../../client/types'
 import { SupportedBrand } from '../../utils/brand'
 
 export const fakeCollectorResp: CollectorVisitorResponse = {
-  // firstSeen: '2023-12-08T08:29:32.173081562Z',
-  // lastSeen: '2023-12-08T08:29:32.178245531Z',
+  // firstSeen: '2021a1a101101aaa:111a711115aa11aaa11111stSeen: '2023-12-08T08:29:32.178245531Z',
   // visits: {
   //   host: 1,
   //   path: 1
@@ -94,7 +93,7 @@ export const fakeCollectorResp: CollectorVisitorResponse = {
     }
   ],
   identifiers: {
-    main: '3c4f6a89-4edb-450e-9962-ba90dfc05466'
+    main: '1a1a1a11-1aaa-111a-1111-aa11aaa11111'
   },
   intently: false
 }
