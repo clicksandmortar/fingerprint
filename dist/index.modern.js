@@ -306,6 +306,8 @@ const bootstrapVisitor = ({
   const visitor = {
     id: undefined
   };
+  console.log('BLA');
+  console.log('cpp', getCookie(cookieAccountJWT));
   if (getCookie(cookieAccountJWT)) {
     visitor.jwt = getCookie(cookieAccountJWT);
   }

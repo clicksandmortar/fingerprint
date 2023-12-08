@@ -62,6 +62,7 @@ const updateCookieUUID = (
   return `${uuid}|${sessionId}|${endTime}`
 }
 
+// TODO: split for testing
 export const updateCookie = (uuid: string) => {
   if (!uuidValidateV4(uuid)) return
 
@@ -78,13 +79,15 @@ export const bootstrapVisitor = ({
   session,
   setSession
 }: {
-  setVisitor: (session: Visitor) => void
+  setVisitor: (visitor: Visitor) => void
   session: Session
   setSession: (session: Session) => void
 }) => {
   const visitor: Visitor = {
     id: undefined
   }
+  console.log('BLA')
+  console.log('cpp', getCookie(cookieAccountJWT))
 
   if (getCookie(cookieAccountJWT)) {
     visitor.jwt = getCookie(cookieAccountJWT)

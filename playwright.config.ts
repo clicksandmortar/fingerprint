@@ -24,6 +24,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] }
     }
 
+    // TODO: add support for more browsers
     // {
     //   name: 'firefox',
     //   use: { ...devices['Desktop Firefox'] }
@@ -36,7 +37,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: `npx serve ${resolve(__dirname, 'example')} -l 4000`,
+    command: `npx serve ${resolve(__dirname)} -l 4000`,
     url: baseURL,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,

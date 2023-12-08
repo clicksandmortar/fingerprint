@@ -10,7 +10,7 @@ export declare const buildCookie: ({ visitorId }: {
 }) => string;
 export declare const updateCookie: (uuid: string) => void;
 export declare const bootstrapVisitor: ({ setVisitor, session, setSession }: {
-    setVisitor: (session: Visitor) => void;
+    setVisitor: (visitor: Visitor) => void;
     session: Session;
     setSession: (session: Session) => void;
 }) => void;
