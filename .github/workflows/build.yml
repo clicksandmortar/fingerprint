@@ -19,7 +19,12 @@ jobs:
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-        
+      - name: Install dependencies
+        run: npx playwright install-deps
+      - name: Setup
+        run: |
+            yarn install
+            npx playwright install
       - name: Setup Chrome
         run: npx playwright install chrome
 
