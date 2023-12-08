@@ -5,6 +5,7 @@ type FuncProp = () => void
 type Config = {
   skip?: boolean
   delay?: number
+  name: string
 }
 
 const reattemptIntervalMs = 500
@@ -23,7 +24,8 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
     if (!location.href) return
     if (location.href === lastCollectedHref) return
 
-    log('useRunOnPathChange: running for path: ', location.href)
+    console.log('useRunOnPathChange: running' + config?.name)
+
     setLastCollectedHref(location.href)
 
     func()

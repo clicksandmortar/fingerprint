@@ -14,6 +14,10 @@ const init = (cfg: Partial<Config>) => {
   })
 }
 
+type TrackerState = {
+  initiated: boolean
+}
+
 const trackEvent = (event: string, props: any, callback?: Callback): void => {
   return mixpanel.track(event, props, callback)
 }
@@ -92,9 +96,7 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
 export type MixpanelContextInterface = {
   trackEvent: (event: string, props: any, callback?: Callback) => void
   registerUserData: (props: RegistrableUserProperties) => void
-  state: {
-    initiated: boolean
-  }
+  state: TrackerState
 }
 
 export const MixpanelContext = createContext<MixpanelContextInterface>({

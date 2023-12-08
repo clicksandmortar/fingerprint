@@ -66,7 +66,10 @@ export function CollectorProvider({
     getRemainingCooldownMs,
     getIdleStatusDelay
   } = useTriggerDelay()
-  const { trackEvent } = useMixpanel()
+  const {
+    trackEvent,
+    state: { initiated: mixpanelBooted }
+  } = useMixpanel()
   const { mutateAsync: collect } = useCollectorMutation()
   const { checkCollinsBookingComplete } = useCollinsBookingComplete()
 
@@ -405,12 +408,15 @@ export function CollectorProvider({
   )
 
   useEffect(() => {
+    if (!mixpanelBooted) return
+
     if (hasVisitorIDInURL()) {
+      log('CollectorProvider: visitor ID in URL, collecting data')
       trackEvent('abandoned_journey_landing', {
         from_email: true
       })
     }
-  }, [])
+  }, [trackEvent, log, mixpanelBooted])
 
   const collectAndApplyVisitorInfo = React.useCallback(() => {
     if (!visitor.id) {
@@ -560,17 +566,20 @@ export function CollectorProvider({
   // @TODO: this will be scrapped / reworked soon
   useRunOnPathChange(checkCollinsBookingComplete, {
     skip: !booted,
-    delay: initialDelay
+    delay: 0,
+    name: 'checkCollinsBookingComplete'
   })
 
   useRunOnPathChange(collectAndApplyVisitorInfo, {
     skip: !booted,
-    delay: initialDelay
+    delay: initialDelay,
+    name: 'collectAndApplyVisitorInfo'
   })
 
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
-    delay: initialDelay
+    delay: initialDelay,
+    name: 'fireOnLoadTriggers'
   })
 
   useFormCollector()

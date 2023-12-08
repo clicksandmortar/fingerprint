@@ -139,7 +139,7 @@ var defaultConfig = {
     triggerCooldownSecs: 60
   },
   brand: {
-    name: 'C&M',
+    name: _LEGACY_getBrand() || 'C&M',
     colors: defaultColors
   }
 };
@@ -330,20 +330,24 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   }
   if (typeof window !== 'undefined') {
     var urlParams = new URLSearchParams(window.location.search);
-    var vid = urlParams.get('v_id');
-    if (vid) visitor.id = vid;
+    var vidParam = urlParams.get('v_id');
+    var visitorId = vidParam || undefined;
+    if (vidParam && vidParam.includes('?')) {
+      visitorId = vidParam.split('?')[0];
+    }
+    visitor.id = visitorId;
     var sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
-  if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie))) {
-    var visitorId = uuid.v4();
-    visitor.id = visitorId;
+  if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie) || '')) {
+    var _visitorId = uuid.v4();
+    visitor.id = _visitorId;
   }
   if (!visitor.id && getCookie(CnMIDCookie)) {
     var c = getCookie(CnMIDCookie);
     var _c$split = c.split('|'),
-      _visitorId = _c$split[0];
-    visitor.id = _visitorId;
+      _visitorId2 = _c$split[0];
+    visitor.id = _visitorId2;
   }
   var combinedCookie = buildCookie({
     visitorId: visitor.id
@@ -591,19 +595,34 @@ var collinBrandsPathConversionMap = {
 };
 function useCollinsBookingComplete() {
   var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+    trackEvent = _useMixpanel.trackEvent,
+    initiated = _useMixpanel.state.initiated;
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var brand = useBrand();
   var checkCollinsBookingComplete = React__default.useCallback(function () {
-    if (!brand) return;
+    log('useCollinsBookingComplete: checking for Collins booking complete');
+    if (!initiated) {
+      log('useCollinsBookingComplete, mixpanel not initiated');
+      return;
+    }
+    if (!brand) {
+      log('useCollinsBookingComplete, no brand');
+      return;
+    }
     var conversionPathForBrand = collinBrandsPathConversionMap[brand];
-    if (!conversionPathForBrand) return;
+    if (!conversionPathForBrand) {
+      log('useCollinsBookingComplete: no path for brand variable');
+      return;
+    }
     var isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
-    if (!isConversionPath) return;
-    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
+    if (!isConversionPath) {
+      log('useCollinsBookingComplete: not a conversion path');
+      return;
+    }
+    console.log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
     trackEvent('booking_complete', {});
-  }, [trackEvent, log, brand]);
+  }, [trackEvent, log, brand, initiated]);
   return {
     checkCollinsBookingComplete: checkCollinsBookingComplete
   };
@@ -1135,7 +1154,7 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
     if (config !== null && config !== void 0 && config.skip) return;
     if (!location.href) return;
     if (location.href === lastCollectedHref) return;
-    log('useRunOnPathChange: running for path: ', location.href);
+    console.log('useRunOnPathChange: running' + (config === null || config === void 0 ? void 0 : config.name));
     setLastCollectedHref(location.href);
     func();
   }, [func, config, lastCollectedHref]);
@@ -1220,7 +1239,8 @@ function CollectorProvider(_ref) {
     getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs,
     getIdleStatusDelay = _useTriggerDelay.getIdleStatusDelay;
   var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+    trackEvent = _useMixpanel.trackEvent,
+    mixpanelBooted = _useMixpanel.state.initiated;
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
   var _useCollinsBookingCom = useCollinsBookingComplete(),
@@ -1439,12 +1459,14 @@ function CollectorProvider(_ref) {
     }
   }, [log, getIdleStatusDelay, setPageTriggers, setConfig, setIncompleteTriggers, visitor.cohort, setConversions, setVisitor, setIntently]);
   React.useEffect(function () {
+    if (!mixpanelBooted) return;
     if (hasVisitorIDInURL()) {
+      log('CollectorProvider: visitor ID in URL, collecting data');
       trackEvent('abandoned_journey_landing', {
         from_email: true
       });
     }
-  }, []);
+  }, [trackEvent, log, mixpanelBooted]);
   var collectAndApplyVisitorInfo = React__default.useCallback(function () {
     if (!visitor.id) {
       log('CollectorProvider: Not yet collecting, awaiting visitor ID');
@@ -1540,15 +1562,18 @@ function CollectorProvider(_ref) {
   }, [fireOnLoadTriggers]);
   useRunOnPathChange(checkCollinsBookingComplete, {
     skip: !booted,
-    delay: initialDelay
+    delay: 0,
+    name: 'checkCollinsBookingComplete'
   });
   useRunOnPathChange(collectAndApplyVisitorInfo, {
     skip: !booted,
-    delay: initialDelay
+    delay: initialDelay,
+    name: 'collectAndApplyVisitorInfo'
   });
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
-    delay: initialDelay
+    delay: initialDelay,
+    name: 'fireOnLoadTriggers'
   });
   useFormCollector();
   useButtonCollector();
