@@ -26,7 +26,7 @@ export const setDom = (url = `${testBaseURL}/test`) => {
         }
       </style>
       <script>
-        console.log('yo!);
+        console.log('Hello DiFi!);
       </script>
     </head>
     

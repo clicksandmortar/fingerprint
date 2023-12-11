@@ -325,8 +325,6 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
   var visitor = {
     id: undefined
   };
-  console.log('BLA');
-  console.log('cpp', getCookie(cookieAccountJWT));
   if (getCookie(cookieAccountJWT)) {
     visitor.jwt = getCookie(cookieAccountJWT);
   }
@@ -622,7 +620,7 @@ function useCollinsBookingComplete() {
       log('useCollinsBookingComplete: not a conversion path');
       return;
     }
-    console.log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
+    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
     trackEvent('booking_complete', {});
   }, [trackEvent, log, brand, initiated]);
   return {
@@ -1156,7 +1154,7 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
     if (config !== null && config !== void 0 && config.skip) return;
     if (!location.href) return;
     if (location.href === lastCollectedHref) return;
-    console.log('useRunOnPathChange: running' + (config === null || config === void 0 ? void 0 : config.name));
+    log('useRunOnPathChange: running' + (config === null || config === void 0 ? void 0 : config.name));
     setLastCollectedHref(location.href);
     func();
   }, [func, config, lastCollectedHref]);

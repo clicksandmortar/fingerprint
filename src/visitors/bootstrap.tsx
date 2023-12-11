@@ -83,8 +83,6 @@ export const bootstrapVisitor = ({
   const visitor: Visitor = {
     id: undefined
   }
-  console.log('BLA')
-  console.log('cpp', getCookie(cookieAccountJWT))
 
   if (getCookie(cookieAccountJWT)) {
     visitor.jwt = getCookie(cookieAccountJWT)
