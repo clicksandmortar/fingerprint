@@ -26,12 +26,9 @@ jobs:
       - name: Install playwright
         run: npx playwright install-deps
       - name: Setup
-        run: |
-            yarn install
-            npx playwright install
-      - name: Setup Chrome
+        run: yarn install
+      - name: Setup Browsers
         run: npx playwright install
-  
       - name: Run Playwright tests
         run: HOME=/root npx playwright test
       - uses: actions/upload-artifact@v3
