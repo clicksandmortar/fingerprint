@@ -14,7 +14,7 @@ export const fakeTriggers: Trigger[] = [
     }
   },
   {
-    id: 'idle-trigger-id',
+    id: 'modal-trigger-id-idle',
     invocation: 'INVOCATION_IDLE_TIME',
     behaviour: 'BEHAVIOUR_MODAL',
     data: {
@@ -26,10 +26,50 @@ export const fakeTriggers: Trigger[] = [
     }
   },
   {
-    id: '7af0fc17-6508-4b5a-9003-1039fc473250',
+    id: 'banner-trigger-id-bottom',
     invocation: 'INVOCATION_PAGE_LOAD',
     behaviour: 'BEHAVIOUR_BANNER',
     data: {
+      position: 'bottom',
+      buttonText: 'Run',
+      buttonURL: 'https://google.com',
+      countdownEndTime: '2024-03-31T23:59',
+      marketingText:
+        'You only have {{ countdownEndTime }} before the horse comes'
+    }
+  },
+  {
+    id: 'banner-trigger-id-top',
+    invocation: 'INVOCATION_PAGE_LOAD',
+    behaviour: 'BEHAVIOUR_BANNER',
+    data: {
+      position: 'top',
+      buttonText: 'Run',
+      buttonURL: 'https://google.com',
+      countdownEndTime: '2024-03-31T23:59',
+      marketingText:
+        'You only have {{ countdownEndTime }} before the horse comes'
+    }
+  },
+  {
+    id: 'banner-trigger-id-right',
+    invocation: 'INVOCATION_PAGE_LOAD',
+    behaviour: 'BEHAVIOUR_BANNER',
+    data: {
+      position: 'right',
+      buttonText: 'Run',
+      buttonURL: 'https://google.com',
+      countdownEndTime: '2024-03-31T23:59',
+      marketingText:
+        'You only have {{ countdownEndTime }} before the horse comes'
+    }
+  },
+  {
+    id: 'banner-trigger-id-left',
+    invocation: 'INVOCATION_PAGE_LOAD',
+    behaviour: 'BEHAVIOUR_BANNER',
+    data: {
+      position: 'left',
       buttonText: 'Run',
       buttonURL: 'https://google.com',
       countdownEndTime: '2024-03-31T23:59',
@@ -55,9 +95,7 @@ export const fakeIncompleteTriggers: IncompleteTrigger[] = [
     signals: [
       {
         op: 'CanSeeElementOnPage',
-        parameters: {
-          selector: '.bla-bla'
-        }
+        parameters: ['.bla-bla', 'contains', '/']
       }
     ]
   }

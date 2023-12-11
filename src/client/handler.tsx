@@ -5,12 +5,18 @@ import { TriggerModal } from '../behaviours/TriggerModal'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'
 import { Trigger } from './types'
 
-export type ClientTrigger = Pick<Trigger, 'id' | 'invoke' | 'behaviour'>
+export type ClientTrigger = Pick<
+  Trigger,
+  'id' | 'invoke' | 'behaviour' | 'multipleOfSameBehaviourSupported'
+>
+
+// a word for "possible to have multiple of the same kind":
 
 export const clientHandlers: ClientTrigger[] = [
   {
     id: 'modal_v1',
     behaviour: 'BEHAVIOUR_MODAL',
+    multipleOfSameBehaviourSupported: false,
     invoke: (trigger: Trigger) => (
       <TriggerModal key={trigger.id} trigger={trigger} />
     )
@@ -18,6 +24,7 @@ export const clientHandlers: ClientTrigger[] = [
   {
     id: 'youtube_v1',
     behaviour: 'BEHAVIOUR_YOUTUBE',
+    multipleOfSameBehaviourSupported: false,
     invoke: (trigger: Trigger) => (
       <TriggerYoutube key={trigger.id} trigger={trigger} />
     )
@@ -25,6 +32,7 @@ export const clientHandlers: ClientTrigger[] = [
   {
     id: 'inverse_v1',
     behaviour: 'BEHAVIOUR_INVERSE_FLOW',
+    multipleOfSameBehaviourSupported: false,
     invoke: (trigger: Trigger) => (
       <TriggerInverse key={trigger.id} trigger={trigger} />
     )
@@ -32,6 +40,7 @@ export const clientHandlers: ClientTrigger[] = [
   {
     id: 'banner_v1',
     behaviour: 'BEHAVIOUR_BANNER',
+    multipleOfSameBehaviourSupported: true,
     invoke: (trigger: Trigger) => (
       <TriggerBanner key={trigger.id} trigger={trigger} />
     )

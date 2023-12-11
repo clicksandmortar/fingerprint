@@ -9,6 +9,8 @@ import useCountdown from '../hooks/useCountdown'
 import { getInterpolate } from '../hooks/useInterpolate'
 import { useSeenMutation } from '../hooks/useSeenMutation'
 
+type Position = 'top' | 'bottom' | 'left' | 'right'
+
 type Props = {
   trigger: Trigger
 }
@@ -17,9 +19,61 @@ const resetPad = () => {
   document.body.style.paddingTop = 'inherit'
 }
 
-const Banner = ({ trigger }: Props) => {
-  const container = useRef<null | HTMLDivElement>(null)
+const getBannerStylesByPosition = ({
+  position,
+  element: { width, height }
+}: {
+  position: Position
+  element: { width: number; height: number }
+}) => {
+  const offset = 0.5 * width + 0.5 * height
 
+  const mutualStyles: React.CSSProperties = {
+    fontFamily: 'sans-serif',
+    position: 'fixed',
+    padding: '5px',
+    background: 'linear-gradient(90deg, rgba(200,41,223,1) 0%, #1f62ff 100%)',
+    display: 'flex',
+    alignItems: 'center'
+  }
+
+  switch (position) {
+    case 'left':
+      return {
+        ...mutualStyles,
+        translate: `0 -${offset}px`,
+        rotate: '90deg',
+        transformOrigin: '0% 50%',
+        top: '50%',
+        left: 0,
+        transform: 'translateY(-50%)',
+        borderRadius: '10px 10px 0 0'
+      }
+    case 'right':
+      return {
+        ...mutualStyles,
+        translate: `0 -${offset}px`,
+        rotate: '270deg',
+        transformOrigin: '100% 50%',
+        top: '50%',
+        right: 0,
+        transform: 'translateY(-50%)',
+        borderRadius: '10px 10px 0 0'
+      }
+    case 'top':
+    case 'bottom':
+      return {
+        ...mutualStyles,
+        [position]: 0,
+        left: 0,
+        width: '100%'
+      }
+  }
+}
+const canBeDismissed = true
+
+const Banner = ({ trigger }: Props) => {
+  // const position = trigger.data?.position as Position
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
@@ -50,8 +104,6 @@ const Banner = ({ trigger }: Props) => {
     }
   }, [open, isSuccess, isLoading])
 
-  const canBeDismissed = true
-
   const handleClickCallToAction = (e: any) => {
     e.preventDefault()
     trackEvent('user_clicked_button', trigger)
@@ -68,6 +120,10 @@ const Banner = ({ trigger }: Props) => {
     resetPad()
   }
 
+  const position = trigger.data?.position as Position
+
+  const container = useRef<null | HTMLDivElement>(null)
+
   const { formattedCountdown } = useCountdown({
     onZero: handleClose,
     initialTimestamp: new Date(trigger.data?.countdownEndTime || ''),
@@ -82,36 +138,37 @@ const Banner = ({ trigger }: Props) => {
     [trigger.data]
   )
 
+  // temporary solution. Takes a few cycles for the countdown to kick in,
+  // we dont want to show an empty div in its place
+  if (!formattedCountdown) return null
+
   useEffect(() => {
     const bannerHeight = container.current?.clientHeight
-    document.body.style.paddingTop = `${bannerHeight}px`
+
+    if (position === 'top') {
+      document.body.style.paddingTop = `${bannerHeight}px`
+    } else if (position === 'bottom') {
+      document.body.style.paddingBottom = `${bannerHeight}px`
+    }
 
     return resetPad
   }, [container, formattedCountdown])
 
   if (!open) return null
 
-  // temporary solution. Takes a few cycles for the countdown to kick in,
-  // we dont want to show an empty div in its place
-  if (!formattedCountdown) return null
+  // since the rotation position is pivoting around a corner, we need to calculate
+  // the width of the container and then use that to offset the translate slightly to center it properly
+
+  const containerStyles = getBannerStylesByPosition({
+    position,
+    element: {
+      width: container.current?.clientWidth || 0,
+      height: container.current?.clientHeight || 0
+    }
+  })
 
   return (
-    // @TODO: convert to CSS?
-    // TODO: colors are hardcoded for now. check this Draft PR before changing the colors here
-    // https://github.com/clicksandmortar/fingerprint/pull/64
-    <div
-      ref={container}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        background:
-          'linear-gradient(90deg, rgba(200,41,223,1) 0%, #1f62ff 100%)',
-        display: 'flex',
-        alignItems: 'center'
-      }}
-    >
+    <div ref={container} style={containerStyles}>
       <div
         style={{
           display: 'flex',
@@ -124,7 +181,7 @@ const Banner = ({ trigger }: Props) => {
         <p
           style={{
             lineHeight: '30px',
-            margin: '10px',
+            margin: '0px 10px',
             color: 'white',
             fontWeight: 600
           }}
@@ -139,7 +196,7 @@ const Banner = ({ trigger }: Props) => {
             color: 'white',
             backgroundColor: '#EA3385',
             padding: '5px 10px',
-            margin: '10px 0',
+            margin: '0px 10px',
             borderRadius: '5px',
             cursor: 'pointer'
           }}
@@ -150,7 +207,7 @@ const Banner = ({ trigger }: Props) => {
       {canBeDismissed && (
         <CloseButton
           onClick={handleClose}
-          style={{ background: 'transparent', color: 'white' }}
+          style={{ background: 'transparent', color: 'white', margin: 0 }}
         />
       )}
     </div>

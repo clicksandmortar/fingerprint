@@ -1214,6 +1214,74 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
+var fakeTriggers = [{
+  id: 'exit-trigger-id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Purchase now (EXIT INTENT)',
+    buttonURL: 'http://www.google.com',
+    heading: '25% Off Gift Cards',
+    paragraph: 'Get 25% off a gift card, if you buy today!'
+  }
+}, {
+  id: 'modal-trigger-id-idle',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an IDLE_TIME',
+    paragraph: 'And so is this'
+  }
+}, {
+  id: 'banner-trigger-id-bottom',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    position: 'bottom',
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+}, {
+  id: 'banner-trigger-id-top',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    position: 'top',
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+}, {
+  id: 'banner-trigger-id-right',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    position: 'right',
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+}, {
+  id: 'banner-trigger-id-left',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    position: 'left',
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+}];
+
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -1291,21 +1359,31 @@ function CollectorProvider(_ref) {
     if (shouldAllowMultipleSimultaneous === void 0) {
       shouldAllowMultipleSimultaneous = false;
     }
-    var invokableTrigger = combinedTriggers.find(function (trigger) {
+    var appendTrigger = function appendTrigger(invokableTrigger) {
+      setDisplayedTriggers(function (prev) {
+        if (prev.includes(invokableTrigger.id)) return prev;
+        return [].concat(prev, [invokableTrigger.id]);
+      });
+    };
+    var invokableTriggers = combinedTriggers.filter(function (trigger) {
       return trigger.invocation === invocation;
     });
-    if (!invokableTrigger) {
-      log('CollectorProvider: Trigger not invokable ', invokableTrigger);
-      return;
-    }
-    if (!shouldAllowMultipleSimultaneous && getIsBehaviourVisible(invokableTrigger.behaviour)) {
-      log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
-      return;
-    }
-    log('CollectorProvider: Triggering behaviour', invokableTrigger);
-    setDisplayedTriggers(function (prev) {
-      if (prev.includes(invokableTrigger.id)) return prev;
-      return [].concat(prev, [invokableTrigger.id]);
+    invokableTriggers.forEach(function (invokableTrigger) {
+      if (!invokableTrigger) {
+        log('CollectorProvider: Trigger not invokable ', invokableTrigger);
+        return;
+      }
+      if (invokableTrigger.behaviour === 'BEHAVIOUR_BANNER') {
+        log('Banners can be stacked up, setting as visible.', invokableTrigger);
+        appendTrigger(invokableTrigger);
+        return;
+      }
+      if (!shouldAllowMultipleSimultaneous && getIsBehaviourVisible(invokableTrigger.behaviour)) {
+        log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
+        return;
+      }
+      log('CollectorProvider: Triggering behaviour', invokableTrigger);
+      appendTrigger(invokableTrigger);
     });
   }, [combinedTriggers, getIsBehaviourVisible, log]);
   React.useEffect(function () {
@@ -1349,38 +1427,44 @@ function CollectorProvider(_ref) {
       });
     });
   }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, setPageTriggersState, combinedTriggers]);
+  console.log('CollectorProvider - TriggerComponent:', displayTriggers);
   var TriggerComponent = React__default.useCallback(function () {
     if (!displayTriggers) return null;
     var activeTriggers = combinedTriggers.filter(function (trigger) {
       return displayTriggers.includes(trigger.id);
     });
     if (!activeTriggers) {
-      error("No trigger found for displayTriggers", displayTriggers);
+      error("CollectorProvider - TriggerComponent: No trigger found for displayTriggers", displayTriggers);
       return null;
     }
-    log('CollectorProvider: available handlers include: ', handlers);
-    log('CollectorProvider: activeTriggers to match are: ', activeTriggers);
-    log('CollectorProvider: attempting to show trigger', activeTriggers);
+    log('CollectorProvider - TriggerComponent: available handlers include: ', handlers);
+    log('CollectorProvider - TriggerComponent: activeTriggers to match are: ', activeTriggers);
+    log('CollectorProvider - TriggerComponent: attempting to show trigger', activeTriggers);
     return activeTriggers.map(function (trigger) {
       var _handler$invoke;
       var handler = getHandlerForTrigger(trigger);
       if (!handler) {
-        log('No handler found for trigger', trigger);
+        log('CollectorProvider - TriggerComponent: No handler found for trigger', trigger);
         return null;
       }
       if (!handler.invoke) {
-        log('No invoke method found for handler', handler);
+        log('CollectorProvider - TriggerComponent: No invoke method found for handler', handler);
+        return null;
+      }
+      var isTriggerOfSameBehaviourAlreadyVisible = getIsBehaviourVisible(trigger.behaviour);
+      if (isTriggerOfSameBehaviourAlreadyVisible && !handler.multipleOfSameBehaviourSupported) {
+        log("CollectorProvider - TriggerComponent: Behaviour " + trigger.behaviour + " is visible and does NOT support multiple triggers. Not showing.", trigger.id);
         return null;
       }
       var potentialComponent = (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
       if (potentialComponent && React__default.isValidElement(potentialComponent)) {
-        log('CollectorProvider: Potential component for trigger is valid. Mounting');
+        log('CollectorProvider - TriggerComponent: Potential component for trigger is valid. Mounting');
         return potentialComponent;
       }
       log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
       return null;
     });
-  }, [displayTriggers, log, handlers, error, getHandlerForTrigger, combinedTriggers]);
+  }, [displayTriggers, log, handlers, error, getHandlerForTrigger, getIsBehaviourVisible, combinedTriggers]);
   React.useEffect(function () {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
@@ -1437,7 +1521,7 @@ function CollectorProvider(_ref) {
           });
         }
         setIdleTimeout(getIdleStatusDelay());
-        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+        setPageTriggers(fakeTriggers);
         setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
@@ -2985,10 +3069,50 @@ var useSeenMutation = function useSeenMutation() {
 var resetPad = function resetPad() {
   document.body.style.paddingTop = 'inherit';
 };
-var Banner = function Banner(_ref) {
-  var _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref.trigger;
-  var container = React.useRef(null);
+var getBannerStylesByPosition = function getBannerStylesByPosition(_ref) {
+  var _extends2;
+  var position = _ref.position,
+    _ref$element = _ref.element,
+    width = _ref$element.width,
+    height = _ref$element.height;
+  var offset = 0.5 * width + 0.5 * height;
+  var mutualStyles = {
+    fontFamily: 'sans-serif',
+    position: 'fixed',
+    padding: '5px',
+    background: 'linear-gradient(90deg, rgba(200,41,223,1) 0%, #1f62ff 100%)',
+    display: 'flex',
+    alignItems: 'center'
+  };
+  switch (position) {
+    case 'left':
+      return _extends({}, mutualStyles, {
+        translate: "0 -" + offset + "px",
+        rotate: '90deg',
+        transformOrigin: '0% 50%',
+        top: '50%',
+        left: 0,
+        transform: 'translateY(-50%)',
+        borderRadius: '10px 10px 0 0'
+      });
+    case 'right':
+      return _extends({}, mutualStyles, {
+        translate: "0 -" + offset + "px",
+        rotate: '270deg',
+        transformOrigin: '100% 50%',
+        top: '50%',
+        right: 0,
+        transform: 'translateY(-50%)',
+        borderRadius: '10px 10px 0 0'
+      });
+    case 'top':
+    case 'bottom':
+      return _extends({}, mutualStyles, (_extends2 = {}, _extends2[position] = 0, _extends2.left = 0, _extends2.width = '100%', _extends2));
+  }
+};
+var Banner = function Banner(_ref2) {
+  var _trigger$data3, _trigger$data4, _trigger$data5, _container$current2, _container$current3, _trigger$data6;
+  var trigger = _ref2.trigger;
   var _useCollector = useCollector(),
     removeActiveTrigger = _useCollector.removeActiveTrigger;
   var _useMixpanel = useMixpanel(),
@@ -3030,11 +3154,13 @@ var Banner = function Banner(_ref) {
     setOpen(false);
     resetPad();
   };
+  var position = (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.position;
+  var container = React.useRef(null);
   var _useCountdown = useCountdown({
       onZero: handleClose,
-      initialTimestamp: new Date(((_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.countdownEndTime) || ''),
+      initialTimestamp: new Date(((_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.countdownEndTime) || ''),
       interpolate: {
-        text: (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.marketingText,
+        text: (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.marketingText,
         structure: trigger.data
       }
     }),
@@ -3042,25 +3168,28 @@ var Banner = function Banner(_ref) {
   var interpolate = React__default.useMemo(function () {
     return getInterpolate(trigger.data || {});
   }, [trigger.data]);
+  if (!formattedCountdown) return null;
   React.useEffect(function () {
     var _container$current;
     var bannerHeight = (_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientHeight;
-    document.body.style.paddingTop = bannerHeight + "px";
+    if (position === 'top') {
+      document.body.style.paddingTop = bannerHeight + "px";
+    } else if (position === 'bottom') {
+      document.body.style.paddingBottom = bannerHeight + "px";
+    }
     return resetPad;
   }, [container, formattedCountdown]);
   if (!open) return null;
-  if (!formattedCountdown) return null;
+  var containerStyles = getBannerStylesByPosition({
+    position: position,
+    element: {
+      width: ((_container$current2 = container.current) === null || _container$current2 === void 0 ? void 0 : _container$current2.clientWidth) || 0,
+      height: ((_container$current3 = container.current) === null || _container$current3 === void 0 ? void 0 : _container$current3.clientHeight) || 0
+    }
+  });
   return React__default.createElement("div", {
     ref: container,
-    style: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      background: 'linear-gradient(90deg, rgba(200,41,223,1) 0%, #1f62ff 100%)',
-      display: 'flex',
-      alignItems: 'center'
-    }
+    style: containerStyles
   }, React__default.createElement("div", {
     style: {
       display: 'flex',
@@ -3072,7 +3201,7 @@ var Banner = function Banner(_ref) {
   }, React__default.createElement("p", {
     style: {
       lineHeight: '30px',
-      margin: '10px',
+      margin: '0px 10px',
       color: 'white',
       fontWeight: 600
     }
@@ -3083,20 +3212,21 @@ var Banner = function Banner(_ref) {
       color: 'white',
       backgroundColor: '#EA3385',
       padding: '5px 10px',
-      margin: '10px 0',
+      margin: '0px 10px',
       borderRadius: '5px',
       cursor: 'pointer'
     }
-  }, interpolate(((_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText) || ''))),  React__default.createElement(CloseButton, {
+  }, interpolate(((_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonText) || ''))),  React__default.createElement(CloseButton, {
     onClick: handleClose,
     style: {
       background: 'transparent',
-      color: 'white'
+      color: 'white',
+      margin: 0
     }
   }));
 };
-var TriggerBanner = function TriggerBanner(_ref2) {
-  var trigger = _ref2.trigger;
+var TriggerBanner = function TriggerBanner(_ref3) {
+  var trigger = _ref3.trigger;
   return ReactDOM.createPortal(React__default.createElement(Banner, {
     trigger: trigger
   }), document.body);
@@ -3975,6 +4105,7 @@ var TriggerYoutube = function TriggerYoutube(_ref2) {
 var clientHandlers = [{
   id: 'modal_v1',
   behaviour: 'BEHAVIOUR_MODAL',
+  multipleOfSameBehaviourSupported: false,
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerModal, {
       key: trigger.id,
@@ -3984,6 +4115,7 @@ var clientHandlers = [{
 }, {
   id: 'youtube_v1',
   behaviour: 'BEHAVIOUR_YOUTUBE',
+  multipleOfSameBehaviourSupported: false,
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerYoutube, {
       key: trigger.id,
@@ -3993,6 +4125,7 @@ var clientHandlers = [{
 }, {
   id: 'inverse_v1',
   behaviour: 'BEHAVIOUR_INVERSE_FLOW',
+  multipleOfSameBehaviourSupported: false,
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerInverse, {
       key: trigger.id,
@@ -4002,6 +4135,7 @@ var clientHandlers = [{
 }, {
   id: 'banner_v1',
   behaviour: 'BEHAVIOUR_BANNER',
+  multipleOfSameBehaviourSupported: true,
   invoke: function invoke(trigger) {
     return React__default.createElement(TriggerBanner, {
       key: trigger.id,

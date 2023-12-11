@@ -144,6 +144,7 @@ export type Trigger = {
     | 'BEHAVIOUR_INVERSE_FLOW'
     | 'BEHAVIOUR_BANNER'
   brand?: any
+  multipleOfSameBehaviourSupported?: boolean
 }
 
 export type PageView = {
