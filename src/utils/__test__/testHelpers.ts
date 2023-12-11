@@ -1,7 +1,7 @@
 import { Browser, Page } from '@playwright/test'
 import { JSDOM } from 'jsdom'
 import { testBaseURL } from '../../../playwright.config'
-import { fakeCollectorResp } from '../../behaviours/__test__/response.fake'
+import { fakeCollectorResp } from './response.fake'
 
 export const getLocation = async (page: Page) => {
   return await page.evaluate(() => {

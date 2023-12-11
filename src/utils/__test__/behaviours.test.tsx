@@ -9,7 +9,7 @@ test.beforeAll(async () => {
   browser = await chromium.launch()
 })
 
-test.describe('Difi script', async () => {
+test.describe('[behaviour] Difi script', async () => {
   test('is operational', async () => {
     const page = await prepPage(browser)
 

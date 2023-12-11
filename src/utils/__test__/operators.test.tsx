@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { getFuncByOperator } from '../../hooks/useConversions'
 
-test.describe('getFuncByOperator', async () => {
+test.describe('[unit] getFuncByOperator', async () => {
   test('contains operator', async () => {
     const containsOperator = getFuncByOperator('contains', 'difi')
 

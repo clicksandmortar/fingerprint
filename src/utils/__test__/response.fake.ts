@@ -1,5 +1,5 @@
 import { CollectorVisitorResponse } from '../../client/types'
-import { SupportedBrand } from '../../utils/brand'
+import { SupportedBrand } from '../brand'
 
 export const fakeCollectorResp: CollectorVisitorResponse = {
   // firstSeen: '2021a1a101101aaa:111a711115aa11aaa11111stSeen: '2023-12-08T08:29:32.178245531Z',
