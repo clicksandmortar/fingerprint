@@ -1427,7 +1427,6 @@ function CollectorProvider(_ref) {
       });
     });
   }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, setPageTriggersState, combinedTriggers]);
-  console.log('CollectorProvider - TriggerComponent:', displayTriggers);
   var TriggerComponent = React__default.useCallback(function () {
     if (!displayTriggers) return null;
     var activeTriggers = combinedTriggers.filter(function (trigger) {

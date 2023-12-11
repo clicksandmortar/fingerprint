@@ -239,7 +239,6 @@ export function CollectorProvider({
     ]
   )
 
-  console.log('CollectorProvider - TriggerComponent:', displayTriggers)
   const TriggerComponent = React.useCallback(():
     | (JSX.Element | null)[]
     | null => {

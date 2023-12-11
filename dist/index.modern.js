@@ -1347,7 +1347,6 @@ function CollectorProvider({
     setVisibleTriggers(prev => prev.filter(trigger => trigger.id !== id));
     setPageTriggersState(prev => prev.filter(trigger => trigger.id !== id));
   }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, setPageTriggersState, combinedTriggers]);
-  console.log('CollectorProvider - TriggerComponent:', displayTriggers);
   const TriggerComponent = React__default.useCallback(() => {
     if (!displayTriggers) return null;
     const activeTriggers = combinedTriggers.filter(trigger => displayTriggers.includes(trigger.id));
