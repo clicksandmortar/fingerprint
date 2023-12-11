@@ -467,7 +467,16 @@ To do this, create a new script in Greasemonkey/Tampermonkey, and paste the foll
 // @name     Embed C&M Fingerprint
 // @version  1
 // @grant    none
+// @match *://*.clicksandmortar.tech/*
 // @match *://*.harvester.co.uk/*
+// @match *://*.browns-restaurants.co.uk/*
+// @match *://*.tobycarvery.co.uk/*
+// @match *://*.vintageinn.co.uk/*
+// @match *://*.stonehouse.co.uk/*
+// @match *://*.emberinns.co.uk/*
+// @match *://*.sizzlingpubs.co.uk/*
+// @match *://*.allbarone.co.uk/*
+// @match *://*.vercel.app/*
 // ==/UserScript==
 
 ;(function (f, i, n, g, e, rp, ri, nt) {
@@ -483,7 +492,8 @@ To do this, create a new script in Greasemonkey/Tampermonkey, and paste the foll
   'script',
   'https://d26qevl4nkue45.cloudfront.net/fingerprint.js',
   'b2a2b2a2b2a2b2a2b2a2b2a2b2a2b2a2',
-  true // Set to false to disable debug mode
+  true, // Set to false to disable debug mode
+  true // Set to false to disable consent
 )
 ```
 

@@ -12,10 +12,6 @@ test.beforeAll(async () => {
   setDom()
 })
 
-test.afterAll(async () => {
-  await browser.close()
-})
-
 test.describe('validateSignalChain', async () => {
   test('validateSignalChain - IsOnPath & IsOnDomain', async () => {
     const correctSignals: FESignal[] = [
