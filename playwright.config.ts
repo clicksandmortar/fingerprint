@@ -13,7 +13,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? 'html' : 'line',
-  // globalSetup: resolve(__dirname, 'src/utils/__test__/globalSetup.ts'),
+
   use: {
     baseURL: testBaseURL,
     trace: 'on-first-retry',

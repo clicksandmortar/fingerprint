@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { Browser, chromium } from 'playwright'
+import { Browser, webkit } from 'playwright'
 import { FESignal } from '../../client/types'
 import { validateSignalChain } from '../signals'
 import { setDom } from './testHelpers'
@@ -8,7 +8,7 @@ import { setDom } from './testHelpers'
 let browser: Browser
 
 test.beforeAll(async () => {
-  browser = await chromium.launch()
+  browser = await webkit.launch()
   setDom()
 })
 

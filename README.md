@@ -522,6 +522,10 @@ Rather than being separated by files, the tests are currently separated by conce
 - Mocking the `/seen` is not implemented yet - you are welcome to add a helper function to do this.
 
 ### Issues and limitations
+
+#### `test.step` is buggy
+`test.step` is a function provided by Playwright that allows you to group tests together. It is buggy and sometimes causes tests to fail. If you are having issues with tests failing, try removing the `test.step` function and see if that fixes it.
+Because of that, some tests are shoved together in a single `test` function. This is not ideal and should be fixed eventually.
 #### We don't have access to Window or Location
 so we have to use this hack to gain access to them:
 ```tsx
