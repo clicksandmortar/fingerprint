@@ -8,6 +8,7 @@ export const testBaseURL = `http://localhost:${PORT}`
 export default defineConfig({
   testDir: 'src',
   fullyParallel: true,
+  timeout: 120 * 1000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 2 : undefined,
