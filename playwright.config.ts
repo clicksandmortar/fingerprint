@@ -2,7 +2,8 @@ import { defineConfig, devices } from '@playwright/test'
 import { resolve } from 'path'
 
 const PORT = process.env.PORT || 4000
-const baseURL = `http://localhost:${PORT}`
+
+export const testBaseURL = `http://localhost:${PORT}`
 
 export default defineConfig({
   testDir: 'src',
@@ -12,7 +13,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? 'html' : 'line',
   use: {
-    baseURL: baseURL,
+    baseURL: testBaseURL,
     trace: 'on-first-retry',
     video: 'on',
     permissions: []
@@ -22,23 +23,21 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] }
+    },
+
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] }
     }
-
-    // TODO: add support for more browsers
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] }
-    // },
-
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] }
-    // }
   ],
 
   webServer: {
-    command: `npx serve ${resolve(__dirname)} -l 4000`,
-    url: baseURL,
+    command: `npx serve ${resolve(__dirname)} -l ${PORT}`,
+    url: testBaseURL,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,
     stdout: 'pipe',

@@ -18,7 +18,11 @@ type TrackerState = {
   initiated: boolean
 }
 
-const trackEvent = (event: string, props: any, callback?: Callback): void => {
+export const trackEvent = (
+  event: string,
+  props: any,
+  callback?: Callback
+): void => {
   return mixpanel.track(event, props, callback)
 }
 

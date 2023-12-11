@@ -72,6 +72,24 @@ export const fakeCollectorResp: CollectorVisitorResponse = {
   },
   conversions: [
     {
+      identifier: 'test-id',
+      signals: [
+        {
+          op: 'IsOnPath',
+          parameters: ['starts_with', '/']
+        },
+        {
+          op: 'CanSeeElementOnPage',
+          parameters: ['#test', 'contains', '/']
+        },
+        {
+          op: 'IsOnDomain',
+          parameters: ['localhost']
+        }
+      ],
+      analyticsEvent: 'unnecessary-event-ids'
+    },
+    {
       identifier: '1842e390-fb0b-415c-842e-bf30a8783786',
       signals: [
         {

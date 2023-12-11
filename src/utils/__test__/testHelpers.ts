@@ -1,5 +1,7 @@
-import { Page } from '@playwright/test'
+import { Browser, Page } from '@playwright/test'
 import { JSDOM } from 'jsdom'
+import { testBaseURL } from '../../../playwright.config'
+import { fakeCollectorResp } from '../../behaviours/__test__/response.fake'
 
 export const getLocation = async (page: Page) => {
   return await page.evaluate(() => {
@@ -12,7 +14,7 @@ export const getDocument = async (page: Page) => {
   })
 }
 
-export const setDom = (url = 'http://localhost:4000/test') => {
+export const setDom = (url = `${testBaseURL}/test`) => {
   const dom = new JSDOM(
     `
   <!doctype html>
@@ -47,4 +49,27 @@ export const setDom = (url = 'http://localhost:4000/test') => {
   global.window = dom.window
 
   return dom
+}
+
+export const getPage = async (browser: Browser) => {
+  const page: Page =
+    (await browser.contexts()[0]?.pages[0]) || (await browser.newPage())
+  return page
+}
+
+export const prepPage = async (browser: Browser) => {
+  const page = await getPage(browser)
+
+  await page.goto(testBaseURL, {
+    waitUntil: 'networkidle',
+    timeout: 60000
+  })
+
+  await page.route('*/**/collector/**', async (route) => {
+    const json = fakeCollectorResp
+
+    await route.fulfill({ json })
+  })
+
+  return page
 }

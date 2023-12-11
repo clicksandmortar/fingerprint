@@ -43,7 +43,7 @@ export const buildCookie = ({ visitorId }: { visitorId: string }) => {
   return `${visitorId}|${sessionId}|${endTime.toISOString()}`
 }
 
-const updateCookieUUID = (
+export const updateCookieUUID = (
   cookieData: string | undefined,
   uuid: string
 ): string | null => {
