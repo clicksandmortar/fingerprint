@@ -1153,74 +1153,6 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
-const fakeTriggers = [{
-  id: 'exit-trigger-id',
-  invocation: 'INVOCATION_EXIT_INTENT',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Purchase now (EXIT INTENT)',
-    buttonURL: 'http://www.google.com',
-    heading: '25% Off Gift Cards',
-    paragraph: 'Get 25% off a gift card, if you buy today!'
-  }
-}, {
-  id: 'modal-trigger-id-idle',
-  invocation: 'INVOCATION_IDLE_TIME',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is an IDLE_TIME',
-    paragraph: 'And so is this'
-  }
-}, {
-  id: 'banner-trigger-id-bottom',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    position: 'bottom',
-    buttonText: 'Run',
-    buttonURL: 'https://google.com',
-    countdownEndTime: '2024-03-31T23:59',
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
-  }
-}, {
-  id: 'banner-trigger-id-top',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    position: 'top',
-    buttonText: 'Run',
-    buttonURL: 'https://google.com',
-    countdownEndTime: '2024-03-31T23:59',
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
-  }
-}, {
-  id: 'banner-trigger-id-right',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    position: 'right',
-    buttonText: 'Run',
-    buttonURL: 'https://google.com',
-    countdownEndTime: '2024-03-31T23:59',
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
-  }
-}, {
-  id: 'banner-trigger-id-left',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    position: 'left',
-    buttonText: 'Run',
-    buttonURL: 'https://google.com',
-    countdownEndTime: '2024-03-31T23:59',
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
-  }
-}];
-
 function CollectorProvider({
   children,
   handlers = []
@@ -1439,7 +1371,7 @@ function CollectorProvider({
       });
     }
     setIdleTimeout(getIdleStatusDelay());
-    setPageTriggers(fakeTriggers);
+    setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
     setConfig(payload.config);
     setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
     setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);

@@ -26,7 +26,6 @@ import { useBrand, useConfig } from '../hooks/useBrandConfig'
 
 import useConversions from '../hooks/useConversions'
 
-import { fakeTriggers } from '../utils/__dev/fakeTriggers'
 import { updateCookie } from '../visitors/bootstrap'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -426,7 +425,7 @@ export function CollectorProvider({
       // Set IdleTimer
       // @todo turn this into the dynamic value
       setIdleTimeout(getIdleStatusDelay())
-      setPageTriggers(fakeTriggers)
+      setPageTriggers(payload?.pageTriggers)
       setConfig(payload.config)
       setIncompleteTriggers(payload?.incompleteTriggers || [])
       setConversions(payload?.conversions || [])
