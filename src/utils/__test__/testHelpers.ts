@@ -51,6 +51,13 @@ export const setDom = (url = `${testBaseURL}/test`) => {
   return dom
 }
 
+export const getBrowserContext = async (browser: Browser) => {
+  if (browser.contexts() && browser.contexts().length > 0)
+    return await browser.contexts()[0]
+
+  return await browser.newContext()
+}
+
 export const getPage = async (browser: Browser) => {
   const page: Page =
     (await browser.contexts()[0]?.pages[0]) || (await browser.newPage())

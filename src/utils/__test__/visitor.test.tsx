@@ -4,10 +4,14 @@ import { Browser, chromium } from 'playwright'
 import { fakeCollectorResp } from '../../behaviours/__test__/response.fake'
 import { cookieAccountJWT } from '../../context/FingerprintContext'
 import { Session } from '../../sessions/types'
-import { prepPage } from '../../utils/__test__/testHelpers'
-import { CnMIDCookie, getCookieDomain, updateCookieUUID } from '../bootstrap'
-import { Visitor } from '../types'
-import { validVisitorId } from '../utils'
+import {
+  CnMIDCookie,
+  getCookieDomain,
+  updateCookieUUID
+} from '../../visitors/bootstrap'
+import { Visitor } from '../../visitors/types'
+import { validVisitorId } from '../../visitors/utils'
+import { prepPage } from './testHelpers'
 
 const { expect, describe } = test
 
@@ -59,50 +63,45 @@ describe('Visitor stuff', async () => {
 
     const context = await browser.newContext()
 
-    test.step('set outdated cookie', async () => {
-      await context?.addCookies([
-        {
-          name: CnMIDCookie,
-          value: outdatedCookie,
-          domain: 'localhost',
-          path: '/'
-        }
-      ])
+    // test.step('set outdated cookie', async () => {
+    await context?.addCookies([
+      {
+        name: CnMIDCookie,
+        value: outdatedCookie,
+        domain: 'localhost',
+        path: '/'
+      }
+    ])
 
-      const oldCookies = await context.cookies()
+    const oldCookies = await context.cookies()
 
-      console.log({ oldCookies })
-      const oldCookie = oldCookies.find((cookie) => cookie.name === CnMIDCookie)
+    const oldCookie = oldCookies.find((cookie) => cookie.name === CnMIDCookie)
 
-      expect(oldCookies).toBeDefined()
-      expect(oldCookie?.value).toEqual(outdatedCookie)
+    expect(oldCookies).toBeDefined()
+    expect(oldCookie?.value).toEqual(outdatedCookie)
+    // })
+    // test.step('outdated cookie is updated', async () => {
+    const page = await prepPage(browser)
+
+    await page.route('*/**/collector/**', async (route) => {
+      const json = fakeCollectorResp
+
+      await route.fulfill({ json })
     })
-    test.step('outdated cookie is updated', async () => {
-      const page = await prepPage(browser)
 
-      await page.route('*/**/collector/**', async (route) => {
-        const json = fakeCollectorResp
+    const cookies = await browser.contexts()[0].cookies()
 
-        await route.fulfill({ json })
-      })
-
-      await page.waitForTimeout(5000)
-
-      const cookies = await browser.contexts()[0].cookies()
-
-      const locatedCookie = cookies?.find((cookie) => {
-        return cookie.name === CnMIDCookie
-      })
-      expect(locatedCookie).toBeDefined()
-
-      const splitCookie = (locatedCookie?.value || '').split('|')
-      expect(splitCookie.length).toEqual(3)
-
-      expect(splitCookie[0]).toEqual('1234-5678-9012-3456')
-      // expect(splitCookie[1]).toEqual(fakeCollectorResp.identifiers?.main) - invalid. session is generted on the fly
-      expect(new Date(splitCookie[2])).toBeInstanceOf(Date)
-      // expect(fauxCookie)
+    const locatedCookie = cookies?.find((cookie) => {
+      return cookie.name === CnMIDCookie
     })
+    expect(locatedCookie).toBeDefined()
+
+    const splitCookie = (locatedCookie?.value || '').split('|')
+    expect(splitCookie.length).toEqual(3)
+
+    expect(splitCookie[0]).toEqual('1234-5678-9012-3456')
+    expect(new Date(splitCookie[2])).toBeInstanceOf(Date)
+    // })
   })
   test('[unit] updateCookieUUID', async () => {
     await prepPage(browser)

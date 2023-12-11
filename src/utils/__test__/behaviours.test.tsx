@@ -13,24 +13,24 @@ test.describe('Difi script', async () => {
   test('is operational', async () => {
     const page = await prepPage(browser)
 
-    test.step('go to a page with difi', async () => {
-      const pageHasDifi = await page.content().then((content) => {
-        return content.includes('fingerprint.js')
-      })
-
-      test.expect(pageHasDifi).toEqual(true)
+    // test.step('go to a page with difi', async () => {
+    const pageHasDifi = await page.content().then((content) => {
+      return content.includes('fingerprint.js')
     })
 
-    test.step('a modal is mounted on load', async () => {
-      await page.waitForTimeout(4000)
+    test.expect(pageHasDifi).toEqual(true)
+    // })
 
-      const modalElement = await page.evaluate(async () => {
-        const modal = document.querySelector('[class$="-modal"]')
-        return modal
-      })
+    // test.step('a modal is mounted on load', async () => {
+    await page.waitForTimeout(4000)
 
-      test.expect(modalElement).toBeTruthy()
+    const modalElement = await page.evaluate(async () => {
+      const modal = document.querySelector('[class$="-modal"]')
+      return modal
     })
+
+    test.expect(modalElement).toBeTruthy()
+    // })
   })
   // Currently only testing that a modal is mounted.
 
