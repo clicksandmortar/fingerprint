@@ -260,7 +260,6 @@ const CnMCookie = '_cm';
 const CnMIDCookie = '_cm_id';
 function getCookieDomain() {
   const parsedUrl = psl.parse(location.host);
-  if (location.host.includes('localhost')) return 'localhost';
   let cookieDomain = null;
   if (!parsedUrl.error) cookieDomain = parsedUrl.domain || null;
   return cookieDomain;

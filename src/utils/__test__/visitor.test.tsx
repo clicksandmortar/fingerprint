@@ -1,6 +1,6 @@
 import { test } from '@playwright/test'
 
-import { Browser, webkit } from 'playwright'
+import { Browser, chromium } from 'playwright'
 import { cookieAccountJWT } from '../../context/FingerprintContext'
 import { Session } from '../../sessions/types'
 import {
@@ -18,7 +18,7 @@ const { expect, describe } = test
 let browser: Browser
 
 test.beforeAll(async () => {
-  browser = await webkit.launch()
+  browser = await chromium.launch()
 })
 
 const getCookie = async (name: string, browser) => {
@@ -39,22 +39,24 @@ describe('Visitor stuff', async () => {
   })
 
   test('[unit] getCookieDomain', async () => {
-    const domain = await test.step('getCookieDomain', async () => {
-      const page = await prepPage(browser)
+    const page = await prepPage(browser)
 
-      await page.goto('https://example.com', {
-        waitUntil: 'networkidle',
-        timeout: 60000
-      })
+    const loc1 = await page.evaluate(() => location)
+    globalThis.location = loc1
 
-      const loc = await page.evaluate(() => location)
-      globalThis.location = loc
+    const domain1 = getCookieDomain()
+    expect(domain1).toEqual(null)
 
-      const domain = getCookieDomain()
-      return domain
+    await page.goto('https://example.com', {
+      waitUntil: 'networkidle',
+      timeout: 60000
     })
 
-    expect(domain).toBe('example.com')
+    const loc2 = await page.evaluate(() => location)
+    globalThis.location = loc2
+
+    const domain2 = getCookieDomain()
+    expect(domain2).toBe('example.com')
   })
 
   test('User cookie gets updated when visitor ID is returned from API', async () => {
@@ -63,43 +65,45 @@ describe('Visitor stuff', async () => {
 
     const context = await browser.newContext()
 
-    await context?.addCookies([
-      {
-        name: CnMIDCookie,
-        value: outdatedCookie,
-        domain: 'localhost',
-        path: '/',
-        secure: true
-      }
-    ])
+    await test.step('set outdated cookie', async () => {
+      await context?.addCookies([
+        {
+          name: CnMIDCookie,
+          value: outdatedCookie,
+          domain: 'localhost',
+          path: '/'
+        }
+      ])
 
-    const oldCookies = await context.cookies()
+      const oldCookies = await context.cookies()
 
-    const oldCookie = oldCookies.find((cookie) => cookie.name === CnMIDCookie)
+      const oldCookie = oldCookies.find((cookie) => cookie.name === CnMIDCookie)
 
-    expect(oldCookies).toBeDefined()
-    expect(oldCookie?.value).toEqual(outdatedCookie)
-
-    const page = await prepPage(browser)
-
-    await page.route('*/**/collector/**', async (route) => {
-      const json = fakeCollectorResp
-
-      await route.fulfill({ json })
+      expect(oldCookies).toBeDefined()
+      expect(oldCookie?.value).toEqual(outdatedCookie)
     })
+    await test.step('outdated cookie is updated', async () => {
+      const page = await prepPage(browser)
 
-    const cookies = await browser.contexts()[0].cookies()
+      await page.route('*/**/collector/**', async (route) => {
+        const json = fakeCollectorResp
 
-    const locatedCookie = cookies?.find((cookie) => {
-      return cookie.name === CnMIDCookie
+        await route.fulfill({ json })
+      })
+
+      const cookies = await browser.contexts()[0].cookies()
+
+      const locatedCookie = cookies?.find((cookie) => {
+        return cookie.name === CnMIDCookie
+      })
+      expect(locatedCookie).toBeDefined()
+
+      const splitCookie = (locatedCookie?.value || '').split('|')
+      expect(splitCookie.length).toEqual(3)
+
+      expect(splitCookie[0]).toEqual('1234-5678-9012-3456')
+      expect(new Date(splitCookie[2])).toBeInstanceOf(Date)
     })
-    expect(locatedCookie).toBeDefined()
-
-    const splitCookie = (locatedCookie?.value || '').split('|')
-    expect(splitCookie.length).toEqual(3)
-
-    expect(splitCookie[0]).toEqual('1234-5678-9012-3456')
-    expect(new Date(splitCookie[2])).toBeInstanceOf(Date)
   })
   test('[unit] updateCookieUUID', async () => {
     await prepPage(browser)

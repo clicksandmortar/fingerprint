@@ -283,7 +283,6 @@ var CnMCookie = '_cm';
 var CnMIDCookie = '_cm_id';
 function getCookieDomain() {
   var parsedUrl = psl.parse(location.host);
-  if (location.host.includes('localhost')) return 'localhost';
   var cookieDomain = null;
   if (!parsedUrl.error) cookieDomain = parsedUrl.domain || null;
   return cookieDomain;
