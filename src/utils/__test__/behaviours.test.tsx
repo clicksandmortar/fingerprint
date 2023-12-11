@@ -1,7 +1,7 @@
 import { test } from '@playwright/test'
 
 import { Browser, webkit } from 'playwright'
-import { prepPage } from '../../utils/__test__/testHelpers'
+import { prepPage } from '../../utils/__dev__/helpers'
 
 let browser: Browser
 

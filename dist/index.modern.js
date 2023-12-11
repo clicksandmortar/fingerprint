@@ -3254,8 +3254,8 @@ const getModalButtonFlexPosition = position => {
       };
   }
 };
-const randomHash = 'cnm-behaviour';
-const prependClass = className => `${randomHash}-${className}`;
+const randomHash = 'f' + v4().split('-')[0];
+const prependClass = className => `f${randomHash}-${className}`;
 const getIsModalFullyClickable = ({
   trigger
 }) => {
@@ -4447,9 +4447,9 @@ const Modal = ({
 const TriggerModal = ({
   trigger
 }) => {
-  return React__default.createElement(Modal, {
+  return ReactDOM.createPortal(React__default.createElement(Modal, {
     trigger: trigger
-  });
+  }), document.body);
 };
 
 const Youtube = ({

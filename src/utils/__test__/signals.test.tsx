@@ -2,8 +2,8 @@ import { expect, test } from '@playwright/test'
 
 import { Browser, webkit } from 'playwright'
 import { FESignal } from '../../client/types'
+import { setDom } from '../__dev__/helpers'
 import { validateSignalChain } from '../signals'
-import { setDom } from './testHelpers'
 
 let browser: Browser
 

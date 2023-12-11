@@ -10,8 +10,8 @@ import {
 } from '../../visitors/bootstrap'
 import { Visitor } from '../../visitors/types'
 import { validVisitorId } from '../../visitors/utils'
-import { fakeCollectorResp } from './response.fake'
-import { prepPage } from './testHelpers'
+import { prepPage } from '../__dev__/helpers'
+import { fakeCollectorResp } from '../__dev__/response.fake'
 
 const { expect, describe } = test
 
