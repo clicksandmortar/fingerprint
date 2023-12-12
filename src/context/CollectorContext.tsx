@@ -10,8 +10,10 @@ import {
   Trigger
 } from '../client/types'
 import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
+import { useBrand, useConfig } from '../hooks/useBrandConfig'
 import useButtonCollector from '../hooks/useButtonCollector'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
+import useConversions from '../hooks/useConversions'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
 import useFormCollector from '../hooks/useFormCollector'
@@ -21,12 +23,6 @@ import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
-
-import { useBrand, useConfig } from '../hooks/useBrandConfig'
-
-import useConversions from '../hooks/useConversions'
-
-import { fakeTriggers } from '../utils/__dev__/triggers.fake'
 import { updateCookie } from '../visitors/bootstrap'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -426,8 +422,7 @@ export function CollectorProvider({
       // Set IdleTimer
       // @todo turn this into the dynamic value
       setIdleTimeout(getIdleStatusDelay())
-      // setPageTriggers(payload?.pageTriggers)
-      setPageTriggers(fakeTriggers)
+      setPageTriggers(payload?.pageTriggers)
       setConfig(payload.config)
       setIncompleteTriggers(payload?.incompleteTriggers || [])
       setConversions(payload?.conversions || [])

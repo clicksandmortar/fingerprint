@@ -853,6 +853,106 @@ function useButtonCollector() {
   }, [visitor]);
 }
 
+var getIsVisible = function getIsVisible(selector) {
+  var element = document.querySelector(selector);
+  if (!element) return false;
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  if (window.getComputedStyle(element).display === 'none') return false;
+  if (window.getComputedStyle(element).opacity === '0') return false;
+  return true;
+};
+
+var validateSignalChain = function validateSignalChain(signals) {
+  var signalPattern = signals.map(function (signal) {
+    if (signal.op === 'IsOnPath') {
+      var _signal$parameters = signal.parameters,
+        operator = _signal$parameters[0],
+        route = _signal$parameters[1];
+      return getFuncByOperator(operator, route)(window.location.pathname);
+    }
+    if (signal.op === 'CanSeeElementOnPage') {
+      var _signal$parameters2 = signal.parameters,
+        itemQuerySelector = _signal$parameters2[0],
+        _operator = _signal$parameters2[1],
+        _route = _signal$parameters2[2];
+      var isSignalOnCorrectRoute = getFuncByOperator(_operator, _route)(window.location.pathname);
+      if (!isSignalOnCorrectRoute) return false;
+      var isVisible = getIsVisible(itemQuerySelector);
+      return isVisible;
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0];
+    }
+    return false;
+  });
+  return signalPattern.every(Boolean);
+};
+
+var getFuncByOperator = function getFuncByOperator(operator, compareWith) {
+  switch (operator) {
+    case 'starts_with':
+      return function (comparison) {
+        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
+      };
+    case 'contains':
+      return function (comparison) {
+        return comparison.toLowerCase().includes(compareWith.toLowerCase());
+      };
+    case 'ends_with':
+      return function (comparison) {
+        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
+      };
+    case 'eq':
+      return function (comparison) {
+        return comparison.toLowerCase() === compareWith.toLowerCase();
+      };
+    default:
+      return function () {
+        console.error('getOperator: unknown operator', operator);
+        return false;
+      };
+  }
+};
+var scanInterval = 500;
+var useConversions = function useConversions() {
+  var _useState = React.useState([]),
+    conversions = _useState[0],
+    setConversions = _useState[1];
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutate;
+  var removeById = React__default.useCallback(function (id) {
+    setConversions(function (prev) {
+      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
+      return prev.filter(function (conversion) {
+        return conversion.identifier !== id;
+      });
+    });
+  }, [setConversions]);
+  var scan = React__default.useCallback(function () {
+    conversions.forEach(function (conversion) {
+      var hasHappened = validateSignalChain(conversion.signals);
+      if (!hasHappened) return;
+      collect({
+        conversion: {
+          id: conversion.identifier
+        }
+      });
+      removeById(conversion.identifier);
+    });
+  }, [collect, conversions, removeById]);
+  React.useEffect(function () {
+    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
+    var intId = setInterval(scan, scanInterval);
+    return function () {
+      return clearInterval(intId);
+    };
+  }, [scan]);
+  return {
+    conversions: conversions,
+    setConversions: setConversions
+  };
+};
+
 var useExitIntentDelay = function useExitIntentDelay(delay) {
   if (delay === void 0) {
     delay = 0;
@@ -944,106 +1044,6 @@ function useFormCollector() {
     };
   }, [visitor]);
 }
-
-var getFuncByOperator = function getFuncByOperator(operator, compareWith) {
-  switch (operator) {
-    case 'starts_with':
-      return function (comparison) {
-        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
-      };
-    case 'contains':
-      return function (comparison) {
-        return comparison.toLowerCase().includes(compareWith.toLowerCase());
-      };
-    case 'ends_with':
-      return function (comparison) {
-        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
-      };
-    case 'eq':
-      return function (comparison) {
-        return comparison.toLowerCase() === compareWith.toLowerCase();
-      };
-    default:
-      return function () {
-        console.error('getOperator: unknown operator', operator);
-        return false;
-      };
-  }
-};
-var scanInterval = 500;
-var useConversions = function useConversions() {
-  var _useState = React.useState([]),
-    conversions = _useState[0],
-    setConversions = _useState[1];
-  var _useCollectorMutation = useCollectorMutation(),
-    collect = _useCollectorMutation.mutate;
-  var removeById = React__default.useCallback(function (id) {
-    setConversions(function (prev) {
-      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
-      return prev.filter(function (conversion) {
-        return conversion.identifier !== id;
-      });
-    });
-  }, [setConversions]);
-  var scan = React__default.useCallback(function () {
-    conversions.forEach(function (conversion) {
-      var hasHappened = validateSignalChain(conversion.signals);
-      if (!hasHappened) return;
-      collect({
-        conversion: {
-          id: conversion.identifier
-        }
-      });
-      removeById(conversion.identifier);
-    });
-  }, [collect, conversions, removeById]);
-  React.useEffect(function () {
-    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
-    var intId = setInterval(scan, scanInterval);
-    return function () {
-      return clearInterval(intId);
-    };
-  }, [scan]);
-  return {
-    conversions: conversions,
-    setConversions: setConversions
-  };
-};
-
-var getIsVisible = function getIsVisible(selector) {
-  var element = document.querySelector(selector);
-  if (!element) return false;
-  if (window.getComputedStyle(element).visibility === 'hidden') return false;
-  if (window.getComputedStyle(element).display === 'none') return false;
-  if (window.getComputedStyle(element).opacity === '0') return false;
-  return true;
-};
-
-var validateSignalChain = function validateSignalChain(signals) {
-  var signalPattern = signals.map(function (signal) {
-    if (signal.op === 'IsOnPath') {
-      var _signal$parameters = signal.parameters,
-        operator = _signal$parameters[0],
-        route = _signal$parameters[1];
-      return getFuncByOperator(operator, route)(window.location.pathname);
-    }
-    if (signal.op === 'CanSeeElementOnPage') {
-      var _signal$parameters2 = signal.parameters,
-        itemQuerySelector = _signal$parameters2[0],
-        _operator = _signal$parameters2[1],
-        _route = _signal$parameters2[2];
-      var isSignalOnCorrectRoute = getFuncByOperator(_operator, _route)(window.location.pathname);
-      if (!isSignalOnCorrectRoute) return false;
-      var isVisible = getIsVisible(itemQuerySelector);
-      return isVisible;
-    }
-    if (signal.op === 'IsOnDomain') {
-      return window.location.hostname === signal.parameters[0];
-    }
-    return false;
-  });
-  return signalPattern.every(Boolean);
-};
 
 var interval = 250;
 var useIncompleteTriggers = function useIncompleteTriggers() {
@@ -1261,49 +1261,6 @@ var getVisitorId = function getVisitorId() {
 var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
-
-var banner = {
-  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    buttonText: 'Run',
-    buttonURL: 'https://google.com',
-    countdownEndTime: '2024-03-31T23:59',
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
-  }
-};
-var fakeTriggers = [].concat(['right', 'left', 'top', 'bottom'].map(function (direction) {
-  return _extends({}, banner, {
-    id: banner.id + "-" + direction,
-    data: _extends({}, banner.data, {
-      position: direction,
-      icon: 'FaBlackTie'
-    })
-  });
-}), [{
-  id: 'exit-trigger-id',
-  invocation: 'INVOCATION_EXIT_INTENT',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Purchase now (EXIT INTENT)',
-    buttonURL: 'http://www.google.com',
-    heading: '25% Off Gift Cards',
-    paragraph: 'Get 25% off a gift card, if you buy today!'
-  }
-}, {
-  id: 'modal-trigger-id-idle',
-  invocation: 'INVOCATION_IDLE_TIME',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is an IDLE_TIME',
-    paragraph: 'And so is this'
-  }
-}]);
 
 function CollectorProvider(_ref) {
   var children = _ref.children,
@@ -1543,7 +1500,7 @@ function CollectorProvider(_ref) {
           });
         }
         setIdleTimeout(getIdleStatusDelay());
-        setPageTriggers(fakeTriggers);
+        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);

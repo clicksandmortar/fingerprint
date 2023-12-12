@@ -775,6 +775,96 @@ function useButtonCollector() {
   }, [visitor]);
 }
 
+const getIsVisible = selector => {
+  const element = document.querySelector(selector);
+  if (!element) return false;
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  if (window.getComputedStyle(element).display === 'none') return false;
+  if (window.getComputedStyle(element).opacity === '0') return false;
+  return true;
+};
+
+const validateSignalChain = signals => {
+  const signalPattern = signals.map(signal => {
+    if (signal.op === 'IsOnPath') {
+      const [operator, route] = signal.parameters;
+      return getFuncByOperator(operator, route)(window.location.pathname);
+    }
+    if (signal.op === 'CanSeeElementOnPage') {
+      const [itemQuerySelector, operator, route] = signal.parameters;
+      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
+      if (!isSignalOnCorrectRoute) return false;
+      const isVisible = getIsVisible(itemQuerySelector);
+      return isVisible;
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0];
+    }
+    return false;
+  });
+  return signalPattern.every(Boolean);
+};
+
+const getFuncByOperator = (operator, compareWith) => {
+  switch (operator) {
+    case 'starts_with':
+      return comparison => {
+        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
+      };
+    case 'contains':
+      return comparison => {
+        return comparison.toLowerCase().includes(compareWith.toLowerCase());
+      };
+    case 'ends_with':
+      return comparison => {
+        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
+      };
+    case 'eq':
+      return comparison => {
+        return comparison.toLowerCase() === compareWith.toLowerCase();
+      };
+    default:
+      return () => {
+        console.error('getOperator: unknown operator', operator);
+        return false;
+      };
+  }
+};
+const scanInterval = 500;
+const useConversions = () => {
+  const [conversions, setConversions] = useState([]);
+  const {
+    mutate: collect
+  } = useCollectorMutation();
+  const removeById = React__default.useCallback(id => {
+    setConversions(prev => {
+      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
+      return prev.filter(conversion => conversion.identifier !== id);
+    });
+  }, [setConversions]);
+  const scan = React__default.useCallback(() => {
+    conversions.forEach(conversion => {
+      const hasHappened = validateSignalChain(conversion.signals);
+      if (!hasHappened) return;
+      collect({
+        conversion: {
+          id: conversion.identifier
+        }
+      });
+      removeById(conversion.identifier);
+    });
+  }, [collect, conversions, removeById]);
+  useEffect(() => {
+    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
+    const intId = setInterval(scan, scanInterval);
+    return () => clearInterval(intId);
+  }, [scan]);
+  return {
+    conversions,
+    setConversions
+  };
+};
+
 const useExitIntentDelay = (delay = 0) => {
   const {
     log
@@ -865,96 +955,6 @@ function useFormCollector() {
     };
   }, [visitor]);
 }
-
-const getFuncByOperator = (operator, compareWith) => {
-  switch (operator) {
-    case 'starts_with':
-      return comparison => {
-        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
-      };
-    case 'contains':
-      return comparison => {
-        return comparison.toLowerCase().includes(compareWith.toLowerCase());
-      };
-    case 'ends_with':
-      return comparison => {
-        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
-      };
-    case 'eq':
-      return comparison => {
-        return comparison.toLowerCase() === compareWith.toLowerCase();
-      };
-    default:
-      return () => {
-        console.error('getOperator: unknown operator', operator);
-        return false;
-      };
-  }
-};
-const scanInterval = 500;
-const useConversions = () => {
-  const [conversions, setConversions] = useState([]);
-  const {
-    mutate: collect
-  } = useCollectorMutation();
-  const removeById = React__default.useCallback(id => {
-    setConversions(prev => {
-      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
-      return prev.filter(conversion => conversion.identifier !== id);
-    });
-  }, [setConversions]);
-  const scan = React__default.useCallback(() => {
-    conversions.forEach(conversion => {
-      const hasHappened = validateSignalChain(conversion.signals);
-      if (!hasHappened) return;
-      collect({
-        conversion: {
-          id: conversion.identifier
-        }
-      });
-      removeById(conversion.identifier);
-    });
-  }, [collect, conversions, removeById]);
-  useEffect(() => {
-    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
-    const intId = setInterval(scan, scanInterval);
-    return () => clearInterval(intId);
-  }, [scan]);
-  return {
-    conversions,
-    setConversions
-  };
-};
-
-const getIsVisible = selector => {
-  const element = document.querySelector(selector);
-  if (!element) return false;
-  if (window.getComputedStyle(element).visibility === 'hidden') return false;
-  if (window.getComputedStyle(element).display === 'none') return false;
-  if (window.getComputedStyle(element).opacity === '0') return false;
-  return true;
-};
-
-const validateSignalChain = signals => {
-  const signalPattern = signals.map(signal => {
-    if (signal.op === 'IsOnPath') {
-      const [operator, route] = signal.parameters;
-      return getFuncByOperator(operator, route)(window.location.pathname);
-    }
-    if (signal.op === 'CanSeeElementOnPage') {
-      const [itemQuerySelector, operator, route] = signal.parameters;
-      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
-      if (!isSignalOnCorrectRoute) return false;
-      const isVisible = getIsVisible(itemQuerySelector);
-      return isVisible;
-    }
-    if (signal.op === 'IsOnDomain') {
-      return window.location.hostname === signal.parameters[0];
-    }
-    return false;
-  });
-  return signalPattern.every(Boolean);
-};
 
 const interval = 250;
 const useIncompleteTriggers = () => {
@@ -1165,49 +1165,6 @@ const getVisitorId = () => {
 const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
-
-const banner = {
-  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    buttonText: 'Run',
-    buttonURL: 'https://google.com',
-    countdownEndTime: '2024-03-31T23:59',
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
-  }
-};
-const fakeTriggers = [...['right', 'left', 'top', 'bottom'].map(direction => ({
-  ...banner,
-  id: `${banner.id}-${direction}`,
-  data: {
-    ...banner.data,
-    position: direction,
-    icon: 'FaBlackTie'
-  }
-})), {
-  id: 'exit-trigger-id',
-  invocation: 'INVOCATION_EXIT_INTENT',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Purchase now (EXIT INTENT)',
-    buttonURL: 'http://www.google.com',
-    heading: '25% Off Gift Cards',
-    paragraph: 'Get 25% off a gift card, if you buy today!'
-  }
-}, {
-  id: 'modal-trigger-id-idle',
-  invocation: 'INVOCATION_IDLE_TIME',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is an IDLE_TIME',
-    paragraph: 'And so is this'
-  }
-}];
 
 function CollectorProvider({
   children,
@@ -1427,7 +1384,7 @@ function CollectorProvider({
       });
     }
     setIdleTimeout(getIdleStatusDelay());
-    setPageTriggers(fakeTriggers);
+    setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
     setConfig(payload.config);
     setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
     setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
