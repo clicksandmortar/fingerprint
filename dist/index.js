@@ -1,5 +1,7 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
+var icons = require('@fortawesome/free-solid-svg-icons');
+var reactFontawesome = require('@fortawesome/react-fontawesome');
 var reactQuery = require('@tanstack/react-query');
 var React = require('react');
 var React__default = _interopDefault(React);
@@ -4117,7 +4119,22 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       return console.error(error, info);
     },
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children))))))));
+  }, children, React__default.createElement(reactFontawesome.FontAwesomeIcon, {
+    icon: icons.faEnvelope,
+    size: '10x'
+  }), React__default.createElement(reactFontawesome.FontAwesomeIcon, {
+    icon: icons.fa1,
+    size: '10x'
+  }), React__default.createElement(reactFontawesome.FontAwesomeIcon, {
+    icon: icons.fa4,
+    size: '10x'
+  }), React__default.createElement(reactFontawesome.FontAwesomeIcon, {
+    icon: icons.faArrowDownUpAcrossLine,
+    size: '10x'
+  }), React__default.createElement(reactFontawesome.FontAwesomeIcon, {
+    icon: icons.faArrowsUpToLine,
+    size: '10x'
+  })))))))));
 };
 var defaultFingerprintState = {
   appId: '',

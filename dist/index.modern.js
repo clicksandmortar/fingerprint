@@ -1,3 +1,5 @@
+import { faEnvelope, fa1, fa4, faArrowDownUpAcrossLine, faArrowsUpToLine } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React__default, { useContext, createContext, useState, useEffect, useCallback, useMemo, useRef, createElement } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -4640,7 +4642,22 @@ const FingerprintProvider = ({
   }, React__default.createElement(ErrorBoundary, {
     onError: (error, info) => console.error(error, info),
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children))))))));
+  }, children, React__default.createElement(FontAwesomeIcon, {
+    icon: faEnvelope,
+    size: '10x'
+  }), React__default.createElement(FontAwesomeIcon, {
+    icon: fa1,
+    size: '10x'
+  }), React__default.createElement(FontAwesomeIcon, {
+    icon: fa4,
+    size: '10x'
+  }), React__default.createElement(FontAwesomeIcon, {
+    icon: faArrowDownUpAcrossLine,
+    size: '10x'
+  }), React__default.createElement(FontAwesomeIcon, {
+    icon: faArrowsUpToLine,
+    size: '10x'
+  })))))))));
 };
 const defaultFingerprintState = {
   appId: '',
