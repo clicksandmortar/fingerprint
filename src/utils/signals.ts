@@ -5,6 +5,8 @@ import getIsVisible from '../hooks/useIsElementVisible'
   Scans through the conversion signals and returns true if all of them are true
 */
 export const validateSignalChain = (signals: FESignal[]) => {
+  // if (typeof window === 'undefined') return false
+
   const signalPattern = signals.map((signal) => {
     if (signal.op === 'IsOnPath') {
       const [operator, route] = signal.parameters

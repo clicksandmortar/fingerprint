@@ -48,6 +48,7 @@
     "@testing-library/user-event": "^7.2.1",
     "@types/jest": "^25.1.4",
     "@types/js-cookie": "^3.0.3",
+    "@types/jsdom": "^21.1.6",
     "@types/mixpanel-browser": "^2.47.1",
     "@types/node": "^12.12.38",
     "@types/psl": "^1.1.3",
