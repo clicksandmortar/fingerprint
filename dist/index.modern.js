@@ -2969,7 +2969,7 @@ const useBannerContainerStyles = ({
 const Banner = ({
   trigger
 }) => {
-  var _trigger$data3, _trigger$data4, _trigger$data5, _container$current2, _container$current3, _trigger$data6, _trigger$data7;
+  var _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6, _container$current2, _container$current3, _trigger$data10, _trigger$data11, _trigger$data12;
   const {
     removeActiveTrigger
   } = useCollector();
@@ -3004,7 +3004,8 @@ const Banner = ({
     setOpen(false);
     resetPad();
   };
-  const handleClose = () => {
+  const handleClose = e => {
+    e === null || e === void 0 ? void 0 : e.stopPropagation();
     trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
@@ -3016,14 +3017,13 @@ const Banner = ({
     formattedCountdown
   } = useCountdown({
     onZero: handleClose,
-    initialTimestamp: new Date(((_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.countdownEndTime) || ''),
+    initialTimestamp: (_trigger$data4 = trigger.data) !== null && _trigger$data4 !== void 0 && _trigger$data4.countdownEndTime ? new Date(((_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.countdownEndTime) || '') : undefined,
     interpolate: {
-      text: (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.marketingText,
+      text: ((_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.marketingText) || '',
       structure: trigger.data
     }
   });
   const interpolate = React__default.useMemo(() => getInterpolate(trigger.data || {}), [trigger.data]);
-  if (!formattedCountdown) return null;
   useEffect(() => {
     var _container$current;
     const bannerHeight = (_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientHeight;
@@ -3034,7 +3034,12 @@ const Banner = ({
     }
     return resetPad;
   }, [container, formattedCountdown]);
-  if (!open) return null;
+  const text = React__default.useMemo(() => {
+    var _trigger$data7, _trigger$data8, _trigger$data9;
+    if (formattedCountdown) return formattedCountdown;
+    if ((_trigger$data7 = trigger.data) !== null && _trigger$data7 !== void 0 && _trigger$data7.marketingText) return interpolate(((_trigger$data8 = trigger.data) === null || _trigger$data8 === void 0 ? void 0 : _trigger$data8.marketingText) || '');
+    return (trigger === null || trigger === void 0 ? void 0 : (_trigger$data9 = trigger.data) === null || _trigger$data9 === void 0 ? void 0 : _trigger$data9.buttonText) || '';
+  }, [trigger, formattedCountdown]);
   const containerStyles = useBannerContainerStyles({
     position,
     element: {
@@ -3046,10 +3051,16 @@ const Banner = ({
     backgroundPrimaryDimmed,
     textPrimary
   } = useBrandColors();
+  const isFullyClickable = !((_trigger$data10 = trigger.data) !== null && _trigger$data10 !== void 0 && _trigger$data10.marketingText);
+  if (!open || !text) return null;
   return React__default.createElement("div", {
     ref: container,
-    style: containerStyles
+    style: {
+      ...containerStyles,
+      cursor: isFullyClickable ? 'pointer' : 'default'
+    }
   }, React__default.createElement("div", {
+    onClick: isFullyClickable ? handleClickCallToAction : undefined,
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -3057,8 +3068,8 @@ const Banner = ({
       maxWidth: '1000px',
       margin: '0 auto'
     }
-  }, !!((_trigger$data6 = trigger.data) !== null && _trigger$data6 !== void 0 && _trigger$data6.icon) && React__default.createElement(Icon, {
-    icon: trigger.data.icon,
+  }, !!((_trigger$data11 = trigger.data) !== null && _trigger$data11 !== void 0 && _trigger$data11.buttonIcon) && React__default.createElement(Icon, {
+    icon: trigger.data.buttonIcon,
     size: '20'
   }), React__default.createElement("span", {
     style: {
@@ -3068,7 +3079,7 @@ const Banner = ({
       fontWeight: 400,
       fontSize: '1rem'
     }
-  }, formattedCountdown), React__default.createElement("button", {
+  }, text), !isFullyClickable && React__default.createElement("button", {
     onClick: handleClickCallToAction,
     style: {
       border: 'none',
@@ -3080,7 +3091,7 @@ const Banner = ({
       cursor: 'pointer',
       fontWeight: 600
     }
-  }, interpolate(((_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonText) || ''))),  React__default.createElement(CloseButton, {
+  }, interpolate(((_trigger$data12 = trigger.data) === null || _trigger$data12 === void 0 ? void 0 : _trigger$data12.buttonText) || ''))),  React__default.createElement(CloseButton, {
     onClick: handleClose,
     style: {
       background: 'transparent',

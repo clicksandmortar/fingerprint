@@ -1,7 +1,18 @@
 ## Icons
 
+
 We use [React Icons](https://react-icons.github.io/react-icons/) as our package of choice because it keeps our bundle size relatively low and provides with a ton of icons for almost any use case.
 
+
+### Non-tech
+
+When setting up the campaign, please use the prefixed, Camelcased name from the docs (2nd in the list of Codes that opens up when you click on an icon). Examples:
+```md
+FcAddDatabase
+Bs0CircleFill
+DiChrome
+GrBarChart
+```
 ### Usage
 
 ```tsx

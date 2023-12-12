@@ -19,7 +19,6 @@ type Props = {
 const canBeDismissed = true
 
 const Banner = ({ trigger }: Props) => {
-  // const position = trigger.data?.position as Position
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
@@ -59,7 +58,8 @@ const Banner = ({ trigger }: Props) => {
     resetPad()
   }
 
-  const handleClose = () => {
+  const handleClose = (e?: any) => {
+    e?.stopPropagation()
     trackEvent('user_closed_trigger', trigger)
     removeActiveTrigger(trigger.id)
     setOpen(false)
@@ -67,14 +67,15 @@ const Banner = ({ trigger }: Props) => {
   }
 
   const position = trigger.data?.position as Position
-
   const container = useRef<null | HTMLDivElement>(null)
 
   const { formattedCountdown } = useCountdown({
     onZero: handleClose,
-    initialTimestamp: new Date(trigger.data?.countdownEndTime || ''),
+    initialTimestamp: trigger.data?.countdownEndTime
+      ? new Date(trigger.data?.countdownEndTime || '')
+      : undefined,
     interpolate: {
-      text: trigger.data?.marketingText,
+      text: trigger.data?.marketingText || '',
       structure: trigger.data as Record<string, unknown>
     }
   })
@@ -84,10 +85,7 @@ const Banner = ({ trigger }: Props) => {
     [trigger.data]
   )
 
-  // temporary solution. Takes a few cycles for the countdown to kick in,
-  // we dont want to show an empty div in its place
-  if (!formattedCountdown) return null
-
+  // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
   useEffect(() => {
     const bannerHeight = container.current?.clientHeight
 
@@ -99,8 +97,16 @@ const Banner = ({ trigger }: Props) => {
 
     return resetPad
   }, [container, formattedCountdown])
+  // temporary solution. Takes a few cycles for the countdown to kick in,
+  // we dont want to show an empty div in its place
+  const text = React.useMemo(() => {
+    if (formattedCountdown) return formattedCountdown
 
-  if (!open) return null
+    if (trigger.data?.marketingText)
+      return interpolate(trigger.data?.marketingText || '')
+
+    return trigger?.data?.buttonText || ''
+  }, [trigger, formattedCountdown])
 
   const containerStyles = useBannerContainerStyles({
     position,
@@ -111,9 +117,20 @@ const Banner = ({ trigger }: Props) => {
   })
   const { backgroundPrimaryDimmed, textPrimary } = useBrandColors()
 
+  const isFullyClickable = !trigger.data?.marketingText
+
+  if (!open || !text) return null
+
   return (
-    <div ref={container} style={containerStyles}>
+    <div
+      ref={container}
+      style={{
+        ...containerStyles,
+        cursor: isFullyClickable ? 'pointer' : 'default'
+      }}
+    >
       <div
+        onClick={isFullyClickable ? handleClickCallToAction : undefined}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -122,8 +139,8 @@ const Banner = ({ trigger }: Props) => {
           margin: '0 auto'
         }}
       >
-        {!!trigger.data?.icon && (
-          <Icon icon={trigger.data.icon as IconName} size='20' />
+        {!!trigger.data?.buttonIcon && (
+          <Icon icon={trigger.data.buttonIcon as IconName} size='20' />
         )}
 
         <span
@@ -135,24 +152,26 @@ const Banner = ({ trigger }: Props) => {
             fontSize: '1rem'
           }}
         >
-          {formattedCountdown}
+          {text}
         </span>
 
-        <button
-          onClick={handleClickCallToAction}
-          style={{
-            border: 'none',
-            color: textPrimary,
-            backgroundColor: backgroundPrimaryDimmed,
-            padding: '5px 10px',
-            margin: '0px 10px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontWeight: 600
-          }}
-        >
-          {interpolate(trigger.data?.buttonText || '')}
-        </button>
+        {!isFullyClickable && (
+          <button
+            onClick={handleClickCallToAction}
+            style={{
+              border: 'none',
+              color: textPrimary,
+              backgroundColor: backgroundPrimaryDimmed,
+              padding: '5px 10px',
+              margin: '0px 10px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 600
+            }}
+          >
+            {interpolate(trigger.data?.buttonText || '')}
+          </button>
+        )}
       </div>
       {canBeDismissed && (
         <CloseButton
