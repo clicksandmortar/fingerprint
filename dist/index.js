@@ -645,10 +645,12 @@ function getReducedSearchParams() {
 function getPagePayload() {
   if (isUndefined(window)) return null;
   var params = getReducedSearchParams();
+  var hash = window.location.hash.substring(2);
   return {
     url: window.location.href,
     path: window.location.pathname,
     title: document.title,
+    hash: hash,
     params: params
   };
 }
@@ -779,6 +781,8 @@ function useButtonCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
   React.useEffect(function () {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
@@ -791,6 +795,7 @@ function useButtonCollector() {
       log('useButtonCollector: button clicked', {
         button: button
       });
+      trackEvent('button_clicked', button);
       collect({
         button: {
           id: button.id,
@@ -840,6 +845,8 @@ function useFormCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
   React.useEffect(function () {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
@@ -882,6 +889,10 @@ function useFormCollector() {
       }, {});
       log('useFormCollector: form submitted', {
         data: data
+      });
+      trackEvent('form_submitted', {
+        id: a.id,
+        name: a.name
       });
       collect({
         form: {

@@ -3,6 +3,7 @@ import { useLogging } from '../context/LoggingContext'
 import { useVisitor } from '../context/VisitorContext'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
+import { useMixpanel } from '../context/MixpanelContext'
 
 const stringIsSubstringOf = (a: string, b: string) => {
   if (a === b) return true
@@ -44,6 +45,7 @@ export default function useFormCollector() {
   const { mutateAsync: collect } = useCollectorMutation()
   const { visitor } = useVisitor()
   const { log } = useLogging()
+  const { trackEvent } = useMixpanel()
 
   useEffect(() => {
     if (isUndefined('document')) return
@@ -101,6 +103,11 @@ export default function useFormCollector() {
 
       log('useFormCollector: form submitted', { data })
 
+
+      trackEvent('form_submitted', {
+        id: a.id,
+        name: a.name,
+      })
       collect({
         form: {
           data
