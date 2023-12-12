@@ -4,7 +4,6 @@ import { RegistrableUserProperties } from '../utils/types';
 declare type TrackerState = {
     initiated: boolean;
 };
-export declare const trackEvent: (event: string, props: any, callback?: Callback | undefined) => void;
 export declare type MixpanelProviderProps = {
     children?: React.ReactNode;
 };

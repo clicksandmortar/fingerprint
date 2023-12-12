@@ -3,26 +3,7 @@ import { ComparisonFunc, Conversion, Operator } from '../client/types'
 import { validateSignalChain } from '../utils/signals'
 import { useCollectorMutation } from './useCollectorMutation'
 
-// TODO: keeping here fo now in case we want to demo this. nuke it after
-export const testConversion: Conversion = {
-  identifier: 'test-id',
-  signals: [
-    {
-      op: 'IsOnPath',
-      parameters: ['starts_with', '/']
-    },
-    {
-      op: 'CanSeeElementOnPage',
-      parameters: ['#test', 'contains', '/']
-    },
-    {
-      op: 'IsOnDomain',
-      parameters: ['localhost']
-    }
-  ],
-  analyticsEvent: 'unnecessary-event-ids'
-}
-
+// TODO: move into utils/signals
 /**
  * Returns a function that compares a string with the signal parameter
  */
@@ -72,8 +53,6 @@ const useConversions = () => {
     },
     [setConversions]
   )
-
-  // TODO: we really need to write unit tests for this bitch...
 
   const scan = React.useCallback(() => {
     conversions.forEach((conversion) => {

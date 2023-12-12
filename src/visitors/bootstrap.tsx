@@ -40,7 +40,7 @@ export const buildCookie = ({ visitorId }: { visitorId: string }) => {
   return `${visitorId}|${sessionId}|${endTime.toISOString()}`
 }
 
-const updateCookieUUID = (
+export const updateCookieUUID = (
   cookieData: string | undefined,
   uuid: string
 ): string | null => {
@@ -59,6 +59,7 @@ const updateCookieUUID = (
   return `${uuid}|${sessionId}|${endTime}`
 }
 
+// TODO: split for testing
 export const updateCookie = (uuid: string) => {
   if (!uuidValidateV4(uuid)) return
 
@@ -75,7 +76,7 @@ export const bootstrapVisitor = ({
   session,
   setSession
 }: {
-  setVisitor: (session: Visitor) => void
+  setVisitor: (visitor: Visitor) => void
   session: Session
   setSession: (session: Session) => void
 }) => {

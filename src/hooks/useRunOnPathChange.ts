@@ -24,7 +24,7 @@ const useRunOnPathChange = (func: FuncProp, config?: Config) => {
     if (!location.href) return
     if (location.href === lastCollectedHref) return
 
-    console.log('useRunOnPathChange: running' + config?.name)
+    log('useRunOnPathChange: running' + config?.name)
 
     setLastCollectedHref(location.href)
 

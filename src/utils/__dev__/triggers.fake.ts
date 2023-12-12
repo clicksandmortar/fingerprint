@@ -55,9 +55,7 @@ export const fakeIncompleteTriggers: IncompleteTrigger[] = [
     signals: [
       {
         op: 'CanSeeElementOnPage',
-        parameters: {
-          selector: '.bla-bla'
-        }
+        parameters: ['.bla-bla', 'contains', '/']
       }
     ]
   }

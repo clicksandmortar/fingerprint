@@ -6,8 +6,6 @@ This package provides a React component that can be used to integrate the C&M Fi
 
 Additionally, this repository includes a build script that can be used to build a static version of the Fingerprint that can be included in any website.
 
-The following README focuses on the React component, but you can find more information about the embeddable script tag in the [README](./example/README.md) of the `examples` directory.
-
 ## Install Package
 
 ```bash
@@ -458,6 +456,8 @@ You can then embed the fingerprint script in any website using the following scr
 
 ## Testing
 
+## Manual Testing
+
 Looking to test the Fingerprint on a production website? You can dynamically inject the Fingerprint script into any website by enabling a Greasemonkey/Tampermonkey script.
 
 To do this, create a new script in Greasemonkey/Tampermonkey, and paste the following code:
@@ -467,7 +467,16 @@ To do this, create a new script in Greasemonkey/Tampermonkey, and paste the foll
 // @name     Embed C&M Fingerprint
 // @version  1
 // @grant    none
+// @match *://*.clicksandmortar.tech/*
 // @match *://*.harvester.co.uk/*
+// @match *://*.browns-restaurants.co.uk/*
+// @match *://*.tobycarvery.co.uk/*
+// @match *://*.vintageinn.co.uk/*
+// @match *://*.stonehouse.co.uk/*
+// @match *://*.emberinns.co.uk/*
+// @match *://*.sizzlingpubs.co.uk/*
+// @match *://*.allbarone.co.uk/*
+// @match *://*.vercel.app/*
 // ==/UserScript==
 
 ;(function (f, i, n, g, e, rp, ri, nt) {
@@ -483,8 +492,57 @@ To do this, create a new script in Greasemonkey/Tampermonkey, and paste the foll
   'script',
   'https://d26qevl4nkue45.cloudfront.net/fingerprint.js',
   'b2a2b2a2b2a2b2a2b2a2b2a2b2a2b2a2',
-  true // Set to false to disable debug mode
+  true, // Set to false to disable debug mode
+  true // Set to false to disable consent
 )
 ```
 
 You can then enable the script on any website by updating the `@match` URL, and the Fingerprint will be injected onto subsequent page views.
+
+
+## Automated testing
+
+Like any other C&M frontend package, automated testing is performed by `Percy + Playwright` through `Github Actions`. The workflow can be found in `.github/workflows/playwright.yml`. (`Jest` will likely be added to the mix soon)
+
+Playwright docs [here](https://playwright.dev/docs/intro)
+### Structure 
+Currently all tests sit in `src/utils/dev/__test__` for simplicity along with:
+- a `testHelpers.ts` file which contains some helper functions for the tests
+- `response.fake.ts` with a fake response from the server.
+
+Rather than being separated by files, the tests are currently separated by concern (e.g. visitor.test.tsx contains all tests related to the visitor object). This may change in the future.
+
+
+### Tests
+
+- There is no consistent way of writing tests currently - follow existing examples or refer to the Playwright docs.
+- Tests are run in `headless` mode by default. Use `yarn test:playwright -ui` for a more convenient DX via a testing utility, or `--headed` to see what's going on
+- We test on 3 browsers - 2 desktop and 1 mobile. If you have platform specific behaviours (e.g. mobile modal vs desktop modal) then make sure your tests cover both.
+- You are welcome to edit the `response.fake.ts` file to change the response from the server. This is useful for testing different behaviours.
+- Mocking the `/seen` is not implemented yet - you are welcome to add a helper function to do this.
+
+### Issues and limitations
+
+#### `test.step` misbehaves occasionally
+`test.step` is a function provided by Playwright that allows you to group tests together. It is buggy and sometimes causes tests to fail. If you are having issues with tests failing, try removing the `test.step` function and see if that fixes it.
+Because of that, some tests are shoved together in a single `test` function. This is not ideal and should be fixed eventually.
+Likely due to the fact we want to parallelise tests, while test.step is not designed to be run consequently if a value relies on its result or if it has side effects.
+#### We don't have access to Window or Location
+so we have to use this hack to gain access to them:
+```tsx
+const loc = await page.evaluate(() => location)
+globalThis.location = loc
+```
+This doesn't work for all tests, so we have to use a combination of this and mocking the window object entirely:
+```tsx
+setDom(`optional.url/here`)
+```
+this creates a mock jsDom for the URL (defaults to the one in `playwright.config.ts`), then sets the global document and window to the ones returned by
+creating JSDom. Bear in mind we become logically disconnected from the actual playwright browser page. 
+
+#### Refactoring needed
+A lot of our functions do not follow SOLID principles and are not very testable. This is because they handle a lot of logic and side effects. Ideally we would refactor these to be more testable and have less side effects.
+A few good examples of that
+
+
+
