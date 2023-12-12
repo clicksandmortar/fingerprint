@@ -1,5 +1,3 @@
-import { faEnvelope, fa1, fa4, faArrowDownUpAcrossLine, faArrowsUpToLine } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React__default, { useContext, createContext, useState, useEffect, useCallback, useMemo, useRef, createElement } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -1155,6 +1153,47 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
+const banner = {
+  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+};
+const fakeTriggers = [...['right', 'left', 'top', 'bottom'].map(direction => ({
+  ...banner,
+  data: {
+    ...banner.data,
+    position: direction
+  }
+})), {
+  id: 'exit-trigger-id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Purchase now (EXIT INTENT)',
+    buttonURL: 'http://www.google.com',
+    heading: '25% Off Gift Cards',
+    paragraph: 'Get 25% off a gift card, if you buy today!'
+  }
+}, {
+  id: 'idle-trigger-id',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an IDLE_TIME',
+    paragraph: 'And so is this'
+  }
+}];
+
 function CollectorProvider({
   children,
   handlers = []
@@ -1358,7 +1397,7 @@ function CollectorProvider({
       });
     }
     setIdleTimeout(getIdleStatusDelay());
-    setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+    setPageTriggers(fakeTriggers);
     setConfig(payload.config);
     setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
     setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
@@ -4642,22 +4681,7 @@ const FingerprintProvider = ({
   }, React__default.createElement(ErrorBoundary, {
     onError: (error, info) => console.error(error, info),
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children, React__default.createElement(FontAwesomeIcon, {
-    icon: faEnvelope,
-    size: '10x'
-  }), React__default.createElement(FontAwesomeIcon, {
-    icon: fa1,
-    size: '10x'
-  }), React__default.createElement(FontAwesomeIcon, {
-    icon: fa4,
-    size: '10x'
-  }), React__default.createElement(FontAwesomeIcon, {
-    icon: faArrowDownUpAcrossLine,
-    size: '10x'
-  }), React__default.createElement(FontAwesomeIcon, {
-    icon: faArrowsUpToLine,
-    size: '10x'
-  })))))))));
+  }, children))))))));
 };
 const defaultFingerprintState = {
   appId: '',

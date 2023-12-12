@@ -1,6 +1,3 @@
-// import { icons.faEnvelope } from '@fortawesome/free-solid-svg-icons'
-import * as icons from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { createContext, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -159,14 +156,6 @@ export const FingerprintProvider = ({
                     fallback={<div>An application error occurred.</div>}
                   >
                     {children}
-                    <FontAwesomeIcon icon={icons.faEnvelope} size='10x' />
-                    <FontAwesomeIcon icon={icons.fa1} size='10x' />
-                    <FontAwesomeIcon icon={icons.fa4} size='10x' />
-                    <FontAwesomeIcon
-                      icon={icons.faArrowDownUpAcrossLine}
-                      size='10x'
-                    />
-                    <FontAwesomeIcon icon={icons.faArrowsUpToLine} size='10x' />
                   </ErrorBoundary>
                 </CollectorProvider>
               </MixpanelProvider>
