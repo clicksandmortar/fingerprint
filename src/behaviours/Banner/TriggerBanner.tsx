@@ -1,74 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { Trigger } from '../client/types'
-import CloseButton from '../components/CloseButton'
-import { useMixpanel } from '../context/MixpanelContext'
-import { useCollector } from '../hooks/useCollector'
-import useCountdown from '../hooks/useCountdown'
-import { getInterpolate } from '../hooks/useInterpolate'
-import { useSeenMutation } from '../hooks/useSeenMutation'
-
-type Position = 'top' | 'bottom' | 'left' | 'right'
+import { Trigger } from '../../client/types'
+import CloseButton from '../../components/CloseButton'
+import { Icon } from '../../components/Icon/Icon'
+import { IconName } from '../../components/Icon/Icon.types'
+import { useMixpanel } from '../../context/MixpanelContext'
+import { useBrandColors } from '../../hooks/useBrandConfig'
+import { useCollector } from '../../hooks/useCollector'
+import useCountdown from '../../hooks/useCountdown'
+import { getInterpolate } from '../../hooks/useInterpolate'
+import { useSeenMutation } from '../../hooks/useSeenMutation'
+import { Position, resetPad, useBannerContainerStyles } from './utils'
 
 type Props = {
   trigger: Trigger
 }
 
-const resetPad = () => {
-  document.body.style.paddingTop = 'inherit'
-}
-
-const getBannerStylesByPosition = ({
-  position,
-  element: { width, height }
-}: {
-  position: Position
-  element: { width: number; height: number }
-}) => {
-  const offset = 0.5 * width + 0.5 * height
-
-  const mutualStyles: React.CSSProperties = {
-    fontFamily: 'sans-serif',
-    position: 'fixed',
-    padding: '5px',
-    background: 'linear-gradient(90deg, rgba(200,41,223,1) 0%, #1f62ff 100%)',
-    display: 'flex',
-    alignItems: 'center'
-  }
-
-  switch (position) {
-    case 'left':
-      return {
-        ...mutualStyles,
-        translate: `0 -${offset}px`,
-        rotate: '90deg',
-        transformOrigin: '0% 50%',
-        top: '50%',
-        left: 0,
-        transform: 'translateY(-50%)',
-        borderRadius: '10px 10px 0 0'
-      }
-    case 'right':
-      return {
-        ...mutualStyles,
-        translate: `0 -${offset}px`,
-        rotate: '270deg',
-        transformOrigin: '100% 50%',
-        top: '50%',
-        right: 0,
-        transform: 'translateY(-50%)',
-        borderRadius: '10px 10px 0 0'
-      }
-    case 'top':
-    case 'bottom':
-      return {
-        ...mutualStyles,
-        [position]: 0,
-        left: 0,
-        width: '100%'
-      }
-  }
-}
 const canBeDismissed = true
 
 const Banner = ({ trigger }: Props) => {
@@ -158,13 +105,14 @@ const Banner = ({ trigger }: Props) => {
   // since the rotation position is pivoting around a corner, we need to calculate
   // the width of the container and then use that to offset the translate slightly to center it properly
 
-  const containerStyles = getBannerStylesByPosition({
+  const containerStyles = useBannerContainerStyles({
     position,
     element: {
       width: container.current?.clientWidth || 0,
       height: container.current?.clientHeight || 0
     }
   })
+  const { backgroundPrimaryDimmed, textPrimary } = useBrandColors()
 
   return (
     <div ref={container} style={containerStyles}>
@@ -177,27 +125,33 @@ const Banner = ({ trigger }: Props) => {
           margin: '0 auto'
         }}
       >
-        <p
+        {!!trigger.data?.icon && (
+          <Icon icon={trigger.data.icon as IconName} size='20' />
+        )}
+
+        <span
           style={{
-            lineHeight: '30px',
+            lineHeight: '1.2rem',
             margin: '0px 10px',
-            color: 'white',
-            fontWeight: 600
+            color: textPrimary,
+            fontWeight: 400,
+            fontSize: '1rem'
           }}
         >
           {formattedCountdown}
-        </p>
+        </span>
 
         <button
           onClick={handleClickCallToAction}
           style={{
             border: 'none',
-            color: 'white',
-            backgroundColor: '#EA3385',
+            color: textPrimary,
+            backgroundColor: backgroundPrimaryDimmed,
             padding: '5px 10px',
             margin: '0px 10px',
             borderRadius: '5px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            fontWeight: 600
           }}
         >
           {interpolate(trigger.data?.buttonText || '')}
@@ -206,7 +160,7 @@ const Banner = ({ trigger }: Props) => {
       {canBeDismissed && (
         <CloseButton
           onClick={handleClose}
-          style={{ background: 'transparent', color: 'white', margin: 0 }}
+          style={{ background: 'transparent', color: textPrimary, margin: 0 }}
         />
       )}
     </div>

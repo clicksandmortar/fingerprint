@@ -15,7 +15,8 @@ const banner: Trigger = {
 export const fakeTriggers: Trigger[] = [
   ...['right', 'left', 'top', 'bottom'].map((direction) => ({
     ...banner,
-    data: { ...banner.data, position: direction }
+    id: `${banner.id}-${direction}`,
+    data: { ...banner.data, position: direction, icon: 'FaBlackTie' }
   })),
 
   {

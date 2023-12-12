@@ -1,5 +1,5 @@
 import React from 'react'
-import { TriggerBanner } from '../behaviours/TriggerBanner'
+import { TriggerBanner } from '../behaviours/Banner/TriggerBanner'
 import TriggerInverse from '../behaviours/TriggerInverse'
 import { TriggerModal } from '../behaviours/TriggerModal'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'

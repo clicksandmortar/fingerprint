@@ -110,6 +110,7 @@ export declare type Trigger = {
     invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode;
     behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW' | 'BEHAVIOUR_BANNER';
     brand?: any;
+    multipleOfSameBehaviourSupported?: boolean;
 };
 export declare type PageView = {
     page: Page;

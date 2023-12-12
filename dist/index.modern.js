@@ -2,6 +2,7 @@ import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-q
 import React__default, { useContext, createContext, useState, useEffect, useCallback, useMemo, useRef, createElement } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactDOM from 'react-dom';
+import loadable from '@loadable/component';
 import mixpanel from 'mixpanel-browser';
 import Cookies from 'js-cookie';
 import psl from 'psl';
@@ -48,6 +49,18 @@ const CloseButton = ({
     d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
   })));
 };
+
+function IcomEl({
+  icon,
+  ...props
+}) {
+  const lib = icon.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ')[0].toLocaleLowerCase();
+  const ElementIcon = loadable(() => import(`react-icons/${lib}/index.js`), {
+    resolveComponent: el => el[icon] != null ? el[icon] : el[Object.keys(el['default'])[0]]
+  });
+  return React__default.createElement(ElementIcon, Object.assign({}, props));
+}
+const Icon = React__default.memo(IcomEl);
 
 const useFingerprint = () => {
   return useContext(FingerprintContext);
@@ -1166,9 +1179,11 @@ const banner = {
 };
 const fakeTriggers = [...['right', 'left', 'top', 'bottom'].map(direction => ({
   ...banner,
+  id: `${banner.id}-${direction}`,
   data: {
     ...banner.data,
-    position: direction
+    position: direction,
+    icon: 'FaBlackTie'
   }
 })), {
   id: 'exit-trigger-id',
@@ -2937,19 +2952,24 @@ const useSeenMutation = () => {
 const resetPad = () => {
   document.body.style.paddingTop = 'inherit';
 };
-const getBannerStylesByPosition = ({
+const useBannerContainerStyles = ({
   position,
   element: {
     width,
     height
   }
 }) => {
+  const {
+    backgroundPrimary,
+    textPrimary
+  } = useBrandColors();
   const offset = 0.5 * width + 0.5 * height;
   const mutualStyles = {
     fontFamily: 'sans-serif',
     position: 'fixed',
     padding: '5px',
-    background: 'linear-gradient(90deg, rgba(200,41,223,1) 0%, #1f62ff 100%)',
+    color: textPrimary,
+    backgroundColor: backgroundPrimary,
     display: 'flex',
     alignItems: 'center'
   };
@@ -2984,12 +3004,15 @@ const getBannerStylesByPosition = ({
         left: 0,
         width: '100%'
       };
+    default:
+      return {};
   }
 };
+
 const Banner = ({
   trigger
 }) => {
-  var _trigger$data3, _trigger$data4, _trigger$data5, _container$current2, _container$current3, _trigger$data6;
+  var _trigger$data3, _trigger$data4, _trigger$data5, _container$current2, _container$current3, _trigger$data6, _trigger$data7;
   const {
     removeActiveTrigger
   } = useCollector();
@@ -3055,13 +3078,17 @@ const Banner = ({
     return resetPad;
   }, [container, formattedCountdown]);
   if (!open) return null;
-  const containerStyles = getBannerStylesByPosition({
+  const containerStyles = useBannerContainerStyles({
     position,
     element: {
       width: ((_container$current2 = container.current) === null || _container$current2 === void 0 ? void 0 : _container$current2.clientWidth) || 0,
       height: ((_container$current3 = container.current) === null || _container$current3 === void 0 ? void 0 : _container$current3.clientHeight) || 0
     }
   });
+  const {
+    backgroundPrimaryDimmed,
+    textPrimary
+  } = useBrandColors();
   return React__default.createElement("div", {
     ref: container,
     style: containerStyles
@@ -3073,29 +3100,34 @@ const Banner = ({
       maxWidth: '1000px',
       margin: '0 auto'
     }
-  }, React__default.createElement("p", {
+  }, !!((_trigger$data6 = trigger.data) !== null && _trigger$data6 !== void 0 && _trigger$data6.icon) && React__default.createElement(Icon, {
+    icon: trigger.data.icon,
+    size: '20'
+  }), React__default.createElement("span", {
     style: {
-      lineHeight: '30px',
+      lineHeight: '1.2rem',
       margin: '0px 10px',
-      color: 'white',
-      fontWeight: 600
+      color: textPrimary,
+      fontWeight: 400,
+      fontSize: '1rem'
     }
   }, formattedCountdown), React__default.createElement("button", {
     onClick: handleClickCallToAction,
     style: {
       border: 'none',
-      color: 'white',
-      backgroundColor: '#EA3385',
+      color: textPrimary,
+      backgroundColor: backgroundPrimaryDimmed,
       padding: '5px 10px',
       margin: '0px 10px',
       borderRadius: '5px',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      fontWeight: 600
     }
-  }, interpolate(((_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonText) || ''))),  React__default.createElement(CloseButton, {
+  }, interpolate(((_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonText) || ''))),  React__default.createElement(CloseButton, {
     onClick: handleClose,
     style: {
       background: 'transparent',
-      color: 'white',
+      color: textPrimary,
       margin: 0
     }
   }));
