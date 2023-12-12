@@ -102,9 +102,6 @@ const Banner = ({ trigger }: Props) => {
 
   if (!open) return null
 
-  // since the rotation position is pivoting around a corner, we need to calculate
-  // the width of the container and then use that to offset the translate slightly to center it properly
-
   const containerStyles = useBannerContainerStyles({
     position,
     element: {
