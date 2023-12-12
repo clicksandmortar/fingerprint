@@ -23,8 +23,8 @@ jobs:
         run: yarn
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      # - name: Install playwright
-      #   run: npx playwright install-deps
+      - name: Install playwright
+        run: npx playwright install-deps
       - name: Setup
         run: yarn install
       - name: Setup Browsers
