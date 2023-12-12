@@ -11,7 +11,6 @@ import {
 import { Visitor } from '../../visitors/types'
 import { validVisitorId } from '../../visitors/utils'
 import { prepPage } from '../__dev__/helpers'
-import { fakeCollectorResp } from '../__dev__/response.fake'
 
 const { expect, describe } = test
 
@@ -83,14 +82,7 @@ describe('Visitor stuff', async () => {
       expect(oldCookie?.value).toEqual(outdatedCookie)
     })
     await test.step('outdated cookie is updated', async () => {
-      const page = await prepPage(browser)
-
-      await page.route('*/**/collector/**', async (route) => {
-        const json = fakeCollectorResp
-
-        await route.fulfill({ json })
-      })
-
+      await prepPage(browser)
       const cookies = await browser.contexts()[0].cookies()
 
       const locatedCookie = cookies?.find((cookie) => {
