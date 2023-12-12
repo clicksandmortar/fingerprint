@@ -1182,7 +1182,7 @@ const fakeTriggers = [...['right', 'left', 'top', 'bottom'].map(direction => ({
     paragraph: 'Get 25% off a gift card, if you buy today!'
   }
 }, {
-  id: 'idle-trigger-id',
+  id: 'modal-trigger-id-idle',
   invocation: 'INVOCATION_IDLE_TIME',
   behaviour: 'BEHAVIOUR_MODAL',
   data: {
