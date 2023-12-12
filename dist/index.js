@@ -1214,6 +1214,47 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
+var banner = {
+  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    buttonText: 'Run',
+    buttonURL: 'https://google.com',
+    countdownEndTime: '2024-03-31T23:59',
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+  }
+};
+var fakeTriggers = [].concat(['right', 'left', 'top', 'bottom'].map(function (direction) {
+  return _extends({}, banner, {
+    data: _extends({}, banner.data, {
+      position: direction
+    })
+  });
+}), [{
+  id: 'exit-trigger-id',
+  invocation: 'INVOCATION_EXIT_INTENT',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Purchase now (EXIT INTENT)',
+    buttonURL: 'http://www.google.com',
+    heading: '25% Off Gift Cards',
+    paragraph: 'Get 25% off a gift card, if you buy today!'
+  }
+}, {
+  id: 'idle-trigger-id',
+  invocation: 'INVOCATION_IDLE_TIME',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'This is an IDLE_TIME',
+    paragraph: 'And so is this'
+  }
+}]);
+
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -1452,7 +1493,7 @@ function CollectorProvider(_ref) {
           });
         }
         setIdleTimeout(getIdleStatusDelay());
-        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+        setPageTriggers(fakeTriggers);
         setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);

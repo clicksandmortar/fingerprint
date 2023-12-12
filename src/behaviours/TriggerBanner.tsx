@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
-
 import { Trigger } from '../client/types'
 import CloseButton from '../components/CloseButton'
 import { useMixpanel } from '../context/MixpanelContext'
