@@ -1,22 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { Trigger } from '../../client/types'
-import CloseButton from '../../components/CloseButton'
-import { Icon } from '../../components/Icon/Icon'
-import { IconName } from '../../components/Icon/Icon.types'
 import { useMixpanel } from '../../context/MixpanelContext'
-import { useBrandColors } from '../../hooks/useBrandConfig'
 import { useCollector } from '../../hooks/useCollector'
-import useCountdown from '../../hooks/useCountdown'
-import { getInterpolate } from '../../hooks/useInterpolate'
 import { useSeenMutation } from '../../hooks/useSeenMutation'
-import { Position, resetPad, useBannerContainerStyles } from './utils'
+import HorizontalBanner from './Components/HorizontalBanner'
+import SideBanner from './Components/SideBanner'
+import { Position, resetPad } from './utils'
 
 type Props = {
   trigger: Trigger
 }
-
-const canBeDismissed = true
 
 const Banner = ({ trigger }: Props) => {
   const { removeActiveTrigger } = useCollector()
@@ -49,6 +43,8 @@ const Banner = ({ trigger }: Props) => {
     }
   }, [open, isSuccess, isLoading])
 
+  if (!open) return null
+
   const handleClickCallToAction = (e: any) => {
     e.preventDefault()
     trackEvent('user_clicked_button', trigger)
@@ -66,123 +62,18 @@ const Banner = ({ trigger }: Props) => {
     resetPad()
   }
 
+  const props = {
+    handleClose: handleClose,
+    handleAction: handleClickCallToAction,
+    trigger: trigger
+  }
+
   const position = trigger.data?.position as Position
-  const container = useRef<null | HTMLDivElement>(null)
 
-  const interpolate = React.useMemo(
-    () => getInterpolate(trigger.data || {}),
-    [trigger.data]
-  )
+  if (position === 'left' || position === 'right')
+    return <SideBanner {...props} />
 
-  useEffect(() => {
-    const bannerHeight = container.current?.clientHeight
-
-    if (position === 'top') {
-      document.body.style.paddingTop = `${bannerHeight}px`
-    } else if (position === 'bottom') {
-      document.body.style.paddingBottom = `${bannerHeight}px`
-    }
-
-    return resetPad
-  }, [container, position])
-
-  // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
-  const { formattedCountdown: text } = useCountdown({
-    onZero: handleClose,
-    initialTimestamp:
-      //  trigger.data?.countdownEndTime ?
-      new Date(trigger.data?.countdownEndTime || ''),
-    // : undefined,
-
-    interpolate: {
-      text: trigger.data?.marketingText || trigger.data?.buttonText || '',
-      structure: trigger.data as Record<string, unknown>
-    }
-  })
-
-  const containerStyles = useBannerContainerStyles({
-    trigger,
-    element: {
-      width: container.current?.clientWidth || 0,
-      height: container.current?.clientHeight || 0
-    }
-  })
-
-  const { backgroundPrimaryDimmed, textPrimary } = useBrandColors()
-  const isFullyClickable = !trigger.data?.marketingText
-
-  if (!open) return null
-
-  const IconToRender = React.useMemo(() => {
-    if (!trigger.data?.buttonIcon) return null
-    let icon
-    try {
-      icon = <Icon icon={trigger.data.buttonIcon as IconName} size='20' />
-    } catch {
-      icon = null
-    }
-
-    return icon
-  }, [trigger])
-
-  if (trigger.data?.buttonIcon && !IconToRender) return null
-
-  return (
-    <div
-      ref={container}
-      style={containerStyles}
-      data-testid={`cnm-banner-${trigger.id}`}
-    >
-      <div
-        onClick={isFullyClickable ? handleClickCallToAction : undefined}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          maxWidth: '1000px',
-          margin: '0 auto'
-        }}
-      >
-        {IconToRender}
-
-        <span
-          style={{
-            lineHeight: '1.2rem',
-            margin: '0px 10px',
-            color: textPrimary,
-            fontWeight: 400,
-            fontSize: '1rem'
-          }}
-        >
-          {text}
-        </span>
-
-        {!isFullyClickable && (
-          <button
-            onClick={handleClickCallToAction}
-            style={{
-              border: 'none',
-              color: textPrimary,
-              backgroundColor: backgroundPrimaryDimmed,
-              padding: '5px 10px',
-              margin: '0px 10px',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontWeight: 600
-            }}
-          >
-            {interpolate(trigger.data?.buttonText || '')}
-          </button>
-        )}
-      </div>
-      {canBeDismissed && (
-        <CloseButton
-          onClick={handleClose}
-          style={{ background: 'transparent', color: textPrimary, margin: 0 }}
-        />
-      )}
-    </div>
-  )
+  return <HorizontalBanner {...props} />
 }
 
 export const TriggerBanner = ({ trigger }: Props) => {

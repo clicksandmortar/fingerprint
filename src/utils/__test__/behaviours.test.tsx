@@ -58,7 +58,7 @@ test.describe('[behaviour] Difi script', async () => {
 
       return _banners
     })
-    console.log({ banners })
+
     test.expect(banners.length).toBe(3)
   })
 

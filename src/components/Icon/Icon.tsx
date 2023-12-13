@@ -3,7 +3,7 @@ import React from 'react'
 import { IconBaseProps } from 'react-icons/lib'
 import { IconName } from './Icon.types'
 
-type typesPropsIcon = {
+export type IconProps = {
   icon: IconName
 } & IconBaseProps
 
@@ -11,7 +11,7 @@ type typesPropsIcon = {
 
 // Modified solution from https://github.com/react-icons/react-icons/issues/594#issuecomment-1236237124
 // Dynamically imports only the junk we need
-export function IconEl({ icon, ...props }: typesPropsIcon): JSX.Element {
+export function IconEl({ icon, ...props }: IconProps): JSX.Element {
   const lib = icon
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
     .split(' ')[0]

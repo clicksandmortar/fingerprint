@@ -8,6 +8,16 @@ export const resetPad = () => {
   document.body.style.paddingTop = 'inherit'
 }
 
+export const getCanBeDismissed = () => {
+  // TODO: implement if needed
+  return true
+}
+
+export const getIsBannerFullyClickable = (trigger: Trigger) => {
+  const isFullyClickable = !trigger.data?.marketingText
+  return isFullyClickable
+}
+
 /**
  * Styles extracted from the Banner component
  * Relies on brand colors from useBrandColors,
@@ -21,8 +31,7 @@ export const useBannerContainerStyles = ({
   element: { width: number; height: number }
 }) => {
   const position = trigger.data?.position as Position
-  const isFullyClickable = !trigger.data?.marketingText
-
+  const isFullyClickable = getIsBannerFullyClickable(trigger)
   const { backgroundPrimary, textPrimary } = useBrandColors()
 
   // since the rotation position is pivoting around a corner, we need to calculate
@@ -33,10 +42,10 @@ export const useBannerContainerStyles = ({
     fontFamily: 'sans-serif',
     position: 'fixed',
     padding: '5px',
-    color: textPrimary,
-    backgroundColor: backgroundPrimary,
     display: 'flex',
     alignItems: 'center',
+    color: textPrimary,
+    backgroundColor: backgroundPrimary,
     cursor: isFullyClickable ? 'pointer' : 'default'
   }
 

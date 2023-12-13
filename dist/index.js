@@ -24,7 +24,6 @@ var React = require('react');
 var React__default = _interopDefault(React);
 var reactErrorBoundary = require('react-error-boundary');
 var ReactDOM = _interopDefault(require('react-dom'));
-var loadable = _interopDefault(require('@loadable/component'));
 var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
 var psl = _interopDefault(require('psl'));
@@ -34,6 +33,7 @@ var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
 var reactDeviceDetect = require('react-device-detect');
 var transcend = _interopDefault(require('lodash/get'));
+var loadable = _interopDefault(require('@loadable/component'));
 var reactHookForm = require('react-hook-form');
 
 function _extends() {
@@ -65,55 +65,6 @@ function _objectWithoutPropertiesLoose(source, excluded) {
   }
   return target;
 }
-
-var closeButtonStyles = {
-  borderRadius: '100%',
-  backgroundColor: 'white',
-  width: '2rem',
-  border: 'none',
-  height: '2rem',
-  margin: 10,
-  color: 'black',
-  fontSize: '1.2rem',
-  fontWeight: 300,
-  cursor: 'pointer',
-  display: 'grid',
-  placeContent: 'center'
-};
-var CloseButton = function CloseButton(_ref) {
-  var onClick = _ref.onClick,
-    style = _ref.style;
-  var buttonStyle = _extends({}, closeButtonStyles, style);
-  return React__default.createElement("button", {
-    style: buttonStyle,
-    onClick: onClick
-  }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '16',
-    height: '16',
-    viewBox: '0 0 16 16'
-  }, React__default.createElement("path", {
-    fill: buttonStyle.color || buttonStyle.fill,
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
-  })));
-};
-
-var _excluded = ["icon"];
-function IconEl(_ref) {
-  var icon = _ref.icon,
-    props = _objectWithoutPropertiesLoose(_ref, _excluded);
-  var lib = icon.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ')[0].toLocaleLowerCase();
-  var ElementIcon = loadable(function () {
-    return new Promise(function (resolve) { resolve(_interopNamespace(require("react-icons/" + lib + "/index.js"))); });
-  }, {
-    resolveComponent: function resolveComponent(el) {
-      return el[icon] != null ? el[icon] : el[Object.keys(el['default'])[0]];
-    }
-  });
-  return React__default.createElement(ElementIcon, Object.assign({}, props));
-}
-var Icon = React__default.memo(IconEl);
 
 var useFingerprint = function useFingerprint() {
   return React.useContext(FingerprintContext);
@@ -1737,6 +1688,104 @@ var useCollector = function useCollector() {
   return React.useContext(CollectorContext);
 };
 
+var useSeenMutation = function useSeenMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useCollector = useCollector(),
+    setPageTriggers = _useCollector.setPageTriggers,
+    setIncompleteTriggers = _useCollector.setIncompleteTriggers,
+    setConversions = _useCollector.setConversions;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor,
+    setVisitor = _useVisitor.setVisitor;
+  var brand = useBrand();
+  var trackTriggerSeen = React__default.useCallback(function (trigger) {
+    trackEvent('trigger_displayed', {
+      triggerId: trigger.id,
+      triggerType: trigger.invocation,
+      triggerBehaviour: trigger.behaviour,
+      time: new Date().toISOString(),
+      brand: brand
+    });
+  }, [trackEvent, brand]);
+  return reactQuery.useMutation(function (trigger) {
+    trackTriggerSeen(trigger);
+    return request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
+      seenTriggerIDs: [trigger.id],
+      visitor: visitor,
+      page: getPagePayload(),
+      device: deviceInfo
+    }).then(function (response) {
+      log('Seen mutation: response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Seen mutation: error', err);
+      return err;
+    });
+  }, {
+    onSuccess: function (res) {
+      try {
+        return Promise.resolve(res.json()).then(function (r) {
+          var _r$identifiers;
+          log('Seen mutation: replacing triggers with:', r.pageTriggers);
+          setPageTriggers(r.pageTriggers);
+          setConversions(r.conversions || []);
+          var retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
+          if (retrievedUserId) {
+            updateCookie(retrievedUserId);
+            setVisitor({
+              id: retrievedUserId
+            });
+          }
+          log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
+          setIncompleteTriggers(r.incompleteTriggers || []);
+          return r;
+        });
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    }
+  });
+};
+
+var closeButtonStyles = {
+  borderRadius: '100%',
+  backgroundColor: 'white',
+  width: '2rem',
+  border: 'none',
+  height: '2rem',
+  margin: 10,
+  color: 'black',
+  fontSize: '1.2rem',
+  fontWeight: 300,
+  cursor: 'pointer',
+  display: 'grid',
+  placeContent: 'center'
+};
+var CloseButton = function CloseButton(_ref) {
+  var onClick = _ref.onClick,
+    style = _ref.style;
+  var buttonStyle = _extends({}, closeButtonStyles, style);
+  return React__default.createElement("button", {
+    style: buttonStyle,
+    onClick: onClick
+  }, React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '16',
+    height: '16',
+    viewBox: '0 0 16 16'
+  }, React__default.createElement("path", {
+    fill: buttonStyle.color || buttonStyle.fill,
+    fillRule: 'evenodd',
+    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+  })));
+};
+
 var defualtFormatString = function defualtFormatString(val) {
   return val;
 };
@@ -1852,82 +1901,60 @@ var useCountdown = function useCountdown(_ref) {
   };
 };
 
-var useSeenMutation = function useSeenMutation() {
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
-  var _useCollector = useCollector(),
-    setPageTriggers = _useCollector.setPageTriggers,
-    setIncompleteTriggers = _useCollector.setIncompleteTriggers,
-    setConversions = _useCollector.setConversions;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor,
-    setVisitor = _useVisitor.setVisitor;
-  var brand = useBrand();
-  var trackTriggerSeen = React__default.useCallback(function (trigger) {
-    trackEvent('trigger_displayed', {
-      triggerId: trigger.id,
-      triggerType: trigger.invocation,
-      triggerBehaviour: trigger.behaviour,
-      time: new Date().toISOString(),
-      brand: brand
-    });
-  }, [trackEvent, brand]);
-  return reactQuery.useMutation(function (trigger) {
-    trackTriggerSeen(trigger);
-    return request.put(hostname + "/triggers/" + appId + "/" + visitor.id + "/seen", {
-      seenTriggerIDs: [trigger.id],
-      visitor: visitor,
-      page: getPagePayload(),
-      device: deviceInfo
-    }).then(function (response) {
-      log('Seen mutation: response', response);
-      return response;
-    })["catch"](function (err) {
-      error('Seen mutation: error', err);
-      return err;
-    });
-  }, {
-    onSuccess: function (res) {
-      try {
-        return Promise.resolve(res.json()).then(function (r) {
-          var _r$identifiers;
-          log('Seen mutation: replacing triggers with:', r.pageTriggers);
-          setPageTriggers(r.pageTriggers);
-          setConversions(r.conversions || []);
-          var retrievedUserId = (_r$identifiers = r.identifiers) === null || _r$identifiers === void 0 ? void 0 : _r$identifiers.main;
-          if (retrievedUserId) {
-            updateCookie(retrievedUserId);
-            setVisitor({
-              id: retrievedUserId
-            });
-          }
-          log('Seen mutation: replacing incomplete Triggers with:', r.incompleteTriggers);
-          setIncompleteTriggers(r.incompleteTriggers || []);
-          return r;
-        });
-      } catch (e) {
-        return Promise.reject(e);
-      }
+var useBannerStyles = function useBannerStyles() {
+  var _useBrandColors = useBrandColors(),
+    textPrimary = _useBrandColors.textPrimary,
+    backgroundPrimaryDimmed = _useBrandColors.backgroundPrimaryDimmed;
+  var styles = {
+    contentContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      maxWidth: '1000px',
+      margin: '0 auto'
+    },
+    text: {
+      lineHeight: '1.2rem',
+      margin: '0px 10px',
+      color: textPrimary,
+      fontWeight: 400,
+      fontSize: '1rem'
+    },
+    button: {
+      border: 'none',
+      color: textPrimary,
+      backgroundColor: backgroundPrimaryDimmed,
+      padding: '5px 10px',
+      margin: '0px 10px',
+      borderRadius: '5px',
+      cursor: 'pointer',
+      fontWeight: 600
+    },
+    closeButton: {
+      background: 'transparent',
+      color: textPrimary,
+      margin: 0
     }
-  });
+  };
+  return styles;
 };
 
 var resetPad = function resetPad() {
   document.body.style.paddingTop = 'inherit';
 };
+var getIsBannerFullyClickable = function getIsBannerFullyClickable(trigger) {
+  var _trigger$data;
+  var isFullyClickable = !((_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.marketingText);
+  return isFullyClickable;
+};
 var useBannerContainerStyles = function useBannerContainerStyles(_ref) {
-  var _trigger$data, _trigger$data2, _extends2;
+  var _trigger$data2, _extends2;
   var trigger = _ref.trigger,
     _ref$element = _ref.element,
     width = _ref$element.width,
     height = _ref$element.height;
-  var position = (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.position;
-  var isFullyClickable = !((_trigger$data2 = trigger.data) !== null && _trigger$data2 !== void 0 && _trigger$data2.marketingText);
+  var position = (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.position;
+  var isFullyClickable = getIsBannerFullyClickable(trigger);
   var _useBrandColors = useBrandColors(),
     backgroundPrimary = _useBrandColors.backgroundPrimary,
     textPrimary = _useBrandColors.textPrimary;
@@ -1936,10 +1963,10 @@ var useBannerContainerStyles = function useBannerContainerStyles(_ref) {
     fontFamily: 'sans-serif',
     position: 'fixed',
     padding: '5px',
-    color: textPrimary,
-    backgroundColor: backgroundPrimary,
     display: 'flex',
     alignItems: 'center',
+    color: textPrimary,
+    backgroundColor: backgroundPrimary,
     cursor: isFullyClickable ? 'pointer' : 'default'
   };
   switch (position) {
@@ -1971,8 +1998,127 @@ var useBannerContainerStyles = function useBannerContainerStyles(_ref) {
   }
 };
 
+var HorizontalBanner = function HorizontalBanner(_ref) {
+  var _container$current, _container$current2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var handleAction = _ref.handleAction,
+    handleClose = _ref.handleClose,
+    trigger = _ref.trigger;
+  var styles = useBannerStyles();
+  var container = React.useRef(null);
+  var isFullyClickable = getIsBannerFullyClickable(trigger);
+  var containerStyles = useBannerContainerStyles({
+    element: {
+      width: ((_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientWidth) || 0,
+      height: ((_container$current2 = container.current) === null || _container$current2 === void 0 ? void 0 : _container$current2.clientHeight) || 0
+    },
+    trigger: trigger
+  });
+  var interpolate = getInterpolate(trigger.data || {});
+  var _useCountdown = useCountdown({
+      onZero: function onZero() {
+        return handleClose({});
+      },
+      initialTimestamp: new Date(((_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime) || ''),
+      interpolate: {
+        text: ((_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.marketingText) || ((_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.buttonText) || '',
+        structure: trigger.data
+      }
+    }),
+    text = _useCountdown.formattedCountdown;
+  var position = (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.position;
+  React.useEffect(function () {
+    var _container$current3;
+    var bannerHeight = (_container$current3 = container.current) === null || _container$current3 === void 0 ? void 0 : _container$current3.clientHeight;
+    if (position === 'top') {
+      document.body.style.paddingTop = bannerHeight + "px";
+    } else if (position === 'bottom') {
+      document.body.style.paddingBottom = bannerHeight + "px";
+    }
+    return resetPad;
+  }, [container, position]);
+  return React__default.createElement("div", {
+    ref: container,
+    style: containerStyles,
+    "data-testid": "cnm-horizontal-banner-" + trigger.id
+  }, React__default.createElement("div", {
+    onClick: isFullyClickable ? handleAction : undefined,
+    style: styles.contentContainer
+  }, React__default.createElement("span", {
+    style: styles.text
+  }, text), React__default.createElement("button", {
+    onClick: handleAction,
+    style: styles.button
+  }, interpolate(((_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText) || ''))),  React__default.createElement(CloseButton, {
+    onClick: handleClose,
+    style: styles.closeButton
+  }));
+};
+
+var _excluded = ["icon"];
+function IconEl(_ref) {
+  var icon = _ref.icon,
+    props = _objectWithoutPropertiesLoose(_ref, _excluded);
+  var lib = icon.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ')[0].toLocaleLowerCase();
+  var ElementIcon = loadable(function () {
+    return new Promise(function (resolve) { resolve(_interopNamespace(require("react-icons/" + lib + "/index.js"))); });
+  }, {
+    resolveComponent: function resolveComponent(el) {
+      return el[icon] != null ? el[icon] : el[Object.keys(el['default'])[0]];
+    }
+  });
+  return React__default.createElement(ElementIcon, Object.assign({}, props));
+}
+var Icon = React__default.memo(IconEl);
+
+var BannerIcon = function BannerIcon(_ref) {
+  var iconName = _ref.iconName,
+    IconProps = _ref.IconProps;
+  var _useLogging = useLogging(),
+    error = _useLogging.error;
+  if (!iconName) {
+    error('BannerIcon: iconName not provided');
+    return null;
+  }
+  return React__default.createElement(Icon, Object.assign({
+    icon: iconName,
+    size: '20'
+  }, IconProps));
+};
+
+var SideBanner = function SideBanner(_ref) {
+  var _container$current, _container$current2, _trigger$data, _trigger$data2;
+  var handleAction = _ref.handleAction,
+    handleClose = _ref.handleClose,
+    trigger = _ref.trigger;
+  var container = React.useRef(null);
+  var isFullyClickable = getIsBannerFullyClickable(trigger);
+  var styles = useBannerStyles();
+  var containerStyles = useBannerContainerStyles({
+    element: {
+      width: ((_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientWidth) || 0,
+      height: ((_container$current2 = container.current) === null || _container$current2 === void 0 ? void 0 : _container$current2.clientHeight) || 0
+    },
+    trigger: trigger
+  });
+  return React__default.createElement("div", {
+    ref: container,
+    style: containerStyles,
+    "data-testid": "cnm-vertical-banner-" + trigger.id
+  }, React__default.createElement("div", {
+    onClick: isFullyClickable ? handleAction : undefined,
+    style: styles.contentContainer
+  }, React__default.createElement(BannerIcon, {
+    iconName: (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonIcon
+  }), React__default.createElement("span", {
+    style: styles.text
+  }, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonText)),  React__default.createElement(CloseButton, {
+    onClick: handleClose,
+    style: styles.closeButton
+  }));
+};
+
 var Banner = function Banner(_ref) {
-  var _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6, _container$current2, _container$current3, _trigger$data7, _trigger$data9, _trigger$data10;
+  var _trigger$data3;
   var trigger = _ref.trigger;
   var _useCollector = useCollector(),
     removeActiveTrigger = _useCollector.removeActiveTrigger;
@@ -2001,6 +2147,7 @@ var Banner = function Banner(_ref) {
       clearTimeout(tId);
     };
   }, [open, isSuccess, isLoading]);
+  if (!open) return null;
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
     e.preventDefault();
@@ -2016,98 +2163,14 @@ var Banner = function Banner(_ref) {
     setOpen(false);
     resetPad();
   };
+  var props = {
+    handleClose: handleClose,
+    handleAction: handleClickCallToAction,
+    trigger: trigger
+  };
   var position = (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.position;
-  var container = React.useRef(null);
-  var interpolate = React__default.useMemo(function () {
-    return getInterpolate(trigger.data || {});
-  }, [trigger.data]);
-  React.useEffect(function () {
-    var _container$current;
-    var bannerHeight = (_container$current = container.current) === null || _container$current === void 0 ? void 0 : _container$current.clientHeight;
-    if (position === 'top') {
-      document.body.style.paddingTop = bannerHeight + "px";
-    } else if (position === 'bottom') {
-      document.body.style.paddingBottom = bannerHeight + "px";
-    }
-    return resetPad;
-  }, [container, position]);
-  var _useCountdown = useCountdown({
-      onZero: handleClose,
-      initialTimestamp: new Date(((_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.countdownEndTime) || ''),
-      interpolate: {
-        text: ((_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.marketingText) || ((_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.buttonText) || '',
-        structure: trigger.data
-      }
-    }),
-    text = _useCountdown.formattedCountdown;
-  var containerStyles = useBannerContainerStyles({
-    trigger: trigger,
-    element: {
-      width: ((_container$current2 = container.current) === null || _container$current2 === void 0 ? void 0 : _container$current2.clientWidth) || 0,
-      height: ((_container$current3 = container.current) === null || _container$current3 === void 0 ? void 0 : _container$current3.clientHeight) || 0
-    }
-  });
-  var _useBrandColors = useBrandColors(),
-    backgroundPrimaryDimmed = _useBrandColors.backgroundPrimaryDimmed,
-    textPrimary = _useBrandColors.textPrimary;
-  var isFullyClickable = !((_trigger$data7 = trigger.data) !== null && _trigger$data7 !== void 0 && _trigger$data7.marketingText);
-  if (!open) return null;
-  var IconToRender = React__default.useMemo(function () {
-    var _trigger$data8;
-    if (!((_trigger$data8 = trigger.data) !== null && _trigger$data8 !== void 0 && _trigger$data8.buttonIcon)) return null;
-    var icon;
-    try {
-      icon = React__default.createElement(Icon, {
-        icon: trigger.data.buttonIcon,
-        size: '20'
-      });
-    } catch (_unused) {
-      icon = null;
-    }
-    return icon;
-  }, [trigger]);
-  if ((_trigger$data9 = trigger.data) !== null && _trigger$data9 !== void 0 && _trigger$data9.buttonIcon && !IconToRender) return null;
-  return React__default.createElement("div", {
-    ref: container,
-    style: containerStyles,
-    "data-testid": "cnm-banner-" + trigger.id
-  }, React__default.createElement("div", {
-    onClick: isFullyClickable ? handleClickCallToAction : undefined,
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      maxWidth: '1000px',
-      margin: '0 auto'
-    }
-  }, IconToRender, React__default.createElement("span", {
-    style: {
-      lineHeight: '1.2rem',
-      margin: '0px 10px',
-      color: textPrimary,
-      fontWeight: 400,
-      fontSize: '1rem'
-    }
-  }, text), !isFullyClickable && React__default.createElement("button", {
-    onClick: handleClickCallToAction,
-    style: {
-      border: 'none',
-      color: textPrimary,
-      backgroundColor: backgroundPrimaryDimmed,
-      padding: '5px 10px',
-      margin: '0px 10px',
-      borderRadius: '5px',
-      cursor: 'pointer',
-      fontWeight: 600
-    }
-  }, interpolate(((_trigger$data10 = trigger.data) === null || _trigger$data10 === void 0 ? void 0 : _trigger$data10.buttonText) || ''))),  React__default.createElement(CloseButton, {
-    onClick: handleClose,
-    style: {
-      background: 'transparent',
-      color: textPrimary,
-      margin: 0
-    }
-  }));
+  if (position === 'left' || position === 'right') return React__default.createElement(SideBanner, Object.assign({}, props));
+  return React__default.createElement(HorizontalBanner, Object.assign({}, props));
 };
 var TriggerBanner = function TriggerBanner(_ref2) {
   var trigger = _ref2.trigger;
