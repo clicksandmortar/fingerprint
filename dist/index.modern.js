@@ -615,10 +615,12 @@ function getReducedSearchParams() {
 function getPagePayload() {
   if (isUndefined(window)) return null;
   const params = getReducedSearchParams();
+  const hash = window.location.hash.substring(2);
   return {
     url: window.location.href,
     path: window.location.pathname,
     title: document.title,
+    hash,
     params
   };
 }
