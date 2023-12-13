@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useLogging } from '../context/LoggingContext'
+import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
-import { useMixpanel } from '../context/MixpanelContext'
 
 const stringIsSubstringOf = (a: string, b: string) => {
   if (a === b) return true
@@ -55,23 +55,25 @@ export default function useFormCollector() {
     const formSubmitListener = (e: any) => {
       if (e.target.nodeName?.toLowerCase() !== 'form') return
 
-      const a = e?.target as HTMLFormElement
+      const elNode = e?.target as HTMLFormElement
 
-      const elements = Array.from(a.elements).filter((b: HTMLFormElement) => {
-        if (bannedTypes.includes(b?.type)) return false
+      const elements = Array.from(elNode.elements).filter(
+        (el: HTMLFormElement) => {
+          if (bannedTypes.includes(el?.type)) return false
 
-        if (
-          bannedFieldPartialNames.find((partialName) => {
-            if (stringIsSubstringOf(b.name, partialName)) return true
-            if (stringIsSubstringOf(b.id, partialName)) return true
-            if (stringIsSubstringOf(b.placeholder, partialName)) return true
+          if (
+            bannedFieldPartialNames.find((partialName) => {
+              if (stringIsSubstringOf(el.name, partialName)) return true
+              if (stringIsSubstringOf(el.id, partialName)) return true
+              if (stringIsSubstringOf(el.placeholder, partialName)) return true
+              return false
+            })
+          )
             return false
-          })
-        )
-          return false
 
-        return true
-      })
+          return true
+        }
+      )
 
       const data = elements.reduce((result: any, item: any) => {
         let fieldName = item.name
@@ -103,10 +105,9 @@ export default function useFormCollector() {
 
       log('useFormCollector: form submitted', { data })
 
-
       trackEvent('form_submitted', {
-        id: a.id,
-        name: a.name,
+        id: elNode.id,
+        name: elNode.name
       })
       collect({
         form: {
