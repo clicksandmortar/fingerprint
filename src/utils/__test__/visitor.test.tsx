@@ -81,7 +81,7 @@ describe('Visitor stuff', async () => {
       expect(oldCookies).toBeDefined()
       expect(oldCookie?.value).toEqual(outdatedCookie)
     })
-    await test.step('outdated cookie is updated', async () => {
+    await test.step('cookie is updated with visitor ID returned', async () => {
       await prepPage(browser)
       const cookies = await browser.contexts()[0].cookies()
 
@@ -93,7 +93,7 @@ describe('Visitor stuff', async () => {
       const splitCookie = (locatedCookie?.value || '').split('|')
       expect(splitCookie.length).toEqual(3)
 
-      expect(splitCookie[0]).toEqual('0e4beaf1-66f1-4276-9f83-09839f53577a')
+      expect(splitCookie[0]).toEqual('1a1a1a11-1aaa-111a-1111-aa11aaa11111')
       expect(new Date(splitCookie[2])).toBeInstanceOf(Date)
     })
   })
