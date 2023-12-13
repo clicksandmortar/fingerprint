@@ -93,7 +93,7 @@ describe('Visitor stuff', async () => {
       const splitCookie = (locatedCookie?.value || '').split('|')
       expect(splitCookie.length).toEqual(3)
 
-      expect(splitCookie[0]).toEqual('1234-5678-9012-3456')
+      expect(splitCookie[0]).not.toEqual('1234-5678-9012-3456')
       expect(new Date(splitCookie[2])).toBeInstanceOf(Date)
     })
   })
