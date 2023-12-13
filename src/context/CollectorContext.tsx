@@ -422,7 +422,6 @@ export function CollectorProvider({
       // Set IdleTimer
       // @todo turn this into the dynamic value
       setIdleTimeout(getIdleStatusDelay())
-      // setPageTriggers(fakeTriggers)
       setPageTriggers(payload?.pageTriggers)
       setConfig(payload.config)
       setIncompleteTriggers(payload?.incompleteTriggers || [])
