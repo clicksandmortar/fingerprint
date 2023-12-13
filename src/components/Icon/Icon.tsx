@@ -2,6 +2,7 @@ import loadable from '@loadable/component'
 import React from 'react'
 import { IconBaseProps } from 'react-icons/lib'
 import { IconName } from './Icon.types'
+import IconFA from './IconFA'
 
 export type IconProps = {
   icon: IconName
@@ -27,4 +28,5 @@ export function IconEl({ icon, ...props }: IconProps): JSX.Element {
 }
 
 // @NOTE: memo is necessary here to avoid flashing during re-renders
-export const Icon = React.memo(IconEl)
+// export const Icon = React.memo(IconEl)
+export const Icon = IconFA

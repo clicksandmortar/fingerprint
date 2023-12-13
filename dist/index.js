@@ -1,24 +1,5 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-function _interopNamespace(e) {
-  if (e && e.__esModule) { return e; } else {
-    var n = {};
-    if (e) {
-      Object.keys(e).forEach(function (k) {
-        var d = Object.getOwnPropertyDescriptor(e, k);
-        Object.defineProperty(n, k, d.get ? d : {
-          enumerable: true,
-          get: function () {
-            return e[k];
-          }
-        });
-      });
-    }
-    n['default'] = e;
-    return n;
-  }
-}
-
 var reactQuery = require('@tanstack/react-query');
 var React = require('react');
 var React__default = _interopDefault(React);
@@ -33,7 +14,7 @@ var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
 var reactDeviceDetect = require('react-device-detect');
 var transcend = _interopDefault(require('lodash/get'));
-var loadable = _interopDefault(require('@loadable/component'));
+var reactFontawesome = require('@fortawesome/react-fontawesome');
 var reactHookForm = require('react-hook-form');
 
 function _extends() {
@@ -52,18 +33,6 @@ function _extends() {
 }
 function _objectDestructuringEmpty(obj) {
   if (obj == null) throw new TypeError("Cannot destructure " + obj);
-}
-function _objectWithoutPropertiesLoose(source, excluded) {
-  if (source == null) return {};
-  var target = {};
-  var sourceKeys = Object.keys(source);
-  var key, i;
-  for (i = 0; i < sourceKeys.length; i++) {
-    key = sourceKeys[i];
-    if (excluded.indexOf(key) >= 0) continue;
-    target[key] = source[key];
-  }
-  return target;
 }
 
 var useFingerprint = function useFingerprint() {
@@ -1216,64 +1185,6 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
-var banner = {
-  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    buttonText: 'Run',
-    buttonURL: 'https://google.com'
-  }
-};
-var fakeTriggers = [_extends({}, banner, {
-  id: "position: 'left',",
-  data: _extends({}, banner.data, {
-    position: 'left',
-    marketingText: 'AAAA!'
-  })
-}), _extends({}, banner, {
-  id: "position: 'top',",
-  data: _extends({}, banner.data, {
-    position: 'top',
-    buttonText: 'Clickable'
-  })
-}), _extends({}, banner, {
-  id: "countdownEndTime: '2024-03-31T23:59',",
-  data: _extends({}, banner.data, {
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes',
-    countdownEndTime: '2024-03-31T23:59',
-    position: 'bottom'
-  })
-}), _extends({}, banner, {
-  id: "position: 'right',",
-  data: _extends({}, banner.data, {
-    position: 'right',
-    buttonText: 'CLickable thing'
-  })
-}), {
-  id: 'exit-trigger-id',
-  invocation: 'INVOCATION_EXIT_INTENT',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Purchase now (EXIT INTENT)',
-    buttonURL: 'http://www.google.com',
-    heading: '25% Off Gift Cards',
-    paragraph: 'Get 25% off a gift card, if you buy today!'
-  }
-}, {
-  id: 'modal-trigger-id-idle',
-  invocation: 'INVOCATION_IDLE_TIME',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is an IDLE_TIME',
-    paragraph: 'And so is this'
-  }
-}];
-
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -1512,7 +1423,7 @@ function CollectorProvider(_ref) {
           });
         }
         setIdleTimeout(getIdleStatusDelay());
-        setPageTriggers(fakeTriggers);
+        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
@@ -2054,21 +1965,16 @@ var HorizontalBanner = function HorizontalBanner(_ref) {
   }));
 };
 
-var _excluded = ["icon"];
-function IconEl(_ref) {
-  var icon = _ref.icon,
-    props = _objectWithoutPropertiesLoose(_ref, _excluded);
-  var lib = icon.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ')[0].toLocaleLowerCase();
-  var ElementIcon = loadable(function () {
-    return new Promise(function (resolve) { resolve(_interopNamespace(require("react-icons/" + lib + "/index.js"))); });
-  }, {
-    resolveComponent: function resolveComponent(el) {
-      return el[icon] != null ? el[icon] : el[Object.keys(el['default'])[0]];
-    }
+var IconFA = function IconFA(props) {
+  var iconName = props.icon;
+  var Component = reactFontawesome.FontAwesomeIcon({
+    icon: iconName,
+    size: '2x'
   });
-  return React__default.createElement(ElementIcon, Object.assign({}, props));
-}
-var Icon = React__default.memo(IconEl);
+  if (!Component) return null;
+  if (!React__default.isValidElement(Component)) return null;
+  return Component;
+};
 
 var BannerIcon = function BannerIcon(_ref) {
   var iconName = _ref.iconName,
@@ -2079,9 +1985,8 @@ var BannerIcon = function BannerIcon(_ref) {
     error('BannerIcon: iconName not provided');
     return null;
   }
-  return React__default.createElement(Icon, Object.assign({
-    icon: iconName,
-    size: '20'
+  return React__default.createElement(IconFA, Object.assign({
+    icon: iconName
   }, IconProps));
 };
 

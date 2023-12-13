@@ -1,6 +1,6 @@
 import React from 'react'
-import { Icon, IconProps } from '../../../components/Icon/Icon'
-import { IconName } from '../../../components/Icon/Icon.types'
+import { IconProps } from '../../../components/Icon/Icon'
+import IconFA from '../../../components/Icon/IconFA'
 import { useLogging } from '../../../context/LoggingContext'
 
 type Props = {
@@ -17,7 +17,7 @@ const BannerIcon = ({ iconName, IconProps }: Props) => {
     return null
   }
 
-  return <Icon icon={iconName as IconName} size='20' {...IconProps} />
+  return <IconFA icon={iconName} {...IconProps} />
 }
 
 export default BannerIcon

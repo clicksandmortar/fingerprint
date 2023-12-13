@@ -11,7 +11,7 @@ import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 import { isMobile } from 'react-device-detect';
 import transcend from 'lodash/get';
-import loadable from '@loadable/component';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForm } from 'react-hook-form';
 
 const useFingerprint = () => {
@@ -1120,72 +1120,6 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
-const banner = {
-  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    buttonText: 'Run',
-    buttonURL: 'https://google.com'
-  }
-};
-const fakeTriggers = [{
-  ...banner,
-  id: `position: 'left',`,
-  data: {
-    ...banner.data,
-    position: 'left',
-    marketingText: 'AAAA!'
-  }
-}, {
-  ...banner,
-  id: `position: 'top',`,
-  data: {
-    ...banner.data,
-    position: 'top',
-    buttonText: 'Clickable'
-  }
-}, {
-  ...banner,
-  id: `countdownEndTime: '2024-03-31T23:59',`,
-  data: {
-    ...banner.data,
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes',
-    countdownEndTime: '2024-03-31T23:59',
-    position: 'bottom'
-  }
-}, {
-  ...banner,
-  id: `position: 'right',`,
-  data: {
-    ...banner.data,
-    position: 'right',
-    buttonText: 'CLickable thing'
-  }
-}, {
-  id: 'exit-trigger-id',
-  invocation: 'INVOCATION_EXIT_INTENT',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Purchase now (EXIT INTENT)',
-    buttonURL: 'http://www.google.com',
-    heading: '25% Off Gift Cards',
-    paragraph: 'Get 25% off a gift card, if you buy today!'
-  }
-}, {
-  id: 'modal-trigger-id-idle',
-  invocation: 'INVOCATION_IDLE_TIME',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-lamb-shank-800.jpg',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'This is an IDLE_TIME',
-    paragraph: 'And so is this'
-  }
-}];
-
 function CollectorProvider({
   children,
   handlers = []
@@ -1404,7 +1338,7 @@ function CollectorProvider({
       });
     }
     setIdleTimeout(getIdleStatusDelay());
-    setPageTriggers(fakeTriggers);
+    setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
     setConfig(payload.config);
     setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
     setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
@@ -1938,17 +1872,16 @@ const HorizontalBanner = ({
   }));
 };
 
-function IconEl({
-  icon,
-  ...props
-}) {
-  const lib = icon.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ')[0].toLocaleLowerCase();
-  const ElementIcon = loadable(() => import(`react-icons/${lib}/index.js`), {
-    resolveComponent: el => el[icon] != null ? el[icon] : el[Object.keys(el['default'])[0]]
+const IconFA = props => {
+  const iconName = props.icon;
+  const Component = FontAwesomeIcon({
+    icon: iconName,
+    size: '2x'
   });
-  return React__default.createElement(ElementIcon, Object.assign({}, props));
-}
-const Icon = React__default.memo(IconEl);
+  if (!Component) return null;
+  if (!React__default.isValidElement(Component)) return null;
+  return Component;
+};
 
 const BannerIcon = ({
   iconName,
@@ -1961,9 +1894,8 @@ const BannerIcon = ({
     error('BannerIcon: iconName not provided');
     return null;
   }
-  return React__default.createElement(Icon, Object.assign({
-    icon: iconName,
-    size: '20'
+  return React__default.createElement(IconFA, Object.assign({
+    icon: iconName
   }, IconProps));
 };
 

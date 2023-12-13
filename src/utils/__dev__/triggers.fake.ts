@@ -17,7 +17,8 @@ export const fakeTriggers: Trigger[] = [
     data: {
       ...banner.data,
       position: 'left',
-      marketingText: 'AAAA!'
+      buttonIcon: 'FaCog',
+      buttonText: 'BANAN! w/icon'
     }
   },
   {
@@ -26,7 +27,7 @@ export const fakeTriggers: Trigger[] = [
     data: {
       ...banner.data,
       position: 'top',
-      // buttonIcon: 'FaCoffee',
+      buttonIcon: 'FaCog',
       buttonText: 'Clickable'
     }
   },
