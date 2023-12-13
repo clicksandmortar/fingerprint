@@ -1,6 +1,6 @@
 import React from 'react'
-import { Trigger } from '../../client/types'
 import { useBrandColors } from '../../hooks/useBrandConfig'
+import { BannerTrigger } from './Banner.types'
 
 export type Position = 'top' | 'bottom' | 'left' | 'right'
 
@@ -13,7 +13,7 @@ export const getCanBeDismissed = () => {
   return true
 }
 
-export const getIsBannerFullyClickable = (trigger: Trigger) => {
+export const getIsBannerFullyClickable = (trigger: BannerTrigger) => {
   const isFullyClickable = !trigger.data?.marketingText
   return isFullyClickable
 }
@@ -27,7 +27,7 @@ export const useBannerContainerStyles = ({
   trigger,
   element: { width, height }
 }: {
-  trigger: Trigger
+  trigger: BannerTrigger
   element: { width: number; height: number }
 }) => {
   const position = trigger.data?.position as Position

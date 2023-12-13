@@ -1,15 +1,15 @@
-import { Trigger } from '../../client/types';
+import { BannerTrigger } from './Banner.types';
 export declare type Position = 'top' | 'bottom' | 'left' | 'right';
 export declare const resetPad: () => void;
 export declare const getCanBeDismissed: () => boolean;
-export declare const getIsBannerFullyClickable: (trigger: Trigger) => boolean;
+export declare const getIsBannerFullyClickable: (trigger: BannerTrigger) => boolean;
 /**
  * Styles extracted from the Banner component
  * Relies on brand colors from useBrandColors,
  * so has to be a hook
  */
 export declare const useBannerContainerStyles: ({ trigger, element: { width, height } }: {
-    trigger: Trigger;
+    trigger: BannerTrigger;
     element: {
         width: number;
         height: number;

@@ -129,6 +129,7 @@ export type Invocation =
   | 'INVOCATION_PAGE_LOAD'
   | 'INVOCATION_ELEMENT_VISIBLE'
 
+//TODO: this should be split into separate BannerTrigger, ModalTrigger, etc for type safety
 export type Trigger = {
   id: string
   invocation?: Invocation

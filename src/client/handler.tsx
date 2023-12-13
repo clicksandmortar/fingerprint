@@ -1,4 +1,5 @@
 import React from 'react'
+import { BannerTrigger } from '../behaviours/Banner/Banner.types'
 import { TriggerBanner } from '../behaviours/Banner/TriggerBanner'
 import TriggerInverse from '../behaviours/TriggerInverse'
 import { TriggerModal } from '../behaviours/TriggerModal'
@@ -42,7 +43,7 @@ export const clientHandlers: ClientTrigger[] = [
     behaviour: 'BEHAVIOUR_BANNER',
     multipleOfSameBehaviourSupported: true,
     invoke: (trigger: Trigger) => (
-      <TriggerBanner key={trigger.id} trigger={trigger} />
+      <TriggerBanner key={trigger.id} trigger={trigger as BannerTrigger} />
     )
   }
 ]

@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { Trigger } from '../../client/types'
 import { useMixpanel } from '../../context/MixpanelContext'
 import { useCollector } from '../../hooks/useCollector'
 import { useSeenMutation } from '../../hooks/useSeenMutation'
+import { BannerTrigger } from './Banner.types'
 import HorizontalBanner from './Components/HorizontalBanner'
 import SideBanner from './Components/SideBanner'
 import { Position, resetPad } from './utils'
 
-type Props = {
-  trigger: Trigger
-}
-
-const Banner = ({ trigger }: Props) => {
+const Banner = ({ trigger }: { trigger: BannerTrigger }) => {
   const { removeActiveTrigger } = useCollector()
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
@@ -76,6 +72,6 @@ const Banner = ({ trigger }: Props) => {
   return <HorizontalBanner {...props} />
 }
 
-export const TriggerBanner = ({ trigger }: Props) => {
+export const TriggerBanner = ({ trigger }: { trigger: BannerTrigger }) => {
   return ReactDOM.createPortal(<Banner trigger={trigger} />, document.body)
 }

@@ -4,7 +4,6 @@ import { testBaseURL } from '../../../playwright.config'
 import { CollectorVisitorResponse } from '../../client/types'
 import { getPage, prepPage } from '../../utils/__dev__/helpers'
 import { fakeCollectorResp } from '../__dev__/response.fake'
-import { fakeTriggers } from '../__dev__/triggers.fake'
 
 let browser: Browser
 
@@ -37,7 +36,7 @@ test.describe('[behaviour] Difi script', async () => {
     await page.route('*/**/collector/**', async (route) => {
       const json: CollectorVisitorResponse = {
         ...fakeCollectorResp,
-        pageTriggers: fakeTriggers
+        pageTriggers: []
       }
 
       await route.fulfill({ json })
