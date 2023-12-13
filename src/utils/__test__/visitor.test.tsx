@@ -60,7 +60,7 @@ describe('Visitor stuff', async () => {
 
   test('User cookie gets updated when visitor ID is returned from API', async () => {
     const outdatedCookie =
-      '1234-5678-9012-3456|3c4f6a89-4edb-450e-9962-ba90dfc05466|1991-01-01T14:13:17.000Z'
+      '0e4beaf1-66f1-4276-9f83-09839f53577a|3c4f6a89-4edb-450e-9962-ba90dfc05466|1991-01-01T14:13:17.000Z'
 
     const context = await browser.newContext()
 
@@ -93,7 +93,7 @@ describe('Visitor stuff', async () => {
       const splitCookie = (locatedCookie?.value || '').split('|')
       expect(splitCookie.length).toEqual(3)
 
-      expect(splitCookie[0]).not.toEqual('1234-5678-9012-3456')
+      expect(splitCookie[0]).toEqual('0e4beaf1-66f1-4276-9f83-09839f53577a')
       expect(new Date(splitCookie[2])).toBeInstanceOf(Date)
     })
   })
