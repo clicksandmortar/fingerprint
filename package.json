@@ -85,6 +85,7 @@
     "parcel": "^2.9.3",
     "parcel-transformer-env-variables-injection": "^0.1.2",
     "prettier": "^2.0.4",
+    "punycode": "^1.4.1",
     "react": ">16.13.1",
     "react-scripts": "^3.4.1",
     "typescript": "^3.7.5"
@@ -100,6 +101,7 @@
     "@types/lodash.uniqby": "^4.7.7",
     "axios": "^1.4.0",
     "js-cookie": "^3.0.5",
+    "lodash": "^4.17.21",
     "lodash.uniqby": "^4.7.0",
     "mixpanel-browser": "^2.47.0",
     "psl": "^1.9.0",

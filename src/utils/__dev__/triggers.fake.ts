@@ -6,19 +6,52 @@ const banner: Trigger = {
   behaviour: 'BEHAVIOUR_BANNER',
   data: {
     buttonText: 'Run',
-    buttonURL: 'https://google.com',
-    countdownEndTime: '2024-03-31T23:59',
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes'
+    buttonURL: 'https://google.com'
   }
 }
 
 export const fakeTriggers: Trigger[] = [
-  ...['right', 'left', 'top', 'bottom'].map((direction) => ({
+  {
     ...banner,
-    id: `${banner.id}-${direction}`,
-    data: { ...banner.data, position: direction, buttonIcon: 'FaBlackTie' }
-  })),
-
+    id: `position: 'left',`,
+    data: {
+      ...banner.data,
+      position: 'left',
+      marketingText: 'AAAA!'
+    }
+  },
+  {
+    ...banner,
+    id: `position: 'top',`,
+    data: {
+      ...banner.data,
+      position: 'top',
+      // buttonIcon: 'FaCoffee',
+      buttonText: 'Clickable'
+    }
+  },
+  {
+    ...banner,
+    id: `countdownEndTime: '2024-03-31T23:59',`,
+    data: {
+      ...banner.data,
+      marketingText:
+        'You only have {{ countdownEndTime }} before the horse comes',
+      countdownEndTime: '2024-03-31T23:59',
+      position: 'bottom'
+      // buttonIcon: 'FaCoffee'
+    }
+  },
+  {
+    ...banner,
+    id: `position: 'right',`,
+    data: {
+      ...banner.data,
+      position: 'right',
+      buttonText: 'CLickable thing'
+      // buttonIcon: 'RiArrowRightDownFill'
+    }
+  },
   {
     id: 'exit-trigger-id',
     invocation: 'INVOCATION_EXIT_INTENT',

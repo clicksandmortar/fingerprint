@@ -66,6 +66,41 @@ type ItiIcons = keyof typeof tiIcons
 type IvscIcons = keyof typeof vscIcons
 type IwiIcons = keyof typeof wiIcons
 
+const Icon = {
+  aiIcons,
+  biIcons,
+  bsIcons,
+  cgIcons,
+  ciIcons,
+  diIcons,
+  faIcons,
+  fa6Icons,
+  fcIcons,
+  fiIcons,
+  giIcons,
+  goIcons,
+  grIcons,
+  hiIcons,
+  hi2Icons,
+  imIcons,
+  ioIcons,
+  io5Icons,
+  liaIcons,
+  libIcons,
+  luIcons,
+  mdIcons,
+  piIcons,
+  riIcons,
+  rxIcons,
+  siIcons,
+  slIcons,
+  tbIcons,
+  tfiIcons,
+  tiIcons,
+  vscIcons,
+  wiIcons
+}
+
 export type IconName =
   | IaiIcons
   | IbiIcons

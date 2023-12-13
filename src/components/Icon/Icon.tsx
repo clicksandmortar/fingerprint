@@ -7,9 +7,11 @@ type typesPropsIcon = {
   icon: IconName
 } & IconBaseProps
 
+// Sadly, doing a {...allIcons}[name] results in very bad performance, so here's a solution that is not testable.
+
 // Modified solution from https://github.com/react-icons/react-icons/issues/594#issuecomment-1236237124
 // Dynamically imports only the junk we need
-export function IcomEl({ icon, ...props }: typesPropsIcon): JSX.Element {
+export function IconEl({ icon, ...props }: typesPropsIcon): JSX.Element {
   const lib = icon
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
     .split(' ')[0]
@@ -24,6 +26,5 @@ export function IcomEl({ icon, ...props }: typesPropsIcon): JSX.Element {
   return <ElementIcon {...props} />
 }
 
-// @NOTE: memo is necessary here to avoid flashing during re-renders.
-
-export const Icon = React.memo(IcomEl)
+// @NOTE: memo is necessary here to avoid flashing during re-renders
+export const Icon = React.memo(IconEl)

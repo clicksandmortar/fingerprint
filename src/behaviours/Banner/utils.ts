@@ -1,4 +1,5 @@
 import React from 'react'
+import { Trigger } from '../../client/types'
 import { useBrandColors } from '../../hooks/useBrandConfig'
 
 export type Position = 'top' | 'bottom' | 'left' | 'right'
@@ -13,12 +14,15 @@ export const resetPad = () => {
  * so has to be a hook
  */
 export const useBannerContainerStyles = ({
-  position,
+  trigger,
   element: { width, height }
 }: {
-  position: Position
+  trigger: Trigger
   element: { width: number; height: number }
 }) => {
+  const position = trigger.data?.position as Position
+  const isFullyClickable = !trigger.data?.marketingText
+
   const { backgroundPrimary, textPrimary } = useBrandColors()
 
   // since the rotation position is pivoting around a corner, we need to calculate
@@ -32,7 +36,8 @@ export const useBannerContainerStyles = ({
     color: textPrimary,
     backgroundColor: backgroundPrimary,
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
+    cursor: isFullyClickable ? 'pointer' : 'default'
   }
 
   switch (position) {

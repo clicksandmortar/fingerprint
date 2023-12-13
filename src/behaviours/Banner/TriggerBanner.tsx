@@ -69,23 +69,11 @@ const Banner = ({ trigger }: Props) => {
   const position = trigger.data?.position as Position
   const container = useRef<null | HTMLDivElement>(null)
 
-  const { formattedCountdown } = useCountdown({
-    onZero: handleClose,
-    initialTimestamp: trigger.data?.countdownEndTime
-      ? new Date(trigger.data?.countdownEndTime || '')
-      : undefined,
-    interpolate: {
-      text: trigger.data?.marketingText || '',
-      structure: trigger.data as Record<string, unknown>
-    }
-  })
-
   const interpolate = React.useMemo(
     () => getInterpolate(trigger.data || {}),
     [trigger.data]
   )
 
-  // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
   useEffect(() => {
     const bannerHeight = container.current?.clientHeight
 
@@ -96,38 +84,54 @@ const Banner = ({ trigger }: Props) => {
     }
 
     return resetPad
-  }, [container, formattedCountdown])
-  // temporary solution. Takes a few cycles for the countdown to kick in,
-  // we dont want to show an empty div in its place
-  const text = React.useMemo(() => {
-    if (formattedCountdown) return formattedCountdown
+  }, [container, position])
 
-    if (trigger.data?.marketingText)
-      return interpolate(trigger.data?.marketingText || '')
+  // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
+  const { formattedCountdown: text } = useCountdown({
+    onZero: handleClose,
+    initialTimestamp:
+      //  trigger.data?.countdownEndTime ?
+      new Date(trigger.data?.countdownEndTime || ''),
+    // : undefined,
 
-    return trigger?.data?.buttonText || ''
-  }, [trigger, formattedCountdown])
+    interpolate: {
+      text: trigger.data?.marketingText || trigger.data?.buttonText || '',
+      structure: trigger.data as Record<string, unknown>
+    }
+  })
 
   const containerStyles = useBannerContainerStyles({
-    position,
+    trigger,
     element: {
       width: container.current?.clientWidth || 0,
       height: container.current?.clientHeight || 0
     }
   })
-  const { backgroundPrimaryDimmed, textPrimary } = useBrandColors()
 
+  const { backgroundPrimaryDimmed, textPrimary } = useBrandColors()
   const isFullyClickable = !trigger.data?.marketingText
 
-  if (!open || !text) return null
+  if (!open) return null
+
+  const IconToRender = React.useMemo(() => {
+    if (!trigger.data?.buttonIcon) return null
+    let icon
+    try {
+      icon = <Icon icon={trigger.data.buttonIcon as IconName} size='20' />
+    } catch {
+      icon = null
+    }
+
+    return icon
+  }, [trigger])
+
+  if (trigger.data?.buttonIcon && !IconToRender) return null
 
   return (
     <div
       ref={container}
-      style={{
-        ...containerStyles,
-        cursor: isFullyClickable ? 'pointer' : 'default'
-      }}
+      style={containerStyles}
+      data-testid={`cnm-banner-${trigger.id}`}
     >
       <div
         onClick={isFullyClickable ? handleClickCallToAction : undefined}
@@ -139,9 +143,7 @@ const Banner = ({ trigger }: Props) => {
           margin: '0 auto'
         }}
       >
-        {!!trigger.data?.buttonIcon && (
-          <Icon icon={trigger.data.buttonIcon as IconName} size='20' />
-        )}
+        {IconToRender}
 
         <span
           style={{

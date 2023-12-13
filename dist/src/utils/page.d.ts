@@ -5,6 +5,7 @@ export declare function getPagePayload(): {
     url: string;
     path: string;
     title: string;
+    hash: string;
     params: any;
 } | null;
 export declare function getReferrer(): {
