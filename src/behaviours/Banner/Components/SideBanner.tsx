@@ -28,7 +28,7 @@ const SideBanner = ({ handleAction, handleClose, trigger }: BannerProps) => {
     <div
       ref={container}
       style={containerStyles}
-      data-testid={`cnm-vertical-banner-${trigger.id}`}
+      data-testid={`cnm-side-banner-${trigger.id}`}
     >
       <div
         onClick={isFullyClickable ? handleAction : undefined}

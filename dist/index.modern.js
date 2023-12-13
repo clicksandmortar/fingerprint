@@ -1986,7 +1986,7 @@ const SideBanner = ({
   return React__default.createElement("div", {
     ref: container,
     style: containerStyles,
-    "data-testid": `cnm-vertical-banner-${trigger.id}`
+    "data-testid": `cnm-side-banner-${trigger.id}`
   }, React__default.createElement("div", {
     onClick: isFullyClickable ? handleAction : undefined,
     style: styles.contentContainer
