@@ -761,6 +761,8 @@ function useButtonCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
   React.useEffect(function () {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
@@ -773,6 +775,7 @@ function useButtonCollector() {
       log('useButtonCollector: button clicked', {
         button: button
       });
+      trackEvent('button_clicked', button);
       collect({
         button: {
           id: button.id,
@@ -922,19 +925,21 @@ function useFormCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
   React.useEffect(function () {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
     var formSubmitListener = function formSubmitListener(e) {
       var _e$target$nodeName;
       if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
-      var a = e === null || e === void 0 ? void 0 : e.target;
-      var elements = Array.from(a.elements).filter(function (b) {
-        if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;
+      var form = e === null || e === void 0 ? void 0 : e.target;
+      var elements = Array.from(form.elements).filter(function (el) {
+        if (bannedTypes.includes(el === null || el === void 0 ? void 0 : el.type)) return false;
         if (bannedFieldPartialNames.find(function (partialName) {
-          if (stringIsSubstringOf(b.name, partialName)) return true;
-          if (stringIsSubstringOf(b.id, partialName)) return true;
-          if (stringIsSubstringOf(b.placeholder, partialName)) return true;
+          if (stringIsSubstringOf(el.name, partialName)) return true;
+          if (stringIsSubstringOf(el.id, partialName)) return true;
+          if (stringIsSubstringOf(el.placeholder, partialName)) return true;
           return false;
         })) return false;
         return true;
@@ -964,6 +969,10 @@ function useFormCollector() {
       }, {});
       log('useFormCollector: form submitted', {
         data: data
+      });
+      trackEvent('form_submitted', {
+        id: form.id,
+        name: form.name
       });
       collect({
         form: {

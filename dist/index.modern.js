@@ -702,6 +702,9 @@ function useButtonCollector() {
   const {
     log
   } = useLogging();
+  const {
+    trackEvent
+  } = useMixpanel();
   useEffect(() => {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
@@ -714,6 +717,7 @@ function useButtonCollector() {
       log('useButtonCollector: button clicked', {
         button
       });
+      trackEvent('button_clicked', button);
       collect({
         button: {
           id: button.id,
@@ -852,19 +856,22 @@ function useFormCollector() {
   const {
     log
   } = useLogging();
+  const {
+    trackEvent
+  } = useMixpanel();
   useEffect(() => {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
     const formSubmitListener = e => {
       var _e$target$nodeName;
       if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
-      const a = e === null || e === void 0 ? void 0 : e.target;
-      const elements = Array.from(a.elements).filter(b => {
-        if (bannedTypes.includes(b === null || b === void 0 ? void 0 : b.type)) return false;
+      const form = e === null || e === void 0 ? void 0 : e.target;
+      const elements = Array.from(form.elements).filter(el => {
+        if (bannedTypes.includes(el === null || el === void 0 ? void 0 : el.type)) return false;
         if (bannedFieldPartialNames.find(partialName => {
-          if (stringIsSubstringOf(b.name, partialName)) return true;
-          if (stringIsSubstringOf(b.id, partialName)) return true;
-          if (stringIsSubstringOf(b.placeholder, partialName)) return true;
+          if (stringIsSubstringOf(el.name, partialName)) return true;
+          if (stringIsSubstringOf(el.id, partialName)) return true;
+          if (stringIsSubstringOf(el.placeholder, partialName)) return true;
           return false;
         })) return false;
         return true;
@@ -894,6 +901,10 @@ function useFormCollector() {
       }, {});
       log('useFormCollector: form submitted', {
         data
+      });
+      trackEvent('form_submitted', {
+        id: form.id,
+        name: form.name
       });
       collect({
         form: {
