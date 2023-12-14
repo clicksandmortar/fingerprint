@@ -28,10 +28,9 @@ test.describe('[behaviour] Difi script', async () => {
     test.expect(modalElement).toBeTruthy()
   })
   test('banners render', async () => {
-
     // TODO: try to test the banners. Cna't get it to work at the moment
     // becaue of an issue with the icon handling lib - @loadable/component
-    
+
     // const page = await getPage(browser)
 
     // await page.route('*/**/collector/**', async (route) => {
@@ -68,9 +67,9 @@ test.describe('[behaviour] Difi script', async () => {
 
     //   return _banners
     // })
-    
+
     // test.expect(banners.length).toBe(3)
-    test.expect(true).toBe(true
+    test.expect(true).toBe(true)
   })
 
   // Currently only testing that a modal is mounted.
