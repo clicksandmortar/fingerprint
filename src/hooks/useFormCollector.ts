@@ -1,28 +1,11 @@
 import { useEffect } from 'react'
+import { cnmFormPrefix } from '../components/CnMForm'
 import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
+import { getFormEntries } from '../utils/forms'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
-
-const stringIsSubstringOf = (a: string, b: string) => {
-  if (a === b) return true
-  if (!a || !b) return false
-
-  return a.toLowerCase().includes(b.toLowerCase())
-}
-
-const bannedTypes = ['password', 'submit']
-const bannedFieldPartialNames = [
-  'expir',
-  'cvv',
-  'cvc',
-  'csv',
-  'csc',
-  'pin',
-  'pass',
-  'card'
-]
 
 /**
  * Hook into forms on the page and collect their data
@@ -57,51 +40,12 @@ export default function useFormCollector() {
 
       const form = e?.target as HTMLFormElement
 
-      const elements = Array.from(form.elements).filter(
-        (el: HTMLFormElement) => {
-          if (bannedTypes.includes(el?.type)) return false
+      if (form.getAttribute('id')?.includes(cnmFormPrefix)) {
+        log('Skipping form collection since this is a C&M form')
+        return
+      }
 
-          if (
-            bannedFieldPartialNames.find((partialName) => {
-              if (stringIsSubstringOf(el.name, partialName)) return true
-              if (stringIsSubstringOf(el.id, partialName)) return true
-              if (stringIsSubstringOf(el.placeholder, partialName)) return true
-              return false
-            })
-          )
-            return false
-
-          return true
-        }
-      )
-
-      const data = elements.reduce((result: any, item: any) => {
-        let fieldName = item.name
-
-        if (!fieldName) {
-          if (item.id) {
-            log(
-              'useFormCollector: form field has no name, falling back to id',
-              { item }
-            )
-            fieldName = item.id
-          } else if (item.placeholder) {
-            log(
-              'useFormCollector: form field has no name or id, falling back to placeholder',
-              { item }
-            )
-            fieldName = item.placeholder
-          } else {
-            log(
-              'useFormCollector: form field has no name, id or placeholder, fallback to type',
-              { item }
-            )
-            fieldName = item.type
-          }
-        }
-        result[fieldName] = item.value
-        return result
-      }, {})
+      const data = getFormEntries(form)
 
       log('useFormCollector: form submitted', { data })
 

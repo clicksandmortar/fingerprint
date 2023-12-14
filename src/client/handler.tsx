@@ -1,8 +1,8 @@
 import React from 'react'
 import { BannerTrigger } from '../behaviours/Banner/Banner.types'
 import { TriggerBanner } from '../behaviours/Banner/TriggerBanner'
+import { TriggerModal } from '../behaviours/Modal/TriggerModal'
 import TriggerInverse from '../behaviours/TriggerInverse'
-import { TriggerModal } from '../behaviours/TriggerModal'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'
 import { Trigger } from './types'
 

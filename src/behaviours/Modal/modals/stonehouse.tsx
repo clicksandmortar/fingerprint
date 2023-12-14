@@ -1,9 +1,9 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
-import { Trigger } from '../../client/types'
-import CloseButton from '../CloseButton'
+import { Trigger } from '../../../client/types'
+import CloseButton from '../../../components/CloseButton'
 import FullyClickableModal from './FullyClickableModal'
-import { getIsModalFullyClickable, prependClass } from './StandardModal/helpers'
+import { getIsModalFullyClickable, prependClass } from './helpers'
 
 type Props = {
   trigger: Trigger

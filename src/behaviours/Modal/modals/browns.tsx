@@ -1,10 +1,10 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { Trigger } from '../../client/types'
-import CloseButton from '../CloseButton'
+import { Trigger } from '../../../client/types'
+import CloseButton from '../../../components/CloseButton'
 import FullyClickableModal from './FullyClickableModal'
-import { getIsModalFullyClickable } from './StandardModal/helpers'
+import { getIsModalFullyClickable } from './helpers'
 
 type Props = {
   trigger: Trigger

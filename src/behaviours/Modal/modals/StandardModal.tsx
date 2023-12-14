@@ -1,40 +1,25 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { Trigger } from '../../../client/types'
-
+import CloseButton from '../../../components/CloseButton'
 import { useLogging } from '../../../context/LoggingContext'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
-import CloseButton from '../../CloseButton'
 import {
-  ButtonPosition,
-  ModalSize,
   getIsModalFullyClickable,
-  getModalButtonFlexPosition,
-  getModalButtonStylesBySize,
   prependClass,
   useModalDimensionsBasedOnImage
 } from './helpers'
-
-type Props = {
-  trigger: Trigger
-  handleClickCallToAction: (e: any) => void
-  handleCloseModal: (e: any) => void
-}
-
-const defaultElementSize: ModalSize = 'medium'
-const defaultButtonPosition: ButtonPosition = 'right'
+import { ModalProps } from './Modal.types'
 
 const StandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
-}: Props) => {
+}: ModalProps) => {
   const { error } = useLogging()
   const isModalFullyClickable = getIsModalFullyClickable({ trigger })
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
-  const buttonSizeStyle = getModalButtonStylesBySize(defaultElementSize)
   const { textPrimary, backgroundPrimary } = useBrandColors()
   const imageURL = trigger?.data?.backgroundURL || ''
   const {
@@ -314,7 +299,7 @@ const StandardModal = ({
             <div
               style={{
                 display: 'flex',
-                ...getModalButtonFlexPosition(defaultButtonPosition)
+                justifyContent: 'flex-end'
               }}
             >
               <div>
@@ -322,7 +307,10 @@ const StandardModal = ({
                   href={trigger?.data?.buttonURL}
                   className={prependClass('cta')}
                   onClick={handleClickCallToAction}
-                  style={buttonSizeStyle}
+                  style={{
+                    fontSize: '1.3rem',
+                    padding: '0.3rem 1rem'
+                  }}
                 >
                   {trigger?.data?.buttonText}
                 </a>
@@ -336,3 +324,37 @@ const StandardModal = ({
 }
 
 export default StandardModal
+
+// type ModalWrapperProps = {
+//   handleClose: (e: any) => void
+//   handleClickCTA: (e: any) => void
+//   trigger: Trigger
+// }
+// const ModalWrapper = ({handleClose, handleClickCTA, trigger, children }: ModalWrapperProps)=>{
+//   const {imageURL} = trigger?.data
+
+//   return <div className={prependClass('overlay')}>
+//   <div
+//     onClick={handleClickCTA}
+//     className={prependClass('modal')}
+//     style={{
+//       background: `url(${imageURL})`,
+//       backgroundPosition: 'center',
+//       backgroundRepeat: 'no-repeat',
+//       backgroundSize: 'cover',
+//       position: 'relative'
+//     }}
+//   >
+//     <div className={prependClass('image-darken')}>
+//       <div className={prependClass('close-button')}>
+//         <CloseButton onClick={handleClose} />
+//       </div>
+
+//       <div className={prependClass('text-container')}>
+//         {content}
+//       </div>
+//       </div>
+//     </div>
+//     </div>
+//     )
+// }
