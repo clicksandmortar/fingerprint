@@ -1,5 +1,4 @@
 import React from 'react'
-
 import { useLogging } from '../../context/LoggingContext'
 import { useMixpanel } from '../../context/MixpanelContext'
 import { SupportedBrand } from '../../utils/brand'

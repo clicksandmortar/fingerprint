@@ -1,6 +1,62 @@
+import { BannerTrigger } from '../../behaviours/Banner/Banner.types'
 import { IncompleteTrigger, Trigger } from '../../client/types'
 
+const banner: Trigger = {
+  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    buttonText: 'Run',
+    buttonURL: 'https://google.com'
+  }
+}
+
+export const fakeBanners: BannerTrigger[] = [
+  {
+    ...banner,
+    id: `position: 'left',`,
+    data: {
+      ...banner.data,
+      position: 'left',
+      buttonIcon: 'ticket',
+      marketingText: 'AAAA!'
+    }
+  },
+  {
+    ...banner,
+    id: `position: 'top',`,
+    data: {
+      ...banner.data,
+      position: 'top',
+      buttonText: 'Clickable'
+    }
+  },
+  {
+    ...banner,
+    id: `countdownEndTime: '2024-03-31T23:59',`,
+    data: {
+      ...banner.data,
+      marketingText:
+        'You only have {{ countdownEndTime }} before the horse comes',
+      countdownEndTime: '2024-03-31T23:59',
+      position: 'bottom'
+      // buttonIcon: 'FaCoffee'
+    }
+  },
+  {
+    ...banner,
+    id: `position: 'right',`,
+    data: {
+      ...banner.data,
+      position: 'right',
+      buttonText: 'CLickable thing',
+      buttonIcon: 'heart'
+    }
+  }
+]
+
 export const fakeTriggers: Trigger[] = [
+  ...fakeBanners,
   {
     id: 'exit-trigger-id',
     invocation: 'INVOCATION_EXIT_INTENT',
@@ -14,7 +70,7 @@ export const fakeTriggers: Trigger[] = [
     }
   },
   {
-    id: 'idle-trigger-id',
+    id: 'modal-trigger-id-idle',
     invocation: 'INVOCATION_IDLE_TIME',
     behaviour: 'BEHAVIOUR_MODAL',
     data: {
@@ -23,18 +79,6 @@ export const fakeTriggers: Trigger[] = [
       buttonURL: 'http://www.google.com',
       heading: 'This is an IDLE_TIME',
       paragraph: 'And so is this'
-    }
-  },
-  {
-    id: '7af0fc17-6508-4b5a-9003-1039fc473250',
-    invocation: 'INVOCATION_PAGE_LOAD',
-    behaviour: 'BEHAVIOUR_BANNER',
-    data: {
-      buttonText: 'Run',
-      buttonURL: 'https://google.com',
-      countdownEndTime: '2024-03-31T23:59',
-      marketingText:
-        'You only have {{ countdownEndTime }} before the horse comes'
     }
   }
 ]

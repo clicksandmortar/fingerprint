@@ -67,15 +67,20 @@ export const getPage = async (browser: Browser) => {
 export const prepPage = async (browser: Browser) => {
   const page = await getPage(browser)
 
-  await page.goto(testBaseURL, {
-    waitUntil: 'networkidle',
-    timeout: 60000
-  })
-
   await page.route('*/**/collector/**', async (route) => {
     const json = fakeCollectorResp
 
     await route.fulfill({ json })
+  })
+  await page.route('*/**/seen/**', async (route) => {
+    const json = fakeCollectorResp
+
+    await route.fulfill({ json })
+  })
+
+  await page.goto(testBaseURL, {
+    waitUntil: 'networkidle',
+    timeout: 60000
   })
 
   return page

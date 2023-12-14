@@ -1,5 +1,5 @@
 import { Trigger } from '../../client/types';
-import { IconName } from '../../components/Icon/Icon.types';
+import { Icon } from '../../components/Icon';
 import { Position } from './utils';
 export declare type BannerTrigger = Omit<Trigger, 'data'> & {
     data: {
@@ -8,7 +8,7 @@ export declare type BannerTrigger = Omit<Trigger, 'data'> & {
         marketingText?: string;
         buttonText?: string;
         countdownEndTime?: string;
-        buttonIcon?: IconName;
+        buttonIcon?: Icon;
     };
 };
 export declare type BannerProps = {

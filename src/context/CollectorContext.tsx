@@ -10,8 +10,10 @@ import {
   Trigger
 } from '../client/types'
 import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
+import { useBrand, useConfig } from '../hooks/useBrandConfig'
 import useButtonCollector from '../hooks/useButtonCollector'
 import { useCollectorMutation } from '../hooks/useCollectorMutation'
+import useConversions from '../hooks/useConversions'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
 import useFormCollector from '../hooks/useFormCollector'
@@ -21,11 +23,6 @@ import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
-
-import { useBrand, useConfig } from '../hooks/useBrandConfig'
-
-import useConversions from '../hooks/useConversions'
-
 import { updateCookie } from '../visitors/bootstrap'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -108,6 +105,7 @@ export function CollectorProvider({
   const getIsBehaviourVisible = React.useCallback(
     (type: Trigger['behaviour']) => {
       if (displayTriggers.length === 0) return false
+
       if (
         displayTriggers.find(
           (triggerId) =>
@@ -127,32 +125,48 @@ export function CollectorProvider({
       invocation: Trigger['invocation'],
       shouldAllowMultipleSimultaneous = false
     ) => {
-      const invokableTrigger = combinedTriggers.find(
+      const appendTrigger = (invokableTrigger: Trigger) => {
+        setDisplayedTriggers((prev) => {
+          if (prev.includes(invokableTrigger.id)) return prev
+
+          return [...prev, invokableTrigger.id]
+        })
+      }
+
+      const invokableTriggers = combinedTriggers.filter(
         (trigger) => trigger.invocation === invocation
       )
 
-      if (!invokableTrigger) {
-        log('CollectorProvider: Trigger not invokable ', invokableTrigger)
-        return
-      }
+      invokableTriggers.forEach((invokableTrigger) => {
+        if (!invokableTrigger) {
+          log('CollectorProvider: Trigger not invokable ', invokableTrigger)
+          return
+        }
 
-      if (
-        !shouldAllowMultipleSimultaneous &&
-        getIsBehaviourVisible(invokableTrigger.behaviour)
-      ) {
-        log(
-          'CollectorProvider: Behaviour already visible, not showing trigger',
-          invokableTrigger
-        )
-        return
-      }
+        if (invokableTrigger.behaviour === 'BEHAVIOUR_BANNER') {
+          //@TODO: special case for banners. we should probably defione this in the handler
+          log(
+            'Banners can be stacked up, setting as visible.',
+            invokableTrigger
+          )
+          appendTrigger(invokableTrigger)
+          return
+        }
 
-      log('CollectorProvider: Triggering behaviour', invokableTrigger)
-      // if the trigger is already in the list, don't add it again
-      setDisplayedTriggers((prev) => {
-        if (prev.includes(invokableTrigger.id)) return prev
+        if (
+          !shouldAllowMultipleSimultaneous &&
+          getIsBehaviourVisible(invokableTrigger.behaviour)
+        ) {
+          log(
+            'CollectorProvider: Behaviour already visible, not showing trigger',
+            invokableTrigger
+          )
+          return
+        }
 
-        return [...prev, invokableTrigger.id]
+        log('CollectorProvider: Triggering behaviour', invokableTrigger)
+        // if the trigger is already in the list, don't add it again
+        appendTrigger(invokableTrigger)
       })
     },
     [combinedTriggers, getIsBehaviourVisible, log]
@@ -233,31 +247,69 @@ export function CollectorProvider({
     )
 
     if (!activeTriggers) {
-      error(`No trigger found for displayTriggers`, displayTriggers)
+      error(
+        `CollectorProvider - TriggerComponent: No trigger found for displayTriggers`,
+        displayTriggers
+      )
       return null
     }
 
-    log('CollectorProvider: available handlers include: ', handlers)
-    log('CollectorProvider: activeTriggers to match are: ', activeTriggers)
+    log(
+      'CollectorProvider - TriggerComponent: available handlers include: ',
+      handlers
+    )
+    log(
+      'CollectorProvider - TriggerComponent: activeTriggers to match are: ',
+      activeTriggers
+    )
 
-    log('CollectorProvider: attempting to show trigger', activeTriggers)
+    log(
+      'CollectorProvider - TriggerComponent: attempting to show trigger',
+      activeTriggers
+    )
 
     return activeTriggers.map((trigger) => {
       const handler = getHandlerForTrigger(trigger)
 
       if (!handler) {
-        log('No handler found for trigger', trigger)
+        log(
+          'CollectorProvider - TriggerComponent: No handler found for trigger',
+          trigger
+        )
         return null
       }
       if (!handler.invoke) {
-        log('No invoke method found for handler', handler)
+        log(
+          'CollectorProvider - TriggerComponent: No invoke method found for handler',
+          handler
+        )
+        return null
+      }
+
+      const isTriggerOfSameBehaviourAlreadyVisible = getIsBehaviourVisible(
+        trigger.behaviour
+      )
+
+      if (
+        // this check is only necessary because we run through multiple render cycles
+        // when we place a component on the page
+        !displayTriggers.includes(trigger.id) &&
+        // ---
+        isTriggerOfSameBehaviourAlreadyVisible &&
+        !handler.multipleOfSameBehaviourSupported
+      ) {
+        log(
+          `CollectorProvider - TriggerComponent: Behaviour ${trigger.behaviour} (triggerId: ${trigger.id}) is already visible and does NOT support multiple triggers. Not showing.`,
+          trigger.id
+        )
         return null
       }
 
       const potentialComponent = handler.invoke?.(trigger)
+
       if (potentialComponent && React.isValidElement(potentialComponent)) {
         log(
-          'CollectorProvider: Potential component for trigger is valid. Mounting'
+          'CollectorProvider - TriggerComponent: Potential component for trigger is valid. Mounting'
         )
         return potentialComponent
       }
@@ -274,6 +326,7 @@ export function CollectorProvider({
     handlers,
     error,
     getHandlerForTrigger,
+    getIsBehaviourVisible,
     combinedTriggers
   ])
 

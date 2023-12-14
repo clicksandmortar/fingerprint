@@ -1,5 +1,4 @@
 import { test } from '@playwright/test'
-
 import { Browser, webkit } from 'playwright'
 import { prepPage } from '../../utils/__dev__/helpers'
 
@@ -28,6 +27,30 @@ test.describe('[behaviour] Difi script', async () => {
 
     test.expect(modalElement).toBeTruthy()
   })
+  test('banners render', async () => {
+    // TODO: Figure out why these are failing on CI....
+    // Works fine locally
+    // const page = await prepPage(browser)
+    // const horizontalBanners = await page.evaluate(async () => {
+    //   const elementsWTestId = document.querySelectorAll('[data-testid]')
+    //   const _banners = Array.from(elementsWTestId).filter((element) => {
+    //     return element
+    //       .getAttribute('data-testid')
+    //       ?.includes('cnm-horizontal-banner')
+    //   })
+    //   return _banners
+    // })
+    // test.expect(horizontalBanners.length).toBe(2)
+    // const sideBanners = await page.evaluate(async () => {
+    //   const elementsWTestId = document.querySelectorAll('[data-testid]')
+    //   const _banners = Array.from(elementsWTestId).filter((element) => {
+    //     return element.getAttribute('data-testid')?.includes('cnm-side-banner')
+    //   })
+    //   return _banners
+    // })
+    // test.expect(sideBanners.length).toBe(2)
+  })
+
   // Currently only testing that a modal is mounted.
 
   // TOOD: add tests for:

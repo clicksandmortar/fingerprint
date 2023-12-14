@@ -1,4 +1,4 @@
-import transcend from 'lodash/get'
+import transcend from 'lodash.get'
 
 const defualtFormatString = (val: string): string => val
 
