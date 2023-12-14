@@ -2642,7 +2642,7 @@ const DataCaptureModal = ({
   handleCloseModal,
   trigger
 }) => {
-  var _trigger$data3, _trigger$data4, _trigger$data5;
+  var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   const [hasSubmitted, setHasSubmitted] = React__default.useState(false);
   const [error, setError] = React__default.useState('');
   const [retainedHeight, setRetainedHeight] = React__default.useState(0);
@@ -2671,6 +2671,10 @@ const DataCaptureModal = ({
     log('DataCaptureModal', 'handleSubmit', 'submit', entries);
     submit(entries);
   };
+  const {
+    backgroundPrimary,
+    textPrimary
+  } = useBrandColors();
   const Wrapper = ({
     children
   }) => {
@@ -2703,7 +2707,7 @@ const DataCaptureModal = ({
     })), React__default.createElement("div", {
       style: {
         borderRadius: '10px',
-        background: 'rgba(0, 0, 0, 0.2)',
+        background: 'rgba(0, 0, 0, 0.45)',
         width: '100%',
         height: '100%',
         display: 'flex',
@@ -2713,21 +2717,20 @@ const DataCaptureModal = ({
       }
     }, children)));
   };
-  if (hasSubmitted) {
-    var _trigger$data2;
-    return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
-  }
+  if (hasSubmitted) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
   return React__default.createElement(Wrapper, null, React__default.createElement("h1", {
     style: {
       fontSize: '1.5rem',
       marginBottom: '1rem',
-      textTransform: 'uppercase'
+      textTransform: 'uppercase',
+      color: textPrimary
     }
   }, (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading), React__default.createElement("p", {
     style: {
       fontSize: '0.9rem',
       lineHeight: 1.5,
-      marginBottom: '1rem'
+      marginBottom: '1rem',
+      color: textPrimary
     }
   }, (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph), React__default.createElement(CnMForm, {
     onSubmit: handleSubmit,
@@ -2754,8 +2757,8 @@ const DataCaptureModal = ({
   })), React__default.createElement("button", {
     style: {
       marginTop: '0.7rem',
-      backgroundColor: 'white',
-      color: 'black',
+      backgroundColor: backgroundPrimary,
+      color: textPrimary,
       borderRadius: '4px',
       padding: '1rem 0.4rem',
       fontSize: '0.8rem',
@@ -2771,7 +2774,7 @@ const DataCaptureModal = ({
       fontSize: '0.9rem',
       lineHeight: 1.5,
       marginBottom: '1rem',
-      color: 'red'
+      color: '#aa2f2f'
     }
   }, error));
 };

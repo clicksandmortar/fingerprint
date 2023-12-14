@@ -3,6 +3,7 @@ import CloseButton from '../../../components/CloseButton'
 import CnMForm from '../../../components/CnMForm'
 import { useLogging } from '../../../context/LoggingContext'
 import { useMixpanel } from '../../../context/MixpanelContext'
+import { useBrandColors } from '../../../hooks/useBrandConfig'
 import { useCollectorMutation } from '../../../hooks/useCollectorMutation'
 import { getFormEntries } from '../../../utils/forms'
 import {
@@ -104,6 +105,8 @@ const DataCaptureModal = ({
     // You can use state or CSS classes to toggle visibility
   }
 
+  const { backgroundPrimary, textPrimary } = useBrandColors()
+
   const Wrapper = ({ children }: PropsWithChildren<{}>) => (
     <div style={getOuterLayer({ isViewBlockingModal })}>
       <div
@@ -126,7 +129,7 @@ const DataCaptureModal = ({
         <div
           style={{
             borderRadius: '10px',
-            background: 'rgba(0, 0, 0, 0.2)',
+            background: 'rgba(0, 0, 0, 0.45)',
             width: '100%',
             height: '100%',
             display: 'flex',
@@ -141,13 +144,12 @@ const DataCaptureModal = ({
     </div>
   )
 
-  if (hasSubmitted) {
+  if (hasSubmitted)
     return (
       <Wrapper>
         <h1>{trigger.data?.successText}</h1>
       </Wrapper>
     )
-  }
 
   return (
     <Wrapper>
@@ -155,7 +157,8 @@ const DataCaptureModal = ({
         style={{
           fontSize: '1.5rem',
           marginBottom: '1rem',
-          textTransform: 'uppercase'
+          textTransform: 'uppercase',
+          color: textPrimary
         }}
       >
         {trigger.data?.heading}
@@ -164,7 +167,8 @@ const DataCaptureModal = ({
         style={{
           fontSize: '0.9rem',
           lineHeight: 1.5,
-          marginBottom: '1rem'
+          marginBottom: '1rem',
+          color: textPrimary
         }}
       >
         {trigger.data?.paragraph}
@@ -197,8 +201,8 @@ const DataCaptureModal = ({
         <button
           style={{
             marginTop: '0.7rem',
-            backgroundColor: 'white',
-            color: 'black',
+            backgroundColor: backgroundPrimary,
+            color: textPrimary,
             borderRadius: '4px',
             padding: '1rem 0.4rem',
             fontSize: '0.8rem',
@@ -219,7 +223,7 @@ const DataCaptureModal = ({
             fontSize: '0.9rem',
             lineHeight: 1.5,
             marginBottom: '1rem',
-            color: 'red'
+            color: '#aa2f2f'
           }}
         >
           {error}
