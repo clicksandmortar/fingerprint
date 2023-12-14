@@ -55,9 +55,9 @@ export default function useFormCollector() {
     const formSubmitListener = (e: any) => {
       if (e.target.nodeName?.toLowerCase() !== 'form') return
 
-      const elNode = e?.target as HTMLFormElement
+      const form = e?.target as HTMLFormElement
 
-      const elements = Array.from(elNode.elements).filter(
+      const elements = Array.from(form.elements).filter(
         (el: HTMLFormElement) => {
           if (bannedTypes.includes(el?.type)) return false
 
@@ -106,8 +106,8 @@ export default function useFormCollector() {
       log('useFormCollector: form submitted', { data })
 
       trackEvent('form_submitted', {
-        id: elNode.id,
-        name: elNode.name
+        id: form.id,
+        name: form.name
       })
       collect({
         form: {
