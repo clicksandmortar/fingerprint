@@ -1,3 +1,4 @@
+import { BannerTrigger } from '../../behaviours/Banner/Banner.types'
 import { IncompleteTrigger, Trigger } from '../../client/types'
 
 const banner: Trigger = {
@@ -10,7 +11,7 @@ const banner: Trigger = {
   }
 }
 
-export const fakeTriggers: Trigger[] = [
+export const fakeBanners: BannerTrigger[] = [
   {
     ...banner,
     id: `position: 'left',`,
@@ -51,7 +52,11 @@ export const fakeTriggers: Trigger[] = [
       buttonText: 'CLickable thing',
       buttonIcon: 'heart'
     }
-  },
+  }
+]
+
+export const fakeTriggers: Trigger[] = [
+  ...fakeBanners,
   {
     id: 'exit-trigger-id',
     invocation: 'INVOCATION_EXIT_INTENT',

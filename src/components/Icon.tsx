@@ -59,7 +59,9 @@ export const Icon = ({ icon, ...props }: Props) => {
   const { error } = useLogging()
   const IconComponent = iconList[icon]
 
-  if (!IconComponent) {
+  if (!icon) return null
+
+  if (icon && !IconComponent) {
     error('BannerIcon: iconName is not valid')
     return null
   }

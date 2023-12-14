@@ -28,48 +28,33 @@ test.describe('[behaviour] Difi script', async () => {
     test.expect(modalElement).toBeTruthy()
   })
   test('banners render', async () => {
-    // TODO: try to test the banners. Cna't get it to work at the moment
-    // becaue of an issue with the icon handling lib - @loadable/component
+    const page = await prepPage(browser)
 
-    // const page = await getPage(browser)
+    const horizontalBanners = await page.evaluate(async () => {
+      const elementsWTestId = document.querySelectorAll('[data-testid]')
 
-    // await page.route('*/**/collector/**', async (route) => {
-    //   const fakeBanner: BannerTrigger = {
-    //     id: 'banner_1',
-    //     behaviour: 'BEHAVIOUR_BANNER',
-    //     multipleOfSameBehaviourSupported: true,
-    //     invocation: 'INVOCATION_PAGE_LOAD',
-    //     data: {
-    //       buttonURL: 'https://www.google.com',
-    //       buttonText: 'Click me!',
-    //       marketingText: 'This is a banner',
-    //       position: 'bottom'
-    //     }
-    //   }
-    //   const json: CollectorVisitorResponse = {
-    //     ...fakeCollectorResp,
-    //     pageTriggers: [fakeBanner as Trigger]
-    //   }
+      const _banners = Array.from(elementsWTestId).filter((element) => {
+        return element
+          .getAttribute('data-testid')
+          ?.includes('cnm-horizontal-banner')
+      })
 
-    //   await route.fulfill({ json })
-    // })
-    // await page.goto(testBaseURL, {
-    //   waitUntil: 'networkidle',
-    //   timeout: 60000
-    // })
+      return _banners
+    })
 
-    // const banners = await page.evaluate(async () => {
-    //   const elementsWTestId = document.querySelectorAll('[data-testid]')
+    test.expect(horizontalBanners.length).toBe(2)
 
-    //   const _banners = Array.from(elementsWTestId).filter((element) => {
-    //     return element.getAttribute('data-testid')?.includes('cnm-banner')
-    //   })
+    const sideBanners = await page.evaluate(async () => {
+      const elementsWTestId = document.querySelectorAll('[data-testid]')
 
-    //   return _banners
-    // })
+      const _banners = Array.from(elementsWTestId).filter((element) => {
+        return element.getAttribute('data-testid')?.includes('cnm-side-banner')
+      })
 
-    // test.expect(banners.length).toBe(3)
-    test.expect(true).toBe(true)
+      return _banners
+    })
+
+    test.expect(sideBanners.length).toBe(2)
   })
 
   // Currently only testing that a modal is mounted.

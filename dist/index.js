@@ -1374,8 +1374,8 @@ function CollectorProvider(_ref) {
         return null;
       }
       var isTriggerOfSameBehaviourAlreadyVisible = getIsBehaviourVisible(trigger.behaviour);
-      if (isTriggerOfSameBehaviourAlreadyVisible && !handler.multipleOfSameBehaviourSupported) {
-        log("CollectorProvider - TriggerComponent: Behaviour " + trigger.behaviour + " is visible and does NOT support multiple triggers. Not showing.", trigger.id);
+      if (!displayTriggers.includes(trigger.id) && isTriggerOfSameBehaviourAlreadyVisible && !handler.multipleOfSameBehaviourSupported) {
+        log("CollectorProvider - TriggerComponent: Behaviour " + trigger.behaviour + " (triggerId: " + trigger.id + ") is already visible and does NOT support multiple triggers. Not showing.", trigger.id);
         return null;
       }
       var potentialComponent = (_handler$invoke = handler.invoke) === null || _handler$invoke === void 0 ? void 0 : _handler$invoke.call(handler, trigger);
@@ -2030,7 +2030,8 @@ var Icon = function Icon(_ref) {
   var _useLogging = useLogging(),
     error = _useLogging.error;
   var IconComponent = iconList[icon];
-  if (!IconComponent) {
+  if (!icon) return null;
+  if (icon && !IconComponent) {
     error('BannerIcon: iconName is not valid');
     return null;
   }

@@ -105,6 +105,7 @@ export function CollectorProvider({
   const getIsBehaviourVisible = React.useCallback(
     (type: Trigger['behaviour']) => {
       if (displayTriggers.length === 0) return false
+
       if (
         displayTriggers.find(
           (triggerId) =>
@@ -290,17 +291,22 @@ export function CollectorProvider({
       )
 
       if (
+        // this check is only necessary because we run through multiple render cycles
+        // when we place a component on the page
+        !displayTriggers.includes(trigger.id) &&
+        // ---
         isTriggerOfSameBehaviourAlreadyVisible &&
         !handler.multipleOfSameBehaviourSupported
       ) {
         log(
-          `CollectorProvider - TriggerComponent: Behaviour ${trigger.behaviour} is visible and does NOT support multiple triggers. Not showing.`,
+          `CollectorProvider - TriggerComponent: Behaviour ${trigger.behaviour} (triggerId: ${trigger.id}) is already visible and does NOT support multiple triggers. Not showing.`,
           trigger.id
         )
         return null
       }
 
       const potentialComponent = handler.invoke?.(trigger)
+
       if (potentialComponent && React.isValidElement(potentialComponent)) {
         log(
           'CollectorProvider - TriggerComponent: Potential component for trigger is valid. Mounting'
