@@ -13,7 +13,7 @@ var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
 var reactDeviceDetect = require('react-device-detect');
-var transcend = _interopDefault(require('lodash/get'));
+var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
 
 function _extends() {
