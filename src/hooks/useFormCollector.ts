@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useLogging } from '../context/LoggingContext'
+import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './useCollectorMutation'
@@ -44,6 +45,7 @@ export default function useFormCollector() {
   const { mutateAsync: collect } = useCollectorMutation()
   const { visitor } = useVisitor()
   const { log } = useLogging()
+  const { trackEvent } = useMixpanel()
 
   useEffect(() => {
     if (isUndefined('document')) return
@@ -53,23 +55,25 @@ export default function useFormCollector() {
     const formSubmitListener = (e: any) => {
       if (e.target.nodeName?.toLowerCase() !== 'form') return
 
-      const a = e?.target as HTMLFormElement
+      const form = e?.target as HTMLFormElement
 
-      const elements = Array.from(a.elements).filter((b: HTMLFormElement) => {
-        if (bannedTypes.includes(b?.type)) return false
+      const elements = Array.from(form.elements).filter(
+        (el: HTMLFormElement) => {
+          if (bannedTypes.includes(el?.type)) return false
 
-        if (
-          bannedFieldPartialNames.find((partialName) => {
-            if (stringIsSubstringOf(b.name, partialName)) return true
-            if (stringIsSubstringOf(b.id, partialName)) return true
-            if (stringIsSubstringOf(b.placeholder, partialName)) return true
+          if (
+            bannedFieldPartialNames.find((partialName) => {
+              if (stringIsSubstringOf(el.name, partialName)) return true
+              if (stringIsSubstringOf(el.id, partialName)) return true
+              if (stringIsSubstringOf(el.placeholder, partialName)) return true
+              return false
+            })
+          )
             return false
-          })
-        )
-          return false
 
-        return true
-      })
+          return true
+        }
+      )
 
       const data = elements.reduce((result: any, item: any) => {
         let fieldName = item.name
@@ -101,6 +105,10 @@ export default function useFormCollector() {
 
       log('useFormCollector: form submitted', { data })
 
+      trackEvent('form_submitted', {
+        id: form.id,
+        name: form.name
+      })
       collect({
         form: {
           data
