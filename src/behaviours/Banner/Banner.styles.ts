@@ -18,6 +18,9 @@ export const useBannerStyles = () => {
       fontWeight: 400,
       fontSize: '1rem'
     },
+    iconContainer: {
+      marginLeft: 5
+    },
     button: {
       border: 'none',
       color: textPrimary,

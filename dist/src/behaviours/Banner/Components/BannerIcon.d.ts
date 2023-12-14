@@ -1,7 +1,7 @@
 import React from 'react';
-import { IconProps } from '../../../components/Icon/Icon';
+import { Icon, IconProps } from '../../../components/Icon';
 declare type Props = {
-    iconName?: string;
+    iconName?: Icon;
     IconProps?: IconProps;
 };
 declare const BannerIcon: ({ iconName, IconProps }: Props) => React.JSX.Element | null;

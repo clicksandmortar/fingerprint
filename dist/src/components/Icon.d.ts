@@ -1,8 +1,11 @@
 import React from 'react';
-import { IconBaseProps } from 'react-icons/lib';
-declare type typesPropsIcon = {
-    icon: string;
-} & IconBaseProps;
-export declare function IcomEl({ icon, ...props }: typesPropsIcon): JSX.Element;
-export declare const Icon: React.MemoExoticComponent<typeof IcomEl>;
+export declare type Icon = 'exclamation' | 'ticket' | 'heart';
+export declare type IconProps = Omit<React.HTMLProps<SVGElement>, 'ref'> & {
+    fill?: string;
+};
+export declare const iconList: Record<Icon, React.FC>;
+declare type Props = {
+    icon: Icon;
+} & IconProps;
+export declare const Icon: ({ icon, ...props }: Props) => React.JSX.Element | null;
 export {};

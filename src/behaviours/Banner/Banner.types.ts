@@ -1,5 +1,5 @@
 import { Trigger } from '../../client/types'
-import { IconName } from '../../components/Icon/Icon.types'
+import { Icon } from '../../components/Icon'
 import { Position } from './utils'
 
 export type BannerTrigger = Omit<Trigger, 'data'> & {
@@ -10,7 +10,7 @@ export type BannerTrigger = Omit<Trigger, 'data'> & {
     buttonText?: string
     // can be anything else in the furture, or dynamic. adjust as needed
     countdownEndTime?: string
-    buttonIcon?: IconName
+    buttonIcon?: Icon
   }
 }
 

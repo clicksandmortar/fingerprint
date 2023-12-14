@@ -13,6 +13,9 @@ export declare const useBannerStyles: () => {
         fontWeight: number;
         fontSize: string;
     };
+    iconContainer: {
+        marginLeft: number;
+    };
     button: {
         border: string;
         color: string;

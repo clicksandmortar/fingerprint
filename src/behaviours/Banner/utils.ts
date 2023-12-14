@@ -32,11 +32,8 @@ export const useBannerContainerStyles = ({
 }) => {
   const position = trigger.data?.position as Position
   const isFullyClickable = getIsBannerFullyClickable(trigger)
-  const { backgroundPrimary, textPrimary } = useBrandColors()
 
-  // since the rotation position is pivoting around a corner, we need to calculate
-  // the width of the container and then use that to offset the translate slightly to center it properly
-  const offset = 0.5 * width + 0.5 * height
+  const { backgroundPrimary, textPrimary } = useBrandColors()
 
   const mutualStyles: React.CSSProperties = {
     fontFamily: 'sans-serif',
@@ -48,6 +45,10 @@ export const useBannerContainerStyles = ({
     backgroundColor: backgroundPrimary,
     cursor: isFullyClickable ? 'pointer' : 'default'
   }
+
+  // since the rotation position is pivoting around a corner, we need to calculate
+  // the width of the container and then use that to offset the translate slightly to center it properly
+  const offset = 0.5 * width + 0.5 * height
 
   switch (position) {
     case 'left':

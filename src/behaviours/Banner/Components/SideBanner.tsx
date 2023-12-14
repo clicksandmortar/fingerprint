@@ -12,7 +12,7 @@ import BannerIcon from './BannerIcon'
 const SideBanner = ({ handleAction, handleClose, trigger }: BannerProps) => {
   const container = useRef<HTMLDivElement | null>(null)
   const isFullyClickable = getIsBannerFullyClickable(trigger)
-
+  const shouldRenderIcon = !!trigger.data?.buttonIcon
   const canBeDismissed = getCanBeDismissed()
   const styles = useBannerStyles()
 
@@ -34,7 +34,11 @@ const SideBanner = ({ handleAction, handleClose, trigger }: BannerProps) => {
         onClick={isFullyClickable ? handleAction : undefined}
         style={styles.contentContainer}
       >
-        <BannerIcon iconName={trigger.data?.buttonIcon} />
+        {shouldRenderIcon && (
+          <div style={styles.iconContainer}>
+            <BannerIcon iconName={trigger.data?.buttonIcon} />
+          </div>
+        )}
 
         <span style={styles.text}>{trigger.data?.buttonText}</span>
       </div>
