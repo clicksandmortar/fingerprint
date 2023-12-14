@@ -24,6 +24,8 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Setup
+        run: yarn build:fingerprint
+      - name: Setup
         run: yarn install
       - name: Setup Browsers
         run: npx playwright install
