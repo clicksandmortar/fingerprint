@@ -8,8 +8,8 @@ import {
   getIsModalFullyClickable,
   prependClass,
   useModalDimensionsBasedOnImage
-} from './helpers'
-import { ModalProps } from './Modal.types'
+} from '../helpers'
+import { ModalProps } from '../Modal.types'
 
 const StandardModal = ({
   trigger,

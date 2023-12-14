@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { Trigger } from '../../../client/types'
 import CloseButton from '../../../components/CloseButton'
-import { prependClass, useModalDimensionsBasedOnImage } from './helpers'
+import { prependClass, useModalDimensionsBasedOnImage } from '../helpers'
 
 type Props = {
   handleClickCallToAction: (e: any) => void

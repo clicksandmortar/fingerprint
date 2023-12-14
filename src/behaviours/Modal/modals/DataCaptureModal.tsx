@@ -9,7 +9,7 @@ import {
   DataCaptureModalField,
   DataCaptureTrigger,
   ModalProps
-} from './Modal.types'
+} from '../Modal.types'
 
 // TODO: switch this to true to make the modal appear on the right and non-block :)
 // Eventually we want to move it to Portal and make it dynamic

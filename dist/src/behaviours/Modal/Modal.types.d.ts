@@ -1,4 +1,4 @@
-import { Trigger } from '../../../client/types';
+import { Trigger } from '../../client/types';
 export declare type ModalProps<T = Trigger> = {
     trigger: T;
     handleClickCallToAction: (e: any) => void;

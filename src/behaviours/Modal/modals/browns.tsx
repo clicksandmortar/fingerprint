@@ -3,8 +3,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../../../client/types'
 import CloseButton from '../../../components/CloseButton'
+import { getIsModalFullyClickable } from '../helpers'
 import FullyClickableModal from './FullyClickableModal'
-import { getIsModalFullyClickable } from './helpers'
 
 type Props = {
   trigger: Trigger

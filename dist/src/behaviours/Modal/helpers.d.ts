@@ -1,6 +1,6 @@
 /// <reference types="react" />
-import { Trigger } from '../../../client/types';
-import { DataCaptureTrigger } from '../Modal.types';
+import { Trigger } from '../../client/types';
+import { DataCaptureTrigger } from './Modal.types';
 export declare const randomHash: string;
 export declare const prependClass: (className: string) => string;
 export declare const getIsModalFullyClickable: ({ trigger }: {

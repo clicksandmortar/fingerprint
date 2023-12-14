@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { v4 as uuidv4 } from 'uuid'
-import { Trigger } from '../../../client/types'
+import { Trigger } from '../../client/types'
 import { DataCaptureTrigger } from './Modal.types'
 
 export const randomHash = 'f' + uuidv4().split('-')[0]
