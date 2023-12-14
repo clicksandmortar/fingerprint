@@ -72,6 +72,11 @@ export const prepPage = async (browser: Browser) => {
 
     await route.fulfill({ json })
   })
+  await page.route('*/**/seen/**', async (route) => {
+    const json = fakeCollectorResp
+
+    await route.fulfill({ json })
+  })
 
   await page.goto(testBaseURL, {
     waitUntil: 'networkidle',

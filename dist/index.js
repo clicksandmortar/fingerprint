@@ -2052,7 +2052,7 @@ var BannerIcon = function BannerIcon(_ref) {
   return React__default.createElement(Icon, Object.assign({
     icon: iconName,
     height: 16,
-    width: 'auto',
+    width: 16,
     fill: textPrimary
   }, IconProps));
 };
