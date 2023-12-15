@@ -4,6 +4,7 @@ import { isMobile } from 'react-device-detect'
 import CloseButton from '../../../components/CloseButton'
 import { useLogging } from '../../../context/LoggingContext'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
+import useCountdown from '../../../hooks/useCountdown'
 import {
   getIsModalFullyClickable,
   prependClass,
@@ -257,6 +258,32 @@ const StandardModal = ({
     [handleCloseModal]
   )
 
+  // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
+  const { formattedCountdown: heading } = useCountdown({
+    onZero: () => handleCloseModal({}),
+    initialTimestamp: trigger.data?.countdownEndTime
+      ? new Date(trigger.data?.countdownEndTime || '')
+      : undefined,
+
+    interpolate: {
+      text: trigger.data?.heading || '',
+      structure: trigger.data as Record<string, unknown>
+    }
+  })
+
+  // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
+  const { formattedCountdown: paragraph } = useCountdown({
+    onZero: () => handleCloseModal({}),
+    initialTimestamp: trigger.data?.countdownEndTime
+      ? new Date(trigger.data?.countdownEndTime || '')
+      : undefined,
+
+    interpolate: {
+      text: trigger.data?.heading || '',
+      structure: trigger.data as Record<string, unknown>
+    }
+  })
+
   if (!stylesLoaded) {
     return null
   }
@@ -287,12 +314,8 @@ const StandardModal = ({
           </div>
 
           <div className={prependClass('text-container')}>
-            <h1 className={prependClass('main-text')}>
-              {trigger?.data?.heading}
-            </h1>
-            <p className={prependClass('sub-text')}>
-              {trigger?.data?.paragraph}
-            </p>
+            <h1 className={prependClass('main-text')}>{heading}</h1>
+            <p className={prependClass('sub-text')}>{paragraph}</p>
           </div>
 
           {!isModalFullyClickable && (

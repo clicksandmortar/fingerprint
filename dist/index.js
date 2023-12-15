@@ -2611,7 +2611,7 @@ var BrownsModal = function BrownsModal(props) {
 };
 
 var StandardModal = function StandardModal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6, _trigger$data7, _trigger$data8, _trigger$data9;
   var trigger = _ref.trigger,
     handleClickCallToAction = _ref.handleClickCallToAction,
     handleCloseModal = _ref.handleCloseModal;
@@ -2664,6 +2664,28 @@ var StandardModal = function StandardModal(_ref) {
     e.stopPropagation();
     return handleCloseModal(e);
   }, [handleCloseModal]);
+  var _useCountdown = useCountdown({
+      onZero: function onZero() {
+        return handleCloseModal({});
+      },
+      initialTimestamp: (_trigger$data2 = trigger.data) !== null && _trigger$data2 !== void 0 && _trigger$data2.countdownEndTime ? new Date(((_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.countdownEndTime) || '') : undefined,
+      interpolate: {
+        text: ((_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading) || '',
+        structure: trigger.data
+      }
+    }),
+    heading = _useCountdown.formattedCountdown;
+  var _useCountdown2 = useCountdown({
+      onZero: function onZero() {
+        return handleCloseModal({});
+      },
+      initialTimestamp: (_trigger$data5 = trigger.data) !== null && _trigger$data5 !== void 0 && _trigger$data5.countdownEndTime ? new Date(((_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.countdownEndTime) || '') : undefined,
+      interpolate: {
+        text: ((_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.heading) || '',
+        structure: trigger.data
+      }
+    }),
+    paragraph = _useCountdown2.formattedCountdown;
   if (!stylesLoaded) {
     return null;
   }
@@ -2693,22 +2715,22 @@ var StandardModal = function StandardModal(_ref) {
     className: prependClass('text-container')
   }, React__default.createElement("h1", {
     className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+  }, heading), React__default.createElement("p", {
     className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
+  }, paragraph)), !isModalFullyClickable && React__default.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'flex-end'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data8 = trigger.data) === null || _trigger$data8 === void 0 ? void 0 : _trigger$data8.buttonURL,
     className: prependClass('cta'),
     onClick: handleClickCallToAction,
     style: {
       fontSize: '1.3rem',
       padding: '0.3rem 1rem'
     }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data9 = trigger.data) === null || _trigger$data9 === void 0 ? void 0 : _trigger$data9.buttonText))))));
 };
 
 var primaryColor = "rgb(33,147,174)";
