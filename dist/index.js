@@ -2296,6 +2296,28 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
   var ref = React__default.useRef(null);
   var _useCollector = useCollector(),
     removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useState = React.useState(null),
+    invocationTimeStamp = _useState[0],
+    setInvocationTimeStamp = _useState[1];
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSuccess = _useSeenMutation.isSuccess,
+    isLoading = _useSeenMutation.isLoading;
+  React.useEffect(function () {
+    if (!open) return;
+    if (invocationTimeStamp) return;
+    if (isSuccess) return;
+    if (isLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+      if (!invocationTimeStamp) {
+        setInvocationTimeStamp(new Date().toISOString());
+      }
+    }, 500);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
   var handleCloseModal = function handleCloseModal() {
     removeActiveTrigger(trigger.id);
     if (!hasSubmitted) trackEvent('user_closed_trigger', trigger);

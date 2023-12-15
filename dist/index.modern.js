@@ -2186,6 +2186,27 @@ const DataCaptureModal = ({
   const {
     removeActiveTrigger
   } = useCollector();
+  const [invocationTimeStamp, setInvocationTimeStamp] = useState(null);
+  const {
+    mutate: runSeen,
+    isSuccess,
+    isLoading
+  } = useSeenMutation();
+  useEffect(() => {
+    if (!open) return;
+    if (invocationTimeStamp) return;
+    if (isSuccess) return;
+    if (isLoading) return;
+    const tId = setTimeout(() => {
+      runSeen(trigger);
+      if (!invocationTimeStamp) {
+        setInvocationTimeStamp(new Date().toISOString());
+      }
+    }, 500);
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
   const handleCloseModal = () => {
     removeActiveTrigger(trigger.id);
     if (!hasSubmitted) trackEvent('user_closed_trigger', trigger);

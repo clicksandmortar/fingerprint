@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from 'react'
+import React, { PropsWithChildren, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import CloseButton from '../../../components/CloseButton'
 import CnMForm from '../../../components/CnMForm'
@@ -7,6 +7,7 @@ import { useMixpanel } from '../../../context/MixpanelContext'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
 import { useCollector } from '../../../hooks/useCollector'
 import { useCollectorMutation } from '../../../hooks/useCollectorMutation'
+import { useSeenMutation } from '../../../hooks/useSeenMutation'
 import { getFormEntries } from '../../../utils/forms'
 import { DataCaptureModalField, DataCaptureTrigger } from '../Modal.types'
 
@@ -75,6 +76,31 @@ const DataCaptureModal = ({ trigger }: Props) => {
   const { log } = useLogging()
   const ref = React.useRef<HTMLDivElement>(null)
   const { removeActiveTrigger } = useCollector()
+
+  const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
+    null
+  )
+  const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
+
+  useEffect(() => {
+    if (!open) return
+    if (invocationTimeStamp) return
+    if (isSuccess) return
+    if (isLoading) return
+
+    // seen gets called multiple times since Collector currently
+    // like to over-rerender componets. This timeout prevents from firing a ton
+    const tId = setTimeout(() => {
+      runSeen(trigger)
+      if (!invocationTimeStamp) {
+        setInvocationTimeStamp(new Date().toISOString())
+      }
+    }, 500)
+
+    return () => {
+      clearTimeout(tId)
+    }
+  }, [open, isSuccess, isLoading])
 
   const handleCloseModal = () => {
     removeActiveTrigger(trigger.id)
