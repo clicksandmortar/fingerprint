@@ -324,37 +324,3 @@ const StandardModal = ({
 }
 
 export default StandardModal
-
-// type ModalWrapperProps = {
-//   handleClose: (e: any) => void
-//   handleClickCTA: (e: any) => void
-//   trigger: Trigger
-// }
-// const ModalWrapper = ({handleClose, handleClickCTA, trigger, children }: ModalWrapperProps)=>{
-//   const {imageURL} = trigger?.data
-
-//   return <div className={prependClass('overlay')}>
-//   <div
-//     onClick={handleClickCTA}
-//     className={prependClass('modal')}
-//     style={{
-//       background: `url(${imageURL})`,
-//       backgroundPosition: 'center',
-//       backgroundRepeat: 'no-repeat',
-//       backgroundSize: 'cover',
-//       position: 'relative'
-//     }}
-//   >
-//     <div className={prependClass('image-darken')}>
-//       <div className={prependClass('close-button')}>
-//         <CloseButton onClick={handleClose} />
-//       </div>
-
-//       <div className={prependClass('text-container')}>
-//         {content}
-//       </div>
-//       </div>
-//     </div>
-//     </div>
-//     )
-// }
