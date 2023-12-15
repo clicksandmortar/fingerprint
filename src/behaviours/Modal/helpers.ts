@@ -77,6 +77,7 @@ export const isModalDataCaptureModal = (
 ): trigger is DataCaptureTrigger => {
   if (!trigger) return false
   if (!trigger.data) return false
+
   // TODO: currently uses the presense of successText to determine if it's a data capture modal
   // if this becomes a new behaviours, we should address this
   if (!trigger.data.successText) return false

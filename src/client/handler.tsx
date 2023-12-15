@@ -1,6 +1,8 @@
 import React from 'react'
 import { BannerTrigger } from '../behaviours/Banner/Banner.types'
 import { TriggerBanner } from '../behaviours/Banner/TriggerBanner'
+import { isModalDataCaptureModal } from '../behaviours/Modal/helpers'
+import DataCaptureModal from '../behaviours/Modal/modals/DataCaptureModal'
 import { TriggerModal } from '../behaviours/Modal/TriggerModal'
 import TriggerInverse from '../behaviours/TriggerInverse'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'
@@ -18,9 +20,13 @@ export const clientHandlers: ClientTrigger[] = [
     id: 'modal_v1',
     behaviour: 'BEHAVIOUR_MODAL',
     multipleOfSameBehaviourSupported: false,
-    invoke: (trigger: Trigger) => (
-      <TriggerModal key={trigger.id} trigger={trigger} />
-    )
+    invoke: (trigger: Trigger) => {
+      // TODO: this should become a separate handler / behaviour in the future?
+      if (isModalDataCaptureModal(trigger))
+        return <DataCaptureModal trigger={trigger} />
+
+      return <TriggerModal key={trigger.id} trigger={trigger} />
+    }
   },
   {
     id: 'youtube_v1',

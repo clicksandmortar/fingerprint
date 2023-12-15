@@ -1,16 +1,14 @@
 import React, { PropsWithChildren } from 'react'
+import ReactDOM from 'react-dom'
 import CloseButton from '../../../components/CloseButton'
 import CnMForm from '../../../components/CnMForm'
 import { useLogging } from '../../../context/LoggingContext'
 import { useMixpanel } from '../../../context/MixpanelContext'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
+import { useCollector } from '../../../hooks/useCollector'
 import { useCollectorMutation } from '../../../hooks/useCollectorMutation'
 import { getFormEntries } from '../../../utils/forms'
-import {
-  DataCaptureModalField,
-  DataCaptureTrigger,
-  ModalProps
-} from '../Modal.types'
+import { DataCaptureModalField, DataCaptureTrigger } from '../Modal.types'
 
 // TODO: switch this to true to make the modal appear on the right and non-block :)
 // Eventually we want to move it to Portal and make it dynamic
@@ -66,18 +64,26 @@ const getOuterLayer = ({
     transform: 'translateY(-50%)'
   }
 }
+type Props = { trigger: DataCaptureTrigger }
 
-const DataCaptureModal = ({
-  handleCloseModal,
-  trigger
-}: Omit<ModalProps<DataCaptureTrigger>, 'handleClickCallToAction'>) => {
+const DataCaptureModal = ({ trigger }: Props) => {
   const [hasSubmitted, setHasSubmitted] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string>('')
   const [retainedHeight, setRetainedHeight] = React.useState<number>(0)
-  const { log } = useLogging()
-  const ref = React.useRef<HTMLDivElement>(null)
 
   const { trackEvent } = useMixpanel()
+  const { log } = useLogging()
+  const ref = React.useRef<HTMLDivElement>(null)
+  const { removeActiveTrigger } = useCollector()
+
+  const handleCloseModal = () => {
+    removeActiveTrigger(trigger.id)
+
+    if (!hasSubmitted) trackEvent('user_closed_trigger', trigger)
+    // Enable this if we find value in tracking the "close after submission"
+    // else trackEvent('user_dismissed_trigger_after_conversion', trigger)
+  }
+
   const { mutate: submit } = useCollectorMutation()
 
   const handleSubmit = (e: any) => {
@@ -89,7 +95,8 @@ const DataCaptureModal = ({
 
     const entries = getFormEntries(e.target)
 
-    trackEvent('user_submitted_data_capture', entries)
+    trackEvent('user_submitted_data_capture', trigger)
+
     const haveAllRequiredFieldsBeenSubmitted = fields.every((field) => {
       return e.target[field.name].value
     })
@@ -233,4 +240,11 @@ const DataCaptureModal = ({
   )
 }
 
-export default DataCaptureModal
+// TODO: rethink. we can potentially get rid of portals entirely in this app, since the styling is
+// position: fixed/absolute in all cases anyway. Keeping for now since we know it works
+export default ({ trigger }: Props) => {
+  return ReactDOM.createPortal(
+    <DataCaptureModal trigger={trigger} />,
+    document.body
+  )
+}

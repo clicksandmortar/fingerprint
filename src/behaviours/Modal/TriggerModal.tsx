@@ -7,10 +7,8 @@ import { useBrand } from '../../hooks/useBrandConfig'
 import { useCollector } from '../../hooks/useCollector'
 import { useCollectorMutation } from '../../hooks/useCollectorMutation'
 import { useSeenMutation } from '../../hooks/useSeenMutation'
-import { isModalDataCaptureModal } from './helpers'
 import { HandleCloseOptions } from './Modal.types'
 import { BrownsModal } from './modals/browns'
-import DataCaptureModal from './modals/DataCaptureModal'
 import CnMStandardModal from './modals/StandardModal'
 import StonehouseModal from './modals/stonehouse'
 
@@ -25,8 +23,6 @@ const Modal = ({ trigger }: Props) => {
   const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
     null
   )
-
-  const isEmailCaptureModal = isModalDataCaptureModal(trigger)
 
   const { mutate: collect } = useCollectorMutation()
 
@@ -84,16 +80,12 @@ const Modal = ({ trigger }: Props) => {
     trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
   }
 
-  if (isEmailCaptureModal)
-    return (
-      <DataCaptureModal trigger={trigger} handleCloseModal={handleCloseModal} />
-    )
-
   const modalProps = {
     trigger: trigger,
     handleClickCallToAction: handleClickCallToAction,
     handleCloseModal: handleCloseModal
   }
+
   switch (brand) {
     // NOTE: these are just temp for go-live, soon we will combine all of these into one modal
     // with support for all underlying behaviours + potential scale config

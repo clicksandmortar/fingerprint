@@ -1,4 +1,7 @@
 import React from 'react';
-import { DataCaptureTrigger, ModalProps } from '../Modal.types';
-declare const DataCaptureModal: ({ handleCloseModal, trigger }: Omit<ModalProps<DataCaptureTrigger>, 'handleClickCallToAction'>) => React.JSX.Element;
-export default DataCaptureModal;
+import { DataCaptureTrigger } from '../Modal.types';
+declare type Props = {
+    trigger: DataCaptureTrigger;
+};
+declare const _default: ({ trigger }: Props) => React.ReactPortal;
+export default _default;

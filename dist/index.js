@@ -2237,6 +2237,200 @@ var isModalDataCaptureModal = function isModalDataCaptureModal(trigger) {
   return true;
 };
 
+var isViewBlockingModal = false;
+var fields = [{
+  name: 'name',
+  label: 'Name',
+  type: 'text',
+  required: true
+}, {
+  name: 'phone',
+  label: 'Phone',
+  type: 'text',
+  required: false
+}, {
+  name: 'email',
+  label: 'Email',
+  type: 'email',
+  required: true
+}];
+var getOuterLayer = function getOuterLayer(_ref) {
+  var isViewBlockingModal = _ref.isViewBlockingModal;
+  if (isViewBlockingModal) {
+    return {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      zIndex: 999,
+      display: 'grid',
+      placeContent: 'center'
+    };
+  }
+  return {
+    zIndex: 999,
+    position: 'fixed',
+    right: '3vw',
+    top: '50%',
+    transform: 'translateY(-50%)'
+  };
+};
+var DataCaptureModal = function DataCaptureModal(_ref2) {
+  var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref2.trigger;
+  var _React$useState = React__default.useState(false),
+    hasSubmitted = _React$useState[0],
+    setHasSubmitted = _React$useState[1];
+  var _React$useState2 = React__default.useState(''),
+    error = _React$useState2[0],
+    setError = _React$useState2[1];
+  var _React$useState3 = React__default.useState(0),
+    retainedHeight = _React$useState3[0],
+    setRetainedHeight = _React$useState3[1];
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var ref = React__default.useRef(null);
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var handleCloseModal = function handleCloseModal() {
+    removeActiveTrigger(trigger.id);
+    if (!hasSubmitted) trackEvent('user_closed_trigger', trigger);
+  };
+  var _useCollectorMutation = useCollectorMutation(),
+    submit = _useCollectorMutation.mutate;
+  var handleSubmit = function handleSubmit(e) {
+    var _ref$current;
+    e.preventDefault();
+    setRetainedHeight(((_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.clientHeight) || 0);
+    setError('');
+    setHasSubmitted(true);
+    var entries = getFormEntries(e.target);
+    trackEvent('user_submitted_data_capture', trigger);
+    var haveAllRequiredFieldsBeenSubmitted = fields.every(function (field) {
+      return e.target[field.name].value;
+    });
+    if (!haveAllRequiredFieldsBeenSubmitted) setError('Please make sure all required fields are filled in.');
+    log('DataCaptureModal', 'handleSubmit', 'submit', entries);
+    submit(entries);
+  };
+  var _useBrandColors = useBrandColors(),
+    backgroundPrimary = _useBrandColors.backgroundPrimary,
+    textPrimary = _useBrandColors.textPrimary;
+  var Wrapper = function Wrapper(_ref3) {
+    var _trigger$data;
+    var children = _ref3.children;
+    return React__default.createElement("div", {
+      style: getOuterLayer({
+        isViewBlockingModal: isViewBlockingModal
+      })
+    }, React__default.createElement("div", {
+      ref: ref,
+      style: {
+        height: retainedHeight || undefined,
+        background: "url(" + ((_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        borderRadius: '16px',
+        width: '400px',
+        maxWidth: '94vw',
+        position: 'relative'
+      }
+    }, React__default.createElement("div", {
+      style: {
+        position: 'absolute',
+        top: 5,
+        right: 5
+      }
+    }, React__default.createElement(CloseButton, {
+      onClick: handleCloseModal
+    })), React__default.createElement("div", {
+      style: {
+        borderRadius: '10px',
+        background: 'rgba(0, 0, 0, 0.45)',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '2rem'
+      }
+    }, children)));
+  };
+  if (hasSubmitted) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
+  return React__default.createElement(Wrapper, null, React__default.createElement("h1", {
+    style: {
+      fontSize: '1.5rem',
+      marginBottom: '1rem',
+      textTransform: 'uppercase',
+      color: textPrimary
+    }
+  }, (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading), React__default.createElement("p", {
+    style: {
+      fontSize: '0.9rem',
+      lineHeight: 1.5,
+      marginBottom: '1rem',
+      color: textPrimary
+    }
+  }, (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph), React__default.createElement(CnMForm, {
+    onSubmit: handleSubmit,
+    style: {
+      display: 'grid'
+    },
+    id: trigger.id
+  }, fields.map(function (field) {
+    return React__default.createElement("input", {
+      key: field.name,
+      name: field.name,
+      placeholder: field.label + (field.required ? ' *' : ''),
+      type: field.type,
+      required: field.required,
+      style: {
+        backgroundColor: 'white',
+        color: '#222',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        padding: '1rem 0.4rem',
+        fontSize: '0.8rem',
+        outline: 'none',
+        marginBottom: '0.4rem'
+      }
+    });
+  }), React__default.createElement("button", {
+    style: {
+      marginTop: '0.7rem',
+      backgroundColor: backgroundPrimary,
+      color: textPrimary,
+      borderRadius: '4px',
+      padding: '1rem 0.4rem',
+      fontSize: '0.8rem',
+      outline: 'none',
+      cursor: 'pointer',
+      border: 'none',
+      letterSpacing: '0.05rem',
+      textTransform: 'uppercase'
+    },
+    type: 'submit'
+  }, (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)), error && React__default.createElement("p", {
+    style: {
+      fontSize: '0.9rem',
+      lineHeight: 1.5,
+      marginBottom: '1rem',
+      color: '#aa2f2f'
+    }
+  }, error));
+};
+var DataCaptureModal$1 = (function (_ref4) {
+  var trigger = _ref4.trigger;
+  return ReactDOM.createPortal(React__default.createElement(DataCaptureModal, {
+    trigger: trigger
+  }), document.body);
+});
+
 var FullyClickableModal = function FullyClickableModal(_ref) {
   var _trigger$data;
   var handleClickCallToAction = _ref.handleClickCallToAction,
@@ -2392,189 +2586,6 @@ var BrownsModal = function BrownsModal(props) {
   });
   if (!isFullyClickable) return React__default.createElement(BrownsCustomModal, Object.assign({}, props));
   return React__default.createElement(FullyClickableModal, Object.assign({}, props));
-};
-
-var isViewBlockingModal = false;
-var fields = [{
-  name: 'name',
-  label: 'Name',
-  type: 'text',
-  required: true
-}, {
-  name: 'phone',
-  label: 'Phone',
-  type: 'text',
-  required: false
-}, {
-  name: 'email',
-  label: 'Email',
-  type: 'email',
-  required: true
-}];
-var getOuterLayer = function getOuterLayer(_ref) {
-  var isViewBlockingModal = _ref.isViewBlockingModal;
-  if (isViewBlockingModal) {
-    return {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      zIndex: 999,
-      display: 'grid',
-      placeContent: 'center'
-    };
-  }
-  return {
-    zIndex: 999,
-    position: 'fixed',
-    right: '3vw',
-    top: '50%',
-    transform: 'translateY(-50%)'
-  };
-};
-var DataCaptureModal = function DataCaptureModal(_ref2) {
-  var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var handleCloseModal = _ref2.handleCloseModal,
-    trigger = _ref2.trigger;
-  var _React$useState = React__default.useState(false),
-    hasSubmitted = _React$useState[0],
-    setHasSubmitted = _React$useState[1];
-  var _React$useState2 = React__default.useState(''),
-    error = _React$useState2[0],
-    setError = _React$useState2[1];
-  var _React$useState3 = React__default.useState(0),
-    retainedHeight = _React$useState3[0],
-    setRetainedHeight = _React$useState3[1];
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  var ref = React__default.useRef(null);
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
-  var _useCollectorMutation = useCollectorMutation(),
-    submit = _useCollectorMutation.mutate;
-  var handleSubmit = function handleSubmit(e) {
-    var _ref$current;
-    e.preventDefault();
-    setRetainedHeight(((_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.clientHeight) || 0);
-    setError('');
-    setHasSubmitted(true);
-    var entries = getFormEntries(e.target);
-    trackEvent('user_submitted_data_capture', entries);
-    var haveAllRequiredFieldsBeenSubmitted = fields.every(function (field) {
-      return e.target[field.name].value;
-    });
-    if (!haveAllRequiredFieldsBeenSubmitted) setError('Please make sure all required fields are filled in.');
-    log('DataCaptureModal', 'handleSubmit', 'submit', entries);
-    submit(entries);
-  };
-  var _useBrandColors = useBrandColors(),
-    backgroundPrimary = _useBrandColors.backgroundPrimary,
-    textPrimary = _useBrandColors.textPrimary;
-  var Wrapper = function Wrapper(_ref3) {
-    var _trigger$data;
-    var children = _ref3.children;
-    return React__default.createElement("div", {
-      style: getOuterLayer({
-        isViewBlockingModal: isViewBlockingModal
-      })
-    }, React__default.createElement("div", {
-      ref: ref,
-      style: {
-        height: retainedHeight || undefined,
-        background: "url(" + ((_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'cover',
-        borderRadius: '16px',
-        width: '400px',
-        maxWidth: '94vw',
-        position: 'relative'
-      }
-    }, React__default.createElement("div", {
-      style: {
-        position: 'absolute',
-        top: 5,
-        right: 5
-      }
-    }, React__default.createElement(CloseButton, {
-      onClick: handleCloseModal
-    })), React__default.createElement("div", {
-      style: {
-        borderRadius: '10px',
-        background: 'rgba(0, 0, 0, 0.45)',
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '2rem'
-      }
-    }, children)));
-  };
-  if (hasSubmitted) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
-  return React__default.createElement(Wrapper, null, React__default.createElement("h1", {
-    style: {
-      fontSize: '1.5rem',
-      marginBottom: '1rem',
-      textTransform: 'uppercase',
-      color: textPrimary
-    }
-  }, (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading), React__default.createElement("p", {
-    style: {
-      fontSize: '0.9rem',
-      lineHeight: 1.5,
-      marginBottom: '1rem',
-      color: textPrimary
-    }
-  }, (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph), React__default.createElement(CnMForm, {
-    onSubmit: handleSubmit,
-    style: {
-      display: 'grid'
-    },
-    id: trigger.id
-  }, fields.map(function (field) {
-    return React__default.createElement("input", {
-      key: field.name,
-      name: field.name,
-      placeholder: field.label + (field.required ? ' *' : ''),
-      type: field.type,
-      required: field.required,
-      style: {
-        backgroundColor: 'white',
-        color: '#222',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
-        padding: '1rem 0.4rem',
-        fontSize: '0.8rem',
-        outline: 'none',
-        marginBottom: '0.4rem'
-      }
-    });
-  }), React__default.createElement("button", {
-    style: {
-      marginTop: '0.7rem',
-      backgroundColor: backgroundPrimary,
-      color: textPrimary,
-      borderRadius: '4px',
-      padding: '1rem 0.4rem',
-      fontSize: '0.8rem',
-      outline: 'none',
-      cursor: 'pointer',
-      border: 'none',
-      letterSpacing: '0.05rem',
-      textTransform: 'uppercase'
-    },
-    type: 'submit'
-  }, (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)), error && React__default.createElement("p", {
-    style: {
-      fontSize: '0.9rem',
-      lineHeight: 1.5,
-      marginBottom: '1rem',
-      color: '#aa2f2f'
-    }
-  }, error));
 };
 
 var StandardModal = function StandardModal(_ref) {
@@ -2794,7 +2805,6 @@ var Modal = function Modal(_ref) {
   var _useState2 = React.useState(null),
     invocationTimeStamp = _useState2[0],
     setInvocationTimeStamp = _useState2[1];
-  var isEmailCaptureModal = isModalDataCaptureModal(trigger);
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutate;
   var brand = useBrand();
@@ -2838,10 +2848,6 @@ var Modal = function Modal(_ref) {
     trackEvent('user_clicked_button', trigger);
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
-  if (isEmailCaptureModal) return React__default.createElement(DataCaptureModal, {
-    trigger: trigger,
-    handleCloseModal: handleCloseModal
-  });
   var modalProps = {
     trigger: trigger,
     handleClickCallToAction: handleClickCallToAction,
@@ -3189,6 +3195,9 @@ var clientHandlers = [{
   behaviour: 'BEHAVIOUR_MODAL',
   multipleOfSameBehaviourSupported: false,
   invoke: function invoke(trigger) {
+    if (isModalDataCaptureModal(trigger)) return React__default.createElement(DataCaptureModal$1, {
+      trigger: trigger
+    });
     return React__default.createElement(TriggerModal, {
       key: trigger.id,
       trigger: trigger
