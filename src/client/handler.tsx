@@ -23,7 +23,7 @@ export const clientHandlers: ClientTrigger[] = [
     invoke: (trigger: Trigger) => {
       // TODO: this should become a separate handler / behaviour in the future?
       if (isModalDataCaptureModal(trigger))
-        return <DataCaptureModal trigger={trigger} />
+        return <DataCaptureModal key={trigger.id} trigger={trigger} />
 
       return <TriggerModal key={trigger.id} trigger={trigger} />
     }

@@ -1,11 +1,11 @@
 import { useMutation } from '@tanstack/react-query'
-import { CollectorUpdate } from '../client/types'
-import { useLogging } from '../context/LoggingContext'
-import { useVisitor } from '../context/VisitorContext'
-import { deviceInfo } from '../utils/device'
-import { hostname, request } from '../utils/http'
-import { useFingerprint } from './useFingerprint'
-import { useHostname } from './useHostname'
+import { CollectorUpdate } from '../../client/types'
+import { useLogging } from '../../context/LoggingContext'
+import { useVisitor } from '../../context/VisitorContext'
+import { deviceInfo } from '../../utils/device'
+import { hostname, request } from '../../utils/http'
+import { useFingerprint } from '../useFingerprint'
+import { useHostname } from '../useHostname'
 
 export const useCollectorMutation = () => {
   const { log, error } = useLogging()

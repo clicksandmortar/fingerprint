@@ -1,15 +1,15 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useContext, createContext, useState, useEffect, useCallback, useMemo, useRef, createElement } from 'react';
+import React__default, { useContext, createContext, useState, useEffect, useCallback, useMemo, useRef, memo, createElement } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactDOM from 'react-dom';
 import mixpanel from 'mixpanel-browser';
 import Cookies from 'js-cookie';
 import psl from 'psl';
 import { validate, version, v4 } from 'uuid';
+import { isMobile } from 'react-device-detect';
 import uniqueBy from 'lodash.uniqby';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
-import { isMobile } from 'react-device-detect';
 import transcend from 'lodash.get';
 import { useForm } from 'react-hook-form';
 
@@ -519,90 +519,6 @@ const useMixpanel = () => {
   return useContext(MixpanelContext);
 };
 
-const collinBrandsPathConversionMap = {
-  Stonehouse: '/tablebooking/enquiry-form-completed',
-  'All Bar One': '/bookings/dmnc-complete',
-  Sizzling: '/tablebooking/enquiry-form-completed',
-  Ember: '/tablebooking/enquiry-form-completed'
-};
-function useCollinsBookingComplete() {
-  const {
-    trackEvent,
-    state: {
-      initiated
-    }
-  } = useMixpanel();
-  const {
-    log
-  } = useLogging();
-  const brand = useBrand();
-  const checkCollinsBookingComplete = React__default.useCallback(() => {
-    log('useCollinsBookingComplete: checking for Collins booking complete');
-    if (!initiated) {
-      log('useCollinsBookingComplete, mixpanel not initiated');
-      return;
-    }
-    if (!brand) {
-      log('useCollinsBookingComplete, no brand');
-      return;
-    }
-    const conversionPathForBrand = collinBrandsPathConversionMap[brand];
-    if (!conversionPathForBrand) {
-      log('useCollinsBookingComplete: no path for brand variable');
-      return;
-    }
-    const isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
-    if (!isConversionPath) {
-      log('useCollinsBookingComplete: not a conversion path');
-      return;
-    }
-    log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
-    trackEvent('booking_complete', {});
-  }, [trackEvent, log, brand, initiated]);
-  return {
-    checkCollinsBookingComplete
-  };
-}
-
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-    const [key, value] = cur.split('=');
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  const params = getReducedSearchParams();
-  const hash = window.location.hash.substring(2);
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    hash,
-    params
-  };
-}
-function getReferrer() {
-  const params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
-
 const deviceInfo = {
   type: isMobile ? 'mobile' : 'desktop'
 };
@@ -647,6 +563,45 @@ const request = {
   }
 };
 
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+    const [key, value] = cur.split('=');
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  const params = getReducedSearchParams();
+  const hash = window.location.hash.substring(2);
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    hash,
+    params
+  };
+}
+function getReferrer() {
+  const params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
 const useHostname = () => {
   var _window, _window$location;
   return ((_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : _window$location.hostname) || '';
@@ -684,6 +639,51 @@ const useCollectorMutation = () => {
     onSuccess: () => {}
   });
 };
+
+const collinBrandsPathConversionMap = {
+  Stonehouse: '/tablebooking/enquiry-form-completed',
+  'All Bar One': '/bookings/dmnc-complete',
+  Sizzling: '/tablebooking/enquiry-form-completed',
+  Ember: '/tablebooking/enquiry-form-completed'
+};
+function useCollinsBookingComplete() {
+  const {
+    trackEvent,
+    state: {
+      initiated
+    }
+  } = useMixpanel();
+  const {
+    log
+  } = useLogging();
+  const brand = useBrand();
+  const checkCollinsBookingComplete = React__default.useCallback(() => {
+    log('useCollinsBookingComplete: checking for Collins booking complete');
+    if (!initiated) {
+      log('useCollinsBookingComplete, mixpanel not initiated');
+      return;
+    }
+    if (!brand) {
+      log('useCollinsBookingComplete, no brand');
+      return;
+    }
+    const conversionPathForBrand = collinBrandsPathConversionMap[brand];
+    if (!conversionPathForBrand) {
+      log('useCollinsBookingComplete: no path for brand variable');
+      return;
+    }
+    const isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
+    if (!isConversionPath) {
+      log('useCollinsBookingComplete: not a conversion path');
+      return;
+    }
+    log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
+    trackEvent('booking_complete', {});
+  }, [trackEvent, log, brand, initiated]);
+  return {
+    checkCollinsBookingComplete
+  };
+}
 
 const getRecursivelyPotentialButton = el => {
   var _el$nodeName;
@@ -2128,6 +2128,33 @@ const isModalDataCaptureModal = trigger => {
   return true;
 };
 
+const useDataCaptureMutation = () => {
+  const {
+    log,
+    error
+  } = useLogging();
+  const {
+    appId
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
+  return useMutation(data => {
+    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id) + '/form', {
+      ...data,
+      appId
+    }).then(response => {
+      log('Trigger API response', response);
+      return response;
+    }).catch(err => {
+      error('Trigger API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: () => {}
+  });
+};
+
 const isViewBlockingModal = false;
 const fields = [{
   name: 'name',
@@ -2173,7 +2200,6 @@ const DataCaptureModal = ({
   trigger
 }) => {
   var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  const [hasSubmitted, setHasSubmitted] = React__default.useState(false);
   const [error, setError] = React__default.useState('');
   const [retainedHeight, setRetainedHeight] = React__default.useState(0);
   const {
@@ -2189,14 +2215,19 @@ const DataCaptureModal = ({
   const [invocationTimeStamp, setInvocationTimeStamp] = useState(null);
   const {
     mutate: runSeen,
-    isSuccess,
-    isLoading
+    isSuccess: isSeenSuccess,
+    isLoading: isSeenLoading
   } = useSeenMutation();
+  const {
+    mutate: submit,
+    isSuccess: isSubmissionSuccess,
+    isLoading: isSubmissionLoading
+  } = useDataCaptureMutation();
   useEffect(() => {
     if (!open) return;
     if (invocationTimeStamp) return;
-    if (isSuccess) return;
-    if (isLoading) return;
+    if (isSeenSuccess) return;
+    if (isSeenLoading) return;
     const tId = setTimeout(() => {
       runSeen(trigger);
       if (!invocationTimeStamp) {
@@ -2206,20 +2237,16 @@ const DataCaptureModal = ({
     return () => {
       clearTimeout(tId);
     };
-  }, [open, isSuccess, isLoading]);
+  }, [open, isSeenSuccess, isSeenLoading]);
   const handleCloseModal = () => {
     removeActiveTrigger(trigger.id);
-    if (!hasSubmitted) trackEvent('user_closed_trigger', trigger);
+    if (!isSubmissionSuccess) trackEvent('user_closed_trigger', trigger);
   };
-  const {
-    mutate: submit
-  } = useCollectorMutation();
   const handleSubmit = e => {
     var _ref$current;
     e.preventDefault();
     setRetainedHeight(((_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.clientHeight) || 0);
     setError('');
-    setHasSubmitted(true);
     const entries = getFormEntries(e.target);
     trackEvent('user_submitted_data_capture', trigger);
     const haveAllRequiredFieldsBeenSubmitted = fields.every(field => {
@@ -2227,8 +2254,11 @@ const DataCaptureModal = ({
     });
     if (!haveAllRequiredFieldsBeenSubmitted) setError('Please make sure all required fields are filled in.');
     log('DataCaptureModal', 'handleSubmit', 'submit', entries);
-    submit(entries);
+    submit({
+      formData: entries
+    });
   };
+  const isButtonDisaled = isSubmissionLoading;
   const {
     backgroundPrimary,
     textPrimary
@@ -2264,7 +2294,7 @@ const DataCaptureModal = ({
       onClick: handleCloseModal
     })), React__default.createElement("div", {
       style: {
-        borderRadius: '10px',
+        borderRadius: '16px',
         background: 'rgba(0, 0, 0, 0.45)',
         width: '100%',
         height: '100%',
@@ -2275,7 +2305,7 @@ const DataCaptureModal = ({
       }
     }, children)));
   };
-  if (hasSubmitted) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
+  if (isSubmissionSuccess) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
   return React__default.createElement(Wrapper, null, React__default.createElement("h1", {
     style: {
       fontSize: '1.5rem',
@@ -2316,6 +2346,7 @@ const DataCaptureModal = ({
     style: {
       marginTop: '0.7rem',
       backgroundColor: backgroundPrimary,
+      filter: isButtonDisaled ? 'brightness(0.7)' : 'brightness(1)',
       color: textPrimary,
       borderRadius: '4px',
       padding: '1rem 0.4rem',
@@ -2326,8 +2357,9 @@ const DataCaptureModal = ({
       letterSpacing: '0.05rem',
       textTransform: 'uppercase'
     },
+    disabled: isButtonDisaled,
     type: 'submit'
-  }, (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)), error && React__default.createElement("p", {
+  }, isButtonDisaled ? '...' : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)), error && React__default.createElement("p", {
     style: {
       fontSize: '0.9rem',
       lineHeight: 1.5,
@@ -2336,7 +2368,7 @@ const DataCaptureModal = ({
     }
   }, error));
 };
-var DataCaptureModal$1 = (({
+var DataCaptureModal$1 = memo(({
   trigger
 }) => {
   return ReactDOM.createPortal(React__default.createElement(DataCaptureModal, {
@@ -3757,6 +3789,7 @@ const clientHandlers = [{
   multipleOfSameBehaviourSupported: false,
   invoke: trigger => {
     if (isModalDataCaptureModal(trigger)) return React__default.createElement(DataCaptureModal$1, {
+      key: trigger.id,
       trigger: trigger
     });
     return React__default.createElement(TriggerModal, {

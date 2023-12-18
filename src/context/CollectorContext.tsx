@@ -1,6 +1,5 @@
 import uniqueBy from 'lodash.uniqby'
 import React, { createContext, useCallback, useEffect, useState } from 'react'
-// import { isMobile } from 'react-device-detect' <= reminder where isMobile came from
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
 import {
@@ -9,10 +8,10 @@ import {
   IncompleteTrigger,
   Trigger
 } from '../client/types'
+import { useCollectorMutation } from '../hooks/api/useCollectorMutation'
 import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
 import { useBrand, useConfig } from '../hooks/useBrandConfig'
 import useButtonCollector from '../hooks/useButtonCollector'
-import { useCollectorMutation } from '../hooks/useCollectorMutation'
 import useConversions from '../hooks/useConversions'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
 import { useFingerprint } from '../hooks/useFingerprint'
