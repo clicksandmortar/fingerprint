@@ -1634,19 +1634,21 @@ const CloseButton = ({
   })));
 };
 
-const defualtFormatString = val => val;
-const getInterpolate = structure => {
-  const interpolate = (text, formatString = defualtFormatString) => {
-    const replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, (match, keys) => {
-      let value = transcend(structure, keys);
-      if (formatString) value = formatString(value);
-      return value !== undefined ? value : match;
-    });
-    return replacedText;
-  };
-  return interpolate;
-};
-
+function formatSimpler(targetDate) {
+  const currentDate = new Date();
+  const diffInSeconds = getPositiveDateDiffInSec(currentDate, targetDate);
+  const days = Math.floor(diffInSeconds / (24 * 60 * 60));
+  const hours = Math.floor(diffInSeconds % (24 * 60 * 60) / (60 * 60));
+  const minutes = Math.floor(diffInSeconds % (60 * 60) / 60);
+  const seconds = diffInSeconds % 60;
+  if (days > 0) {
+    return `${days}d ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  } else if (hours > 0) {
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  } else {
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
 const getPositiveDateDiffInSec = (date1, date2) => {
   return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
 };
@@ -1679,10 +1681,25 @@ function formatTimeStamp(targetDate) {
   const formattedDuration = parts.join(' ') + ` and ${lastPart}`;
   return formattedDuration;
 }
+
+const defualtFormatString = val => val;
+const getInterpolate = structure => {
+  const interpolate = (text, formatString = defualtFormatString) => {
+    const replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, (match, keys) => {
+      let value = transcend(structure, keys);
+      if (formatString) value = formatString(value);
+      return value !== undefined ? value : match;
+    });
+    return replacedText;
+  };
+  return interpolate;
+};
+
 const useCountdown = ({
   onZero,
   initialTimestamp,
-  interpolate
+  interpolate,
+  formatDate: _formatDate = formatTimeStamp
 }) => {
   const {
     error
@@ -1723,7 +1740,7 @@ const useCountdown = ({
       error('No text provided to timer interpolation. Rendering just countdown.');
       return countdown;
     }
-    const formatVal = val => formatTimeStamp(new Date(val));
+    const formatVal = val => _formatDate(new Date(val));
     const interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
     return interpoaltedVal;
   }, [countdown, interpolate, interpolatefunc]);
@@ -3061,7 +3078,8 @@ const StandardModal = ({
     interpolate: {
       text: ((_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading) || '',
       structure: trigger.data
-    }
+    },
+    formatDate: formatSimpler
   });
   const {
     formattedCountdown: paragraph
@@ -3071,7 +3089,8 @@ const StandardModal = ({
     interpolate: {
       text: ((_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.heading) || '',
       structure: trigger.data
-    }
+    },
+    formatDate: formatSimpler
   });
   if (!stylesLoaded) {
     return null;

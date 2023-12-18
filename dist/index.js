@@ -1733,24 +1733,21 @@ var CloseButton = function CloseButton(_ref) {
   })));
 };
 
-var defualtFormatString = function defualtFormatString(val) {
-  return val;
-};
-var getInterpolate = function getInterpolate(structure) {
-  var interpolate = function interpolate(text, formatString) {
-    if (formatString === void 0) {
-      formatString = defualtFormatString;
-    }
-    var replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, function (match, keys) {
-      var value = transcend(structure, keys);
-      if (formatString) value = formatString(value);
-      return value !== undefined ? value : match;
-    });
-    return replacedText;
-  };
-  return interpolate;
-};
-
+function formatSimpler(targetDate) {
+  var currentDate = new Date();
+  var diffInSeconds = getPositiveDateDiffInSec(currentDate, targetDate);
+  var days = Math.floor(diffInSeconds / (24 * 60 * 60));
+  var hours = Math.floor(diffInSeconds % (24 * 60 * 60) / (60 * 60));
+  var minutes = Math.floor(diffInSeconds % (60 * 60) / 60);
+  var seconds = diffInSeconds % 60;
+  if (days > 0) {
+    return days + "d " + hours.toString().padStart(2, '0') + ":" + minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0');
+  } else if (hours > 0) {
+    return hours.toString().padStart(2, '0') + ":" + minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0');
+  } else {
+    return minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0');
+  }
+}
 var getPositiveDateDiffInSec = function getPositiveDateDiffInSec(date1, date2) {
   return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
 };
@@ -1783,10 +1780,31 @@ function formatTimeStamp(targetDate) {
   var formattedDuration = parts.join(' ') + (" and " + lastPart);
   return formattedDuration;
 }
+
+var defualtFormatString = function defualtFormatString(val) {
+  return val;
+};
+var getInterpolate = function getInterpolate(structure) {
+  var interpolate = function interpolate(text, formatString) {
+    if (formatString === void 0) {
+      formatString = defualtFormatString;
+    }
+    var replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, function (match, keys) {
+      var value = transcend(structure, keys);
+      if (formatString) value = formatString(value);
+      return value !== undefined ? value : match;
+    });
+    return replacedText;
+  };
+  return interpolate;
+};
+
 var useCountdown = function useCountdown(_ref) {
   var onZero = _ref.onZero,
     initialTimestamp = _ref.initialTimestamp,
-    interpolate = _ref.interpolate;
+    interpolate = _ref.interpolate,
+    _ref$formatDate = _ref.formatDate,
+    formatDate = _ref$formatDate === void 0 ? formatTimeStamp : _ref$formatDate;
   var _useLogging = useLogging(),
     error = _useLogging.error;
   var _useState = React.useState(initialTimestamp || null),
@@ -1836,7 +1854,7 @@ var useCountdown = function useCountdown(_ref) {
       return countdown;
     }
     var formatVal = function formatVal(val) {
-      return formatTimeStamp(new Date(val));
+      return formatDate(new Date(val));
     };
     var interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
     return interpoaltedVal;
@@ -2672,7 +2690,8 @@ var StandardModal = function StandardModal(_ref) {
       interpolate: {
         text: ((_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading) || '',
         structure: trigger.data
-      }
+      },
+      formatDate: formatSimpler
     }),
     heading = _useCountdown.formattedCountdown;
   var _useCountdown2 = useCountdown({
@@ -2683,7 +2702,8 @@ var StandardModal = function StandardModal(_ref) {
       interpolate: {
         text: ((_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.heading) || '',
         structure: trigger.data
-      }
+      },
+      formatDate: formatSimpler
     }),
     paragraph = _useCountdown2.formattedCountdown;
   if (!stylesLoaded) {

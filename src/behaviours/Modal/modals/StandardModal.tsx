@@ -5,6 +5,7 @@ import CloseButton from '../../../components/CloseButton'
 import { useLogging } from '../../../context/LoggingContext'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
 import useCountdown from '../../../hooks/useCountdown'
+import { formatSimpler } from '../../../utils/date'
 import {
   getIsModalFullyClickable,
   prependClass,
@@ -268,7 +269,8 @@ const StandardModal = ({
     interpolate: {
       text: trigger.data?.heading || '',
       structure: trigger.data as Record<string, unknown>
-    }
+    },
+    formatDate: formatSimpler
   })
 
   // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
@@ -281,7 +283,8 @@ const StandardModal = ({
     interpolate: {
       text: trigger.data?.heading || '',
       structure: trigger.data as Record<string, unknown>
-    }
+    },
+    formatDate: formatSimpler
   })
 
   if (!stylesLoaded) {
