@@ -45,7 +45,10 @@ export default function useFormCollector() {
         return
       }
 
-      const data = getFormEntries(form)
+      const data = getFormEntries(form, {
+        bannedFieldPartialNames: [],
+        bannedTypes: []
+      })
 
       log('useFormCollector: form submitted', { data })
 

@@ -132,7 +132,7 @@ const DataCaptureModal = ({ trigger }: Props) => {
     setRetainedHeight(ref.current?.clientHeight || 0)
     setError('')
 
-    const entries = getFormEntries(e.target)
+    const entries = getFormEntries(e.target, {})
 
     trackEvent('user_submitted_data_capture', trigger)
 

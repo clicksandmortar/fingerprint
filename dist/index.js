@@ -923,9 +923,13 @@ var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
   if (!a || !b) return false;
   return a.toLowerCase().includes(b.toLowerCase());
 };
-var bannedTypes = ['password', 'submit'];
-var bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-var getFormEntries = function getFormEntries(form) {
+var defaultBannedTypes = ['password', 'submit'];
+var defaultBannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
+var getFormEntries = function getFormEntries(form, _ref) {
+  var _ref$bannedFieldParti = _ref.bannedFieldPartialNames,
+    bannedFieldPartialNames = _ref$bannedFieldParti === void 0 ? defaultBannedFieldPartialNames : _ref$bannedFieldParti,
+    _ref$bannedTypes = _ref.bannedTypes,
+    bannedTypes = _ref$bannedTypes === void 0 ? defaultBannedTypes : _ref$bannedTypes;
   var elements = Array.from(form.elements).filter(function (el) {
     if (bannedTypes.includes(el === null || el === void 0 ? void 0 : el.type)) return false;
     if (bannedFieldPartialNames.find(function (partialName) {
@@ -982,7 +986,10 @@ function useFormCollector() {
         log('Skipping form collection since this is a C&M form');
         return;
       }
-      var data = getFormEntries(form);
+      var data = getFormEntries(form, {
+        bannedFieldPartialNames: [],
+        bannedTypes: []
+      });
       log('useFormCollector: form submitted', {
         data: data
       });
@@ -2351,7 +2358,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
     e.preventDefault();
     setRetainedHeight(((_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.clientHeight) || 0);
     setError('');
-    var entries = getFormEntries(e.target);
+    var entries = getFormEntries(e.target, {});
     trackEvent('user_submitted_data_capture', trigger);
     var haveAllRequiredFieldsBeenSubmitted = fields.every(function (field) {
       return e.target[field.name].value;

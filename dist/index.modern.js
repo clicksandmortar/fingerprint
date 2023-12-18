@@ -851,12 +851,15 @@ const stringIsSubstringOf = (a, b) => {
   if (!a || !b) return false;
   return a.toLowerCase().includes(b.toLowerCase());
 };
-const bannedTypes = ['password', 'submit'];
-const bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-const getFormEntries = form => {
+const defaultBannedTypes = ['password', 'submit'];
+const defaultBannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
+const getFormEntries = (form, {
+  bannedFieldPartialNames: _bannedFieldPartialNames = defaultBannedFieldPartialNames,
+  bannedTypes: _bannedTypes = defaultBannedTypes
+}) => {
   const elements = Array.from(form.elements).filter(el => {
-    if (bannedTypes.includes(el === null || el === void 0 ? void 0 : el.type)) return false;
-    if (bannedFieldPartialNames.find(partialName => {
+    if (_bannedTypes.includes(el === null || el === void 0 ? void 0 : el.type)) return false;
+    if (_bannedFieldPartialNames.find(partialName => {
       if (stringIsSubstringOf(el.name, partialName)) return true;
       if (stringIsSubstringOf(el.id, partialName)) return true;
       if (stringIsSubstringOf(el.placeholder, partialName)) return true;
@@ -914,7 +917,10 @@ function useFormCollector() {
         log('Skipping form collection since this is a C&M form');
         return;
       }
-      const data = getFormEntries(form);
+      const data = getFormEntries(form, {
+        bannedFieldPartialNames: [],
+        bannedTypes: []
+      });
       log('useFormCollector: form submitted', {
         data
       });
@@ -2247,7 +2253,7 @@ const DataCaptureModal = ({
     e.preventDefault();
     setRetainedHeight(((_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.clientHeight) || 0);
     setError('');
-    const entries = getFormEntries(e.target);
+    const entries = getFormEntries(e.target, {});
     trackEvent('user_submitted_data_capture', trigger);
     const haveAllRequiredFieldsBeenSubmitted = fields.every(field => {
       return e.target[field.name].value;
