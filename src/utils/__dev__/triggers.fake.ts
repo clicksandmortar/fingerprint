@@ -11,6 +11,20 @@ const banner: Trigger = {
   }
 }
 
+export const fakeDataCaptureModal: Trigger = {
+  id: 'data-capture-modal',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
+    buttonText: 'Click me',
+    errorText: '',
+    successText: 'Hooray!',
+    heading: 'This is a data capture modal',
+    paragraph: 'And so is this'
+  }
+}
+
 export const fakeBanners: BannerTrigger[] = [
   {
     ...banner,
@@ -57,7 +71,6 @@ export const fakeBanners: BannerTrigger[] = [
 
 export const fakeTriggers: Trigger[] = [
   // ...fakeBanners,
-  // @ts-ignore
   fakeDataCaptureModal,
   {
     id: 'exit-trigger-id',
@@ -106,17 +119,3 @@ export const fakeIncompleteTriggers: IncompleteTrigger[] = [
     ]
   }
 ]
-
-export const fakeDataCaptureModal: Trigger = {
-  id: 'data-capture-modal',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://cdn.fingerprint.host/browns-three-plates-800.jpg',
-    buttonText: 'Click me',
-    errorText: '',
-    successText: 'Hooray!',
-    heading: 'This is a data capture modal',
-    paragraph: 'And so is this'
-  }
-}
