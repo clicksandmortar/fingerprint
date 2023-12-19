@@ -1,40 +1,25 @@
 // @todo: Kill this with fire 🔥
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { Trigger } from '../../../client/types'
-
+import CloseButton from '../../../components/CloseButton'
 import { useLogging } from '../../../context/LoggingContext'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
-import CloseButton from '../../CloseButton'
 import {
-  ButtonPosition,
-  ModalSize,
   getIsModalFullyClickable,
-  getModalButtonFlexPosition,
-  getModalButtonStylesBySize,
   prependClass,
   useModalDimensionsBasedOnImage
-} from './helpers'
-
-type Props = {
-  trigger: Trigger
-  handleClickCallToAction: (e: any) => void
-  handleCloseModal: (e: any) => void
-}
-
-const defaultElementSize: ModalSize = 'medium'
-const defaultButtonPosition: ButtonPosition = 'right'
+} from '../helpers'
+import { ModalProps } from '../Modal.types'
 
 const StandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
-}: Props) => {
+}: ModalProps) => {
   const { error } = useLogging()
   const isModalFullyClickable = getIsModalFullyClickable({ trigger })
   const [stylesLoaded, setStylesLoaded] = useState(false)
 
-  const buttonSizeStyle = getModalButtonStylesBySize(defaultElementSize)
   const { textPrimary, backgroundPrimary } = useBrandColors()
   const imageURL = trigger?.data?.backgroundURL || ''
   const {
@@ -314,7 +299,7 @@ const StandardModal = ({
             <div
               style={{
                 display: 'flex',
-                ...getModalButtonFlexPosition(defaultButtonPosition)
+                justifyContent: 'flex-end'
               }}
             >
               <div>
@@ -322,7 +307,10 @@ const StandardModal = ({
                   href={trigger?.data?.buttonURL}
                   className={prependClass('cta')}
                   onClick={handleClickCallToAction}
-                  style={buttonSizeStyle}
+                  style={{
+                    fontSize: '1.3rem',
+                    padding: '0.3rem 1rem'
+                  }}
                 >
                   {trigger?.data?.buttonText}
                 </a>

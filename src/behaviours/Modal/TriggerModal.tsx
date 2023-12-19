@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import ReactDOM from 'react-dom'
-import { Trigger } from '../client/types'
-import CnMStandardModal from '../components/modals/StandardModal'
-import { BrownsModal } from '../components/modals/browns'
-import StonehouseModal from '../components/modals/stonehouse'
-
-import { useMixpanel } from '../context/MixpanelContext'
-import { useBrand } from '../hooks/useBrandConfig'
-import { useCollector } from '../hooks/useCollector'
-import { useCollectorMutation } from '../hooks/useCollectorMutation'
-import { useSeenMutation } from '../hooks/useSeenMutation'
+import { Trigger } from '../../client/types'
+import { useMixpanel } from '../../context/MixpanelContext'
+import { useCollectorMutation } from '../../hooks/api/useCollectorMutation'
+import { useSeenMutation } from '../../hooks/api/useSeenMutation'
+import { useBrand } from '../../hooks/useBrandConfig'
+import { useCollector } from '../../hooks/useCollector'
+import { HandleCloseOptions } from './Modal.types'
+import { BrownsModal } from './modals/browns'
+import CnMStandardModal from './modals/StandardModal'
+import StonehouseModal from './modals/stonehouse'
 
 type Props = {
   trigger: Trigger
@@ -53,20 +53,7 @@ const Modal = ({ trigger }: Props) => {
     return null
   }
 
-  const handleClickCallToAction = (e: any) => {
-    e.preventDefault()
-    collect({
-      cta: {
-        variantID: trigger.id,
-        shownAt: invocationTimeStamp || new Date().toISOString()
-      }
-    })
-    trackEvent('user_clicked_button', { ...trigger, variantName: 'MODAL' })
-    trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
-  }
-
-  const handleCloseModal = () => {
-    trackEvent('user_closed_trigger', { ...trigger, variantName: 'MODAL' })
+  const handleCloseModal = (options?: HandleCloseOptions) => {
     // collect({
     //   exit: {
     //     variantID: trigger.id,
@@ -75,6 +62,22 @@ const Modal = ({ trigger }: Props) => {
     // })
     removeActiveTrigger(trigger.id)
     setOpen(false)
+
+    if (options?.skipTrackingEvent) return
+
+    trackEvent('user_closed_trigger', trigger)
+  }
+
+  const handleClickCallToAction = (e: any) => {
+    e.preventDefault()
+    collect({
+      cta: {
+        variantID: trigger.id,
+        shownAt: invocationTimeStamp || new Date().toISOString()
+      }
+    })
+    trackEvent('user_clicked_button', trigger)
+    trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
   }
 
   const modalProps = {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ComparisonFunc, Conversion, Operator } from '../client/types'
 import { validateSignalChain } from '../utils/signals'
-import { useCollectorMutation } from './useCollectorMutation'
+import { useCollectorMutation } from './api/useCollectorMutation'
 
 // TODO: move into utils/signals
 /**

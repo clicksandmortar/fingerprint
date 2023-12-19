@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Trigger } from '../client/types'
-import { useSeenMutation } from './useSeenMutation'
+import { useSeenMutation } from './api/useSeenMutation'
 
 type Props = {
   trigger: Trigger
@@ -10,7 +10,11 @@ const useActivationSeen = ({ trigger }: Props) => {
   const [open, setOpen] = useState(true)
   const [hasFired, setHasFired] = useState(false)
 
-  const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
+  const {
+    mutate: runSeen,
+    isSeenSuccess: isSuccess,
+    isLoading
+  } = useSeenMutation()
 
   useEffect(() => {
     if (!open) return

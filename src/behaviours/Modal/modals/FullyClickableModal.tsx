@@ -7,12 +7,9 @@
 
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
-import { Trigger } from '../../client/types'
-import CloseButton from '../CloseButton'
-import {
-  prependClass,
-  useModalDimensionsBasedOnImage
-} from './StandardModal/helpers'
+import { Trigger } from '../../../client/types'
+import CloseButton from '../../../components/CloseButton'
+import { prependClass, useModalDimensionsBasedOnImage } from '../helpers'
 
 type Props = {
   handleClickCallToAction: (e: any) => void
@@ -172,14 +169,6 @@ const FullyClickableModal = ({
       filter: brightness(0.95);
     }
     
-    .${prependClass('image-darken')} {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 100%;
-      padding: 2rem 1.5rem 1.5rem 1.5rem;
-    }
     
     .${prependClass('text-shadow')} {
       text-shadow: var(--text-shadow);

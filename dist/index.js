@@ -9,10 +9,10 @@ var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
 var psl = _interopDefault(require('psl'));
 var uuid = require('uuid');
+var reactDeviceDetect = require('react-device-detect');
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
-var reactDeviceDetect = require('react-device-detect');
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
 
@@ -567,88 +567,6 @@ var useMixpanel = function useMixpanel() {
   return React.useContext(MixpanelContext);
 };
 
-var collinBrandsPathConversionMap = {
-  Stonehouse: '/tablebooking/enquiry-form-completed',
-  'All Bar One': '/bookings/dmnc-complete',
-  Sizzling: '/tablebooking/enquiry-form-completed',
-  Ember: '/tablebooking/enquiry-form-completed'
-};
-function useCollinsBookingComplete() {
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent,
-    initiated = _useMixpanel.state.initiated;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  var brand = useBrand();
-  var checkCollinsBookingComplete = React__default.useCallback(function () {
-    log('useCollinsBookingComplete: checking for Collins booking complete');
-    if (!initiated) {
-      log('useCollinsBookingComplete, mixpanel not initiated');
-      return;
-    }
-    if (!brand) {
-      log('useCollinsBookingComplete, no brand');
-      return;
-    }
-    var conversionPathForBrand = collinBrandsPathConversionMap[brand];
-    if (!conversionPathForBrand) {
-      log('useCollinsBookingComplete: no path for brand variable');
-      return;
-    }
-    var isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
-    if (!isConversionPath) {
-      log('useCollinsBookingComplete: not a conversion path');
-      return;
-    }
-    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
-    trackEvent('booking_complete', {});
-  }, [trackEvent, log, brand, initiated]);
-  return {
-    checkCollinsBookingComplete: checkCollinsBookingComplete
-  };
-}
-
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-    var _cur$split = cur.split('='),
-      key = _cur$split[0],
-      value = _cur$split[1];
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  var params = getReducedSearchParams();
-  var hash = window.location.hash.substring(2);
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    hash: hash,
-    params: params
-  };
-}
-function getReferrer() {
-  var params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
-
 var deviceInfo = {
   type: reactDeviceDetect.isMobile ? 'mobile' : 'desktop'
 };
@@ -713,6 +631,47 @@ var request = {
   }
 };
 
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+    var _cur$split = cur.split('='),
+      key = _cur$split[0],
+      value = _cur$split[1];
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  var params = getReducedSearchParams();
+  var hash = window.location.hash.substring(2);
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    hash: hash,
+    params: params
+  };
+}
+function getReferrer() {
+  var params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
 var useHostname = function useHostname() {
   var _window, _window$location;
   return ((_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : _window$location.hostname) || '';
@@ -746,6 +705,47 @@ var useCollectorMutation = function useCollectorMutation() {
     onSuccess: function onSuccess() {}
   });
 };
+
+var collinBrandsPathConversionMap = {
+  Stonehouse: '/tablebooking/enquiry-form-completed',
+  'All Bar One': '/bookings/dmnc-complete',
+  Sizzling: '/tablebooking/enquiry-form-completed',
+  Ember: '/tablebooking/enquiry-form-completed'
+};
+function useCollinsBookingComplete() {
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent,
+    initiated = _useMixpanel.state.initiated;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var brand = useBrand();
+  var checkCollinsBookingComplete = React__default.useCallback(function () {
+    log('useCollinsBookingComplete: checking for Collins booking complete');
+    if (!initiated) {
+      log('useCollinsBookingComplete, mixpanel not initiated');
+      return;
+    }
+    if (!brand) {
+      log('useCollinsBookingComplete, no brand');
+      return;
+    }
+    var conversionPathForBrand = collinBrandsPathConversionMap[brand];
+    if (!conversionPathForBrand) {
+      log('useCollinsBookingComplete: no path for brand variable');
+      return;
+    }
+    var isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
+    if (!isConversionPath) {
+      log('useCollinsBookingComplete: not a conversion path');
+      return;
+    }
+    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
+    trackEvent('booking_complete', {});
+  }, [trackEvent, log, brand, initiated]);
+  return {
+    checkCollinsBookingComplete: checkCollinsBookingComplete
+  };
+}
 
 var getRecursivelyPotentialButton = function getRecursivelyPotentialButton(el) {
   var _el$nodeName;
@@ -911,13 +911,61 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
+var cnmFormPrefix = 'cnm-form';
+var CnMForm = function CnMForm(props) {
+  return React__default.createElement("form", Object.assign({}, props, {
+    id: cnmFormPrefix + "-" + props.id
+  }));
+};
+
 var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
   if (a === b) return true;
   if (!a || !b) return false;
   return a.toLowerCase().includes(b.toLowerCase());
 };
-var bannedTypes = ['password', 'submit'];
-var bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
+var defaultBannedTypes = ['password', 'submit'];
+var defaultBannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
+var getFormEntries = function getFormEntries(form, _ref) {
+  var _ref$bannedFieldParti = _ref.bannedFieldPartialNames,
+    bannedFieldPartialNames = _ref$bannedFieldParti === void 0 ? defaultBannedFieldPartialNames : _ref$bannedFieldParti,
+    _ref$bannedTypes = _ref.bannedTypes,
+    bannedTypes = _ref$bannedTypes === void 0 ? defaultBannedTypes : _ref$bannedTypes;
+  var elements = Array.from(form.elements).filter(function (el) {
+    if (bannedTypes.includes(el === null || el === void 0 ? void 0 : el.type)) return false;
+    if (bannedFieldPartialNames.find(function (partialName) {
+      if (stringIsSubstringOf(el.name, partialName)) return true;
+      if (stringIsSubstringOf(el.id, partialName)) return true;
+      if (stringIsSubstringOf(el.placeholder, partialName)) return true;
+      return false;
+    })) return false;
+    return true;
+  });
+  var data = elements.reduce(function (result, item) {
+    var fieldName = item.name;
+    if (!fieldName) {
+      if (item.id) {
+        console.error('getFormEntries: form field has no name, falling back to id', {
+          item: item
+        });
+        fieldName = item.id;
+      } else if (item.placeholder) {
+        console.error('getFormEntries: form field has no name or id, falling back to placeholder', {
+          item: item
+        });
+        fieldName = item.placeholder;
+      } else {
+        console.error('getFormEntries: form field has no name, id or placeholder, fallback to type', {
+          item: item
+        });
+        fieldName = item.type;
+      }
+    }
+    result[fieldName] = item.value;
+    return result;
+  }, {});
+  return data;
+};
+
 function useFormCollector() {
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
@@ -931,42 +979,17 @@ function useFormCollector() {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
     var formSubmitListener = function formSubmitListener(e) {
-      var _e$target$nodeName;
+      var _e$target$nodeName, _form$getAttribute;
       if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
       var form = e === null || e === void 0 ? void 0 : e.target;
-      var elements = Array.from(form.elements).filter(function (el) {
-        if (bannedTypes.includes(el === null || el === void 0 ? void 0 : el.type)) return false;
-        if (bannedFieldPartialNames.find(function (partialName) {
-          if (stringIsSubstringOf(el.name, partialName)) return true;
-          if (stringIsSubstringOf(el.id, partialName)) return true;
-          if (stringIsSubstringOf(el.placeholder, partialName)) return true;
-          return false;
-        })) return false;
-        return true;
+      if ((_form$getAttribute = form.getAttribute('id')) !== null && _form$getAttribute !== void 0 && _form$getAttribute.includes(cnmFormPrefix)) {
+        log('Skipping form collection since this is a C&M form');
+        return;
+      }
+      var data = getFormEntries(form, {
+        bannedFieldPartialNames: [],
+        bannedTypes: []
       });
-      var data = elements.reduce(function (result, item) {
-        var fieldName = item.name;
-        if (!fieldName) {
-          if (item.id) {
-            log('useFormCollector: form field has no name, falling back to id', {
-              item: item
-            });
-            fieldName = item.id;
-          } else if (item.placeholder) {
-            log('useFormCollector: form field has no name or id, falling back to placeholder', {
-              item: item
-            });
-            fieldName = item.placeholder;
-          } else {
-            log('useFormCollector: form field has no name, id or placeholder, fallback to type', {
-              item: item
-            });
-            fieldName = item.type;
-          }
-        }
-        result[fieldName] = item.value;
-        return result;
-      }, {});
       log('useFormCollector: form submitted', {
         data: data
       });
@@ -2154,6 +2177,778 @@ var TriggerBanner = function TriggerBanner(_ref2) {
   }), document.body);
 };
 
+var randomHash = 'f' + uuid.v4().split('-')[0];
+var prependClass = function prependClass(className) {
+  return "f" + randomHash + "-" + className;
+};
+var getIsModalFullyClickable = function getIsModalFullyClickable(_ref) {
+  var _trigger$data;
+  var trigger = _ref.trigger;
+  return !(trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonText);
+};
+var getModalSizing = function getModalSizing(img) {
+  var imageRealHeight = img.height;
+  var imageRealWidth = img.width;
+  var aspectRatio = imageRealWidth / imageRealHeight;
+  var getMaxWidth = function getMaxWidth(num) {
+    return window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9;
+  };
+  var getMaxHeight = function getMaxHeight(num) {
+    return window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9;
+  };
+  var deviceSizeLimits = reactDeviceDetect.isMobile ? {
+    height: getMaxHeight(1000),
+    width: getMaxWidth(640)
+  } : {
+    height: getMaxHeight(490),
+    width: getMaxWidth(819)
+  };
+  var widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
+  var heightToUse = widthToUse / aspectRatio;
+  return {
+    height: heightToUse,
+    width: widthToUse
+  };
+};
+var useModalDimensionsBasedOnImage = function useModalDimensionsBasedOnImage(_ref2) {
+  var imageURL = _ref2.imageURL;
+  var _useState = React.useState({
+      width: 0,
+      height: 0
+    }),
+    imageDimensions = _useState[0],
+    setImageDimensions = _useState[1];
+  React.useEffect(function () {
+    var img = new Image();
+    img.src = imageURL;
+    var id = setInterval(function () {
+      var modalSize = getModalSizing(img);
+      if (modalSize.height || modalSize.width) {
+        setImageDimensions(modalSize);
+        clearInterval(id);
+      }
+    }, 50);
+    return function () {
+      clearInterval(id);
+    };
+  }, [imageURL]);
+  return {
+    imageDimensions: imageDimensions,
+    setImageDimensions: setImageDimensions
+  };
+};
+var isModalDataCaptureModal = function isModalDataCaptureModal(trigger) {
+  if (!trigger) return false;
+  if (!trigger.data) return false;
+  if (!trigger.data.successText) return false;
+  return true;
+};
+
+var useDataCaptureMutation = function useDataCaptureMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  return reactQuery.useMutation(function (data) {
+    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id) + '/form', _extends({}, data, {
+      appId: appId
+    })).then(function (response) {
+      log('Trigger API response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Trigger API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: function onSuccess() {}
+  });
+};
+
+var isViewBlockingModal = false;
+var fields = [{
+  name: 'name',
+  label: 'Name',
+  type: 'text',
+  required: true
+}, {
+  name: 'phone',
+  label: 'Phone',
+  type: 'text',
+  required: false
+}, {
+  name: 'email',
+  label: 'Email',
+  type: 'email',
+  required: true
+}];
+var getOuterLayer = function getOuterLayer(_ref) {
+  var isViewBlockingModal = _ref.isViewBlockingModal;
+  if (isViewBlockingModal) {
+    return {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      zIndex: 999,
+      display: 'grid',
+      placeContent: 'center'
+    };
+  }
+  return {
+    zIndex: 999,
+    position: 'fixed',
+    right: '3vw',
+    top: '50%',
+    transform: 'translateY(-50%)'
+  };
+};
+var DataCaptureModal = function DataCaptureModal(_ref2) {
+  var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref2.trigger;
+  var _React$useState = React__default.useState(''),
+    error = _React$useState[0],
+    setError = _React$useState[1];
+  var _React$useState2 = React__default.useState(0),
+    retainedHeight = _React$useState2[0],
+    setRetainedHeight = _React$useState2[1];
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var ref = React__default.useRef(null);
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useState = React.useState(null),
+    invocationTimeStamp = _useState[0],
+    setInvocationTimeStamp = _useState[1];
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSeenSuccess = _useSeenMutation.isSuccess,
+    isSeenLoading = _useSeenMutation.isLoading;
+  var _useDataCaptureMutati = useDataCaptureMutation(),
+    submit = _useDataCaptureMutati.mutate,
+    isSubmissionSuccess = _useDataCaptureMutati.isSuccess,
+    isSubmissionLoading = _useDataCaptureMutati.isLoading;
+  React.useEffect(function () {
+    if (!open) return;
+    if (invocationTimeStamp) return;
+    if (isSeenSuccess) return;
+    if (isSeenLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+      if (!invocationTimeStamp) {
+        setInvocationTimeStamp(new Date().toISOString());
+      }
+    }, 500);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [open, isSeenSuccess, isSeenLoading]);
+  var handleCloseModal = function handleCloseModal() {
+    removeActiveTrigger(trigger.id);
+    if (!isSubmissionSuccess) trackEvent('user_closed_trigger', trigger);
+  };
+  var handleSubmit = function handleSubmit(e) {
+    var _ref$current;
+    e.preventDefault();
+    setRetainedHeight(((_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.clientHeight) || 0);
+    setError('');
+    var entries = getFormEntries(e.target, {});
+    trackEvent('user_submitted_data_capture', trigger);
+    var haveAllRequiredFieldsBeenSubmitted = fields.every(function (field) {
+      return e.target[field.name].value;
+    });
+    if (!haveAllRequiredFieldsBeenSubmitted) setError('Please make sure all required fields are filled in.');
+    log('DataCaptureModal', 'handleSubmit', 'submit', entries);
+    submit({
+      formData: entries
+    });
+  };
+  var isButtonDisaled = isSubmissionLoading;
+  var _useBrandColors = useBrandColors(),
+    backgroundPrimary = _useBrandColors.backgroundPrimary,
+    textPrimary = _useBrandColors.textPrimary;
+  var Wrapper = function Wrapper(_ref3) {
+    var _trigger$data;
+    var children = _ref3.children;
+    return React__default.createElement("div", {
+      style: getOuterLayer({
+        isViewBlockingModal: isViewBlockingModal
+      })
+    }, React__default.createElement("div", {
+      ref: ref,
+      style: {
+        height: retainedHeight || undefined,
+        background: "url(" + ((_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        borderRadius: '16px',
+        width: '400px',
+        maxWidth: '94vw',
+        position: 'relative'
+      }
+    }, React__default.createElement("div", {
+      style: {
+        position: 'absolute',
+        top: 5,
+        right: 5
+      }
+    }, React__default.createElement(CloseButton, {
+      onClick: handleCloseModal
+    })), React__default.createElement("div", {
+      style: {
+        borderRadius: '16px',
+        background: 'rgba(0, 0, 0, 0.45)',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '2rem'
+      }
+    }, children)));
+  };
+  if (isSubmissionSuccess) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
+  return React__default.createElement(Wrapper, null, React__default.createElement("h1", {
+    style: {
+      fontSize: '1.5rem',
+      marginBottom: '1rem',
+      textTransform: 'uppercase',
+      color: textPrimary
+    }
+  }, (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading), React__default.createElement("p", {
+    style: {
+      fontSize: '0.9rem',
+      lineHeight: 1.5,
+      marginBottom: '1rem',
+      color: textPrimary
+    }
+  }, (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph), React__default.createElement(CnMForm, {
+    onSubmit: handleSubmit,
+    style: {
+      display: 'grid'
+    },
+    id: trigger.id
+  }, fields.map(function (field) {
+    return React__default.createElement("input", {
+      key: field.name,
+      name: field.name,
+      placeholder: field.label + (field.required ? ' *' : ''),
+      type: field.type,
+      required: field.required,
+      style: {
+        backgroundColor: 'white',
+        color: '#222',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        padding: '1rem 0.4rem',
+        fontSize: '0.8rem',
+        outline: 'none',
+        marginBottom: '0.4rem'
+      }
+    });
+  }), React__default.createElement("button", {
+    style: {
+      marginTop: '0.7rem',
+      backgroundColor: backgroundPrimary,
+      filter: isButtonDisaled ? 'brightness(0.7)' : 'brightness(1)',
+      color: textPrimary,
+      borderRadius: '4px',
+      padding: '1rem 0.4rem',
+      fontSize: '0.8rem',
+      outline: 'none',
+      cursor: 'pointer',
+      border: 'none',
+      letterSpacing: '0.05rem',
+      textTransform: 'uppercase'
+    },
+    disabled: isButtonDisaled,
+    type: 'submit'
+  }, isButtonDisaled ? '...' : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)), error && React__default.createElement("p", {
+    style: {
+      fontSize: '0.9rem',
+      lineHeight: 1.5,
+      marginBottom: '1rem',
+      color: '#aa2f2f'
+    }
+  }, error));
+};
+var DataCaptureModal$1 = React.memo(function (_ref4) {
+  var trigger = _ref4.trigger;
+  return ReactDOM.createPortal(React__default.createElement(DataCaptureModal, {
+    trigger: trigger
+  }), document.body);
+});
+
+var FullyClickableModal = function FullyClickableModal(_ref) {
+  var _trigger$data;
+  var handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal,
+    trigger = _ref.trigger;
+  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
+      imageURL: imageURL
+    }),
+    _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
+    height = _useModalDimensionsBa2.height,
+    width = _useModalDimensionsBa2.width;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var appendResponsiveBehaviour = React__default.useCallback(function () {
+    return reactDeviceDetect.isMobile ? "." + prependClass('modal') + " {\n\n    }" : "\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n";
+  }, [height, width]);
+  React.useEffect(function () {
+    var cssToApply = "\n  \n    ." + prependClass('overlay') + " {\n      background-color: rgba(0, 0, 0, 0.7);\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + ( 'transition: all 0.3s ease-in-out;' ) + "\n      " + ( 'cursor: pointer;' ) + "\n    }\n\n    " + ( "." + prependClass('modal') + ":hover {\n      filter: brightness(1.05);\n      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n    }" ) + "\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n\n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+    return function () {
+      document.head.removeChild(styles);
+    };
+  }, [height, width, appendResponsiveBehaviour]);
+  var handleModalAction = React__default.useCallback(function (e) {
+    return handleClickCallToAction(e);
+  }, [handleClickCallToAction]);
+  var handleClickClose = React__default.useCallback(function (e) {
+    e.stopPropagation();
+    return handleCloseModal(e);
+  }, [handleCloseModal]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    onClick: handleModalAction,
+    style: {
+      background: "url(" + imageURL + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleClickClose
+  }))));
+};
+
+var CurlyText = function CurlyText(_ref) {
+  var randomHash = _ref.randomHash,
+    text = _ref.text;
+  return React__default.createElement("svg", {
+    xmlns: 'http://www.w3.org/2000/svg',
+    xmlnsXlink: 'http://www.w3.org/1999/xlink',
+    version: '1.1',
+    viewBox: '0 0 500 500',
+    className: 'f' + randomHash + '-curlyText'
+  }, React__default.createElement("defs", null, React__default.createElement("path", {
+    id: 'textPath',
+    d: 'M 0 500 A 175,100 0 0 1 500,500'
+  })), React__default.createElement("text", {
+    x: '0',
+    y: '0',
+    textAnchor: 'middle'
+  }, React__default.createElement("textPath", {
+    xlinkHref: '#textPath',
+    fill: 'white',
+    startOffset: '50%'
+  }, text)));
+};
+var BrownsCustomModal = function BrownsCustomModal(props) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = props.trigger,
+    handleClickCallToAction = props.handleClickCallToAction,
+    handleCloseModal = props.handleCloseModal;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var randomHash = React.useMemo(function () {
+    return uuid.v4().split('-')[0];
+  }, []);
+  React.useEffect(function () {
+    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-close-button:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(css));
+    document.head.appendChild(styles);
+    setStylesLoaded(true);
+  }, [randomHash]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: 'f' + randomHash + '-overlay'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-modal',
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative',
+      height: 500
+    }
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-image-darken'
+  }, React__default.createElement("div", {
+    className: 'f' + randomHash + '-close-button'
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement(CurlyText, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
+    randomHash: randomHash
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1
+    },
+    className: 'f' + randomHash + '--spacer'
+  }), React__default.createElement("div", {
+    style: {
+      flex: 1,
+      marginTop: -150,
+      textTransform: 'uppercase',
+      textAlign: 'center',
+      letterSpacing: '2pt'
+    }
+  }, React__default.createElement("span", {
+    className: 'f' + randomHash + '-mainText'
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    className: 'f' + randomHash + '-buttonContainer'
+  }, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: 'f' + randomHash + '-cta',
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
+};
+var BrownsModal = function BrownsModal(props) {
+  var trigger = props.trigger;
+  var isFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
+  });
+  if (!isFullyClickable) return React__default.createElement(BrownsCustomModal, Object.assign({}, props));
+  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
+};
+
+var StandardModal = function StandardModal(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var _useLogging = useLogging(),
+    error = _useLogging.error;
+  var isModalFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
+  });
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  var _useBrandColors = useBrandColors(),
+    textPrimary = _useBrandColors.textPrimary,
+    backgroundPrimary = _useBrandColors.backgroundPrimary;
+  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
+      imageURL: imageURL
+    }),
+    _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
+    height = _useModalDimensionsBa2.height,
+    width = _useModalDimensionsBa2.width,
+    setImageDimensions = _useModalDimensionsBa.setImageDimensions;
+  var appendResponsiveBehaviour = React__default.useCallback(function () {
+    return reactDeviceDetect.isMobile ? "" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 2.4rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 1.3rem;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 1.6rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 0.9rem;\n  }\n}\n\n";
+  }, [height, width, imageURL, reactDeviceDetect.isMobile]);
+  React.useEffect(function () {
+    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : "") + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+    return function () {
+      document.head.removeChild(styles);
+    };
+  }, [isModalFullyClickable, height, width, appendResponsiveBehaviour]);
+  var getHandleModalActionFinal = React__default.useCallback(function () {
+    if (!isModalFullyClickable) return undefined;
+    return function (e) {
+      setImageDimensions({
+        width: 0,
+        height: 0
+      });
+      handleClickCallToAction(e);
+    };
+  }, [handleClickCallToAction]);
+  var handleClickCloseFinal = React__default.useCallback(function (e) {
+    e.stopPropagation();
+    return handleCloseModal(e);
+  }, [handleCloseModal]);
+  if (!stylesLoaded) {
+    return null;
+  }
+  if (!width || !height) {
+    error("StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate.");
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    onClick: getHandleModalActionFinal(),
+    className: prependClass('modal'),
+    style: {
+      background: "url(" + imageURL + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-darken')
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleClickCloseFinal
+  })), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'flex-end'
+    }
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction,
+    style: {
+      fontSize: '1.3rem',
+      padding: '0.3rem 1rem'
+    }
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+
+var primaryColor = "rgb(33,147,174)";
+var secondaryColor = "#e0aa00";
+var callToActionColor = 'rgb(235,63,43)';
+var mainGrey = 'rgb(70,70,70)';
+var scaleBg = function scaleBg(scale) {
+  var imageWidth = 800;
+  var imageHeight = 700;
+  return {
+    height: imageHeight * scale,
+    width: imageWidth * scale
+  };
+};
+var StonehouseCustomModal = function StonehouseCustomModal(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var trigger = _ref.trigger,
+    handleClickCallToAction = _ref.handleClickCallToAction,
+    handleCloseModal = _ref.handleCloseModal;
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
+  React.useEffect(function () {
+    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        height: " + scaleBg(0.7).height + "px;\n        width: " + scaleBg(0.7).width + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        margin-left: auto;\n        margin-right: auto;\n        margin-top: 0;\n        margin-bottom: -1.5rem;\n        font-size: 4.5rem;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: grid;\n        place-content: center;\n        flex: 1;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n        font-size: 2.4rem;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        display: block;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n        font-size: 1.3rem;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 4rem 1.5rem 2rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2.5rem;\n          margin-bottom: -0.6rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.9rem;\n          letter-spacing: 1.2pt;\n\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 2rem 1.5rem 1rem 1.5rem;\n        }\n      }\n    ";
+    var styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
+    setTimeout(function () {
+      setStylesLoaded(true);
+    }, 500);
+    return function () {
+      document.head.removeChild(styles);
+    };
+  }, []);
+  var textColorByRoute = React__default.useMemo(function () {
+    if (location.href.includes('tablebooking')) return {
+      heading: {
+        color: 'white'
+      },
+      paragraph: {
+        color: secondaryColor
+      }
+    };
+    return {
+      heading: {
+        color: primaryColor,
+        WebkitTextStroke: "2px " + mainGrey
+      },
+      paragraph: {
+        color: mainGrey
+      }
+    };
+  }, []);
+  if (!stylesLoaded) {
+    return null;
+  }
+  return React__default.createElement("div", {
+    className: prependClass('overlay')
+  }, React__default.createElement("div", {
+    className: prependClass('modal'),
+    style: {
+      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      position: 'relative'
+    }
+  }, React__default.createElement("div", {
+    className: prependClass('image-container')
+  }, React__default.createElement("div", {
+    className: prependClass('close-button')
+  }, React__default.createElement(CloseButton, {
+    onClick: handleCloseModal
+  })), React__default.createElement("div", {
+    className: prependClass('text-container')
+  }, React__default.createElement("h1", {
+    className: prependClass('main-text'),
+    style: textColorByRoute.heading
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
+    className: prependClass('sub-text'),
+    style: textColorByRoute.paragraph
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
+    style: {
+      flex: 1,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }
+  }, React__default.createElement("div", null, React__default.createElement("a", {
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    className: prependClass('cta'),
+    onClick: handleClickCallToAction
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+};
+var StonehouseModal = function StonehouseModal(props) {
+  var trigger = props.trigger;
+  var isFullyClickable = getIsModalFullyClickable({
+    trigger: trigger
+  });
+  if (!isFullyClickable) {
+    return React__default.createElement(StonehouseCustomModal, Object.assign({}, props));
+  }
+  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
+};
+
+var Modal = function Modal(_ref) {
+  var trigger = _ref.trigger;
+  var _useCollector = useCollector(),
+    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  var _useState = React.useState(true),
+    open = _useState[0],
+    setOpen = _useState[1];
+  var _useState2 = React.useState(null),
+    invocationTimeStamp = _useState2[0],
+    setInvocationTimeStamp = _useState2[1];
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutate;
+  var brand = useBrand();
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    isSuccess = _useSeenMutation.isSuccess,
+    isLoading = _useSeenMutation.isLoading;
+  React.useEffect(function () {
+    if (!open) return;
+    if (invocationTimeStamp) return;
+    if (isSuccess) return;
+    if (isLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+      if (!invocationTimeStamp) {
+        setInvocationTimeStamp(new Date().toISOString());
+      }
+    }, 500);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [open, isSuccess, isLoading]);
+  if (!open) {
+    return null;
+  }
+  var handleCloseModal = function handleCloseModal(options) {
+    removeActiveTrigger(trigger.id);
+    setOpen(false);
+    if (options !== null && options !== void 0 && options.skipTrackingEvent) return;
+    trackEvent('user_closed_trigger', trigger);
+  };
+  var handleClickCallToAction = function handleClickCallToAction(e) {
+    var _trigger$data, _trigger$data2;
+    e.preventDefault();
+    collect({
+      cta: {
+        variantID: trigger.id,
+        shownAt: invocationTimeStamp || new Date().toISOString()
+      }
+    });
+    trackEvent('user_clicked_button', trigger);
+    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
+  };
+  var modalProps = {
+    trigger: trigger,
+    handleClickCallToAction: handleClickCallToAction,
+    handleCloseModal: handleCloseModal
+  };
+  switch (brand) {
+    case 'Ember':
+      {
+        var image = reactDeviceDetect.isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
+        if (window.location.href.includes('nationalsearch')) image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg";
+        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
+          trigger: _extends({}, trigger, {
+            data: _extends({}, trigger.data, {
+              backgroundURL: image
+            })
+          })
+        }));
+      }
+    case 'Sizzling':
+      {
+        var _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg";
+        if (window.location.href.includes('signup')) _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg";
+        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
+          trigger: _extends({}, trigger, {
+            data: _extends({}, trigger.data, {
+              backgroundURL: _image
+            })
+          })
+        }));
+      }
+    case 'Stonehouse':
+      return React__default.createElement(StonehouseModal, Object.assign({}, modalProps));
+    case 'Browns':
+      return React__default.createElement(BrownsModal, Object.assign({}, modalProps));
+    case 'C&M':
+    default:
+      return React__default.createElement(StandardModal, Object.assign({}, modalProps));
+  }
+};
+var TriggerModal = function TriggerModal(_ref2) {
+  var trigger = _ref2.trigger;
+  return ReactDOM.createPortal(React__default.createElement(Modal, {
+    trigger: trigger
+  }), document.body);
+};
+
 var baseUrl = 'https://bookings-bff.starship-staging.com';
 var makeFullUrl = function makeFullUrl(resource, params) {
   if (params === void 0) {
@@ -2378,580 +3173,6 @@ var TriggerInverse = function TriggerInverse(_ref3) {
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
 };
 
-var getModalButtonStylesBySize = function getModalButtonStylesBySize(size) {
-  switch (size) {
-    case 'small':
-      {
-        return {
-          fontSize: '1.3rem',
-          padding: '0.3rem 1rem'
-        };
-      }
-    case 'medium':
-      {
-        return {
-          fontSize: '1.3rem',
-          padding: '0.3rem 1rem'
-        };
-      }
-    case 'large':
-      {
-        return {
-          fontSize: '1.3rem',
-          padding: '0.3rem 1rem'
-        };
-      }
-    case 'full':
-      {
-        return {
-          fontSize: '1.5rem',
-          padding: '0.5rem 1.2rem'
-        };
-      }
-  }
-};
-var getModalButtonFlexPosition = function getModalButtonFlexPosition(position) {
-  switch (position) {
-    case 'left':
-      return {
-        justifyContent: 'flex-start'
-      };
-    case 'right':
-      return {
-        justifyContent: 'flex-end'
-      };
-    case 'center':
-      return {
-        justifyContent: 'center'
-      };
-  }
-};
-var randomHash = 'f' + uuid.v4().split('-')[0];
-var prependClass = function prependClass(className) {
-  return "f" + randomHash + "-" + className;
-};
-var getIsModalFullyClickable = function getIsModalFullyClickable(_ref) {
-  var _trigger$data;
-  var trigger = _ref.trigger;
-  return !(trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonText);
-};
-var getModalSizing = function getModalSizing(img) {
-  var imageRealHeight = img.height;
-  var imageRealWidth = img.width;
-  var aspectRatio = imageRealWidth / imageRealHeight;
-  var getMaxWidth = function getMaxWidth(num) {
-    return window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9;
-  };
-  var getMaxHeight = function getMaxHeight(num) {
-    return window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9;
-  };
-  var deviceSizeLimits = reactDeviceDetect.isMobile ? {
-    height: getMaxHeight(1000),
-    width: getMaxWidth(640)
-  } : {
-    height: getMaxHeight(490),
-    width: getMaxWidth(819)
-  };
-  var widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
-  var heightToUse = widthToUse / aspectRatio;
-  return {
-    height: heightToUse,
-    width: widthToUse
-  };
-};
-var useModalDimensionsBasedOnImage = function useModalDimensionsBasedOnImage(_ref2) {
-  var imageURL = _ref2.imageURL;
-  var _useState = React.useState({
-      width: 0,
-      height: 0
-    }),
-    imageDimensions = _useState[0],
-    setImageDimensions = _useState[1];
-  React.useEffect(function () {
-    var img = new Image();
-    img.src = imageURL;
-    var id = setInterval(function () {
-      var modalSize = getModalSizing(img);
-      if (modalSize.height || modalSize.width) {
-        setImageDimensions(modalSize);
-        clearInterval(id);
-      }
-    }, 50);
-    return function () {
-      clearInterval(id);
-    };
-  }, [imageURL]);
-  return {
-    imageDimensions: imageDimensions,
-    setImageDimensions: setImageDimensions
-  };
-};
-
-var defaultElementSize = 'medium';
-var defaultButtonPosition = 'right';
-var StandardModal = function StandardModal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref.trigger,
-    handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal;
-  var _useLogging = useLogging(),
-    error = _useLogging.error;
-  var isModalFullyClickable = getIsModalFullyClickable({
-    trigger: trigger
-  });
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var buttonSizeStyle = getModalButtonStylesBySize(defaultElementSize);
-  var _useBrandColors = useBrandColors(),
-    textPrimary = _useBrandColors.textPrimary,
-    backgroundPrimary = _useBrandColors.backgroundPrimary;
-  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
-  var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
-      imageURL: imageURL
-    }),
-    _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
-    height = _useModalDimensionsBa2.height,
-    width = _useModalDimensionsBa2.width,
-    setImageDimensions = _useModalDimensionsBa.setImageDimensions;
-  var appendResponsiveBehaviour = React__default.useCallback(function () {
-    return reactDeviceDetect.isMobile ? "" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 2.4rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 1.3rem;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 1.6rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 0.9rem;\n  }\n}\n\n";
-  }, [height, width, imageURL, reactDeviceDetect.isMobile]);
-  React.useEffect(function () {
-    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : "") + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-    return function () {
-      document.head.removeChild(styles);
-    };
-  }, [isModalFullyClickable, height, width, appendResponsiveBehaviour]);
-  var getHandleModalActionFinal = React__default.useCallback(function () {
-    if (!isModalFullyClickable) return undefined;
-    return function (e) {
-      setImageDimensions({
-        width: 0,
-        height: 0
-      });
-      handleClickCallToAction(e);
-    };
-  }, [handleClickCallToAction]);
-  var handleClickCloseFinal = React__default.useCallback(function (e) {
-    e.stopPropagation();
-    return handleCloseModal(e);
-  }, [handleCloseModal]);
-  if (!stylesLoaded) {
-    return null;
-  }
-  if (!width || !height) {
-    error("StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate.");
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    onClick: getHandleModalActionFinal(),
-    className: prependClass('modal'),
-    style: {
-      background: "url(" + imageURL + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('image-darken')
-  }, React__default.createElement("div", {
-    className: prependClass('close-button')
-  }, React__default.createElement(CloseButton, {
-    onClick: handleClickCloseFinal
-  })), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
-    style: _extends({
-      display: 'flex'
-    }, getModalButtonFlexPosition(defaultButtonPosition))
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction,
-    style: buttonSizeStyle
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-
-var FullyClickableModal = function FullyClickableModal(_ref) {
-  var _trigger$data;
-  var handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal,
-    trigger = _ref.trigger;
-  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
-  var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
-      imageURL: imageURL
-    }),
-    _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
-    height = _useModalDimensionsBa2.height,
-    width = _useModalDimensionsBa2.width;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var appendResponsiveBehaviour = React__default.useCallback(function () {
-    return reactDeviceDetect.isMobile ? "." + prependClass('modal') + " {\n\n    }" : "\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n";
-  }, [height, width]);
-  React.useEffect(function () {
-    var cssToApply = "\n  \n    ." + prependClass('overlay') + " {\n      background-color: rgba(0, 0, 0, 0.7);\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + ( 'transition: all 0.3s ease-in-out;' ) + "\n      " + ( 'cursor: pointer;' ) + "\n    }\n\n    " + ( "." + prependClass('modal') + ":hover {\n      filter: brightness(1.05);\n      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n    }" ) + "\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n\n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n      padding: 2rem 1.5rem 1.5rem 1.5rem;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-    return function () {
-      document.head.removeChild(styles);
-    };
-  }, [height, width, appendResponsiveBehaviour]);
-  var handleModalAction = React__default.useCallback(function (e) {
-    return handleClickCallToAction(e);
-  }, [handleClickCallToAction]);
-  var handleClickClose = React__default.useCallback(function (e) {
-    e.stopPropagation();
-    return handleCloseModal(e);
-  }, [handleCloseModal]);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    onClick: handleModalAction,
-    style: {
-      background: "url(" + imageURL + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('close-button')
-  }, React__default.createElement(CloseButton, {
-    onClick: handleClickClose
-  }))));
-};
-
-var CurlyText = function CurlyText(_ref) {
-  var randomHash = _ref.randomHash,
-    text = _ref.text;
-  return React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    xmlnsXlink: 'http://www.w3.org/1999/xlink',
-    version: '1.1',
-    viewBox: '0 0 500 500',
-    className: 'f' + randomHash + '-curlyText'
-  }, React__default.createElement("defs", null, React__default.createElement("path", {
-    id: 'textPath',
-    d: 'M 0 500 A 175,100 0 0 1 500,500'
-  })), React__default.createElement("text", {
-    x: '0',
-    y: '0',
-    textAnchor: 'middle'
-  }, React__default.createElement("textPath", {
-    xlinkHref: '#textPath',
-    fill: 'white',
-    startOffset: '50%'
-  }, text)));
-};
-var BrownsCustomModal = function BrownsCustomModal(props) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = props.trigger,
-    handleClickCallToAction = props.handleClickCallToAction,
-    handleCloseModal = props.handleCloseModal;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var randomHash = React.useMemo(function () {
-    return uuid.v4().split('-')[0];
-  }, []);
-  React.useEffect(function () {
-    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-close-button:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  }, [randomHash]);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: 'f' + randomHash + '-overlay'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-modal',
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative',
-      height: 500
-    }
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-image-darken'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-close-button'
-  }, React__default.createElement(CloseButton, {
-    onClick: handleCloseModal
-  })), React__default.createElement(CurlyText, {
-    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
-    randomHash: randomHash
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1
-    },
-    className: 'f' + randomHash + '--spacer'
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      marginTop: -150,
-      textTransform: 'uppercase',
-      textAlign: 'center',
-      letterSpacing: '2pt'
-    }
-  }, React__default.createElement("span", {
-    className: 'f' + randomHash + '-mainText'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    className: 'f' + randomHash + '-buttonContainer'
-  }, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: 'f' + randomHash + '-cta',
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
-};
-var BrownsModal = function BrownsModal(props) {
-  var trigger = props.trigger;
-  var isFullyClickable = getIsModalFullyClickable({
-    trigger: trigger
-  });
-  if (!isFullyClickable) return React__default.createElement(BrownsCustomModal, Object.assign({}, props));
-  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
-};
-
-var primaryColor = "rgb(33,147,174)";
-var secondaryColor = "#e0aa00";
-var callToActionColor = 'rgb(235,63,43)';
-var mainGrey = 'rgb(70,70,70)';
-var scaleBg = function scaleBg(scale) {
-  var imageWidth = 800;
-  var imageHeight = 700;
-  return {
-    height: imageHeight * scale,
-    width: imageWidth * scale
-  };
-};
-var StonehouseCustomModal = function StonehouseCustomModal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref.trigger,
-    handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  React.useEffect(function () {
-    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        height: " + scaleBg(0.7).height + "px;\n        width: " + scaleBg(0.7).width + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        margin-left: auto;\n        margin-right: auto;\n        margin-top: 0;\n        margin-bottom: -1.5rem;\n        font-size: 4.5rem;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: grid;\n        place-content: center;\n        flex: 1;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n        font-size: 2.4rem;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        display: block;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n        font-size: 1.3rem;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 4rem 1.5rem 2rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2.5rem;\n          margin-bottom: -0.6rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.9rem;\n          letter-spacing: 1.2pt;\n\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 2rem 1.5rem 1rem 1.5rem;\n        }\n      }\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-    return function () {
-      document.head.removeChild(styles);
-    };
-  }, []);
-  var textColorByRoute = React__default.useMemo(function () {
-    if (location.href.includes('tablebooking')) return {
-      heading: {
-        color: 'white'
-      },
-      paragraph: {
-        color: secondaryColor
-      }
-    };
-    return {
-      heading: {
-        color: primaryColor,
-        WebkitTextStroke: "2px " + mainGrey
-      },
-      paragraph: {
-        color: mainGrey
-      }
-    };
-  }, []);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('image-container')
-  }, React__default.createElement("div", {
-    className: prependClass('close-button')
-  }, React__default.createElement(CloseButton, {
-    onClick: handleCloseModal
-  })), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text'),
-    style: textColorByRoute.heading
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
-    className: prependClass('sub-text'),
-    style: textColorByRoute.paragraph
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-var StonehouseModal = function StonehouseModal(props) {
-  var trigger = props.trigger;
-  var isFullyClickable = getIsModalFullyClickable({
-    trigger: trigger
-  });
-  if (!isFullyClickable) {
-    return React__default.createElement(StonehouseCustomModal, Object.assign({}, props));
-  }
-  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
-};
-
-var Modal = function Modal(_ref) {
-  var trigger = _ref.trigger;
-  var _useCollector = useCollector(),
-    removeActiveTrigger = _useCollector.removeActiveTrigger;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
-  var _useState = React.useState(true),
-    open = _useState[0],
-    setOpen = _useState[1];
-  var _useState2 = React.useState(null),
-    invocationTimeStamp = _useState2[0],
-    setInvocationTimeStamp = _useState2[1];
-  var _useCollectorMutation = useCollectorMutation(),
-    collect = _useCollectorMutation.mutate;
-  var brand = useBrand();
-  var _useSeenMutation = useSeenMutation(),
-    runSeen = _useSeenMutation.mutate,
-    isSuccess = _useSeenMutation.isSuccess,
-    isLoading = _useSeenMutation.isLoading;
-  React.useEffect(function () {
-    if (!open) return;
-    if (invocationTimeStamp) return;
-    if (isSuccess) return;
-    if (isLoading) return;
-    var tId = setTimeout(function () {
-      runSeen(trigger);
-      if (!invocationTimeStamp) {
-        setInvocationTimeStamp(new Date().toISOString());
-      }
-    }, 500);
-    return function () {
-      clearTimeout(tId);
-    };
-  }, [open, isSuccess, isLoading]);
-  if (!open) {
-    return null;
-  }
-  var handleClickCallToAction = function handleClickCallToAction(e) {
-    var _trigger$data, _trigger$data2;
-    e.preventDefault();
-    collect({
-      cta: {
-        variantID: trigger.id,
-        shownAt: invocationTimeStamp || new Date().toISOString()
-      }
-    });
-    trackEvent('user_clicked_button', _extends({}, trigger, {
-      variantName: 'MODAL'
-    }));
-    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
-  };
-  var handleCloseModal = function handleCloseModal() {
-    trackEvent('user_closed_trigger', _extends({}, trigger, {
-      variantName: 'MODAL'
-    }));
-    removeActiveTrigger(trigger.id);
-    setOpen(false);
-  };
-  var modalProps = {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  };
-  switch (brand) {
-    case 'Ember':
-      {
-        var image = reactDeviceDetect.isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
-        if (window.location.href.includes('nationalsearch')) image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg";
-        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
-          trigger: _extends({}, trigger, {
-            data: _extends({}, trigger.data, {
-              backgroundURL: image
-            })
-          })
-        }));
-      }
-    case 'Sizzling':
-      {
-        var _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg";
-        if (window.location.href.includes('signup')) _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg";
-        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
-          trigger: _extends({}, trigger, {
-            data: _extends({}, trigger.data, {
-              backgroundURL: _image
-            })
-          })
-        }));
-      }
-    case 'Stonehouse':
-      return React__default.createElement(StonehouseModal, Object.assign({}, modalProps));
-    case 'Browns':
-      return React__default.createElement(BrownsModal, Object.assign({}, modalProps));
-    case 'C&M':
-    default:
-      return React__default.createElement(StandardModal, Object.assign({}, modalProps));
-  }
-};
-var TriggerModal = function TriggerModal(_ref2) {
-  var trigger = _ref2.trigger;
-  return ReactDOM.createPortal(React__default.createElement(Modal, {
-    trigger: trigger
-  }), document.body);
-};
-
 var Youtube = function Youtube(_ref) {
   var _trigger$brand, _trigger$brand2, _trigger$brand3, _trigger$brand4, _trigger$data;
   var trigger = _ref.trigger;
@@ -3029,6 +3250,10 @@ var clientHandlers = [{
   behaviour: 'BEHAVIOUR_MODAL',
   multipleOfSameBehaviourSupported: false,
   invoke: function invoke(trigger) {
+    if (isModalDataCaptureModal(trigger)) return React__default.createElement(DataCaptureModal$1, {
+      key: trigger.id,
+      trigger: trigger
+    });
     return React__default.createElement(TriggerModal, {
       key: trigger.id,
       trigger: trigger
