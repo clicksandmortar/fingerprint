@@ -21,7 +21,7 @@ const Header = ({ trigger }: Props) => {
   return (
     <div>
       <StdHeader text={texts.text1} />
-      <div style={{ maxWidth: 220, margin: 'auto' }}>
+      <div style={{ maxWidth: 220, margin: '0.4rem auto' }}>
         <CountdownFlipClock targetDate={new Date(countdownEndTime)} />
       </div>
       {texts.text2 && <StdHeader text={texts.text2} />}

@@ -1146,20 +1146,6 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
-const fakeCountdownModal = {
-  id: 'modal-trigger-urgency',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://shopus.parelli.com/cdn/shop/articles/2023-07-31-how-much-do-horses-weigh.png?v=1690553380',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'Only {{countdownEndTime}} left to horse around!',
-    paragraph: 'Use it wisely',
-    countdownEndTime: '2024-01-31T23:59'
-  }
-};
-
 function CollectorProvider({
   children,
   handlers = []
@@ -1378,7 +1364,7 @@ function CollectorProvider({
       });
     }
     setIdleTimeout(getIdleStatusDelay());
-    setPageTriggers([fakeCountdownModal]);
+    setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
     setConfig(payload.config);
     setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
     setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
@@ -2976,7 +2962,7 @@ class FlipClock extends React__default.Component {
       width: 100%;
       height: 50%;
       overflow: hidden;
-      border: 1px solid whitesmoke;
+      border: 1px solid ${backgroundPrimary};
     }
     
     .upperCard span, .lowerCard span {
@@ -2988,7 +2974,7 @@ class FlipClock extends React__default.Component {
     
     .upperCard {
       align-items: flex-end;
-      border-bottom: 0.5px solid whitesmoke;
+      border-bottom: 0.5px solid ${backgroundPrimary};
       border-top-left-radius: 3px;
       border-top-right-radius: 3px;
     }
@@ -2998,7 +2984,7 @@ class FlipClock extends React__default.Component {
     
     .lowerCard {
       align-items: flex-start;
-      border-top: 0.5px solid whitesmoke;
+      border-top: 0.5px solid ${backgroundPrimary};
       border-bottom-left-radius: 3px;
       border-bottom-right-radius: 3px;
     }
@@ -3023,6 +3009,7 @@ class FlipClock extends React__default.Component {
       font-weight: lighter;
       color: ${textPrimary};
     }
+
     .flipCard.unfold {
       top: 50%;
       align-items: flex-start;
@@ -3031,8 +3018,8 @@ class FlipClock extends React__default.Component {
       background-color: ${backgroundPrimary};
       border-bottom-left-radius: 3px;
       border-bottom-right-radius: 3px;
-      border: 0.5px solid whitesmoke;
-      border-top: 0.5px solid whitesmoke;
+      border: 0.5px solid ${backgroundPrimary};
+      border-top: 0.5px solid ${backgroundPrimary};
     }
     .flipCard.unfold span {
       transform: translateY(-50%);
@@ -3045,8 +3032,8 @@ class FlipClock extends React__default.Component {
       background-color: ${backgroundPrimary};
       border-top-left-radius: 3px;
       border-top-right-radius: 3px;
-      border: 0.5px solid whitesmoke;
-      border-bottom: 0.5px solid whitesmoke;
+      border: 0.5px solid ${backgroundPrimary};
+      border-bottom: 0.5px solid ${backgroundPrimary};
     }
     .flipCard.fold span {
       transform: translateY(50%);
@@ -3095,6 +3082,16 @@ class FlipClock extends React__default.Component {
       }
       100% {
         transform: rotateX(0deg);
+      }
+    }
+    @media screen and (max-width: 850px) {
+      .flipClock {
+        scale: 0.8
+      }
+    }
+    @media screen and (max-width: 450px) {
+      .flipClock {
+        scale: 0.5
       }
     }
     `;
@@ -3226,7 +3223,7 @@ const Header = ({
   }), React__default.createElement("div", {
     style: {
       maxWidth: 220,
-      margin: 'auto'
+      margin: '0.4rem auto'
     }
   }, React__default.createElement(CountdownFlipClock, {
     targetDate: new Date(countdownEndTime)

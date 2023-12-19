@@ -1233,57 +1233,6 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
-var banner = {
-  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_BANNER',
-  data: {
-    buttonText: 'Run',
-    buttonURL: 'https://google.com'
-  }
-};
-var fakeBanners = [_extends({}, banner, {
-  id: "position: 'left',",
-  data: _extends({}, banner.data, {
-    position: 'left',
-    buttonIcon: 'ticket',
-    marketingText: 'AAAA!'
-  })
-}), _extends({}, banner, {
-  id: "position: 'top',",
-  data: _extends({}, banner.data, {
-    position: 'top',
-    buttonText: 'Clickable'
-  })
-}), _extends({}, banner, {
-  id: "countdownEndTime: '2024-03-31T23:59',",
-  data: _extends({}, banner.data, {
-    marketingText: 'You only have {{ countdownEndTime }} before the horse comes',
-    countdownEndTime: '2024-03-31T23:59',
-    position: 'bottom'
-  })
-}), _extends({}, banner, {
-  id: "position: 'right',",
-  data: _extends({}, banner.data, {
-    position: 'right',
-    buttonText: 'CLickable thing',
-    buttonIcon: 'heart'
-  })
-})];
-var fakeCountdownModal = {
-  id: 'modal-trigger-urgency',
-  invocation: 'INVOCATION_PAGE_LOAD',
-  behaviour: 'BEHAVIOUR_MODAL',
-  data: {
-    backgroundURL: 'https://shopus.parelli.com/cdn/shop/articles/2023-07-31-how-much-do-horses-weigh.png?v=1690553380',
-    buttonText: 'Click me',
-    buttonURL: 'http://www.google.com',
-    heading: 'Only {{countdownEndTime}} left to horse around!',
-    paragraph: 'Use it wisely',
-    countdownEndTime: '2024-01-31T23:59'
-  }
-};
-
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -1522,7 +1471,7 @@ function CollectorProvider(_ref) {
           });
         }
         setIdleTimeout(getIdleStatusDelay());
-        setPageTriggers([fakeCountdownModal]);
+        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
         setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
@@ -2793,7 +2742,7 @@ var FlipClock = /*#__PURE__*/function (_React$Component) {
     var _this$props$colorConf = this.props.colorConfig,
       textPrimary = _this$props$colorConf.textPrimary,
       backgroundPrimary = _this$props$colorConf.backgroundPrimary;
-    var CSS = "\n    @import url(\"https://fonts.googleapis.com/css?family=Droid+Sans+Mono\");\n    * {\n      box-sizing: border-box;\n    }\n    \n    body {\n      margin: 0;\n    }\n    \n    .flipClock {\n      display: flex;\n      justify-content: space-between;\n    }\n    \n    .flipUnitContainer {\n      display: block;\n      position: relative;\n      width: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n      height: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n      perspective-origin: 50% 50%;\n      perspective: 300px;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 3px;\n      box-shadow: 0px 10px 10px -10px grey;\n    }\n    \n    .upperCard, .lowerCard {\n      display: flex;\n      position: relative;\n      justify-content: center;\n      width: 100%;\n      height: 50%;\n      overflow: hidden;\n      border: 1px solid whitesmoke;\n    }\n    \n    .upperCard span, .lowerCard span {\n      font-size: " + fontSize + ";\n      font-family: \"Droid Sans Mono\", monospace;\n      font-weight: lighter;\n      color: " + textPrimary + ";\n    }\n    \n    .upperCard {\n      align-items: flex-end;\n      border-bottom: 0.5px solid whitesmoke;\n      border-top-left-radius: 3px;\n      border-top-right-radius: 3px;\n    }\n    .upperCard span {\n      transform: translateY(50%);\n    }\n    \n    .lowerCard {\n      align-items: flex-start;\n      border-top: 0.5px solid whitesmoke;\n      border-bottom-left-radius: 3px;\n      border-bottom-right-radius: 3px;\n    }\n    .lowerCard span {\n      transform: translateY(-50%);\n    }\n    \n    .flipCard {\n      display: flex;\n      justify-content: center;\n      position: absolute;\n      left: 0;\n      width: 100%;\n      height: 50%;\n      overflow: hidden;\n      -webkit-backface-visibility: hidden;\n              backface-visibility: hidden;\n    }\n    .flipCard span {\n      font-family: \"Droid Sans Mono\", monospace;\n      font-size: " + fontSize + ";\n      font-weight: lighter;\n      color: " + textPrimary + ";\n    }\n    .flipCard.unfold {\n      top: 50%;\n      align-items: flex-start;\n      transform-origin: 50% 0%;\n      transform: rotateX(180deg);\n      background-color: " + backgroundPrimary + ";\n      border-bottom-left-radius: 3px;\n      border-bottom-right-radius: 3px;\n      border: 0.5px solid whitesmoke;\n      border-top: 0.5px solid whitesmoke;\n    }\n    .flipCard.unfold span {\n      transform: translateY(-50%);\n    }\n    .flipCard.fold {\n      top: 0%;\n      align-items: flex-end;\n      transform-origin: 50% 100%;\n      transform: rotateX(0deg);\n      background-color: " + backgroundPrimary + ";\n      border-top-left-radius: 3px;\n      border-top-right-radius: 3px;\n      border: 0.5px solid whitesmoke;\n      border-bottom: 0.5px solid whitesmoke;\n    }\n    .flipCard.fold span {\n      transform: translateY(50%);\n    }\n    \n    .fold {\n      -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n              animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n      transform-style: preserve-3d;\n    }\n    \n    .unfold {\n      -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n              animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n      transform-style: preserve-3d;\n    }\n    \n    @-webkit-keyframes fold {\n      0% {\n        transform: rotateX(0deg);\n      }\n      100% {\n        transform: rotateX(-180deg);\n      }\n    }\n    \n    @keyframes fold {\n      0% {\n        transform: rotateX(0deg);\n      }\n      100% {\n        transform: rotateX(-180deg);\n      }\n    }\n    @-webkit-keyframes unfold {\n      0% {\n        transform: rotateX(180deg);\n      }\n      100% {\n        transform: rotateX(0deg);\n      }\n    }\n    @keyframes unfold {\n      0% {\n        transform: rotateX(180deg);\n      }\n      100% {\n        transform: rotateX(0deg);\n      }\n    }\n    ";
+    var CSS = "\n    @import url(\"https://fonts.googleapis.com/css?family=Droid+Sans+Mono\");\n    * {\n      box-sizing: border-box;\n    }\n    \n    body {\n      margin: 0;\n    }\n    \n    .flipClock {\n      display: flex;\n      justify-content: space-between;\n    }\n    \n    .flipUnitContainer {\n      display: block;\n      position: relative;\n      width: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n      height: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n      perspective-origin: 50% 50%;\n      perspective: 300px;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 3px;\n      box-shadow: 0px 10px 10px -10px grey;\n    }\n    \n    .upperCard, .lowerCard {\n      display: flex;\n      position: relative;\n      justify-content: center;\n      width: 100%;\n      height: 50%;\n      overflow: hidden;\n      border: 1px solid " + backgroundPrimary + ";\n    }\n    \n    .upperCard span, .lowerCard span {\n      font-size: " + fontSize + ";\n      font-family: \"Droid Sans Mono\", monospace;\n      font-weight: lighter;\n      color: " + textPrimary + ";\n    }\n    \n    .upperCard {\n      align-items: flex-end;\n      border-bottom: 0.5px solid " + backgroundPrimary + ";\n      border-top-left-radius: 3px;\n      border-top-right-radius: 3px;\n    }\n    .upperCard span {\n      transform: translateY(50%);\n    }\n    \n    .lowerCard {\n      align-items: flex-start;\n      border-top: 0.5px solid " + backgroundPrimary + ";\n      border-bottom-left-radius: 3px;\n      border-bottom-right-radius: 3px;\n    }\n    .lowerCard span {\n      transform: translateY(-50%);\n    }\n    \n    .flipCard {\n      display: flex;\n      justify-content: center;\n      position: absolute;\n      left: 0;\n      width: 100%;\n      height: 50%;\n      overflow: hidden;\n      -webkit-backface-visibility: hidden;\n              backface-visibility: hidden;\n    }\n    .flipCard span {\n      font-family: \"Droid Sans Mono\", monospace;\n      font-size: " + fontSize + ";\n      font-weight: lighter;\n      color: " + textPrimary + ";\n    }\n\n    .flipCard.unfold {\n      top: 50%;\n      align-items: flex-start;\n      transform-origin: 50% 0%;\n      transform: rotateX(180deg);\n      background-color: " + backgroundPrimary + ";\n      border-bottom-left-radius: 3px;\n      border-bottom-right-radius: 3px;\n      border: 0.5px solid " + backgroundPrimary + ";\n      border-top: 0.5px solid " + backgroundPrimary + ";\n    }\n    .flipCard.unfold span {\n      transform: translateY(-50%);\n    }\n    .flipCard.fold {\n      top: 0%;\n      align-items: flex-end;\n      transform-origin: 50% 100%;\n      transform: rotateX(0deg);\n      background-color: " + backgroundPrimary + ";\n      border-top-left-radius: 3px;\n      border-top-right-radius: 3px;\n      border: 0.5px solid " + backgroundPrimary + ";\n      border-bottom: 0.5px solid " + backgroundPrimary + ";\n    }\n    .flipCard.fold span {\n      transform: translateY(50%);\n    }\n    \n    .fold {\n      -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n              animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n      transform-style: preserve-3d;\n    }\n    \n    .unfold {\n      -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n              animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n      transform-style: preserve-3d;\n    }\n    \n    @-webkit-keyframes fold {\n      0% {\n        transform: rotateX(0deg);\n      }\n      100% {\n        transform: rotateX(-180deg);\n      }\n    }\n    \n    @keyframes fold {\n      0% {\n        transform: rotateX(0deg);\n      }\n      100% {\n        transform: rotateX(-180deg);\n      }\n    }\n    @-webkit-keyframes unfold {\n      0% {\n        transform: rotateX(180deg);\n      }\n      100% {\n        transform: rotateX(0deg);\n      }\n    }\n    @keyframes unfold {\n      0% {\n        transform: rotateX(180deg);\n      }\n      100% {\n        transform: rotateX(0deg);\n      }\n    }\n    @media screen and (max-width: 850px) {\n      .flipClock {\n        scale: 0.8\n      }\n    }\n    @media screen and (max-width: 450px) {\n      .flipClock {\n        scale: 0.5\n      }\n    }\n    ";
     this.timerID = setInterval(function () {
       return _this2.updateTime();
     }, 50);
@@ -2922,7 +2871,7 @@ var Header = function Header(_ref) {
   }), React__default.createElement("div", {
     style: {
       maxWidth: 220,
-      margin: 'auto'
+      margin: '0.4rem auto'
     }
   }, React__default.createElement(CountdownFlipClock, {
     targetDate: new Date(countdownEndTime)

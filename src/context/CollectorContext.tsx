@@ -23,7 +23,6 @@ import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
-import { fakeCountdownModal } from '../utils/__dev__/triggers.fake'
 import { updateCookie } from '../visitors/bootstrap'
 import { useLogging } from './LoggingContext'
 import { useMixpanel } from './MixpanelContext'
@@ -429,8 +428,7 @@ export function CollectorProvider({
       // Set IdleTimer
       // @todo turn this into the dynamic value
       setIdleTimeout(getIdleStatusDelay())
-      // setPageTriggers(payload?.pageTriggers)
-      setPageTriggers([fakeCountdownModal])
+      setPageTriggers(payload?.pageTriggers)
       setConfig(payload.config)
       setIncompleteTriggers(payload?.incompleteTriggers || [])
       setConversions(payload?.conversions || [])

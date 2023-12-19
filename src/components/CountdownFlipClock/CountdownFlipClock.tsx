@@ -158,7 +158,7 @@ class FlipClock extends React.Component<
       width: 100%;
       height: 50%;
       overflow: hidden;
-      border: 1px solid whitesmoke;
+      border: 1px solid ${backgroundPrimary};
     }
     
     .upperCard span, .lowerCard span {
@@ -170,7 +170,7 @@ class FlipClock extends React.Component<
     
     .upperCard {
       align-items: flex-end;
-      border-bottom: 0.5px solid whitesmoke;
+      border-bottom: 0.5px solid ${backgroundPrimary};
       border-top-left-radius: 3px;
       border-top-right-radius: 3px;
     }
@@ -180,7 +180,7 @@ class FlipClock extends React.Component<
     
     .lowerCard {
       align-items: flex-start;
-      border-top: 0.5px solid whitesmoke;
+      border-top: 0.5px solid ${backgroundPrimary};
       border-bottom-left-radius: 3px;
       border-bottom-right-radius: 3px;
     }
@@ -205,6 +205,7 @@ class FlipClock extends React.Component<
       font-weight: lighter;
       color: ${textPrimary};
     }
+
     .flipCard.unfold {
       top: 50%;
       align-items: flex-start;
@@ -213,8 +214,8 @@ class FlipClock extends React.Component<
       background-color: ${backgroundPrimary};
       border-bottom-left-radius: 3px;
       border-bottom-right-radius: 3px;
-      border: 0.5px solid whitesmoke;
-      border-top: 0.5px solid whitesmoke;
+      border: 0.5px solid ${backgroundPrimary};
+      border-top: 0.5px solid ${backgroundPrimary};
     }
     .flipCard.unfold span {
       transform: translateY(-50%);
@@ -227,8 +228,8 @@ class FlipClock extends React.Component<
       background-color: ${backgroundPrimary};
       border-top-left-radius: 3px;
       border-top-right-radius: 3px;
-      border: 0.5px solid whitesmoke;
-      border-bottom: 0.5px solid whitesmoke;
+      border: 0.5px solid ${backgroundPrimary};
+      border-bottom: 0.5px solid ${backgroundPrimary};
     }
     .flipCard.fold span {
       transform: translateY(50%);
@@ -277,6 +278,16 @@ class FlipClock extends React.Component<
       }
       100% {
         transform: rotateX(0deg);
+      }
+    }
+    @media screen and (max-width: 850px) {
+      .flipClock {
+        scale: 0.8
+      }
+    }
+    @media screen and (max-width: 450px) {
+      .flipClock {
+        scale: 0.5
       }
     }
     `
