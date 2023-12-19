@@ -1,12 +1,7 @@
-import uniqueBy from 'lodash.uniqby'
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import {
-  DifiStore,
-  useDifiStore,
-  usePageTriggers
-} from '../beautifulSugar/store'
+import { DifiStore, useStore } from '../beautifulSugar/store'
 import {
   CollectorVisitorResponse,
   Conversion,
@@ -60,8 +55,7 @@ export function CollectorProvider({
     setConfig,
     config: { trigger: config }
   } = useConfig()
-  const fuk = useConfig()
-  console.log({ fuk })
+
   const { visitor, setVisitor } = useVisitor()
   const {
     canNextTriggerOccur,
@@ -86,13 +80,18 @@ export function CollectorProvider({
     getIdleStatusDelay()
   )
 
-  const pageTriggers = usePageTriggers()
-  const { removePageTrigger } = useDifiStore((s: DifiStore) => s.setters)
-  // const setPageTriggersState = useDifiStore(s => s.set)
-  const set = useDifiStore((state: DifiStore) => state.set)
+  const {
+    removePageTrigger,
+    pageTriggers,
+    displayedTriggersIds,
+    setPageTriggers,
+    setDisplayedTriggers,
+    // combinedTriggers,
+    set
+    // get
+  } = useStore()
 
   const { setIntently } = useIntently()
-  const [displayTriggers, setDisplayedTriggers] = useState<Trigger['id'][]>([])
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
@@ -114,11 +113,11 @@ export function CollectorProvider({
 
   const getIsBehaviourVisible = React.useCallback(
     (type: Trigger['behaviour']) => {
-      if (displayTriggers.length === 0) return false
+      if (displayedTriggersIds.length === 0) return false
 
       if (
-        displayTriggers.find(
-          (triggerId) =>
+        displayedTriggersIds.find(
+          (triggerId: Trigger['id']) =>
             combinedTriggers.find((trigger) => trigger.id === triggerId)
               ?.behaviour === type
         )
@@ -127,7 +126,7 @@ export function CollectorProvider({
 
       return false
     },
-    [displayTriggers, combinedTriggers]
+    [displayedTriggersIds, combinedTriggers]
   )
 
   const setDisplayedTriggerByInvocation = React.useCallback(
@@ -135,11 +134,18 @@ export function CollectorProvider({
       invocation: Trigger['invocation'],
       shouldAllowMultipleSimultaneous = false
     ) => {
+      console.log('aaa firing invocation', invocation)
       const appendTrigger = (invokableTrigger: Trigger) => {
-        setDisplayedTriggers((prev) => {
-          if (prev.includes(invokableTrigger.id)) return prev
+        set((prev: DifiStore) => {
+          if (prev.displayedTriggersIds.includes(invokableTrigger.id))
+            return prev
 
-          return [...prev, invokableTrigger.id]
+          return {
+            displayedTriggersIds: [
+              ...prev.displayedTriggersIds,
+              invokableTrigger.id
+            ]
+          }
         })
       }
 
@@ -190,27 +196,6 @@ export function CollectorProvider({
     // will need to be refactored / reworked
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
   }, [visibleIncompleteTriggers, setDisplayedTriggerByInvocation])
-  /**
-   * add triggers to existing ones, keep unique to prevent multi-firing
-   */
-  const setPageTriggers = React.useCallback(
-    (triggers: Trigger[]) => {
-      set((prev: DifiStore) => {
-        const nonDismissed = prev.pageTriggers.filter((tr) =>
-          displayTriggers.includes(tr.id)
-        )
-        // no pageTriggers = no triggers, rather than missing key.
-        // serverside omition. Means we set pagetriggers to nothing.
-        return {
-          pageTriggers: uniqueBy<Trigger>(
-            [...(triggers || []), ...nonDismissed],
-            'id'
-          )
-        }
-      })
-    },
-    [set, displayTriggers]
-  )
 
   const getHandlerForTrigger = React.useCallback(
     (_trigger: Trigger) => {
@@ -224,11 +209,13 @@ export function CollectorProvider({
     [handlers]
   )
 
+  // const { incompleteTriggers, } = useDifiStore()
+
   const removeActiveTrigger = useCallback(
     (id: Trigger['id']) => {
-      log(`CollectorProvider: removing id:${id} from displayTriggers`)
-      const refreshedTriggers = displayTriggers.filter(
-        (triggerId) => triggerId !== id
+      log(`CollectorProvider: removing id:${id} from displayedTriggersIds`)
+      const refreshedTriggers = displayedTriggersIds.filter(
+        (triggerId: Trigger['id']) => triggerId !== id
       )
       setDisplayedTriggers(refreshedTriggers)
       setIncompleteTriggers((prev) =>
@@ -238,11 +225,10 @@ export function CollectorProvider({
       removePageTrigger(id)
     },
     [
-      displayTriggers,
+      displayedTriggersIds,
       log,
       setIncompleteTriggers,
       setVisibleTriggers,
-      set,
       combinedTriggers
     ]
   )
@@ -250,17 +236,17 @@ export function CollectorProvider({
   const TriggerComponent = React.useCallback(():
     | (JSX.Element | null)[]
     | null => {
-    if (!displayTriggers) return null
+    if (!displayedTriggersIds) return null
 
     // TODO: UNDO
     const activeTriggers = combinedTriggers.filter((trigger) =>
-      displayTriggers.includes(trigger.id)
+      displayedTriggersIds.includes(trigger.id)
     )
 
     if (!activeTriggers) {
       error(
-        `CollectorProvider - TriggerComponent: No trigger found for displayTriggers`,
-        displayTriggers
+        `CollectorProvider - TriggerComponent: No trigger found for displayedTriggersIds`,
+        displayedTriggersIds
       )
       return null
     }
@@ -304,7 +290,7 @@ export function CollectorProvider({
       if (
         // this check is only necessary because we run through multiple render cycles
         // when we place a component on the page
-        !displayTriggers.includes(trigger.id) &&
+        !displayedTriggersIds.includes(trigger.id) &&
         // ---
         isTriggerOfSameBehaviourAlreadyVisible &&
         !handler.multipleOfSameBehaviourSupported
@@ -332,7 +318,7 @@ export function CollectorProvider({
       return null
     })
   }, [
-    displayTriggers,
+    displayedTriggersIds,
     log,
     handlers,
     error,
@@ -412,6 +398,7 @@ export function CollectorProvider({
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
 
   const fireOnLoadTriggers = useCallback(() => {
+    console.log('aaa firing onload')
     if (!pageLoadTriggers) return
     if (!combinedTriggers?.length) return
 
@@ -439,8 +426,8 @@ export function CollectorProvider({
       // Set IdleTimer
       // @todo turn this into the dynamic value
       setIdleTimeout(getIdleStatusDelay())
-      setPageTriggers(payload?.pageTriggers)
       // setPageTriggers([fakeInterpolationModal])
+      setPageTriggers(payload?.pageTriggers || [])
       setConfig(payload.config)
       setIncompleteTriggers(payload?.incompleteTriggers || [])
       setConversions(payload?.conversions || [])

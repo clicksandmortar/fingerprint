@@ -1,17 +1,17 @@
 // this file name must remain as is, otherwise the octopus will be deployed.
-
 import { Session } from 'inspector'
-import { create } from 'zustand'
-import { Config, Conversion, IncompleteTrigger, Trigger } from '../client/types'
-
+import uniqueBy from 'lodash.uniqby'
+import { create, EqualityChecker, StateSelector, StoreApi } from 'zustand'
+import { Config, Conversion, Trigger } from '../client/types'
 import { Visitor } from '../visitors/types'
 
-// const useDifiStore = create((set) => ({
-//   bears: 0,
-//   getBears,
-//   increasePopulation: () => set((state: Store) => ({ bears: state.bears + 1 })),
-//   removeAllBears: () => set({ bears: 0 })
-// }))
+type Set = StoreApi<DifiStore>['setState']
+type Get = StoreApi<DifiStore>['getState']
+
+type UseBoundStoreAlt<T> = <U>(
+  selector: StateSelector<T, U>,
+  equalityFn?: EqualityChecker<U>
+) => U & StoreApi<T>
 
 export type DifiStore = {
   visitor: Visitor
@@ -19,53 +19,76 @@ export type DifiStore = {
   config: Config
   intently: boolean
   pageTriggers: Trigger[]
-  // tobe renamed to displayed Triggers I guess
-  displayTriggers: Trigger['id'][]
-  incompleteTriggers: IncompleteTrigger[]
+  displayedTriggersIds: Trigger['id'][]
+  // incompleteTriggers: IncompleteTrigger[]
+  // visibleIncompleteTriggers: IncompleteTrigger[]
+  // setIncompleteTriggers: (triggers: IncompleteTrigger[]) => void
+
+  // combinedTriggers: (Trigger | IncompleteTrigger)[]
   conversions: Conversion[]
-  set: SetType
-  setters: {
-    removePageTrigger: (id: Trigger['id']) => void
-  }
-  // setters: {
-  //   setIncompleteTriggers: Setter<IncompleteTrigger[]>
-  //   setPageTriggers: Setter<Trigger[]>
-  // }
+  set: Set
+  get: Get
+  setDisplayedTriggers: (triggers: Trigger['id'][]) => void
+  setPageTriggers: (triggers: Trigger[]) => void
+  removePageTrigger: (id: Trigger['id']) => void
 }
+// TODO: slice'ify
+export const useDifiStore: UseBoundStoreAlt<DifiStore> = create<DifiStore>(
+  (set: Set, get: Get) => {
+    return {
+      visitor: {} as Visitor,
+      config: {} as Config,
+      conversions: [],
+      displayedTriggersIds: [],
+      // visibleIncompleteTriggers: [],
+      // incompleteTriggers: [],
+      intently: true,
+      pageTriggers: [],
+      session: {} as Session,
+      // combinedTriggers: [
+      // ...get().pageTriggers,
+      // ...get().visibleIncompleteTriggers
+      // ],
+      set,
+      get,
+      setDisplayedTriggers: (triggers: Trigger['id'][]) => {
+        set(() => ({
+          displayedTriggersIds: triggers
+        }))
+      },
 
-// export const useDifiStore = (getter:) => {
-//   const { removePageTrigger } = useDifiStore((s: DifiStore) => s.setters)
+      setPageTriggers: (triggers: Trigger[]) => {
+        const displayedTriggers = get().displayedTriggersIds
 
-// }
-
-type SetType = (
-  partial:
-    | DifiStore
-    | Partial<DifiStore>
-    | ((state: DifiStore) => DifiStore | Partial<DifiStore>),
-  replace?: boolean | undefined
-) => void
-
-export const useDifiStore = create<DifiStore>((set) => {
-  return {
-    visitor: {} as Visitor,
-    config: {} as Config,
-    conversions: [],
-    displayTriggers: [],
-    incompleteTriggers: [],
-    intently: true,
-    pageTriggers: [],
-    session: {} as Session,
-    set,
-    setters: {
+        set((prev: DifiStore) => {
+          const nonDismissed = prev.pageTriggers.filter((tr) =>
+            displayedTriggers.includes(tr.id)
+          )
+          // no pageTriggers = no triggers, rather than missing key.
+          // serverside omition. Means we set pagetriggers to nothing.
+          return {
+            pageTriggers: uniqueBy<Trigger>(
+              [...(triggers || []), ...nonDismissed],
+              'id'
+            )
+          }
+        })
+      },
       removePageTrigger: (id: Trigger['id']) => {
         set((prev: DifiStore) => ({
           pageTriggers: prev.pageTriggers.filter((trigger) => trigger.id !== id)
         }))
       }
+      // setIncompleteTriggers: (triggers: IncompleteTrigger[]) => {
+      //   set(() => ({
+      //     incompleteTriggers: triggers
+      //   }))
+      // }
     }
   }
-})
+)
+
+export const useStore = () => useDifiStore((s) => s)
 
 export const usePageTriggerState = () => {}
 // const set = useDifiStore((state) => state.set)
@@ -75,16 +98,8 @@ export const usePageTriggerState = () => {}
 export const usePageTriggers = () =>
   useDifiStore((state: DifiStore) => state.pageTriggers)
 
-export const useIncompleteTriggers = () =>
-  useDifiStore((state: DifiStore) => state.incompleteTriggers)
+// export const useIncompleteTriggers = () =>
+//   useDifiStore((state: DifiStore) => state.incompleteTriggers)
 
-export const useCombinedTriggers = () => {
-  const pageTriggers = usePageTriggers()
-  const incompleteTriggers = useIncompleteTriggers()
-  // const set = useDifiStore((state) => state.set)
-  // const setDisplays = makeSetter('displayTriggers', set)
-
-  // setDisplays((prev) => prev)
-
-  return [...pageTriggers, ...incompleteTriggers]
-}
+export const useDisplayedTriggers = () =>
+  useDifiStore((state: DifiStore) => state.displayedTriggersIds)

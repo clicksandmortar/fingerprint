@@ -1,25 +1,28 @@
 /// <reference types="node" />
 import { Session } from 'inspector';
-import { Config, Conversion, IncompleteTrigger, Trigger } from '../client/types';
+import { EqualityChecker, StateSelector, StoreApi } from 'zustand';
+import { Config, Conversion, Trigger } from '../client/types';
 import { Visitor } from '../visitors/types';
+declare type Set = StoreApi<DifiStore>['setState'];
+declare type Get = StoreApi<DifiStore>['getState'];
+declare type UseBoundStoreAlt<T> = <U>(selector: StateSelector<T, U>, equalityFn?: EqualityChecker<U>) => U & StoreApi<T>;
 export declare type DifiStore = {
     visitor: Visitor;
     session: Session;
     config: Config;
     intently: boolean;
     pageTriggers: Trigger[];
-    displayTriggers: Trigger['id'][];
-    incompleteTriggers: IncompleteTrigger[];
+    displayedTriggersIds: Trigger['id'][];
     conversions: Conversion[];
-    set: SetType;
-    setters: {
-        removePageTrigger: (id: Trigger['id']) => void;
-    };
+    set: Set;
+    get: Get;
+    setDisplayedTriggers: (triggers: Trigger['id'][]) => void;
+    setPageTriggers: (triggers: Trigger[]) => void;
+    removePageTrigger: (id: Trigger['id']) => void;
 };
-declare type SetType = (partial: DifiStore | Partial<DifiStore> | ((state: DifiStore) => DifiStore | Partial<DifiStore>), replace?: boolean | undefined) => void;
-export declare const useDifiStore: any;
+export declare const useDifiStore: UseBoundStoreAlt<DifiStore>;
+export declare const useStore: () => DifiStore & StoreApi<DifiStore>;
 export declare const usePageTriggerState: () => void;
-export declare const usePageTriggers: () => any;
-export declare const useIncompleteTriggers: () => any;
-export declare const useCombinedTriggers: () => any[];
+export declare const usePageTriggers: () => Trigger[] & StoreApi<DifiStore>;
+export declare const useDisplayedTriggers: () => string[] & StoreApi<DifiStore>;
 export {};

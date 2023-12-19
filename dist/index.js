@@ -10,9 +10,9 @@ var Cookies = _interopDefault(require('js-cookie'));
 var psl = _interopDefault(require('psl'));
 var uuid = require('uuid');
 var reactDeviceDetect = require('react-device-detect');
-var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
+var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var zustand = require('zustand');
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
@@ -685,33 +685,49 @@ function getReferrer() {
   };
 }
 
-var useDifiStore = zustand.create(function (set) {
+var useDifiStore = zustand.create(function (set, get) {
   return {
     visitor: {},
     config: {},
     conversions: [],
-    displayTriggers: [],
-    incompleteTriggers: [],
+    displayedTriggersIds: [],
     intently: true,
     pageTriggers: [],
     session: {},
     set: set,
-    setters: {
-      removePageTrigger: function removePageTrigger(id) {
-        set(function (prev) {
-          return {
-            pageTriggers: prev.pageTriggers.filter(function (trigger) {
-              return trigger.id !== id;
-            })
-          };
+    get: get,
+    setDisplayedTriggers: function setDisplayedTriggers(triggers) {
+      set(function () {
+        return {
+          displayedTriggersIds: triggers
+        };
+      });
+    },
+    setPageTriggers: function setPageTriggers(triggers) {
+      var displayedTriggers = get().displayedTriggersIds;
+      set(function (prev) {
+        var nonDismissed = prev.pageTriggers.filter(function (tr) {
+          return displayedTriggers.includes(tr.id);
         });
-      }
+        return {
+          pageTriggers: uniqueBy([].concat(triggers || [], nonDismissed), 'id')
+        };
+      });
+    },
+    removePageTrigger: function removePageTrigger(id) {
+      set(function (prev) {
+        return {
+          pageTriggers: prev.pageTriggers.filter(function (trigger) {
+            return trigger.id !== id;
+          })
+        };
+      });
     }
   };
 });
-var usePageTriggers = function usePageTriggers() {
-  return useDifiStore(function (state) {
-    return state.pageTriggers;
+var useStore = function useStore() {
+  return useDifiStore(function (s) {
+    return s;
   });
 };
 
@@ -1287,10 +1303,6 @@ function CollectorProvider(_ref) {
   var _useConfig = useConfig(),
     setConfig = _useConfig.setConfig,
     config = _useConfig.config.trigger;
-  var fuk = useConfig();
-  console.log({
-    fuk: fuk
-  });
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
     setVisitor = _useVisitor.setVisitor;
@@ -1317,22 +1329,18 @@ function CollectorProvider(_ref) {
   var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
-  var pageTriggers = usePageTriggers();
-  var _useDifiStore = useDifiStore(function (s) {
-      return s.setters;
-    }),
-    removePageTrigger = _useDifiStore.removePageTrigger;
-  var set = useDifiStore(function (state) {
-    return state.set;
-  });
+  var _useStore = useStore(),
+    removePageTrigger = _useStore.removePageTrigger,
+    pageTriggers = _useStore.pageTriggers,
+    displayedTriggersIds = _useStore.displayedTriggersIds,
+    setPageTriggers = _useStore.setPageTriggers,
+    setDisplayedTriggers = _useStore.setDisplayedTriggers,
+    set = _useStore.set;
   var _useIntently = useIntently(),
     setIntently = _useIntently.setIntently;
-  var _useState2 = React.useState([]),
-    displayTriggers = _useState2[0],
-    setDisplayedTriggers = _useState2[1];
-  var _useState3 = React.useState(new Map()),
-    foundWatchers = _useState3[0],
-    setFoundWatchers = _useState3[1];
+  var _useState2 = React.useState(new Map()),
+    foundWatchers = _useState2[0],
+    setFoundWatchers = _useState2[1];
   var _useConversions = useConversions(),
     setConversions = _useConversions.setConversions;
   var brand = useBrand();
@@ -1344,23 +1352,26 @@ function CollectorProvider(_ref) {
     return [].concat(pageTriggers, visibleIncompleteTriggers);
   }, [pageTriggers, visibleIncompleteTriggers]);
   var getIsBehaviourVisible = React__default.useCallback(function (type) {
-    if (displayTriggers.length === 0) return false;
-    if (displayTriggers.find(function (triggerId) {
+    if (displayedTriggersIds.length === 0) return false;
+    if (displayedTriggersIds.find(function (triggerId) {
       var _combinedTriggers$fin;
       return ((_combinedTriggers$fin = combinedTriggers.find(function (trigger) {
         return trigger.id === triggerId;
       })) === null || _combinedTriggers$fin === void 0 ? void 0 : _combinedTriggers$fin.behaviour) === type;
     })) return true;
     return false;
-  }, [displayTriggers, combinedTriggers]);
+  }, [displayedTriggersIds, combinedTriggers]);
   var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation, shouldAllowMultipleSimultaneous) {
     if (shouldAllowMultipleSimultaneous === void 0) {
       shouldAllowMultipleSimultaneous = false;
     }
+    console.log('aaa firing invocation', invocation);
     var appendTrigger = function appendTrigger(invokableTrigger) {
-      setDisplayedTriggers(function (prev) {
-        if (prev.includes(invokableTrigger.id)) return prev;
-        return [].concat(prev, [invokableTrigger.id]);
+      set(function (prev) {
+        if (prev.displayedTriggersIds.includes(invokableTrigger.id)) return prev;
+        return {
+          displayedTriggersIds: [].concat(prev.displayedTriggersIds, [invokableTrigger.id])
+        };
       });
     };
     var invokableTriggers = combinedTriggers.filter(function (trigger) {
@@ -1389,16 +1400,6 @@ function CollectorProvider(_ref) {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [visibleIncompleteTriggers, setDisplayedTriggerByInvocation]);
-  var setPageTriggers = React__default.useCallback(function (triggers) {
-    set(function (prev) {
-      var nonDismissed = prev.pageTriggers.filter(function (tr) {
-        return displayTriggers.includes(tr.id);
-      });
-      return {
-        pageTriggers: uniqueBy([].concat(triggers || [], nonDismissed), 'id')
-      };
-    });
-  }, [set, displayTriggers]);
   var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
     var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
       return handler.behaviour === _trigger.behaviour;
@@ -1407,8 +1408,8 @@ function CollectorProvider(_ref) {
     return potentialHandler;
   }, [handlers]);
   var removeActiveTrigger = React.useCallback(function (id) {
-    log("CollectorProvider: removing id:" + id + " from displayTriggers");
-    var refreshedTriggers = displayTriggers.filter(function (triggerId) {
+    log("CollectorProvider: removing id:" + id + " from displayedTriggersIds");
+    var refreshedTriggers = displayedTriggersIds.filter(function (triggerId) {
       return triggerId !== id;
     });
     setDisplayedTriggers(refreshedTriggers);
@@ -1423,14 +1424,14 @@ function CollectorProvider(_ref) {
       });
     });
     removePageTrigger(id);
-  }, [displayTriggers, log, setIncompleteTriggers, setVisibleTriggers, set, combinedTriggers]);
+  }, [displayedTriggersIds, log, setIncompleteTriggers, setVisibleTriggers, combinedTriggers]);
   var TriggerComponent = React__default.useCallback(function () {
-    if (!displayTriggers) return null;
+    if (!displayedTriggersIds) return null;
     var activeTriggers = combinedTriggers.filter(function (trigger) {
-      return displayTriggers.includes(trigger.id);
+      return displayedTriggersIds.includes(trigger.id);
     });
     if (!activeTriggers) {
-      error("CollectorProvider - TriggerComponent: No trigger found for displayTriggers", displayTriggers);
+      error("CollectorProvider - TriggerComponent: No trigger found for displayedTriggersIds", displayedTriggersIds);
       return null;
     }
     log('CollectorProvider - TriggerComponent: available handlers include: ', handlers);
@@ -1448,7 +1449,7 @@ function CollectorProvider(_ref) {
         return null;
       }
       var isTriggerOfSameBehaviourAlreadyVisible = getIsBehaviourVisible(trigger.behaviour);
-      if (!displayTriggers.includes(trigger.id) && isTriggerOfSameBehaviourAlreadyVisible && !handler.multipleOfSameBehaviourSupported) {
+      if (!displayedTriggersIds.includes(trigger.id) && isTriggerOfSameBehaviourAlreadyVisible && !handler.multipleOfSameBehaviourSupported) {
         log("CollectorProvider - TriggerComponent: Behaviour " + trigger.behaviour + " (triggerId: " + trigger.id + ") is already visible and does NOT support multiple triggers. Not showing.", trigger.id);
         return null;
       }
@@ -1460,7 +1461,7 @@ function CollectorProvider(_ref) {
       log('CollectorProvider: Potential component for trigger invalid. Running as regular func.');
       return null;
     });
-  }, [displayTriggers, log, handlers, error, getHandlerForTrigger, getIsBehaviourVisible, combinedTriggers]);
+  }, [displayedTriggersIds, log, handlers, error, getHandlerForTrigger, getIsBehaviourVisible, combinedTriggers]);
   React.useEffect(function () {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
@@ -1499,6 +1500,7 @@ function CollectorProvider(_ref) {
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
   var fireOnLoadTriggers = React.useCallback(function () {
+    console.log('aaa firing onload');
     if (!pageLoadTriggers) return;
     if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
     log('CollectorProvider: attempting to fire on-page-load trigger');
@@ -1517,7 +1519,7 @@ function CollectorProvider(_ref) {
           });
         }
         setIdleTimeout(getIdleStatusDelay());
-        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+        setPageTriggers((payload === null || payload === void 0 ? void 0 : payload.pageTriggers) || []);
         setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
