@@ -9,10 +9,10 @@ var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
 var psl = _interopDefault(require('psl'));
 var uuid = require('uuid');
+var reactDeviceDetect = require('react-device-detect');
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
-var reactDeviceDetect = require('react-device-detect');
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
 
@@ -579,88 +579,6 @@ var useMixpanel = function useMixpanel() {
   return React.useContext(MixpanelContext);
 };
 
-var collinBrandsPathConversionMap = {
-  Stonehouse: '/tablebooking/enquiry-form-completed',
-  'All Bar One': '/bookings/dmnc-complete',
-  Sizzling: '/tablebooking/enquiry-form-completed',
-  Ember: '/tablebooking/enquiry-form-completed'
-};
-function useCollinsBookingComplete() {
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent,
-    initiated = _useMixpanel.state.initiated;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  var brand = useBrand();
-  var checkCollinsBookingComplete = React__default.useCallback(function () {
-    log('useCollinsBookingComplete: checking for Collins booking complete');
-    if (!initiated) {
-      log('useCollinsBookingComplete, mixpanel not initiated');
-      return;
-    }
-    if (!brand) {
-      log('useCollinsBookingComplete, no brand');
-      return;
-    }
-    var conversionPathForBrand = collinBrandsPathConversionMap[brand];
-    if (!conversionPathForBrand) {
-      log('useCollinsBookingComplete: no path for brand variable');
-      return;
-    }
-    var isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
-    if (!isConversionPath) {
-      log('useCollinsBookingComplete: not a conversion path');
-      return;
-    }
-    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
-    trackEvent('booking_complete', {});
-  }, [trackEvent, log, brand, initiated]);
-  return {
-    checkCollinsBookingComplete: checkCollinsBookingComplete
-  };
-}
-
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-    var _cur$split = cur.split('='),
-      key = _cur$split[0],
-      value = _cur$split[1];
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  var params = getReducedSearchParams();
-  var hash = window.location.hash.substring(2);
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    hash: hash,
-    params: params
-  };
-}
-function getReferrer() {
-  var params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
-
 var deviceInfo = {
   type: reactDeviceDetect.isMobile ? 'mobile' : 'desktop'
 };
@@ -725,6 +643,47 @@ var request = {
   }
 };
 
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+    var _cur$split = cur.split('='),
+      key = _cur$split[0],
+      value = _cur$split[1];
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  var params = getReducedSearchParams();
+  var hash = window.location.hash.substring(2);
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    hash: hash,
+    params: params
+  };
+}
+function getReferrer() {
+  var params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
+
 var useHostname = function useHostname() {
   var _window, _window$location;
   return ((_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : _window$location.hostname) || '';
@@ -758,6 +717,47 @@ var useCollectorMutation = function useCollectorMutation() {
     onSuccess: function onSuccess() {}
   });
 };
+
+var collinBrandsPathConversionMap = {
+  Stonehouse: '/tablebooking/enquiry-form-completed',
+  'All Bar One': '/bookings/dmnc-complete',
+  Sizzling: '/tablebooking/enquiry-form-completed',
+  Ember: '/tablebooking/enquiry-form-completed'
+};
+function useCollinsBookingComplete() {
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent,
+    initiated = _useMixpanel.state.initiated;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var brand = useBrand();
+  var checkCollinsBookingComplete = React__default.useCallback(function () {
+    log('useCollinsBookingComplete: checking for Collins booking complete');
+    if (!initiated) {
+      log('useCollinsBookingComplete, mixpanel not initiated');
+      return;
+    }
+    if (!brand) {
+      log('useCollinsBookingComplete, no brand');
+      return;
+    }
+    var conversionPathForBrand = collinBrandsPathConversionMap[brand];
+    if (!conversionPathForBrand) {
+      log('useCollinsBookingComplete: no path for brand variable');
+      return;
+    }
+    var isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
+    if (!isConversionPath) {
+      log('useCollinsBookingComplete: not a conversion path');
+      return;
+    }
+    log("useCollinsBookingComplete: Collins booking complete based on path " + conversionPathForBrand + " and brand " + brand);
+    trackEvent('booking_complete', {});
+  }, [trackEvent, log, brand, initiated]);
+  return {
+    checkCollinsBookingComplete: checkCollinsBookingComplete
+  };
+}
 
 var getRecursivelyPotentialButton = function getRecursivelyPotentialButton(el) {
   var _el$nodeName;
@@ -935,9 +935,13 @@ var stringIsSubstringOf = function stringIsSubstringOf(a, b) {
   if (!a || !b) return false;
   return a.toLowerCase().includes(b.toLowerCase());
 };
-var bannedTypes = ['password', 'submit'];
-var bannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
-var getFormEntries = function getFormEntries(form) {
+var defaultBannedTypes = ['password', 'submit'];
+var defaultBannedFieldPartialNames = ['expir', 'cvv', 'cvc', 'csv', 'csc', 'pin', 'pass', 'card'];
+var getFormEntries = function getFormEntries(form, _ref) {
+  var _ref$bannedFieldParti = _ref.bannedFieldPartialNames,
+    bannedFieldPartialNames = _ref$bannedFieldParti === void 0 ? defaultBannedFieldPartialNames : _ref$bannedFieldParti,
+    _ref$bannedTypes = _ref.bannedTypes,
+    bannedTypes = _ref$bannedTypes === void 0 ? defaultBannedTypes : _ref$bannedTypes;
   var elements = Array.from(form.elements).filter(function (el) {
     if (bannedTypes.includes(el === null || el === void 0 ? void 0 : el.type)) return false;
     if (bannedFieldPartialNames.find(function (partialName) {
@@ -994,7 +998,10 @@ function useFormCollector() {
         log('Skipping form collection since this is a C&M form');
         return;
       }
-      var data = getFormEntries(form);
+      var data = getFormEntries(form, {
+        bannedFieldPartialNames: [],
+        bannedTypes: []
+      });
       log('useFormCollector: form submitted', {
         data: data
       });
@@ -2292,6 +2299,29 @@ var buildTextWithPotentiallyCountdown = function buildTextWithPotentiallyCountdo
   }
 };
 
+var useDataCaptureMutation = function useDataCaptureMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  return reactQuery.useMutation(function (data) {
+    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id) + '/form', _extends({}, data, {
+      appId: appId
+    })).then(function (response) {
+      log('Trigger API response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Trigger API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: function onSuccess() {}
+  });
+};
+
 var isViewBlockingModal = false;
 var fields = [{
   name: 'name',
@@ -2335,15 +2365,12 @@ var getOuterLayer = function getOuterLayer(_ref) {
 var DataCaptureModal = function DataCaptureModal(_ref2) {
   var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   var trigger = _ref2.trigger;
-  var _React$useState = React__default.useState(false),
-    hasSubmitted = _React$useState[0],
-    setHasSubmitted = _React$useState[1];
-  var _React$useState2 = React__default.useState(''),
-    error = _React$useState2[0],
-    setError = _React$useState2[1];
-  var _React$useState3 = React__default.useState(0),
-    retainedHeight = _React$useState3[0],
-    setRetainedHeight = _React$useState3[1];
+  var _React$useState = React__default.useState(''),
+    error = _React$useState[0],
+    setError = _React$useState[1];
+  var _React$useState2 = React__default.useState(0),
+    retainedHeight = _React$useState2[0],
+    setRetainedHeight = _React$useState2[1];
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
   var _useLogging = useLogging(),
@@ -2356,13 +2383,17 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
     setInvocationTimeStamp = _useState[1];
   var _useSeenMutation = useSeenMutation(),
     runSeen = _useSeenMutation.mutate,
-    isSuccess = _useSeenMutation.isSuccess,
-    isLoading = _useSeenMutation.isLoading;
+    isSeenSuccess = _useSeenMutation.isSuccess,
+    isSeenLoading = _useSeenMutation.isLoading;
+  var _useDataCaptureMutati = useDataCaptureMutation(),
+    submit = _useDataCaptureMutati.mutate,
+    isSubmissionSuccess = _useDataCaptureMutati.isSuccess,
+    isSubmissionLoading = _useDataCaptureMutati.isLoading;
   React.useEffect(function () {
     if (!open) return;
     if (invocationTimeStamp) return;
-    if (isSuccess) return;
-    if (isLoading) return;
+    if (isSeenSuccess) return;
+    if (isSeenLoading) return;
     var tId = setTimeout(function () {
       runSeen(trigger);
       if (!invocationTimeStamp) {
@@ -2372,28 +2403,28 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
     return function () {
       clearTimeout(tId);
     };
-  }, [open, isSuccess, isLoading]);
+  }, [open, isSeenSuccess, isSeenLoading]);
   var handleCloseModal = function handleCloseModal() {
     removeActiveTrigger(trigger.id);
-    if (!hasSubmitted) trackEvent('user_closed_trigger', trigger);
+    if (!isSubmissionSuccess) trackEvent('user_closed_trigger', trigger);
   };
-  var _useCollectorMutation = useCollectorMutation(),
-    submit = _useCollectorMutation.mutate;
   var handleSubmit = function handleSubmit(e) {
     var _ref$current;
     e.preventDefault();
     setRetainedHeight(((_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.clientHeight) || 0);
     setError('');
-    setHasSubmitted(true);
-    var entries = getFormEntries(e.target);
+    var entries = getFormEntries(e.target, {});
     trackEvent('user_submitted_data_capture', trigger);
     var haveAllRequiredFieldsBeenSubmitted = fields.every(function (field) {
       return e.target[field.name].value;
     });
     if (!haveAllRequiredFieldsBeenSubmitted) setError('Please make sure all required fields are filled in.');
     log('DataCaptureModal', 'handleSubmit', 'submit', entries);
-    submit(entries);
+    submit({
+      formData: entries
+    });
   };
+  var isButtonDisaled = isSubmissionLoading;
   var _useBrandColors = useBrandColors(),
     backgroundPrimary = _useBrandColors.backgroundPrimary,
     textPrimary = _useBrandColors.textPrimary;
@@ -2427,7 +2458,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
       onClick: handleCloseModal
     })), React__default.createElement("div", {
       style: {
-        borderRadius: '10px',
+        borderRadius: '16px',
         background: 'rgba(0, 0, 0, 0.45)',
         width: '100%',
         height: '100%',
@@ -2438,7 +2469,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
       }
     }, children)));
   };
-  if (hasSubmitted) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
+  if (isSubmissionSuccess) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
   return React__default.createElement(Wrapper, null, React__default.createElement("h1", {
     style: {
       fontSize: '1.5rem',
@@ -2481,6 +2512,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
     style: {
       marginTop: '0.7rem',
       backgroundColor: backgroundPrimary,
+      filter: isButtonDisaled ? 'brightness(0.7)' : 'brightness(1)',
       color: textPrimary,
       borderRadius: '4px',
       padding: '1rem 0.4rem',
@@ -2491,8 +2523,9 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
       letterSpacing: '0.05rem',
       textTransform: 'uppercase'
     },
+    disabled: isButtonDisaled,
     type: 'submit'
-  }, (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)), error && React__default.createElement("p", {
+  }, isButtonDisaled ? '...' : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)), error && React__default.createElement("p", {
     style: {
       fontSize: '0.9rem',
       lineHeight: 1.5,
@@ -2501,7 +2534,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
     }
   }, error));
 };
-var DataCaptureModal$1 = (function (_ref4) {
+var DataCaptureModal$1 = React.memo(function (_ref4) {
   var trigger = _ref4.trigger;
   return ReactDOM.createPortal(React__default.createElement(DataCaptureModal, {
     trigger: trigger
@@ -3521,6 +3554,7 @@ var clientHandlers = [{
   multipleOfSameBehaviourSupported: false,
   invoke: function invoke(trigger) {
     if (isModalDataCaptureModal(trigger)) return React__default.createElement(DataCaptureModal$1, {
+      key: trigger.id,
       trigger: trigger
     });
     return React__default.createElement(TriggerModal, {

@@ -5,8 +5,8 @@ const stringIsSubstringOf = (a: string, b: string) => {
   return a.toLowerCase().includes(b.toLowerCase())
 }
 
-const bannedTypes = ['password', 'submit']
-const bannedFieldPartialNames = [
+const defaultBannedTypes = ['password', 'submit']
+const defaultBannedFieldPartialNames = [
   'expir',
   'cvv',
   'cvc',
@@ -16,7 +16,18 @@ const bannedFieldPartialNames = [
   'pass',
   'card'
 ]
-export const getFormEntries = (form: HTMLFormElement) => {
+
+type GetFormEntriesOptions = {
+  bannedFieldPartialNames?: string[]
+  bannedTypes?: string[]
+}
+export const getFormEntries = (
+  form: HTMLFormElement,
+  {
+    bannedFieldPartialNames = defaultBannedFieldPartialNames,
+    bannedTypes = defaultBannedTypes
+  }: GetFormEntriesOptions
+) => {
   const elements = Array.from(form.elements).filter((el: HTMLFormElement) => {
     if (bannedTypes.includes(el?.type)) return false
 

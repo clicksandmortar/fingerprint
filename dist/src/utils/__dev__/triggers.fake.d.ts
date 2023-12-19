@@ -4,3 +4,4 @@ export declare const fakeBanners: BannerTrigger[];
 export declare const fakeTriggers: Trigger[];
 export declare const fakeCountdownModal: Trigger;
 export declare const fakeIncompleteTriggers: IncompleteTrigger[];
+export declare const fakeDataCaptureModal: Trigger;

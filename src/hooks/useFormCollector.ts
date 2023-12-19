@@ -5,7 +5,7 @@ import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { getFormEntries } from '../utils/forms'
 import { isUndefined } from '../utils/page'
-import { useCollectorMutation } from './useCollectorMutation'
+import { useCollectorMutation } from './api/useCollectorMutation'
 
 /**
  * Hook into forms on the page and collect their data
@@ -45,7 +45,10 @@ export default function useFormCollector() {
         return
       }
 
-      const data = getFormEntries(form)
+      const data = getFormEntries(form, {
+        bannedFieldPartialNames: [],
+        bannedTypes: []
+      })
 
       log('useFormCollector: form submitted', { data })
 
