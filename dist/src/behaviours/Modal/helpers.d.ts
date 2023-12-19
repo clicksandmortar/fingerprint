@@ -20,3 +20,10 @@ export declare const useModalDimensionsBasedOnImage: ({ imageURL }: {
 };
 export declare const isModalDataCaptureModal: (trigger: any) => trigger is DataCaptureTrigger;
 export declare function splitSenseOfUrgencyText(text: string): string[];
+export declare const buildTextWithPotentiallyCountdown: (text: string) => {
+    text: string;
+} | {
+    text1: string;
+    hasCountdown: boolean;
+    text2?: string | undefined;
+};

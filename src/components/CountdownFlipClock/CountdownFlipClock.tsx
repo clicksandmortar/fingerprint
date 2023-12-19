@@ -93,7 +93,6 @@ type State = {
   haveStylesLoaded: boolean
 }
 
-// class component
 export class CountdownFlipClock extends React.Component<FlipClockProps, State> {
   constructor(props: FlipClockProps) {
     super(props)
@@ -172,7 +171,6 @@ export class CountdownFlipClock extends React.Component<FlipClockProps, State> {
   }
 
   render() {
-    // state object destructuring
     const {
       hours,
       minutes,

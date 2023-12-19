@@ -2,16 +2,16 @@
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import CloseButton from '../../../components/CloseButton'
-import { CountdownFlipClock } from '../../../components/CountdownFlipClock/CountdownFlipClock'
 import { useLogging } from '../../../context/LoggingContext'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
 import {
   getIsModalFullyClickable,
   prependClass,
-  splitSenseOfUrgencyText,
   useModalDimensionsBasedOnImage
 } from '../helpers'
 import { ModalProps } from '../Modal.types'
+import Header from './components/Header'
+import Paragraph from './components/Paragraph'
 
 const StandardModal = ({
   trigger,
@@ -259,76 +259,6 @@ const StandardModal = ({
     [handleCloseModal]
   )
 
-  // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
-  // const { formattedCountdown: heading } = useCountdown({
-  //   onZero: () => handleCloseModal({}),
-  //   interpolate: {
-  //     text: trigger.data?.heading || '',
-  //     structure: trigger.data as Record<string, unknown>
-  //   },
-  //   formatDate: formatSimpler
-  // })
-
-  // // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
-  // const { formattedCountdown: paragraph } = useCountdown({
-  //   onZero: () => handleCloseModal({}),
-  //   interpolate: {
-  //     text: trigger.data?.heading || '',
-  //     structure: trigger.data as Record<string, unknown>
-  //   },
-  //   formatDate: formatSimpler
-  // })
-
-  const buildTextWithPotentiallyCountdown = (
-    text: string
-  ):
-    | { text: string }
-    | { text1: string; hasCountdown: boolean; text2?: string } => {
-    let hasCountdown = false
-    let text1 = ''
-    let text2 = ''
-
-    const split = splitSenseOfUrgencyText(text)
-    text1 = split[0]
-
-    if (split.length > 1) {
-      text2 = split[1]
-      hasCountdown = true
-      return { hasCountdown, text1, text2 }
-    } else {
-      return { text: text1 }
-    }
-  }
-
-  const HeaderComponent = React.useCallback(() => {
-    const countdownEndTime = trigger?.data?.countdownEndTime
-
-    const header = buildTextWithPotentiallyCountdown(
-      trigger?.data?.heading || ''
-    )
-    if (!countdownEndTime)
-      return (
-        <h1 className={prependClass('main-text')}>{trigger?.data?.heading}</h1>
-      )
-    if (!('hasCountdown' in header))
-      return (
-        <h1 className={prependClass('main-text')}>{trigger?.data?.heading}</h1>
-      )
-
-    return (
-      <div>
-        <h1 className={prependClass('main-text')}>{header.text1}</h1>
-        <div style={{ maxWidth: 220, margin: 'auto' }}>
-          <CountdownFlipClock targetDate={new Date(countdownEndTime)} />
-        </div>
-
-        {header.text2 && (
-          <h1 className={prependClass('main-text')}>{header.text2}</h1>
-        )}
-      </div>
-    )
-  }, [trigger])
-
   if (!stylesLoaded) {
     return null
   }
@@ -339,17 +269,6 @@ const StandardModal = ({
     )
     return null
   }
-  // let countdownTimer = null
-
-  // let header = trigger?.data?.heading || ''
-  // let headerP2 = ''
-
-  // if (countdownEndTime) {
-  //   const { string1, string2 } = splitSenseOfUrgencyText(header)
-  //   header = string1
-  //   headerP2 = string2
-  //   countdownTimer = countdownEndTime
-  // }
 
   return (
     <div className={prependClass('overlay')}>
@@ -370,17 +289,8 @@ const StandardModal = ({
           </div>
 
           <div className={prependClass('text-container')}>
-            {/* <h1 className={prependClass('main-text')}>{header}</h1>
-            {countdownTimer && (
-              <CountdownFlipClock targetDate={new Date(countdownTimer)} />
-            )}
-            {!!headerP2 && (
-              <h1 className={prependClass('main-text')}>{headerP2}</h1>
-            )} */}
-            {<HeaderComponent />}
-            <p className={prependClass('sub-text')}>
-              {trigger?.data?.paragraph}
-            </p>
+            <Header trigger={trigger} />
+            <Paragraph trigger={trigger} />
           </div>
 
           {!isModalFullyClickable && (

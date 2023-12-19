@@ -54,7 +54,7 @@ export const fakeBanners: BannerTrigger[] = [
     }
   }
 ]
-
+// @ts-ignore
 export const fakeTriggers: Trigger[] = [
   ...fakeBanners,
   {
@@ -82,6 +82,21 @@ export const fakeTriggers: Trigger[] = [
     }
   }
 ]
+
+export const fakeCountdownModal: Trigger = {
+  id: 'modal-trigger-urgency',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL:
+      'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'Only {{countdownEndTime}} left to horse around!',
+    paragraph: 'Use it wisely',
+    countdownEndTime: '2024-03-31T23:59'
+  }
+}
 
 export const fakeIncompleteTriggers: IncompleteTrigger[] = [
   {

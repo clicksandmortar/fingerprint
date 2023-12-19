@@ -1233,6 +1233,57 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
   return getVisitorId() !== null;
 };
 
+var banner = {
+  id: '7af0fc17-6508-4b5a-9003-1039fc473250',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_BANNER',
+  data: {
+    buttonText: 'Run',
+    buttonURL: 'https://google.com'
+  }
+};
+var fakeBanners = [_extends({}, banner, {
+  id: "position: 'left',",
+  data: _extends({}, banner.data, {
+    position: 'left',
+    buttonIcon: 'ticket',
+    marketingText: 'AAAA!'
+  })
+}), _extends({}, banner, {
+  id: "position: 'top',",
+  data: _extends({}, banner.data, {
+    position: 'top',
+    buttonText: 'Clickable'
+  })
+}), _extends({}, banner, {
+  id: "countdownEndTime: '2024-03-31T23:59',",
+  data: _extends({}, banner.data, {
+    marketingText: 'You only have {{ countdownEndTime }} before the horse comes',
+    countdownEndTime: '2024-03-31T23:59',
+    position: 'bottom'
+  })
+}), _extends({}, banner, {
+  id: "position: 'right',",
+  data: _extends({}, banner.data, {
+    position: 'right',
+    buttonText: 'CLickable thing',
+    buttonIcon: 'heart'
+  })
+})];
+var fakeCountdownModal = {
+  id: 'modal-trigger-urgency',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'Only {{countdownEndTime}} left to horse around!',
+    paragraph: 'Use it wisely',
+    countdownEndTime: '2024-03-31T23:59'
+  }
+};
+
 function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
@@ -1471,7 +1522,7 @@ function CollectorProvider(_ref) {
           });
         }
         setIdleTimeout(getIdleStatusDelay());
-        setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+        setPageTriggers([fakeCountdownModal]);
         setConfig(payload.config);
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
@@ -2271,6 +2322,26 @@ function splitSenseOfUrgencyText(text) {
   var split = text.split(/\{\{\s*countdownEndTime\s*\}\}/i);
   return split;
 }
+var buildTextWithPotentiallyCountdown = function buildTextWithPotentiallyCountdown(text) {
+  var hasCountdown = false;
+  var text1 = '';
+  var text2 = '';
+  var split = splitSenseOfUrgencyText(text);
+  text1 = split[0];
+  if (split.length > 1) {
+    text2 = split[1];
+    hasCountdown = true;
+    return {
+      hasCountdown: hasCountdown,
+      text1: text1,
+      text2: text2
+    };
+  } else {
+    return {
+      text: text1
+    };
+  }
+};
 
 var isViewBlockingModal = false;
 var fields = [{
@@ -2812,8 +2883,72 @@ var fontSize = '2em';
 var cardFontScaleFactor = 1.5;
 var CSS = "\n@import url(\"https://fonts.googleapis.com/css?family=Droid+Sans+Mono\");\n* {\n  box-sizing: border-box;\n}\n\nbody {\n  margin: 0;\n}\n\n#app {\n  display: flex;\n  position: relative;\n  width: 100%;\n  min-height: 100vh;\n  justify-content: center;\n  align-items: center;\n  background-color: #FBAB7E;\n  background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%);\n}\n\n.flipClock {\n  display: flex;\n  justify-content: space-between;\n}\n\n.flipUnitContainer {\n  display: block;\n  position: relative;\n  width: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n  height: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n  perspective-origin: 50% 50%;\n  perspective: 300px;\n  background-color: orange;\n  border-radius: 3px;\n  box-shadow: 0px 10px 10px -10px grey;\n}\n\n.upperCard, .lowerCard {\n  display: flex;\n  position: relative;\n  justify-content: center;\n  width: 100%;\n  height: 50%;\n  overflow: hidden;\n  border: 1px solid whitesmoke;\n}\n\n.upperCard span, .lowerCard span {\n  font-size: " + fontSize + ";\n  font-family: \"Droid Sans Mono\", monospace;\n  font-weight: lighter;\n  color: green;\n}\n\n.upperCard {\n  align-items: flex-end;\n  border-bottom: 0.5px solid whitesmoke;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.upperCard span {\n  transform: translateY(50%);\n}\n\n.lowerCard {\n  align-items: flex-start;\n  border-top: 0.5px solid whitesmoke;\n  border-bottom-left-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.lowerCard span {\n  transform: translateY(-50%);\n}\n\n.flipCard {\n  display: flex;\n  justify-content: center;\n  position: absolute;\n  left: 0;\n  width: 100%;\n  height: 50%;\n  overflow: hidden;\n  -webkit-backface-visibility: hidden;\n          backface-visibility: hidden;\n}\n.flipCard span {\n  font-family: \"Droid Sans Mono\", monospace;\n  font-size: " + fontSize + ";\n  font-weight: lighter;\n  color: green;\n}\n.flipCard.unfold {\n  top: 50%;\n  align-items: flex-start;\n  transform-origin: 50% 0%;\n  transform: rotateX(180deg);\n  background-color: orange;\n  border-bottom-left-radius: 3px;\n  border-bottom-right-radius: 3px;\n  border: 0.5px solid whitesmoke;\n  border-top: 0.5px solid whitesmoke;\n}\n.flipCard.unfold span {\n  transform: translateY(-50%);\n}\n.flipCard.fold {\n  top: 0%;\n  align-items: flex-end;\n  transform-origin: 50% 100%;\n  transform: rotateX(0deg);\n  background-color: orange;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n  border: 0.5px solid whitesmoke;\n  border-bottom: 0.5px solid whitesmoke;\n}\n.flipCard.fold span {\n  transform: translateY(50%);\n}\n\n.fold {\n  -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n          animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n  transform-style: preserve-3d;\n}\n\n.unfold {\n  -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n          animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n  transform-style: preserve-3d;\n}\n\n@-webkit-keyframes fold {\n  0% {\n    transform: rotateX(0deg);\n  }\n  100% {\n    transform: rotateX(-180deg);\n  }\n}\n\n@keyframes fold {\n  0% {\n    transform: rotateX(0deg);\n  }\n  100% {\n    transform: rotateX(-180deg);\n  }\n}\n@-webkit-keyframes unfold {\n  0% {\n    transform: rotateX(180deg);\n  }\n  100% {\n    transform: rotateX(0deg);\n  }\n}\n@keyframes unfold {\n  0% {\n    transform: rotateX(180deg);\n  }\n  100% {\n    transform: rotateX(0deg);\n  }\n}\n";
 
+var Header = function Header(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
+  var trigger = _ref.trigger;
+  var countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  var StdHeader = function StdHeader(_ref2) {
+    var text = _ref2.text;
+    return React__default.createElement("h1", {
+      className: prependClass('main-text')
+    }, text || '');
+  };
+  var texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading) || '');
+  if (!countdownEndTime) return React__default.createElement(StdHeader, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading
+  });
+  if (!('hasCountdown' in texts)) return React__default.createElement(StdHeader, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading
+  });
+  return React__default.createElement("div", null, React__default.createElement(StdHeader, {
+    text: texts.text1
+  }), React__default.createElement("div", {
+    style: {
+      maxWidth: 220,
+      margin: 'auto'
+    }
+  }, React__default.createElement(CountdownFlipClock, {
+    targetDate: new Date(countdownEndTime)
+  })), texts.text2 && React__default.createElement(StdHeader, {
+    text: texts.text2
+  }));
+};
+var Header$1 = React.memo(Header);
+
+var Paragraph = function Paragraph(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
+  var trigger = _ref.trigger;
+  var countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  var StdParagraph = function StdParagraph(_ref2) {
+    var text = _ref2.text;
+    return React__default.createElement("p", {
+      className: prependClass('sub-text')
+    }, text || '');
+  };
+  var texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.paragraph) || '');
+  if (!countdownEndTime) return React__default.createElement(StdParagraph, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph
+  });
+  if (!('hasCountdown' in texts)) return React__default.createElement(StdParagraph, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph
+  });
+  return React__default.createElement("div", null, React__default.createElement(StdParagraph, {
+    text: texts.text1
+  }), React__default.createElement("div", {
+    style: {
+      maxWidth: 220,
+      margin: 'auto'
+    }
+  }, React__default.createElement(CountdownFlipClock, {
+    targetDate: new Date(countdownEndTime)
+  })), texts.text2 && React__default.createElement(StdParagraph, {
+    text: texts.text2
+  }));
+};
+var Paragraph$1 = React.memo(Paragraph);
+
 var StandardModal = function StandardModal(_ref) {
-  var _trigger$data, _trigger$data6, _trigger$data7, _trigger$data8;
+  var _trigger$data, _trigger$data2, _trigger$data3;
   var trigger = _ref.trigger,
     handleClickCallToAction = _ref.handleClickCallToAction,
     handleCloseModal = _ref.handleCloseModal;
@@ -2866,49 +3001,6 @@ var StandardModal = function StandardModal(_ref) {
     e.stopPropagation();
     return handleCloseModal(e);
   }, [handleCloseModal]);
-  var buildTextWithPotentiallyCountdown = function buildTextWithPotentiallyCountdown(text) {
-    var hasCountdown = false;
-    var text1 = '';
-    var text2 = '';
-    var split = splitSenseOfUrgencyText(text);
-    text1 = split[0];
-    if (split.length > 1) {
-      text2 = split[1];
-      hasCountdown = true;
-      return {
-        hasCountdown: hasCountdown,
-        text1: text1,
-        text2: text2
-      };
-    } else {
-      return {
-        text: text1
-      };
-    }
-  };
-  var HeaderComponent = React__default.useCallback(function () {
-    var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-    var countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.countdownEndTime;
-    var header = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading) || '');
-    if (!countdownEndTime) return React__default.createElement("h1", {
-      className: prependClass('main-text')
-    }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading);
-    if (!('hasCountdown' in header)) return React__default.createElement("h1", {
-      className: prependClass('main-text')
-    }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.heading);
-    return React__default.createElement("div", null, React__default.createElement("h1", {
-      className: prependClass('main-text')
-    }, header.text1), React__default.createElement("div", {
-      style: {
-        maxWidth: 220,
-        margin: 'auto'
-      }
-    }, React__default.createElement(CountdownFlipClock, {
-      targetDate: new Date(countdownEndTime)
-    })), header.text2 && React__default.createElement("h1", {
-      className: prependClass('main-text')
-    }, header.text2));
-  }, [trigger]);
   if (!stylesLoaded) {
     return null;
   }
@@ -2936,22 +3028,24 @@ var StandardModal = function StandardModal(_ref) {
     onClick: handleClickCloseFinal
   })), React__default.createElement("div", {
     className: prependClass('text-container')
-  }, React__default.createElement(HeaderComponent, null), React__default.createElement("p", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
+  }, React__default.createElement(Header$1, {
+    trigger: trigger
+  }), React__default.createElement(Paragraph$1, {
+    trigger: trigger
+  })), !isModalFullyClickable && React__default.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'flex-end'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonURL,
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL,
     className: prependClass('cta'),
     onClick: handleClickCallToAction,
     style: {
       fontSize: '1.3rem',
       padding: '0.3rem 1rem'
     }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data8 = trigger.data) === null || _trigger$data8 === void 0 ? void 0 : _trigger$data8.buttonText))))));
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.buttonText))))));
 };
 
 var primaryColor = "rgb(33,147,174)";

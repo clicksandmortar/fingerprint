@@ -1,5 +1,5 @@
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React__default, { useContext, createContext, useState, useEffect, useCallback, useMemo, useRef, createElement } from 'react';
+import React__default, { useContext, createContext, useState, useEffect, useCallback, useMemo, useRef, memo, createElement } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactDOM from 'react-dom';
 import mixpanel from 'mixpanel-browser';
@@ -1146,6 +1146,20 @@ const hasVisitorIDInURL = () => {
   return getVisitorId() !== null;
 };
 
+const fakeCountdownModal = {
+  id: 'modal-trigger-urgency',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL: 'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png',
+    buttonText: 'Click me',
+    buttonURL: 'http://www.google.com',
+    heading: 'Only {{countdownEndTime}} left to horse around!',
+    paragraph: 'Use it wisely',
+    countdownEndTime: '2024-03-31T23:59'
+  }
+};
+
 function CollectorProvider({
   children,
   handlers = []
@@ -1364,7 +1378,7 @@ function CollectorProvider({
       });
     }
     setIdleTimeout(getIdleStatusDelay());
-    setPageTriggers(payload === null || payload === void 0 ? void 0 : payload.pageTriggers);
+    setPageTriggers([fakeCountdownModal]);
     setConfig(payload.config);
     setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
     setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
@@ -2146,6 +2160,26 @@ function splitSenseOfUrgencyText(text) {
   const split = text.split(/\{\{\s*countdownEndTime\s*\}\}/i);
   return split;
 }
+const buildTextWithPotentiallyCountdown = text => {
+  let hasCountdown = false;
+  let text1 = '';
+  let text2 = '';
+  const split = splitSenseOfUrgencyText(text);
+  text1 = split[0];
+  if (split.length > 1) {
+    text2 = split[1];
+    hasCountdown = true;
+    return {
+      hasCountdown,
+      text1,
+      text2
+    };
+  } else {
+    return {
+      text: text1
+    };
+  }
+};
 
 const isViewBlockingModal = false;
 const fields = [{
@@ -3163,12 +3197,76 @@ body {
 }
 `;
 
+const Header = ({
+  trigger
+}) => {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
+  const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  const StdHeader = ({
+    text
+  }) => React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, text || '');
+  const texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading) || '');
+  if (!countdownEndTime) return React__default.createElement(StdHeader, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading
+  });
+  if (!('hasCountdown' in texts)) return React__default.createElement(StdHeader, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading
+  });
+  return React__default.createElement("div", null, React__default.createElement(StdHeader, {
+    text: texts.text1
+  }), React__default.createElement("div", {
+    style: {
+      maxWidth: 220,
+      margin: 'auto'
+    }
+  }, React__default.createElement(CountdownFlipClock, {
+    targetDate: new Date(countdownEndTime)
+  })), texts.text2 && React__default.createElement(StdHeader, {
+    text: texts.text2
+  }));
+};
+var Header$1 = memo(Header);
+
+const Paragraph = ({
+  trigger
+}) => {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
+  const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  const StdParagraph = ({
+    text
+  }) => React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, text || '');
+  const texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.paragraph) || '');
+  if (!countdownEndTime) return React__default.createElement(StdParagraph, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph
+  });
+  if (!('hasCountdown' in texts)) return React__default.createElement(StdParagraph, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph
+  });
+  return React__default.createElement("div", null, React__default.createElement(StdParagraph, {
+    text: texts.text1
+  }), React__default.createElement("div", {
+    style: {
+      maxWidth: 220,
+      margin: 'auto'
+    }
+  }, React__default.createElement(CountdownFlipClock, {
+    targetDate: new Date(countdownEndTime)
+  })), texts.text2 && React__default.createElement(StdParagraph, {
+    text: texts.text2
+  }));
+};
+var Paragraph$1 = memo(Paragraph);
+
 const StandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }) => {
-  var _trigger$data, _trigger$data6, _trigger$data7, _trigger$data8;
+  var _trigger$data, _trigger$data2, _trigger$data3;
   const {
     error
   } = useLogging();
@@ -3403,49 +3501,6 @@ const StandardModal = ({
     e.stopPropagation();
     return handleCloseModal(e);
   }, [handleCloseModal]);
-  const buildTextWithPotentiallyCountdown = text => {
-    let hasCountdown = false;
-    let text1 = '';
-    let text2 = '';
-    const split = splitSenseOfUrgencyText(text);
-    text1 = split[0];
-    if (split.length > 1) {
-      text2 = split[1];
-      hasCountdown = true;
-      return {
-        hasCountdown,
-        text1,
-        text2
-      };
-    } else {
-      return {
-        text: text1
-      };
-    }
-  };
-  const HeaderComponent = React__default.useCallback(() => {
-    var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-    const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.countdownEndTime;
-    const header = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading) || '');
-    if (!countdownEndTime) return React__default.createElement("h1", {
-      className: prependClass('main-text')
-    }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading);
-    if (!('hasCountdown' in header)) return React__default.createElement("h1", {
-      className: prependClass('main-text')
-    }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.heading);
-    return React__default.createElement("div", null, React__default.createElement("h1", {
-      className: prependClass('main-text')
-    }, header.text1), React__default.createElement("div", {
-      style: {
-        maxWidth: 220,
-        margin: 'auto'
-      }
-    }, React__default.createElement(CountdownFlipClock, {
-      targetDate: new Date(countdownEndTime)
-    })), header.text2 && React__default.createElement("h1", {
-      className: prependClass('main-text')
-    }, header.text2));
-  }, [trigger]);
   if (!stylesLoaded) {
     return null;
   }
@@ -3473,22 +3528,24 @@ const StandardModal = ({
     onClick: handleClickCloseFinal
   })), React__default.createElement("div", {
     className: prependClass('text-container')
-  }, React__default.createElement(HeaderComponent, null), React__default.createElement("p", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
+  }, React__default.createElement(Header$1, {
+    trigger: trigger
+  }), React__default.createElement(Paragraph$1, {
+    trigger: trigger
+  })), !isModalFullyClickable && React__default.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'flex-end'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonURL,
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL,
     className: prependClass('cta'),
     onClick: handleClickCallToAction,
     style: {
       fontSize: '1.3rem',
       padding: '0.3rem 1rem'
     }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data8 = trigger.data) === null || _trigger$data8 === void 0 ? void 0 : _trigger$data8.buttonText))))));
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.buttonText))))));
 };
 
 const primaryColor = `rgb(33,147,174)`;
