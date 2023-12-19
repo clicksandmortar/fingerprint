@@ -2,6 +2,11 @@ import React from 'react'
 import { useBrandColors } from '../../hooks/useBrandConfig'
 import { getDiffInDHMS } from '../../utils/date'
 
+/**
+ * Note: For some reason the flip animation gets broken whenever you try to convert this into a fully functional component.
+ * If you need to add more props or hook logic, use the HOC at the bottom of the file.
+ */
+
 const fontSize = '2em'
 const cardFontScaleFactor = 1.5
 
