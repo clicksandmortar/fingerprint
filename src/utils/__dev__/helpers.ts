@@ -1,6 +1,7 @@
 import { Browser, Page } from '@playwright/test'
 import { JSDOM } from 'jsdom'
 import { testBaseURL } from '../../../playwright.config'
+import { CollectorVisitorResponse, Trigger } from '../../client/types'
 import { fakeCollectorResp } from './response.fake'
 
 export const getLocation = async (page: Page) => {
@@ -64,18 +65,20 @@ export const getPage = async (browser: Browser) => {
   return page
 }
 
-export const prepPage = async (browser: Browser) => {
+export const prepPage = async (browser: Browser, payload?: Trigger[]) => {
   const page = await getPage(browser)
 
+  const response: CollectorVisitorResponse = {
+    ...fakeCollectorResp,
+    pageTriggers: payload || fakeCollectorResp.pageTriggers
+  }
+
   await page.route('*/**/collector/**', async (route) => {
-    const json = fakeCollectorResp
-
-    await route.fulfill({ json })
+    await route.fulfill({ json: response })
   })
-  await page.route('*/**/seen/**', async (route) => {
-    const json = fakeCollectorResp
 
-    await route.fulfill({ json })
+  await page.route('*/**/seen/**', async (route) => {
+    await route.fulfill({ json: response })
   })
 
   await page.goto(testBaseURL, {

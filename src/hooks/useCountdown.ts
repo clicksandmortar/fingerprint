@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLogging } from '../context/LoggingContext'
 import { formatTimeStamp, getPositiveDateDiffInSec } from '../utils/date'
-import { getInterpolate } from './useInterpolate'
+import { getInterpolate } from '../utils/getInterpolate'
 
 type InterpolateVal = {
   structure: Record<string, unknown>
@@ -56,7 +56,7 @@ const useCountdown = ({
   }, [onZero, timestamp, intId])
 
   const interpolatefunc = useMemo(
-    () => getInterpolate(interpolate?.structure as Record<string, unknown>),
+    () => getInterpolate(interpolate?.structure || {}),
     [interpolate]
   )
 

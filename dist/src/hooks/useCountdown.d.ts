@@ -12,6 +12,6 @@ declare type Props = {
 declare const useCountdown: ({ onZero, initialTimestamp, interpolate, formatDate }: Props) => {
     countdown: string;
     setTimeStamp: import("react").Dispatch<import("react").SetStateAction<Date | null>>;
-    formattedCountdown: string;
+    formattedCountdown: string | null;
 };
 export default useCountdown;

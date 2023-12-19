@@ -1687,11 +1687,12 @@ function formatTimeStamp(targetDate) {
 }
 
 const defualtFormatString = val => val;
-const getInterpolate = structure => {
+const getInterpolate = (structure, hideMissingValues = true) => {
   const interpolate = (text, formatString = defualtFormatString) => {
     const replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, (match, keys) => {
       let value = transcend(structure, keys);
       if (formatString) value = formatString(value);
+      if (!!match && !value && hideMissingValues) return '';
       return value !== undefined ? value : match;
     });
     return replacedText;
@@ -1730,7 +1731,7 @@ const useCountdown = ({
       clearInterval(intId);
     }
   }, [onZero, timestamp, intId]);
-  const interpolatefunc = useMemo(() => getInterpolate(interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure), [interpolate]);
+  const interpolatefunc = useMemo(() => getInterpolate((interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure) || {}), [interpolate]);
   const formattedCountdown = useMemo(() => {
     if (!interpolate) {
       error('No interpolation provided to timer. Rendering just countdown.');
@@ -3243,12 +3244,13 @@ const Header = ({
   trigger
 }) => {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
+  const interpolate = getInterpolate(trigger.data || {}, true);
   const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
   const StdHeader = ({
     text
   }) => React__default.createElement("h1", {
     className: prependClass('main-text')
-  }, text || '');
+  }, interpolate(text || ''));
   const texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading) || '');
   if (!countdownEndTime) return React__default.createElement(StdHeader, {
     text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading
@@ -3276,11 +3278,12 @@ const Paragraph = ({
 }) => {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
   const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  const interpolate = getInterpolate(trigger.data || {}, true);
   const StdParagraph = ({
     text
   }) => React__default.createElement("p", {
     className: prependClass('sub-text')
-  }, text || '');
+  }, interpolate(text || ''));
   const texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.paragraph) || '');
   if (!countdownEndTime) return React__default.createElement(StdParagraph, {
     text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph

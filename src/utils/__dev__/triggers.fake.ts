@@ -113,6 +113,22 @@ export const fakeCountdownModal: Trigger = {
   }
 }
 
+export const fakeInterpolationModal: Trigger = {
+  id: 'modal-trigger-interpolation-regular-text',
+  invocation: 'INVOCATION_PAGE_LOAD',
+  behaviour: 'BEHAVIOUR_MODAL',
+  data: {
+    backgroundURL:
+      'https://shopus.parelli.com/cdn/shop/articles/2023-07-31-how-much-do-horses-weigh.png?v=1690553380',
+    buttonText: 'GET DEAL',
+    buttonURL: 'http://www.google.com',
+    firstName: 'Ed',
+    lastName: 'Penguin slapper',
+    heading: 'Hello {{ firstName }}',
+    paragraph: 'indeed {{ lastName }}'
+  }
+}
+
 export const fakeIncompleteTriggers: IncompleteTrigger[] = [
   {
     id: 'incomplete-1',
