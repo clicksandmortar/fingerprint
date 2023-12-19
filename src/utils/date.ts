@@ -1,12 +1,19 @@
-export function formatSimpler(targetDate: Date): string {
-  const currentDate = new Date()
-  const diffInSeconds = getPositiveDateDiffInSec(currentDate, targetDate)
+export const getDiffInDHMS = (
+  targetDate: Date,
+  initialDate: Date = new Date()
+) => {
+  const diffInSeconds = getPositiveDateDiffInSec(targetDate, initialDate)
 
   const days = Math.floor(diffInSeconds / (24 * 60 * 60))
   const hours = Math.floor((diffInSeconds % (24 * 60 * 60)) / (60 * 60))
   const minutes = Math.floor((diffInSeconds % (60 * 60)) / 60)
   const seconds = diffInSeconds % 60
 
+  return { days, minutes, hours, seconds }
+}
+
+export function formatSimpler(targetDate: Date): string {
+  const { days, hours, minutes, seconds } = getDiffInDHMS(targetDate)
   if (days > 0) {
     return `${days}d ${hours.toString().padStart(2, '0')}:${minutes
       .toString()

@@ -84,3 +84,8 @@ export const isModalDataCaptureModal = (
 
   return true
 }
+
+export function splitSenseOfUrgencyText(text: string) {
+  const split = text.split(/\{\{\s*countdownEndTime\s*\}\}/i)
+  return split
+}

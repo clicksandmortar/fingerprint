@@ -1634,21 +1634,19 @@ const CloseButton = ({
   })));
 };
 
-function formatSimpler(targetDate) {
-  const currentDate = new Date();
-  const diffInSeconds = getPositiveDateDiffInSec(currentDate, targetDate);
+const getDiffInDHMS = (targetDate, initialDate = new Date()) => {
+  const diffInSeconds = getPositiveDateDiffInSec(targetDate, initialDate);
   const days = Math.floor(diffInSeconds / (24 * 60 * 60));
   const hours = Math.floor(diffInSeconds % (24 * 60 * 60) / (60 * 60));
   const minutes = Math.floor(diffInSeconds % (60 * 60) / 60);
   const seconds = diffInSeconds % 60;
-  if (days > 0) {
-    return `${days}d ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  } else if (hours > 0) {
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  } else {
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }
-}
+  return {
+    days,
+    minutes,
+    hours,
+    seconds
+  };
+};
 const getPositiveDateDiffInSec = (date1, date2) => {
   return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
 };
@@ -2144,6 +2142,10 @@ const isModalDataCaptureModal = trigger => {
   if (!trigger.data.successText) return false;
   return true;
 };
+function splitSenseOfUrgencyText(text) {
+  const split = text.split(/\{\{\s*countdownEndTime\s*\}\}/i);
+  return split;
+}
 
 const isViewBlockingModal = false;
 const fields = [{
@@ -2830,12 +2832,343 @@ const BrownsModal = props => {
   return React__default.createElement(FullyClickableModal, Object.assign({}, props));
 };
 
+const AnimatedCard = ({
+  animation,
+  digit
+}) => {
+  return React__default.createElement("div", {
+    className: `flipCard ${animation}`
+  }, React__default.createElement("span", null, digit));
+};
+const StaticCard = ({
+  position,
+  digit
+}) => {
+  return React__default.createElement("div", {
+    className: position
+  }, React__default.createElement("span", null, digit));
+};
+const FlipUnitContainer = ({
+  digit,
+  shuffle,
+  unit
+}) => {
+  let currentDigit = digit;
+  let previousDigit = digit + 1;
+  if (unit !== 'hours') {
+    previousDigit = previousDigit === -1 ? 59 : previousDigit;
+  } else {
+    previousDigit = previousDigit === -1 ? 23 : previousDigit;
+  }
+  if (currentDigit < 10) {
+    currentDigit = `0${currentDigit}`;
+  }
+  if (previousDigit < 10) {
+    previousDigit = `0${previousDigit}`;
+  }
+  const digit1 = shuffle ? previousDigit : currentDigit;
+  const digit2 = !shuffle ? previousDigit : currentDigit;
+  const animation1 = shuffle ? 'fold' : 'unfold';
+  const animation2 = !shuffle ? 'fold' : 'unfold';
+  return React__default.createElement("div", {
+    className: 'flipUnitContainer'
+  }, React__default.createElement(StaticCard, {
+    position: 'upperCard',
+    digit: currentDigit
+  }), React__default.createElement(StaticCard, {
+    position: 'lowerCard',
+    digit: previousDigit
+  }), React__default.createElement(AnimatedCard, {
+    digit: digit1,
+    animation: animation1
+  }), React__default.createElement(AnimatedCard, {
+    digit: digit2,
+    animation: animation2
+  }));
+};
+class CountdownFlipClock extends React__default.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hours: 0,
+      hoursShuffle: true,
+      days: 0,
+      daysShuffle: true,
+      minutes: 0,
+      minutesShuffle: true,
+      seconds: 0,
+      secondsShuffle: true,
+      haveStylesLoaded: false
+    };
+  }
+  componentDidMount() {
+    this.timerID = setInterval(() => this.updateTime(), 50);
+    const styles = document.createElement('style');
+    styles.appendChild(document.createTextNode(CSS));
+    document.head.appendChild(styles);
+    setTimeout(() => {
+      this.setState({
+        haveStylesLoaded: true
+      });
+    }, 500);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+  }
+  updateTime() {
+    const startDate = this.props.startDate || new Date();
+    const diff = getDiffInDHMS(startDate, this.props.targetDate);
+    const {
+      days,
+      hours,
+      minutes,
+      seconds
+    } = diff;
+    if (days !== this.state.days) {
+      const daysShuffle = !this.state.daysShuffle;
+      this.setState({
+        days,
+        daysShuffle
+      });
+    }
+    if (hours !== this.state.hours) {
+      const hoursShuffle = !this.state.hoursShuffle;
+      this.setState({
+        hours,
+        hoursShuffle
+      });
+    }
+    if (hours !== this.state.hours) {
+      const hoursShuffle = !this.state.hoursShuffle;
+      this.setState({
+        hours,
+        hoursShuffle
+      });
+    }
+    if (minutes !== this.state.minutes) {
+      const minutesShuffle = !this.state.minutesShuffle;
+      this.setState({
+        minutes,
+        minutesShuffle
+      });
+    }
+    if (seconds !== this.state.seconds) {
+      const secondsShuffle = !this.state.secondsShuffle;
+      this.setState({
+        seconds,
+        secondsShuffle
+      });
+    }
+  }
+  render() {
+    const {
+      hours,
+      minutes,
+      seconds,
+      days,
+      daysShuffle,
+      hoursShuffle,
+      minutesShuffle,
+      secondsShuffle
+    } = this.state;
+    if (!this.state.haveStylesLoaded) return null;
+    return React__default.createElement("div", {
+      className: 'flipClock'
+    }, React__default.createElement(FlipUnitContainer, {
+      unit: 'days',
+      digit: days,
+      shuffle: daysShuffle
+    }), React__default.createElement(FlipUnitContainer, {
+      unit: 'hours',
+      digit: hours,
+      shuffle: hoursShuffle
+    }), React__default.createElement(FlipUnitContainer, {
+      unit: 'minutes',
+      digit: minutes,
+      shuffle: minutesShuffle
+    }), React__default.createElement(FlipUnitContainer, {
+      unit: 'seconds',
+      digit: seconds,
+      shuffle: secondsShuffle
+    }));
+  }
+}
+const fontSize = '2em';
+const cardFontScaleFactor = 1.5;
+const CSS = `
+@import url("https://fonts.googleapis.com/css?family=Droid+Sans+Mono");
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+#app {
+  display: flex;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  background-color: #FBAB7E;
+  background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%);
+}
+
+.flipClock {
+  display: flex;
+  justify-content: space-between;
+}
+
+.flipUnitContainer {
+  display: block;
+  position: relative;
+  width: calc(${fontSize} * ${cardFontScaleFactor});
+  height: calc(${fontSize} * ${cardFontScaleFactor});
+  perspective-origin: 50% 50%;
+  perspective: 300px;
+  background-color: orange;
+  border-radius: 3px;
+  box-shadow: 0px 10px 10px -10px grey;
+}
+
+.upperCard, .lowerCard {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  border: 1px solid whitesmoke;
+}
+
+.upperCard span, .lowerCard span {
+  font-size: ${fontSize};
+  font-family: "Droid Sans Mono", monospace;
+  font-weight: lighter;
+  color: green;
+}
+
+.upperCard {
+  align-items: flex-end;
+  border-bottom: 0.5px solid whitesmoke;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+.upperCard span {
+  transform: translateY(50%);
+}
+
+.lowerCard {
+  align-items: flex-start;
+  border-top: 0.5px solid whitesmoke;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+.lowerCard span {
+  transform: translateY(-50%);
+}
+
+.flipCard {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+}
+.flipCard span {
+  font-family: "Droid Sans Mono", monospace;
+  font-size: ${fontSize};
+  font-weight: lighter;
+  color: green;
+}
+.flipCard.unfold {
+  top: 50%;
+  align-items: flex-start;
+  transform-origin: 50% 0%;
+  transform: rotateX(180deg);
+  background-color: orange;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  border: 0.5px solid whitesmoke;
+  border-top: 0.5px solid whitesmoke;
+}
+.flipCard.unfold span {
+  transform: translateY(-50%);
+}
+.flipCard.fold {
+  top: 0%;
+  align-items: flex-end;
+  transform-origin: 50% 100%;
+  transform: rotateX(0deg);
+  background-color: orange;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border: 0.5px solid whitesmoke;
+  border-bottom: 0.5px solid whitesmoke;
+}
+.flipCard.fold span {
+  transform: translateY(50%);
+}
+
+.fold {
+  -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+          animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+  transform-style: preserve-3d;
+}
+
+.unfold {
+  -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+          animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+  transform-style: preserve-3d;
+}
+
+@-webkit-keyframes fold {
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(-180deg);
+  }
+}
+
+@keyframes fold {
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(-180deg);
+  }
+}
+@-webkit-keyframes unfold {
+  0% {
+    transform: rotateX(180deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+@keyframes unfold {
+  0% {
+    transform: rotateX(180deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+`;
+
 const StandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }) => {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5, _trigger$data6, _trigger$data7, _trigger$data8, _trigger$data9;
+  var _trigger$data, _trigger$data6, _trigger$data7, _trigger$data8;
   const {
     error
   } = useLogging();
@@ -3070,28 +3403,49 @@ const StandardModal = ({
     e.stopPropagation();
     return handleCloseModal(e);
   }, [handleCloseModal]);
-  const {
-    formattedCountdown: heading
-  } = useCountdown({
-    onZero: () => handleCloseModal({}),
-    initialTimestamp: (_trigger$data2 = trigger.data) !== null && _trigger$data2 !== void 0 && _trigger$data2.countdownEndTime ? new Date(((_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.countdownEndTime) || '') : undefined,
-    interpolate: {
-      text: ((_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading) || '',
-      structure: trigger.data
-    },
-    formatDate: formatSimpler
-  });
-  const {
-    formattedCountdown: paragraph
-  } = useCountdown({
-    onZero: () => handleCloseModal({}),
-    initialTimestamp: (_trigger$data5 = trigger.data) !== null && _trigger$data5 !== void 0 && _trigger$data5.countdownEndTime ? new Date(((_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.countdownEndTime) || '') : undefined,
-    interpolate: {
-      text: ((_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.heading) || '',
-      structure: trigger.data
-    },
-    formatDate: formatSimpler
-  });
+  const buildTextWithPotentiallyCountdown = text => {
+    let hasCountdown = false;
+    let text1 = '';
+    let text2 = '';
+    const split = splitSenseOfUrgencyText(text);
+    text1 = split[0];
+    if (split.length > 1) {
+      text2 = split[1];
+      hasCountdown = true;
+      return {
+        hasCountdown,
+        text1,
+        text2
+      };
+    } else {
+      return {
+        text: text1
+      };
+    }
+  };
+  const HeaderComponent = React__default.useCallback(() => {
+    var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+    const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.countdownEndTime;
+    const header = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading) || '');
+    if (!countdownEndTime) return React__default.createElement("h1", {
+      className: prependClass('main-text')
+    }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading);
+    if (!('hasCountdown' in header)) return React__default.createElement("h1", {
+      className: prependClass('main-text')
+    }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.heading);
+    return React__default.createElement("div", null, React__default.createElement("h1", {
+      className: prependClass('main-text')
+    }, header.text1), React__default.createElement("div", {
+      style: {
+        maxWidth: 220,
+        margin: 'auto'
+      }
+    }, React__default.createElement(CountdownFlipClock, {
+      targetDate: new Date(countdownEndTime)
+    })), header.text2 && React__default.createElement("h1", {
+      className: prependClass('main-text')
+    }, header.text2));
+  }, [trigger]);
   if (!stylesLoaded) {
     return null;
   }
@@ -3119,24 +3473,22 @@ const StandardModal = ({
     onClick: handleClickCloseFinal
   })), React__default.createElement("div", {
     className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, heading), React__default.createElement("p", {
+  }, React__default.createElement(HeaderComponent, null), React__default.createElement("p", {
     className: prependClass('sub-text')
-  }, paragraph)), !isModalFullyClickable && React__default.createElement("div", {
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data6 = trigger.data) === null || _trigger$data6 === void 0 ? void 0 : _trigger$data6.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'flex-end'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data8 = trigger.data) === null || _trigger$data8 === void 0 ? void 0 : _trigger$data8.buttonURL,
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data7 = trigger.data) === null || _trigger$data7 === void 0 ? void 0 : _trigger$data7.buttonURL,
     className: prependClass('cta'),
     onClick: handleClickCallToAction,
     style: {
       fontSize: '1.3rem',
       padding: '0.3rem 1rem'
     }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data9 = trigger.data) === null || _trigger$data9 === void 0 ? void 0 : _trigger$data9.buttonText))))));
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data8 = trigger.data) === null || _trigger$data8 === void 0 ? void 0 : _trigger$data8.buttonText))))));
 };
 
 const primaryColor = `rgb(33,147,174)`;

@@ -19,3 +19,4 @@ export declare const useModalDimensionsBasedOnImage: ({ imageURL }: {
     }>>;
 };
 export declare const isModalDataCaptureModal: (trigger: any) => trigger is DataCaptureTrigger;
+export declare function splitSenseOfUrgencyText(text: string): string[];
