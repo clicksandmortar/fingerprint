@@ -1275,12 +1275,12 @@ var fakeCountdownModal = {
   invocation: 'INVOCATION_PAGE_LOAD',
   behaviour: 'BEHAVIOUR_MODAL',
   data: {
-    backgroundURL: 'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png',
+    backgroundURL: 'https://shopus.parelli.com/cdn/shop/articles/2023-07-31-how-much-do-horses-weigh.png?v=1690553380',
     buttonText: 'Click me',
     buttonURL: 'http://www.google.com',
     heading: 'Only {{countdownEndTime}} left to horse around!',
     paragraph: 'Use it wisely',
-    countdownEndTime: '2024-03-31T23:59'
+    countdownEndTime: '2024-01-31T23:59'
   }
 };
 
@@ -2716,6 +2716,8 @@ var BrownsModal = function BrownsModal(props) {
   return React__default.createElement(FullyClickableModal, Object.assign({}, props));
 };
 
+var fontSize = '2em';
+var cardFontScaleFactor = 1.5;
 var AnimatedCard = function AnimatedCard(_ref) {
   var animation = _ref.animation,
     digit = _ref.digit;
@@ -2767,9 +2769,9 @@ var FlipUnitContainer = function FlipUnitContainer(_ref3) {
     animation: animation2
   }));
 };
-var CountdownFlipClock = /*#__PURE__*/function (_React$Component) {
-  _inheritsLoose(CountdownFlipClock, _React$Component);
-  function CountdownFlipClock(props) {
+var FlipClock = /*#__PURE__*/function (_React$Component) {
+  _inheritsLoose(FlipClock, _React$Component);
+  function FlipClock(props) {
     var _this;
     _this = _React$Component.call(this, props) || this;
     _this.state = {
@@ -2785,9 +2787,13 @@ var CountdownFlipClock = /*#__PURE__*/function (_React$Component) {
     };
     return _this;
   }
-  var _proto = CountdownFlipClock.prototype;
+  var _proto = FlipClock.prototype;
   _proto.componentDidMount = function componentDidMount() {
     var _this2 = this;
+    var _this$props$colorConf = this.props.colorConfig,
+      textPrimary = _this$props$colorConf.textPrimary,
+      backgroundPrimary = _this$props$colorConf.backgroundPrimary;
+    var CSS = "\n    @import url(\"https://fonts.googleapis.com/css?family=Droid+Sans+Mono\");\n    * {\n      box-sizing: border-box;\n    }\n    \n    body {\n      margin: 0;\n    }\n    \n    .flipClock {\n      display: flex;\n      justify-content: space-between;\n    }\n    \n    .flipUnitContainer {\n      display: block;\n      position: relative;\n      width: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n      height: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n      perspective-origin: 50% 50%;\n      perspective: 300px;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 3px;\n      box-shadow: 0px 10px 10px -10px grey;\n    }\n    \n    .upperCard, .lowerCard {\n      display: flex;\n      position: relative;\n      justify-content: center;\n      width: 100%;\n      height: 50%;\n      overflow: hidden;\n      border: 1px solid whitesmoke;\n    }\n    \n    .upperCard span, .lowerCard span {\n      font-size: " + fontSize + ";\n      font-family: \"Droid Sans Mono\", monospace;\n      font-weight: lighter;\n      color: " + textPrimary + ";\n    }\n    \n    .upperCard {\n      align-items: flex-end;\n      border-bottom: 0.5px solid whitesmoke;\n      border-top-left-radius: 3px;\n      border-top-right-radius: 3px;\n    }\n    .upperCard span {\n      transform: translateY(50%);\n    }\n    \n    .lowerCard {\n      align-items: flex-start;\n      border-top: 0.5px solid whitesmoke;\n      border-bottom-left-radius: 3px;\n      border-bottom-right-radius: 3px;\n    }\n    .lowerCard span {\n      transform: translateY(-50%);\n    }\n    \n    .flipCard {\n      display: flex;\n      justify-content: center;\n      position: absolute;\n      left: 0;\n      width: 100%;\n      height: 50%;\n      overflow: hidden;\n      -webkit-backface-visibility: hidden;\n              backface-visibility: hidden;\n    }\n    .flipCard span {\n      font-family: \"Droid Sans Mono\", monospace;\n      font-size: " + fontSize + ";\n      font-weight: lighter;\n      color: " + textPrimary + ";\n    }\n    .flipCard.unfold {\n      top: 50%;\n      align-items: flex-start;\n      transform-origin: 50% 0%;\n      transform: rotateX(180deg);\n      background-color: " + backgroundPrimary + ";\n      border-bottom-left-radius: 3px;\n      border-bottom-right-radius: 3px;\n      border: 0.5px solid whitesmoke;\n      border-top: 0.5px solid whitesmoke;\n    }\n    .flipCard.unfold span {\n      transform: translateY(-50%);\n    }\n    .flipCard.fold {\n      top: 0%;\n      align-items: flex-end;\n      transform-origin: 50% 100%;\n      transform: rotateX(0deg);\n      background-color: " + backgroundPrimary + ";\n      border-top-left-radius: 3px;\n      border-top-right-radius: 3px;\n      border: 0.5px solid whitesmoke;\n      border-bottom: 0.5px solid whitesmoke;\n    }\n    .flipCard.fold span {\n      transform: translateY(50%);\n    }\n    \n    .fold {\n      -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n              animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n      transform-style: preserve-3d;\n    }\n    \n    .unfold {\n      -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n              animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n      transform-style: preserve-3d;\n    }\n    \n    @-webkit-keyframes fold {\n      0% {\n        transform: rotateX(0deg);\n      }\n      100% {\n        transform: rotateX(-180deg);\n      }\n    }\n    \n    @keyframes fold {\n      0% {\n        transform: rotateX(0deg);\n      }\n      100% {\n        transform: rotateX(-180deg);\n      }\n    }\n    @-webkit-keyframes unfold {\n      0% {\n        transform: rotateX(180deg);\n      }\n      100% {\n        transform: rotateX(0deg);\n      }\n    }\n    @keyframes unfold {\n      0% {\n        transform: rotateX(180deg);\n      }\n      100% {\n        transform: rotateX(0deg);\n      }\n    }\n    ";
     this.timerID = setInterval(function () {
       return _this2.updateTime();
     }, 50);
@@ -2857,31 +2863,42 @@ var CountdownFlipClock = /*#__PURE__*/function (_React$Component) {
       minutesShuffle = _this$state.minutesShuffle,
       secondsShuffle = _this$state.secondsShuffle;
     if (!this.state.haveStylesLoaded) return null;
+    var textPrimary = this.props.colorConfig.textPrimary;
+    var Separator = function Separator() {
+      return React__default.createElement("h1", {
+        style: {
+          color: textPrimary
+        }
+      }, ":");
+    };
     return React__default.createElement("div", {
       className: 'flipClock'
     }, React__default.createElement(FlipUnitContainer, {
       unit: 'days',
       digit: days,
       shuffle: daysShuffle
-    }), React__default.createElement(FlipUnitContainer, {
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
       unit: 'hours',
       digit: hours,
       shuffle: hoursShuffle
-    }), React__default.createElement(FlipUnitContainer, {
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
       unit: 'minutes',
       digit: minutes,
       shuffle: minutesShuffle
-    }), React__default.createElement(FlipUnitContainer, {
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
       unit: 'seconds',
       digit: seconds,
       shuffle: secondsShuffle
     }));
   };
-  return CountdownFlipClock;
+  return FlipClock;
 }(React__default.Component);
-var fontSize = '2em';
-var cardFontScaleFactor = 1.5;
-var CSS = "\n@import url(\"https://fonts.googleapis.com/css?family=Droid+Sans+Mono\");\n* {\n  box-sizing: border-box;\n}\n\nbody {\n  margin: 0;\n}\n\n#app {\n  display: flex;\n  position: relative;\n  width: 100%;\n  min-height: 100vh;\n  justify-content: center;\n  align-items: center;\n  background-color: #FBAB7E;\n  background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%);\n}\n\n.flipClock {\n  display: flex;\n  justify-content: space-between;\n}\n\n.flipUnitContainer {\n  display: block;\n  position: relative;\n  width: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n  height: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n  perspective-origin: 50% 50%;\n  perspective: 300px;\n  background-color: orange;\n  border-radius: 3px;\n  box-shadow: 0px 10px 10px -10px grey;\n}\n\n.upperCard, .lowerCard {\n  display: flex;\n  position: relative;\n  justify-content: center;\n  width: 100%;\n  height: 50%;\n  overflow: hidden;\n  border: 1px solid whitesmoke;\n}\n\n.upperCard span, .lowerCard span {\n  font-size: " + fontSize + ";\n  font-family: \"Droid Sans Mono\", monospace;\n  font-weight: lighter;\n  color: green;\n}\n\n.upperCard {\n  align-items: flex-end;\n  border-bottom: 0.5px solid whitesmoke;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.upperCard span {\n  transform: translateY(50%);\n}\n\n.lowerCard {\n  align-items: flex-start;\n  border-top: 0.5px solid whitesmoke;\n  border-bottom-left-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.lowerCard span {\n  transform: translateY(-50%);\n}\n\n.flipCard {\n  display: flex;\n  justify-content: center;\n  position: absolute;\n  left: 0;\n  width: 100%;\n  height: 50%;\n  overflow: hidden;\n  -webkit-backface-visibility: hidden;\n          backface-visibility: hidden;\n}\n.flipCard span {\n  font-family: \"Droid Sans Mono\", monospace;\n  font-size: " + fontSize + ";\n  font-weight: lighter;\n  color: green;\n}\n.flipCard.unfold {\n  top: 50%;\n  align-items: flex-start;\n  transform-origin: 50% 0%;\n  transform: rotateX(180deg);\n  background-color: orange;\n  border-bottom-left-radius: 3px;\n  border-bottom-right-radius: 3px;\n  border: 0.5px solid whitesmoke;\n  border-top: 0.5px solid whitesmoke;\n}\n.flipCard.unfold span {\n  transform: translateY(-50%);\n}\n.flipCard.fold {\n  top: 0%;\n  align-items: flex-end;\n  transform-origin: 50% 100%;\n  transform: rotateX(0deg);\n  background-color: orange;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n  border: 0.5px solid whitesmoke;\n  border-bottom: 0.5px solid whitesmoke;\n}\n.flipCard.fold span {\n  transform: translateY(50%);\n}\n\n.fold {\n  -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n          animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n  transform-style: preserve-3d;\n}\n\n.unfold {\n  -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n          animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n  transform-style: preserve-3d;\n}\n\n@-webkit-keyframes fold {\n  0% {\n    transform: rotateX(0deg);\n  }\n  100% {\n    transform: rotateX(-180deg);\n  }\n}\n\n@keyframes fold {\n  0% {\n    transform: rotateX(0deg);\n  }\n  100% {\n    transform: rotateX(-180deg);\n  }\n}\n@-webkit-keyframes unfold {\n  0% {\n    transform: rotateX(180deg);\n  }\n  100% {\n    transform: rotateX(0deg);\n  }\n}\n@keyframes unfold {\n  0% {\n    transform: rotateX(180deg);\n  }\n  100% {\n    transform: rotateX(0deg);\n  }\n}\n";
+var CountdownFlipClock = function CountdownFlipClock(props) {
+  var colors = useBrandColors();
+  return React__default.createElement(FlipClock, Object.assign({}, props, {
+    colorConfig: colors
+  }));
+};
 
 var Header = function Header(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
@@ -2975,7 +2992,7 @@ var StandardModal = function StandardModal(_ref) {
     return reactDeviceDetect.isMobile ? "" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 2.4rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 1.3rem;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 1.6rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 0.9rem;\n  }\n}\n\n";
   }, [height, width, imageURL, reactDeviceDetect.isMobile]);
   React.useEffect(function () {
-    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : "") + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
+    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : "") + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.3);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));

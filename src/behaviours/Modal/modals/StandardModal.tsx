@@ -212,7 +212,7 @@ const StandardModal = ({
     }
     
     .${prependClass('image-darken')} {
-      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);'}
+      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.3);'}
       height: 100%;
       display: flex;
       flex-direction: column;

@@ -1,6 +1,6 @@
 import React, { memo } from 'react'
 import { Trigger } from '../../../../client/types'
-import { CountdownFlipClock } from '../../../../components/CountdownFlipClock/CountdownFlipClock'
+import CountdownFlipClock from '../../../../components/CountdownFlipClock/CountdownFlipClock'
 import { buildTextWithPotentiallyCountdown, prependClass } from '../../helpers'
 
 type Props = { trigger: Trigger }

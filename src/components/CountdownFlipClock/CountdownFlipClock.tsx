@@ -1,5 +1,9 @@
 import React from 'react'
+import { useBrandColors } from '../../hooks/useBrandConfig'
 import { getDiffInDHMS } from '../../utils/date'
+
+const fontSize = '2em'
+const cardFontScaleFactor = 1.5
 
 const AnimatedCard = ({
   animation,
@@ -75,7 +79,7 @@ const FlipUnitContainer = ({
   )
 }
 
-type FlipClockProps = {
+export type FlipClockProps = {
   targetDate: Date
   startDate?: Date
 }
@@ -93,8 +97,11 @@ type State = {
   haveStylesLoaded: boolean
 }
 
-export class CountdownFlipClock extends React.Component<FlipClockProps, State> {
-  constructor(props: FlipClockProps) {
+class FlipClock extends React.Component<
+  FlipClockProps & ConfigHOCProps,
+  State
+> {
+  constructor(props: FlipClockProps & ConfigHOCProps) {
     super(props)
     this.state = {
       hours: 0,
@@ -111,6 +118,164 @@ export class CountdownFlipClock extends React.Component<FlipClockProps, State> {
   public timerID: NodeJS.Timer
 
   componentDidMount() {
+    const { textPrimary, backgroundPrimary } = this.props.colorConfig
+    const CSS = `
+    @import url("https://fonts.googleapis.com/css?family=Droid+Sans+Mono");
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+    }
+    
+    .flipClock {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .flipUnitContainer {
+      display: block;
+      position: relative;
+      width: calc(${fontSize} * ${cardFontScaleFactor});
+      height: calc(${fontSize} * ${cardFontScaleFactor});
+      perspective-origin: 50% 50%;
+      perspective: 300px;
+      background-color: ${backgroundPrimary};
+      border-radius: 3px;
+      box-shadow: 0px 10px 10px -10px grey;
+    }
+    
+    .upperCard, .lowerCard {
+      display: flex;
+      position: relative;
+      justify-content: center;
+      width: 100%;
+      height: 50%;
+      overflow: hidden;
+      border: 1px solid whitesmoke;
+    }
+    
+    .upperCard span, .lowerCard span {
+      font-size: ${fontSize};
+      font-family: "Droid Sans Mono", monospace;
+      font-weight: lighter;
+      color: ${textPrimary};
+    }
+    
+    .upperCard {
+      align-items: flex-end;
+      border-bottom: 0.5px solid whitesmoke;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+    }
+    .upperCard span {
+      transform: translateY(50%);
+    }
+    
+    .lowerCard {
+      align-items: flex-start;
+      border-top: 0.5px solid whitesmoke;
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+    .lowerCard span {
+      transform: translateY(-50%);
+    }
+    
+    .flipCard {
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      overflow: hidden;
+      -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+    }
+    .flipCard span {
+      font-family: "Droid Sans Mono", monospace;
+      font-size: ${fontSize};
+      font-weight: lighter;
+      color: ${textPrimary};
+    }
+    .flipCard.unfold {
+      top: 50%;
+      align-items: flex-start;
+      transform-origin: 50% 0%;
+      transform: rotateX(180deg);
+      background-color: ${backgroundPrimary};
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+      border: 0.5px solid whitesmoke;
+      border-top: 0.5px solid whitesmoke;
+    }
+    .flipCard.unfold span {
+      transform: translateY(-50%);
+    }
+    .flipCard.fold {
+      top: 0%;
+      align-items: flex-end;
+      transform-origin: 50% 100%;
+      transform: rotateX(0deg);
+      background-color: ${backgroundPrimary};
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      border: 0.5px solid whitesmoke;
+      border-bottom: 0.5px solid whitesmoke;
+    }
+    .flipCard.fold span {
+      transform: translateY(50%);
+    }
+    
+    .fold {
+      -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+              animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+      transform-style: preserve-3d;
+    }
+    
+    .unfold {
+      -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+              animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+      transform-style: preserve-3d;
+    }
+    
+    @-webkit-keyframes fold {
+      0% {
+        transform: rotateX(0deg);
+      }
+      100% {
+        transform: rotateX(-180deg);
+      }
+    }
+    
+    @keyframes fold {
+      0% {
+        transform: rotateX(0deg);
+      }
+      100% {
+        transform: rotateX(-180deg);
+      }
+    }
+    @-webkit-keyframes unfold {
+      0% {
+        transform: rotateX(180deg);
+      }
+      100% {
+        transform: rotateX(0deg);
+      }
+    }
+    @keyframes unfold {
+      0% {
+        transform: rotateX(180deg);
+      }
+      100% {
+        transform: rotateX(0deg);
+      }
+    }
+    `
+
     this.timerID = setInterval(() => this.updateTime(), 50)
     const styles = document.createElement('style')
     styles.appendChild(document.createTextNode(CSS))
@@ -184,19 +349,26 @@ export class CountdownFlipClock extends React.Component<FlipClockProps, State> {
 
     if (!this.state.haveStylesLoaded) return null
 
+    const { textPrimary } = this.props.colorConfig
+
+    const Separator = () => <h1 style={{ color: textPrimary }}>:</h1>
+
     return (
       <div className={'flipClock'}>
         <FlipUnitContainer unit={'days'} digit={days} shuffle={daysShuffle} />
+        <Separator />
         <FlipUnitContainer
           unit={'hours'}
           digit={hours}
           shuffle={hoursShuffle}
         />
+        <Separator />
         <FlipUnitContainer
           unit={'minutes'}
           digit={minutes}
           shuffle={minutesShuffle}
         />
+        <Separator />
         <FlipUnitContainer
           unit={'seconds'}
           digit={seconds}
@@ -207,173 +379,18 @@ export class CountdownFlipClock extends React.Component<FlipClockProps, State> {
   }
 }
 
-const fontSize = '2em'
-const cardFontScaleFactor = 1.5
+type Props = FlipClockProps
 
-const CSS = `
-@import url("https://fonts.googleapis.com/css?family=Droid+Sans+Mono");
-* {
-  box-sizing: border-box;
+export type ConfigHOCProps = {
+  colorConfig: ReturnType<typeof useBrandColors>
 }
 
-body {
-  margin: 0;
+// Adds colorConfig prop to FlipClock.
+// Add all your hook logic here if you need to and pass as props..
+const CountdownFlipClock = (props: Props) => {
+  const colors = useBrandColors()
+
+  return <FlipClock {...props} colorConfig={colors} />
 }
 
-#app {
-  display: flex;
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  justify-content: center;
-  align-items: center;
-  background-color: #FBAB7E;
-  background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%);
-}
-
-.flipClock {
-  display: flex;
-  justify-content: space-between;
-}
-
-.flipUnitContainer {
-  display: block;
-  position: relative;
-  width: calc(${fontSize} * ${cardFontScaleFactor});
-  height: calc(${fontSize} * ${cardFontScaleFactor});
-  perspective-origin: 50% 50%;
-  perspective: 300px;
-  background-color: orange;
-  border-radius: 3px;
-  box-shadow: 0px 10px 10px -10px grey;
-}
-
-.upperCard, .lowerCard {
-  display: flex;
-  position: relative;
-  justify-content: center;
-  width: 100%;
-  height: 50%;
-  overflow: hidden;
-  border: 1px solid whitesmoke;
-}
-
-.upperCard span, .lowerCard span {
-  font-size: ${fontSize};
-  font-family: "Droid Sans Mono", monospace;
-  font-weight: lighter;
-  color: green;
-}
-
-.upperCard {
-  align-items: flex-end;
-  border-bottom: 0.5px solid whitesmoke;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-}
-.upperCard span {
-  transform: translateY(50%);
-}
-
-.lowerCard {
-  align-items: flex-start;
-  border-top: 0.5px solid whitesmoke;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-}
-.lowerCard span {
-  transform: translateY(-50%);
-}
-
-.flipCard {
-  display: flex;
-  justify-content: center;
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  overflow: hidden;
-  -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
-}
-.flipCard span {
-  font-family: "Droid Sans Mono", monospace;
-  font-size: ${fontSize};
-  font-weight: lighter;
-  color: green;
-}
-.flipCard.unfold {
-  top: 50%;
-  align-items: flex-start;
-  transform-origin: 50% 0%;
-  transform: rotateX(180deg);
-  background-color: orange;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-  border: 0.5px solid whitesmoke;
-  border-top: 0.5px solid whitesmoke;
-}
-.flipCard.unfold span {
-  transform: translateY(-50%);
-}
-.flipCard.fold {
-  top: 0%;
-  align-items: flex-end;
-  transform-origin: 50% 100%;
-  transform: rotateX(0deg);
-  background-color: orange;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-  border: 0.5px solid whitesmoke;
-  border-bottom: 0.5px solid whitesmoke;
-}
-.flipCard.fold span {
-  transform: translateY(50%);
-}
-
-.fold {
-  -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
-          animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
-  transform-style: preserve-3d;
-}
-
-.unfold {
-  -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
-          animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
-  transform-style: preserve-3d;
-}
-
-@-webkit-keyframes fold {
-  0% {
-    transform: rotateX(0deg);
-  }
-  100% {
-    transform: rotateX(-180deg);
-  }
-}
-
-@keyframes fold {
-  0% {
-    transform: rotateX(0deg);
-  }
-  100% {
-    transform: rotateX(-180deg);
-  }
-}
-@-webkit-keyframes unfold {
-  0% {
-    transform: rotateX(180deg);
-  }
-  100% {
-    transform: rotateX(0deg);
-  }
-}
-@keyframes unfold {
-  0% {
-    transform: rotateX(180deg);
-  }
-  100% {
-    transform: rotateX(0deg);
-  }
-}
-`
+export default CountdownFlipClock

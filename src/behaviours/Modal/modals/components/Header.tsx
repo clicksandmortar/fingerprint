@@ -1,12 +1,11 @@
 import React, { memo } from 'react'
 import { Trigger } from '../../../../client/types'
-import { CountdownFlipClock } from '../../../../components/CountdownFlipClock/CountdownFlipClock'
+import CountdownFlipClock from '../../../../components/CountdownFlipClock/CountdownFlipClock'
 import { buildTextWithPotentiallyCountdown, prependClass } from '../../helpers'
 
 type Props = { trigger: Trigger }
 
 // NOTE: the styles here rely on the styles useEffect in StandardModal.tsx
-
 const Header = ({ trigger }: Props) => {
   const countdownEndTime = trigger?.data?.countdownEndTime
 

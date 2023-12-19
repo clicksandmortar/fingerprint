@@ -1151,12 +1151,12 @@ const fakeCountdownModal = {
   invocation: 'INVOCATION_PAGE_LOAD',
   behaviour: 'BEHAVIOUR_MODAL',
   data: {
-    backgroundURL: 'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png',
+    backgroundURL: 'https://shopus.parelli.com/cdn/shop/articles/2023-07-31-how-much-do-horses-weigh.png?v=1690553380',
     buttonText: 'Click me',
     buttonURL: 'http://www.google.com',
     heading: 'Only {{countdownEndTime}} left to horse around!',
     paragraph: 'Use it wisely',
-    countdownEndTime: '2024-03-31T23:59'
+    countdownEndTime: '2024-01-31T23:59'
   }
 };
 
@@ -2866,6 +2866,8 @@ const BrownsModal = props => {
   return React__default.createElement(FullyClickableModal, Object.assign({}, props));
 };
 
+const fontSize = '2em';
+const cardFontScaleFactor = 1.5;
 const AnimatedCard = ({
   animation,
   digit
@@ -2920,7 +2922,7 @@ const FlipUnitContainer = ({
     animation: animation2
   }));
 };
-class CountdownFlipClock extends React__default.Component {
+class FlipClock extends React__default.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -2936,6 +2938,166 @@ class CountdownFlipClock extends React__default.Component {
     };
   }
   componentDidMount() {
+    const {
+      textPrimary,
+      backgroundPrimary
+    } = this.props.colorConfig;
+    const CSS = `
+    @import url("https://fonts.googleapis.com/css?family=Droid+Sans+Mono");
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+    }
+    
+    .flipClock {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .flipUnitContainer {
+      display: block;
+      position: relative;
+      width: calc(${fontSize} * ${cardFontScaleFactor});
+      height: calc(${fontSize} * ${cardFontScaleFactor});
+      perspective-origin: 50% 50%;
+      perspective: 300px;
+      background-color: ${backgroundPrimary};
+      border-radius: 3px;
+      box-shadow: 0px 10px 10px -10px grey;
+    }
+    
+    .upperCard, .lowerCard {
+      display: flex;
+      position: relative;
+      justify-content: center;
+      width: 100%;
+      height: 50%;
+      overflow: hidden;
+      border: 1px solid whitesmoke;
+    }
+    
+    .upperCard span, .lowerCard span {
+      font-size: ${fontSize};
+      font-family: "Droid Sans Mono", monospace;
+      font-weight: lighter;
+      color: ${textPrimary};
+    }
+    
+    .upperCard {
+      align-items: flex-end;
+      border-bottom: 0.5px solid whitesmoke;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+    }
+    .upperCard span {
+      transform: translateY(50%);
+    }
+    
+    .lowerCard {
+      align-items: flex-start;
+      border-top: 0.5px solid whitesmoke;
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+    .lowerCard span {
+      transform: translateY(-50%);
+    }
+    
+    .flipCard {
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      overflow: hidden;
+      -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+    }
+    .flipCard span {
+      font-family: "Droid Sans Mono", monospace;
+      font-size: ${fontSize};
+      font-weight: lighter;
+      color: ${textPrimary};
+    }
+    .flipCard.unfold {
+      top: 50%;
+      align-items: flex-start;
+      transform-origin: 50% 0%;
+      transform: rotateX(180deg);
+      background-color: ${backgroundPrimary};
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+      border: 0.5px solid whitesmoke;
+      border-top: 0.5px solid whitesmoke;
+    }
+    .flipCard.unfold span {
+      transform: translateY(-50%);
+    }
+    .flipCard.fold {
+      top: 0%;
+      align-items: flex-end;
+      transform-origin: 50% 100%;
+      transform: rotateX(0deg);
+      background-color: ${backgroundPrimary};
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      border: 0.5px solid whitesmoke;
+      border-bottom: 0.5px solid whitesmoke;
+    }
+    .flipCard.fold span {
+      transform: translateY(50%);
+    }
+    
+    .fold {
+      -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+              animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+      transform-style: preserve-3d;
+    }
+    
+    .unfold {
+      -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+              animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+      transform-style: preserve-3d;
+    }
+    
+    @-webkit-keyframes fold {
+      0% {
+        transform: rotateX(0deg);
+      }
+      100% {
+        transform: rotateX(-180deg);
+      }
+    }
+    
+    @keyframes fold {
+      0% {
+        transform: rotateX(0deg);
+      }
+      100% {
+        transform: rotateX(-180deg);
+      }
+    }
+    @-webkit-keyframes unfold {
+      0% {
+        transform: rotateX(180deg);
+      }
+      100% {
+        transform: rotateX(0deg);
+      }
+    }
+    @keyframes unfold {
+      0% {
+        transform: rotateX(180deg);
+      }
+      100% {
+        transform: rotateX(0deg);
+      }
+    }
+    `;
     this.timerID = setInterval(() => this.updateTime(), 50);
     const styles = document.createElement('style');
     styles.appendChild(document.createTextNode(CSS));
@@ -3006,196 +3168,41 @@ class CountdownFlipClock extends React__default.Component {
       secondsShuffle
     } = this.state;
     if (!this.state.haveStylesLoaded) return null;
+    const {
+      textPrimary
+    } = this.props.colorConfig;
+    const Separator = () => React__default.createElement("h1", {
+      style: {
+        color: textPrimary
+      }
+    }, ":");
     return React__default.createElement("div", {
       className: 'flipClock'
     }, React__default.createElement(FlipUnitContainer, {
       unit: 'days',
       digit: days,
       shuffle: daysShuffle
-    }), React__default.createElement(FlipUnitContainer, {
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
       unit: 'hours',
       digit: hours,
       shuffle: hoursShuffle
-    }), React__default.createElement(FlipUnitContainer, {
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
       unit: 'minutes',
       digit: minutes,
       shuffle: minutesShuffle
-    }), React__default.createElement(FlipUnitContainer, {
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
       unit: 'seconds',
       digit: seconds,
       shuffle: secondsShuffle
     }));
   }
 }
-const fontSize = '2em';
-const cardFontScaleFactor = 1.5;
-const CSS = `
-@import url("https://fonts.googleapis.com/css?family=Droid+Sans+Mono");
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-#app {
-  display: flex;
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  justify-content: center;
-  align-items: center;
-  background-color: #FBAB7E;
-  background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%);
-}
-
-.flipClock {
-  display: flex;
-  justify-content: space-between;
-}
-
-.flipUnitContainer {
-  display: block;
-  position: relative;
-  width: calc(${fontSize} * ${cardFontScaleFactor});
-  height: calc(${fontSize} * ${cardFontScaleFactor});
-  perspective-origin: 50% 50%;
-  perspective: 300px;
-  background-color: orange;
-  border-radius: 3px;
-  box-shadow: 0px 10px 10px -10px grey;
-}
-
-.upperCard, .lowerCard {
-  display: flex;
-  position: relative;
-  justify-content: center;
-  width: 100%;
-  height: 50%;
-  overflow: hidden;
-  border: 1px solid whitesmoke;
-}
-
-.upperCard span, .lowerCard span {
-  font-size: ${fontSize};
-  font-family: "Droid Sans Mono", monospace;
-  font-weight: lighter;
-  color: green;
-}
-
-.upperCard {
-  align-items: flex-end;
-  border-bottom: 0.5px solid whitesmoke;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-}
-.upperCard span {
-  transform: translateY(50%);
-}
-
-.lowerCard {
-  align-items: flex-start;
-  border-top: 0.5px solid whitesmoke;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-}
-.lowerCard span {
-  transform: translateY(-50%);
-}
-
-.flipCard {
-  display: flex;
-  justify-content: center;
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  overflow: hidden;
-  -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
-}
-.flipCard span {
-  font-family: "Droid Sans Mono", monospace;
-  font-size: ${fontSize};
-  font-weight: lighter;
-  color: green;
-}
-.flipCard.unfold {
-  top: 50%;
-  align-items: flex-start;
-  transform-origin: 50% 0%;
-  transform: rotateX(180deg);
-  background-color: orange;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-  border: 0.5px solid whitesmoke;
-  border-top: 0.5px solid whitesmoke;
-}
-.flipCard.unfold span {
-  transform: translateY(-50%);
-}
-.flipCard.fold {
-  top: 0%;
-  align-items: flex-end;
-  transform-origin: 50% 100%;
-  transform: rotateX(0deg);
-  background-color: orange;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-  border: 0.5px solid whitesmoke;
-  border-bottom: 0.5px solid whitesmoke;
-}
-.flipCard.fold span {
-  transform: translateY(50%);
-}
-
-.fold {
-  -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
-          animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
-  transform-style: preserve-3d;
-}
-
-.unfold {
-  -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
-          animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
-  transform-style: preserve-3d;
-}
-
-@-webkit-keyframes fold {
-  0% {
-    transform: rotateX(0deg);
-  }
-  100% {
-    transform: rotateX(-180deg);
-  }
-}
-
-@keyframes fold {
-  0% {
-    transform: rotateX(0deg);
-  }
-  100% {
-    transform: rotateX(-180deg);
-  }
-}
-@-webkit-keyframes unfold {
-  0% {
-    transform: rotateX(180deg);
-  }
-  100% {
-    transform: rotateX(0deg);
-  }
-}
-@keyframes unfold {
-  0% {
-    transform: rotateX(180deg);
-  }
-  100% {
-    transform: rotateX(0deg);
-  }
-}
-`;
+const CountdownFlipClock = props => {
+  const colors = useBrandColors();
+  return React__default.createElement(FlipClock, Object.assign({}, props, {
+    colorConfig: colors
+  }));
+};
 
 const Header = ({
   trigger
@@ -3459,7 +3466,7 @@ const StandardModal = ({
     }
     
     .${prependClass('image-darken')} {
-      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);'}
+      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.3);'}
       height: 100%;
       display: flex;
       flex-direction: column;

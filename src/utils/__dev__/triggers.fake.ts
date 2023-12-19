@@ -89,12 +89,12 @@ export const fakeCountdownModal: Trigger = {
   behaviour: 'BEHAVIOUR_MODAL',
   data: {
     backgroundURL:
-      'https://cdn.fingerprint.host/assets/toby/christmas-gift-card-desktop.png',
+      'https://shopus.parelli.com/cdn/shop/articles/2023-07-31-how-much-do-horses-weigh.png?v=1690553380',
     buttonText: 'Click me',
     buttonURL: 'http://www.google.com',
     heading: 'Only {{countdownEndTime}} left to horse around!',
     paragraph: 'Use it wisely',
-    countdownEndTime: '2024-03-31T23:59'
+    countdownEndTime: '2024-01-31T23:59'
   }
 }
 

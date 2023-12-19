@@ -1,26 +1,12 @@
-/// <reference types="node" />
 import React from 'react';
-declare type FlipClockProps = {
+import { useBrandColors } from '../../hooks/useBrandConfig';
+export declare type FlipClockProps = {
     targetDate: Date;
     startDate?: Date;
 };
-declare type State = {
-    hours: number;
-    hoursShuffle: boolean;
-    days: number;
-    daysShuffle: boolean;
-    minutes: number;
-    minutesShuffle: boolean;
-    seconds: number;
-    secondsShuffle: boolean;
-    haveStylesLoaded: boolean;
+declare type Props = FlipClockProps;
+export declare type ConfigHOCProps = {
+    colorConfig: ReturnType<typeof useBrandColors>;
 };
-export declare class CountdownFlipClock extends React.Component<FlipClockProps, State> {
-    constructor(props: FlipClockProps);
-    timerID: NodeJS.Timer;
-    componentDidMount(): void;
-    componentWillUnmount(): void;
-    updateTime(): void;
-    render(): React.JSX.Element | null;
-}
-export {};
+declare const CountdownFlipClock: (props: Props) => React.JSX.Element;
+export default CountdownFlipClock;
