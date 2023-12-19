@@ -5,6 +5,8 @@ import { getDiffInDHMS } from '../../utils/date'
 /**
  * Note: For some reason the flip animation gets broken whenever you try to convert this into a fully functional component.
  * If you need to add more props or hook logic, use the HOC at the bottom of the file.
+ *
+ * IDea taken from here https://codepen.io/liborgabrhel/pen/JyJzjb and modified to meet our needs.
  */
 
 const fontSize = '2em'
