@@ -117,7 +117,7 @@ export type CollectorVisitorResponse = {
     path: 3
   }
   pageTriggers: Trigger[]
-  config: ConfigResponseIBlameBlixenkrone
+  config: Config
   incompleteTriggers?: IncompleteTrigger[]
   // @todo remove this temp hack once split testing with Intently is complete
   intently: boolean
@@ -132,6 +132,7 @@ export type Invocation =
   | 'INVOCATION_PAGE_LOAD'
   | 'INVOCATION_ELEMENT_VISIBLE'
 
+//TODO: this should be split into separate BannerTrigger, ModalTrigger, etc for type safety
 export type Trigger = {
   id: string
   invocation?: Invocation
@@ -149,6 +150,7 @@ export type Trigger = {
   brand?: any
   variantID?: string
   variantName?: string
+  multipleOfSameBehaviourSupported?: boolean
 }
 
 export type PageView = {
@@ -183,19 +185,8 @@ type BrandConfig = {
   }
 }
 
-// TODO: make as part of shared lib, @David
-type ObjectMap<T, F, W> = {
-  [K in keyof T]: T[K] extends F ? W : T[K]
-}
-
 export type Config = {
   script: ScriptConfig
   trigger: TriggerConfig
-  brand: BrandConfig
-}
-
-export type ConfigResponseIBlameBlixenkrone = {
-  script: ScriptConfig
-  trigger: ObjectMap<TriggerConfig, number, string>
   brand: BrandConfig
 }

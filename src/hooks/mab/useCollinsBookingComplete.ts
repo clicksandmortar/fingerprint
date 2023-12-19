@@ -1,5 +1,4 @@
 import React from 'react'
-
 import { useLogging } from '../../context/LoggingContext'
 import { useMixpanel } from '../../context/MixpanelContext'
 import { SupportedBrand } from '../../utils/brand'
@@ -20,29 +19,46 @@ const collinBrandsPathConversionMap: Partial<{
  * Necessary since registerWatcher doesn't work on Collins sites
  */
 export function useCollinsBookingComplete() {
-  const { trackEvent } = useMixpanel()
+  const {
+    trackEvent,
+    state: { initiated }
+  } = useMixpanel()
   const { log } = useLogging()
   const brand = useBrand()
 
   const checkCollinsBookingComplete = React.useCallback(() => {
+    log('useCollinsBookingComplete: checking for Collins booking complete')
     // might want to add these checks as part of skip condition in `useRunOnPathChange`
-
-    if (!brand) return
+    if (!initiated) {
+      log('useCollinsBookingComplete, mixpanel not initiated')
+      return
+    }
+    if (!brand) {
+      log('useCollinsBookingComplete, no brand')
+      return
+    }
 
     const conversionPathForBrand = collinBrandsPathConversionMap[brand]
-    if (!conversionPathForBrand) return
+    if (!conversionPathForBrand) {
+      log('useCollinsBookingComplete: no path for brand variable')
+      return
+    }
 
     const isConversionPath = window.location.pathname
       .toLowerCase()
       .includes(conversionPathForBrand.toLowerCase())
-    if (!isConversionPath) return
+
+    if (!isConversionPath) {
+      log('useCollinsBookingComplete: not a conversion path')
+      return
+    }
 
     log(
       `useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`
     )
 
     trackEvent('booking_complete', {})
-  }, [trackEvent, log, brand])
+  }, [trackEvent, log, brand, initiated])
 
   return { checkCollinsBookingComplete }
 }

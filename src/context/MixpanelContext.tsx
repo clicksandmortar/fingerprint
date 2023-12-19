@@ -14,6 +14,10 @@ const init = (cfg: Partial<Config>) => {
   })
 }
 
+type TrackerState = {
+  initiated: boolean
+}
+
 const trackEvent = (event: string, props: any, callback?: Callback): void => {
   return mixpanel.track(event, props, callback)
 }
@@ -43,15 +47,6 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     mixpanel.identify(visitor.id)
   }, [appId, visitor?.id])
 
-  useEffect(() => {
-    if (!visitor?.cohort) {
-      log('Able to register user cohort, but none provided. ')
-      return
-    }
-
-    registerUserData({ u_cohort: visitor.cohort })
-  }, [visitor, setInitiated])
-
   const registerUserData = React.useCallback(
     (properties: RegistrableUserProperties) => {
       log(
@@ -64,6 +59,24 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     },
     [log]
   )
+  useEffect(() => {
+    if (!visitor.cohort) {
+      log('Able to register user cohort, but none provided. ')
+      return
+    }
+
+    registerUserData({
+      u_cohort: visitor.cohort
+    })
+  }, [visitor, registerUserData])
+
+  useEffect(() => {
+    if (!visitor.sourceId) return
+
+    registerUserData({
+      sourceId: visitor.sourceId
+    })
+  }, [visitor, registerUserData])
 
   return (
     <MixpanelContext.Provider
@@ -83,9 +96,7 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
 export type MixpanelContextInterface = {
   trackEvent: (event: string, props: any, callback?: Callback) => void
   registerUserData: (props: RegistrableUserProperties) => void
-  state: {
-    initiated: boolean
-  }
+  state: TrackerState
 }
 
 export const MixpanelContext = createContext<MixpanelContextInterface>({

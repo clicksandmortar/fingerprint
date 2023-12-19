@@ -108,6 +108,7 @@ export const FingerprintProvider = ({
     const performBoot = async () => {
       // TODO: since all the config is being retrieve on any API call including /collect
       // we can probably remove this TODO. It is redundant.
+
       setBooted(true)
     }
 

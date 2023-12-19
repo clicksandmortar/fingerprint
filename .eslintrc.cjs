@@ -258,7 +258,7 @@ module.exports = {
       // Turn off some rules for test files
       files: [
         '**/__mocks__/**/*',
-        '**/__tests__/**/*',
+        '**/__test__/**/*',
         '**/*.test.*',
         '**/__utils__/**/*'
       ],

@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie'
+import psl from 'psl'
 import { v4 as uuidv4 } from 'uuid'
 import { cookieAccountJWT } from '../context/FingerprintContext'
 import { Session } from '../sessions/types'
@@ -6,15 +8,39 @@ import { uuidValidateV4 } from '../utils/uuid'
 import { Visitor } from './types'
 import { validVisitorId } from './utils'
 
-export const CnMCookie = '_cm_id'
+export const cookieValidDays = 365
+export const CnMCookie = '_cm'
+export const CnMIDCookie = '_cm_id'
+
+export function getCookieDomain(): string | null {
+  const parsedUrl = psl.parse(location.host)
+
+  let cookieDomain = null
+
+  // discriminantly type safe. nice.
+  if (!parsedUrl.error) cookieDomain = parsedUrl.domain || null
+  return cookieDomain
+}
+
+// sort of temporary. We can remove this once all cookies have been updated with domains
+// one.two.three. ... .site.com => .site.com
+export function correctCookieSubdomain() {
+  let cookie = getCookie(CnMIDCookie)
+  if (!cookie) return
+
+  Cookies.remove(CnMIDCookie)
+  setCookie(CnMIDCookie, cookie, cookieValidDays)
+
+  return cookie
+}
 
 export const buildCookie = ({ visitorId }: { visitorId: string }) => {
-  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
+  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMIDCookie))
 
   return `${visitorId}|${sessionId}|${endTime.toISOString()}`
 }
 
-const updateCookieUUID = (
+export const updateCookieUUID = (
   cookieData: string | undefined,
   uuid: string
 ): string | null => {
@@ -33,14 +59,16 @@ const updateCookieUUID = (
   return `${uuid}|${sessionId}|${endTime}`
 }
 
+// TODO: split for testing
 export const updateCookie = (uuid: string) => {
   if (!uuidValidateV4(uuid)) return
 
-  const cookie = getCookie(CnMCookie)
+  const cookie = getCookie(CnMIDCookie)
   const newCookie = updateCookieUUID(cookie, uuid)
+
   if (!newCookie) return
 
-  setCookie(CnMCookie, newCookie, 365)
+  setCookie(CnMIDCookie, newCookie, cookieValidDays)
 }
 
 export const bootstrapVisitor = ({
@@ -48,7 +76,7 @@ export const bootstrapVisitor = ({
   session,
   setSession
 }: {
-  setVisitor: (session: Visitor) => void
+  setVisitor: (visitor: Visitor) => void
   session: Session
   setSession: (session: Session) => void
 }) => {
@@ -63,31 +91,38 @@ export const bootstrapVisitor = ({
   if (typeof window !== 'undefined') {
     // Check if `v_id` is in the query parameters
     const urlParams = new URLSearchParams(window.location.search)
-    const vid = urlParams.get('v_id')
-    if (vid) {
-      visitor.id = vid
+
+    let vidParam = urlParams.get('v_id')
+
+    let visitorId = vidParam || undefined
+
+    if (vidParam && vidParam.includes('?')) {
+      visitorId = vidParam.split('?')[0]
     }
+    visitor.id = visitorId
+
+    const sourceId = urlParams.get('source_id')
+    if (sourceId) visitor.sourceId = sourceId
   }
 
   if (
-    (!visitor.id && !getCookie(CnMCookie)) ||
-    !validVisitorId(getCookie(CnMCookie) as string)
+    (!visitor.id && !getCookie(CnMIDCookie)) ||
+    !validVisitorId(getCookie(CnMIDCookie) || '')
   ) {
     const visitorId = uuidv4()
     visitor.id = visitorId
   }
 
-  if (!visitor.id && getCookie(CnMCookie)) {
-    const c = getCookie(CnMCookie) as string
+  if (!visitor.id && getCookie(CnMIDCookie)) {
+    const c = getCookie(CnMIDCookie) as string
     const [visitorId] = c.split('|')
     visitor.id = visitorId
   }
 
-  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMCookie))
-
   const combinedCookie = buildCookie({ visitorId: visitor.id as string })
-  setCookie(CnMCookie, combinedCookie, 365)
+  setCookie(CnMIDCookie, combinedCookie, cookieValidDays)
 
+  const { sessionId, endTime } = getSessionIdAndEndTime(getCookie(CnMIDCookie))
   session.id = sessionId
   session.endTime = endTime
   setSession(session)
@@ -124,6 +159,7 @@ const getSessionIdAndEndTime = (
 const hasCookieValueExpired = (cookieData: string | undefined): Boolean => {
   if (!cookieData) return true
   const cookieSplit = cookieData.split('|')
+
   if (cookieSplit.length > 1) {
     const timestampString = cookieSplit[cookieSplit.length - 1]
     const expiryTimeEpoch = Date.parse(timestampString)

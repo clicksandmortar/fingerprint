@@ -71,3 +71,8 @@ yarn-error.log
 .idea
 
 .parcel-cache
+
+# Ignore test outcomes
+playwright-report
+src/react-app-env*
+test-results

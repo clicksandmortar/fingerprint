@@ -1,0 +1,42 @@
+<!-- This is a sample HTML page with difi embedded into it. This file is used for testing and uses the current build. See README for testing deployed versions -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/" />
+  <title>C&M Fingerprint Example</title>
+</head>
+
+<body>
+  <img
+    src="https://static.wixstatic.com/media/e1a921_c2f14e936c6b4561ba212316ee18e500~mv2.png/v1/fill/w_201,h_66,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Clicks-and-Mortar.png"
+    style="width:50px" />
+  <p>
+    Note: Embedded fingerprint should appear on the page. Refresh to change
+    behaviour.
+  </p>
+
+  <script>
+    ; (function (f, i, n, g, e, rp, ri, nt) {
+      p = i.createElement(n)
+      r = i.getElementsByTagName(n)[0]
+      p.src = g
+      p.id = e
+      p.setAttribute('data-debug', rp)
+      p.setAttribute('data-consent', ri)
+      r.parentNode.insertBefore(p, r)
+    })(
+      window,
+      document,
+      'script',
+      './dist/fingerprint.js',
+      'bdd744ae-bf2e-486a-bf89-63c4d4119764',
+      true,
+      true
+    )
+  </script>
+</body>
+
+</html>

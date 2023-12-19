@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
 import { useLogging } from '../context/LoggingContext'
+import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { isUndefined } from '../utils/page'
-import { useCollectorMutation } from './useCollectorMutation'
+import { useCollectorMutation } from './api/useCollectorMutation'
 
 // prepends a dot to the class name and joins multiple classes with dots to make a valid CSS selector
 export const getButtonSelector = (el: HTMLButtonElement) => {
@@ -35,6 +36,8 @@ export default function useButtonCollector() {
   const { visitor } = useVisitor()
   const { log } = useLogging()
 
+  const { trackEvent } = useMixpanel()
+
   useEffect(() => {
     if (isUndefined('document')) return
     if (!visitor.id) return
@@ -53,6 +56,7 @@ export default function useButtonCollector() {
       if (button.type === 'submit') return
 
       log('useButtonCollector: button clicked', { button })
+      trackEvent('button_clicked', button)
       collect({
         button: {
           id: button.id,

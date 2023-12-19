@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { bootstrapSession } from '../sessions/bootstrap'
 import { Session } from '../sessions/types'
-import { bootstrapVisitor } from '../visitors/bootstrap'
+import { bootstrapVisitor, correctCookieSubdomain } from '../visitors/bootstrap'
 import { Visitor } from '../visitors/types'
 import { useLogging } from './LoggingContext'
 
@@ -35,6 +35,9 @@ export const VisitorProvider = ({ children }: VisitorProviderProps) => {
         session,
         setSession
       })
+
+      const updatedCookie = correctCookieSubdomain()
+      log('FingerprintContext: Correcting cookie domain to', updatedCookie)
     }
 
     boot()
