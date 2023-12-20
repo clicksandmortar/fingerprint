@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import { Trigger } from '../../../client/types'
 import CloseButton from '../../../components/CloseButton'
+import { useSeen } from '../../../hooks/api/useSeenMutation'
 import { prependClass, useModalDimensionsBasedOnImage } from '../helpers'
 
 type Props = {
@@ -24,13 +25,16 @@ const FullyClickableModal = ({
 }: Props) => {
   const imageURL = trigger?.data?.backgroundURL || ''
 
+  const [stylesLoaded, setStylesLoaded] = useState(false)
+
   const {
     imageDimensions: { height, width }
   } = useModalDimensionsBasedOnImage({
     imageURL
   })
+  const isImageBrokenDontShowModal = !width || !height
 
-  const [stylesLoaded, setStylesLoaded] = useState(false)
+  useSeen({ trigger, skip: !stylesLoaded || isImageBrokenDontShowModal })
 
   const appendResponsiveBehaviour = React.useCallback(() => {
     return isMobile
@@ -210,6 +214,9 @@ const FullyClickableModal = ({
   )
 
   if (!stylesLoaded) {
+    return null
+  }
+  if (isImageBrokenDontShowModal) {
     return null
   }
 

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useMixpanel } from '../../context/MixpanelContext'
-import { useSeenMutation } from '../../hooks/api/useSeenMutation'
+import { useSeen } from '../../hooks/api/useSeenMutation'
 import { useCollector } from '../../hooks/useCollector'
 import { BannerTrigger } from './Banner.types'
 import HorizontalBanner from './Components/HorizontalBanner'
@@ -13,31 +13,7 @@ const Banner = ({ trigger }: { trigger: BannerTrigger }) => {
   const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
 
-  const [hasFired, setHasFired] = useState(false)
-
-  const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
-
-  // @Todo: @Ed - extract into a reusable piece, or move the logic to TriggerComponent
-  useEffect(() => {
-    if (!open) return
-    if (hasFired) return
-    if (isSuccess) return
-    if (isLoading) return
-
-    // seen gets called multiple times since Collector currently
-    // like to over-rerender componets. This timeout prevents from firing a ton
-    // even with this, Banner can still re-issue the same request since all components
-    // get re-rendered and unlike Modal, Banner gets to stay.
-    //  @Ed to deal with at a later point
-    const tId = setTimeout(() => {
-      runSeen(trigger)
-    }, 500)
-
-    setHasFired(true)
-    return () => {
-      clearTimeout(tId)
-    }
-  }, [open, isSuccess, isLoading])
+  useSeen({ trigger, skip: !open })
 
   if (!open) return null
 

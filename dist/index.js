@@ -328,6 +328,7 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
       visitorId = vidParam.split('?')[0];
     }
     visitor.id = visitorId;
+    setCookie(cookieAccountJWT, visitorId || '', cookieValidDays);
     var sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
@@ -1654,6 +1655,7 @@ var useCollector = function useCollector() {
   return React.useContext(CollectorContext);
 };
 
+var _excluded = ["mutate"];
 var useSeenMutation = function useSeenMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
@@ -1717,6 +1719,30 @@ var useSeenMutation = function useSeenMutation() {
       }
     }
   });
+};
+var useSeen = function useSeen(_ref) {
+  var trigger = _ref.trigger,
+    skip = _ref.skip;
+  var _useState = React.useState(false),
+    hasFired = _useState[0],
+    setHasFired = _useState[1];
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    mutationRest = _objectWithoutPropertiesLoose(_useSeenMutation, _excluded);
+  React.useEffect(function () {
+    if (skip) return;
+    if (hasFired) return;
+    if (mutationRest.isSuccess) return;
+    if (mutationRest.isLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+      setHasFired(true);
+    }, 500);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [mutationRest, skip, hasFired, runSeen, setHasFired]);
+  return mutationRest;
 };
 
 var closeButtonStyles = {
@@ -2046,7 +2072,7 @@ var HorizontalBanner = function HorizontalBanner(_ref) {
   }));
 };
 
-var _excluded = ["icon"];
+var _excluded$1 = ["icon"];
 var Ticket = function Ticket(props) {
   return React__default.createElement("svg", Object.assign({
     xmlns: 'http://www.w3.org/2000/svg',
@@ -2084,7 +2110,7 @@ var iconList = {
 };
 var Icon = function Icon(_ref) {
   var icon = _ref.icon,
-    props = _objectWithoutPropertiesLoose(_ref, _excluded);
+    props = _objectWithoutPropertiesLoose(_ref, _excluded$1);
   var _useLogging = useLogging(),
     error = _useLogging.error;
   var IconComponent = iconList[icon];
@@ -2160,26 +2186,10 @@ var Banner = function Banner(_ref) {
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
-  var _useState2 = React.useState(false),
-    hasFired = _useState2[0],
-    setHasFired = _useState2[1];
-  var _useSeenMutation = useSeenMutation(),
-    runSeen = _useSeenMutation.mutate,
-    isSuccess = _useSeenMutation.isSuccess,
-    isLoading = _useSeenMutation.isLoading;
-  React.useEffect(function () {
-    if (!open) return;
-    if (hasFired) return;
-    if (isSuccess) return;
-    if (isLoading) return;
-    var tId = setTimeout(function () {
-      runSeen(trigger);
-    }, 500);
-    setHasFired(true);
-    return function () {
-      clearTimeout(tId);
-    };
-  }, [open, isSuccess, isLoading]);
+  useSeen({
+    trigger: trigger,
+    skip: !open
+  });
   if (!open) return null;
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
@@ -2385,10 +2395,12 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
   var _useState = React.useState(null),
     invocationTimeStamp = _useState[0],
     setInvocationTimeStamp = _useState[1];
-  var _useSeenMutation = useSeenMutation(),
-    runSeen = _useSeenMutation.mutate,
-    isSeenSuccess = _useSeenMutation.isSuccess,
-    isSeenLoading = _useSeenMutation.isLoading;
+  var _useSeen = useSeen({
+      trigger: trigger,
+      skip: !open
+    }),
+    isSeenSuccess = _useSeen.isSuccess,
+    isSeenLoading = _useSeen.isLoading;
   var _useDataCaptureMutati = useDataCaptureMutation(),
     submit = _useDataCaptureMutati.mutate,
     isSubmissionSuccess = _useDataCaptureMutati.isSuccess,
@@ -2399,7 +2411,6 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
     if (isSeenSuccess) return;
     if (isSeenLoading) return;
     var tId = setTimeout(function () {
-      runSeen(trigger);
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString());
       }
@@ -2551,15 +2562,20 @@ var FullyClickableModal = function FullyClickableModal(_ref) {
     handleCloseModal = _ref.handleCloseModal,
     trigger = _ref.trigger;
   var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  var _useState = React.useState(false),
+    stylesLoaded = _useState[0],
+    setStylesLoaded = _useState[1];
   var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
       imageURL: imageURL
     }),
     _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
     height = _useModalDimensionsBa2.height,
     width = _useModalDimensionsBa2.width;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
+  var isImageBrokenDontShowModal = !width || !height;
+  useSeen({
+    trigger: trigger,
+    skip: !stylesLoaded || isImageBrokenDontShowModal
+  });
   var appendResponsiveBehaviour = React__default.useCallback(function () {
     return reactDeviceDetect.isMobile ? "." + prependClass('modal') + " {\n\n    }" : "\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n";
   }, [height, width]);
@@ -2584,6 +2600,9 @@ var FullyClickableModal = function FullyClickableModal(_ref) {
     return handleCloseModal(e);
   }, [handleCloseModal]);
   if (!stylesLoaded) {
+    return null;
+  }
+  if (isImageBrokenDontShowModal) {
     return null;
   }
   return React__default.createElement("div", {
@@ -2646,6 +2665,10 @@ var BrownsCustomModal = function BrownsCustomModal(props) {
     document.head.appendChild(styles);
     setStylesLoaded(true);
   }, [randomHash]);
+  useSeen({
+    trigger: trigger,
+    skip: !open || !stylesLoaded
+  });
   if (!stylesLoaded) {
     return null;
   }
@@ -2977,6 +3000,11 @@ var StandardModal = function StandardModal(_ref) {
     height = _useModalDimensionsBa2.height,
     width = _useModalDimensionsBa2.width,
     setImageDimensions = _useModalDimensionsBa.setImageDimensions;
+  var isImageBrokenDontShowModal = !width || !height;
+  useSeen({
+    trigger: trigger,
+    skip: !stylesLoaded || isImageBrokenDontShowModal
+  });
   var appendResponsiveBehaviour = React__default.useCallback(function () {
     return reactDeviceDetect.isMobile ? "" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 2.4rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 1.3rem;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 1.6rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 0.9rem;\n  }\n}\n\n";
   }, [height, width, imageURL, reactDeviceDetect.isMobile]);
@@ -3010,7 +3038,7 @@ var StandardModal = function StandardModal(_ref) {
   if (!stylesLoaded) {
     return null;
   }
-  if (!width || !height) {
+  if (isImageBrokenDontShowModal) {
     error("StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate.");
     return null;
   }
@@ -3074,6 +3102,10 @@ var StonehouseCustomModal = function StonehouseCustomModal(_ref) {
   var _useState = React.useState(false),
     stylesLoaded = _useState[0],
     setStylesLoaded = _useState[1];
+  useSeen({
+    trigger: trigger,
+    skip: !stylesLoaded
+  });
   React.useEffect(function () {
     var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        height: " + scaleBg(0.7).height + "px;\n        width: " + scaleBg(0.7).width + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        margin-left: auto;\n        margin-right: auto;\n        margin-top: 0;\n        margin-bottom: -1.5rem;\n        font-size: 4.5rem;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: grid;\n        place-content: center;\n        flex: 1;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n        font-size: 2.4rem;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        display: block;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n        font-size: 1.3rem;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 4rem 1.5rem 2rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2.5rem;\n          margin-bottom: -0.6rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.9rem;\n          letter-spacing: 1.2pt;\n\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 2rem 1.5rem 1rem 1.5rem;\n        }\n      }\n    ";
     var styles = document.createElement('style');
@@ -3173,17 +3205,9 @@ var Modal = function Modal(_ref) {
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutate;
   var brand = useBrand();
-  var _useSeenMutation = useSeenMutation(),
-    runSeen = _useSeenMutation.mutate,
-    isSuccess = _useSeenMutation.isSuccess,
-    isLoading = _useSeenMutation.isLoading;
   React.useEffect(function () {
-    if (!open) return;
-    if (invocationTimeStamp) return;
-    if (isSuccess) return;
-    if (isLoading) return;
+    if (!!invocationTimeStamp) return;
     var tId = setTimeout(function () {
-      runSeen(trigger);
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString());
       }
@@ -3191,7 +3215,7 @@ var Modal = function Modal(_ref) {
     return function () {
       clearTimeout(tId);
     };
-  }, [open, isSuccess, isLoading]);
+  }, [invocationTimeStamp]);
   if (!open) {
     return null;
   }

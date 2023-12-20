@@ -280,6 +280,7 @@ const bootstrapVisitor = ({
       visitorId = vidParam.split('?')[0];
     }
     visitor.id = visitorId;
+    setCookie(cookieAccountJWT, visitorId || '', cookieValidDays);
     const sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
@@ -1602,6 +1603,30 @@ const useSeenMutation = () => {
     }
   });
 };
+const useSeen = ({
+  trigger,
+  skip
+}) => {
+  const [hasFired, setHasFired] = useState(false);
+  const {
+    mutate: runSeen,
+    ...mutationRest
+  } = useSeenMutation();
+  useEffect(() => {
+    if (skip) return;
+    if (hasFired) return;
+    if (mutationRest.isSuccess) return;
+    if (mutationRest.isLoading) return;
+    const tId = setTimeout(() => {
+      runSeen(trigger);
+      setHasFired(true);
+    }, 500);
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [mutationRest, skip, hasFired, runSeen, setHasFired]);
+  return mutationRest;
+};
 
 const closeButtonStyles = {
   borderRadius: '100%',
@@ -2037,25 +2062,10 @@ const Banner = ({
     trackEvent
   } = useMixpanel();
   const [open, setOpen] = useState(true);
-  const [hasFired, setHasFired] = useState(false);
-  const {
-    mutate: runSeen,
-    isSuccess,
-    isLoading
-  } = useSeenMutation();
-  useEffect(() => {
-    if (!open) return;
-    if (hasFired) return;
-    if (isSuccess) return;
-    if (isLoading) return;
-    const tId = setTimeout(() => {
-      runSeen(trigger);
-    }, 500);
-    setHasFired(true);
-    return () => {
-      clearTimeout(tId);
-    };
-  }, [open, isSuccess, isLoading]);
+  useSeen({
+    trigger,
+    skip: !open
+  });
   if (!open) return null;
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
@@ -2260,10 +2270,12 @@ const DataCaptureModal = ({
   } = useCollector();
   const [invocationTimeStamp, setInvocationTimeStamp] = useState(null);
   const {
-    mutate: runSeen,
     isSuccess: isSeenSuccess,
     isLoading: isSeenLoading
-  } = useSeenMutation();
+  } = useSeen({
+    trigger,
+    skip: !open
+  });
   const {
     mutate: submit,
     isSuccess: isSubmissionSuccess,
@@ -2275,7 +2287,6 @@ const DataCaptureModal = ({
     if (isSeenSuccess) return;
     if (isSeenLoading) return;
     const tId = setTimeout(() => {
-      runSeen(trigger);
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString());
       }
@@ -2429,6 +2440,7 @@ const FullyClickableModal = ({
 }) => {
   var _trigger$data;
   const imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
+  const [stylesLoaded, setStylesLoaded] = useState(false);
   const {
     imageDimensions: {
       height,
@@ -2437,7 +2449,11 @@ const FullyClickableModal = ({
   } = useModalDimensionsBasedOnImage({
     imageURL
   });
-  const [stylesLoaded, setStylesLoaded] = useState(false);
+  const isImageBrokenDontShowModal = !width || !height;
+  useSeen({
+    trigger,
+    skip: !stylesLoaded || isImageBrokenDontShowModal
+  });
   const appendResponsiveBehaviour = React__default.useCallback(() => {
     return isMobile ? `.${prependClass('modal')} {
 
@@ -2592,6 +2608,9 @@ const FullyClickableModal = ({
     return handleCloseModal(e);
   }, [handleCloseModal]);
   if (!stylesLoaded) {
+    return null;
+  }
+  if (isImageBrokenDontShowModal) {
     return null;
   }
   return React__default.createElement("div", {
@@ -2833,6 +2852,10 @@ const BrownsCustomModal = props => {
     document.head.appendChild(styles);
     setStylesLoaded(true);
   }, [randomHash]);
+  useSeen({
+    trigger,
+    skip: !open || !stylesLoaded
+  });
   if (!stylesLoaded) {
     return null;
   }
@@ -3334,6 +3357,11 @@ const StandardModal = ({
   } = useModalDimensionsBasedOnImage({
     imageURL
   });
+  const isImageBrokenDontShowModal = !width || !height;
+  useSeen({
+    trigger,
+    skip: !stylesLoaded || isImageBrokenDontShowModal
+  });
   const appendResponsiveBehaviour = React__default.useCallback(() => {
     return isMobile ? `` : `
 
@@ -3550,7 +3578,7 @@ const StandardModal = ({
   if (!stylesLoaded) {
     return null;
   }
-  if (!width || !height) {
+  if (isImageBrokenDontShowModal) {
     error("StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate.");
     return null;
   }
@@ -3613,6 +3641,10 @@ const StonehouseCustomModal = ({
 }) => {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   const [stylesLoaded, setStylesLoaded] = useState(false);
+  useSeen({
+    trigger,
+    skip: !stylesLoaded
+  });
   useEffect(() => {
     const cssToApply = `
       @font-face{
@@ -3876,18 +3908,9 @@ const Modal = ({
     mutate: collect
   } = useCollectorMutation();
   const brand = useBrand();
-  const {
-    mutate: runSeen,
-    isSuccess,
-    isLoading
-  } = useSeenMutation();
   useEffect(() => {
-    if (!open) return;
-    if (invocationTimeStamp) return;
-    if (isSuccess) return;
-    if (isLoading) return;
+    if (!!invocationTimeStamp) return;
     const tId = setTimeout(() => {
-      runSeen(trigger);
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString());
       }
@@ -3895,7 +3918,7 @@ const Modal = ({
     return () => {
       clearTimeout(tId);
     };
-  }, [open, isSuccess, isLoading]);
+  }, [invocationTimeStamp]);
   if (!open) {
     return null;
   }
