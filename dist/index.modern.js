@@ -3175,9 +3175,9 @@ class FlipClock extends React__default.Component {
     }
     `;
     this.timerID = setInterval(() => this.updateTime(), 50);
-    const styles = document.createElement('style');
-    styles.appendChild(document.createTextNode(CSS));
-    document.head.appendChild(styles);
+    this.styles = document.createElement('style');
+    this.styles.appendChild(document.createTextNode(CSS));
+    document.head.appendChild(this.styles);
     setTimeout(() => {
       this.setState({
         haveStylesLoaded: true
@@ -3186,6 +3186,7 @@ class FlipClock extends React__default.Component {
   }
   componentWillUnmount() {
     clearInterval(this.timerID);
+    document.head.removeChild(this.styles);
   }
   updateTime() {
     const startDate = this.props.startDate || new Date();

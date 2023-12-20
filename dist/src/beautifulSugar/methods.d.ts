@@ -1,1 +1,2 @@
-export declare const a = 3;
+import { Trigger } from '../client/types';
+export declare const setPageTriggers: (set: any, get: any) => (triggers: Trigger[]) => void;

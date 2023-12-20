@@ -122,7 +122,8 @@ class FlipClock extends React.Component<
       haveStylesLoaded: false
     }
   }
-  public timerID: NodeJS.Timer
+  private timerID: NodeJS.Timer
+  private styles: HTMLStyleElement
 
   componentDidMount() {
     const { textPrimary, backgroundPrimary } = this.props.colorConfig
@@ -295,9 +296,9 @@ class FlipClock extends React.Component<
     `
 
     this.timerID = setInterval(() => this.updateTime(), 50)
-    const styles = document.createElement('style')
-    styles.appendChild(document.createTextNode(CSS))
-    document.head.appendChild(styles)
+    this.styles = document.createElement('style')
+    this.styles.appendChild(document.createTextNode(CSS))
+    document.head.appendChild(this.styles)
     setTimeout(() => {
       this.setState({ haveStylesLoaded: true })
     }, 500)
@@ -305,6 +306,7 @@ class FlipClock extends React.Component<
 
   componentWillUnmount() {
     clearInterval(this.timerID)
+    document.head.removeChild(this.styles)
   }
 
   updateTime() {

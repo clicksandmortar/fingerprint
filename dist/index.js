@@ -2824,9 +2824,9 @@ var FlipClock = /*#__PURE__*/function (_React$Component) {
     this.timerID = setInterval(function () {
       return _this2.updateTime();
     }, 50);
-    var styles = document.createElement('style');
-    styles.appendChild(document.createTextNode(CSS));
-    document.head.appendChild(styles);
+    this.styles = document.createElement('style');
+    this.styles.appendChild(document.createTextNode(CSS));
+    document.head.appendChild(this.styles);
     setTimeout(function () {
       _this2.setState({
         haveStylesLoaded: true
@@ -2835,6 +2835,7 @@ var FlipClock = /*#__PURE__*/function (_React$Component) {
   };
   _proto.componentWillUnmount = function componentWillUnmount() {
     clearInterval(this.timerID);
+    document.head.removeChild(this.styles);
   };
   _proto.updateTime = function updateTime() {
     var startDate = this.props.startDate || new Date();
