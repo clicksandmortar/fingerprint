@@ -1,6 +1,7 @@
 import React, { memo } from 'react'
 import { Trigger } from '../../../../client/types'
 import CountdownFlipClock from '../../../../components/CountdownFlipClock/CountdownFlipClock'
+import { getInterpolate } from '../../../../utils/getInterpolate'
 import { buildTextWithPotentiallyCountdown, prependClass } from '../../helpers'
 
 type Props = { trigger: Trigger }
@@ -8,9 +9,10 @@ type Props = { trigger: Trigger }
 // NOTE: the styles here rely on the styles useEffect in StandardModal.tsx
 const Paragraph = ({ trigger }: Props) => {
   const countdownEndTime = trigger?.data?.countdownEndTime
+  const interpolate = getInterpolate(trigger.data || {}, true)
 
   const StdParagraph = ({ text }: { text: string | undefined }) => (
-    <p className={prependClass('sub-text')}>{text || ''}</p>
+    <p className={prependClass('sub-text')}>{interpolate(text || '')}</p>
   )
 
   const texts = buildTextWithPotentiallyCountdown(

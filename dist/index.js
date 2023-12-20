@@ -1804,7 +1804,10 @@ function formatTimeStamp(targetDate) {
 var defualtFormatString = function defualtFormatString(val) {
   return val;
 };
-var getInterpolate = function getInterpolate(structure) {
+var getInterpolate = function getInterpolate(structure, hideMissingValues) {
+  if (hideMissingValues === void 0) {
+    hideMissingValues = true;
+  }
   var interpolate = function interpolate(text, formatString) {
     if (formatString === void 0) {
       formatString = defualtFormatString;
@@ -1812,6 +1815,7 @@ var getInterpolate = function getInterpolate(structure) {
     var replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, function (match, keys) {
       var value = transcend(structure, keys);
       if (formatString) value = formatString(value);
+      if (!!match && !value && hideMissingValues) return '';
       return value !== undefined ? value : match;
     });
     return replacedText;
@@ -1858,7 +1862,7 @@ var useCountdown = function useCountdown(_ref) {
     }
   }, [onZero, timestamp, intId]);
   var interpolatefunc = React.useMemo(function () {
-    return getInterpolate(interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure);
+    return getInterpolate((interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure) || {});
   }, [interpolate]);
   var formattedCountdown = React.useMemo(function () {
     if (!interpolate) {
@@ -2885,12 +2889,13 @@ var CountdownFlipClock = function CountdownFlipClock(props) {
 var Header = function Header(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
   var trigger = _ref.trigger;
+  var interpolate = getInterpolate(trigger.data || {}, true);
   var countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
   var StdHeader = function StdHeader(_ref2) {
     var text = _ref2.text;
     return React__default.createElement("h1", {
       className: prependClass('main-text')
-    }, text || '');
+    }, interpolate(text || ''));
   };
   var texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading) || '');
   if (!countdownEndTime) return React__default.createElement(StdHeader, {
@@ -2918,11 +2923,12 @@ var Paragraph = function Paragraph(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
   var trigger = _ref.trigger;
   var countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  var interpolate = getInterpolate(trigger.data || {}, true);
   var StdParagraph = function StdParagraph(_ref2) {
     var text = _ref2.text;
     return React__default.createElement("p", {
       className: prependClass('sub-text')
-    }, text || '');
+    }, interpolate(text || ''));
   };
   var texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.paragraph) || '');
   if (!countdownEndTime) return React__default.createElement(StdParagraph, {

@@ -1,6 +1,7 @@
 import { test } from '@playwright/test'
 import { Browser, webkit } from 'playwright'
 import { prepPage } from '../../utils/__dev__/helpers'
+import { fakeInterpolationModal } from '../__dev__/triggers.fake'
 
 let browser: Browser
 
@@ -26,6 +27,65 @@ test.describe('[behaviour] Difi script', async () => {
     })
 
     test.expect(modalElement).toBeTruthy()
+  })
+  test('modal text is interpolated', async () => {
+    const page = await prepPage(browser, [fakeInterpolationModal])
+
+    await page.waitForTimeout(4000)
+
+    const renderedHeaderText = await page.evaluate(async () => {
+      const text = document.querySelector('[class$="main-text"]')
+      return text?.innerHTML
+    })
+    const renderedParagraphText = await page.evaluate(async () => {
+      const text = document.querySelector('[class$="sub-text"]')
+      return text?.innerHTML
+    })
+
+    test.expect(renderedHeaderText).toEqual('Hello Ed')
+    test
+      .expect(renderedParagraphText?.toLowerCase())
+      .toEqual('indeed penguin slapper')
+
+    test.expect(renderedHeaderText).not.toContain('{')
+    test.expect(renderedParagraphText).not.toEqual('{')
+
+    test.expect(renderedHeaderText).not.toContain('}')
+    test.expect(renderedParagraphText).not.toEqual('}')
+  })
+  test('modal text with incorrect interpolation substrings is hidden', async () => {
+    const page = await prepPage(browser, [
+      {
+        ...fakeInterpolationModal,
+        data: {
+          ...fakeInterpolationModal.data,
+          fihterTootle: '<<- intentionaly Misspelled key',
+          paragraph: 'indeed {{ lastName }} is a {{ fighterTitle }}'
+        }
+      }
+    ])
+
+    await page.waitForTimeout(4000)
+
+    const renderedHeaderText = await page.evaluate(async () => {
+      const text = document.querySelector('[class$="main-text"]')
+      return text?.innerHTML
+    })
+    const renderedParagraphText = await page.evaluate(async () => {
+      const text = document.querySelector('[class$="sub-text"]')
+      return text?.innerHTML
+    })
+
+    test.expect(renderedHeaderText).toEqual('Hello Ed')
+    test
+      .expect(renderedParagraphText?.toLowerCase())
+      .toEqual('indeed penguin slapper is a ')
+
+    test.expect(renderedHeaderText).not.toContain('{')
+    test.expect(renderedParagraphText).not.toEqual('{')
+
+    test.expect(renderedHeaderText).not.toContain('}')
+    test.expect(renderedParagraphText).not.toEqual('}')
   })
   test('banners render', async () => {
     // TODO: Figure out why these are failing on CI....
