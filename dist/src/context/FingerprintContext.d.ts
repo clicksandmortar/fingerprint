@@ -1,7 +1,6 @@
 import { PropsWithChildren } from 'react';
 import { Handler } from '../client/handler';
 import { LEGACY_FingerprintConfig } from '../client/types';
-export declare const cookieAccountJWT = "b2c_token";
 export declare type FingerprintProviderProps = PropsWithChildren<{
     appId?: string;
     consent?: boolean;

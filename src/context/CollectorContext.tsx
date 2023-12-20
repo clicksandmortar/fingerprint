@@ -11,23 +11,21 @@ import {
   Trigger
 } from '../client/types'
 import { useCollectorMutation } from '../hooks/api/useCollectorMutation'
+import { useInitTracking } from '../hooks/init/useInitTracking'
 import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
 import { useBrand } from '../hooks/useBrandConfig'
 import useButtonCollector from '../hooks/useButtonCollector'
 import useConversions from '../hooks/useConversions'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
-import { useFingerprint } from '../hooks/useFingerprint'
 import useFormCollector from '../hooks/useFormCollector'
 import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
 import useIntently from '../hooks/useIntently'
 import { useLogging } from '../hooks/useLogging'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
-import { useTracking } from '../hooks/useTracking'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { updateCookie } from '../visitors/bootstrap'
-import { useVisitor } from './VisitorContext'
 
 export type CollectorProviderProps = {
   children?: React.ReactNode
@@ -46,16 +44,28 @@ export function CollectorProvider({
   handlers = []
 }: CollectorProviderProps) {
   const { log, error } = useLogging()
-  const {
-    initialDelay,
-    exitIntentTriggers,
-    idleTriggers,
-    pageLoadTriggers,
-    booted
-  } = useFingerprint()
-  const { config } = useEntireStore()
 
-  const { visitor, setVisitor } = useVisitor()
+  const {
+    config,
+    visitor,
+    setVisitor,
+    removePageTrigger,
+    pageTriggers,
+    displayedTriggersIds,
+    setPageTriggers,
+    setDisplayedTriggers,
+    set,
+    tracking: { initiated: mixpanelBooted },
+    difiProps: {
+      initialDelay,
+      exitIntentTriggers,
+      idleTriggers,
+      pageLoadTriggers,
+      booted
+    }
+  } = useEntireStore()
+
+  const { trackEvent } = useInitTracking()
 
   const {
     canNextTriggerOccur,
@@ -63,10 +73,7 @@ export function CollectorProvider({
     getRemainingCooldownMs,
     getIdleStatusDelay
   } = useTriggerDelay()
-  const {
-    trackEvent,
-    state: { initiated: mixpanelBooted }
-  } = useTracking()
+
   const { mutateAsync: collect } = useCollectorMutation()
   const { checkCollinsBookingComplete } = useCollinsBookingComplete()
 
@@ -80,14 +87,7 @@ export function CollectorProvider({
     getIdleStatusDelay()
   )
 
-  const {
-    removePageTrigger,
-    pageTriggers,
-    displayedTriggersIds,
-    setPageTriggers,
-    setDisplayedTriggers,
-    set
-  } = useEntireStore()
+  const {} = useEntireStore()
 
   const { setIntently } = useIntently()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(

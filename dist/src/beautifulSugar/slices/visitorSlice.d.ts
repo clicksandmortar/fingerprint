@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand';
 import { Session } from '../../sessions/types';
 import { Visitor } from '../../visitors/types';
-import { DifiStore } from '../types';
+import { DifiStore } from '../store';
 export declare type VisitorSlice = {
     visitor: Visitor;
     setVisitor: (visitor: Partial<Visitor>) => void;

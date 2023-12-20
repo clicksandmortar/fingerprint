@@ -2,6 +2,7 @@ import { Session } from 'inspector'
 import uniqueBy from 'lodash.uniqby'
 import { StateCreator } from 'zustand'
 import { Trigger } from '../../client/types'
+import { DifiStore } from '../store'
 import { Get, Set } from '../types'
 
 export type PageTriggersSlice = {
@@ -28,7 +29,7 @@ export const createPagetriggersSlice: StateCreator<
     }))
   },
   appendTrigger: (invokableTrigger: Trigger) => {
-    set((prev) => {
+    set((prev: DifiStore) => {
       if (prev.displayedTriggersIds.includes(invokableTrigger.id)) return prev
 
       return {

@@ -1,3 +1,10 @@
+import { ConfigSlice } from './slices/configSlice';
+import { HandlersSlice } from './slices/handlersSlice';
+import { MutualSlice } from './slices/mutualSlice';
+import { PageTriggersSlice } from './slices/pageTriggersSlice';
+import { TrackingSlice } from './slices/trackingSlice';
+import { VisitorSlice } from './slices/visitorSlice';
 import { UseDifiStore } from './types';
+export declare type DifiStore = PageTriggersSlice & ConfigSlice & MutualSlice & HandlersSlice & VisitorSlice & TrackingSlice;
 export declare const useDifiStore: UseDifiStore;
-export declare const useEntireStore: () => import("./slices/pageTriggersSlice").PageTriggersSlice & import("./slices/configSlice").ConfigSlice & import("./slices/mutualSlice").MutualSlice & import("../hooks/useLogging").LoggingSlice & import("./slices/handlersSlice").HandlersSlice & import("./slices/visitorSlice").VisitorSlice & import("zustand/esm/vanilla").StoreApi<import("./types").DifiStore>;
+export declare const useEntireStore: () => PageTriggersSlice & ConfigSlice & MutualSlice & HandlersSlice & VisitorSlice & TrackingSlice & import("zustand/esm/vanilla").StoreApi<import("./types").DifiStore>;

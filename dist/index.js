@@ -7,15 +7,15 @@ var useExitIntent = require('use-exit-intent');
 var zustand = require('zustand');
 var ReactDOM = _interopDefault(require('react-dom'));
 var reactQuery = require('@tanstack/react-query');
+var reactDeviceDetect = require('react-device-detect');
 var Cookies = _interopDefault(require('js-cookie'));
 var psl = _interopDefault(require('psl'));
 var uuid = require('uuid');
-var reactErrorBoundary = require('react-error-boundary');
-var reactDeviceDetect = require('react-device-detect');
 var mixpanel = _interopDefault(require('mixpanel-browser'));
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
+var reactErrorBoundary = require('react-error-boundary');
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -142,364 +142,6 @@ var createConfigSlice = function createConfigSlice(set, get) {
       });
     }
   };
-};
-
-var useFingerprint = function useFingerprint() {
-  return useDifiStore(function (s) {
-    return s.difiProps;
-  });
-};
-
-var disabledLogging = {
-  log: function log() {},
-  warn: function warn() {},
-  error: function error() {},
-  info: function info() {}
-};
-var enabledLogging = {
-  log: function log() {
-    var _console;
-    return (_console = console).log.apply(_console, arguments);
-  },
-  warn: function warn() {
-    var _console2;
-    return (_console2 = console).warn.apply(_console2, arguments);
-  },
-  error: function error() {
-    var _console3;
-    return (_console3 = console).error.apply(_console3, arguments);
-  },
-  info: function info() {
-    var _console4;
-    return (_console4 = console).info.apply(_console4, arguments);
-  }
-};
-var useLogging = function useLogging() {
-  var isDebugMode = useDifiStore(function (s) {
-    return s.config.script.debugMode;
-  });
-  if (isDebugMode) return enabledLogging;
-  return disabledLogging;
-};
-
-var queryClient = new reactQuery.QueryClient();
-var cookieAccountJWT = 'b2c_token';
-var useConsentCheck = function useConsentCheck(consent, consentCallback) {
-  var _useState = React.useState(consent),
-    consentGiven = _useState[0],
-    setConsentGiven = _useState[1];
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  React.useEffect(function () {
-    if (consent) {
-      setConsentGiven(consent);
-      return;
-    }
-    log('Fingerprint Widget Consent: ', consent);
-    if (!consentCallback) return;
-    var consentGivenViaCallback = consentCallback();
-    var interval = setInterval(function () {
-      setConsentGiven(consent);
-    }, 1000);
-    if (consentGivenViaCallback) {
-      clearInterval(interval);
-    }
-    return function () {
-      return clearInterval(interval);
-    };
-  }, [consentCallback, consent]);
-  return consentGiven;
-};
-var FingerprintProvider = function FingerprintProvider(props) {
-  var _useEntireStore = useEntireStore(),
-    set = _useEntireStore.set,
-    handlers = _useEntireStore.handlers,
-    addHandlers = _useEntireStore.addHandlers,
-    difiProps = _useEntireStore.difiProps;
-  var booted = difiProps.booted,
-    appId = difiProps.appId,
-    children = difiProps.children,
-    _difiProps$consent = difiProps.consent,
-    consent = _difiProps$consent === void 0 ? false : _difiProps$consent,
-    consentCallback = difiProps.consentCallback,
-    defaultHandlers = difiProps.defaultHandlers;
-  var setBooted = function setBooted(val) {
-    return set({
-      difiProps: _extends({}, difiProps, {
-        booted: val
-      })
-    });
-  };
-  React.useEffect(function () {
-    set({
-      difiProps: _extends({}, difiProps, props)
-    });
-    addHandlers(defaultHandlers || []);
-  }, [props]);
-  var consentGiven = useConsentCheck(consent, consentCallback);
-  React.useEffect(function () {
-    if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
-    if (!appId) return;
-    if (booted) return;
-    if (!consentGiven) return;
-    var performBoot = function performBoot() {
-      try {
-        setBooted(true);
-        return Promise.resolve();
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    };
-    performBoot();
-  }, [consentGiven, booted, appId, props.appId]);
-  if (!appId) {
-    return null;
-  }
-  if (!consentGiven) {
-    return children;
-  }
-  if (!booted) {
-    console.log('booting Difi...');
-    return null;
-  }
-  return React__default.createElement(reactQuery.QueryClientProvider, {
-    client: queryClient
-  }, React__default.createElement(VisitorProvider, null), React__default.createElement(CollectorProvider, {
-    handlers: handlers
-  }, React__default.createElement(reactErrorBoundary.ErrorBoundary, {
-    onError: function onError(error, info) {
-      return console.error(error, info);
-    },
-    fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children)));
-};
-
-var uuidValidateV4 = function uuidValidateV4(uuid$1) {
-  return uuid.validate(uuid$1) && uuid.version(uuid$1) === 4;
-};
-
-var validVisitorId = function validVisitorId(id) {
-  var splitCookie = id.split('|');
-  return uuidValidateV4(splitCookie[0]);
-};
-
-var cookieValidDays = 365;
-var CnMCookie = '_cm';
-var CnMIDCookie = '_cm_id';
-function getCookieDomain() {
-  var parsedUrl = psl.parse(location.host);
-  var cookieDomain = null;
-  if (!parsedUrl.error) cookieDomain = parsedUrl.domain || null;
-  return cookieDomain;
-}
-function correctCookieSubdomain() {
-  var cookie = getCookie(CnMIDCookie);
-  if (!cookie) return;
-  Cookies.remove(CnMIDCookie);
-  setCookie(CnMIDCookie, cookie, cookieValidDays);
-  return cookie;
-}
-var buildCookie = function buildCookie(_ref) {
-  var visitorId = _ref.visitorId;
-  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie(CnMIDCookie)),
-    sessionId = _getSessionIdAndEndTi.sessionId,
-    endTime = _getSessionIdAndEndTi.endTime;
-  return visitorId + "|" + sessionId + "|" + endTime.toISOString();
-};
-var updateCookieUUID = function updateCookieUUID(cookieData, uuid) {
-  if (!cookieData) return null;
-  var cookieSplit = cookieData.split('|');
-  if (cookieSplit.length <= 2) return null;
-  var visitorId = cookieSplit[0];
-  if (visitorId === uuid) return null;
-  var sessionId = cookieSplit[1];
-  var endTime = cookieSplit[2];
-  return uuid + "|" + sessionId + "|" + endTime;
-};
-var updateCookie = function updateCookie(uuid) {
-  if (!uuidValidateV4(uuid)) return;
-  var cookie = getCookie(CnMIDCookie);
-  var newCookie = updateCookieUUID(cookie, uuid);
-  if (!newCookie) return;
-  setCookie(CnMIDCookie, newCookie, cookieValidDays);
-};
-var bootstrapVisitor = function bootstrapVisitor(_ref2) {
-  var setVisitor = _ref2.setVisitor,
-    session = _ref2.session,
-    setSession = _ref2.setSession;
-  var visitor = {
-    id: undefined
-  };
-  if (getCookie(cookieAccountJWT)) {
-    visitor.jwt = getCookie(cookieAccountJWT);
-  }
-  if (typeof window !== 'undefined') {
-    var urlParams = new URLSearchParams(window.location.search);
-    var vidParam = urlParams.get('v_id');
-    var visitorId = vidParam || undefined;
-    if (vidParam && vidParam.includes('?')) {
-      visitorId = vidParam.split('?')[0];
-    }
-    visitor.id = visitorId;
-    var sourceId = urlParams.get('source_id');
-    if (sourceId) visitor.sourceId = sourceId;
-  }
-  if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie) || '')) {
-    var _visitorId = uuid.v4();
-    visitor.id = _visitorId;
-  }
-  if (!visitor.id && getCookie(CnMIDCookie)) {
-    var c = getCookie(CnMIDCookie);
-    var _c$split = c.split('|'),
-      _visitorId2 = _c$split[0];
-    visitor.id = _visitorId2;
-  }
-  var combinedCookie = buildCookie({
-    visitorId: visitor.id
-  });
-  setCookie(CnMIDCookie, combinedCookie, cookieValidDays);
-  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMIDCookie)),
-    sessionId = _getSessionIdAndEndTi2.sessionId,
-    endTime = _getSessionIdAndEndTi2.endTime;
-  session.id = sessionId;
-  session.endTime = endTime;
-  setSession(session);
-  setVisitor(visitor);
-};
-var getSessionIdAndEndTime = function getSessionIdAndEndTime(cookieData) {
-  var t = new Date();
-  t.setMinutes(t.getMinutes() + 30);
-  var sessionId;
-  var endTime = t;
-  if (!cookieData || hasCookieValueExpired(cookieData)) {
-    sessionId = uuid.v4();
-  } else {
-    var c = cookieData;
-    var _c$split2 = c.split('|'),
-      sessId = _c$split2[1];
-    if (sessId === 'undefined' || sessId === undefined) {
-      sessId = uuid.v4();
-    }
-    sessionId = sessId;
-  }
-  return {
-    sessionId: sessionId,
-    endTime: endTime
-  };
-};
-var hasCookieValueExpired = function hasCookieValueExpired(cookieData) {
-  if (!cookieData) return true;
-  var cookieSplit = cookieData.split('|');
-  if (cookieSplit.length > 1) {
-    var timestampString = cookieSplit[cookieSplit.length - 1];
-    var expiryTimeEpoch = Date.parse(timestampString);
-    var expiryTime = new Date();
-    expiryTime.setTime(expiryTimeEpoch);
-    var n = new Date();
-    if (n > expiryTime) {
-      return true;
-    }
-  }
-  return false;
-};
-
-var setCookie = function setCookie(name, value, expires, options) {
-  return Cookies.set(name, value, _extends({
-    expires: expires,
-    sameSite: 'strict',
-    domain: getCookieDomain() || undefined
-  }, options));
-};
-var getCookie = function getCookie(name) {
-  return Cookies.get(name);
-};
-var onCookieChanged = function onCookieChanged(callback, interval) {
-  if (interval === void 0) {
-    interval = 1000;
-  }
-  var lastCookie = document.cookie;
-  setInterval(function () {
-    var cookie = document.cookie;
-    if (cookie !== lastCookie) {
-      try {
-        callback({
-          oldValue: lastCookie,
-          newValue: cookie
-        });
-      } finally {
-        lastCookie = cookie;
-      }
-    }
-  }, interval);
-};
-
-var bootstrapSession = function bootstrapSession(_ref) {
-  var appId = _ref.appId,
-    setSession = _ref.setSession;
-  var session = {
-    firstVisit: undefined
-  };
-  if (!getCookie(CnMCookie) || getCookie(CnMCookie) !== appId) {
-    setCookie(CnMCookie, appId, cookieValidDays);
-    setSession(session);
-    return;
-  }
-  if (getCookie(CnMCookie) && getCookie(CnMCookie) === appId) {
-    session.firstVisit = false;
-    setSession(session);
-  }
-};
-
-var VisitorProvider = function VisitorProvider() {
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId,
-    booted = _useFingerprint.booted;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  var _useEntireStore = useEntireStore(),
-    session = _useEntireStore.session,
-    setSession = _useEntireStore.setSession,
-    visitor = _useEntireStore.visitor,
-    set = _useEntireStore.set;
-  var setVisitor = function setVisitor(val) {
-    return set({
-      visitor: val
-    });
-  };
-  React.useEffect(function () {
-    if (!booted) {
-      log('VisitorProvider: not booted');
-      return;
-    }
-    log('VisitorProvider: booting');
-    var boot = function boot() {
-      try {
-        return Promise.resolve(bootstrapSession({
-          appId: appId,
-          setSession: setSession
-        })).then(function () {
-          return Promise.resolve(bootstrapVisitor({
-            setVisitor: setVisitor,
-            session: session,
-            setSession: setSession
-          })).then(function () {
-            var updatedCookie = correctCookieSubdomain();
-            log('FingerprintContext: Correcting cookie domain to', updatedCookie);
-          });
-        });
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    };
-    boot();
-    log('VisitorProvider: booted', session, visitor);
-  }, [appId, booted]);
-  return null;
-};
-var useVisitor = function useVisitor() {
-  return useDifiStore(function (s) {
-    return s;
-  });
 };
 
 var deviceInfo = {
@@ -632,23 +274,233 @@ function getReferrer() {
   };
 }
 
-var useConfig = function useConfig() {
-  return useEntireStore().config;
+var setCookie = function setCookie(name, value, expires, options) {
+  return Cookies.set(name, value, _extends({
+    expires: expires,
+    sameSite: 'strict',
+    domain: getCookieDomain() || undefined
+  }, options));
 };
-var useBrand = function useBrand() {
-  var configBrandName = useConfig().brand.name;
-  if (configBrandName) return configBrandName;
-  return _LEGACY_getBrand();
+var getCookie = function getCookie(name) {
+  return Cookies.get(name);
 };
-var useTriggerConfig = function useTriggerConfig() {
-  return useConfig().trigger;
-};
-var useBrandColors = function useBrandColors() {
-  return useConfig().brand.colors || defaultColors;
+var onCookieChanged = function onCookieChanged(callback, interval) {
+  if (interval === void 0) {
+    interval = 1000;
+  }
+  var lastCookie = document.cookie;
+  setInterval(function () {
+    var cookie = document.cookie;
+    if (cookie !== lastCookie) {
+      try {
+        callback({
+          oldValue: lastCookie,
+          newValue: cookie
+        });
+      } finally {
+        lastCookie = cookie;
+      }
+    }
+  }, interval);
 };
 
-var useCollector = function useCollector() {
-  return React.useContext(CollectorContext);
+var uuidValidateV4 = function uuidValidateV4(uuid$1) {
+  return uuid.validate(uuid$1) && uuid.version(uuid$1) === 4;
+};
+
+var validVisitorId = function validVisitorId(id) {
+  var splitCookie = id.split('|');
+  return uuidValidateV4(splitCookie[0]);
+};
+
+var cookieAccountJWT = 'b2c_token';
+var cookieValidDays = 365;
+var CnMCookie = '_cm';
+var CnMIDCookie = '_cm_id';
+function getCookieDomain() {
+  var parsedUrl = psl.parse(location.host);
+  var cookieDomain = null;
+  if (!parsedUrl.error) cookieDomain = parsedUrl.domain || null;
+  return cookieDomain;
+}
+function correctCookieSubdomain() {
+  var cookie = getCookie(CnMIDCookie);
+  if (!cookie) return;
+  Cookies.remove(CnMIDCookie);
+  setCookie(CnMIDCookie, cookie, cookieValidDays);
+  return cookie;
+}
+var buildCookie = function buildCookie(_ref) {
+  var visitorId = _ref.visitorId;
+  var _getSessionIdAndEndTi = getSessionIdAndEndTime(getCookie(CnMIDCookie)),
+    sessionId = _getSessionIdAndEndTi.sessionId,
+    endTime = _getSessionIdAndEndTi.endTime;
+  return visitorId + "|" + sessionId + "|" + endTime.toISOString();
+};
+var updateCookieUUID = function updateCookieUUID(cookieData, uuid) {
+  if (!cookieData) return null;
+  var cookieSplit = cookieData.split('|');
+  if (cookieSplit.length <= 2) return null;
+  var visitorId = cookieSplit[0];
+  if (visitorId === uuid) return null;
+  var sessionId = cookieSplit[1];
+  var endTime = cookieSplit[2];
+  return uuid + "|" + sessionId + "|" + endTime;
+};
+var updateCookie = function updateCookie(uuid) {
+  if (!uuidValidateV4(uuid)) return;
+  var cookie = getCookie(CnMIDCookie);
+  var newCookie = updateCookieUUID(cookie, uuid);
+  if (!newCookie) return;
+  setCookie(CnMIDCookie, newCookie, cookieValidDays);
+};
+var bootstrapVisitor = function bootstrapVisitor(_ref2) {
+  var setVisitor = _ref2.setVisitor,
+    session = _ref2.session,
+    setSession = _ref2.setSession;
+  var visitor = {
+    id: undefined
+  };
+  if (getCookie(cookieAccountJWT)) {
+    visitor.jwt = getCookie(cookieAccountJWT);
+  }
+  if (typeof window !== 'undefined') {
+    var urlParams = new URLSearchParams(window.location.search);
+    var vidParam = urlParams.get('v_id');
+    var visitorId = vidParam || undefined;
+    if (vidParam && vidParam.includes('?')) {
+      visitorId = vidParam.split('?')[0];
+    }
+    visitor.id = visitorId;
+    var sourceId = urlParams.get('source_id');
+    if (sourceId) visitor.sourceId = sourceId;
+  }
+  if (!visitor.id && !getCookie(CnMIDCookie) || !validVisitorId(getCookie(CnMIDCookie) || '')) {
+    var _visitorId = uuid.v4();
+    visitor.id = _visitorId;
+  }
+  if (!visitor.id && getCookie(CnMIDCookie)) {
+    var c = getCookie(CnMIDCookie);
+    var _c$split = c.split('|'),
+      _visitorId2 = _c$split[0];
+    visitor.id = _visitorId2;
+  }
+  var combinedCookie = buildCookie({
+    visitorId: visitor.id
+  });
+  setCookie(CnMIDCookie, combinedCookie, cookieValidDays);
+  var _getSessionIdAndEndTi2 = getSessionIdAndEndTime(getCookie(CnMIDCookie)),
+    sessionId = _getSessionIdAndEndTi2.sessionId,
+    endTime = _getSessionIdAndEndTi2.endTime;
+  session.id = sessionId;
+  session.endTime = endTime;
+  setSession(session);
+  setVisitor(visitor);
+};
+var getSessionIdAndEndTime = function getSessionIdAndEndTime(cookieData) {
+  var t = new Date();
+  t.setMinutes(t.getMinutes() + 30);
+  var sessionId;
+  var endTime = t;
+  if (!cookieData || hasCookieValueExpired(cookieData)) {
+    sessionId = uuid.v4();
+  } else {
+    var c = cookieData;
+    var _c$split2 = c.split('|'),
+      sessId = _c$split2[1];
+    if (sessId === 'undefined' || sessId === undefined) {
+      sessId = uuid.v4();
+    }
+    sessionId = sessId;
+  }
+  return {
+    sessionId: sessionId,
+    endTime: endTime
+  };
+};
+var hasCookieValueExpired = function hasCookieValueExpired(cookieData) {
+  if (!cookieData) return true;
+  var cookieSplit = cookieData.split('|');
+  if (cookieSplit.length > 1) {
+    var timestampString = cookieSplit[cookieSplit.length - 1];
+    var expiryTimeEpoch = Date.parse(timestampString);
+    var expiryTime = new Date();
+    expiryTime.setTime(expiryTimeEpoch);
+    var n = new Date();
+    if (n > expiryTime) {
+      return true;
+    }
+  }
+  return false;
+};
+
+var useFingerprint = function useFingerprint() {
+  return useDifiStore(function (s) {
+    return s.difiProps;
+  });
+};
+
+var disabledLogging = {
+  log: function log() {},
+  warn: function warn() {},
+  error: function error() {},
+  info: function info() {}
+};
+var enabledLogging = {
+  log: function log() {
+    var _console;
+    return (_console = console).log.apply(_console, arguments);
+  },
+  warn: function warn() {
+    var _console2;
+    return (_console2 = console).warn.apply(_console2, arguments);
+  },
+  error: function error() {
+    var _console3;
+    return (_console3 = console).error.apply(_console3, arguments);
+  },
+  info: function info() {
+    var _console4;
+    return (_console4 = console).info.apply(_console4, arguments);
+  }
+};
+var useLogging = function useLogging() {
+  var isDebugMode = useDifiStore(function (s) {
+    return s.config.script.debugMode;
+  });
+  if (isDebugMode) return enabledLogging;
+  return disabledLogging;
+};
+
+var useInitVisitor = function useInitVisitor() {
+  var _useFingerprint = useFingerprint(),
+    booted = _useFingerprint.booted;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useEntireStore = useEntireStore(),
+    session = _useEntireStore.session,
+    setSession = _useEntireStore.setSession,
+    setVisitor = _useEntireStore.setVisitor;
+  React.useEffect(function () {
+    if (!booted) {
+      log('useInitVisitor: not booted');
+      return;
+    }
+    log('useInitVisitor: booting');
+    bootstrapVisitor({
+      setVisitor: setVisitor,
+      session: session,
+      setSession: setSession
+    });
+    var updatedCookie = correctCookieSubdomain();
+    log('useInitVisitor: Correcting cookie domain to', updatedCookie);
+  }, [booted, session, setSession, setVisitor, log]);
+  return null;
+};
+var useVisitor = function useVisitor() {
+  return useDifiStore(function (s) {
+    return s;
+  });
 };
 
 var init = function init(cfg) {
@@ -709,6 +561,25 @@ var useTracking = function useTracking() {
       initiated: initiated
     }
   };
+};
+
+var useConfig = function useConfig() {
+  return useEntireStore().config;
+};
+var useBrand = function useBrand() {
+  var configBrandName = useConfig().brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
+};
+var useTriggerConfig = function useTriggerConfig() {
+  return useConfig().trigger;
+};
+var useBrandColors = function useBrandColors() {
+  return useConfig().brand.colors || defaultColors;
+};
+
+var useCollector = function useCollector() {
+  return React.useContext(CollectorContext);
 };
 
 var useSeenMutation = function useSeenMutation() {
@@ -2823,6 +2694,23 @@ var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
   };
 };
 
+var createTrackingSlice = function createTrackingSlice(set, _get) {
+  return {
+    tracking: {
+      initiated: false,
+      setInitiated: function setInitiated(val) {
+        return set(function (prev) {
+          return {
+            tracking: _extends({}, prev.tracking, {
+              initiated: val
+            })
+          };
+        });
+      }
+    }
+  };
+};
+
 var createVisitorSlice = function createVisitorSlice(set, _get) {
   return {
     visitor: {},
@@ -2843,7 +2731,7 @@ var createVisitorSlice = function createVisitorSlice(set, _get) {
 };
 
 var useDifiStore = zustand.create(function () {
-  return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments));
+  return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments), createTrackingSlice.apply(void 0, arguments));
 });
 var useEntireStore = function useEntireStore() {
   return useDifiStore(function (s) {
@@ -3325,25 +3213,30 @@ function CollectorProvider(_ref) {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
-  var _useFingerprint = useFingerprint(),
-    initialDelay = _useFingerprint.initialDelay,
-    exitIntentTriggers = _useFingerprint.exitIntentTriggers,
-    idleTriggers = _useFingerprint.idleTriggers,
-    pageLoadTriggers = _useFingerprint.pageLoadTriggers,
-    booted = _useFingerprint.booted;
   var _useEntireStore = useEntireStore(),
-    config = _useEntireStore.config;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor,
-    setVisitor = _useVisitor.setVisitor;
+    config = _useEntireStore.config,
+    visitor = _useEntireStore.visitor,
+    setVisitor = _useEntireStore.setVisitor,
+    removePageTrigger = _useEntireStore.removePageTrigger,
+    pageTriggers = _useEntireStore.pageTriggers,
+    displayedTriggersIds = _useEntireStore.displayedTriggersIds,
+    setPageTriggers = _useEntireStore.setPageTriggers,
+    setDisplayedTriggers = _useEntireStore.setDisplayedTriggers,
+    set = _useEntireStore.set,
+    _useEntireStore$difiP = _useEntireStore.difiProps,
+    initialDelay = _useEntireStore$difiP.initialDelay,
+    exitIntentTriggers = _useEntireStore$difiP.exitIntentTriggers,
+    idleTriggers = _useEntireStore$difiP.idleTriggers,
+    pageLoadTriggers = _useEntireStore$difiP.pageLoadTriggers,
+    booted = _useEntireStore$difiP.booted;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent,
+    mixpanelBooted = _useTracking.state.initiated;
   var _useTriggerDelay = useTriggerDelay(),
     canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
     startCooldown = _useTriggerDelay.startCooldown,
     getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs,
     getIdleStatusDelay = _useTriggerDelay.getIdleStatusDelay;
-  var _useTracking = useTracking(),
-    trackEvent = _useTracking.trackEvent,
-    mixpanelBooted = _useTracking.state.initiated;
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
   var _useCollinsBookingCom = useCollinsBookingComplete(),
@@ -3359,13 +3252,7 @@ function CollectorProvider(_ref) {
   var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
-  var _useEntireStore2 = useEntireStore(),
-    removePageTrigger = _useEntireStore2.removePageTrigger,
-    pageTriggers = _useEntireStore2.pageTriggers,
-    displayedTriggersIds = _useEntireStore2.displayedTriggersIds,
-    setPageTriggers = _useEntireStore2.setPageTriggers,
-    setDisplayedTriggers = _useEntireStore2.setDisplayedTriggers,
-    set = _useEntireStore2.set;
+  _objectDestructuringEmpty(useEntireStore());
   var _useIntently = useIntently(),
     setIntently = _useIntently.setIntently;
   var _useState2 = React.useState(new Map()),
@@ -3718,6 +3605,137 @@ var CollectorContext = React.createContext({
     console.error('trackEvent not implemented correctly');
   }
 });
+
+var bootstrapSession = function bootstrapSession(_ref) {
+  var appId = _ref.appId,
+    setSession = _ref.setSession;
+  var session = {
+    firstVisit: undefined
+  };
+  if (!getCookie(CnMCookie) || getCookie(CnMCookie) !== appId) {
+    setCookie(CnMCookie, appId, cookieValidDays);
+    setSession(session);
+    return;
+  }
+  if (getCookie(CnMCookie) && getCookie(CnMCookie) === appId) {
+    session.firstVisit = false;
+    setSession(session);
+  }
+};
+
+var useInitSession = function useInitSession() {
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId,
+    booted = _useFingerprint.booted;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useEntireStore = useEntireStore(),
+    setSession = _useEntireStore.setSession;
+  React.useEffect(function () {
+    if (!booted) {
+      log('useInitSession: not booted yet');
+      return;
+    }
+    log('useInitSession: booting');
+    bootstrapSession({
+      appId: appId,
+      setSession: setSession
+    });
+  }, [appId, booted]);
+};
+
+var queryClient = new reactQuery.QueryClient();
+var useConsentCheck = function useConsentCheck(consent, consentCallback) {
+  var _useState = React.useState(consent),
+    consentGiven = _useState[0],
+    setConsentGiven = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  React.useEffect(function () {
+    if (consent) {
+      setConsentGiven(consent);
+      return;
+    }
+    log('Fingerprint Widget Consent: ', consent);
+    if (!consentCallback) return;
+    var consentGivenViaCallback = consentCallback();
+    var interval = setInterval(function () {
+      setConsentGiven(consent);
+    }, 1000);
+    if (consentGivenViaCallback) {
+      clearInterval(interval);
+    }
+    return function () {
+      return clearInterval(interval);
+    };
+  }, [consentCallback, consent]);
+  return consentGiven;
+};
+var FingerprintProvider = function FingerprintProvider(props) {
+  var _useEntireStore = useEntireStore(),
+    set = _useEntireStore.set,
+    handlers = _useEntireStore.handlers,
+    addHandlers = _useEntireStore.addHandlers,
+    difiProps = _useEntireStore.difiProps;
+  var booted = difiProps.booted,
+    appId = difiProps.appId,
+    children = difiProps.children,
+    _difiProps$consent = difiProps.consent,
+    consent = _difiProps$consent === void 0 ? false : _difiProps$consent,
+    consentCallback = difiProps.consentCallback,
+    defaultHandlers = difiProps.defaultHandlers;
+  var setBooted = function setBooted(val) {
+    return set({
+      difiProps: _extends({}, difiProps, {
+        booted: val
+      })
+    });
+  };
+  React.useEffect(function () {
+    set({
+      difiProps: _extends({}, difiProps, props)
+    });
+    addHandlers(defaultHandlers || []);
+  }, [props]);
+  useInitVisitor();
+  useInitSession();
+  var consentGiven = useConsentCheck(consent, consentCallback);
+  React.useEffect(function () {
+    if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
+    if (!appId) return;
+    if (booted) return;
+    if (!consentGiven) return;
+    var performBoot = function performBoot() {
+      try {
+        setBooted(true);
+        return Promise.resolve();
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    };
+    performBoot();
+  }, [consentGiven, booted, appId, props.appId]);
+  if (!appId) {
+    return null;
+  }
+  if (!consentGiven) {
+    return children;
+  }
+  if (!booted) {
+    console.log('booting Difi...');
+    return null;
+  }
+  return React__default.createElement(reactQuery.QueryClientProvider, {
+    client: queryClient
+  }, React__default.createElement(CollectorProvider, {
+    handlers: handlers
+  }, React__default.createElement(reactErrorBoundary.ErrorBoundary, {
+    onError: function onError(error, info) {
+      return console.error(error, info);
+    },
+    fallback: React__default.createElement("div", null, "An application error occurred.")
+  }, children)));
+};
 
 exports.CollectorContext = CollectorContext;
 exports.CollectorProvider = CollectorProvider;

@@ -1,10 +1,11 @@
 import mixpanel, { Callback, Config } from 'mixpanel-browser'
-import React, { useEffect, useState } from 'react'
-import { useVisitor } from '../context/VisitorContext'
-import { getEnvVars } from '../utils/getEnvVars'
-import { RegistrableUserProperties } from '../utils/types'
-import { useFingerprint } from './useFingerprint'
-import { useLogging } from './useLogging'
+import React, { useEffect } from 'react'
+import { useDifiStore } from '../../beautifulSugar/store'
+import { getEnvVars } from '../../utils/getEnvVars'
+import { RegistrableUserProperties } from '../../utils/types'
+import { useFingerprint } from '../useFingerprint'
+import { useLogging } from '../useLogging'
+import { useVisitor } from './useInitVisitor'
 
 const init = (cfg: Partial<Config>) => {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
@@ -26,11 +27,11 @@ export type MixpanelProviderProps = {
   children?: React.ReactNode
 }
 
-export const useTracking = () => {
+export const useInitTracking = () => {
   const { appId } = useFingerprint()
   const { visitor } = useVisitor()
   const { log } = useLogging()
-  const [initiated, setInitiated] = useState(false)
+  const { initiated, setInitiated } = useDifiStore((s) => s.tracking)
 
   useEffect(() => {
     if (!appId || !visitor.id) {

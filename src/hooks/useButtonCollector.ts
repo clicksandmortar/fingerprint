@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
-import { useVisitor } from '../context/VisitorContext'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './api/useCollectorMutation'
+import { useTracking } from './init/useInitTracking'
+import { useVisitor } from './init/useInitVisitor'
 import { useLogging } from './useLogging'
-import { useTracking } from './useTracking'
 
 // prepends a dot to the class name and joins multiple classes with dots to make a valid CSS selector
 export const getButtonSelector = (el: HTMLButtonElement) => {

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
-import { useVisitor } from '../../context/VisitorContext'
 import { hostname, request } from '../../utils/http'
+import { useVisitor } from '../init/useInitVisitor'
 import { useFingerprint } from '../useFingerprint'
 import { useLogging } from '../useLogging'
 

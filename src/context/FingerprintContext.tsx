@@ -4,14 +4,12 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { useEntireStore } from '../beautifulSugar/store'
 import { Handler } from '../client/handler'
 import { LEGACY_FingerprintConfig } from '../client/types'
+import { useInitSession } from '../hooks/init/useInitSession'
+import { useInitVisitor } from '../hooks/init/useInitVisitor'
 import { useLogging } from '../hooks/useLogging'
 import { CollectorProvider } from './CollectorContext'
-// import { MixpanelProvider } from './MixpanelContext'
-import { VisitorProvider } from './VisitorContext'
 
 const queryClient = new QueryClient()
-
-export const cookieAccountJWT = 'b2c_token'
 
 /** * @todo - extract */
 const useConsentCheck = (consent: boolean, consentCallback: any) => {
@@ -94,9 +92,10 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
     addHandlers(defaultHandlers || [])
   }, [props])
 
-  const consentGiven = useConsentCheck(consent, consentCallback)
+  useInitVisitor()
+  useInitSession()
 
-  // const { visitor } = useVisitor()
+  const consentGiven = useConsentCheck(consent, consentCallback)
 
   useEffect(() => {
     // if the props have never been probided, throw an error.
@@ -132,8 +131,6 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <VisitorProvider />
-      {/* <MixpanelProvider /> */}
       <CollectorProvider handlers={handlers}>
         <ErrorBoundary
           onError={(error, info) => console.error(error, info)}

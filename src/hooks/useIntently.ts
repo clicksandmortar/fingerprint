@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { SupportedBrand } from '../utils/brand'
+import { useTracking } from './init/useInitTracking'
 import { useBrand } from './useBrandConfig'
 import { useLogging } from './useLogging'
-import { useTracking } from './useTracking'
 
 const selectorRateMs = 100
 

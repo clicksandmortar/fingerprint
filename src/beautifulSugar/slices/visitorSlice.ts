@@ -1,8 +1,8 @@
 import { StateCreator } from 'zustand'
 import { Session } from '../../sessions/types'
 import { Visitor } from '../../visitors/types'
-import { useDifiStore } from '../store'
-import { DifiStore, Get, Set } from '../types'
+import { DifiStore, useDifiStore } from '../store'
+import { Get, Set } from '../types'
 
 export type VisitorSlice = {
   visitor: Visitor
