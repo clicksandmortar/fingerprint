@@ -1689,7 +1689,7 @@ function formatTimeStamp(targetDate) {
 const defualtFormatString = val => val;
 const getInterpolate = (structure, hideMissingValues = true) => {
   const interpolate = (text, formatString = defualtFormatString) => {
-    const replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, (match, keys) => {
+    const replacedText = text.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (match, keys) => {
       let value = transcend(structure, keys);
       if (formatString) value = formatString(value);
       if (!!match && !value && hideMissingValues) return '';
@@ -3135,9 +3135,9 @@ class FlipClock extends React__default.Component {
     }
     `;
     this.timerID = setInterval(() => this.updateTime(), 50);
-    const styles = document.createElement('style');
-    styles.appendChild(document.createTextNode(CSS));
-    document.head.appendChild(styles);
+    this.styles = document.createElement('style');
+    this.styles.appendChild(document.createTextNode(CSS));
+    document.head.appendChild(this.styles);
     setTimeout(() => {
       this.setState({
         haveStylesLoaded: true
@@ -3146,6 +3146,7 @@ class FlipClock extends React__default.Component {
   }
   componentWillUnmount() {
     clearInterval(this.timerID);
+    document.head.removeChild(this.styles);
   }
   updateTime() {
     const startDate = this.props.startDate || new Date();
