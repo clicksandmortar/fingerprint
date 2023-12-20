@@ -7,11 +7,11 @@ var useExitIntent = require('use-exit-intent');
 var zustand = require('zustand');
 var ReactDOM = _interopDefault(require('react-dom'));
 var mixpanel = _interopDefault(require('mixpanel-browser'));
-var reactQuery = require('@tanstack/react-query');
-var reactErrorBoundary = require('react-error-boundary');
 var Cookies = _interopDefault(require('js-cookie'));
 var psl = _interopDefault(require('psl'));
 var uuid = require('uuid');
+var reactQuery = require('@tanstack/react-query');
+var reactErrorBoundary = require('react-error-boundary');
 var reactDeviceDetect = require('react-device-detect');
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
@@ -144,10 +144,133 @@ var createConfigSlice = function createConfigSlice(set, get) {
   };
 };
 
+var useFingerprint = function useFingerprint() {
+  return useDifiStore(function (s) {
+    return s.difiProps;
+  });
+};
+
+function getEnvVars() {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
+  var isDev = false;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
+
 var useLogging = function useLogging() {
   return useDifiStore(function (s) {
     return s.logging;
   });
+};
+
+var queryClient = new reactQuery.QueryClient();
+var cookieAccountJWT = 'b2c_token';
+var useConsentCheck = function useConsentCheck(consent, consentCallback) {
+  var _useState = React.useState(consent),
+    consentGiven = _useState[0],
+    setConsentGiven = _useState[1];
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  React.useEffect(function () {
+    if (consent) {
+      setConsentGiven(consent);
+      return;
+    }
+    log('Fingerprint Widget Consent: ', consent);
+    if (!consentCallback) return;
+    var consentGivenViaCallback = consentCallback();
+    var interval = setInterval(function () {
+      setConsentGiven(consent);
+    }, 1000);
+    if (consentGivenViaCallback) {
+      clearInterval(interval);
+    }
+    return function () {
+      return clearInterval(interval);
+    };
+  }, [consentCallback, consent]);
+  return consentGiven;
+};
+var FingerprintProvider = function FingerprintProvider(props) {
+  var _useStore = useStore(),
+    set = _useStore.set,
+    handlers = _useStore.handlers,
+    addHandlers = _useStore.addHandlers,
+    difiProps = _useStore.difiProps;
+  var booted = difiProps.booted,
+    appId = difiProps.appId,
+    children = difiProps.children,
+    _difiProps$consent = difiProps.consent,
+    consent = _difiProps$consent === void 0 ? false : _difiProps$consent,
+    consentCallback = difiProps.consentCallback,
+    defaultHandlers = difiProps.defaultHandlers;
+  var setBooted = function setBooted(val) {
+    return set({
+      difiProps: _extends({}, difiProps, {
+        booted: val
+      })
+    });
+  };
+  React.useEffect(function () {
+    set({
+      difiProps: _extends({}, difiProps, props)
+    });
+    addHandlers(defaultHandlers || []);
+  }, [props]);
+  var consentGiven = useConsentCheck(consent, consentCallback);
+  React.useEffect(function () {
+    if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
+    if (!appId) return;
+    if (booted) return;
+    if (!consentGiven) return;
+    var performBoot = function performBoot() {
+      try {
+        setBooted(true);
+        return Promise.resolve();
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    };
+    performBoot();
+  }, [consentGiven, booted, appId, props.appId]);
+  if (!appId) {
+    return null;
+  }
+  if (!consentGiven) {
+    return children;
+  }
+  if (!booted) {
+    console.log('booting Difi...');
+    return null;
+  }
+  return React__default.createElement(reactQuery.QueryClientProvider, {
+    client: queryClient
+  }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
+    handlers: handlers
+  }, React__default.createElement(reactErrorBoundary.ErrorBoundary, {
+    onError: function onError(error, info) {
+      return console.error(error, info);
+    },
+    fallback: React__default.createElement("div", null, "An application error occurred.")
+  }, children)))));
 };
 
 var uuidValidateV4 = function uuidValidateV4(uuid$1) {
@@ -328,7 +451,7 @@ var bootstrapSession = function bootstrapSession(_ref) {
 
 var VisitorProvider = function VisitorProvider(_ref) {
   var children = _ref.children;
-  var _useFingerprint = useFingerprint$1(),
+  var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId,
     booted = _useFingerprint.booted;
   var _useLogging = useLogging(),
@@ -391,132 +514,6 @@ var useVisitor = function useVisitor() {
   return React.useContext(VisitorContext);
 };
 
-var queryClient = new reactQuery.QueryClient();
-var cookieAccountJWT = 'b2c_token';
-var useConsentCheck = function useConsentCheck(consent, consentCallback) {
-  var _useState = React.useState(consent),
-    consentGiven = _useState[0],
-    setConsentGiven = _useState[1];
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  React.useEffect(function () {
-    if (consent) {
-      setConsentGiven(consent);
-      return;
-    }
-    log('Fingerprint Widget Consent: ', consent);
-    if (!consentCallback) return;
-    var consentGivenViaCallback = consentCallback();
-    var interval = setInterval(function () {
-      setConsentGiven(consent);
-    }, 1000);
-    if (consentGivenViaCallback) {
-      clearInterval(interval);
-    }
-    return function () {
-      return clearInterval(interval);
-    };
-  }, [consentCallback, consent]);
-  return consentGiven;
-};
-var FingerprintProvider = function FingerprintProvider(props) {
-  _objectDestructuringEmpty(props);
-  var _useStore = useStore(),
-    set = _useStore.set,
-    handlers = _useStore.handlers,
-    addHandlers = _useStore.addHandlers,
-    difiProps = _useStore.difiProps;
-  var booted = difiProps.booted,
-    appId = difiProps.appId,
-    children = difiProps.children,
-    _difiProps$consent = difiProps.consent,
-    consent = _difiProps$consent === void 0 ? false : _difiProps$consent,
-    consentCallback = difiProps.consentCallback,
-    defaultHandlers = difiProps.defaultHandlers;
-  var setBooted = function setBooted(val) {
-    return set({
-      difiProps: _extends({}, difiProps, {
-        booted: val
-      })
-    });
-  };
-  React.useEffect(function () {
-    set({
-      difiProps: _extends({}, difiProps, props)
-    });
-    addHandlers(defaultHandlers || []);
-  }, [props]);
-  var consentGiven = useConsentCheck(consent, consentCallback);
-  React.useEffect(function () {
-    if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
-    if (!appId) return;
-    if (booted) return;
-    if (!consentGiven) return;
-    var performBoot = function performBoot() {
-      try {
-        setBooted(true);
-        return Promise.resolve();
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    };
-    performBoot();
-  }, [consentGiven, booted, appId, props.appId]);
-  if (!appId) {
-    return null;
-  }
-  if (!consentGiven) {
-    return children;
-  }
-  if (!booted) {
-    return null;
-  }
-  return React__default.createElement(reactQuery.QueryClientProvider, {
-    client: queryClient
-  }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
-    handlers: handlers
-  }, React__default.createElement(reactErrorBoundary.ErrorBoundary, {
-    onError: function onError(error, info) {
-      return console.error(error, info);
-    },
-    fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children)))));
-};
-var useFingerprint = function useFingerprint() {
-  return useDifiStore(function (s) {
-    return s.difiProps;
-  });
-};
-
-var useFingerprint$1 = function useFingerprint$1() {
-  return useFingerprint();
-};
-
-function getEnvVars() {
-  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
-  var isDev = false;
-  switch (true) {
-    case typeof window === 'undefined':
-    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
-    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
-    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
-    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
-    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
-      isDev = true;
-      break;
-    default:
-      isDev = false;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
-
 var init = function init(cfg) {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
     debug: cfg.debug,
@@ -529,7 +526,7 @@ var trackEvent = function trackEvent(event, props, callback) {
 };
 var MixpanelProvider = function MixpanelProvider(_ref) {
   var children = _ref.children;
-  var _useFingerprint = useFingerprint$1(),
+  var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
@@ -722,7 +719,7 @@ var useSeenMutation = function useSeenMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
-  var _useFingerprint = useFingerprint$1(),
+  var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
@@ -1378,7 +1375,7 @@ var useDataCaptureMutation = function useDataCaptureMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
-  var _useFingerprint = useFingerprint$1(),
+  var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
@@ -1673,7 +1670,7 @@ var useCollectorMutation = function useCollectorMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
-  var _useFingerprint = useFingerprint$1(),
+  var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
@@ -3330,7 +3327,7 @@ function CollectorProvider(_ref) {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
-  var _useFingerprint = useFingerprint$1(),
+  var _useFingerprint = useFingerprint(),
     initialDelay = _useFingerprint.initialDelay,
     exitIntentTriggers = _useFingerprint.exitIntentTriggers,
     idleTriggers = _useFingerprint.idleTriggers,
@@ -3731,5 +3728,5 @@ exports.CollectorProvider = CollectorProvider;
 exports.FingerprintProvider = FingerprintProvider;
 exports.onCookieChanged = onCookieChanged;
 exports.useCollector = useCollector;
-exports.useFingerprint = useFingerprint$1;
+exports.useFingerprint = useFingerprint;
 //# sourceMappingURL=index.js.map

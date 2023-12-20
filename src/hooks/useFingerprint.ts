@@ -1,4 +1,4 @@
-import { useFingerprint as useFingerprintII } from '../context/FingerprintContext'
+import { useDifiStore } from '../beautifulSugar/store'
 
 // TODO: remove re-export
-export const useFingerprint = () => useFingerprintII()
+export const useFingerprint = () => useDifiStore((s) => s.difiProps)
