@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import CloseButton from '../../../components/CloseButton'
 import useCountdown from '../../../hooks/useCountdown'
-import { getInterpolate } from '../../../hooks/useInterpolate'
+import { getInterpolate } from '../../../utils/getInterpolate'
 import { useBannerStyles } from '../Banner.styles'
 import { BannerProps } from '../Banner.types'
 import {

@@ -10,6 +10,8 @@ import {
   useModalDimensionsBasedOnImage
 } from '../helpers'
 import { ModalProps } from '../Modal.types'
+import Header from './components/Header'
+import Paragraph from './components/Paragraph'
 
 const StandardModal = ({
   trigger,
@@ -210,7 +212,7 @@ const StandardModal = ({
     }
     
     .${prependClass('image-darken')} {
-      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);'}
+      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.3);'}
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -287,12 +289,8 @@ const StandardModal = ({
           </div>
 
           <div className={prependClass('text-container')}>
-            <h1 className={prependClass('main-text')}>
-              {trigger?.data?.heading}
-            </h1>
-            <p className={prependClass('sub-text')}>
-              {trigger?.data?.paragraph}
-            </p>
+            <Header trigger={trigger} />
+            <Paragraph trigger={trigger} />
           </div>
 
           {!isModalFullyClickable && (
