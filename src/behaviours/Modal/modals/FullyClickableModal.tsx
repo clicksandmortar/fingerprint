@@ -216,6 +216,9 @@ const FullyClickableModal = ({
   if (!stylesLoaded) {
     return null
   }
+  if (isImageBrokenDontShowModal) {
+    return null
+  }
 
   return (
     <div className={prependClass('overlay')}>

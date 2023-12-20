@@ -31,6 +31,7 @@ const StandardModal = ({
   } = useModalDimensionsBasedOnImage({
     imageURL
   })
+
   const isImageBrokenDontShowModal = !width || !height
 
   useSeen({ trigger, skip: !stylesLoaded || isImageBrokenDontShowModal })

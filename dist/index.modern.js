@@ -2610,6 +2610,9 @@ const FullyClickableModal = ({
   if (!stylesLoaded) {
     return null;
   }
+  if (isImageBrokenDontShowModal) {
+    return null;
+  }
   return React__default.createElement("div", {
     className: prependClass('overlay')
   }, React__default.createElement("div", {

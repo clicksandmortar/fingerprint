@@ -26,7 +26,6 @@ const Modal = ({ trigger }: Props) => {
   const { mutate: collect } = useCollectorMutation()
 
   const brand = useBrand()
-  // useSeen({ trigger, skip: !open })
 
   useEffect(() => {
     if (!!invocationTimeStamp) return
