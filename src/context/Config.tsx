@@ -20,7 +20,7 @@ export const defaultColors: NonNullable<Config['brand']['colors']> = {
   greyText: '#40404b'
 }
 
-const defaultConfig: Config = {
+export const defaultConfig: Config = {
   script: {
     debugMode: false
   },
@@ -39,7 +39,7 @@ const defaultConfig: Config = {
 // otherwise, use the one from the portal
 //
 // Also note that the Portal config uses seconds, while the LEGACY config uses milliseconds, so /1000
-const LEGACY_merge_config = (
+export const LEGACY_merge_config = (
   config: Config,
   legacy_config: Props['legacy_config']
 ): Config['trigger'] => ({
@@ -60,7 +60,7 @@ type Props = PropsWithChildren<{
 
 // having to do this because the config is stored as a string
 // in the database.
-const objStringtoObjNum = (obj: any) => {
+export const objStringtoObjNum = (obj: any) => {
   const newObj: any = {}
 
   Object.keys(obj).forEach((key) => {

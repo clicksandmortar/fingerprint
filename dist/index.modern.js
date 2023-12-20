@@ -9,8 +9,8 @@ import { validate, version, v4 } from 'uuid';
 import { isMobile } from 'react-device-detect';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
-import uniqueBy from 'lodash.uniqby';
 import { create } from 'zustand';
+import uniqueBy from 'lodash.uniqby';
 import transcend from 'lodash.get';
 import { useForm } from 'react-hook-form';
 
@@ -603,39 +603,66 @@ function getReferrer() {
   };
 }
 
-const useDifiStore = create((set, get) => {
-  return {
-    visitor: {},
-    config: {},
-    conversions: [],
-    displayedTriggersIds: [],
-    intently: true,
-    pageTriggers: [],
-    session: {},
-    set,
-    get,
-    setDisplayedTriggers: triggers => {
-      set(() => ({
-        displayedTriggersIds: triggers
-      }));
-    },
-    setPageTriggers: triggers => {
-      const displayedTriggers = get().displayedTriggersIds;
-      set(prev => {
-        const nonDismissed = prev.pageTriggers.filter(tr => displayedTriggers.includes(tr.id));
-        return {
-          pageTriggers: uniqueBy([...(triggers || []), ...nonDismissed], 'id')
-        };
-      });
-    },
-    removePageTrigger: id => {
-      set(prev => ({
-        pageTriggers: prev.pageTriggers.filter(trigger => trigger.id !== id)
-      }));
-    }
-  };
+const createConfigSlice = (set) => ({
+  config: defaultConfig,
+  setConfig: updatedConfigEntries => {
+    var _updatedConfigEntries;
+    const argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
+    const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
+    set(prev => {
+      return {
+        ...prev,
+        ...updatedConfigEntries,
+        brand: {
+          ...prev.config,
+          ...updatedConfigEntries.brand,
+          colors: shouldUpdateColors ? {
+            ...(prev.config.brand.colors || defaultColors),
+            ...(argColors || {})
+          } : prev.config.brand.colors
+        },
+        trigger: {
+          ...prev.config.trigger,
+          ...objStringtoObjNum(LEGACY_merge_config(prev.config, {
+            exitIntentDelay: 0,
+            idleDelay: 0,
+            triggerCooldown: 0
+          }))
+        }
+      };
+    });
+  }
 });
-const useStore = () => useDifiStore(s => s);
+
+const createPagetriggersSlice = (set, get) => ({
+  pageTriggers: [],
+  displayedTriggersIds: [],
+  session: {},
+  setDisplayedTriggers: triggers => {
+    set(() => ({
+      displayedTriggersIds: triggers
+    }));
+  },
+  setPageTriggers: triggers => {
+    const displayedTriggers = get().displayedTriggersIds;
+    set(prev => {
+      const nonDismissed = prev.pageTriggers.filter(tr => displayedTriggers.includes(tr.id));
+      return {
+        pageTriggers: uniqueBy([...(triggers || []), ...nonDismissed], 'id')
+      };
+    });
+  },
+  removePageTrigger: id => {
+    set(prev => ({
+      pageTriggers: prev.pageTriggers.filter(trigger => trigger.id !== id)
+    }));
+  }
+});
+
+const useDifiStore = create((...a) => ({
+  ...createPagetriggersSlice(...a),
+  ...createConfigSlice(...a)
+}));
 
 const useHostname = () => {
   var _window, _window$location;
@@ -1247,7 +1274,7 @@ function CollectorProvider({
     setPageTriggers,
     setDisplayedTriggers,
     set
-  } = useStore();
+  } = useDifiStore(e => e);
   const {
     setIntently
   } = useIntently();

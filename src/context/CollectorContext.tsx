@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { DifiStore, useStore } from '../beautifulSugar/store'
+import { BigSlice, useDifiStore } from '../beautifulSugar/store'
 import {
   CollectorVisitorResponse,
   Conversion,
@@ -89,7 +89,7 @@ export function CollectorProvider({
     // combinedTriggers,
     set
     // get
-  } = useStore()
+  } = useDifiStore((e) => e)
 
   const { setIntently } = useIntently()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
@@ -136,7 +136,7 @@ export function CollectorProvider({
     ) => {
       console.log('aaa firing invocation', invocation)
       const appendTrigger = (invokableTrigger: Trigger) => {
-        set((prev: DifiStore) => {
+        set((prev: BigSlice) => {
           if (prev.displayedTriggersIds.includes(invokableTrigger.id))
             return prev
 

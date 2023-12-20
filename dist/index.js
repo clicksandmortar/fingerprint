@@ -12,8 +12,8 @@ var uuid = require('uuid');
 var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
-var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var zustand = require('zustand');
+var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
 
@@ -685,17 +685,34 @@ function getReferrer() {
   };
 }
 
-var useDifiStore = zustand.create(function (set, get) {
+var createConfigSlice = function createConfigSlice(set) {
   return {
-    visitor: {},
-    config: {},
-    conversions: [],
-    displayedTriggersIds: [],
-    intently: true,
+    config: defaultConfig,
+    setConfig: function setConfig(updatedConfigEntries) {
+      var _updatedConfigEntries;
+      var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
+      var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
+      set(function (prev) {
+        return _extends({}, prev, updatedConfigEntries, {
+          brand: _extends({}, prev.config, updatedConfigEntries.brand, {
+            colors: shouldUpdateColors ? _extends({}, prev.config.brand.colors || defaultColors, argColors || {}) : prev.config.brand.colors
+          }),
+          trigger: _extends({}, prev.config.trigger, objStringtoObjNum(LEGACY_merge_config(prev.config, {
+            exitIntentDelay: 0,
+            idleDelay: 0,
+            triggerCooldown: 0
+          })))
+        });
+      });
+    }
+  };
+};
+
+var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
+  return {
     pageTriggers: [],
+    displayedTriggersIds: [],
     session: {},
-    set: set,
-    get: get,
     setDisplayedTriggers: function setDisplayedTriggers(triggers) {
       set(function () {
         return {
@@ -724,12 +741,11 @@ var useDifiStore = zustand.create(function (set, get) {
       });
     }
   };
-});
-var useStore = function useStore() {
-  return useDifiStore(function (s) {
-    return s;
-  });
 };
+
+var useDifiStore = zustand.create(function () {
+  return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments));
+});
 
 var useHostname = function useHostname() {
   var _window, _window$location;
@@ -1329,13 +1345,15 @@ function CollectorProvider(_ref) {
   var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
-  var _useStore = useStore(),
-    removePageTrigger = _useStore.removePageTrigger,
-    pageTriggers = _useStore.pageTriggers,
-    displayedTriggersIds = _useStore.displayedTriggersIds,
-    setPageTriggers = _useStore.setPageTriggers,
-    setDisplayedTriggers = _useStore.setDisplayedTriggers,
-    set = _useStore.set;
+  var _useDifiStore = useDifiStore(function (e) {
+      return e;
+    }),
+    removePageTrigger = _useDifiStore.removePageTrigger,
+    pageTriggers = _useDifiStore.pageTriggers,
+    displayedTriggersIds = _useDifiStore.displayedTriggersIds,
+    setPageTriggers = _useDifiStore.setPageTriggers,
+    setDisplayedTriggers = _useDifiStore.setDisplayedTriggers,
+    set = _useDifiStore.set;
   var _useIntently = useIntently(),
     setIntently = _useIntently.setIntently;
   var _useState2 = React.useState(new Map()),
