@@ -181,7 +181,7 @@ const FingerprintProvider = props => {
     handlers,
     addHandlers,
     difiProps
-  } = useStore();
+  } = useEntireStore();
   const {
     booted,
     appId,
@@ -426,7 +426,7 @@ const VisitorProvider = () => {
     setSession,
     visitor,
     set
-  } = useStore();
+  } = useEntireStore();
   const setVisitor = val => set({
     visitor: val
   });
@@ -614,7 +614,7 @@ function getReferrer() {
   };
 }
 
-const useConfig = () => useStore().config;
+const useConfig = () => useEntireStore().config;
 const useBrand = () => {
   const configBrandName = useConfig().brand.name;
   if (configBrandName) return configBrandName;
@@ -3549,7 +3549,7 @@ const useDifiStore = create((...beautifulSugar) => ({
   ...createHandlersSlice(...beautifulSugar),
   ...createVisitorSlice(...beautifulSugar)
 }));
-const useStore = () => useDifiStore(s => s);
+const useEntireStore = () => useDifiStore(s => s);
 
 const collinBrandsPathConversionMap = {
   Stonehouse: '/tablebooking/enquiry-form-completed',
@@ -4026,7 +4026,7 @@ function CollectorProvider({
   } = useFingerprint();
   const {
     config
-  } = useStore();
+  } = useEntireStore();
   const {
     visitor,
     setVisitor
@@ -4066,7 +4066,7 @@ function CollectorProvider({
     setPageTriggers,
     setDisplayedTriggers,
     set
-  } = useDifiStore(e => e);
+  } = useEntireStore();
   const {
     setIntently
   } = useIntently();

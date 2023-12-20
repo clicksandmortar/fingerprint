@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { PropsWithChildren, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { useStore } from '../beautifulSugar/store'
+import { useEntireStore } from '../beautifulSugar/store'
 import { Handler } from '../client/handler'
 import { LEGACY_FingerprintConfig } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
@@ -74,7 +74,7 @@ export type FingerprintProviderProps = PropsWithChildren<{
 // @todo split this into multiple providers, FingerprintProvider should
 // only bootstrap the app.
 export const FingerprintProvider = (props: FingerprintProviderProps) => {
-  const { set, handlers, addHandlers, difiProps } = useStore()
+  const { set, handlers, addHandlers, difiProps } = useEntireStore()
   const {
     booted,
     appId,

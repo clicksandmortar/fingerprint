@@ -240,11 +240,11 @@ var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   return consentGiven;
 };
 var FingerprintProvider = function FingerprintProvider(props) {
-  var _useStore = useStore(),
-    set = _useStore.set,
-    handlers = _useStore.handlers,
-    addHandlers = _useStore.addHandlers,
-    difiProps = _useStore.difiProps;
+  var _useEntireStore = useEntireStore(),
+    set = _useEntireStore.set,
+    handlers = _useEntireStore.handlers,
+    addHandlers = _useEntireStore.addHandlers,
+    difiProps = _useEntireStore.difiProps;
   var booted = difiProps.booted,
     appId = difiProps.appId,
     children = difiProps.children,
@@ -485,11 +485,11 @@ var VisitorProvider = function VisitorProvider() {
     booted = _useFingerprint.booted;
   var _useLogging = useLogging$1(),
     log = _useLogging.log;
-  var _useStore = useStore(),
-    session = _useStore.session,
-    setSession = _useStore.setSession,
-    visitor = _useStore.visitor,
-    set = _useStore.set;
+  var _useEntireStore = useEntireStore(),
+    session = _useEntireStore.session,
+    setSession = _useEntireStore.setSession,
+    visitor = _useEntireStore.visitor,
+    set = _useEntireStore.set;
   var setVisitor = function setVisitor(val) {
     return set({
       visitor: val
@@ -714,7 +714,7 @@ function getReferrer() {
 }
 
 var useConfig = function useConfig() {
-  return useStore().config;
+  return useEntireStore().config;
 };
 var useBrand = function useBrand() {
   var configBrandName = useConfig().brand.name;
@@ -2866,7 +2866,7 @@ var createVisitorSlice = function createVisitorSlice(set, _get) {
 var useDifiStore = zustand.create(function () {
   return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments));
 });
-var useStore = function useStore() {
+var useEntireStore = function useEntireStore() {
   return useDifiStore(function (s) {
     return s;
   });
@@ -3352,8 +3352,8 @@ function CollectorProvider(_ref) {
     idleTriggers = _useFingerprint.idleTriggers,
     pageLoadTriggers = _useFingerprint.pageLoadTriggers,
     booted = _useFingerprint.booted;
-  var _useStore = useStore(),
-    config = _useStore.config;
+  var _useEntireStore = useEntireStore(),
+    config = _useEntireStore.config;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
     setVisitor = _useVisitor.setVisitor;
@@ -3380,15 +3380,13 @@ function CollectorProvider(_ref) {
   var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
-  var _useDifiStore = useDifiStore(function (e) {
-      return e;
-    }),
-    removePageTrigger = _useDifiStore.removePageTrigger,
-    pageTriggers = _useDifiStore.pageTriggers,
-    displayedTriggersIds = _useDifiStore.displayedTriggersIds,
-    setPageTriggers = _useDifiStore.setPageTriggers,
-    setDisplayedTriggers = _useDifiStore.setDisplayedTriggers,
-    set = _useDifiStore.set;
+  var _useEntireStore2 = useEntireStore(),
+    removePageTrigger = _useEntireStore2.removePageTrigger,
+    pageTriggers = _useEntireStore2.pageTriggers,
+    displayedTriggersIds = _useEntireStore2.displayedTriggersIds,
+    setPageTriggers = _useEntireStore2.setPageTriggers,
+    setDisplayedTriggers = _useEntireStore2.setDisplayedTriggers,
+    set = _useEntireStore2.set;
   var _useIntently = useIntently(),
     setIntently = _useIntently.setIntently;
   var _useState2 = React.useState(new Map()),
@@ -3415,10 +3413,10 @@ function CollectorProvider(_ref) {
     })) return true;
     return false;
   }, [displayedTriggersIds, combinedTriggers]);
-  var _useDifiStore2 = useDifiStore(function (s) {
+  var _useDifiStore = useDifiStore(function (s) {
       return s;
     }),
-    appendTrigger = _useDifiStore2.appendTrigger;
+    appendTrigger = _useDifiStore.appendTrigger;
   var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation, shouldAllowMultipleSimultaneous) {
     if (shouldAllowMultipleSimultaneous === void 0) {
       shouldAllowMultipleSimultaneous = false;

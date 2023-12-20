@@ -3,7 +3,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { useDifiStore, useStore } from '../beautifulSugar/store'
+import { useDifiStore, useEntireStore } from '../beautifulSugar/store'
 import {
   CollectorVisitorResponse,
   Conversion,
@@ -53,7 +53,7 @@ export function CollectorProvider({
     pageLoadTriggers,
     booted
   } = useFingerprint()
-  const { config } = useStore()
+  const { config } = useEntireStore()
 
   const { visitor, setVisitor } = useVisitor()
 
@@ -87,7 +87,7 @@ export function CollectorProvider({
     setPageTriggers,
     setDisplayedTriggers,
     set
-  } = useDifiStore((e) => e)
+  } = useEntireStore()
 
   const { setIntently } = useIntently()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(

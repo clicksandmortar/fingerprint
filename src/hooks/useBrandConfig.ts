@@ -1,11 +1,11 @@
-import { useStore } from '../beautifulSugar/store'
+import { useEntireStore } from '../beautifulSugar/store'
 import { Config } from '../client/types'
 import { defaultColors } from '../context/Config'
 import { SupportedBrand, _LEGACY_getBrand } from '../utils/brand'
 
 // export const useConfig = () => React.useContext(ConfigContext)
 
-export const useConfig = () => useStore().config
+export const useConfig = () => useEntireStore().config
 
 export const useBrand = (): SupportedBrand | null => {
   const configBrandName = useConfig().brand.name

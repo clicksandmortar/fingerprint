@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useDifiStore, useStore } from '../beautifulSugar/store'
+import { useDifiStore, useEntireStore } from '../beautifulSugar/store'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { bootstrapSession } from '../sessions/bootstrap'
 import { Session } from '../sessions/types'
@@ -14,7 +14,7 @@ export const VisitorProvider = () => {
   const { appId, booted } = useFingerprint()
   const { log } = useLogging()
 
-  const { session, setSession, visitor, set } = useStore()
+  const { session, setSession, visitor, set } = useEntireStore()
   // TODO: unmodify?
   const setVisitor = (val: Visitor) => set({ visitor: val })
 
