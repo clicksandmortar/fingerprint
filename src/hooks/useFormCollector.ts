@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 import { cnmFormPrefix } from '../components/CnMForm'
-import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { getFormEntries } from '../utils/forms'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './api/useCollectorMutation'
+import { useLogging } from './useLogging'
 
 /**
  * Hook into forms on the page and collect their data

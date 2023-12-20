@@ -1,13 +1,13 @@
 import { StateCreator } from 'zustand'
 import { Config } from '../../client/types'
+import { haveBrandColorsBeenConfigured } from '../../utils/brand'
+import { DifiStore, Get, Set } from '../types'
 import {
   defaultColors,
   defaultConfig,
   LEGACY_merge_config,
   objStringtoObjNum
-} from '../../context/Config'
-import { haveBrandColorsBeenConfigured } from '../../utils/brand'
-import { DifiStore, Get, Set } from '../types'
+} from './utils/configUtils'
 
 export type ConfigSlice = {
   config: Config

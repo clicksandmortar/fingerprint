@@ -1,8 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
-import { useLogging } from '../../context/LoggingContext'
 import { useVisitor } from '../../context/VisitorContext'
 import { hostname, request } from '../../utils/http'
 import { useFingerprint } from '../useFingerprint'
+import { useLogging } from '../useLogging'
 
 // if this mutation needs to change, make this more dynamic. For now, we only use it for /form,
 // so ok to hardcode here:

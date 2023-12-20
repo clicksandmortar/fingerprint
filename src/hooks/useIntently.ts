@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-
-import { useLogging } from '../context/LoggingContext'
 import { useMixpanel } from '../context/MixpanelContext'
 import { SupportedBrand } from '../utils/brand'
 import { useBrand } from './useBrandConfig'
+import { useLogging } from './useLogging'
 
 const selectorRateMs = 100
 

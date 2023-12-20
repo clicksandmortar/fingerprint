@@ -150,31 +150,6 @@ var useFingerprint = function useFingerprint() {
   });
 };
 
-function getEnvVars() {
-  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
-  var isDev = false;
-  switch (true) {
-    case typeof window === 'undefined':
-    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
-    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
-    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
-    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
-    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
-      isDev = true;
-      break;
-    default:
-      isDev = false;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
-
 var disabledLogging = {
   log: function log() {},
   warn: function warn() {},
@@ -207,9 +182,30 @@ var useLogging = function useLogging() {
   return disabledLogging;
 };
 
-var useLogging$1 = function useLogging$1() {
-  return useLogging();
-};
+function getEnvVars() {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
+  var isDev = false;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
 
 var queryClient = new reactQuery.QueryClient();
 var cookieAccountJWT = 'b2c_token';
@@ -217,7 +213,7 @@ var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   var _useState = React.useState(consent),
     consentGiven = _useState[0],
     setConsentGiven = _useState[1];
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   React.useEffect(function () {
     if (consent) {
@@ -483,7 +479,7 @@ var VisitorProvider = function VisitorProvider() {
   var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId,
     booted = _useFingerprint.booted;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   var _useEntireStore = useEntireStore(),
     session = _useEntireStore.session,
@@ -547,7 +543,7 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     appId = _useFingerprint.appId;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   var _useState = React.useState(false),
     initiated = _useState[0],
@@ -733,7 +729,7 @@ var useCollector = function useCollector() {
 };
 
 var useSeenMutation = function useSeenMutation() {
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
@@ -907,7 +903,7 @@ var useCountdown = function useCountdown(_ref) {
     interpolate = _ref.interpolate,
     _ref$formatDate = _ref.formatDate,
     formatDate = _ref$formatDate === void 0 ? formatTimeStamp : _ref$formatDate;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     error = _useLogging.error;
   var _useState = React.useState(initialTimestamp || null),
     timestamp = _useState[0],
@@ -1163,7 +1159,7 @@ var iconList = {
 var Icon = function Icon(_ref) {
   var icon = _ref.icon,
     props = _objectWithoutPropertiesLoose(_ref, _excluded);
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     error = _useLogging.error;
   var IconComponent = iconList[icon];
   if (!icon) return null;
@@ -1177,7 +1173,7 @@ var Icon = function Icon(_ref) {
 var BannerIcon = function BannerIcon(_ref) {
   var iconName = _ref.iconName,
     IconProps = _ref.IconProps;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     error = _useLogging.error;
   var _useBrandColors = useBrandColors(),
     textPrimary = _useBrandColors.textPrimary;
@@ -1389,7 +1385,7 @@ var CnMForm = function CnMForm(props) {
 };
 
 var useDataCaptureMutation = function useDataCaptureMutation() {
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
@@ -1510,7 +1506,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
     setRetainedHeight = _React$useState2[1];
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   var ref = React__default.useRef(null);
   var _useCollector = useCollector(),
@@ -1684,7 +1680,7 @@ var useHostname = function useHostname() {
 };
 
 var useCollectorMutation = function useCollectorMutation() {
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
@@ -2125,7 +2121,7 @@ var StandardModal = function StandardModal(_ref) {
   var trigger = _ref.trigger,
     handleClickCallToAction = _ref.handleClickCallToAction,
     handleCloseModal = _ref.handleCloseModal;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     error = _useLogging.error;
   var isModalFullyClickable = getIsModalFullyClickable({
     trigger: trigger
@@ -2882,7 +2878,7 @@ function useCollinsBookingComplete() {
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent,
     initiated = _useMixpanel.state.initiated;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   var brand = useBrand();
   var checkCollinsBookingComplete = React__default.useCallback(function () {
@@ -2925,7 +2921,7 @@ function useButtonCollector() {
     collect = _useCollectorMutation.mutateAsync;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
@@ -3060,7 +3056,7 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   if (delay === void 0) {
     delay = 0;
   }
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   var _useState = React.useState(false),
     hasDelayPassed = _useState[0],
@@ -3082,7 +3078,7 @@ function useFormCollector() {
     collect = _useCollectorMutation.mutateAsync;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
@@ -3165,7 +3161,7 @@ function useTrackIntentlyModal(_ref) {
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent,
     initiated = _useMixpanel.state.initiated;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
   var brand = useBrand();
@@ -3227,7 +3223,7 @@ function useTrackIntentlyModal(_ref) {
 var brandsThatSupportIntentlyRemoval = ['Browns'];
 var useRemoveIntently = function useRemoveIntently(_ref2) {
   var intently = _ref2.intently;
-  var _useLogging2 = useLogging$1(),
+  var _useLogging2 = useLogging(),
     log = _useLogging2.log;
   var brand = useBrand();
   React.useEffect(function () {
@@ -3273,7 +3269,7 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
   var _useState = React.useState(''),
     lastCollectedHref = _useState[0],
     setLastCollectedHref = _useState[1];
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   var run = React__default.useCallback(function () {
     if (config !== null && config !== void 0 && config.skip) return;
@@ -3299,7 +3295,7 @@ function useTriggerDelay() {
   var triggerConfig = useTriggerConfig();
   var cooldownMs = triggerConfig.triggerCooldownSecs * 1000;
   var idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log;
   var startCooldown = React__default.useCallback(function () {
     var currentTimeStamp = Number(new Date());
@@ -3343,7 +3339,7 @@ function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
     handlers = _ref$handlers === void 0 ? [] : _ref$handlers;
-  var _useLogging = useLogging$1(),
+  var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),

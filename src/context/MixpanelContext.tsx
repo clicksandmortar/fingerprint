@@ -1,9 +1,9 @@
 import mixpanel, { Callback, Config } from 'mixpanel-browser'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useFingerprint } from '../hooks/useFingerprint'
+import { useLogging } from '../hooks/useLogging'
 import { getEnvVars } from '../utils/getEnvVars'
 import { RegistrableUserProperties } from '../utils/types'
-import { useLogging } from './LoggingContext'
 import { useVisitor } from './VisitorContext'
 
 const init = (cfg: Partial<Config>) => {

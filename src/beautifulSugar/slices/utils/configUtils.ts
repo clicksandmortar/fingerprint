@@ -1,7 +1,7 @@
 import { PropsWithChildren } from 'react'
-import { Config } from '../client/types'
-import { _LEGACY_getBrand } from '../utils/brand'
-import { FingerprintProviderProps } from './FingerprintContext'
+import { Config } from '../../../client/types'
+import { FingerprintProviderProps } from '../../../context/FingerprintContext'
+import { _LEGACY_getBrand } from '../../../utils/brand'
 
 // 27 233 237 - dimmed, 41 100 249 - main, 13 14 49 - text Secondary, white primary, 226 226 226 greyBg, some dark grey text ?
 

@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react'
 import { useDifiStore, useEntireStore } from '../beautifulSugar/store'
 import { useFingerprint } from '../hooks/useFingerprint'
+import { useLogging } from '../hooks/useLogging'
 import { bootstrapSession } from '../sessions/bootstrap'
 import { Session } from '../sessions/types'
 import { bootstrapVisitor, correctCookieSubdomain } from '../visitors/bootstrap'
 import { Visitor } from '../visitors/types'
-import { useLogging } from './LoggingContext'
 export type VisitorProviderProps = {
   children?: React.ReactNode
 }

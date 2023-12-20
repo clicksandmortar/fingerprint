@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import React from 'react'
 import { Trigger } from '../../client/types'
-import { useLogging } from '../../context/LoggingContext'
 import { useMixpanel } from '../../context/MixpanelContext'
 import { useVisitor } from '../../context/VisitorContext'
 import { deviceInfo } from '../../utils/device'
@@ -11,6 +10,7 @@ import { updateCookie } from '../../visitors/bootstrap'
 import { useBrand } from '../useBrandConfig'
 import { useCollector } from '../useCollector'
 import { useFingerprint } from '../useFingerprint'
+import { useLogging } from '../useLogging'
 
 export const useSeenMutation = () => {
   const { log, error } = useLogging()

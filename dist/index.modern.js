@@ -105,6 +105,24 @@ const createConfigSlice = (set, get) => ({
 
 const useFingerprint = () => useDifiStore(s => s.difiProps);
 
+const disabledLogging = {
+  log: (...message) => {},
+  warn: (...message) => {},
+  error: (...message) => {},
+  info: (...message) => {}
+};
+const enabledLogging = {
+  log: (...message) => console.log(...message),
+  warn: (...message) => console.warn(...message),
+  error: (...message) => console.error(...message),
+  info: (...message) => console.info(...message)
+};
+const useLogging = () => {
+  const isDebugMode = useDifiStore(s => s.config.script.debugMode);
+  if (isDebugMode) return enabledLogging;
+  return disabledLogging;
+};
+
 function getEnvVars() {
   var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
   let isDev = false;
@@ -130,33 +148,13 @@ function getEnvVars() {
   };
 }
 
-const disabledLogging = {
-  log: (...message) => {},
-  warn: (...message) => {},
-  error: (...message) => {},
-  info: (...message) => {}
-};
-const enabledLogging = {
-  log: (...message) => console.log(...message),
-  warn: (...message) => console.warn(...message),
-  error: (...message) => console.error(...message),
-  info: (...message) => console.info(...message)
-};
-const useLogging = () => {
-  const isDebugMode = useDifiStore(s => s.config.script.debugMode);
-  if (isDebugMode) return enabledLogging;
-  return disabledLogging;
-};
-
-const useLogging$1 = () => useLogging();
-
 const queryClient = new QueryClient();
 const cookieAccountJWT = 'b2c_token';
 const useConsentCheck = (consent, consentCallback) => {
   const [consentGiven, setConsentGiven] = useState(consent);
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   useEffect(() => {
     if (consent) {
       setConsentGiven(consent);
@@ -420,7 +418,7 @@ const VisitorProvider = () => {
   } = useFingerprint();
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const {
     session,
     setSession,
@@ -477,7 +475,7 @@ const MixpanelProvider = ({
   } = useVisitor();
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const [initiated, setInitiated] = useState(false);
   useEffect(() => {
     if (!appId || !visitor.id) {
@@ -633,7 +631,7 @@ const useSeenMutation = () => {
   const {
     log,
     error
-  } = useLogging$1();
+  } = useLogging();
   const {
     appId
   } = useFingerprint();
@@ -799,7 +797,7 @@ const useCountdown = ({
 }) => {
   const {
     error
-  } = useLogging$1();
+  } = useLogging();
   const [timestamp, setTimeStamp] = useState(initialTimestamp || null);
   const [countdown, setCountdown] = useState('');
   const [intId, setIntId] = useState();
@@ -1049,7 +1047,7 @@ const Icon = ({
 }) => {
   const {
     error
-  } = useLogging$1();
+  } = useLogging();
   const IconComponent = iconList[icon];
   if (!icon) return null;
   if (icon && !IconComponent) {
@@ -1065,7 +1063,7 @@ const BannerIcon = ({
 }) => {
   const {
     error
-  } = useLogging$1();
+  } = useLogging();
   const {
     textPrimary
   } = useBrandColors();
@@ -1276,7 +1274,7 @@ const useDataCaptureMutation = () => {
   const {
     log,
     error
-  } = useLogging$1();
+  } = useLogging();
   const {
     appId
   } = useFingerprint();
@@ -1398,7 +1396,7 @@ const DataCaptureModal = ({
   } = useMixpanel();
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const ref = React__default.useRef(null);
   const {
     removeActiveTrigger
@@ -1576,7 +1574,7 @@ const useCollectorMutation = () => {
   const {
     log,
     error
-  } = useLogging$1();
+  } = useLogging();
   const {
     appId
   } = useFingerprint();
@@ -2498,7 +2496,7 @@ const StandardModal = ({
   var _trigger$data, _trigger$data2, _trigger$data3;
   const {
     error
-  } = useLogging$1();
+  } = useLogging();
   const isModalFullyClickable = getIsModalFullyClickable({
     trigger
   });
@@ -3566,7 +3564,7 @@ function useCollinsBookingComplete() {
   } = useMixpanel();
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const brand = useBrand();
   const checkCollinsBookingComplete = React__default.useCallback(() => {
     log('useCollinsBookingComplete: checking for Collins booking complete');
@@ -3612,7 +3610,7 @@ function useButtonCollector() {
   } = useVisitor();
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const {
     trackEvent
   } = useMixpanel();
@@ -3736,7 +3734,7 @@ const useConversions = () => {
 const useExitIntentDelay = (delay = 0) => {
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const [hasDelayPassed, setHasDelayPassed] = useState(false);
   useEffect(() => {
     log(`Exit intents are suspended because of initiation delay of ${delay}ms`);
@@ -3759,7 +3757,7 @@ function useFormCollector() {
   } = useVisitor();
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const {
     trackEvent
   } = useMixpanel();
@@ -3843,7 +3841,7 @@ function useTrackIntentlyModal({
   const {
     log,
     error
-  } = useLogging$1();
+  } = useLogging();
   const brand = useBrand();
   useEffect(() => {
     if (!initiated) return;
@@ -3904,7 +3902,7 @@ const useRemoveIntently = ({
 }) => {
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const brand = useBrand();
   useEffect(() => {
     if (intently) return;
@@ -3947,7 +3945,7 @@ const useRunOnPathChange = (func, config) => {
   const [lastCollectedHref, setLastCollectedHref] = useState('');
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const run = React__default.useCallback(() => {
     if (config !== null && config !== void 0 && config.skip) return;
     if (!location.href) return;
@@ -3970,7 +3968,7 @@ function useTriggerDelay() {
   const idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
   const {
     log
-  } = useLogging$1();
+  } = useLogging();
   const startCooldown = React__default.useCallback(() => {
     const currentTimeStamp = Number(new Date());
     setLastTriggerTimeStamp(currentTimeStamp);
@@ -4016,7 +4014,7 @@ function CollectorProvider({
   const {
     log,
     error
-  } = useLogging$1();
+  } = useLogging();
   const {
     initialDelay,
     exitIntentTriggers,

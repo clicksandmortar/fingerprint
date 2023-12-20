@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-
-import { useLogging } from '../context/LoggingContext'
 import { useTriggerConfig } from './useBrandConfig'
+import { useLogging } from './useLogging'
 
 export function useTriggerDelay() {
   const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState<

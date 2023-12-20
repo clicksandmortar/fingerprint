@@ -1,5 +1,5 @@
 import React from 'react'
-import { useLogging } from '../context/LoggingContext'
+import { useLogging } from '../hooks/useLogging'
 
 export type Icon = 'exclamation' | 'ticket' | 'heart'
 
