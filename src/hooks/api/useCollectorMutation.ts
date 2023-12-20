@@ -14,6 +14,7 @@ export const useCollectorMutation = () => {
 
   const requestHost = useHostname()
 
+  console.log('appid', { appId, visitor, session })
   return useMutation<Response, unknown, CollectorUpdate, unknown>(
     (data: CollectorUpdate) => {
       return request

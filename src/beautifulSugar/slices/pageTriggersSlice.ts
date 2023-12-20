@@ -7,6 +7,7 @@ import { Get, Set } from '../types'
 export type PageTriggersSlice = {
   pageTriggers: Trigger[]
   displayedTriggersIds: Trigger['id'][]
+  appendTrigger: (invokableTrigger: Trigger) => void
   setDisplayedTriggers: (triggers: Trigger['id'][]) => void
   setPageTriggers: (triggers: Trigger[]) => void
   removePageTrigger: (id: Trigger['id']) => void
@@ -25,6 +26,18 @@ export const createPagetriggersSlice: StateCreator<
     set(() => ({
       displayedTriggersIds: triggers
     }))
+  },
+  appendTrigger: (invokableTrigger: Trigger) => {
+    set((prev) => {
+      if (prev.displayedTriggersIds.includes(invokableTrigger.id)) return prev
+
+      return {
+        displayedTriggersIds: [
+          ...prev.displayedTriggersIds,
+          invokableTrigger.id
+        ]
+      }
+    })
   },
 
   setPageTriggers: (triggers: Trigger[]) => {

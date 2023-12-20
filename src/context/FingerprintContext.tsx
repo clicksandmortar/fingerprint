@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import React, { createContext, useEffect, useState } from 'react'
+import React, { PropsWithChildren, useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { useStore } from '../beautifulSugar/store'
-import { clientHandlers } from '../client/handler'
-import { LEGACY_FingerprintConfig, PageView, Trigger } from '../client/types'
+import { useDifiStore, useStore } from '../beautifulSugar/store'
+import { Handler } from '../client/handler'
+import { LEGACY_FingerprintConfig } from '../client/types'
 import { CollectorProvider } from './CollectorContext'
 import { useLogging } from './LoggingContext'
 import { MixpanelProvider } from './MixpanelContext'
@@ -49,9 +49,8 @@ const useConsentCheck = (consent: boolean, consentCallback: any) => {
   return consentGiven
 }
 
-export type FingerprintProviderProps = {
+export type FingerprintProviderProps = PropsWithChildren<{
   appId?: string
-  children?: React.ReactNode
   consent?: boolean
   consentCallback?: () => boolean
   /**
@@ -60,7 +59,7 @@ export type FingerprintProviderProps = {
    * Please use the portal to configure these values.
    */
   debug: never
-  defaultHandlers?: Trigger[]
+  defaultHandlers?: Handler[]
   initialDelay?: number
   exitIntentTriggers?: boolean
   idleTriggers?: boolean
@@ -70,51 +69,47 @@ export type FingerprintProviderProps = {
    * Please use the portal to configure these values. Until then this will act as override
    */
   config?: LEGACY_FingerprintConfig
-}
+}>
 
 // @todo split this into multiple providers, FingerprintProvider should
 // only bootstrap the app.
 export const FingerprintProvider = (props: FingerprintProviderProps) => {
   const {
+    // appId,
+    // children,
+    // consent = false,
+    // consentCallback,
+    // defaultHandlers
+  } = props
+
+  const { set, handlers, addHandlers, difiProps } = useStore()
+  const {
+    booted,
     appId,
     children,
     consent = false,
     consentCallback,
-    // TODO: should be renamed to custom handlers or smt
-    defaultHandlers = [],
-    initialDelay = 0,
-    exitIntentTriggers = true,
-    idleTriggers = true,
-    pageLoadTriggers = true
-  } = props
+    defaultHandlers
+  } = difiProps
 
-  const { set } = useStore()
+  const setBooted = (val: boolean) =>
+    set({ difiProps: { ...difiProps, booted: val } })
 
   useEffect(() => {
-    set({ difiProps: props })
+    set({
+      difiProps: { ...difiProps, ...props }
+    })
+    addHandlers(defaultHandlers || [])
   }, [props])
 
   const consentGiven = useConsentCheck(consent, consentCallback)
 
-  const [booted, setBooted] = useState(true)
-  const [handlers, setHandlers] = useState([
-    ...clientHandlers,
-    ...defaultHandlers
-  ])
-
-  // @todo Move this to a Handlers Context and add logging.
-  const addAnotherHandler = React.useCallback(
-    // TODO: Handler. not trigger
-    (handler: Trigger) => {
-      setHandlers((handlers) => {
-        return [...handlers, handler]
-      })
-    },
-    [setHandlers]
-  )
-
   useEffect(() => {
-    if (!appId) throw new Error('C&M Fingerprint: appId is required')
+    // if the props have never been probided, throw an error.
+    if (!props.appId) throw new Error('C&M Fingerprint: appId is required')
+
+    // otherwise, wait until zustand picks it up
+    if (!appId) return
     if (booted) return
     if (!consentGiven) return
 
@@ -126,7 +121,7 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
     }
 
     performBoot()
-  }, [consentGiven])
+  }, [consentGiven, booted, appId, props.appId])
 
   if (!appId) {
     return null
@@ -135,77 +130,26 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
   if (!consentGiven) {
     return children
   }
+  if (!booted) {
+    return null
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <FingerprintContext.Provider
-        value={{
-          appId,
-          booted,
-          currentTrigger: null,
-          registerHandler: addAnotherHandler,
-          trackEvent: () => {
-            alert('trackEvent not implemented')
-          },
-          trackPageView: () => {
-            alert('trackPageView not implemented')
-          },
-          unregisterHandler: () => {
-            alert('unregisterHandler not implemented')
-          },
-          initialDelay,
-          idleTriggers,
-          pageLoadTriggers,
-          exitIntentTriggers
-        }}
-      >
-        <VisitorProvider>
-          <MixpanelProvider>
-            <CollectorProvider handlers={handlers}>
-              <ErrorBoundary
-                onError={(error, info) => console.error(error, info)}
-                fallback={<div>An application error occurred.</div>}
-              >
-                {children}
-              </ErrorBoundary>
-            </CollectorProvider>
-          </MixpanelProvider>
-        </VisitorProvider>
-      </FingerprintContext.Provider>
+      <VisitorProvider>
+        <MixpanelProvider>
+          <CollectorProvider handlers={handlers}>
+            <ErrorBoundary
+              onError={(error, info) => console.error(error, info)}
+              fallback={<div>An application error occurred.</div>}
+            >
+              {children}
+            </ErrorBoundary>
+          </CollectorProvider>
+        </MixpanelProvider>
+      </VisitorProvider>
     </QueryClientProvider>
   )
 }
 
-export interface FingerprintContextInterface {
-  appId: string
-  booted: boolean
-  consent?: boolean
-  currentTrigger: Trigger | null
-  exitIntentTriggers: boolean
-  idleTriggers: boolean
-  pageLoadTriggers: boolean
-  initialDelay: number
-  registerHandler: (trigger: Trigger) => void
-  trackEvent: (event: Event) => void
-  trackPageView: (pageView: PageView) => void
-  unregisterHandler: (trigger: Trigger) => void
-}
-
-const defaultFingerprintState: FingerprintContextInterface = {
-  appId: '',
-  booted: false,
-  consent: false,
-  currentTrigger: null,
-  exitIntentTriggers: false,
-  idleTriggers: false,
-  pageLoadTriggers: false,
-  initialDelay: 0,
-  registerHandler: () => {},
-  trackEvent: () => {},
-  trackPageView: () => {},
-  unregisterHandler: () => {}
-}
-
-export const FingerprintContext = createContext<FingerprintContextInterface>({
-  ...defaultFingerprintState
-})
+export const useFingerprint = () => useDifiStore((s) => s.difiProps)

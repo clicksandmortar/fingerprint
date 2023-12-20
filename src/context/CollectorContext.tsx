@@ -1,8 +1,9 @@
+/* eslint-disable max-lines */
+/* eslint-disable require-jsdoc */
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
 import { useDifiStore, useStore } from '../beautifulSugar/store'
-import { DifiStore } from '../beautifulSugar/types'
 import {
   CollectorVisitorResponse,
   Conversion,
@@ -46,13 +47,13 @@ export function CollectorProvider({
 }: CollectorProviderProps) {
   const { log, error } = useLogging()
   const {
-    booted,
     initialDelay,
     exitIntentTriggers,
     idleTriggers,
-    pageLoadTriggers
+    pageLoadTriggers,
+    booted
   } = useFingerprint()
-  const { setConfig, config } = useStore()
+  const { config } = useStore()
 
   const { visitor, setVisitor } = useVisitor()
   const {
@@ -102,10 +103,10 @@ export function CollectorProvider({
     visibleTriggers: visibleIncompleteTriggers
   } = useIncompleteTriggers()
 
-  const combinedTriggers = React.useMemo(
-    () => [...pageTriggers, ...visibleIncompleteTriggers],
-    [pageTriggers, visibleIncompleteTriggers]
-  )
+  const combinedTriggers = React.useMemo(() => {
+    const _combinedTriggers = [...pageTriggers, ...visibleIncompleteTriggers]
+    return _combinedTriggers
+  }, [pageTriggers, visibleIncompleteTriggers])
 
   const getIsBehaviourVisible = React.useCallback(
     (type: Trigger['behaviour']) => {
@@ -125,26 +126,13 @@ export function CollectorProvider({
     [displayedTriggersIds, combinedTriggers]
   )
 
+  const { appendTrigger } = useDifiStore((s) => s)
+
   const setDisplayedTriggerByInvocation = React.useCallback(
     (
       invocation: Trigger['invocation'],
       shouldAllowMultipleSimultaneous = false
     ) => {
-      console.log('aaa firing invocation', invocation)
-      const appendTrigger = (invokableTrigger: Trigger) => {
-        set((prev: DifiStore) => {
-          if (prev.displayedTriggersIds.includes(invokableTrigger.id))
-            return prev
-
-          return {
-            displayedTriggersIds: [
-              ...prev.displayedTriggersIds,
-              invokableTrigger.id
-            ]
-          }
-        })
-      }
-
       const invokableTriggers = combinedTriggers.filter(
         (trigger) => trigger.invocation === invocation
       )
@@ -156,7 +144,7 @@ export function CollectorProvider({
         }
 
         if (invokableTrigger.behaviour === 'BEHAVIOUR_BANNER') {
-          //@TODO: special case for banners. we should probably defione this in the handler
+          // @TODO: special case for banners. we should probably defione this in the handler
           log(
             'Banners can be stacked up, setting as visible.',
             invokableTrigger
@@ -181,10 +169,9 @@ export function CollectorProvider({
         appendTrigger(invokableTrigger)
       })
     },
-    [combinedTriggers, getIsBehaviourVisible, log]
+    [combinedTriggers, getIsBehaviourVisible, log, appendTrigger]
   )
 
-  console.log('rerender', pageTriggers, config)
   useEffect(() => {
     if (!visibleIncompleteTriggers?.length) return
 
@@ -223,11 +210,12 @@ export function CollectorProvider({
       removePageTrigger(id)
     },
     [
-      displayedTriggersIds,
       log,
+      displayedTriggersIds,
+      setDisplayedTriggers,
       setIncompleteTriggers,
       setVisibleTriggers,
-      combinedTriggers
+      removePageTrigger
     ]
   )
 
@@ -343,6 +331,7 @@ export function CollectorProvider({
     startCooldown()
   }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown])
 
+  // TODO: unsafe chaining?
   const { hasDelayPassed } = useExitIntentDelay(
     config?.trigger.displayTriggerAfterSecs * 1000
   )
@@ -396,7 +385,6 @@ export function CollectorProvider({
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
 
   const fireOnLoadTriggers = useCallback(() => {
-    console.log('aaa firing onload')
     if (!pageLoadTriggers) return
     if (!combinedTriggers?.length) return
 
@@ -421,15 +409,15 @@ export function CollectorProvider({
         setVisitor({ id: retrievedUserId })
       }
 
+      set(() => ({
+        pageTriggers: payload?.pageTriggers || [],
+        config: payload?.config
+      }))
       // Set IdleTimer
       // @todo turn this into the dynamic value
       setIdleTimeout(getIdleStatusDelay())
-      setPageTriggers(payload?.pageTriggers || [])
-      setConfig(payload.config)
-      console.log({ 'gained config': payload.config })
       setIncompleteTriggers(payload?.incompleteTriggers || [])
       setConversions(payload?.conversions || [])
-      console.log({ 'set config': config })
       const cohort = payload.intently ? 'intently' : 'fingerprint'
       if (visitor.cohort !== cohort) setVisitor({ cohort })
 
@@ -446,13 +434,13 @@ export function CollectorProvider({
     },
     [
       log,
+      set,
       getIdleStatusDelay,
-      setPageTriggers,
-      setConfig,
       setIncompleteTriggers,
-      visitor.cohort,
       setConversions,
+      visitor.cohort,
       setVisitor,
+      pageTriggers,
       setIntently
     ]
   )
