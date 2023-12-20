@@ -6,7 +6,7 @@ import { Handler } from '../client/handler'
 import { LEGACY_FingerprintConfig } from '../client/types'
 import { useLogging } from '../hooks/useLogging'
 import { CollectorProvider } from './CollectorContext'
-import { MixpanelProvider } from './MixpanelContext'
+// import { MixpanelProvider } from './MixpanelContext'
 import { VisitorProvider } from './VisitorContext'
 
 const queryClient = new QueryClient()
@@ -133,16 +133,15 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
   return (
     <QueryClientProvider client={queryClient}>
       <VisitorProvider />
-      <MixpanelProvider>
-        <CollectorProvider handlers={handlers}>
-          <ErrorBoundary
-            onError={(error, info) => console.error(error, info)}
-            fallback={<div>An application error occurred.</div>}
-          >
-            {children}
-          </ErrorBoundary>
-        </CollectorProvider>
-      </MixpanelProvider>
+      {/* <MixpanelProvider /> */}
+      <CollectorProvider handlers={handlers}>
+        <ErrorBoundary
+          onError={(error, info) => console.error(error, info)}
+          fallback={<div>An application error occurred.</div>}
+        >
+          {children}
+        </ErrorBoundary>
+      </CollectorProvider>
     </QueryClientProvider>
   )
 }

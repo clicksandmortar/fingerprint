@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 import { cnmFormPrefix } from '../components/CnMForm'
-import { useMixpanel } from '../context/MixpanelContext'
 import { useVisitor } from '../context/VisitorContext'
 import { getFormEntries } from '../utils/forms'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './api/useCollectorMutation'
 import { useLogging } from './useLogging'
+import { useTracking } from './useTracking'
 
 /**
  * Hook into forms on the page and collect their data
@@ -28,7 +28,7 @@ export default function useFormCollector() {
   const { mutateAsync: collect } = useCollectorMutation()
   const { visitor } = useVisitor()
   const { log } = useLogging()
-  const { trackEvent } = useMixpanel()
+  const { trackEvent } = useTracking()
 
   useEffect(() => {
     if (isUndefined('document')) return

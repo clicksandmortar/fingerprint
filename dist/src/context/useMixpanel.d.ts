@@ -4,7 +4,7 @@ import { RegistrableUserProperties } from '../utils/types';
 export declare type MixpanelProviderProps = {
     children?: React.ReactNode;
 };
-export declare const useMixpanel: () => {
+export declare const useTracking: () => {
     trackEvent: (event: string, props: any, callback?: Callback | undefined) => void;
     registerUserData: (properties: RegistrableUserProperties) => void;
     state: {

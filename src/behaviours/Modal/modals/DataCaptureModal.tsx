@@ -2,12 +2,12 @@ import React, { memo, PropsWithChildren, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import CloseButton from '../../../components/CloseButton'
 import CnMForm from '../../../components/CnMForm'
-import { useMixpanel } from '../../../context/MixpanelContext'
 import { useDataCaptureMutation } from '../../../hooks/api/useDataCaptureMutation'
 import { useSeenMutation } from '../../../hooks/api/useSeenMutation'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
 import { useCollector } from '../../../hooks/useCollector'
 import { useLogging } from '../../../hooks/useLogging'
+import { useTracking } from '../../../hooks/useTracking'
 import { getFormEntries } from '../../../utils/forms'
 import { DataCaptureModalField, DataCaptureTrigger } from '../Modal.types'
 
@@ -79,7 +79,7 @@ const DataCaptureModal = ({ trigger }: Props) => {
   const [error, setError] = React.useState<string>('')
   const [retainedHeight, setRetainedHeight] = React.useState<number>(0)
 
-  const { trackEvent } = useMixpanel()
+  const { trackEvent } = useTracking()
   const { log } = useLogging()
   const ref = React.useRef<HTMLDivElement>(null)
   const { removeActiveTrigger } = useCollector()

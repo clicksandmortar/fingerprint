@@ -1,15 +1,15 @@
-import React__default, { useEffect, useState, createContext, useContext, useMemo, useRef, memo, createElement, useCallback } from 'react';
+import React__default, { useEffect, useState, useContext, useMemo, useRef, memo, createElement, useCallback, createContext } from 'react';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 import { create } from 'zustand';
 import ReactDOM from 'react-dom';
-import mixpanel from 'mixpanel-browser';
+import { QueryClient, QueryClientProvider, useMutation } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import psl from 'psl';
 import { validate, version, v4 } from 'uuid';
-import { QueryClient, QueryClientProvider, useMutation } from '@tanstack/react-query';
 import { ErrorBoundary } from 'react-error-boundary';
 import { isMobile } from 'react-device-detect';
+import mixpanel from 'mixpanel-browser';
 import transcend from 'lodash.get';
 import { useForm } from 'react-hook-form';
 import uniqueBy from 'lodash.uniqby';
@@ -123,31 +123,6 @@ const useLogging = () => {
   return disabledLogging;
 };
 
-function getEnvVars() {
-  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
-  let isDev = false;
-  switch (true) {
-    case typeof window === 'undefined':
-    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
-    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
-    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
-    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
-    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
-      isDev = true;
-      break;
-    default:
-      isDev = false;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
-
 const queryClient = new QueryClient();
 const cookieAccountJWT = 'b2c_token';
 const useConsentCheck = (consent, consentCallback) => {
@@ -226,12 +201,12 @@ const FingerprintProvider = props => {
   }
   return React__default.createElement(QueryClientProvider, {
     client: queryClient
-  }, React__default.createElement(VisitorProvider, null), React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
+  }, React__default.createElement(VisitorProvider, null), React__default.createElement(CollectorProvider, {
     handlers: handlers
   }, React__default.createElement(ErrorBoundary, {
     onError: (error, info) => console.error(error, info),
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children))));
+  }, children)));
 };
 
 const uuidValidateV4 = uuid => {
@@ -454,84 +429,34 @@ const VisitorProvider = () => {
 };
 const useVisitor = () => useDifiStore(s => s);
 
-const init = cfg => {
-  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
-};
-const trackEvent = (event, props, callback) => {
-  return mixpanel.track(event, props, callback);
-};
-const MixpanelProvider = ({
-  children
-}) => {
-  const {
-    appId
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    log
-  } = useLogging();
-  const [initiated, setInitiated] = useState(false);
-  useEffect(() => {
-    if (!appId || !visitor.id) {
-      return;
-    }
-    log('MixpanelProvider: booting');
-    init({
-      debug: true
-    });
-    setInitiated(true);
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
-    mixpanel.identify(visitor.id);
-  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
-  const registerUserData = React__default.useCallback(properties => {
-    log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
-    mixpanel.people.set(properties);
-  }, [log]);
-  useEffect(() => {
-    if (!visitor.cohort) {
-      log('Able to register user cohort, but none provided. ');
-      return;
-    }
-    registerUserData({
-      u_cohort: visitor.cohort
-    });
-  }, [visitor, registerUserData]);
-  useEffect(() => {
-    if (!visitor.sourceId) return;
-    registerUserData({
-      sourceId: visitor.sourceId
-    });
-  }, [visitor, registerUserData]);
-  return React__default.createElement(MixpanelContext.Provider, {
-    value: {
-      trackEvent,
-      registerUserData,
-      state: {
-        initiated
-      }
-    }
-  }, children);
-};
-const MixpanelContext = createContext({
-  trackEvent: () => console.error('Mixpanel: trackEvent not setup properly. Check your Context order.'),
-  registerUserData: () => console.error('Mixpanel: registerUserData not setup properly. Check your Context order.'),
-  state: {
-    initiated: false
-  }
-});
-const useMixpanel = () => {
-  return useContext(MixpanelContext);
-};
-
 const deviceInfo = {
   type: isMobile ? 'mobile' : 'desktop'
 };
+
+function getEnvVars() {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
+  let isDev = false;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
 
 const headers = {
   'Content-Type': 'application/json'
@@ -627,6 +552,67 @@ const useCollector = () => {
   return useContext(CollectorContext);
 };
 
+const init = cfg => {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+const trackEvent = (event, props, callback) => {
+  return mixpanel.track(event, props, callback);
+};
+const useTracking = () => {
+  const {
+    appId
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  const [initiated, setInitiated] = useState(false);
+  useEffect(() => {
+    if (!appId || !visitor.id) {
+      return;
+    }
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    setInitiated(true);
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  const registerUserData = React__default.useCallback(properties => {
+    log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
+    mixpanel.people.set(properties);
+  }, [log]);
+  useEffect(() => {
+    if (!visitor.cohort) {
+      log('Able to register user cohort, but none provided. ');
+      return;
+    }
+    registerUserData({
+      u_cohort: visitor.cohort
+    });
+  }, [visitor, registerUserData]);
+  useEffect(() => {
+    if (!visitor.sourceId) return;
+    registerUserData({
+      sourceId: visitor.sourceId
+    });
+  }, [visitor, registerUserData]);
+  return {
+    trackEvent,
+    registerUserData,
+    state: {
+      initiated
+    }
+  };
+};
+
 const useSeenMutation = () => {
   const {
     log,
@@ -637,7 +623,7 @@ const useSeenMutation = () => {
   } = useFingerprint();
   const {
     trackEvent
-  } = useMixpanel();
+  } = useTracking();
   const {
     setPageTriggers,
     setIncompleteTriggers,
@@ -1124,7 +1110,7 @@ const Banner = ({
   } = useCollector();
   const {
     trackEvent
-  } = useMixpanel();
+  } = useTracking();
   const [open, setOpen] = useState(true);
   const [hasFired, setHasFired] = useState(false);
   const {
@@ -1393,7 +1379,7 @@ const DataCaptureModal = ({
   const [retainedHeight, setRetainedHeight] = React__default.useState(0);
   const {
     trackEvent
-  } = useMixpanel();
+  } = useTracking();
   const {
     log
   } = useLogging();
@@ -3050,7 +3036,7 @@ const Modal = ({
   } = useCollector();
   const {
     trackEvent
-  } = useMixpanel();
+  } = useTracking();
   const [open, setOpen] = useState(true);
   const [invocationTimeStamp, setInvocationTimeStamp] = useState(null);
   const {
@@ -3561,7 +3547,7 @@ function useCollinsBookingComplete() {
     state: {
       initiated
     }
-  } = useMixpanel();
+  } = useTracking();
   const {
     log
   } = useLogging();
@@ -3613,7 +3599,7 @@ function useButtonCollector() {
   } = useLogging();
   const {
     trackEvent
-  } = useMixpanel();
+  } = useTracking();
   useEffect(() => {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
@@ -3760,7 +3746,7 @@ function useFormCollector() {
   } = useLogging();
   const {
     trackEvent
-  } = useMixpanel();
+  } = useTracking();
   useEffect(() => {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
@@ -3837,7 +3823,7 @@ function useTrackIntentlyModal({
     state: {
       initiated
     }
-  } = useMixpanel();
+  } = useTracking();
   const {
     log,
     error
@@ -4040,7 +4026,7 @@ function CollectorProvider({
     state: {
       initiated: mixpanelBooted
     }
-  } = useMixpanel();
+  } = useTracking();
   const {
     mutateAsync: collect
   } = useCollectorMutation();

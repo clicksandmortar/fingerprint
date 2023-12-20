@@ -1,10 +1,10 @@
 import mixpanel, { Callback, Config } from 'mixpanel-browser'
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { useFingerprint } from '../hooks/useFingerprint'
-import { useLogging } from '../hooks/useLogging'
+import React, { useEffect, useState } from 'react'
+import { useVisitor } from '../context/VisitorContext'
 import { getEnvVars } from '../utils/getEnvVars'
 import { RegistrableUserProperties } from '../utils/types'
-import { useVisitor } from './VisitorContext'
+import { useFingerprint } from './useFingerprint'
+import { useLogging } from './useLogging'
 
 const init = (cfg: Partial<Config>) => {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
@@ -14,9 +14,9 @@ const init = (cfg: Partial<Config>) => {
   })
 }
 
-type TrackerState = {
-  initiated: boolean
-}
+// type TrackerState = {
+//   initiated: boolean
+// }
 
 const trackEvent = (event: string, props: any, callback?: Callback): void => {
   return mixpanel.track(event, props, callback)
@@ -26,7 +26,7 @@ export type MixpanelProviderProps = {
   children?: React.ReactNode
 }
 
-export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
+export const useTracking = () => {
   const { appId } = useFingerprint()
   const { visitor } = useVisitor()
   const { log } = useLogging()
@@ -59,6 +59,7 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     },
     [log]
   )
+
   useEffect(() => {
     if (!visitor.cohort) {
       log('Able to register user cohort, but none provided. ')
@@ -78,41 +79,11 @@ export const MixpanelProvider = ({ children }: MixpanelProviderProps) => {
     })
   }, [visitor, registerUserData])
 
-  return (
-    <MixpanelContext.Provider
-      value={{
-        trackEvent,
-        registerUserData,
-        state: {
-          initiated
-        }
-      }}
-    >
-      {children}
-    </MixpanelContext.Provider>
-  )
-}
-
-export type MixpanelContextInterface = {
-  trackEvent: (event: string, props: any, callback?: Callback) => void
-  registerUserData: (props: RegistrableUserProperties) => void
-  state: TrackerState
-}
-
-export const MixpanelContext = createContext<MixpanelContextInterface>({
-  trackEvent: () =>
-    console.error(
-      'Mixpanel: trackEvent not setup properly. Check your Context order.'
-    ),
-  registerUserData: () =>
-    console.error(
-      'Mixpanel: registerUserData not setup properly. Check your Context order.'
-    ),
-  state: {
-    initiated: false
+  return {
+    trackEvent,
+    registerUserData,
+    state: {
+      initiated
+    }
   }
-})
-
-export const useMixpanel = () => {
-  return useContext(MixpanelContext)
 }

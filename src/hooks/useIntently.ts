@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useMixpanel } from '../context/MixpanelContext'
 import { SupportedBrand } from '../utils/brand'
 import { useBrand } from './useBrandConfig'
 import { useLogging } from './useLogging'
+import { useTracking } from './useTracking'
 
 const selectorRateMs = 100
 
@@ -18,7 +18,7 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
   const {
     trackEvent,
     state: { initiated }
-  } = useMixpanel()
+  } = useTracking()
   const { log, error } = useLogging()
 
   const brand = useBrand()

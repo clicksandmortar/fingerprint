@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { useMixpanel } from '../../context/MixpanelContext'
 import { useSeenMutation } from '../../hooks/api/useSeenMutation'
 import { useCollector } from '../../hooks/useCollector'
+import { useTracking } from '../../hooks/useTracking'
 import { BannerTrigger } from './Banner.types'
 import HorizontalBanner from './Components/HorizontalBanner'
 import SideBanner from './Components/SideBanner'
@@ -10,7 +10,7 @@ import { Position, resetPad } from './utils'
 
 const Banner = ({ trigger }: { trigger: BannerTrigger }) => {
   const { removeActiveTrigger } = useCollector()
-  const { trackEvent } = useMixpanel()
+  const { trackEvent } = useTracking()
   const [open, setOpen] = useState(true)
 
   const [hasFired, setHasFired] = useState(false)

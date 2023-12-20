@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import React from 'react'
 import { Trigger } from '../../client/types'
-import { useMixpanel } from '../../context/MixpanelContext'
 import { useVisitor } from '../../context/VisitorContext'
 import { deviceInfo } from '../../utils/device'
 import { hostname, request } from '../../utils/http'
@@ -11,11 +10,12 @@ import { useBrand } from '../useBrandConfig'
 import { useCollector } from '../useCollector'
 import { useFingerprint } from '../useFingerprint'
 import { useLogging } from '../useLogging'
+import { useTracking } from '../useTracking'
 
 export const useSeenMutation = () => {
   const { log, error } = useLogging()
   const { appId } = useFingerprint()
-  const { trackEvent } = useMixpanel()
+  const { trackEvent } = useTracking()
   const { setPageTriggers, setIncompleteTriggers, setConversions } =
     useCollector()
 

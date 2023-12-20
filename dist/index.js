@@ -6,13 +6,13 @@ var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
 var zustand = require('zustand');
 var ReactDOM = _interopDefault(require('react-dom'));
-var mixpanel = _interopDefault(require('mixpanel-browser'));
+var reactQuery = require('@tanstack/react-query');
 var Cookies = _interopDefault(require('js-cookie'));
 var psl = _interopDefault(require('psl'));
 var uuid = require('uuid');
-var reactQuery = require('@tanstack/react-query');
 var reactErrorBoundary = require('react-error-boundary');
 var reactDeviceDetect = require('react-device-detect');
+var mixpanel = _interopDefault(require('mixpanel-browser'));
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
 var uniqueBy = _interopDefault(require('lodash.uniqby'));
@@ -182,31 +182,6 @@ var useLogging = function useLogging() {
   return disabledLogging;
 };
 
-function getEnvVars() {
-  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
-  var isDev = false;
-  switch (true) {
-    case typeof window === 'undefined':
-    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
-    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
-    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
-    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
-    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
-      isDev = true;
-      break;
-    default:
-      isDev = false;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
-}
-
 var queryClient = new reactQuery.QueryClient();
 var cookieAccountJWT = 'b2c_token';
 var useConsentCheck = function useConsentCheck(consent, consentCallback) {
@@ -289,14 +264,14 @@ var FingerprintProvider = function FingerprintProvider(props) {
   }
   return React__default.createElement(reactQuery.QueryClientProvider, {
     client: queryClient
-  }, React__default.createElement(VisitorProvider, null), React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
+  }, React__default.createElement(VisitorProvider, null), React__default.createElement(CollectorProvider, {
     handlers: handlers
   }, React__default.createElement(reactErrorBoundary.ErrorBoundary, {
     onError: function onError(error, info) {
       return console.error(error, info);
     },
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children))));
+  }, children)));
 };
 
 var uuidValidateV4 = function uuidValidateV4(uuid$1) {
@@ -527,86 +502,34 @@ var useVisitor = function useVisitor() {
   });
 };
 
-var init = function init(cfg) {
-  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
-};
-var trackEvent = function trackEvent(event, props, callback) {
-  return mixpanel.track(event, props, callback);
-};
-var MixpanelProvider = function MixpanelProvider(_ref) {
-  var children = _ref.children;
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  var _useState = React.useState(false),
-    initiated = _useState[0],
-    setInitiated = _useState[1];
-  React.useEffect(function () {
-    if (!appId || !visitor.id) {
-      return;
-    }
-    log('MixpanelProvider: booting');
-    init({
-      debug: true
-    });
-    setInitiated(true);
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
-    mixpanel.identify(visitor.id);
-  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
-  var registerUserData = React__default.useCallback(function (properties) {
-    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
-    mixpanel.people.set(properties);
-  }, [log]);
-  React.useEffect(function () {
-    if (!visitor.cohort) {
-      log('Able to register user cohort, but none provided. ');
-      return;
-    }
-    registerUserData({
-      u_cohort: visitor.cohort
-    });
-  }, [visitor, registerUserData]);
-  React.useEffect(function () {
-    if (!visitor.sourceId) return;
-    registerUserData({
-      sourceId: visitor.sourceId
-    });
-  }, [visitor, registerUserData]);
-  return React__default.createElement(MixpanelContext.Provider, {
-    value: {
-      trackEvent: trackEvent,
-      registerUserData: registerUserData,
-      state: {
-        initiated: initiated
-      }
-    }
-  }, children);
-};
-var MixpanelContext = React.createContext({
-  trackEvent: function trackEvent() {
-    return console.error('Mixpanel: trackEvent not setup properly. Check your Context order.');
-  },
-  registerUserData: function registerUserData() {
-    return console.error('Mixpanel: registerUserData not setup properly. Check your Context order.');
-  },
-  state: {
-    initiated: false
-  }
-});
-var useMixpanel = function useMixpanel() {
-  return React.useContext(MixpanelContext);
-};
-
 var deviceInfo = {
   type: reactDeviceDetect.isMobile ? 'mobile' : 'desktop'
 };
+
+function getEnvVars() {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
+  var isDev = false;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
 
 var headers = {
   'Content-Type': 'application/json'
@@ -728,14 +651,74 @@ var useCollector = function useCollector() {
   return React.useContext(CollectorContext);
 };
 
+var init = function init(cfg) {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+var trackEvent = function trackEvent(event, props, callback) {
+  return mixpanel.track(event, props, callback);
+};
+var useTracking = function useTracking() {
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useState = React.useState(false),
+    initiated = _useState[0],
+    setInitiated = _useState[1];
+  React.useEffect(function () {
+    if (!appId || !visitor.id) {
+      return;
+    }
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    setInitiated(true);
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
+  var registerUserData = React__default.useCallback(function (properties) {
+    log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
+    mixpanel.people.set(properties);
+  }, [log]);
+  React.useEffect(function () {
+    if (!visitor.cohort) {
+      log('Able to register user cohort, but none provided. ');
+      return;
+    }
+    registerUserData({
+      u_cohort: visitor.cohort
+    });
+  }, [visitor, registerUserData]);
+  React.useEffect(function () {
+    if (!visitor.sourceId) return;
+    registerUserData({
+      sourceId: visitor.sourceId
+    });
+  }, [visitor, registerUserData]);
+  return {
+    trackEvent: trackEvent,
+    registerUserData: registerUserData,
+    state: {
+      initiated: initiated
+    }
+  };
+};
+
 var useSeenMutation = function useSeenMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent;
   var _useCollector = useCollector(),
     setPageTriggers = _useCollector.setPageTriggers,
     setIncompleteTriggers = _useCollector.setIncompleteTriggers,
@@ -1229,8 +1212,8 @@ var Banner = function Banner(_ref) {
   var trigger = _ref.trigger;
   var _useCollector = useCollector(),
     removeActiveTrigger = _useCollector.removeActiveTrigger;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent;
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
@@ -1504,8 +1487,8 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
   var _React$useState2 = React__default.useState(0),
     retainedHeight = _React$useState2[0],
     setRetainedHeight = _React$useState2[1];
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent;
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var ref = React__default.useRef(null);
@@ -2325,8 +2308,8 @@ var Modal = function Modal(_ref) {
   var trigger = _ref.trigger;
   var _useCollector = useCollector(),
     removeActiveTrigger = _useCollector.removeActiveTrigger;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent;
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
@@ -2875,9 +2858,9 @@ var collinBrandsPathConversionMap = {
   Ember: '/tablebooking/enquiry-form-completed'
 };
 function useCollinsBookingComplete() {
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent,
-    initiated = _useMixpanel.state.initiated;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent,
+    initiated = _useTracking.state.initiated;
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var brand = useBrand();
@@ -2923,8 +2906,8 @@ function useButtonCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent;
   React.useEffect(function () {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
@@ -3080,8 +3063,8 @@ function useFormCollector() {
     visitor = _useVisitor.visitor;
   var _useLogging = useLogging(),
     log = _useLogging.log;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent;
   React.useEffect(function () {
     if (isUndefined('document')) return;
     if (!visitor.id) return;
@@ -3158,9 +3141,9 @@ function useTrackIntentlyModal(_ref) {
   var _useState = React.useState(false),
     isVisible = _useState[0],
     setIsVisible = _useState[1];
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent,
-    initiated = _useMixpanel.state.initiated;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent,
+    initiated = _useTracking.state.initiated;
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
@@ -3358,9 +3341,9 @@ function CollectorProvider(_ref) {
     startCooldown = _useTriggerDelay.startCooldown,
     getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs,
     getIdleStatusDelay = _useTriggerDelay.getIdleStatusDelay;
-  var _useMixpanel = useMixpanel(),
-    trackEvent = _useMixpanel.trackEvent,
-    mixpanelBooted = _useMixpanel.state.initiated;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent,
+    mixpanelBooted = _useTracking.state.initiated;
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutateAsync;
   var _useCollinsBookingCom = useCollinsBookingComplete(),

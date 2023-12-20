@@ -22,11 +22,11 @@ import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
 import useIntently from '../hooks/useIntently'
 import { useLogging } from '../hooks/useLogging'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
+import { useTracking } from '../hooks/useTracking'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
 import { updateCookie } from '../visitors/bootstrap'
-import { useMixpanel } from './MixpanelContext'
 import { useVisitor } from './VisitorContext'
 
 export type CollectorProviderProps = {
@@ -66,7 +66,7 @@ export function CollectorProvider({
   const {
     trackEvent,
     state: { initiated: mixpanelBooted }
-  } = useMixpanel()
+  } = useTracking()
   const { mutateAsync: collect } = useCollectorMutation()
   const { checkCollinsBookingComplete } = useCollinsBookingComplete()
 

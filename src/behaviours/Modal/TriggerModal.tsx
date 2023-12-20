@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import ReactDOM from 'react-dom'
 import { Trigger } from '../../client/types'
-import { useMixpanel } from '../../context/MixpanelContext'
 import { useCollectorMutation } from '../../hooks/api/useCollectorMutation'
 import { useSeenMutation } from '../../hooks/api/useSeenMutation'
 import { useBrand } from '../../hooks/useBrandConfig'
 import { useCollector } from '../../hooks/useCollector'
+import { useTracking } from '../../hooks/useTracking'
 import { HandleCloseOptions } from './Modal.types'
 import { BrownsModal } from './modals/browns'
 import CnMStandardModal from './modals/StandardModal'
@@ -18,7 +18,7 @@ type Props = {
 
 const Modal = ({ trigger }: Props) => {
   const { removeActiveTrigger } = useCollector()
-  const { trackEvent } = useMixpanel()
+  const { trackEvent } = useTracking()
   const [open, setOpen] = useState(true)
   const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
     null
