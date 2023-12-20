@@ -1,5 +1,5 @@
 import React from 'react';
-import { FingerprintConfig, PageView, Trigger } from '../client/types';
+import { LEGACY_FingerprintConfig, PageView, Trigger } from '../client/types';
 export declare const cookieAccountJWT = "b2c_token";
 export declare type FingerprintProviderProps = {
     appId?: string;
@@ -21,9 +21,9 @@ export declare type FingerprintProviderProps = {
      * @deprecated
      * Please use the portal to configure these values. Until then this will act as override
      */
-    config?: FingerprintConfig;
+    config?: LEGACY_FingerprintConfig;
 };
-export declare const FingerprintProvider: ({ appId, children, consent, consentCallback, defaultHandlers, initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, config: legacy_config }: FingerprintProviderProps) => {} | null | undefined;
+export declare const FingerprintProvider: (props: FingerprintProviderProps) => {} | null | undefined;
 export interface FingerprintContextInterface {
     appId: string;
     booted: boolean;

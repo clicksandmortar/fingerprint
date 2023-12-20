@@ -1,7 +1,8 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { BigSlice, useDifiStore } from '../beautifulSugar/store'
+import { useDifiStore, useStore } from '../beautifulSugar/store'
+import { DifiStore } from '../beautifulSugar/types'
 import {
   CollectorVisitorResponse,
   Conversion,
@@ -10,7 +11,7 @@ import {
 } from '../client/types'
 import { useCollectorMutation } from '../hooks/api/useCollectorMutation'
 import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
-import { useBrand, useConfig } from '../hooks/useBrandConfig'
+import { useBrand } from '../hooks/useBrandConfig'
 import useButtonCollector from '../hooks/useButtonCollector'
 import useConversions from '../hooks/useConversions'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
@@ -51,10 +52,7 @@ export function CollectorProvider({
     idleTriggers,
     pageLoadTriggers
   } = useFingerprint()
-  const {
-    setConfig,
-    config: { trigger: config }
-  } = useConfig()
+  const { setConfig, config } = useStore()
 
   const { visitor, setVisitor } = useVisitor()
   const {
@@ -86,9 +84,7 @@ export function CollectorProvider({
     displayedTriggersIds,
     setPageTriggers,
     setDisplayedTriggers,
-    // combinedTriggers,
     set
-    // get
   } = useDifiStore((e) => e)
 
   const { setIntently } = useIntently()
@@ -136,7 +132,7 @@ export function CollectorProvider({
     ) => {
       console.log('aaa firing invocation', invocation)
       const appendTrigger = (invokableTrigger: Trigger) => {
-        set((prev: BigSlice) => {
+        set((prev: DifiStore) => {
           if (prev.displayedTriggersIds.includes(invokableTrigger.id))
             return prev
 
@@ -214,9 +210,11 @@ export function CollectorProvider({
   const removeActiveTrigger = useCallback(
     (id: Trigger['id']) => {
       log(`CollectorProvider: removing id:${id} from displayedTriggersIds`)
+
       const refreshedTriggers = displayedTriggersIds.filter(
         (triggerId: Trigger['id']) => triggerId !== id
       )
+
       setDisplayedTriggers(refreshedTriggers)
       setIncompleteTriggers((prev) =>
         prev.filter((trigger) => trigger.id !== id)
@@ -346,7 +344,7 @@ export function CollectorProvider({
   }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown])
 
   const { hasDelayPassed } = useExitIntentDelay(
-    config?.displayTriggerAfterSecs * 1000
+    config?.trigger.displayTriggerAfterSecs * 1000
   )
 
   const fireExitTrigger = React.useCallback(() => {
@@ -428,9 +426,10 @@ export function CollectorProvider({
       setIdleTimeout(getIdleStatusDelay())
       setPageTriggers(payload?.pageTriggers || [])
       setConfig(payload.config)
+      console.log({ 'gained config': payload.config })
       setIncompleteTriggers(payload?.incompleteTriggers || [])
       setConversions(payload?.conversions || [])
-
+      console.log({ 'set config': config })
       const cohort = payload.intently ? 'intently' : 'fingerprint'
       if (visitor.cohort !== cohort) setVisitor({ cohort })
 

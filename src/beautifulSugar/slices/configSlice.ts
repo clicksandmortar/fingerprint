@@ -7,7 +7,7 @@ import {
   objStringtoObjNum
 } from '../../context/Config'
 import { haveBrandColorsBeenConfigured } from '../../utils/brand'
-import { DifiStore, Set } from '../types'
+import { DifiStore, Get, Set } from '../types'
 
 export type ConfigSlice = {
   config: Config
@@ -15,8 +15,8 @@ export type ConfigSlice = {
 }
 
 export const createConfigSlice: StateCreator<DifiStore, [], [], ConfigSlice> = (
-  set: Set
-  // get: Get
+  set: Set,
+  get: Get
 ) => ({
   config: defaultConfig,
   setConfig: (updatedConfigEntries: Partial<Config>) => {
@@ -25,42 +25,41 @@ export const createConfigSlice: StateCreator<DifiStore, [], [], ConfigSlice> = (
     const argColors = updatedConfigEntries?.brand?.colors
     const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors)
 
+    const legacy_config = get().difiProps.config
     // if (shouldUpdateColors)
     //   log('setConfig: setting brand colors from portal config', argColors)
     // else log('setConfig: keeping colors in state || fallback to default')
 
     set((prev) => {
       return {
-        ...prev,
-        ...updatedConfigEntries,
-        brand: {
+        config: {
           ...prev.config,
-          ...updatedConfigEntries.brand,
-          // there is a chance that config.brand.colors isn't returned
-          // when its not configured. In that case, we want to use either the colors already
-          // in the config state, or the default colors
-          colors: shouldUpdateColors
-            ? {
-                // defaultColors here are just a fallback to keep TS happy. No need for them realistically. @TODO: look into
-                ...(prev.config.brand.colors || defaultColors),
-                ...(argColors || {})
-              }
-            : prev.config.brand.colors
-        },
-        trigger: {
-          ...prev.config.trigger,
-          // the stars aligned in the shittiest-most way making it so that the BE returns these as strings
-          ...objStringtoObjNum(
-            LEGACY_merge_config(
-              prev.config,
-              // TODO: Fixme with prope
-              /*legacy_config */ {
-                exitIntentDelay: 0,
-                idleDelay: 0,
-                triggerCooldown: 0
-              }
+          ...updatedConfigEntries,
+          brand: {
+            ...prev.config.brand,
+            ...updatedConfigEntries.brand,
+            // there is a chance that config.brand.colors isn't returned
+            // when its not configured. In that case, we want to use either the colors already
+            // in the config state, or the default colors
+            colors: shouldUpdateColors
+              ? {
+                  // defaultColors here are just a fallback to keep TS happy. No need for them realistically. @TODO: look into
+                  ...(prev.config.brand.colors || defaultColors),
+                  ...(argColors || {})
+                }
+              : prev.config.brand.colors
+          },
+          trigger: {
+            ...prev.config.trigger,
+            // the stars aligned in the shittiest-most way making it so that the BE returns these as strings
+            ...objStringtoObjNum(
+              LEGACY_merge_config(
+                prev.config,
+                // TODO: Fixme with prope
+                legacy_config
+              )
             )
-          )
+          }
         }
       }
     })

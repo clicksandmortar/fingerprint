@@ -159,7 +159,7 @@ export type PageView = {
   viewedAt: Date
 }
 
-export type FingerprintConfig = {
+export type LEGACY_FingerprintConfig = {
   exitIntentDelay?: number
   idleDelay?: number
   triggerCooldown?: number

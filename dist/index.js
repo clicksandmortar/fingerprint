@@ -4,6 +4,8 @@ var reactQuery = require('@tanstack/react-query');
 var React = require('react');
 var React__default = _interopDefault(React);
 var reactErrorBoundary = require('react-error-boundary');
+var zustand = require('zustand');
+var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var ReactDOM = _interopDefault(require('react-dom'));
 var mixpanel = _interopDefault(require('mixpanel-browser'));
 var Cookies = _interopDefault(require('js-cookie'));
@@ -12,8 +14,6 @@ var uuid = require('uuid');
 var reactDeviceDetect = require('react-device-detect');
 var reactIdleTimer = require('react-idle-timer');
 var useExitIntent = require('use-exit-intent');
-var zustand = require('zustand');
-var uniqueBy = _interopDefault(require('lodash.uniqby'));
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
 
@@ -57,35 +57,6 @@ function _objectWithoutPropertiesLoose(source, excluded) {
     target[key] = source[key];
   }
   return target;
-}
-
-var useFingerprint = function useFingerprint() {
-  return React.useContext(FingerprintContext);
-};
-
-function getEnvVars() {
-  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
-  var isDev = false;
-  switch (true) {
-    case typeof window === 'undefined':
-    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
-    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
-    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
-    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
-    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
-      isDev = true;
-      break;
-    default:
-      isDev = false;
-  }
-  if (isDev) return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
-  return {
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
-    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
-  };
 }
 
 var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
@@ -150,116 +121,126 @@ var objStringtoObjNum = function objStringtoObjNum(obj) {
   });
   return newObj;
 };
-function ConfigProvider(_ref) {
-  var children = _ref.children,
-    legacy_config = _ref.legacy_config;
-  var _useState = React.useState(defaultConfig),
-    config = _useState[0],
-    setConfigState = _useState[1];
-  var log = React__default.useCallback(function () {
-    if (config.script.debugMode) {
-      var _console;
-      for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
-        params[_key] = arguments[_key];
-      }
-      (_console = console).log.apply(_console, ['[ConfigProvider]'].concat(params));
-    }
-  }, [config, legacy_config]);
-  var setConfig = React__default.useCallback(function (updatedConfigEntries) {
-    var _updatedConfigEntries;
-    var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
-    var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
-    if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
-    setConfigState(function (prev) {
-      return _extends({}, prev, updatedConfigEntries, {
-        brand: _extends({}, prev.brand, updatedConfigEntries.brand, {
-          colors: shouldUpdateColors ? _extends({}, prev.brand.colors || defaultColors, argColors || {}) : prev.brand.colors
-        }),
-        trigger: _extends({}, prev.trigger, objStringtoObjNum(LEGACY_merge_config(prev, legacy_config)))
+
+var createConfigSlice = function createConfigSlice(set, get) {
+  return {
+    config: defaultConfig,
+    setConfig: function setConfig(updatedConfigEntries) {
+      var _updatedConfigEntries;
+      var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
+      var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
+      var legacy_config = get().difiProps.config;
+      set(function (prev) {
+        return {
+          config: _extends({}, prev.config, updatedConfigEntries, {
+            brand: _extends({}, prev.config.brand, updatedConfigEntries.brand, {
+              colors: shouldUpdateColors ? _extends({}, prev.config.brand.colors || defaultColors, argColors || {}) : prev.config.brand.colors
+            }),
+            trigger: _extends({}, prev.config.trigger, objStringtoObjNum(LEGACY_merge_config(prev.config, legacy_config)))
+          })
+        };
       });
-    });
-  }, [setConfigState]);
-  var value = {
-    config: config,
-    setConfig: setConfig
+    }
   };
-  React.useEffect(function () {
-    log('config in use:', config);
-  }, [config]);
-  return React__default.createElement(ConfigContext.Provider, {
-    value: value
-  }, children);
-}
-var ConfigContext = React.createContext({
-  config: defaultConfig,
-  setConfig: function setConfig() {
-    console.error('ConfigContext: setConfig not implemented');
-  }
-});
-
-var useConfig = function useConfig() {
-  return React__default.useContext(ConfigContext);
-};
-var useBrand = function useBrand() {
-  var configBrandName = useConfig().config.brand.name;
-  if (configBrandName) return configBrandName;
-  return _LEGACY_getBrand();
-};
-var useTriggerConfig = function useTriggerConfig() {
-  return useConfig().config.trigger;
-};
-var useBrandColors = function useBrandColors() {
-  return useConfig().config.brand.colors || defaultColors;
 };
 
-var LoggingProvider = function LoggingProvider(_ref) {
-  var children = _ref.children;
-  var debug = useConfig().config.script.debugMode;
-  var log = function log() {
-    if (debug) {
-      var _console;
-      (_console = console).log.apply(_console, arguments);
-    }
-  };
-  var warn = function warn() {
-    if (debug) {
-      var _console2;
-      (_console2 = console).warn.apply(_console2, arguments);
-    }
-  };
-  var error = function error() {
-    if (debug) {
-      var _console3;
-      (_console3 = console).error.apply(_console3, arguments);
-    }
-  };
-  var info = function info() {
-    if (debug) {
-      var _console4;
-      (_console4 = console).info.apply(_console4, arguments);
-    }
-  };
-  React.useEffect(function () {
-    if (!debug) return;
-    log('LoggingProvider: In Debug Mode');
-  });
-  return React__default.createElement(LoggingContext.Provider, {
-    value: {
-      log: log,
-      warn: warn,
-      error: error,
-      info: info
-    }
-  }, children);
-};
-var LoggingContext = React.createContext({
+var noDebugNoLogging = {
   log: function log() {},
   warn: function warn() {},
   error: function error() {},
   info: function info() {}
+};
+var createLoggingSlice = function createLoggingSlice(_set, _get) {
+  return {
+    logging: noDebugNoLogging
+  };
+};
+
+var createMutualSlice = function createMutualSlice(set, get) {
+  return {
+    set: set,
+    get: get,
+    difiProps: {}
+  };
+};
+
+var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
+  return {
+    pageTriggers: [],
+    displayedTriggersIds: [],
+    session: {},
+    setDisplayedTriggers: function setDisplayedTriggers(triggers) {
+      set(function () {
+        return {
+          displayedTriggersIds: triggers
+        };
+      });
+    },
+    setPageTriggers: function setPageTriggers(triggers) {
+      var displayedTriggers = get().displayedTriggersIds;
+      set(function (prev) {
+        var nonDismissed = prev.pageTriggers.filter(function (tr) {
+          return displayedTriggers.includes(tr.id);
+        });
+        return {
+          pageTriggers: uniqueBy([].concat(triggers || [], nonDismissed), 'id')
+        };
+      });
+    },
+    removePageTrigger: function removePageTrigger(id) {
+      set(function (prev) {
+        return {
+          pageTriggers: prev.pageTriggers.filter(function (trigger) {
+            return trigger.id !== id;
+          })
+        };
+      });
+    }
+  };
+};
+
+var useDifiStore = zustand.create(function () {
+  return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createLoggingSlice.apply(void 0, arguments));
 });
+var useStore = function useStore() {
+  return useDifiStore(function (s) {
+    return s;
+  });
+};
+
+var useFingerprint = function useFingerprint() {
+  return React.useContext(FingerprintContext);
+};
+
+function getEnvVars() {
+  var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
+  var isDev = false;
+  switch (true) {
+    case typeof window === 'undefined':
+    case (_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : (_window$location$host = _window$location.host) === null || _window$location$host === void 0 ? void 0 : _window$location$host.includes('localhost'):
+    case (_window2 = window) === null || _window2 === void 0 ? void 0 : (_window2$location = _window2.location) === null || _window2$location === void 0 ? void 0 : (_window2$location$hos = _window2$location.host) === null || _window2$location$hos === void 0 ? void 0 : _window2$location$hos.includes('clicksandmortar.tech'):
+    case (_window3 = window) === null || _window3 === void 0 ? void 0 : (_window3$location = _window3.location) === null || _window3$location === void 0 ? void 0 : _window3$location.host.startsWith('stage65-az'):
+    case (_window4 = window) === null || _window4 === void 0 ? void 0 : (_window4$location = _window4.location) === null || _window4$location === void 0 ? void 0 : _window4$location.host.startsWith('test65-az'):
+    case (_window5 = window) === null || _window5 === void 0 ? void 0 : (_window5$location = _window5.location) === null || _window5$location === void 0 ? void 0 : _window5$location.host.includes('vercel.app'):
+      isDev = true;
+      break;
+    default:
+      isDev = false;
+  }
+  if (isDev) return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+  };
+  return {
+    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
+    MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
+  };
+}
+
 var useLogging = function useLogging() {
-  return React.useContext(LoggingContext);
+  return useDifiStore(function (s) {
+    return s.logging;
+  });
 };
 
 var uuidValidateV4 = function uuidValidateV4(uuid$1) {
@@ -685,67 +666,20 @@ function getReferrer() {
   };
 }
 
-var createConfigSlice = function createConfigSlice(set) {
-  return {
-    config: defaultConfig,
-    setConfig: function setConfig(updatedConfigEntries) {
-      var _updatedConfigEntries;
-      var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
-      var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
-      set(function (prev) {
-        return _extends({}, prev, updatedConfigEntries, {
-          brand: _extends({}, prev.config, updatedConfigEntries.brand, {
-            colors: shouldUpdateColors ? _extends({}, prev.config.brand.colors || defaultColors, argColors || {}) : prev.config.brand.colors
-          }),
-          trigger: _extends({}, prev.config.trigger, objStringtoObjNum(LEGACY_merge_config(prev.config, {
-            exitIntentDelay: 0,
-            idleDelay: 0,
-            triggerCooldown: 0
-          })))
-        });
-      });
-    }
-  };
+var useConfig = function useConfig() {
+  return useStore().config;
 };
-
-var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
-  return {
-    pageTriggers: [],
-    displayedTriggersIds: [],
-    session: {},
-    setDisplayedTriggers: function setDisplayedTriggers(triggers) {
-      set(function () {
-        return {
-          displayedTriggersIds: triggers
-        };
-      });
-    },
-    setPageTriggers: function setPageTriggers(triggers) {
-      var displayedTriggers = get().displayedTriggersIds;
-      set(function (prev) {
-        var nonDismissed = prev.pageTriggers.filter(function (tr) {
-          return displayedTriggers.includes(tr.id);
-        });
-        return {
-          pageTriggers: uniqueBy([].concat(triggers || [], nonDismissed), 'id')
-        };
-      });
-    },
-    removePageTrigger: function removePageTrigger(id) {
-      set(function (prev) {
-        return {
-          pageTriggers: prev.pageTriggers.filter(function (trigger) {
-            return trigger.id !== id;
-          })
-        };
-      });
-    }
-  };
+var useBrand = function useBrand() {
+  var configBrandName = useConfig().brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
 };
-
-var useDifiStore = zustand.create(function () {
-  return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments));
-});
+var useTriggerConfig = function useTriggerConfig() {
+  return useConfig().trigger;
+};
+var useBrandColors = function useBrandColors() {
+  return useConfig().brand.colors || defaultColors;
+};
 
 var useHostname = function useHostname() {
   var _window, _window$location;
@@ -1316,9 +1250,9 @@ function CollectorProvider(_ref) {
     exitIntentTriggers = _useFingerprint.exitIntentTriggers,
     idleTriggers = _useFingerprint.idleTriggers,
     pageLoadTriggers = _useFingerprint.pageLoadTriggers;
-  var _useConfig = useConfig(),
-    setConfig = _useConfig.setConfig,
-    config = _useConfig.config.trigger;
+  var _useStore = useStore(),
+    setConfig = _useStore.setConfig,
+    config = _useStore.config;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
     setVisitor = _useVisitor.setVisitor;
@@ -1490,7 +1424,7 @@ function CollectorProvider(_ref) {
     setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
     startCooldown();
   }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
-  var _useExitIntentDelay = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.displayTriggerAfterSecs) * 1000),
+  var _useExitIntentDelay = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.trigger.displayTriggerAfterSecs) * 1000),
     hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
   var fireExitTrigger = React__default.useCallback(function () {
     if (!hasDelayPassed) {
@@ -1539,8 +1473,14 @@ function CollectorProvider(_ref) {
         setIdleTimeout(getIdleStatusDelay());
         setPageTriggers((payload === null || payload === void 0 ? void 0 : payload.pageTriggers) || []);
         setConfig(payload.config);
+        console.log({
+          'gained config': payload.config
+        });
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
+        console.log({
+          'set config': config
+        });
         var cohort = payload.intently ? 'intently' : 'fingerprint';
         if (visitor.cohort !== cohort) setVisitor({
           cohort: cohort
@@ -3688,32 +3628,39 @@ var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   }, [consentCallback, consent]);
   return consentGiven;
 };
-var FingerprintProvider = function FingerprintProvider(_ref) {
-  var appId = _ref.appId,
-    children = _ref.children,
-    _ref$consent = _ref.consent,
-    consent = _ref$consent === void 0 ? false : _ref$consent,
-    consentCallback = _ref.consentCallback,
-    defaultHandlers = _ref.defaultHandlers,
-    _ref$initialDelay = _ref.initialDelay,
-    initialDelay = _ref$initialDelay === void 0 ? 0 : _ref$initialDelay,
-    _ref$exitIntentTrigge = _ref.exitIntentTriggers,
-    exitIntentTriggers = _ref$exitIntentTrigge === void 0 ? true : _ref$exitIntentTrigge,
-    _ref$idleTriggers = _ref.idleTriggers,
-    idleTriggers = _ref$idleTriggers === void 0 ? true : _ref$idleTriggers,
-    _ref$pageLoadTriggers = _ref.pageLoadTriggers,
-    pageLoadTriggers = _ref$pageLoadTriggers === void 0 ? true : _ref$pageLoadTriggers,
-    legacy_config = _ref.config;
+var FingerprintProvider = function FingerprintProvider(props) {
+  var appId = props.appId,
+    children = props.children,
+    _props$consent = props.consent,
+    consent = _props$consent === void 0 ? false : _props$consent,
+    consentCallback = props.consentCallback,
+    _props$defaultHandler = props.defaultHandlers,
+    defaultHandlers = _props$defaultHandler === void 0 ? [] : _props$defaultHandler,
+    _props$initialDelay = props.initialDelay,
+    initialDelay = _props$initialDelay === void 0 ? 0 : _props$initialDelay,
+    _props$exitIntentTrig = props.exitIntentTriggers,
+    exitIntentTriggers = _props$exitIntentTrig === void 0 ? true : _props$exitIntentTrig,
+    _props$idleTriggers = props.idleTriggers,
+    idleTriggers = _props$idleTriggers === void 0 ? true : _props$idleTriggers,
+    _props$pageLoadTrigge = props.pageLoadTriggers,
+    pageLoadTriggers = _props$pageLoadTrigge === void 0 ? true : _props$pageLoadTrigge;
+  var _useStore = useStore(),
+    set = _useStore.set;
+  React.useEffect(function () {
+    set({
+      difiProps: props
+    });
+  }, [props]);
+  var consentGiven = useConsentCheck(consent, consentCallback);
   var _useState2 = React.useState(true),
     booted = _useState2[0],
     setBooted = _useState2[1];
-  var _useState3 = React.useState(defaultHandlers || clientHandlers),
+  var _useState3 = React.useState([].concat(clientHandlers, defaultHandlers)),
     handlers = _useState3[0],
     setHandlers = _useState3[1];
-  var consentGiven = useConsentCheck(consent, consentCallback);
-  var addAnotherHandler = React__default.useCallback(function (trigger) {
+  var addAnotherHandler = React__default.useCallback(function (handler) {
     setHandlers(function (handlers) {
-      return [].concat(handlers, [trigger]);
+      return [].concat(handlers, [handler]);
     });
   }, [setHandlers]);
   React.useEffect(function () {
@@ -3736,9 +3683,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
   if (!consentGiven) {
     return children;
   }
-  return React__default.createElement(ConfigProvider, {
-    legacy_config: legacy_config
-  }, React__default.createElement(LoggingProvider, null, React__default.createElement(reactQuery.QueryClientProvider, {
+  return React__default.createElement(reactQuery.QueryClientProvider, {
     client: queryClient
   }, React__default.createElement(FingerprintContext.Provider, {
     value: {
@@ -3767,7 +3712,7 @@ var FingerprintProvider = function FingerprintProvider(_ref) {
       return console.error(error, info);
     },
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children))))))));
+  }, children))))));
 };
 var defaultFingerprintState = {
   appId: '',

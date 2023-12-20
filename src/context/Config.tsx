@@ -1,11 +1,6 @@
-import React, {
-  createContext,
-  PropsWithChildren,
-  useEffect,
-  useState
-} from 'react'
+import { PropsWithChildren } from 'react'
 import { Config } from '../client/types'
-import { haveBrandColorsBeenConfigured, _LEGACY_getBrand } from '../utils/brand'
+import { _LEGACY_getBrand } from '../utils/brand'
 import { FingerprintProviderProps } from './FingerprintContext'
 
 // 27 233 237 - dimmed, 41 100 249 - main, 13 14 49 - text Secondary, white primary, 226 226 226 greyBg, some dark grey text ?
@@ -69,84 +64,3 @@ export const objStringtoObjNum = (obj: any) => {
 
   return newObj
 }
-export function ConfigProvider({ children, legacy_config }: Props) {
-  const [config, setConfigState] = useState<Config>(defaultConfig)
-
-  // NOTE that this is the top level wrapper
-  // so log along with some other stuff won't work here.
-  const log = React.useCallback(
-    (...params) => {
-      if (config.script.debugMode) {
-        console.log('[ConfigProvider]', ...params)
-      } else () => {}
-    },
-    [config, legacy_config]
-  )
-
-  // This is super messy. I know. Once we get rid of the legacy behaviour this should become
-  //  much clearer
-  const setConfig = React.useCallback(
-    (updatedConfigEntries: Partial<Config>) => {
-      // if the colors have been configured, we want to use the colors from the portal
-      // if not - keep the default ones
-      const argColors = updatedConfigEntries?.brand?.colors
-      const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors)
-
-      if (shouldUpdateColors)
-        log('setConfig: setting brand colors from portal config', argColors)
-      else log('setConfig: keeping colors in state || fallback to default')
-
-      setConfigState((prev) => {
-        return {
-          ...prev,
-          ...updatedConfigEntries,
-          brand: {
-            ...prev.brand,
-            ...updatedConfigEntries.brand,
-            // there is a chance that config.brand.colors isn't returned
-            // when its not configured. In that case, we want to use either the colors already
-            // in the config state, or the default colors
-            colors: shouldUpdateColors
-              ? {
-                  // defaultColors here are just a fallback to keep TS happy. No need for them realistically. @TODO: look into
-                  ...(prev.brand.colors || defaultColors),
-                  ...(argColors || {})
-                }
-              : prev.brand.colors
-          },
-          trigger: {
-            ...prev.trigger,
-            // the stars aligned in the shittiest-most way making it so that the BE returns these as strings
-            ...objStringtoObjNum(LEGACY_merge_config(prev, legacy_config))
-          }
-        }
-      })
-    },
-    [setConfigState]
-  )
-
-  const value: ConfigContextType = {
-    config,
-    setConfig
-  }
-
-  useEffect(() => {
-    log('config in use:', config)
-  }, [config])
-
-  return (
-    <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>
-  )
-}
-
-type ConfigContextType = {
-  config: Config
-  setConfig: (config: Partial<Config>) => void
-}
-
-export const ConfigContext = createContext<ConfigContextType>({
-  config: defaultConfig,
-  setConfig: () => {
-    console.error('ConfigContext: setConfig not implemented')
-  }
-})
