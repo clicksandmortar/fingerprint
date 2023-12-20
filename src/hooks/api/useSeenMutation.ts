@@ -1,5 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { BannerTrigger } from '../../behaviours/Banner/Banner.types'
+import { DataCaptureTrigger } from '../../behaviours/Modal/Modal.types'
 import { Trigger } from '../../client/types'
 import { useLogging } from '../../context/LoggingContext'
 import { useMixpanel } from '../../context/MixpanelContext'
@@ -81,4 +83,41 @@ export const useSeenMutation = () => {
       }
     }
   )
+}
+
+export const useSeen = ({
+  trigger,
+  skip
+}: {
+  trigger: Trigger | BannerTrigger | DataCaptureTrigger
+  skip: boolean
+}) => {
+  const [hasFired, setHasFired] = useState<boolean>(false)
+
+  const { mutate: runSeen, ...mutationRest } = useSeenMutation()
+
+  useEffect(() => {
+    if (skip) return
+    if (hasFired) return
+    if (mutationRest.isSuccess) return
+    if (mutationRest.isLoading) return
+
+    // seen gets called multiple times since Collector currently
+    // like to over-rerender componets. This timeout prevents from firing a ton
+    // even with this, Banner can still re-issue the same request since all components
+    // get re-rendered and unlike Modal, Banner gets to stay.
+    //  @Ed to deal with at a later point
+    const tId = setTimeout(() => {
+      runSeen(trigger)
+      setHasFired(true)
+    }, 500)
+
+    return () => {
+      clearTimeout(tId)
+    }
+  }, [mutationRest, skip, hasFired, runSeen, setHasFired])
+
+  // NOTE: do not export the actual mutation
+  // just statuses - to prevent from running multiple times by accident
+  return mutationRest
 }
