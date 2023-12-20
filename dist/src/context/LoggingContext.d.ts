@@ -7,4 +7,4 @@ export declare const useLogging: () => {
     warn: (...message: any) => void;
     error: (...message: any) => void;
     info: (...message: any) => void;
-} & import("zustand/esm/vanilla").StoreApi<import("../beautifulSugar/types").DifiStore>;
+};

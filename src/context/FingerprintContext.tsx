@@ -96,6 +96,8 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
 
   const consentGiven = useConsentCheck(consent, consentCallback)
 
+  // const { visitor } = useVisitor()
+
   useEffect(() => {
     // if the props have never been probided, throw an error.
     if (!props.appId) throw new Error('C&M Fingerprint: appId is required')
@@ -122,6 +124,7 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
   if (!consentGiven) {
     return children
   }
+
   if (!booted) {
     console.log('booting Difi...')
     return null
@@ -129,18 +132,17 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <VisitorProvider>
-        <MixpanelProvider>
-          <CollectorProvider handlers={handlers}>
-            <ErrorBoundary
-              onError={(error, info) => console.error(error, info)}
-              fallback={<div>An application error occurred.</div>}
-            >
-              {children}
-            </ErrorBoundary>
-          </CollectorProvider>
-        </MixpanelProvider>
-      </VisitorProvider>
+      <VisitorProvider />
+      <MixpanelProvider>
+        <CollectorProvider handlers={handlers}>
+          <ErrorBoundary
+            onError={(error, info) => console.error(error, info)}
+            fallback={<div>An application error occurred.</div>}
+          >
+            {children}
+          </ErrorBoundary>
+        </CollectorProvider>
+      </MixpanelProvider>
     </QueryClientProvider>
   )
 }

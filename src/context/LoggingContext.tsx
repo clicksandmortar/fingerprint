@@ -1,11 +1,9 @@
 // TODO: move
 import React from 'react'
-import { useDifiStore } from '../beautifulSugar/store'
+import { useLogging as useLoggingII } from '../hooks/useLogging'
 
 export type LoggingProviderProps = {
   children?: React.ReactNode
 }
 
-export const useLogging = () => {
-  return useDifiStore((s) => s.logging)
-}
+export const useLogging = () => useLoggingII()

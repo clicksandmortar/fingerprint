@@ -56,6 +56,7 @@ export function CollectorProvider({
   const { config } = useStore()
 
   const { visitor, setVisitor } = useVisitor()
+
   const {
     canNextTriggerOccur,
     startCooldown,
@@ -419,6 +420,7 @@ export function CollectorProvider({
       setIncompleteTriggers(payload?.incompleteTriggers || [])
       setConversions(payload?.conversions || [])
       const cohort = payload.intently ? 'intently' : 'fingerprint'
+
       if (visitor.cohort !== cohort) setVisitor({ cohort })
 
       log('CollectorProvider: collected data')
@@ -438,7 +440,7 @@ export function CollectorProvider({
       getIdleStatusDelay,
       setIncompleteTriggers,
       setConversions,
-      visitor.cohort,
+      visitor,
       setVisitor,
       pageTriggers,
       setIntently
@@ -504,7 +506,7 @@ export function CollectorProvider({
         error('failed to store collected data', err)
       })
   }, [
-    visitor.id,
+    visitor,
     brand,
     log,
     collect,

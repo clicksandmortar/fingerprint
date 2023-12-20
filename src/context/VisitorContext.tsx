@@ -1,20 +1,22 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
+import { useDifiStore, useStore } from '../beautifulSugar/store'
 import { useFingerprint } from '../hooks/useFingerprint'
 import { bootstrapSession } from '../sessions/bootstrap'
 import { Session } from '../sessions/types'
 import { bootstrapVisitor, correctCookieSubdomain } from '../visitors/bootstrap'
 import { Visitor } from '../visitors/types'
 import { useLogging } from './LoggingContext'
-
 export type VisitorProviderProps = {
   children?: React.ReactNode
 }
 
-export const VisitorProvider = ({ children }: VisitorProviderProps) => {
+export const VisitorProvider = () => {
   const { appId, booted } = useFingerprint()
   const { log } = useLogging()
-  const [session, setSession] = useState<Session>({})
-  const [visitor, setVisitor] = useState<Visitor>({})
+
+  const { session, setSession, visitor, set } = useStore()
+  // TODO: unmodify?
+  const setVisitor = (val: Visitor) => set({ visitor: val })
 
   useEffect(() => {
     if (!booted) {
@@ -45,24 +47,8 @@ export const VisitorProvider = ({ children }: VisitorProviderProps) => {
     log('VisitorProvider: booted', session, visitor)
   }, [appId, booted])
 
-  const setVisitorData = React.useCallback(
-    (prop: Partial<Visitor>) => {
-      setVisitor((visitor) => ({ ...visitor, ...prop }))
-    },
-    [setVisitor]
-  )
-
-  return (
-    <VisitorContext.Provider
-      value={{
-        session,
-        visitor,
-        setVisitor: setVisitorData
-      }}
-    >
-      {children}
-    </VisitorContext.Provider>
-  )
+  // turn into hook?
+  return null
 }
 
 export type VisitorContextInterface = {
@@ -71,15 +57,4 @@ export type VisitorContextInterface = {
   setVisitor: (visitor: Partial<Visitor>) => void
 }
 
-export const VisitorContext = createContext<VisitorContextInterface>({
-  session: {},
-  visitor: {},
-  setVisitor: () =>
-    console.error(
-      'VisitorContext: setVisitor not setup properly. Check your Context order.'
-    )
-})
-
-export const useVisitor = () => {
-  return useContext(VisitorContext)
-}
+export const useVisitor = () => useDifiStore((s) => s)

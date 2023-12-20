@@ -1,6 +1,4 @@
-import { StateCreator } from 'zustand'
-import { useDifiStore } from '../store'
-import { DifiStore, Get, Set } from '../types'
+import { useDifiStore } from '../beautifulSugar/store'
 
 type Logging = {
   log: (...message: any) => void
@@ -13,7 +11,9 @@ export type LoggingSlice = {
   logging: Logging
 }
 
-const noDebugNoLogging: Logging = {
+const disabledLogging: Logging = {
+  // we don't want TS to error out when you pass a param here, but NOT using it
+  // creates an unused var warning. So we use ts-expect-error to silence it
   //@ts-expect-error no unused vars
   log: (...message) => {},
   //@ts-expect-error no unused vars
@@ -24,21 +24,17 @@ const noDebugNoLogging: Logging = {
   info: (...message) => {}
 }
 
-//@ts-expect-error
-const debugModeLogging: Logging = {
+const enabledLogging: Logging = {
   log: (...message: any) => console.log(...message),
   warn: (...message: any) => console.warn(...message),
   error: (...message: any) => console.error(...message),
   info: (...message: any) => console.info(...message)
 }
 
-export const createLoggingSlice: StateCreator<
-  DifiStore,
-  [],
-  [],
-  LoggingSlice
-> = (_set: Set, _get: Get) => ({
-  logging: noDebugNoLogging
-})
+export const useLogging = (): Logging => {
+  const isDebugMode = useDifiStore((s) => s.config.script.debugMode)
 
-export const useLogging = () => useDifiStore((s) => s).getState().logging
+  if (isDebugMode) return enabledLogging
+
+  return disabledLogging
+}

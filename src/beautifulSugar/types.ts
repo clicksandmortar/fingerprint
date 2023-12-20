@@ -1,15 +1,17 @@
 import { EqualityChecker, StateSelector, StoreApi } from 'zustand'
+import { LoggingSlice } from '../hooks/useLogging'
 import { ConfigSlice } from './slices/configSlice'
 import { HandlersSlice } from './slices/handlersSlice'
-import { LoggingSlice } from './slices/loggingSlice'
 import { MutualSlice } from './slices/mutualSlice'
 import { PageTriggersSlice } from './slices/pageTriggersSlice'
+import { VisitorSlice } from './slices/visitorSlice'
 
 export type DifiStore = PageTriggersSlice &
   ConfigSlice &
   MutualSlice &
   LoggingSlice &
-  HandlersSlice
+  HandlersSlice &
+  VisitorSlice
 
 export type Set = StoreApi<DifiStore>['setState']
 export type Get = StoreApi<DifiStore>['getState']

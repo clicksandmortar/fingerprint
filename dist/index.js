@@ -175,10 +175,40 @@ function getEnvVars() {
   };
 }
 
+var disabledLogging = {
+  log: function log() {},
+  warn: function warn() {},
+  error: function error() {},
+  info: function info() {}
+};
+var enabledLogging = {
+  log: function log() {
+    var _console;
+    return (_console = console).log.apply(_console, arguments);
+  },
+  warn: function warn() {
+    var _console2;
+    return (_console2 = console).warn.apply(_console2, arguments);
+  },
+  error: function error() {
+    var _console3;
+    return (_console3 = console).error.apply(_console3, arguments);
+  },
+  info: function info() {
+    var _console4;
+    return (_console4 = console).info.apply(_console4, arguments);
+  }
+};
 var useLogging = function useLogging() {
-  return useDifiStore(function (s) {
-    return s.logging;
+  var isDebugMode = useDifiStore(function (s) {
+    return s.config.script.debugMode;
   });
+  if (isDebugMode) return enabledLogging;
+  return disabledLogging;
+};
+
+var useLogging$1 = function useLogging$1() {
+  return useLogging();
 };
 
 var queryClient = new reactQuery.QueryClient();
@@ -187,7 +217,7 @@ var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   var _useState = React.useState(consent),
     consentGiven = _useState[0],
     setConsentGiven = _useState[1];
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
   React.useEffect(function () {
     if (consent) {
@@ -263,14 +293,14 @@ var FingerprintProvider = function FingerprintProvider(props) {
   }
   return React__default.createElement(reactQuery.QueryClientProvider, {
     client: queryClient
-  }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
+  }, React__default.createElement(VisitorProvider, null), React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
   }, React__default.createElement(reactErrorBoundary.ErrorBoundary, {
     onError: function onError(error, info) {
       return console.error(error, info);
     },
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children)))));
+  }, children))));
 };
 
 var uuidValidateV4 = function uuidValidateV4(uuid$1) {
@@ -449,19 +479,22 @@ var bootstrapSession = function bootstrapSession(_ref) {
   }
 };
 
-var VisitorProvider = function VisitorProvider(_ref) {
-  var children = _ref.children;
+var VisitorProvider = function VisitorProvider() {
   var _useFingerprint = useFingerprint(),
     appId = _useFingerprint.appId,
     booted = _useFingerprint.booted;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
-  var _useState = React.useState({}),
-    session = _useState[0],
-    setSession = _useState[1];
-  var _useState2 = React.useState({}),
-    visitor = _useState2[0],
-    setVisitor = _useState2[1];
+  var _useStore = useStore(),
+    session = _useStore.session,
+    setSession = _useStore.setSession,
+    visitor = _useStore.visitor,
+    set = _useStore.set;
+  var setVisitor = function setVisitor(val) {
+    return set({
+      visitor: val
+    });
+  };
   React.useEffect(function () {
     if (!booted) {
       log('VisitorProvider: not booted');
@@ -490,28 +523,12 @@ var VisitorProvider = function VisitorProvider(_ref) {
     boot();
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
-  var setVisitorData = React__default.useCallback(function (prop) {
-    setVisitor(function (visitor) {
-      return _extends({}, visitor, prop);
-    });
-  }, [setVisitor]);
-  return React__default.createElement(VisitorContext.Provider, {
-    value: {
-      session: session,
-      visitor: visitor,
-      setVisitor: setVisitorData
-    }
-  }, children);
+  return null;
 };
-var VisitorContext = React.createContext({
-  session: {},
-  visitor: {},
-  setVisitor: function setVisitor() {
-    return console.error('VisitorContext: setVisitor not setup properly. Check your Context order.');
-  }
-});
 var useVisitor = function useVisitor() {
-  return React.useContext(VisitorContext);
+  return useDifiStore(function (s) {
+    return s;
+  });
 };
 
 var init = function init(cfg) {
@@ -530,7 +547,7 @@ var MixpanelProvider = function MixpanelProvider(_ref) {
     appId = _useFingerprint.appId;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
   var _useState = React.useState(false),
     initiated = _useState[0],
@@ -716,7 +733,7 @@ var useCollector = function useCollector() {
 };
 
 var useSeenMutation = function useSeenMutation() {
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
@@ -890,7 +907,7 @@ var useCountdown = function useCountdown(_ref) {
     interpolate = _ref.interpolate,
     _ref$formatDate = _ref.formatDate,
     formatDate = _ref$formatDate === void 0 ? formatTimeStamp : _ref$formatDate;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     error = _useLogging.error;
   var _useState = React.useState(initialTimestamp || null),
     timestamp = _useState[0],
@@ -1146,7 +1163,7 @@ var iconList = {
 var Icon = function Icon(_ref) {
   var icon = _ref.icon,
     props = _objectWithoutPropertiesLoose(_ref, _excluded);
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     error = _useLogging.error;
   var IconComponent = iconList[icon];
   if (!icon) return null;
@@ -1160,7 +1177,7 @@ var Icon = function Icon(_ref) {
 var BannerIcon = function BannerIcon(_ref) {
   var iconName = _ref.iconName,
     IconProps = _ref.IconProps;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     error = _useLogging.error;
   var _useBrandColors = useBrandColors(),
     textPrimary = _useBrandColors.textPrimary;
@@ -1372,7 +1389,7 @@ var CnMForm = function CnMForm(props) {
 };
 
 var useDataCaptureMutation = function useDataCaptureMutation() {
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
@@ -1493,7 +1510,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
     setRetainedHeight = _React$useState2[1];
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
   var ref = React__default.useRef(null);
   var _useCollector = useCollector(),
@@ -1667,7 +1684,7 @@ var useHostname = function useHostname() {
 };
 
 var useCollectorMutation = function useCollectorMutation() {
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
@@ -1676,11 +1693,6 @@ var useCollectorMutation = function useCollectorMutation() {
     visitor = _useVisitor.visitor,
     session = _useVisitor.session;
   var requestHost = useHostname();
-  console.log('appid', {
-    appId: appId,
-    visitor: visitor,
-    session: session
-  });
   return reactQuery.useMutation(function (data) {
     return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), _extends({}, data, {
       appId: appId,
@@ -2113,7 +2125,7 @@ var StandardModal = function StandardModal(_ref) {
   var trigger = _ref.trigger,
     handleClickCallToAction = _ref.handleClickCallToAction,
     handleCloseModal = _ref.handleCloseModal;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     error = _useLogging.error;
   var isModalFullyClickable = getIsModalFullyClickable({
     trigger: trigger
@@ -2767,18 +2779,6 @@ var createHandlersSlice = function createHandlersSlice(set, get) {
   };
 };
 
-var noDebugNoLogging = {
-  log: function log() {},
-  warn: function warn() {},
-  error: function error() {},
-  info: function info() {}
-};
-var createLoggingSlice = function createLoggingSlice(_set, _get) {
-  return {
-    logging: noDebugNoLogging
-  };
-};
-
 var createMutualSlice = function createMutualSlice(set, get) {
   return {
     set: set,
@@ -2844,8 +2844,27 @@ var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
   };
 };
 
+var createVisitorSlice = function createVisitorSlice(set, _get) {
+  return {
+    visitor: {},
+    setVisitor: function setVisitor(partialVisitor) {
+      return set(function (prev) {
+        return {
+          visitor: _extends({}, prev.visitor, partialVisitor)
+        };
+      });
+    },
+    session: {},
+    setSession: function setSession(updatedSession) {
+      return set({
+        session: updatedSession
+      });
+    }
+  };
+};
+
 var useDifiStore = zustand.create(function () {
-  return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createLoggingSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments));
+  return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments));
 });
 var useStore = function useStore() {
   return useDifiStore(function (s) {
@@ -2863,7 +2882,7 @@ function useCollinsBookingComplete() {
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent,
     initiated = _useMixpanel.state.initiated;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
   var brand = useBrand();
   var checkCollinsBookingComplete = React__default.useCallback(function () {
@@ -2906,7 +2925,7 @@ function useButtonCollector() {
     collect = _useCollectorMutation.mutateAsync;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
@@ -3041,7 +3060,7 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   if (delay === void 0) {
     delay = 0;
   }
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
   var _useState = React.useState(false),
     hasDelayPassed = _useState[0],
@@ -3063,7 +3082,7 @@ function useFormCollector() {
     collect = _useCollectorMutation.mutateAsync;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent;
@@ -3146,7 +3165,7 @@ function useTrackIntentlyModal(_ref) {
   var _useMixpanel = useMixpanel(),
     trackEvent = _useMixpanel.trackEvent,
     initiated = _useMixpanel.state.initiated;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log,
     error = _useLogging.error;
   var brand = useBrand();
@@ -3208,7 +3227,7 @@ function useTrackIntentlyModal(_ref) {
 var brandsThatSupportIntentlyRemoval = ['Browns'];
 var useRemoveIntently = function useRemoveIntently(_ref2) {
   var intently = _ref2.intently;
-  var _useLogging2 = useLogging(),
+  var _useLogging2 = useLogging$1(),
     log = _useLogging2.log;
   var brand = useBrand();
   React.useEffect(function () {
@@ -3254,7 +3273,7 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
   var _useState = React.useState(''),
     lastCollectedHref = _useState[0],
     setLastCollectedHref = _useState[1];
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
   var run = React__default.useCallback(function () {
     if (config !== null && config !== void 0 && config.skip) return;
@@ -3280,7 +3299,7 @@ function useTriggerDelay() {
   var triggerConfig = useTriggerConfig();
   var cooldownMs = triggerConfig.triggerCooldownSecs * 1000;
   var idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log;
   var startCooldown = React__default.useCallback(function () {
     var currentTimeStamp = Number(new Date());
@@ -3324,7 +3343,7 @@ function CollectorProvider(_ref) {
   var children = _ref.children,
     _ref$handlers = _ref.handlers,
     handlers = _ref$handlers === void 0 ? [] : _ref$handlers;
-  var _useLogging = useLogging(),
+  var _useLogging = useLogging$1(),
     log = _useLogging.log,
     error = _useLogging.error;
   var _useFingerprint = useFingerprint(),
@@ -3571,7 +3590,7 @@ function CollectorProvider(_ref) {
     } catch (e) {
       return Promise.reject(e);
     }
-  }, [log, set, getIdleStatusDelay, setIncompleteTriggers, setConversions, visitor.cohort, setVisitor, pageTriggers, setIntently]);
+  }, [log, set, getIdleStatusDelay, setIncompleteTriggers, setConversions, visitor, setVisitor, pageTriggers, setIntently]);
   React.useEffect(function () {
     if (!mixpanelBooted) return;
     if (hasVisitorIDInURL()) {
@@ -3618,7 +3637,7 @@ function CollectorProvider(_ref) {
     })["catch"](function (err) {
       error('failed to store collected data', err);
     });
-  }, [visitor.id, brand, log, collect, trackEvent, error, collectorCallback, setIntently]);
+  }, [visitor, brand, log, collect, trackEvent, error, collectorCallback, setIntently]);
   var registerWatcher = React__default.useCallback(function (configuredSelector, configuredSearch) {
     var intervalId = setInterval(function () {
       var inputs = document.querySelectorAll(configuredSelector);

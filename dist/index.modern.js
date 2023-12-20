@@ -130,9 +130,25 @@ function getEnvVars() {
   };
 }
 
-const useLogging = () => {
-  return useDifiStore(s => s.logging);
+const disabledLogging = {
+  log: (...message) => {},
+  warn: (...message) => {},
+  error: (...message) => {},
+  info: (...message) => {}
 };
+const enabledLogging = {
+  log: (...message) => console.log(...message),
+  warn: (...message) => console.warn(...message),
+  error: (...message) => console.error(...message),
+  info: (...message) => console.info(...message)
+};
+const useLogging = () => {
+  const isDebugMode = useDifiStore(s => s.config.script.debugMode);
+  if (isDebugMode) return enabledLogging;
+  return disabledLogging;
+};
+
+const useLogging$1 = () => useLogging();
 
 const queryClient = new QueryClient();
 const cookieAccountJWT = 'b2c_token';
@@ -140,7 +156,7 @@ const useConsentCheck = (consent, consentCallback) => {
   const [consentGiven, setConsentGiven] = useState(consent);
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   useEffect(() => {
     if (consent) {
       setConsentGiven(consent);
@@ -212,12 +228,12 @@ const FingerprintProvider = props => {
   }
   return React__default.createElement(QueryClientProvider, {
     client: queryClient
-  }, React__default.createElement(VisitorProvider, null, React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
+  }, React__default.createElement(VisitorProvider, null), React__default.createElement(MixpanelProvider, null, React__default.createElement(CollectorProvider, {
     handlers: handlers
   }, React__default.createElement(ErrorBoundary, {
     onError: (error, info) => console.error(error, info),
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children)))));
+  }, children))));
 };
 
 const uuidValidateV4 = uuid => {
@@ -397,18 +413,23 @@ const bootstrapSession = ({
   }
 };
 
-const VisitorProvider = ({
-  children
-}) => {
+const VisitorProvider = () => {
   const {
     appId,
     booted
   } = useFingerprint();
   const {
     log
-  } = useLogging();
-  const [session, setSession] = useState({});
-  const [visitor, setVisitor] = useState({});
+  } = useLogging$1();
+  const {
+    session,
+    setSession,
+    visitor,
+    set
+  } = useStore();
+  const setVisitor = val => set({
+    visitor: val
+  });
   useEffect(() => {
     if (!booted) {
       log('VisitorProvider: not booted');
@@ -431,28 +452,9 @@ const VisitorProvider = ({
     boot();
     log('VisitorProvider: booted', session, visitor);
   }, [appId, booted]);
-  const setVisitorData = React__default.useCallback(prop => {
-    setVisitor(visitor => ({
-      ...visitor,
-      ...prop
-    }));
-  }, [setVisitor]);
-  return React__default.createElement(VisitorContext.Provider, {
-    value: {
-      session,
-      visitor,
-      setVisitor: setVisitorData
-    }
-  }, children);
+  return null;
 };
-const VisitorContext = createContext({
-  session: {},
-  visitor: {},
-  setVisitor: () => console.error('VisitorContext: setVisitor not setup properly. Check your Context order.')
-});
-const useVisitor = () => {
-  return useContext(VisitorContext);
-};
+const useVisitor = () => useDifiStore(s => s);
 
 const init = cfg => {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
@@ -475,7 +477,7 @@ const MixpanelProvider = ({
   } = useVisitor();
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   const [initiated, setInitiated] = useState(false);
   useEffect(() => {
     if (!appId || !visitor.id) {
@@ -631,7 +633,7 @@ const useSeenMutation = () => {
   const {
     log,
     error
-  } = useLogging();
+  } = useLogging$1();
   const {
     appId
   } = useFingerprint();
@@ -797,7 +799,7 @@ const useCountdown = ({
 }) => {
   const {
     error
-  } = useLogging();
+  } = useLogging$1();
   const [timestamp, setTimeStamp] = useState(initialTimestamp || null);
   const [countdown, setCountdown] = useState('');
   const [intId, setIntId] = useState();
@@ -1047,7 +1049,7 @@ const Icon = ({
 }) => {
   const {
     error
-  } = useLogging();
+  } = useLogging$1();
   const IconComponent = iconList[icon];
   if (!icon) return null;
   if (icon && !IconComponent) {
@@ -1063,7 +1065,7 @@ const BannerIcon = ({
 }) => {
   const {
     error
-  } = useLogging();
+  } = useLogging$1();
   const {
     textPrimary
   } = useBrandColors();
@@ -1274,7 +1276,7 @@ const useDataCaptureMutation = () => {
   const {
     log,
     error
-  } = useLogging();
+  } = useLogging$1();
   const {
     appId
   } = useFingerprint();
@@ -1396,7 +1398,7 @@ const DataCaptureModal = ({
   } = useMixpanel();
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   const ref = React__default.useRef(null);
   const {
     removeActiveTrigger
@@ -1574,7 +1576,7 @@ const useCollectorMutation = () => {
   const {
     log,
     error
-  } = useLogging();
+  } = useLogging$1();
   const {
     appId
   } = useFingerprint();
@@ -1583,11 +1585,6 @@ const useCollectorMutation = () => {
     session
   } = useVisitor();
   const requestHost = useHostname();
-  console.log('appid', {
-    appId,
-    visitor,
-    session
-  });
   return useMutation(data => {
     return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), {
       ...data,
@@ -2501,7 +2498,7 @@ const StandardModal = ({
   var _trigger$data, _trigger$data2, _trigger$data3;
   const {
     error
-  } = useLogging();
+  } = useLogging$1();
   const isModalFullyClickable = getIsModalFullyClickable({
     trigger
   });
@@ -3480,16 +3477,6 @@ const createHandlersSlice = (set, get) => ({
   }
 });
 
-const noDebugNoLogging = {
-  log: (...message) => {},
-  warn: (...message) => {},
-  error: (...message) => {},
-  info: (...message) => {}
-};
-const createLoggingSlice = (_set, _get) => ({
-  logging: noDebugNoLogging
-});
-
 const createMutualSlice = (set, get) => ({
   set,
   get,
@@ -3541,12 +3528,26 @@ const createPagetriggersSlice = (set, get) => ({
   }
 });
 
-const useDifiStore = create((...a) => ({
-  ...createPagetriggersSlice(...a),
-  ...createConfigSlice(...a),
-  ...createMutualSlice(...a),
-  ...createLoggingSlice(),
-  ...createHandlersSlice(...a)
+const createVisitorSlice = (set, _get) => ({
+  visitor: {},
+  setVisitor: partialVisitor => set(prev => ({
+    visitor: {
+      ...prev.visitor,
+      ...partialVisitor
+    }
+  })),
+  session: {},
+  setSession: updatedSession => set({
+    session: updatedSession
+  })
+});
+
+const useDifiStore = create((...beautifulSugar) => ({
+  ...createPagetriggersSlice(...beautifulSugar),
+  ...createConfigSlice(...beautifulSugar),
+  ...createMutualSlice(...beautifulSugar),
+  ...createHandlersSlice(...beautifulSugar),
+  ...createVisitorSlice(...beautifulSugar)
 }));
 const useStore = () => useDifiStore(s => s);
 
@@ -3565,7 +3566,7 @@ function useCollinsBookingComplete() {
   } = useMixpanel();
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   const brand = useBrand();
   const checkCollinsBookingComplete = React__default.useCallback(() => {
     log('useCollinsBookingComplete: checking for Collins booking complete');
@@ -3611,7 +3612,7 @@ function useButtonCollector() {
   } = useVisitor();
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   const {
     trackEvent
   } = useMixpanel();
@@ -3735,7 +3736,7 @@ const useConversions = () => {
 const useExitIntentDelay = (delay = 0) => {
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   const [hasDelayPassed, setHasDelayPassed] = useState(false);
   useEffect(() => {
     log(`Exit intents are suspended because of initiation delay of ${delay}ms`);
@@ -3758,7 +3759,7 @@ function useFormCollector() {
   } = useVisitor();
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   const {
     trackEvent
   } = useMixpanel();
@@ -3842,7 +3843,7 @@ function useTrackIntentlyModal({
   const {
     log,
     error
-  } = useLogging();
+  } = useLogging$1();
   const brand = useBrand();
   useEffect(() => {
     if (!initiated) return;
@@ -3903,7 +3904,7 @@ const useRemoveIntently = ({
 }) => {
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   const brand = useBrand();
   useEffect(() => {
     if (intently) return;
@@ -3946,7 +3947,7 @@ const useRunOnPathChange = (func, config) => {
   const [lastCollectedHref, setLastCollectedHref] = useState('');
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   const run = React__default.useCallback(() => {
     if (config !== null && config !== void 0 && config.skip) return;
     if (!location.href) return;
@@ -3969,7 +3970,7 @@ function useTriggerDelay() {
   const idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
   const {
     log
-  } = useLogging();
+  } = useLogging$1();
   const startCooldown = React__default.useCallback(() => {
     const currentTimeStamp = Number(new Date());
     setLastTriggerTimeStamp(currentTimeStamp);
@@ -4015,7 +4016,7 @@ function CollectorProvider({
   const {
     log,
     error
-  } = useLogging();
+  } = useLogging$1();
   const {
     initialDelay,
     exitIntentTriggers,
@@ -4241,7 +4242,7 @@ function CollectorProvider({
       log('CollectorProvider: user is in Intently cohort');
       setIntently(true);
     }
-  }, [log, set, getIdleStatusDelay, setIncompleteTriggers, setConversions, visitor.cohort, setVisitor, pageTriggers, setIntently]);
+  }, [log, set, getIdleStatusDelay, setIncompleteTriggers, setConversions, visitor, setVisitor, pageTriggers, setIntently]);
   useEffect(() => {
     if (!mixpanelBooted) return;
     if (hasVisitorIDInURL()) {
@@ -4288,7 +4289,7 @@ function CollectorProvider({
     }).catch(err => {
       error('failed to store collected data', err);
     });
-  }, [visitor.id, brand, log, collect, trackEvent, error, collectorCallback, setIntently]);
+  }, [visitor, brand, log, collect, trackEvent, error, collectorCallback, setIntently]);
   const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
     const intervalId = setInterval(() => {
       const inputs = document.querySelectorAll(configuredSelector);
