@@ -1,16 +1,24 @@
+/* eslint-disable require-jsdoc */
+
 import React from 'react'
 import { useEntireStore } from '../beautifulSugar/store'
 import { CollectorVisitorResponse } from '../client/types'
 import { useLogging } from '../hooks/useLogging'
+import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { updateCookie } from '../visitors/bootstrap'
 
 const useCollectorCallback = () => {
-  // needs:
-  //    conversions
-  //    setIdleTimeout
-  //    intently
+  const { getIdleStatusDelay } = useTriggerDelay()
 
-  const { setVisitor, set, setIncompleteTriggers, visitor } = useEntireStore()
+  const {
+    idleTime: { setIdleTimeout },
+    setVisitor,
+    set,
+    setIncompleteTriggers,
+    visitor,
+    // intently: { setIntently },
+    conversions: { setConversions }
+  } = useEntireStore()
   const { log } = useLogging()
 
   const collectorCallback = React.useCallback(
@@ -43,23 +51,24 @@ const useCollectorCallback = () => {
       if (!payload.intently) {
         // remove intently overlay here
         log('CollectorProvider: user is in Fingerprint cohort')
-        setIntently(false)
+        // setIntently(false)
       } else {
         // show intently overlay here
         log('CollectorProvider: user is in Intently cohort')
-        setIntently(true)
+        // setIntently(true)
       }
+      return response
     },
     [
       log,
       set,
+      setIdleTimeout,
       getIdleStatusDelay,
       setIncompleteTriggers,
       setConversions,
-      visitor,
-      setVisitor,
-      pageTriggers,
-      setIntently
+      visitor.cohort,
+      setVisitor
+      // setIntently
     ]
   )
 

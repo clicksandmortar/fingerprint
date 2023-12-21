@@ -8,5 +8,9 @@ export declare type PageTriggersSlice = {
     setPageTriggers: (triggers: Trigger[]) => void;
     removePageTrigger: (id: Trigger['id']) => void;
     removeActiveTrigger: (id: Trigger['id']) => void;
+    setDisplayedTriggerByInvocation: (invocation: Trigger['invocation'], shouldAllowMultipleSimultaneous?: boolean) => void;
+    getIsBehaviourVisible: (type: Trigger['behaviour']) => boolean;
+    setActiveTrigger: (trigger: Trigger) => void;
+    getCombinedTriggers: () => Trigger[];
 };
 export declare const createPagetriggersSlice: StateCreator<PageTriggersSlice, [], [], PageTriggersSlice>;

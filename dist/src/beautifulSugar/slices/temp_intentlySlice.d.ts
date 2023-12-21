@@ -7,7 +7,3 @@ export declare type IntentlySlice = {
     };
 };
 export declare const createMutualSlice: StateCreator<DifiStore, [], [], IntentlySlice>;
-export declare const useIntentlyStore: () => {
-    isIntently: boolean;
-    setIntently: (intently: boolean) => void;
-} & import("zustand/esm/vanilla").StoreApi<DifiStore>;

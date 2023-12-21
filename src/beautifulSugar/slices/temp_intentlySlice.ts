@@ -1,10 +1,10 @@
 import { StateCreator } from 'zustand'
-import { DifiStore, useDifiStore } from '../store'
+import { DifiStore } from '../store'
 import { Get, Set } from '../types'
 
 export type IntentlySlice = {
   intently: {
-    isIntently: boolean
+    intently: boolean
     setIntently: (intently: boolean) => void
   }
 }
@@ -16,12 +16,15 @@ export const createMutualSlice: StateCreator<
   IntentlySlice
 > = (set: Set, _get: Get) => ({
   intently: {
-    isIntently: true,
-    setIntently: (intently: boolean) => {
+    intently: true,
+    setIntently: (val: boolean) => {
       set((prev) => ({
-        intently: { ...prev.intently, isIntently: intently }
+        ...prev,
+        intently: {
+          ...prev.intently,
+          intently: val
+        }
       }))
     }
   }
 })
-export const useIntentlyStore = () => useDifiStore((s) => s.intently)

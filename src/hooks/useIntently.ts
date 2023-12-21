@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useIntentlyStore } from '../beautifulSugar/slices/temp_intentlySlice'
+import { useEntireStore } from '../beautifulSugar/store'
 import { SupportedBrand } from '../utils/brand'
 import { useBrand } from './useBrandConfig'
 import { useLogging } from './useLogging'
@@ -151,10 +151,12 @@ const useRemoveIntently = ({ intently }: IntentlyProps) => {
 }
 
 export function useIntently() {
-  const { isIntently: intently } = useIntentlyStore()
+  const {
+    // intently: { intently }
+  } = useEntireStore()
 
-  useRemoveIntently({ intently })
-  useTrackIntentlyModal({ intently })
+  useRemoveIntently({ intently: false })
+  useTrackIntentlyModal({ intently: false })
 }
 
 export default useIntently

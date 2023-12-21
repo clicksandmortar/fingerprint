@@ -1,19 +1,22 @@
 /* eslint-disable max-lines */
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState } from 'react'
+import { useVisitor } from '../beautifulSugar/slices/visitorSlice'
 import { useCollectorMutation } from '../hooks/api/useCollectorMutation'
 import { useLogging } from '../hooks/useLogging'
 import { useTracking } from '../hooks/useTracking'
+import useCollectorCallback from './useCollectorCallback'
 
-type Props = {}
-
-const useWatchers = (props: Props) => {
+const useWatchers = () => {
   const { trackEvent } = useTracking()
-  const { collect } = useCollectorMutation()
-  const { log } = useLogging()
+  const { mutateAsync: collect } = useCollectorMutation()
+  const visitor = useVisitor()
+  const { error } = useLogging()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
+  const collectorCallback = useCollectorCallback()
+
   const registerWatcher = React.useCallback(
     (configuredSelector: string, configuredSearch: string) => {
       const intervalId = setInterval(() => {
@@ -44,10 +47,6 @@ const useWatchers = (props: Props) => {
                 }
               ]
             })
-              .then(collectorCallback)
-              .catch((err) => {
-                error('failed to store collected data', err)
-              })
             // unregister the watcher when the element is found
             clearInterval(intervalId)
           }
@@ -56,7 +55,7 @@ const useWatchers = (props: Props) => {
 
       return intervalId
     },
-    [collect, collectorCallback, error, foundWatchers, trackEvent]
+    [collectorCallback, error, foundWatchers, trackEvent]
   )
   useEffect(() => {
     if (!visitor.id) return

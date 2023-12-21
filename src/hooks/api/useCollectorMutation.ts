@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { CollectorUpdate } from '../../client/types'
+import useCollectorCallback from '../../context/useCollectorCallback'
 import { deviceInfo } from '../../utils/device'
 import { hostname, request } from '../../utils/http'
 import { useVisitor } from '../init/useInitVisitor'
@@ -13,6 +14,8 @@ export const useCollectorMutation = () => {
   const { visitor, session } = useVisitor()
 
   const requestHost = useHostname()
+
+  const collectorCallback = useCollectorCallback()
 
   return useMutation<Response, unknown, CollectorUpdate, unknown>(
     (data: CollectorUpdate) => {
@@ -37,7 +40,7 @@ export const useCollectorMutation = () => {
     {
       // TODO: merge this and collecor callback into one thing when we no longer require
       // setting intently - thats the only differentiator between the callbacks
-      onSuccess: () => {}
+      onSuccess: collectorCallback
     }
   )
 }

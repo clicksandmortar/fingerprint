@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
+import { useEntireStore } from '../../beautifulSugar/store'
 import { BannerTrigger } from '../../behaviours/Banner/Banner.types'
 import { DataCaptureTrigger } from '../../behaviours/Modal/Modal.types'
 import { Trigger } from '../../client/types'
@@ -9,7 +10,6 @@ import { getPagePayload } from '../../utils/page'
 import { updateCookie } from '../../visitors/bootstrap'
 import { useVisitor } from '../init/useInitVisitor'
 import { useBrand } from '../useBrandConfig'
-import { useCollector } from '../useCollector'
 import { useFingerprint } from '../useFingerprint'
 import { useLogging } from '../useLogging'
 import { useTracking } from '../useTracking'
@@ -18,8 +18,11 @@ export const useSeenMutation = () => {
   const { log, error } = useLogging()
   const { appId } = useFingerprint()
   const { trackEvent } = useTracking()
-  const { setPageTriggers, setIncompleteTriggers, setConversions } =
-    useCollector()
+  const {
+    setPageTriggers,
+    setIncompleteTriggers,
+    conversions: { setConversions }
+  } = useEntireStore()
 
   const { visitor, setVisitor } = useVisitor()
   const brand = useBrand()

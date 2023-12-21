@@ -1,3 +1,2 @@
-declare type Props = {};
-declare const useWatchers: (props: Props) => void;
+declare const useWatchers: () => void;
 export default useWatchers;

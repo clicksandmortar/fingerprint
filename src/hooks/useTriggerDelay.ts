@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useIdleTime } from '../beautifulSugar/slices/idleTimeSlice'
 import { useTriggerConfig } from './useBrandConfig'
 import { useLogging } from './useLogging'
 
 export function useTriggerDelay() {
-  const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState<
-    number | null
-  >(null)
+  const { lastTriggerTimeStamp, setLastTriggerTimeStamp } = useIdleTime()
 
   const triggerConfig = useTriggerConfig()
   const cooldownMs = triggerConfig.triggerCooldownSecs * 1000

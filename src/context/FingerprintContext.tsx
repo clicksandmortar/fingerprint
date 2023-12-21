@@ -7,12 +7,15 @@ import { LEGACY_FingerprintConfig } from '../client/types'
 import { useInitSession } from '../hooks/init/useInitSession'
 import { useTrackingInit } from '../hooks/init/useInitTracking'
 import { useInitVisitor } from '../hooks/init/useInitVisitor'
+import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
 import useButtonCollector from '../hooks/useButtonCollector'
 import { useConsentCheck } from '../hooks/useConsentCheck'
+import useConversions from '../hooks/useConversions'
 import useFormCollector from '../hooks/useFormCollector'
 import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
 import useIntently from '../hooks/useIntently'
 import { CollectorProvider } from './CollectorContext'
+import useWatchers from './useWatchers'
 
 const queryClient = new QueryClient()
 
@@ -71,6 +74,9 @@ export const Provider = (props: FingerprintProviderProps) => {
   useFormCollector()
   useButtonCollector()
   useIntently()
+  useWatchers()
+  useConversions()
+  useCollinsBookingComplete()
 
   const consentGiven = useConsentCheck(consent, consentCallback)
 

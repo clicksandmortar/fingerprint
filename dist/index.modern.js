@@ -1,7 +1,6 @@
-import React__default, { useEffect, useContext, useState, useMemo, useRef, memo, createElement, useCallback, createContext } from 'react';
+import React__default, { useEffect, useState, useMemo, useRef, memo, createElement, useCallback, createContext } from 'react';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
-import { create } from 'zustand';
 import ReactDOM from 'react-dom';
 import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { isMobile } from 'react-device-detect';
@@ -13,6 +12,544 @@ import transcend from 'lodash.get';
 import { useForm } from 'react-hook-form';
 import uniqueBy from 'lodash.uniqby';
 import { ErrorBoundary } from 'react-error-boundary';
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var vanilla_1 = createCommonjsModule(function (module, exports) {
+
+var createStoreImpl = function createStoreImpl(createState) {
+  var state;
+  var listeners = new Set();
+  var setState = function setState(partial, replace) {
+    var nextState = typeof partial === 'function' ? partial(state) : partial;
+    if (!Object.is(nextState, state)) {
+      var _previousState = state;
+      state = (replace != null ? replace : typeof nextState !== 'object' || nextState === null) ? nextState : Object.assign({}, state, nextState);
+      listeners.forEach(function (listener) {
+        return listener(state, _previousState);
+      });
+    }
+  };
+  var getState = function getState() {
+    return state;
+  };
+  var subscribe = function subscribe(listener) {
+    listeners.add(listener);
+    return function () {
+      return listeners.delete(listener);
+    };
+  };
+  var destroy = function destroy() {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[DEPRECATED] The `destroy` method will be unsupported in a future version. Instead use unsubscribe function returned by subscribe. Everything will be garbage-collected if store is garbage-collected.');
+    }
+    listeners.clear();
+  };
+  var api = {
+    setState: setState,
+    getState: getState,
+    subscribe: subscribe,
+    destroy: destroy
+  };
+  state = createState(setState, getState, api);
+  return api;
+};
+var createStore = function createStore(createState) {
+  return createState ? createStoreImpl(createState) : createStoreImpl;
+};
+var vanilla = (function (createState) {
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn("[DEPRECATED] Default export is deprecated. Instead use import { createStore } from 'zustand/vanilla'.");
+  }
+  return createStore(createState);
+});
+
+exports.createStore = createStore;
+exports.default = vanilla;
+
+module.exports = vanilla;
+module.exports.createStore = createStore;
+exports.default = module.exports;
+});
+
+function h(a,b){return a===b&&(0!==a||1/a===1/b)||a!==a&&b!==b}var k="function"===typeof Object.is?Object.is:h,l=React__default.useState,m=React__default.useEffect,n=React__default.useLayoutEffect,p=React__default.useDebugValue;function q(a,b){var d=b(),f=l({inst:{value:d,getSnapshot:b}}),c=f[0].inst,g=f[1];n(function(){c.value=d;c.getSnapshot=b;r(c)&&g({inst:c});},[a,d,b]);m(function(){r(c)&&g({inst:c});return a(function(){r(c)&&g({inst:c});})},[a]);p(d);return d}
+function r(a){var b=a.getSnapshot;a=a.value;try{var d=b();return !k(a,d)}catch(f){return !0}}function t(a,b){return b()}var u="undefined"===typeof window||"undefined"===typeof window.document||"undefined"===typeof window.document.createElement?t:q;var useSyncExternalStore=void 0!==React__default.useSyncExternalStore?React__default.useSyncExternalStore:u;
+
+var useSyncExternalStoreShim_production_min = {
+	useSyncExternalStore: useSyncExternalStore
+};
+
+var useSyncExternalStoreShim_development = createCommonjsModule(function (module, exports) {
+
+if (process.env.NODE_ENV !== "production") {
+  (function() {
+
+/* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
+if (
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined' &&
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart ===
+    'function'
+) {
+  __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
+}
+          var React = React__default;
+
+var ReactSharedInternals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+
+function error(format) {
+  {
+    {
+      for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
+      }
+
+      printWarning('error', format, args);
+    }
+  }
+}
+
+function printWarning(level, format, args) {
+  // When changing this logic, you might want to also
+  // update consoleWithStackDev.www.js as well.
+  {
+    var ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
+    var stack = ReactDebugCurrentFrame.getStackAddendum();
+
+    if (stack !== '') {
+      format += '%s';
+      args = args.concat([stack]);
+    } // eslint-disable-next-line react-internal/safe-string-coercion
+
+
+    var argsWithFormat = args.map(function (item) {
+      return String(item);
+    }); // Careful: RN currently depends on this prefix
+
+    argsWithFormat.unshift('Warning: ' + format); // We intentionally don't use spread (or .apply) directly because it
+    // breaks IE9: https://github.com/facebook/react/issues/13610
+    // eslint-disable-next-line react-internal/no-production-logging
+
+    Function.prototype.apply.call(console[level], console, argsWithFormat);
+  }
+}
+
+/**
+ * inlined Object.is polyfill to avoid requiring consumers ship their own
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+ */
+function is(x, y) {
+  return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y // eslint-disable-line no-self-compare
+  ;
+}
+
+var objectIs = typeof Object.is === 'function' ? Object.is : is;
+
+// dispatch for CommonJS interop named imports.
+
+var useState = React.useState,
+    useEffect = React.useEffect,
+    useLayoutEffect = React.useLayoutEffect,
+    useDebugValue = React.useDebugValue;
+var didWarnOld18Alpha = false;
+var didWarnUncachedGetSnapshot = false; // Disclaimer: This shim breaks many of the rules of React, and only works
+// because of a very particular set of implementation details and assumptions
+// -- change any one of them and it will break. The most important assumption
+// is that updates are always synchronous, because concurrent rendering is
+// only available in versions of React that also have a built-in
+// useSyncExternalStore API. And we only use this shim when the built-in API
+// does not exist.
+//
+// Do not assume that the clever hacks used by this hook also work in general.
+// The point of this shim is to replace the need for hacks by other libraries.
+
+function useSyncExternalStore(subscribe, getSnapshot, // Note: The shim does not use getServerSnapshot, because pre-18 versions of
+// React do not expose a way to check if we're hydrating. So users of the shim
+// will need to track that themselves and return the correct value
+// from `getSnapshot`.
+getServerSnapshot) {
+  {
+    if (!didWarnOld18Alpha) {
+      if (React.startTransition !== undefined) {
+        didWarnOld18Alpha = true;
+
+        error('You are using an outdated, pre-release alpha of React 18 that ' + 'does not support useSyncExternalStore. The ' + 'use-sync-external-store shim will not work correctly. Upgrade ' + 'to a newer pre-release.');
+      }
+    }
+  } // Read the current snapshot from the store on every render. Again, this
+  // breaks the rules of React, and only works here because of specific
+  // implementation details, most importantly that updates are
+  // always synchronous.
+
+
+  var value = getSnapshot();
+
+  {
+    if (!didWarnUncachedGetSnapshot) {
+      var cachedValue = getSnapshot();
+
+      if (!objectIs(value, cachedValue)) {
+        error('The result of getSnapshot should be cached to avoid an infinite loop');
+
+        didWarnUncachedGetSnapshot = true;
+      }
+    }
+  } // Because updates are synchronous, we don't queue them. Instead we force a
+  // re-render whenever the subscribed state changes by updating an some
+  // arbitrary useState hook. Then, during render, we call getSnapshot to read
+  // the current value.
+  //
+  // Because we don't actually use the state returned by the useState hook, we
+  // can save a bit of memory by storing other stuff in that slot.
+  //
+  // To implement the early bailout, we need to track some things on a mutable
+  // object. Usually, we would put that in a useRef hook, but we can stash it in
+  // our useState hook instead.
+  //
+  // To force a re-render, we call forceUpdate({inst}). That works because the
+  // new object always fails an equality check.
+
+
+  var _useState = useState({
+    inst: {
+      value: value,
+      getSnapshot: getSnapshot
+    }
+  }),
+      inst = _useState[0].inst,
+      forceUpdate = _useState[1]; // Track the latest getSnapshot function with a ref. This needs to be updated
+  // in the layout phase so we can access it during the tearing check that
+  // happens on subscribe.
+
+
+  useLayoutEffect(function () {
+    inst.value = value;
+    inst.getSnapshot = getSnapshot; // Whenever getSnapshot or subscribe changes, we need to check in the
+    // commit phase if there was an interleaved mutation. In concurrent mode
+    // this can happen all the time, but even in synchronous mode, an earlier
+    // effect may have mutated the store.
+
+    if (checkIfSnapshotChanged(inst)) {
+      // Force a re-render.
+      forceUpdate({
+        inst: inst
+      });
+    }
+  }, [subscribe, value, getSnapshot]);
+  useEffect(function () {
+    // Check for changes right before subscribing. Subsequent changes will be
+    // detected in the subscription handler.
+    if (checkIfSnapshotChanged(inst)) {
+      // Force a re-render.
+      forceUpdate({
+        inst: inst
+      });
+    }
+
+    var handleStoreChange = function () {
+      // TODO: Because there is no cross-renderer API for batching updates, it's
+      // up to the consumer of this library to wrap their subscription event
+      // with unstable_batchedUpdates. Should we try to detect when this isn't
+      // the case and print a warning in development?
+      // The store changed. Check if the snapshot changed since the last time we
+      // read from the store.
+      if (checkIfSnapshotChanged(inst)) {
+        // Force a re-render.
+        forceUpdate({
+          inst: inst
+        });
+      }
+    }; // Subscribe to the store and return a clean-up function.
+
+
+    return subscribe(handleStoreChange);
+  }, [subscribe]);
+  useDebugValue(value);
+  return value;
+}
+
+function checkIfSnapshotChanged(inst) {
+  var latestGetSnapshot = inst.getSnapshot;
+  var prevValue = inst.value;
+
+  try {
+    var nextValue = latestGetSnapshot();
+    return !objectIs(prevValue, nextValue);
+  } catch (error) {
+    return true;
+  }
+}
+
+function useSyncExternalStore$1(subscribe, getSnapshot, getServerSnapshot) {
+  // Note: The shim does not use getServerSnapshot, because pre-18 versions of
+  // React do not expose a way to check if we're hydrating. So users of the shim
+  // will need to track that themselves and return the correct value
+  // from `getSnapshot`.
+  return getSnapshot();
+}
+
+var canUseDOM = !!(typeof window !== 'undefined' && typeof window.document !== 'undefined' && typeof window.document.createElement !== 'undefined');
+
+var isServerEnvironment = !canUseDOM;
+
+var shim = isServerEnvironment ? useSyncExternalStore$1 : useSyncExternalStore;
+var useSyncExternalStore$2 = React.useSyncExternalStore !== undefined ? React.useSyncExternalStore : shim;
+
+exports.useSyncExternalStore = useSyncExternalStore$2;
+          /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
+if (
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined' &&
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop ===
+    'function'
+) {
+  __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(new Error());
+}
+        
+  })();
+}
+});
+
+var shim = createCommonjsModule(function (module) {
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = useSyncExternalStoreShim_production_min;
+} else {
+  module.exports = useSyncExternalStoreShim_development;
+}
+});
+
+function p$1(a,b){return a===b&&(0!==a||1/a===1/b)||a!==a&&b!==b}var q$1="function"===typeof Object.is?Object.is:p$1,r$1=shim.useSyncExternalStore,t$1=React__default.useRef,u$1=React__default.useEffect,v=React__default.useMemo,w=React__default.useDebugValue;
+var useSyncExternalStoreWithSelector=function(a,b,e,l,g){var c=t$1(null);if(null===c.current){var f={hasValue:!1,value:null};c.current=f;}else f=c.current;c=v(function(){function a(a){if(!c){c=!0;d=a;a=l(a);if(void 0!==g&&f.hasValue){var b=f.value;if(g(b,a))return k=b}return k=a}b=k;if(q$1(d,a))return b;var e=l(a);if(void 0!==g&&g(b,e))return b;d=a;return k=e}var c=!1,d,k,m=void 0===e?null:e;return [function(){return a(b())},null===m?void 0:function(){return a(m())}]},[b,e,l,g]);var d=r$1(a,c[0],c[1]);
+u$1(function(){f.hasValue=!0;f.value=d;},[d]);w(d);return d};
+
+var withSelector_production_min = {
+	useSyncExternalStoreWithSelector: useSyncExternalStoreWithSelector
+};
+
+var withSelector_development = createCommonjsModule(function (module, exports) {
+
+if (process.env.NODE_ENV !== "production") {
+  (function() {
+
+/* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
+if (
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined' &&
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart ===
+    'function'
+) {
+  __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
+}
+          var React = React__default;
+var shim$1 = shim;
+
+/**
+ * inlined Object.is polyfill to avoid requiring consumers ship their own
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+ */
+function is(x, y) {
+  return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y // eslint-disable-line no-self-compare
+  ;
+}
+
+var objectIs = typeof Object.is === 'function' ? Object.is : is;
+
+var useSyncExternalStore = shim$1.useSyncExternalStore;
+
+// for CommonJS interop.
+
+var useRef = React.useRef,
+    useEffect = React.useEffect,
+    useMemo = React.useMemo,
+    useDebugValue = React.useDebugValue; // Same as useSyncExternalStore, but supports selector and isEqual arguments.
+
+function useSyncExternalStoreWithSelector(subscribe, getSnapshot, getServerSnapshot, selector, isEqual) {
+  // Use this to track the rendered snapshot.
+  var instRef = useRef(null);
+  var inst;
+
+  if (instRef.current === null) {
+    inst = {
+      hasValue: false,
+      value: null
+    };
+    instRef.current = inst;
+  } else {
+    inst = instRef.current;
+  }
+
+  var _useMemo = useMemo(function () {
+    // Track the memoized state using closure variables that are local to this
+    // memoized instance of a getSnapshot function. Intentionally not using a
+    // useRef hook, because that state would be shared across all concurrent
+    // copies of the hook/component.
+    var hasMemo = false;
+    var memoizedSnapshot;
+    var memoizedSelection;
+
+    var memoizedSelector = function (nextSnapshot) {
+      if (!hasMemo) {
+        // The first time the hook is called, there is no memoized result.
+        hasMemo = true;
+        memoizedSnapshot = nextSnapshot;
+
+        var _nextSelection = selector(nextSnapshot);
+
+        if (isEqual !== undefined) {
+          // Even if the selector has changed, the currently rendered selection
+          // may be equal to the new selection. We should attempt to reuse the
+          // current value if possible, to preserve downstream memoizations.
+          if (inst.hasValue) {
+            var currentSelection = inst.value;
+
+            if (isEqual(currentSelection, _nextSelection)) {
+              memoizedSelection = currentSelection;
+              return currentSelection;
+            }
+          }
+        }
+
+        memoizedSelection = _nextSelection;
+        return _nextSelection;
+      } // We may be able to reuse the previous invocation's result.
+
+
+      // We may be able to reuse the previous invocation's result.
+      var prevSnapshot = memoizedSnapshot;
+      var prevSelection = memoizedSelection;
+
+      if (objectIs(prevSnapshot, nextSnapshot)) {
+        // The snapshot is the same as last time. Reuse the previous selection.
+        return prevSelection;
+      } // The snapshot has changed, so we need to compute a new selection.
+
+
+      // The snapshot has changed, so we need to compute a new selection.
+      var nextSelection = selector(nextSnapshot); // If a custom isEqual function is provided, use that to check if the data
+      // has changed. If it hasn't, return the previous selection. That signals
+      // to React that the selections are conceptually equal, and we can bail
+      // out of rendering.
+
+      // If a custom isEqual function is provided, use that to check if the data
+      // has changed. If it hasn't, return the previous selection. That signals
+      // to React that the selections are conceptually equal, and we can bail
+      // out of rendering.
+      if (isEqual !== undefined && isEqual(prevSelection, nextSelection)) {
+        return prevSelection;
+      }
+
+      memoizedSnapshot = nextSnapshot;
+      memoizedSelection = nextSelection;
+      return nextSelection;
+    }; // Assigning this to a constant so that Flow knows it can't change.
+
+
+    // Assigning this to a constant so that Flow knows it can't change.
+    var maybeGetServerSnapshot = getServerSnapshot === undefined ? null : getServerSnapshot;
+
+    var getSnapshotWithSelector = function () {
+      return memoizedSelector(getSnapshot());
+    };
+
+    var getServerSnapshotWithSelector = maybeGetServerSnapshot === null ? undefined : function () {
+      return memoizedSelector(maybeGetServerSnapshot());
+    };
+    return [getSnapshotWithSelector, getServerSnapshotWithSelector];
+  }, [getSnapshot, getServerSnapshot, selector, isEqual]),
+      getSelection = _useMemo[0],
+      getServerSelection = _useMemo[1];
+
+  var value = useSyncExternalStore(subscribe, getSelection, getServerSelection);
+  useEffect(function () {
+    inst.hasValue = true;
+    inst.value = value;
+  }, [value]);
+  useDebugValue(value);
+  return value;
+}
+
+exports.useSyncExternalStoreWithSelector = useSyncExternalStoreWithSelector;
+          /* global __REACT_DEVTOOLS_GLOBAL_HOOK__ */
+if (
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined' &&
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop ===
+    'function'
+) {
+  __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(new Error());
+}
+        
+  })();
+}
+});
+
+var withSelector = createCommonjsModule(function (module) {
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = withSelector_production_min;
+} else {
+  module.exports = withSelector_development;
+}
+});
+
+var zustand = createCommonjsModule(function (module, exports) {
+
+
+
+
+
+var useDebugValue = React__default.useDebugValue;
+var useSyncExternalStoreWithSelector = withSelector.useSyncExternalStoreWithSelector;
+var didWarnAboutEqualityFn = false;
+function useStore(api, selector, equalityFn) {
+  if (selector === void 0) {
+    selector = api.getState;
+  }
+  if (process.env.NODE_ENV !== 'production' && equalityFn && !didWarnAboutEqualityFn) {
+    console.warn("[DEPRECATED] Use `createWithEqualityFn` instead of `create` or use `useStoreWithEqualityFn` instead of `useStore`. They can be imported from 'zustand/traditional'. https://github.com/pmndrs/zustand/discussions/1937");
+    didWarnAboutEqualityFn = true;
+  }
+  var slice = useSyncExternalStoreWithSelector(api.subscribe, api.getState, api.getServerState || api.getState, selector, equalityFn);
+  useDebugValue(slice);
+  return slice;
+}
+var createImpl = function createImpl(createState) {
+  if (process.env.NODE_ENV !== 'production' && typeof createState !== 'function') {
+    console.warn("[DEPRECATED] Passing a vanilla store will be unsupported in a future version. Instead use `import { useStore } from 'zustand'`.");
+  }
+  var api = typeof createState === 'function' ? vanilla_1.createStore(createState) : createState;
+  var useBoundStore = function useBoundStore(selector, equalityFn) {
+    return useStore(api, selector, equalityFn);
+  };
+  Object.assign(useBoundStore, api);
+  return useBoundStore;
+};
+var create = function create(createState) {
+  return createState ? createImpl(createState) : createImpl;
+};
+var react = (function (createState) {
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn("[DEPRECATED] Default export is deprecated. Instead use `import { create } from 'zustand'`.");
+  }
+  return create(createState);
+});
+
+exports.create = create;
+exports.default = react;
+exports.useStore = useStore;
+Object.keys(vanilla_1).forEach(function (k) {
+  if (k !== 'default' && !Object.prototype.hasOwnProperty.call(exports, k)) Object.defineProperty(exports, k, {
+    enumerable: true,
+    get: function () { return vanilla_1[k]; }
+  });
+});
+
+module.exports = react;
+module.exports.create = create;
+module.exports.useStore = useStore;
+module.exports.createStore = vanilla_1.createStore;
+exports.default = module.exports;
+});
+var zustand_1 = zustand.create;
 
 const TEMP_isCNMBrand = () => {
   if (typeof window === 'undefined') return false;
@@ -100,6 +637,18 @@ const createConfigSlice = (set, get) => ({
         }
       };
     });
+  }
+});
+
+const createConversionsSlice = (set, _get) => ({
+  conversions: {
+    conversions: [],
+    setConversions: val => set(prev => ({
+      conversions: {
+        ...prev.conversions,
+        conversions: val
+      }
+    }))
   }
 });
 
@@ -433,10 +982,6 @@ const useBrandColors = () => {
   return useConfig().brand.colors || defaultColors;
 };
 
-const useCollector = () => {
-  return useContext(CollectorContext);
-};
-
 const trackEvent = (event, props, callback) => {
   return mixpanel.track(event, props, callback);
 };
@@ -474,8 +1019,10 @@ const useSeenMutation = () => {
   const {
     setPageTriggers,
     setIncompleteTriggers,
-    setConversions
-  } = useCollector();
+    conversions: {
+      setConversions
+    }
+  } = useEntireStore();
   const {
     visitor,
     setVisitor
@@ -1408,6 +1955,117 @@ var DataCaptureModal$1 = memo(({
   }), document.body);
 });
 
+const createIdleTimeSlice = (set, _get) => ({
+  idleTime: {
+    idleTimeout: 0,
+    setIdleTimeout: val => set(prev => ({
+      idleTime: {
+        ...prev.idleTime,
+        idleTimeout: val
+      }
+    })),
+    lastTriggerTimeStamp: null,
+    setLastTriggerTimeStamp: val => set(prev => ({
+      idleTime: {
+        ...prev.idleTime,
+        lastTriggerTimeStamp: val
+      }
+    }))
+  }
+});
+const useIdleTime = () => useDifiStore(s => s.idleTime);
+
+function useTriggerDelay() {
+  const {
+    lastTriggerTimeStamp,
+    setLastTriggerTimeStamp
+  } = useIdleTime();
+  const triggerConfig = useTriggerConfig();
+  const cooldownMs = triggerConfig.triggerCooldownSecs * 1000;
+  const idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
+  const {
+    log
+  } = useLogging();
+  const startCooldown = React__default.useCallback(() => {
+    const currentTimeStamp = Number(new Date());
+    setLastTriggerTimeStamp(currentTimeStamp);
+  }, [setLastTriggerTimeStamp]);
+  const getRemainingCooldownMs = React__default.useCallback(() => {
+    if (!lastTriggerTimeStamp) return 0;
+    const currentTime = Number(new Date());
+    const remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
+    if (remainingMS < 0) return 0;
+    return remainingMS;
+  }, [lastTriggerTimeStamp, cooldownMs]);
+  const canNextTriggerOccur = React__default.useCallback(() => {
+    return getRemainingCooldownMs() === 0;
+  }, [getRemainingCooldownMs]);
+  const getIdleStatusDelay = React__default.useCallback(() => {
+    const cooldownDelay = getRemainingCooldownMs();
+    const delayAdjustedForCooldown = idleDelay + cooldownDelay;
+    log(`Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + idleDelay ${idleDelay}ms)`);
+    return delayAdjustedForCooldown;
+  }, [idleDelay, getRemainingCooldownMs, log]);
+  return {
+    startCooldown,
+    canNextTriggerOccur,
+    getRemainingCooldownMs,
+    getIdleStatusDelay
+  };
+}
+
+const useCollectorCallback = () => {
+  const {
+    getIdleStatusDelay
+  } = useTriggerDelay();
+  const {
+    idleTime: {
+      setIdleTimeout
+    },
+    setVisitor,
+    set,
+    setIncompleteTriggers,
+    visitor,
+    conversions: {
+      setConversions
+    }
+  } = useEntireStore();
+  const {
+    log
+  } = useLogging();
+  const collectorCallback = React__default.useCallback(async response => {
+    var _payload$identifiers;
+    const payload = await response.json();
+    log('Sent collector data, retrieved:', payload);
+    const retrievedUserId = (_payload$identifiers = payload.identifiers) === null || _payload$identifiers === void 0 ? void 0 : _payload$identifiers.main;
+    if (retrievedUserId) {
+      updateCookie(retrievedUserId);
+      setVisitor({
+        id: retrievedUserId
+      });
+    }
+    set(() => ({
+      pageTriggers: (payload === null || payload === void 0 ? void 0 : payload.pageTriggers) || [],
+      config: payload === null || payload === void 0 ? void 0 : payload.config
+    }));
+    setIdleTimeout(getIdleStatusDelay());
+    setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
+    setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
+    const cohort = payload.intently ? 'intently' : 'fingerprint';
+    if (visitor.cohort !== cohort) setVisitor({
+      cohort
+    });
+    log('CollectorProvider: collected data');
+    if (!payload.intently) {
+      log('CollectorProvider: user is in Fingerprint cohort');
+    } else {
+      log('CollectorProvider: user is in Intently cohort');
+    }
+    return response;
+  }, [log, set, setIdleTimeout, getIdleStatusDelay, setIncompleteTriggers, setConversions, visitor.cohort, setVisitor]);
+  return collectorCallback;
+};
+
 const useHostname = () => {
   var _window, _window$location;
   return ((_window = window) === null || _window === void 0 ? void 0 : (_window$location = _window.location) === null || _window$location === void 0 ? void 0 : _window$location.hostname) || '';
@@ -1426,6 +2084,7 @@ const useCollectorMutation = () => {
     session
   } = useVisitor();
   const requestHost = useHostname();
+  const collectorCallback = useCollectorCallback();
   return useMutation(data => {
     return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), {
       ...data,
@@ -1442,7 +2101,7 @@ const useCollectorMutation = () => {
       return err;
     });
   }, {
-    onSuccess: () => {}
+    onSuccess: collectorCallback
   });
 };
 
@@ -3412,6 +4071,52 @@ const createPagetriggersSlice = (set, get) => ({
     const updatedVisibleIncompleteTriggers = visibleTriggersIssuedByIncomplete.filter(trigger => trigger.id !== id);
     setVisibleTriggersIssuedByIncomplete(updatedVisibleIncompleteTriggers);
     removePageTrigger(id);
+  },
+  setDisplayedTriggerByInvocation: (invocation, shouldAllowMultipleSimultaneous = false) => {
+    const {
+      addDisplayedTrigger,
+      getIsBehaviourVisible,
+      getCombinedTriggers
+    } = get();
+    const combinedTriggers = getCombinedTriggers();
+    const invokableTriggers = combinedTriggers.filter(trigger => trigger.invocation === invocation);
+    invokableTriggers.forEach(invokableTrigger => {
+      if (!invokableTrigger) {
+        return;
+      }
+      if (invokableTrigger.behaviour === 'BEHAVIOUR_BANNER') {
+        addDisplayedTrigger(invokableTrigger);
+        return;
+      }
+      if (!shouldAllowMultipleSimultaneous && getIsBehaviourVisible(invokableTrigger.behaviour)) {
+        return;
+      }
+      addDisplayedTrigger(invokableTrigger);
+    });
+  },
+  getCombinedTriggers: () => {
+    return [...get().pageTriggers, ...get().visibleTriggersIssuedByIncomplete];
+  },
+  getIsBehaviourVisible: type => {
+    const {
+      displayedTriggersIds,
+      getCombinedTriggers
+    } = get();
+    const combinedTriggers = getCombinedTriggers();
+    if (displayedTriggersIds.length === 0) return false;
+    if (displayedTriggersIds.find(triggerId => {
+      var _combinedTriggers$fin;
+      return ((_combinedTriggers$fin = combinedTriggers.find(trigger => trigger.id === triggerId)) === null || _combinedTriggers$fin === void 0 ? void 0 : _combinedTriggers$fin.behaviour) === type;
+    })) return true;
+    return false;
+  },
+  setActiveTrigger: trigger => {
+    const {
+      setPageTriggers,
+      setDisplayedTriggerByInvocation
+    } = get();
+    setPageTriggers([trigger]);
+    setDisplayedTriggerByInvocation(trigger.invocation);
   }
 });
 
@@ -3440,152 +4145,20 @@ const createVisitorSlice = (set, _get) => ({
     session: updatedSession
   })
 });
+const useVisitor$1 = () => useDifiStore(state => state.visitor);
 
-const useDifiStore = create((...beautifulSugar) => ({
+const useDifiStore = zustand_1((...beautifulSugar) => ({
   ...createPagetriggersSlice(...beautifulSugar),
   ...createConfigSlice(...beautifulSugar),
   ...createMutualSlice(...beautifulSugar),
   ...createHandlersSlice(...beautifulSugar),
   ...createVisitorSlice(...beautifulSugar),
   ...createTrackingSlice(...beautifulSugar),
-  ...createincompleteTriggersSlice(...beautifulSugar)
+  ...createincompleteTriggersSlice(...beautifulSugar),
+  ...createConversionsSlice(...beautifulSugar),
+  ...createIdleTimeSlice(...beautifulSugar)
 }));
 const useEntireStore = () => useDifiStore(s => s);
-
-const collinBrandsPathConversionMap = {
-  Stonehouse: '/tablebooking/enquiry-form-completed',
-  'All Bar One': '/bookings/dmnc-complete',
-  Sizzling: '/tablebooking/enquiry-form-completed',
-  Ember: '/tablebooking/enquiry-form-completed'
-};
-function useCollinsBookingComplete() {
-  const {
-    trackEvent,
-    state: {
-      initiated
-    }
-  } = useTracking();
-  const {
-    log
-  } = useLogging();
-  const brand = useBrand();
-  const checkCollinsBookingComplete = React__default.useCallback(() => {
-    log('useCollinsBookingComplete: checking for Collins booking complete');
-    if (!initiated) {
-      log('useCollinsBookingComplete, mixpanel not initiated');
-      return;
-    }
-    if (!brand) {
-      log('useCollinsBookingComplete, no brand');
-      return;
-    }
-    const conversionPathForBrand = collinBrandsPathConversionMap[brand];
-    if (!conversionPathForBrand) {
-      log('useCollinsBookingComplete: no path for brand variable');
-      return;
-    }
-    const isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
-    if (!isConversionPath) {
-      log('useCollinsBookingComplete: not a conversion path');
-      return;
-    }
-    log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
-    trackEvent('booking_complete', {});
-  }, [trackEvent, log, brand, initiated]);
-  return {
-    checkCollinsBookingComplete
-  };
-}
-
-const getIsVisible = selector => {
-  const element = document.querySelector(selector);
-  if (!element) return false;
-  if (window.getComputedStyle(element).visibility === 'hidden') return false;
-  if (window.getComputedStyle(element).display === 'none') return false;
-  if (window.getComputedStyle(element).opacity === '0') return false;
-  return true;
-};
-
-const validateSignalChain = signals => {
-  const signalPattern = signals.map(signal => {
-    if (signal.op === 'IsOnPath') {
-      const [operator, route] = signal.parameters;
-      return getFuncByOperator(operator, route)(window.location.pathname);
-    }
-    if (signal.op === 'CanSeeElementOnPage') {
-      const [itemQuerySelector, operator, route] = signal.parameters;
-      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
-      if (!isSignalOnCorrectRoute) return false;
-      const isVisible = getIsVisible(itemQuerySelector);
-      return isVisible;
-    }
-    if (signal.op === 'IsOnDomain') {
-      return window.location.hostname === signal.parameters[0];
-    }
-    return false;
-  });
-  return signalPattern.every(Boolean);
-};
-
-const getFuncByOperator = (operator, compareWith) => {
-  switch (operator) {
-    case 'starts_with':
-      return comparison => {
-        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
-      };
-    case 'contains':
-      return comparison => {
-        return comparison.toLowerCase().includes(compareWith.toLowerCase());
-      };
-    case 'ends_with':
-      return comparison => {
-        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
-      };
-    case 'eq':
-      return comparison => {
-        return comparison.toLowerCase() === compareWith.toLowerCase();
-      };
-    default:
-      return () => {
-        console.error('getOperator: unknown operator', operator);
-        return false;
-      };
-  }
-};
-const scanInterval = 500;
-const useConversions = () => {
-  const [conversions, setConversions] = useState([]);
-  const {
-    mutate: collect
-  } = useCollectorMutation();
-  const removeById = React__default.useCallback(id => {
-    setConversions(prev => {
-      if (!(prev !== null && prev !== void 0 && prev.length)) return prev;
-      return prev.filter(conversion => conversion.identifier !== id);
-    });
-  }, [setConversions]);
-  const scan = React__default.useCallback(() => {
-    conversions.forEach(conversion => {
-      const hasHappened = validateSignalChain(conversion.signals);
-      if (!hasHappened) return;
-      collect({
-        conversion: {
-          id: conversion.identifier
-        }
-      });
-      removeById(conversion.identifier);
-    });
-  }, [collect, conversions, removeById]);
-  useEffect(() => {
-    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
-    const intId = setInterval(scan, scanInterval);
-    return () => clearInterval(intId);
-  }, [scan]);
-  return {
-    conversions,
-    setConversions
-  };
-};
 
 const useExitIntentDelay = (delay = 0) => {
   const {
@@ -3625,42 +4198,6 @@ const useRunOnPathChange = (func, config) => {
   }, [run]);
 };
 
-function useTriggerDelay() {
-  const [lastTriggerTimeStamp, setLastTriggerTimeStamp] = useState(null);
-  const triggerConfig = useTriggerConfig();
-  const cooldownMs = triggerConfig.triggerCooldownSecs * 1000;
-  const idleDelay = triggerConfig.userIdleThresholdSecs * 1000;
-  const {
-    log
-  } = useLogging();
-  const startCooldown = React__default.useCallback(() => {
-    const currentTimeStamp = Number(new Date());
-    setLastTriggerTimeStamp(currentTimeStamp);
-  }, [setLastTriggerTimeStamp]);
-  const getRemainingCooldownMs = React__default.useCallback(() => {
-    if (!lastTriggerTimeStamp) return 0;
-    const currentTime = Number(new Date());
-    const remainingMS = lastTriggerTimeStamp + cooldownMs - currentTime;
-    if (remainingMS < 0) return 0;
-    return remainingMS;
-  }, [lastTriggerTimeStamp, cooldownMs]);
-  const canNextTriggerOccur = React__default.useCallback(() => {
-    return getRemainingCooldownMs() === 0;
-  }, [getRemainingCooldownMs]);
-  const getIdleStatusDelay = React__default.useCallback(() => {
-    const cooldownDelay = getRemainingCooldownMs();
-    const delayAdjustedForCooldown = idleDelay + cooldownDelay;
-    log(`Setting idle delay at ${delayAdjustedForCooldown}ms (cooldown ${cooldownDelay}ms + idleDelay ${idleDelay}ms)`);
-    return delayAdjustedForCooldown;
-  }, [idleDelay, getRemainingCooldownMs, log]);
-  return {
-    startCooldown,
-    canNextTriggerOccur,
-    getRemainingCooldownMs,
-    getIdleStatusDelay
-  };
-}
-
 const getVisitorId = () => {
   if (typeof window === 'undefined') return null;
   const urlParams = new URLSearchParams(window.location.search);
@@ -3681,19 +4218,24 @@ function CollectorProvider({
   const {
     config,
     visitor,
-    setVisitor,
-    pageTriggers,
     displayedTriggersIds,
     setPageTriggers,
-    addDisplayedTrigger,
+    setDisplayedTriggerByInvocation,
     getHandlerForTrigger,
+    getIsBehaviourVisible,
+    setActiveTrigger,
     removeActiveTrigger,
-    set,
+    getCombinedTriggers,
     tracking: {
       initiated: mixpanelBooted
     },
-    intently: {
-      setIntently
+    visibleTriggersIssuedByIncomplete,
+    idleTime: {
+      idleTimeout
+    },
+    setIncompleteTriggers,
+    conversions: {
+      setConversions
     },
     difiProps: {
       defaultHandlers: handlers,
@@ -3704,21 +4246,18 @@ function CollectorProvider({
       booted
     }
   } = useEntireStore();
+  const combinedTriggers = getCombinedTriggers();
   const {
     trackEvent
   } = useTracking();
   const {
     canNextTriggerOccur,
     startCooldown,
-    getRemainingCooldownMs,
-    getIdleStatusDelay
+    getRemainingCooldownMs
   } = useTriggerDelay();
   const {
     mutateAsync: collect
   } = useCollectorMutation();
-  const {
-    checkCollinsBookingComplete
-  } = useCollinsBookingComplete();
   const {
     registerHandler,
     resetState: reRegisterExitIntent
@@ -3728,52 +4267,11 @@ function CollectorProvider({
       daysToExpire: 0
     }
   });
-  const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
-  const [foundWatchers, setFoundWatchers] = useState(new Map());
-  const {
-    setConversions
-  } = useConversions();
   const brand = useBrand();
-  const {
-    setIncompleteTriggers,
-    visibleTriggersIssuedByIncomplete: visibleIncompleteTriggers
-  } = useEntireStore();
-  const combinedTriggers = React__default.useMemo(() => {
-    const _combinedTriggers = [...pageTriggers, ...visibleIncompleteTriggers];
-    return _combinedTriggers;
-  }, [pageTriggers, visibleIncompleteTriggers]);
-  const getIsBehaviourVisible = React__default.useCallback(type => {
-    if (displayedTriggersIds.length === 0) return false;
-    if (displayedTriggersIds.find(triggerId => {
-      var _combinedTriggers$fin;
-      return ((_combinedTriggers$fin = combinedTriggers.find(trigger => trigger.id === triggerId)) === null || _combinedTriggers$fin === void 0 ? void 0 : _combinedTriggers$fin.behaviour) === type;
-    })) return true;
-    return false;
-  }, [displayedTriggersIds, combinedTriggers]);
-  const setDisplayedTriggerByInvocation = React__default.useCallback((invocation, shouldAllowMultipleSimultaneous = false) => {
-    const invokableTriggers = combinedTriggers.filter(trigger => trigger.invocation === invocation);
-    invokableTriggers.forEach(invokableTrigger => {
-      if (!invokableTrigger) {
-        log('CollectorProvider: Trigger not invokable ', invokableTrigger);
-        return;
-      }
-      if (invokableTrigger.behaviour === 'BEHAVIOUR_BANNER') {
-        log('Banners can be stacked up, setting as visible.', invokableTrigger);
-        addDisplayedTrigger(invokableTrigger);
-        return;
-      }
-      if (!shouldAllowMultipleSimultaneous && getIsBehaviourVisible(invokableTrigger.behaviour)) {
-        log('CollectorProvider: Behaviour already visible, not showing trigger', invokableTrigger);
-        return;
-      }
-      log('CollectorProvider: Triggering behaviour', invokableTrigger);
-      addDisplayedTrigger(invokableTrigger);
-    });
-  }, [combinedTriggers, getIsBehaviourVisible, log, addDisplayedTrigger]);
   useEffect(() => {
-    if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
+    if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [visibleIncompleteTriggers, setDisplayedTriggerByInvocation]);
+  }, [visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
   const TriggerComponent = React__default.useCallback(() => {
     if (!displayedTriggersIds) return null;
     const activeTriggers = combinedTriggers.filter(trigger => displayedTriggersIds.includes(trigger.id));
@@ -3810,9 +4308,9 @@ function CollectorProvider({
     });
   }, [displayedTriggersIds, log, handlers, error, getHandlerForTrigger, getIsBehaviourVisible, combinedTriggers]);
   useEffect(() => {
-    if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
+    if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [setDisplayedTriggerByInvocation, visibleIncompleteTriggers]);
+  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
     log('CollectorProvider: attempting to fire idle time trigger');
@@ -3854,37 +4352,6 @@ function CollectorProvider({
     log('CollectorProvider: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
   }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation]);
-  const collectorCallback = React__default.useCallback(async response => {
-    var _payload$identifiers;
-    const payload = await response.json();
-    log('Sent collector data, retrieved:', payload);
-    const retrievedUserId = (_payload$identifiers = payload.identifiers) === null || _payload$identifiers === void 0 ? void 0 : _payload$identifiers.main;
-    if (retrievedUserId) {
-      updateCookie(retrievedUserId);
-      setVisitor({
-        id: retrievedUserId
-      });
-    }
-    set(() => ({
-      pageTriggers: (payload === null || payload === void 0 ? void 0 : payload.pageTriggers) || [],
-      config: payload === null || payload === void 0 ? void 0 : payload.config
-    }));
-    setIdleTimeout(getIdleStatusDelay());
-    setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
-    setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);
-    const cohort = payload.intently ? 'intently' : 'fingerprint';
-    if (visitor.cohort !== cohort) setVisitor({
-      cohort
-    });
-    log('CollectorProvider: collected data');
-    if (!payload.intently) {
-      log('CollectorProvider: user is in Fingerprint cohort');
-      setIntently(false);
-    } else {
-      log('CollectorProvider: user is in Intently cohort');
-      setIntently(true);
-    }
-  }, [log, set, getIdleStatusDelay, setIncompleteTriggers, setConversions, visitor, setVisitor, pageTriggers, setIntently]);
   useEffect(() => {
     if (!mixpanelBooted) return;
     if (hasVisitorIDInURL()) {
@@ -3915,8 +4382,6 @@ function CollectorProvider({
         account: {
           token: hashParams.id_token
         }
-      }).then(collectorCallback).catch(err => {
-        error('failed to store collected data', err);
       });
     }
     collect({
@@ -3924,54 +4389,12 @@ function CollectorProvider({
       referrer: getReferrer() || undefined
     }).then(response => {
       if (response.status === 204) {
-        setIntently(true);
         return;
       }
-      collectorCallback(response);
     }).catch(err => {
       error('failed to store collected data', err);
     });
-  }, [visitor, brand, log, collect, trackEvent, error, collectorCallback, setIntently]);
-  const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
-    const intervalId = setInterval(() => {
-      const inputs = document.querySelectorAll(configuredSelector);
-      let found = false;
-      inputs.forEach(element => {
-        if (configuredSearch === '' && window.getComputedStyle(element).display !== 'none') {
-          found = true;
-        } else if (element.textContent === configuredSearch) {
-          found = true;
-        }
-        if (found && !foundWatchers[configuredSelector]) {
-          trackEvent('booking_complete', {});
-          foundWatchers[configuredSelector] = true;
-          setFoundWatchers(foundWatchers);
-          collect({
-            elements: [{
-              path: window.location.pathname,
-              selector: configuredSelector
-            }]
-          }).then(collectorCallback).catch(err => {
-            error('failed to store collected data', err);
-          });
-          clearInterval(intervalId);
-        }
-      });
-    }, 500);
-    return intervalId;
-  }, [collect, collectorCallback, error, foundWatchers, trackEvent]);
-  useEffect(() => {
-    if (!visitor.id) return;
-    const intervalIds = [registerWatcher('.stage-5', '')];
-    return () => {
-      intervalIds.forEach(intervalId => clearInterval(intervalId));
-    };
-  }, [registerWatcher, visitor]);
-  const setActiveTrigger = React__default.useCallback(trigger => {
-    log('CollectorProvider: manually setting trigger', trigger);
-    setPageTriggers([trigger]);
-    setDisplayedTriggerByInvocation(trigger.invocation);
-  }, [log, setDisplayedTriggerByInvocation, setPageTriggers]);
+  }, [visitor, brand, log, collect, trackEvent, error]);
   const collectorContextVal = React__default.useMemo(() => ({
     setPageTriggers,
     removeActiveTrigger,
@@ -3982,11 +4405,6 @@ function CollectorProvider({
   useEffect(() => {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
-  useRunOnPathChange(checkCollinsBookingComplete, {
-    skip: !booted,
-    delay: 0,
-    name: 'checkCollinsBookingComplete'
-  });
   useRunOnPathChange(collectAndApplyVisitorInfo, {
     skip: !booted,
     delay: initialDelay,
@@ -3997,12 +4415,11 @@ function CollectorProvider({
     delay: initialDelay,
     name: 'fireOnLoadTriggers'
   });
-  const onPresenseChange = React__default.useCallback(presence => {
-    log('presence changed', presence);
-  }, [log]);
   return React__default.createElement(IdleTimerProvider, {
     timeout: idleTimeout,
-    onPresenceChange: onPresenseChange,
+    onPresenceChange: presence => {
+      log('presence changed', presence);
+    },
     onIdle: fireIdleTrigger
   }, React__default.createElement(CollectorContext.Provider, {
     value: collectorContextVal
@@ -4131,6 +4548,58 @@ const useTrackingInit = () => {
   }, [visitor, registerUserData]);
 };
 
+const collinBrandsPathConversionMap = {
+  Stonehouse: '/tablebooking/enquiry-form-completed',
+  'All Bar One': '/bookings/dmnc-complete',
+  Sizzling: '/tablebooking/enquiry-form-completed',
+  Ember: '/tablebooking/enquiry-form-completed'
+};
+function useCollinsBookingComplete() {
+  const {
+    difiProps: {
+      booted
+    }
+  } = useEntireStore();
+  const {
+    trackEvent,
+    state: {
+      initiated
+    }
+  } = useTracking();
+  const {
+    log
+  } = useLogging();
+  const brand = useBrand();
+  const checkCollinsBookingComplete = React__default.useCallback(() => {
+    log('useCollinsBookingComplete: checking for Collins booking complete');
+    if (!initiated) {
+      log('useCollinsBookingComplete, mixpanel not initiated');
+      return;
+    }
+    if (!brand) {
+      log('useCollinsBookingComplete, no brand');
+      return;
+    }
+    const conversionPathForBrand = collinBrandsPathConversionMap[brand];
+    if (!conversionPathForBrand) {
+      log('useCollinsBookingComplete: no path for brand variable');
+      return;
+    }
+    const isConversionPath = window.location.pathname.toLowerCase().includes(conversionPathForBrand.toLowerCase());
+    if (!isConversionPath) {
+      log('useCollinsBookingComplete: not a conversion path');
+      return;
+    }
+    log(`useCollinsBookingComplete: Collins booking complete based on path ${conversionPathForBrand} and brand ${brand}`);
+    trackEvent('booking_complete', {});
+  }, [trackEvent, log, brand, initiated]);
+  useRunOnPathChange(checkCollinsBookingComplete, {
+    skip: !booted,
+    delay: 0,
+    name: 'checkCollinsBookingComplete'
+  });
+}
+
 const getRecursivelyPotentialButton = el => {
   var _el$nodeName;
   if (!el) return null;
@@ -4208,6 +4677,104 @@ const useConsentCheck = (consent, consentCallback) => {
   return consentGiven;
 };
 
+const getIsVisible = selector => {
+  const element = document.querySelector(selector);
+  if (!element) return false;
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  if (window.getComputedStyle(element).display === 'none') return false;
+  if (window.getComputedStyle(element).opacity === '0') return false;
+  return true;
+};
+
+const validateSignalChain = signals => {
+  const signalPattern = signals.map(signal => {
+    if (signal.op === 'IsOnPath') {
+      const [operator, route] = signal.parameters;
+      return getFuncByOperator(operator, route)(window.location.pathname);
+    }
+    if (signal.op === 'CanSeeElementOnPage') {
+      const [itemQuerySelector, operator, route] = signal.parameters;
+      const isSignalOnCorrectRoute = getFuncByOperator(operator, route)(window.location.pathname);
+      if (!isSignalOnCorrectRoute) return false;
+      const isVisible = getIsVisible(itemQuerySelector);
+      return isVisible;
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0];
+    }
+    return false;
+  });
+  return signalPattern.every(Boolean);
+};
+
+const getFuncByOperator = (operator, compareWith) => {
+  switch (operator) {
+    case 'starts_with':
+      return comparison => {
+        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
+      };
+    case 'contains':
+      return comparison => {
+        return comparison.toLowerCase().includes(compareWith.toLowerCase());
+      };
+    case 'ends_with':
+      return comparison => {
+        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
+      };
+    case 'eq':
+      return comparison => {
+        return comparison.toLowerCase() === compareWith.toLowerCase();
+      };
+    default:
+      return () => {
+        console.error('getOperator: unknown operator', operator);
+        return false;
+      };
+  }
+};
+const scanInterval = 500;
+const useConversions = () => {
+  const {
+    conversions: {
+      conversions
+    },
+    set
+  } = useEntireStore();
+  const {
+    mutate: collect
+  } = useCollectorMutation();
+  const removeById = React__default.useCallback(id => {
+    set(prev => {
+      if (!(prev !== null && prev !== void 0 && prev.conversions.conversions.length)) return prev;
+      const filteredConversions = prev.conversions.conversions.filter(conversion => conversion.identifier !== id);
+      return {
+        ...prev,
+        conversions: {
+          ...prev.conversions,
+          conversions: filteredConversions
+        }
+      };
+    });
+  }, [set]);
+  const scan = React__default.useCallback(() => {
+    conversions.forEach(conversion => {
+      const hasHappened = validateSignalChain(conversion.signals);
+      if (!hasHappened) return;
+      collect({
+        conversion: {
+          id: conversion.identifier
+        }
+      });
+      removeById(conversion.identifier);
+    });
+  }, [collect, conversions, removeById]);
+  useEffect(() => {
+    if (!(conversions !== null && conversions !== void 0 && conversions.length)) return;
+    const intId = setInterval(scan, scanInterval);
+    return () => clearInterval(intId);
+  }, [scan]);
+};
+
 function useFormCollector() {
   const {
     mutateAsync: collect
@@ -4283,8 +4850,6 @@ const useIncompleteTriggers = () => {
     };
   }, [incompleteTriggers, setVisibleTriggersIssuedByIncomplete]);
 };
-
-const useIntentlyStore = () => useDifiStore(s => s.intently);
 
 const selectorRateMs = 100;
 function useTrackIntentlyModal({
@@ -4386,16 +4951,62 @@ const useRemoveIntently = ({
   }, [intently, brand, log]);
 };
 function useIntently() {
-  const {
-    isIntently: intently
-  } = useIntentlyStore();
+  const {} = useEntireStore();
   useRemoveIntently({
-    intently
+    intently: false
   });
   useTrackIntentlyModal({
-    intently
+    intently: false
   });
 }
+
+const useWatchers = () => {
+  const {
+    trackEvent
+  } = useTracking();
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const visitor = useVisitor$1();
+  const {
+    error
+  } = useLogging();
+  const [foundWatchers, setFoundWatchers] = useState(new Map());
+  const collectorCallback = useCollectorCallback();
+  const registerWatcher = React__default.useCallback((configuredSelector, configuredSearch) => {
+    const intervalId = setInterval(() => {
+      const inputs = document.querySelectorAll(configuredSelector);
+      let found = false;
+      inputs.forEach(element => {
+        if (configuredSearch === '' && window.getComputedStyle(element).display !== 'none') {
+          found = true;
+        } else if (element.textContent === configuredSearch) {
+          found = true;
+        }
+        if (found && !foundWatchers[configuredSelector]) {
+          trackEvent('booking_complete', {});
+          foundWatchers[configuredSelector] = true;
+          setFoundWatchers(foundWatchers);
+          collect({
+            elements: [{
+              path: window.location.pathname,
+              selector: configuredSelector
+            }]
+          });
+          clearInterval(intervalId);
+        }
+      });
+    }, 500);
+    return intervalId;
+  }, [collectorCallback, error, foundWatchers, trackEvent]);
+  useEffect(() => {
+    if (!visitor.id) return;
+    const intervalIds = [registerWatcher('.stage-5', '')];
+    return () => {
+      intervalIds.forEach(intervalId => clearInterval(intervalId));
+    };
+  }, [registerWatcher, visitor]);
+};
 
 const queryClient = new QueryClient();
 const Provider = props => {
@@ -4434,6 +5045,9 @@ const Provider = props => {
   useFormCollector();
   useButtonCollector();
   useIntently();
+  useWatchers();
+  useConversions();
+  useCollinsBookingComplete();
   const consentGiven = useConsentCheck(consent, consentCallback);
   useEffect(() => {
     if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
@@ -4463,5 +5077,5 @@ const FingerprintProvider = props => React__default.createElement(QueryClientPro
   fallback: React__default.createElement("div", null, "An application error occurred.")
 }, React__default.createElement(Provider, Object.assign({}, props))));
 
-export { CollectorContext, CollectorProvider, FingerprintProvider, onCookieChanged, useCollector, useFingerprint };
+export { CollectorProvider, FingerprintProvider, onCookieChanged, useFingerprint };
 //# sourceMappingURL=index.modern.js.map
