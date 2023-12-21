@@ -11,6 +11,7 @@ import useButtonCollector from '../hooks/useButtonCollector'
 import { useConsentCheck } from '../hooks/useConsentCheck'
 import useFormCollector from '../hooks/useFormCollector'
 import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
+import useIntently from '../hooks/useIntently'
 import { CollectorProvider } from './CollectorContext'
 
 const queryClient = new QueryClient()
@@ -69,6 +70,7 @@ export const Provider = (props: FingerprintProviderProps) => {
   useIncompleteTriggers()
   useFormCollector()
   useButtonCollector()
+  useIntently()
 
   const consentGiven = useConsentCheck(consent, consentCallback)
 

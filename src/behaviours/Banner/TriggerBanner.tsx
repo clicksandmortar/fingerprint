@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
+import { useEntireStore } from '../../beautifulSugar/store'
 import { useSeen } from '../../hooks/api/useSeenMutation'
-import { useTracking } from '../../hooks/init/useTracking'
-import { useCollector } from '../../hooks/useCollector'
+import { useTracking } from '../../hooks/useTracking'
 import { BannerTrigger } from './Banner.types'
 import HorizontalBanner from './Components/HorizontalBanner'
 import SideBanner from './Components/SideBanner'
 import { Position, resetPad } from './utils'
 
 const Banner = ({ trigger }: { trigger: BannerTrigger }) => {
-  const { removeActiveTrigger } = useCollector()
+  const { removeActiveTrigger } = useEntireStore()
   const { trackEvent } = useTracking()
   const [open, setOpen] = useState(true)
 

@@ -1,8 +1,8 @@
 import mixpanel, { Callback } from 'mixpanel-browser'
 import React from 'react'
-import { useDifiStore } from '../../beautifulSugar/store'
-import { RegistrableUserProperties } from '../../utils/types'
-import { useLogging } from '../useLogging'
+import { useDifiStore } from '../beautifulSugar/store'
+import { RegistrableUserProperties } from '../utils/types'
+import { useLogging } from './useLogging'
 
 const trackEvent = (event: string, props: any, callback?: Callback): void => {
   return mixpanel.track(event, props, callback)

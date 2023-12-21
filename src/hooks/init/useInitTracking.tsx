@@ -4,8 +4,8 @@ import { useDifiStore, useEntireStore } from '../../beautifulSugar/store'
 import { getEnvVars } from '../../utils/getEnvVars'
 import { useFingerprint } from '../useFingerprint'
 import { useLogging } from '../useLogging'
+import { useTracking } from '../useTracking'
 import { useVisitor } from './useInitVisitor'
-import { useTracking } from './useTracking'
 
 const init = (cfg: Partial<Config>) => {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {

@@ -504,6 +504,25 @@ var useVisitor = function useVisitor() {
   });
 };
 
+var useConfig = function useConfig() {
+  return useEntireStore().config;
+};
+var useBrand = function useBrand() {
+  var configBrandName = useConfig().brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
+};
+var useTriggerConfig = function useTriggerConfig() {
+  return useConfig().trigger;
+};
+var useBrandColors = function useBrandColors() {
+  return useConfig().brand.colors || defaultColors;
+};
+
+var useCollector = function useCollector() {
+  return React.useContext(CollectorContext);
+};
+
 var trackEvent = function trackEvent(event, props, callback) {
   return mixpanel.track(event, props, callback);
 };
@@ -525,25 +544,6 @@ var useTracking = function useTracking() {
       initiated: initiated
     }
   };
-};
-
-var useConfig = function useConfig() {
-  return useEntireStore().config;
-};
-var useBrand = function useBrand() {
-  var configBrandName = useConfig().brand.name;
-  if (configBrandName) return configBrandName;
-  return _LEGACY_getBrand();
-};
-var useTriggerConfig = function useTriggerConfig() {
-  return useConfig().trigger;
-};
-var useBrandColors = function useBrandColors() {
-  return useConfig().brand.colors || defaultColors;
-};
-
-var useCollector = function useCollector() {
-  return React.useContext(CollectorContext);
 };
 
 var _excluded = ["mutate"];
@@ -1070,8 +1070,8 @@ var SideBanner = function SideBanner(_ref) {
 var Banner = function Banner(_ref) {
   var _trigger$data3;
   var trigger = _ref.trigger;
-  var _useCollector = useCollector(),
-    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useEntireStore = useEntireStore(),
+    removeActiveTrigger = _useEntireStore.removeActiveTrigger;
   var _useTracking = useTracking(),
     trackEvent = _useTracking.trackEvent;
   var _useState = React.useState(true),
@@ -1336,8 +1336,8 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var ref = React__default.useRef(null);
-  var _useCollector = useCollector(),
-    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useEntireStore = useEntireStore(),
+    removeActiveTrigger = _useEntireStore.removeActiveTrigger;
   var _useState = React.useState(null),
     invocationTimeStamp = _useState[0],
     setInvocationTimeStamp = _useState[1];
@@ -2172,8 +2172,8 @@ var StonehouseModal = function StonehouseModal(props) {
 
 var Modal = function Modal(_ref) {
   var trigger = _ref.trigger;
-  var _useCollector = useCollector(),
-    removeActiveTrigger = _useCollector.removeActiveTrigger;
+  var _useEntireStore = useEntireStore(),
+    removeActiveTrigger = _useEntireStore.removeActiveTrigger;
   var _useTracking = useTracking(),
     trackEvent = _useTracking.trackEvent;
   var _useState = React.useState(true),
@@ -2935,118 +2935,6 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
-var selectorRateMs = 100;
-function useTrackIntentlyModal(_ref) {
-  var intently = _ref.intently;
-  var _useState = React.useState(false),
-    isVisible = _useState[0],
-    setIsVisible = _useState[1];
-  var _useTracking = useTracking(),
-    trackEvent = _useTracking.trackEvent,
-    initiated = _useTracking.state.initiated;
-  var _useLogging = useLogging(),
-    log = _useLogging.log,
-    error = _useLogging.error;
-  var brand = useBrand();
-  React.useEffect(function () {
-    if (!initiated) return;
-    if (!intently) return;
-    var id = setInterval(function () {
-      var intentlyOuterContainer = document.querySelector('smc-overlay-outer');
-      if (!intentlyOuterContainer) {
-        return;
-      }
-      var isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
-      if (!isIntentlyOuterVisible) {
-        return;
-      }
-      var intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
-      if (!intentlyInnerOverlay) {
-        return;
-      }
-      log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
-      setIsVisible(true);
-      trackEvent('trigger_displayed', {
-        triggerId: 'Intently',
-        triggerType: 'INVOCATION_EXIT_INTENT',
-        triggerBehaviour: 'BEHAVIOUR_MODAL',
-        time: new Date().toISOString(),
-        brand: brand
-      });
-      clearInterval(id);
-    }, selectorRateMs);
-    return function () {
-      clearInterval(id);
-    };
-  }, [intently, log, setIsVisible, trackEvent, initiated, brand]);
-  var getHandleTrackAction = function getHandleTrackAction(action) {
-    return function () {
-      log("useTrackIntentlyModal: user clicked " + action + " button");
-      trackEvent("user_clicked_" + action + "_button", {});
-    };
-  };
-  React.useEffect(function () {
-    if (!isVisible) return;
-    var closeBtn = document.querySelector('[data-close-type="x_close"]');
-    var exitHandler = getHandleTrackAction('exit');
-    var ctaBtn = document.querySelector('smc-input-group > span');
-    var ctaHandler = getHandleTrackAction('CTA');
-    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
-    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
-    return function () {
-      ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
-      closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
-    };
-  }, [error, getHandleTrackAction, isVisible]);
-  return {
-    isVisible: isVisible,
-    setIsVisible: setIsVisible
-  };
-}
-var brandsThatSupportIntentlyRemoval = ['Browns'];
-var useRemoveIntently = function useRemoveIntently(_ref2) {
-  var intently = _ref2.intently;
-  var _useLogging2 = useLogging(),
-    log = _useLogging2.log;
-  var brand = useBrand();
-  React.useEffect(function () {
-    if (intently) return;
-    if (brand && !brandsThatSupportIntentlyRemoval.includes(brand)) {
-      log("useRemoveIntently: Intently is " + intently + ", but skipping overlay removal for brand", {
-        brand: brand
-      });
-      return;
-    }
-    log('useRemoveIntently: removing intently overlay');
-    var runningInterval = setInterval(function () {
-      var locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
-      Array.prototype.forEach.call(locatedIntentlyScript, function (node) {
-        node.parentNode.removeChild(node);
-        log('useRemoveIntently: successfully removed intently overlay');
-        clearInterval(runningInterval);
-      });
-    }, selectorRateMs);
-    return function () {
-      clearInterval(runningInterval);
-    };
-  }, [intently, brand, log]);
-};
-function useIntently() {
-  var _useState2 = React.useState(true),
-    intently = _useState2[0],
-    setIntently = _useState2[1];
-  useRemoveIntently({
-    intently: intently
-  });
-  useTrackIntentlyModal({
-    intently: intently
-  });
-  return {
-    setIntently: setIntently,
-    intently: intently
-  };
-}
-
 var reattemptIntervalMs = 500;
 var useRunOnPathChange = function useRunOnPathChange(func, config) {
   var _useState = React.useState(''),
@@ -3135,6 +3023,7 @@ function CollectorProvider(_ref) {
     removeActiveTrigger = _useEntireStore.removeActiveTrigger,
     set = _useEntireStore.set,
     mixpanelBooted = _useEntireStore.tracking.initiated,
+    setIntently = _useEntireStore.intently.setIntently,
     _useEntireStore$difiP = _useEntireStore.difiProps,
     handlers = _useEntireStore$difiP.defaultHandlers,
     initialDelay = _useEntireStore$difiP.initialDelay,
@@ -3164,8 +3053,6 @@ function CollectorProvider(_ref) {
   var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
-  var _useIntently = useIntently(),
-    setIntently = _useIntently.setIntently;
   var _useState2 = React.useState(new Map()),
     foundWatchers = _useState2[0],
     setFoundWatchers = _useState2[1];
@@ -3431,10 +3318,9 @@ function CollectorProvider(_ref) {
       removeActiveTrigger: removeActiveTrigger,
       setActiveTrigger: setActiveTrigger,
       setIncompleteTriggers: setIncompleteTriggers,
-      trackEvent: trackEvent,
       setConversions: setConversions
     };
-  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, trackEvent, setIncompleteTriggers, setConversions]);
+  }, [setPageTriggers, removeActiveTrigger, setActiveTrigger, setIncompleteTriggers, setConversions]);
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
@@ -3479,9 +3365,6 @@ var CollectorContext = React.createContext({
   },
   setConversions: function setConversions() {
     console.error('setConversions not implemented correctly');
-  },
-  trackEvent: function trackEvent() {
-    console.error('trackEvent not implemented correctly');
   }
 });
 
@@ -3729,6 +3612,119 @@ var useIncompleteTriggers = function useIncompleteTriggers() {
   }, [incompleteTriggers, setVisibleTriggersIssuedByIncomplete]);
 };
 
+var useIntentlyStore = function useIntentlyStore() {
+  return useDifiStore(function (s) {
+    return s.intently;
+  });
+};
+
+var selectorRateMs = 100;
+function useTrackIntentlyModal(_ref) {
+  var intently = _ref.intently;
+  var _useState = React.useState(false),
+    isVisible = _useState[0],
+    setIsVisible = _useState[1];
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent,
+    initiated = _useTracking.state.initiated;
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var brand = useBrand();
+  React.useEffect(function () {
+    if (!initiated) return;
+    if (!intently) return;
+    var id = setInterval(function () {
+      var intentlyOuterContainer = document.querySelector('smc-overlay-outer');
+      if (!intentlyOuterContainer) {
+        return;
+      }
+      var isIntentlyOuterVisible = window.getComputedStyle(intentlyOuterContainer).display === 'block';
+      if (!isIntentlyOuterVisible) {
+        return;
+      }
+      var intentlyInnerOverlay = document.querySelector('smc-overlay-inner');
+      if (!intentlyInnerOverlay) {
+        return;
+      }
+      log('useTrackIntentlyModal: Located Intently modal. Measuring performance');
+      setIsVisible(true);
+      trackEvent('trigger_displayed', {
+        triggerId: 'Intently',
+        triggerType: 'INVOCATION_EXIT_INTENT',
+        triggerBehaviour: 'BEHAVIOUR_MODAL',
+        time: new Date().toISOString(),
+        brand: brand
+      });
+      clearInterval(id);
+    }, selectorRateMs);
+    return function () {
+      clearInterval(id);
+    };
+  }, [intently, log, setIsVisible, trackEvent, initiated, brand]);
+  var getHandleTrackAction = function getHandleTrackAction(action) {
+    return function () {
+      log("useTrackIntentlyModal: user clicked " + action + " button");
+      trackEvent("user_clicked_" + action + "_button", {});
+    };
+  };
+  React.useEffect(function () {
+    if (!isVisible) return;
+    var closeBtn = document.querySelector('[data-close-type="x_close"]');
+    var exitHandler = getHandleTrackAction('exit');
+    var ctaBtn = document.querySelector('smc-input-group > span');
+    var ctaHandler = getHandleTrackAction('CTA');
+    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
+    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
+    return function () {
+      ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
+      closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
+    };
+  }, [error, getHandleTrackAction, isVisible]);
+  return {
+    isVisible: isVisible,
+    setIsVisible: setIsVisible
+  };
+}
+var brandsThatSupportIntentlyRemoval = ['Browns'];
+var useRemoveIntently = function useRemoveIntently(_ref2) {
+  var intently = _ref2.intently;
+  var _useLogging2 = useLogging(),
+    log = _useLogging2.log;
+  var brand = useBrand();
+  React.useEffect(function () {
+    if (intently) return;
+    if (brand && !brandsThatSupportIntentlyRemoval.includes(brand)) {
+      log("useRemoveIntently: Intently is " + intently + ", but skipping overlay removal for brand", {
+        brand: brand
+      });
+      return;
+    }
+    log('useRemoveIntently: removing intently overlay');
+    var runningInterval = setInterval(function () {
+      var locatedIntentlyScript = document.querySelectorAll('div[id^=smc-v5-overlay-]');
+      Array.prototype.forEach.call(locatedIntentlyScript, function (node) {
+        node.parentNode.removeChild(node);
+        log('useRemoveIntently: successfully removed intently overlay');
+        clearInterval(runningInterval);
+      });
+    }, selectorRateMs);
+    return function () {
+      clearInterval(runningInterval);
+    };
+  }, [intently, brand, log]);
+};
+function useIntently() {
+  var _useIntentlyStore = useIntentlyStore(),
+    intently = _useIntentlyStore.isIntently;
+  useRemoveIntently({
+    intently: intently
+  });
+  useTrackIntentlyModal({
+    intently: intently
+  });
+}
+
 var queryClient = new reactQuery.QueryClient();
 var Provider = function Provider(props) {
   var _useEntireStore = useEntireStore(),
@@ -3761,6 +3757,7 @@ var Provider = function Provider(props) {
   useIncompleteTriggers();
   useFormCollector();
   useButtonCollector();
+  useIntently();
   var consentGiven = useConsentCheck(consent, consentCallback);
   React.useEffect(function () {
     if (!props.appId) throw new Error('C&M Fingerprint: appId is required');

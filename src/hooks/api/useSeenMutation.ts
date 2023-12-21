@@ -8,11 +8,11 @@ import { hostname, request } from '../../utils/http'
 import { getPagePayload } from '../../utils/page'
 import { updateCookie } from '../../visitors/bootstrap'
 import { useVisitor } from '../init/useInitVisitor'
-import { useTracking } from '../init/useTracking'
 import { useBrand } from '../useBrandConfig'
 import { useCollector } from '../useCollector'
 import { useFingerprint } from '../useFingerprint'
 import { useLogging } from '../useLogging'
+import { useTracking } from '../useTracking'
 
 export const useSeenMutation = () => {
   const { log, error } = useLogging()

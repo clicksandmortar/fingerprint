@@ -11,14 +11,13 @@ import {
   Trigger
 } from '../client/types'
 import { useCollectorMutation } from '../hooks/api/useCollectorMutation'
-import { useTracking } from '../hooks/init/useTracking'
 import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
 import { useBrand } from '../hooks/useBrandConfig'
 import useConversions from '../hooks/useConversions'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
-import useIntently from '../hooks/useIntently'
 import { useLogging } from '../hooks/useLogging'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
+import { useTracking } from '../hooks/useTracking'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
 import { getPagePayload, getReferrer } from '../utils/page'
 import { hasVisitorIDInURL } from '../utils/visitor_id'
@@ -51,6 +50,7 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
     removeActiveTrigger,
     set,
     tracking: { initiated: mixpanelBooted },
+    intently: { setIntently },
     difiProps: {
       defaultHandlers: handlers,
       initialDelay,
@@ -83,7 +83,6 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
     getIdleStatusDelay()
   )
 
-  const { setIntently } = useIntently()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
   )
@@ -539,14 +538,12 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
       removeActiveTrigger,
       setActiveTrigger,
       setIncompleteTriggers,
-      trackEvent,
       setConversions
     }),
     [
       setPageTriggers,
       removeActiveTrigger,
       setActiveTrigger,
-      trackEvent,
       setIncompleteTriggers,
       setConversions
     ]
@@ -603,9 +600,6 @@ export type CollectorContextInterface = {
   removeActiveTrigger: (id: Trigger['id']) => void
   setActiveTrigger: (trigger: Trigger) => void
   setConversions: (conversion: Conversion[]) => void
-  // @NOTE: please keep it here. THis makes sure that context mixup doesn't
-  // impact the usage of the tracking function
-  trackEvent: (event: string, properties?: any) => void
 }
 
 export const CollectorContext = createContext<CollectorContextInterface>({
@@ -623,8 +617,5 @@ export const CollectorContext = createContext<CollectorContextInterface>({
   },
   setConversions: () => {
     console.error('setConversions not implemented correctly')
-  },
-  trackEvent: () => {
-    console.error('trackEvent not implemented correctly')
   }
 })

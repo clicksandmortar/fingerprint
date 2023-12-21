@@ -11,6 +11,5 @@ export declare type CollectorContextInterface = {
     removeActiveTrigger: (id: Trigger['id']) => void;
     setActiveTrigger: (trigger: Trigger) => void;
     setConversions: (conversion: Conversion[]) => void;
-    trackEvent: (event: string, properties?: any) => void;
 };
 export declare const CollectorContext: React.Context<CollectorContextInterface>;

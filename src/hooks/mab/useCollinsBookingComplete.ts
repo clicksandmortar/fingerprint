@@ -1,8 +1,8 @@
 import React from 'react'
 import { SupportedBrand } from '../../utils/brand'
-import { useTracking } from '../init/useTracking'
 import { useBrand } from '../useBrandConfig'
 import { useLogging } from '../useLogging'
+import { useTracking } from '../useTracking'
 
 // if a brand is not present in this map, skip tracking via this method (other ones should pick it up)
 const collinBrandsPathConversionMap: Partial<{

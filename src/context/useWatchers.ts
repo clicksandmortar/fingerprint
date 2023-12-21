@@ -2,8 +2,8 @@
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState } from 'react'
 import { useCollectorMutation } from '../hooks/api/useCollectorMutation'
-import { useTracking } from '../hooks/init/useTracking'
 import { useLogging } from '../hooks/useLogging'
+import { useTracking } from '../hooks/useTracking'
 
 type Props = {}
 

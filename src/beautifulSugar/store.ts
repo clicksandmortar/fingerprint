@@ -11,6 +11,7 @@ import {
   createPagetriggersSlice,
   PageTriggersSlice
 } from './slices/pageTriggersSlice'
+import { IntentlySlice } from './slices/temp_intentlySlice'
 import { createTrackingSlice, TrackingSlice } from './slices/trackingSlice'
 import { createVisitorSlice, VisitorSlice } from './slices/visitorSlice'
 import { UseDifiStore } from './types'
@@ -21,7 +22,8 @@ export type DifiStore = PageTriggersSlice &
   HandlersSlice &
   VisitorSlice &
   TrackingSlice &
-  IncompleteTriggersSlice
+  IncompleteTriggersSlice &
+  IntentlySlice
 
 export const useDifiStore: UseDifiStore = create((...beautifulSugar) => ({
   ...createPagetriggersSlice(...beautifulSugar),

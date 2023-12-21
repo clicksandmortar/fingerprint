@@ -4,8 +4,8 @@ import { getFormEntries } from '../utils/forms'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './api/useCollectorMutation'
 import { useVisitor } from './init/useInitVisitor'
-import { useTracking } from './init/useTracking'
 import { useLogging } from './useLogging'
+import { useTracking } from './useTracking'
 
 /**
  * Hook into forms on the page and collect their data

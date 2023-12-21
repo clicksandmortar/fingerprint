@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useIntentlyStore } from '../beautifulSugar/slices/temp_intentlySlice'
 import { SupportedBrand } from '../utils/brand'
-import { useTracking } from './init/useTracking'
 import { useBrand } from './useBrandConfig'
 import { useLogging } from './useLogging'
+import { useTracking } from './useTracking'
 
 const selectorRateMs = 100
 
@@ -150,12 +151,10 @@ const useRemoveIntently = ({ intently }: IntentlyProps) => {
 }
 
 export function useIntently() {
-  const [intently, setIntently] = useState<boolean>(true)
+  const { isIntently: intently } = useIntentlyStore()
 
   useRemoveIntently({ intently })
   useTrackIntentlyModal({ intently })
-
-  return { setIntently, intently }
 }
 
 export default useIntently
