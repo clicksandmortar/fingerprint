@@ -1,5 +1,9 @@
-import { getCookie, setCookie } from '../utils/cookies'
-import { CnMCookie, cookieValidDays } from '../visitors/bootstrap'
+import {
+  CnMCookie,
+  cookieValidDays,
+  getCookie,
+  setCookie
+} from '../utils/cookies'
 import { Session } from './types'
 
 export const bootstrapSession = ({

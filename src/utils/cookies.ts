@@ -1,12 +1,25 @@
 import Cookies, { CookieAttributes } from 'js-cookie'
 import { getCookieDomain } from '../visitors/bootstrap'
 
+export const CnMCookie = '_cm'
+export const CnMIDCookie = '_cm_id'
+
+export const cookieValidDays = 365
+
+const ourCookies = [CnMCookie, CnMIDCookie]
+
 export const setCookie = (
   name: string,
   value: string,
   expires: number | undefined,
   options?: CookieAttributes
 ) => {
+  if (!ourCookies.includes(name)) {
+    throw new Error(
+      `Fingerprint cannot set ${name} cookies. Is not a C&M Fingerprint managed cookie.`
+    )
+  }
+
   return Cookies.set(name, value, {
     expires: expires,
     sameSite: 'strict',

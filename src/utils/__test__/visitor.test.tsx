@@ -2,14 +2,11 @@ import { test } from '@playwright/test'
 import { Browser, chromium } from 'playwright'
 import { cookieAccountJWT } from '../../context/FingerprintContext'
 import { Session } from '../../sessions/types'
-import {
-  CnMIDCookie,
-  getCookieDomain,
-  updateCookieUUID
-} from '../../visitors/bootstrap'
+import { getCookieDomain, updateCookieUUID } from '../../visitors/bootstrap'
 import { Visitor } from '../../visitors/types'
 import { validVisitorId } from '../../visitors/utils'
 import { prepPage } from '../__dev__/helpers'
+import { CnMIDCookie } from '../cookies'
 
 const { expect, describe } = test
 

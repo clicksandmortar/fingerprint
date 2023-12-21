@@ -3,14 +3,15 @@ import psl from 'psl'
 import { v4 as uuidv4 } from 'uuid'
 import { cookieAccountJWT } from '../context/FingerprintContext'
 import { Session } from '../sessions/types'
-import { getCookie, setCookie } from '../utils/cookies'
+import {
+  CnMIDCookie,
+  cookieValidDays,
+  getCookie,
+  setCookie
+} from '../utils/cookies'
 import { uuidValidateV4 } from '../utils/uuid'
 import { Visitor } from './types'
 import { validVisitorId } from './utils'
-
-export const cookieValidDays = 365
-export const CnMCookie = '_cm'
-export const CnMIDCookie = '_cm_id'
 
 export function getCookieDomain(): string | null {
   const parsedUrl = psl.parse(location.host)
