@@ -40,21 +40,21 @@ export default function useButtonCollector() {
 
   const buttonClickListener = React.useCallback(
     (e: any) => {
-      console.log('here!', 1)
       if (!e.target) return
-      console.log('here!', 2)
       const potentialButton = getRecursivelyPotentialButton(e.target)
-      console.log('here!', 3)
       // makes sure we fire this when clicking on a nested item inside a button
       if (!potentialButton) return
-      console.log('here!', 4)
       const button = potentialButton as HTMLButtonElement
-      console.log('here!', 5)
       // we dont want to track submitions. useFormCollector is responsible for that
       if (button.type === 'submit') return
-      console.log('here!', 6)
       log('useButtonCollector: button clicked', { button })
-      console.log('here!', 7)
+      trackEvent('button_clicked', {
+        id: button.getAttribute('id'),
+        name: button.getAttribute('name'),
+        class: button.getAttribute('className'),
+        type: button.getAttribute('type'),
+        text: button.innerText
+      })
       collect({
         button: {
           id: button.id,
@@ -66,7 +66,6 @@ export default function useButtonCollector() {
           // selector: getButtonSelector(button)
         }
       })
-      trackEvent('button_clicked', button)
     },
     [collect, log, trackEvent]
   )

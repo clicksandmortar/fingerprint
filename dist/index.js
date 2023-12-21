@@ -3600,28 +3600,27 @@ function useButtonCollector() {
   var _useTracking = useTracking(),
     trackEvent = _useTracking.trackEvent;
   var buttonClickListener = React__default.useCallback(function (e) {
-    console.log('here!', 1);
     if (!e.target) return;
-    console.log('here!', 2);
     var potentialButton = getRecursivelyPotentialButton(e.target);
-    console.log('here!', 3);
     if (!potentialButton) return;
-    console.log('here!', 4);
     var button = potentialButton;
-    console.log('here!', 5);
     if (button.type === 'submit') return;
-    console.log('here!', 6);
     log('useButtonCollector: button clicked', {
       button: button
     });
-    console.log('here!', 7);
+    trackEvent('button_clicked', {
+      id: button.getAttribute('id'),
+      name: button.getAttribute('name'),
+      "class": button.getAttribute('className'),
+      type: button.getAttribute('type'),
+      text: button.innerText
+    });
     collect({
       button: {
         id: button.id,
         selector: button.innerText
       }
     });
-    trackEvent('button_clicked', button);
   }, [collect, log, trackEvent]);
   React.useEffect(function () {
     if (isUndefined('document')) return;
