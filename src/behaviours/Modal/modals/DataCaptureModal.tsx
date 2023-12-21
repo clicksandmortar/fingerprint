@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import CloseButton from '../../../components/CloseButton'
 import CnMForm from '../../../components/CnMForm'
 import { useDataCaptureMutation } from '../../../hooks/api/useDataCaptureMutation'
-import { useSeenMutation } from '../../../hooks/api/useSeenMutation'
+import { useSeen } from '../../../hooks/api/useSeenMutation'
 import { useTracking } from '../../../hooks/init/useTracking'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
 import { useCollector } from '../../../hooks/useCollector'
@@ -87,11 +87,11 @@ const DataCaptureModal = ({ trigger }: Props) => {
   const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
     null
   )
-  const {
-    mutate: runSeen,
-    isSuccess: isSeenSuccess,
-    isLoading: isSeenLoading
-  } = useSeenMutation()
+  const { isSuccess: isSeenSuccess, isLoading: isSeenLoading } = useSeen({
+    trigger,
+    skip: !open
+  })
+
   const {
     mutate: submit,
     isSuccess: isSubmissionSuccess,
@@ -107,7 +107,6 @@ const DataCaptureModal = ({ trigger }: Props) => {
     // seen gets called multiple times since Collector currently
     // like to over-rerender componets. This timeout prevents from firing a ton
     const tId = setTimeout(() => {
-      runSeen(trigger)
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString())
       }

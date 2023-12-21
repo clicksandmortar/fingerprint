@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { Trigger } from '../../../client/types'
 import CloseButton from '../../../components/CloseButton'
+import { useSeen } from '../../../hooks/api/useSeenMutation'
 import { getIsModalFullyClickable } from '../helpers'
 import FullyClickableModal from './FullyClickableModal'
 
@@ -265,6 +266,8 @@ export const BrownsCustomModal = (props: Props) => {
     document.head.appendChild(styles)
     setStylesLoaded(true)
   }, [randomHash])
+
+  useSeen({ trigger, skip: !open || !stylesLoaded })
 
   if (!stylesLoaded) {
     return null

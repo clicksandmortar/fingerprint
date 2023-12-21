@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { Trigger } from '../../../client/types'
 import CloseButton from '../../../components/CloseButton'
+import { useSeen } from '../../../hooks/api/useSeenMutation'
 import { getIsModalFullyClickable, prependClass } from '../helpers'
 import FullyClickableModal from './FullyClickableModal'
 
@@ -33,6 +34,8 @@ const StonehouseCustomModal = ({
   handleCloseModal
 }: Props) => {
   const [stylesLoaded, setStylesLoaded] = useState(false)
+
+  useSeen({ trigger, skip: !stylesLoaded })
 
   useEffect(() => {
     // @todo: note that because of the font being screwed up a bit on all of these host urls,
@@ -240,6 +243,7 @@ const StonehouseCustomModal = ({
   if (!stylesLoaded) {
     return null
   }
+
   return (
     <div className={prependClass('overlay')}>
       <div

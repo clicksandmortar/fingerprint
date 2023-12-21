@@ -3,7 +3,6 @@ import { isMobile } from 'react-device-detect'
 import ReactDOM from 'react-dom'
 import { Trigger } from '../../client/types'
 import { useCollectorMutation } from '../../hooks/api/useCollectorMutation'
-import { useSeenMutation } from '../../hooks/api/useSeenMutation'
 import { useTracking } from '../../hooks/init/useTracking'
 import { useBrand } from '../../hooks/useBrandConfig'
 import { useCollector } from '../../hooks/useCollector'
@@ -27,18 +26,11 @@ const Modal = ({ trigger }: Props) => {
   const { mutate: collect } = useCollectorMutation()
 
   const brand = useBrand()
-  const { mutate: runSeen, isSuccess, isLoading } = useSeenMutation()
 
   useEffect(() => {
-    if (!open) return
-    if (invocationTimeStamp) return
-    if (isSuccess) return
-    if (isLoading) return
+    if (!!invocationTimeStamp) return
 
-    // seen gets called multiple times since Collector currently
-    // like to over-rerender componets. This timeout prevents from firing a ton
     const tId = setTimeout(() => {
-      runSeen(trigger)
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString())
       }
@@ -47,7 +39,7 @@ const Modal = ({ trigger }: Props) => {
     return () => {
       clearTimeout(tId)
     }
-  }, [open, isSuccess, isLoading])
+  }, [invocationTimeStamp])
 
   if (!open) {
     return null
