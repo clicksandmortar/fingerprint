@@ -328,7 +328,6 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
       visitorId = vidParam.split('?')[0];
     }
     visitor.id = visitorId;
-    setCookie(cookieAccountJWT, visitorId || '', cookieValidDays);
     var sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
