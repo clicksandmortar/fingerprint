@@ -503,57 +503,20 @@ var useVisitor = function useVisitor() {
   });
 };
 
-var init = function init(cfg) {
-  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
-};
 var trackEvent = function trackEvent(event, props, callback) {
   return mixpanel.track(event, props, callback);
 };
 var useTracking = function useTracking() {
-  var _useFingerprint = useFingerprint(),
-    appId = _useFingerprint.appId;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
+  var _useDifiStore = useDifiStore(function (s) {
+      return s.tracking;
+    }),
+    initiated = _useDifiStore.initiated;
   var _useLogging = useLogging(),
     log = _useLogging.log;
-  var _useState = React.useState(false),
-    initiated = _useState[0],
-    setInitiated = _useState[1];
-  React.useEffect(function () {
-    if (!appId || !visitor.id) {
-      return;
-    }
-    log('MixpanelProvider: booting');
-    init({
-      debug: true
-    });
-    setInitiated(true);
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
-    mixpanel.identify(visitor.id);
-  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
   var registerUserData = React__default.useCallback(function (properties) {
     log("Mixpanel: attempting to'register/override properties: " + Object.keys(properties).join(', '));
     mixpanel.people.set(properties);
   }, [log]);
-  React.useEffect(function () {
-    if (!visitor.cohort) {
-      log('Able to register user cohort, but none provided. ');
-      return;
-    }
-    registerUserData({
-      u_cohort: visitor.cohort
-    });
-  }, [visitor, registerUserData]);
-  React.useEffect(function () {
-    if (!visitor.sourceId) return;
-    registerUserData({
-      sourceId: visitor.sourceId
-    });
-  }, [visitor, registerUserData]);
   return {
     trackEvent: trackEvent,
     registerUserData: registerUserData,
@@ -2625,6 +2588,31 @@ var createHandlersSlice = function createHandlersSlice(set, get) {
       set({
         handlers: [].concat(get().handlers, handlers)
       });
+    },
+    getHandlerForTrigger: function getHandlerForTrigger(_trigger) {
+      var _get$handlers;
+      var potentialHandler = (_get$handlers = get().handlers) === null || _get$handlers === void 0 ? void 0 : _get$handlers.find(function (handler) {
+        return handler.behaviour === _trigger.behaviour;
+      });
+      if (!potentialHandler) return null;
+      return potentialHandler;
+    }
+  };
+};
+
+var createincompleteTriggersSlice = function createincompleteTriggersSlice(set, _get) {
+  return {
+    incompleteTriggers: [],
+    setIncompleteTriggers: function setIncompleteTriggers(val) {
+      return set({
+        incompleteTriggers: val
+      });
+    },
+    visibleTriggersIssuedByIncomplete: [],
+    setVisibleTriggersIssuedByIncomplete: function setVisibleTriggersIssuedByIncomplete(val) {
+      return set({
+        visibleTriggersIssuedByIncomplete: val
+      });
     }
   };
 };
@@ -2655,7 +2643,6 @@ var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
   return {
     pageTriggers: [],
     displayedTriggersIds: [],
-    session: {},
     setDisplayedTriggers: function setDisplayedTriggers(triggers) {
       set(function () {
         return {
@@ -2663,7 +2650,7 @@ var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
         };
       });
     },
-    appendTrigger: function appendTrigger(invokableTrigger) {
+    addDisplayedTrigger: function addDisplayedTrigger(invokableTrigger) {
       set(function (prev) {
         if (prev.displayedTriggersIds.includes(invokableTrigger.id)) return prev;
         return {
@@ -2690,6 +2677,29 @@ var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
           })
         };
       });
+    },
+    removeActiveTrigger: function removeActiveTrigger(id) {
+      var _get = get(),
+        displayedTriggersIds = _get.displayedTriggersIds,
+        setDisplayedTriggers = _get.setDisplayedTriggers,
+        incompleteTriggers = _get.incompleteTriggers,
+        setIncompleteTriggers = _get.setIncompleteTriggers,
+        visibleTriggersIssuedByIncomplete = _get.visibleTriggersIssuedByIncomplete,
+        setVisibleTriggersIssuedByIncomplete = _get.setVisibleTriggersIssuedByIncomplete,
+        removePageTrigger = _get.removePageTrigger;
+      var refreshedTriggers = displayedTriggersIds.filter(function (triggerId) {
+        return triggerId !== id;
+      });
+      setDisplayedTriggers(refreshedTriggers);
+      var updatedIncompleteTriggers = incompleteTriggers.filter(function (trigger) {
+        return trigger.id !== id;
+      });
+      setIncompleteTriggers(updatedIncompleteTriggers);
+      var updatedVisibleIncompleteTriggers = visibleTriggersIssuedByIncomplete.filter(function (trigger) {
+        return trigger.id !== id;
+      });
+      setVisibleTriggersIssuedByIncomplete(updatedVisibleIncompleteTriggers);
+      removePageTrigger(id);
     }
   };
 };
@@ -2731,7 +2741,7 @@ var createVisitorSlice = function createVisitorSlice(set, _get) {
 };
 
 var useDifiStore = zustand.create(function () {
-  return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments), createTrackingSlice.apply(void 0, arguments));
+  return _extends({}, createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments), createTrackingSlice.apply(void 0, arguments), createincompleteTriggersSlice.apply(void 0, arguments));
 });
 var useEntireStore = function useEntireStore() {
   return useDifiStore(function (s) {
@@ -2778,49 +2788,6 @@ function useCollinsBookingComplete() {
   return {
     checkCollinsBookingComplete: checkCollinsBookingComplete
   };
-}
-
-var getRecursivelyPotentialButton = function getRecursivelyPotentialButton(el) {
-  var _el$nodeName;
-  if (!el) return null;
-  if (((_el$nodeName = el.nodeName) === null || _el$nodeName === void 0 ? void 0 : _el$nodeName.toLowerCase()) === 'button') return el;
-  if (el.parentElement) return getRecursivelyPotentialButton(el.parentElement);
-  return null;
-};
-function useButtonCollector() {
-  var _useCollectorMutation = useCollectorMutation(),
-    collect = _useCollectorMutation.mutateAsync;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  var _useTracking = useTracking(),
-    trackEvent = _useTracking.trackEvent;
-  React.useEffect(function () {
-    if (isUndefined('document')) return;
-    if (!visitor.id) return;
-    var buttonClickListener = function buttonClickListener(e) {
-      if (!e.target) return;
-      var potentialButton = getRecursivelyPotentialButton(e.target);
-      if (!potentialButton) return;
-      var button = potentialButton;
-      if (button.type === 'submit') return;
-      log('useButtonCollector: button clicked', {
-        button: button
-      });
-      trackEvent('button_clicked', button);
-      collect({
-        button: {
-          id: button.id,
-          selector: button.innerText
-        }
-      });
-    };
-    document.addEventListener('click', buttonClickListener);
-    return function () {
-      document.removeEventListener('click', buttonClickListener);
-    };
-  }, [visitor]);
 }
 
 var getIsVisible = function getIsVisible(selector) {
@@ -2941,85 +2908,6 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   }, [delay]);
   return {
     hasDelayPassed: hasDelayPassed
-  };
-};
-
-function useFormCollector() {
-  var _useCollectorMutation = useCollectorMutation(),
-    collect = _useCollectorMutation.mutateAsync;
-  var _useVisitor = useVisitor(),
-    visitor = _useVisitor.visitor;
-  var _useLogging = useLogging(),
-    log = _useLogging.log;
-  var _useTracking = useTracking(),
-    trackEvent = _useTracking.trackEvent;
-  React.useEffect(function () {
-    if (isUndefined('document')) return;
-    if (!visitor.id) return;
-    var formSubmitListener = function formSubmitListener(e) {
-      var _e$target$nodeName, _form$getAttribute;
-      if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
-      var form = e === null || e === void 0 ? void 0 : e.target;
-      if ((_form$getAttribute = form.getAttribute('id')) !== null && _form$getAttribute !== void 0 && _form$getAttribute.includes(cnmFormPrefix)) {
-        log('Skipping form collection since this is a C&M form');
-        return;
-      }
-      var data = getFormEntries(form, {
-        bannedFieldPartialNames: [],
-        bannedTypes: []
-      });
-      log('useFormCollector: form submitted', {
-        data: data
-      });
-      trackEvent('form_submitted', {
-        id: form.id,
-        name: form.name
-      });
-      collect({
-        form: {
-          data: data
-        }
-      });
-    };
-    document.removeEventListener('submit', formSubmitListener);
-    document.addEventListener('submit', formSubmitListener);
-    return function () {
-      document.removeEventListener('submit', formSubmitListener);
-    };
-  }, [visitor]);
-}
-
-var interval = 250;
-var useIncompleteTriggers = function useIncompleteTriggers() {
-  var _useState = React.useState([]),
-    incompleteTriggers = _useState[0],
-    setIncompleteTriggers = _useState[1];
-  var _useState2 = React.useState([]),
-    visibleTriggers = _useState2[0],
-    setVisibleTriggers = _useState2[1];
-  var scan = React__default.useCallback(function () {
-    var validTriggers = incompleteTriggers.filter(function (trigger) {
-      var shouldTrigger = validateSignalChain(trigger.signals);
-      if (!shouldTrigger) return false;
-      return true;
-    });
-    setVisibleTriggers(function (prev) {
-      if (!validTriggers.length) return prev;
-      return validTriggers;
-    });
-  }, [setVisibleTriggers, incompleteTriggers]);
-  React.useEffect(function () {
-    if (!incompleteTriggers.length) return;
-    var intId = setInterval(scan, interval);
-    return function () {
-      clearInterval(intId);
-    };
-  }, [incompleteTriggers, getIsVisible, setVisibleTriggers]);
-  return {
-    incompleteTriggers: incompleteTriggers,
-    setIncompleteTriggers: setIncompleteTriggers,
-    setVisibleTriggers: setVisibleTriggers,
-    visibleTriggers: visibleTriggers
   };
 };
 
@@ -3207,9 +3095,7 @@ var hasVisitorIDInURL = function hasVisitorIDInURL() {
 };
 
 function CollectorProvider(_ref) {
-  var children = _ref.children,
-    _ref$handlers = _ref.handlers,
-    handlers = _ref$handlers === void 0 ? [] : _ref$handlers;
+  var children = _ref.children;
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
@@ -3217,21 +3103,23 @@ function CollectorProvider(_ref) {
     config = _useEntireStore.config,
     visitor = _useEntireStore.visitor,
     setVisitor = _useEntireStore.setVisitor,
-    removePageTrigger = _useEntireStore.removePageTrigger,
     pageTriggers = _useEntireStore.pageTriggers,
     displayedTriggersIds = _useEntireStore.displayedTriggersIds,
     setPageTriggers = _useEntireStore.setPageTriggers,
-    setDisplayedTriggers = _useEntireStore.setDisplayedTriggers,
+    addDisplayedTrigger = _useEntireStore.addDisplayedTrigger,
+    getHandlerForTrigger = _useEntireStore.getHandlerForTrigger,
+    removeActiveTrigger = _useEntireStore.removeActiveTrigger,
     set = _useEntireStore.set,
+    mixpanelBooted = _useEntireStore.tracking.initiated,
     _useEntireStore$difiP = _useEntireStore.difiProps,
+    handlers = _useEntireStore$difiP.defaultHandlers,
     initialDelay = _useEntireStore$difiP.initialDelay,
     exitIntentTriggers = _useEntireStore$difiP.exitIntentTriggers,
     idleTriggers = _useEntireStore$difiP.idleTriggers,
     pageLoadTriggers = _useEntireStore$difiP.pageLoadTriggers,
     booted = _useEntireStore$difiP.booted;
   var _useTracking = useTracking(),
-    trackEvent = _useTracking.trackEvent,
-    mixpanelBooted = _useTracking.state.initiated;
+    trackEvent = _useTracking.trackEvent;
   var _useTriggerDelay = useTriggerDelay(),
     canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
     startCooldown = _useTriggerDelay.startCooldown,
@@ -3252,7 +3140,6 @@ function CollectorProvider(_ref) {
   var _useState = React.useState(getIdleStatusDelay()),
     idleTimeout = _useState[0],
     setIdleTimeout = _useState[1];
-  _objectDestructuringEmpty(useEntireStore());
   var _useIntently = useIntently(),
     setIntently = _useIntently.setIntently;
   var _useState2 = React.useState(new Map()),
@@ -3261,10 +3148,9 @@ function CollectorProvider(_ref) {
   var _useConversions = useConversions(),
     setConversions = _useConversions.setConversions;
   var brand = useBrand();
-  var _useIncompleteTrigger = useIncompleteTriggers(),
-    setIncompleteTriggers = _useIncompleteTrigger.setIncompleteTriggers,
-    setVisibleTriggers = _useIncompleteTrigger.setVisibleTriggers,
-    visibleIncompleteTriggers = _useIncompleteTrigger.visibleTriggers;
+  var _useEntireStore2 = useEntireStore(),
+    setIncompleteTriggers = _useEntireStore2.setIncompleteTriggers,
+    visibleIncompleteTriggers = _useEntireStore2.visibleTriggersIssuedByIncomplete;
   var combinedTriggers = React__default.useMemo(function () {
     var _combinedTriggers = [].concat(pageTriggers, visibleIncompleteTriggers);
     return _combinedTriggers;
@@ -3279,10 +3165,6 @@ function CollectorProvider(_ref) {
     })) return true;
     return false;
   }, [displayedTriggersIds, combinedTriggers]);
-  var _useDifiStore = useDifiStore(function (s) {
-      return s;
-    }),
-    appendTrigger = _useDifiStore.appendTrigger;
   var setDisplayedTriggerByInvocation = React__default.useCallback(function (invocation, shouldAllowMultipleSimultaneous) {
     if (shouldAllowMultipleSimultaneous === void 0) {
       shouldAllowMultipleSimultaneous = false;
@@ -3297,7 +3179,7 @@ function CollectorProvider(_ref) {
       }
       if (invokableTrigger.behaviour === 'BEHAVIOUR_BANNER') {
         log('Banners can be stacked up, setting as visible.', invokableTrigger);
-        appendTrigger(invokableTrigger);
+        addDisplayedTrigger(invokableTrigger);
         return;
       }
       if (!shouldAllowMultipleSimultaneous && getIsBehaviourVisible(invokableTrigger.behaviour)) {
@@ -3305,38 +3187,13 @@ function CollectorProvider(_ref) {
         return;
       }
       log('CollectorProvider: Triggering behaviour', invokableTrigger);
-      appendTrigger(invokableTrigger);
+      addDisplayedTrigger(invokableTrigger);
     });
-  }, [combinedTriggers, getIsBehaviourVisible, log, appendTrigger]);
+  }, [combinedTriggers, getIsBehaviourVisible, log, addDisplayedTrigger]);
   React.useEffect(function () {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [visibleIncompleteTriggers, setDisplayedTriggerByInvocation]);
-  var getHandlerForTrigger = React__default.useCallback(function (_trigger) {
-    var potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(function (handler) {
-      return handler.behaviour === _trigger.behaviour;
-    });
-    if (!potentialHandler) return null;
-    return potentialHandler;
-  }, [handlers]);
-  var removeActiveTrigger = React.useCallback(function (id) {
-    log("CollectorProvider: removing id:" + id + " from displayedTriggersIds");
-    var refreshedTriggers = displayedTriggersIds.filter(function (triggerId) {
-      return triggerId !== id;
-    });
-    setDisplayedTriggers(refreshedTriggers);
-    setIncompleteTriggers(function (prev) {
-      return prev.filter(function (trigger) {
-        return trigger.id !== id;
-      });
-    });
-    setVisibleTriggers(function (prev) {
-      return prev.filter(function (trigger) {
-        return trigger.id !== id;
-      });
-    });
-    removePageTrigger(id);
-  }, [log, displayedTriggersIds, setDisplayedTriggers, setIncompleteTriggers, setVisibleTriggers, removePageTrigger]);
   var TriggerComponent = React__default.useCallback(function () {
     if (!displayedTriggersIds) return null;
     var activeTriggers = combinedTriggers.filter(function (trigger) {
@@ -3572,8 +3429,6 @@ function CollectorProvider(_ref) {
     delay: initialDelay,
     name: 'fireOnLoadTriggers'
   });
-  useFormCollector();
-  useButtonCollector();
   var onPresenseChange = React__default.useCallback(function (presence) {
     log('presence changed', presence);
   }, [log]);
@@ -3644,7 +3499,116 @@ var useInitSession = function useInitSession() {
   }, [appId, booted]);
 };
 
-var queryClient = new reactQuery.QueryClient();
+var init = function init(cfg) {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+var useTrackingInit = function useTrackingInit() {
+  var _useFingerprint = useFingerprint(),
+    appId = _useFingerprint.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useDifiStore = useDifiStore(function (s) {
+      return s.tracking;
+    }),
+    initiated = _useDifiStore.initiated;
+  var _useEntireStore = useEntireStore(),
+    set = _useEntireStore.set;
+  var _useTracking = useTracking(),
+    registerUserData = _useTracking.registerUserData;
+  React.useEffect(function () {
+    if (!appId) return;
+    if (!visitor.id) return;
+    if (initiated) return;
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    set(function (prev) {
+      return {
+        tracking: _extends({}, prev.tracking, {
+          initiated: true
+        })
+      };
+    });
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id, set, initiated, log, registerUserData]);
+  React.useEffect(function () {
+    if (!initiated) return;
+    if (!visitor.id) return;
+    if (!visitor.cohort) {
+      log('Able to register user cohort, but none provided. ');
+      return;
+    }
+    log('Registering user.cohort');
+    registerUserData({
+      u_cohort: visitor.cohort
+    });
+  }, [visitor, registerUserData, initiated, log]);
+  React.useEffect(function () {
+    if (!visitor.sourceId) return;
+    registerUserData({
+      sourceId: visitor.sourceId
+    });
+  }, [visitor, registerUserData]);
+};
+
+var getRecursivelyPotentialButton = function getRecursivelyPotentialButton(el) {
+  var _el$nodeName;
+  if (!el) return null;
+  if (((_el$nodeName = el.nodeName) === null || _el$nodeName === void 0 ? void 0 : _el$nodeName.toLowerCase()) === 'button') return el;
+  if (el.parentElement) return getRecursivelyPotentialButton(el.parentElement);
+  return null;
+};
+function useButtonCollector() {
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent;
+  var buttonClickListener = React__default.useCallback(function (e) {
+    console.log('here!', 1);
+    if (!e.target) return;
+    console.log('here!', 2);
+    var potentialButton = getRecursivelyPotentialButton(e.target);
+    console.log('here!', 3);
+    if (!potentialButton) return;
+    console.log('here!', 4);
+    var button = potentialButton;
+    console.log('here!', 5);
+    if (button.type === 'submit') return;
+    console.log('here!', 6);
+    log('useButtonCollector: button clicked', {
+      button: button
+    });
+    console.log('here!', 7);
+    collect({
+      button: {
+        id: button.id,
+        selector: button.innerText
+      }
+    });
+    trackEvent('button_clicked', button);
+  }, [collect, log, trackEvent]);
+  React.useEffect(function () {
+    if (isUndefined('document')) return;
+    if (!visitor.id) return;
+    document.addEventListener('click', buttonClickListener);
+    return function () {
+      document.removeEventListener('click', buttonClickListener);
+    };
+  }, [buttonClickListener, visitor]);
+}
+
 var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   var _useState = React.useState(consent),
     consentGiven = _useState[0],
@@ -3671,10 +3635,81 @@ var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   }, [consentCallback, consent]);
   return consentGiven;
 };
-var FingerprintProvider = function FingerprintProvider(props) {
+
+function useFormCollector() {
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent;
+  React.useEffect(function () {
+    if (isUndefined('document')) return;
+    if (!visitor.id) return;
+    var formSubmitListener = function formSubmitListener(e) {
+      var _e$target$nodeName, _form$getAttribute;
+      if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
+      var form = e === null || e === void 0 ? void 0 : e.target;
+      if ((_form$getAttribute = form.getAttribute('id')) !== null && _form$getAttribute !== void 0 && _form$getAttribute.includes(cnmFormPrefix)) {
+        log('Skipping form collection since this is a C&M form');
+        return;
+      }
+      var data = getFormEntries(form, {
+        bannedFieldPartialNames: [],
+        bannedTypes: []
+      });
+      log('useFormCollector: form submitted', {
+        data: data
+      });
+      trackEvent('form_submitted', {
+        id: form.id,
+        name: form.name
+      });
+      collect({
+        form: {
+          data: data
+        }
+      });
+    };
+    document.removeEventListener('submit', formSubmitListener);
+    document.addEventListener('submit', formSubmitListener);
+    return function () {
+      document.removeEventListener('submit', formSubmitListener);
+    };
+  }, [visitor]);
+}
+
+var interval = 250;
+var useIncompleteTriggers = function useIncompleteTriggers() {
+  var _useEntireStore = useEntireStore(),
+    incompleteTriggers = _useEntireStore.incompleteTriggers,
+    setVisibleTriggersIssuedByIncomplete = _useEntireStore.setVisibleTriggersIssuedByIncomplete;
+  var _useEntireStore2 = useEntireStore(),
+    set = _useEntireStore2.set;
+  var scan = React__default.useCallback(function () {
+    var validTriggers = incompleteTriggers.filter(function (trigger) {
+      var shouldTrigger = validateSignalChain(trigger.signals);
+      if (!shouldTrigger) return false;
+      return true;
+    });
+    if (!validTriggers.length) return;
+    setVisibleTriggersIssuedByIncomplete(validTriggers);
+  }, [set, incompleteTriggers, setVisibleTriggersIssuedByIncomplete]);
+  React.useEffect(function () {
+    if (!incompleteTriggers.length) return;
+    var intId = setInterval(scan, interval);
+    return function () {
+      clearInterval(intId);
+    };
+  }, [incompleteTriggers, setVisibleTriggersIssuedByIncomplete]);
+};
+
+var queryClient = new reactQuery.QueryClient();
+var Provider = function Provider(props) {
   var _useEntireStore = useEntireStore(),
     set = _useEntireStore.set,
-    handlers = _useEntireStore.handlers,
     addHandlers = _useEntireStore.addHandlers,
     difiProps = _useEntireStore.difiProps;
   var booted = difiProps.booted,
@@ -3697,8 +3732,12 @@ var FingerprintProvider = function FingerprintProvider(props) {
     });
     addHandlers(defaultHandlers || []);
   }, [props]);
+  useTrackingInit();
   useInitVisitor();
   useInitSession();
+  useIncompleteTriggers();
+  useFormCollector();
+  useButtonCollector();
   var consentGiven = useConsentCheck(consent, consentCallback);
   React.useEffect(function () {
     if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
@@ -3722,19 +3761,19 @@ var FingerprintProvider = function FingerprintProvider(props) {
     return children;
   }
   if (!booted) {
-    console.log('booting Difi...');
     return null;
   }
+  return React__default.createElement(CollectorProvider, null, children);
+};
+var FingerprintProvider = function FingerprintProvider(props) {
   return React__default.createElement(reactQuery.QueryClientProvider, {
     client: queryClient
-  }, React__default.createElement(CollectorProvider, {
-    handlers: handlers
   }, React__default.createElement(reactErrorBoundary.ErrorBoundary, {
     onError: function onError(error, info) {
       return console.error(error, info);
     },
     fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children)));
+  }, React__default.createElement(Provider, Object.assign({}, props))));
 };
 
 exports.CollectorContext = CollectorContext;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useSeenMutation } from '../../hooks/api/useSeenMutation'
-import { useTracking } from '../../hooks/init/useInitTracking'
+import { useTracking } from '../../hooks/init/useTracking'
 import { useCollector } from '../../hooks/useCollector'
 import { BannerTrigger } from './Banner.types'
 import HorizontalBanner from './Components/HorizontalBanner'

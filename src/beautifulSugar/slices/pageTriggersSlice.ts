@@ -1,4 +1,3 @@
-import { Session } from 'inspector'
 import uniqueBy from 'lodash.uniqby'
 import { StateCreator } from 'zustand'
 import { Trigger } from '../../client/types'
@@ -8,10 +7,11 @@ import { Get, Set } from '../types'
 export type PageTriggersSlice = {
   pageTriggers: Trigger[]
   displayedTriggersIds: Trigger['id'][]
-  appendTrigger: (invokableTrigger: Trigger) => void
+  addDisplayedTrigger: (invokableTrigger: Trigger) => void
   setDisplayedTriggers: (triggers: Trigger['id'][]) => void
   setPageTriggers: (triggers: Trigger[]) => void
   removePageTrigger: (id: Trigger['id']) => void
+  removeActiveTrigger: (id: Trigger['id']) => void
 }
 
 export const createPagetriggersSlice: StateCreator<
@@ -22,13 +22,12 @@ export const createPagetriggersSlice: StateCreator<
 > = (set: Set, get: Get) => ({
   pageTriggers: [],
   displayedTriggersIds: [],
-  session: {} as Session,
   setDisplayedTriggers: (triggers: Trigger['id'][]) => {
     set(() => ({
       displayedTriggersIds: triggers
     }))
   },
-  appendTrigger: (invokableTrigger: Trigger) => {
+  addDisplayedTrigger: (invokableTrigger: Trigger) => {
     set((prev: DifiStore) => {
       if (prev.displayedTriggersIds.includes(invokableTrigger.id)) return prev
 
@@ -40,7 +39,6 @@ export const createPagetriggersSlice: StateCreator<
       }
     })
   },
-
   setPageTriggers: (triggers: Trigger[]) => {
     const displayedTriggers = get().displayedTriggersIds
 
@@ -62,5 +60,38 @@ export const createPagetriggersSlice: StateCreator<
     set((prev: PageTriggersSlice) => ({
       pageTriggers: prev.pageTriggers.filter((trigger) => trigger.id !== id)
     }))
+  },
+  removeActiveTrigger: (id: Trigger['id']) => {
+    const {
+      displayedTriggersIds,
+      setDisplayedTriggers,
+      incompleteTriggers,
+      setIncompleteTriggers,
+      visibleTriggersIssuedByIncomplete,
+      setVisibleTriggersIssuedByIncomplete,
+      removePageTrigger
+    } = get()
+
+    // log(`CollectorProvider: removing id:${id} from displayedTriggersIds`)
+
+    const refreshedTriggers = displayedTriggersIds.filter(
+      (triggerId: Trigger['id']) => triggerId !== id
+    )
+
+    setDisplayedTriggers(refreshedTriggers)
+
+    const updatedIncompleteTriggers = incompleteTriggers.filter(
+      (trigger) => trigger.id !== id
+    )
+
+    setIncompleteTriggers(updatedIncompleteTriggers)
+    const updatedVisibleIncompleteTriggers =
+      visibleTriggersIssuedByIncomplete.filter((trigger) => trigger.id !== id)
+    setVisibleTriggersIssuedByIncomplete(updatedVisibleIncompleteTriggers)
+    removePageTrigger(id)
   }
+
+  // rely on combined triggers:
+
+  // setDisplayedTriggerByInvocation:
 })

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { SupportedBrand } from '../utils/brand'
-import { useTracking } from './init/useInitTracking'
+import { useTracking } from './init/useTracking'
 import { useBrand } from './useBrandConfig'
 import { useLogging } from './useLogging'
 

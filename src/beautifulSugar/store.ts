@@ -2,6 +2,10 @@
 import { create } from 'zustand'
 import { ConfigSlice, createConfigSlice } from './slices/configSlice'
 import { createHandlersSlice, HandlersSlice } from './slices/handlersSlice'
+import {
+  createincompleteTriggersSlice,
+  IncompleteTriggersSlice
+} from './slices/incompleteTriggersSlice'
 import { createMutualSlice, MutualSlice } from './slices/mutualSlice'
 import {
   createPagetriggersSlice,
@@ -16,7 +20,8 @@ export type DifiStore = PageTriggersSlice &
   MutualSlice &
   HandlersSlice &
   VisitorSlice &
-  TrackingSlice
+  TrackingSlice &
+  IncompleteTriggersSlice
 
 export const useDifiStore: UseDifiStore = create((...beautifulSugar) => ({
   ...createPagetriggersSlice(...beautifulSugar),
@@ -24,7 +29,8 @@ export const useDifiStore: UseDifiStore = create((...beautifulSugar) => ({
   ...createMutualSlice(...beautifulSugar),
   ...createHandlersSlice(...beautifulSugar),
   ...createVisitorSlice(...beautifulSugar),
-  ...createTrackingSlice(...beautifulSugar)
+  ...createTrackingSlice(...beautifulSugar),
+  ...createincompleteTriggersSlice(...beautifulSugar)
 }))
 
 export const useEntireStore = () => useDifiStore((s) => s)

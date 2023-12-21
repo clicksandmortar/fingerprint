@@ -1,4 +1,4 @@
-import React__default, { useEffect, useState, useContext, useMemo, useRef, memo, createElement, useCallback, createContext } from 'react';
+import React__default, { useEffect, useContext, useState, useMemo, useRef, memo, createElement, useCallback, createContext } from 'react';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 import { create } from 'zustand';
@@ -421,58 +421,20 @@ const useInitVisitor = () => {
 };
 const useVisitor = () => useDifiStore(s => s);
 
-const init = cfg => {
-  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
-    debug: cfg.debug,
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
-};
 const trackEvent = (event, props, callback) => {
   return mixpanel.track(event, props, callback);
 };
 const useTracking = () => {
   const {
-    appId
-  } = useFingerprint();
-  const {
-    visitor
-  } = useVisitor();
+    initiated
+  } = useDifiStore(s => s.tracking);
   const {
     log
   } = useLogging();
-  const [initiated, setInitiated] = useState(false);
-  useEffect(() => {
-    if (!appId || !visitor.id) {
-      return;
-    }
-    log('MixpanelProvider: booting');
-    init({
-      debug: true
-    });
-    setInitiated(true);
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
-    mixpanel.identify(visitor.id);
-  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id]);
   const registerUserData = React__default.useCallback(properties => {
     log(`Mixpanel: attempting to'register/override properties: ${Object.keys(properties).join(', ')}`);
     mixpanel.people.set(properties);
   }, [log]);
-  useEffect(() => {
-    if (!visitor.cohort) {
-      log('Able to register user cohort, but none provided. ');
-      return;
-    }
-    registerUserData({
-      u_cohort: visitor.cohort
-    });
-  }, [visitor, registerUserData]);
-  useEffect(() => {
-    if (!visitor.sourceId) return;
-    registerUserData({
-      sourceId: visitor.sourceId
-    });
-  }, [visitor, registerUserData]);
   return {
     trackEvent,
     registerUserData,
@@ -3342,7 +3304,24 @@ const createHandlersSlice = (set, get) => ({
     set({
       handlers: [...get().handlers, ...handlers]
     });
+  },
+  getHandlerForTrigger: _trigger => {
+    var _get$handlers;
+    const potentialHandler = (_get$handlers = get().handlers) === null || _get$handlers === void 0 ? void 0 : _get$handlers.find(handler => handler.behaviour === _trigger.behaviour);
+    if (!potentialHandler) return null;
+    return potentialHandler;
   }
+});
+
+const createincompleteTriggersSlice = (set, _get) => ({
+  incompleteTriggers: [],
+  setIncompleteTriggers: val => set({
+    incompleteTriggers: val
+  }),
+  visibleTriggersIssuedByIncomplete: [],
+  setVisibleTriggersIssuedByIncomplete: val => set({
+    visibleTriggersIssuedByIncomplete: val
+  })
 });
 
 const createMutualSlice = (set, get) => ({
@@ -3366,13 +3345,12 @@ const defaultFingerprintState = {
 const createPagetriggersSlice = (set, get) => ({
   pageTriggers: [],
   displayedTriggersIds: [],
-  session: {},
   setDisplayedTriggers: triggers => {
     set(() => ({
       displayedTriggersIds: triggers
     }));
   },
-  appendTrigger: invokableTrigger => {
+  addDisplayedTrigger: invokableTrigger => {
     set(prev => {
       if (prev.displayedTriggersIds.includes(invokableTrigger.id)) return prev;
       return {
@@ -3393,6 +3371,24 @@ const createPagetriggersSlice = (set, get) => ({
     set(prev => ({
       pageTriggers: prev.pageTriggers.filter(trigger => trigger.id !== id)
     }));
+  },
+  removeActiveTrigger: id => {
+    const {
+      displayedTriggersIds,
+      setDisplayedTriggers,
+      incompleteTriggers,
+      setIncompleteTriggers,
+      visibleTriggersIssuedByIncomplete,
+      setVisibleTriggersIssuedByIncomplete,
+      removePageTrigger
+    } = get();
+    const refreshedTriggers = displayedTriggersIds.filter(triggerId => triggerId !== id);
+    setDisplayedTriggers(refreshedTriggers);
+    const updatedIncompleteTriggers = incompleteTriggers.filter(trigger => trigger.id !== id);
+    setIncompleteTriggers(updatedIncompleteTriggers);
+    const updatedVisibleIncompleteTriggers = visibleTriggersIssuedByIncomplete.filter(trigger => trigger.id !== id);
+    setVisibleTriggersIssuedByIncomplete(updatedVisibleIncompleteTriggers);
+    removePageTrigger(id);
   }
 });
 
@@ -3428,7 +3424,8 @@ const useDifiStore = create((...beautifulSugar) => ({
   ...createMutualSlice(...beautifulSugar),
   ...createHandlersSlice(...beautifulSugar),
   ...createVisitorSlice(...beautifulSugar),
-  ...createTrackingSlice(...beautifulSugar)
+  ...createTrackingSlice(...beautifulSugar),
+  ...createincompleteTriggersSlice(...beautifulSugar)
 }));
 const useEntireStore = () => useDifiStore(s => s);
 
@@ -3475,53 +3472,6 @@ function useCollinsBookingComplete() {
   return {
     checkCollinsBookingComplete
   };
-}
-
-const getRecursivelyPotentialButton = el => {
-  var _el$nodeName;
-  if (!el) return null;
-  if (((_el$nodeName = el.nodeName) === null || _el$nodeName === void 0 ? void 0 : _el$nodeName.toLowerCase()) === 'button') return el;
-  if (el.parentElement) return getRecursivelyPotentialButton(el.parentElement);
-  return null;
-};
-function useButtonCollector() {
-  const {
-    mutateAsync: collect
-  } = useCollectorMutation();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    log
-  } = useLogging();
-  const {
-    trackEvent
-  } = useTracking();
-  useEffect(() => {
-    if (isUndefined('document')) return;
-    if (!visitor.id) return;
-    const buttonClickListener = e => {
-      if (!e.target) return;
-      const potentialButton = getRecursivelyPotentialButton(e.target);
-      if (!potentialButton) return;
-      const button = potentialButton;
-      if (button.type === 'submit') return;
-      log('useButtonCollector: button clicked', {
-        button
-      });
-      trackEvent('button_clicked', button);
-      collect({
-        button: {
-          id: button.id,
-          selector: button.innerText
-        }
-      });
-    };
-    document.addEventListener('click', buttonClickListener);
-    return () => {
-      document.removeEventListener('click', buttonClickListener);
-    };
-  }, [visitor]);
 }
 
 const getIsVisible = selector => {
@@ -3628,85 +3578,6 @@ const useExitIntentDelay = (delay = 0) => {
   }, [delay]);
   return {
     hasDelayPassed
-  };
-};
-
-function useFormCollector() {
-  const {
-    mutateAsync: collect
-  } = useCollectorMutation();
-  const {
-    visitor
-  } = useVisitor();
-  const {
-    log
-  } = useLogging();
-  const {
-    trackEvent
-  } = useTracking();
-  useEffect(() => {
-    if (isUndefined('document')) return;
-    if (!visitor.id) return;
-    const formSubmitListener = e => {
-      var _e$target$nodeName, _form$getAttribute;
-      if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
-      const form = e === null || e === void 0 ? void 0 : e.target;
-      if ((_form$getAttribute = form.getAttribute('id')) !== null && _form$getAttribute !== void 0 && _form$getAttribute.includes(cnmFormPrefix)) {
-        log('Skipping form collection since this is a C&M form');
-        return;
-      }
-      const data = getFormEntries(form, {
-        bannedFieldPartialNames: [],
-        bannedTypes: []
-      });
-      log('useFormCollector: form submitted', {
-        data
-      });
-      trackEvent('form_submitted', {
-        id: form.id,
-        name: form.name
-      });
-      collect({
-        form: {
-          data
-        }
-      });
-    };
-    document.removeEventListener('submit', formSubmitListener);
-    document.addEventListener('submit', formSubmitListener);
-    return () => {
-      document.removeEventListener('submit', formSubmitListener);
-    };
-  }, [visitor]);
-}
-
-const interval = 250;
-const useIncompleteTriggers = () => {
-  const [incompleteTriggers, setIncompleteTriggers] = useState([]);
-  const [visibleTriggers, setVisibleTriggers] = useState([]);
-  const scan = React__default.useCallback(() => {
-    const validTriggers = incompleteTriggers.filter(trigger => {
-      const shouldTrigger = validateSignalChain(trigger.signals);
-      if (!shouldTrigger) return false;
-      return true;
-    });
-    setVisibleTriggers(prev => {
-      if (!validTriggers.length) return prev;
-      return validTriggers;
-    });
-  }, [setVisibleTriggers, incompleteTriggers]);
-  useEffect(() => {
-    if (!incompleteTriggers.length) return;
-    const intId = setInterval(scan, interval);
-    return () => {
-      clearInterval(intId);
-    };
-  }, [incompleteTriggers, getIsVisible, setVisibleTriggers]);
-  return {
-    incompleteTriggers,
-    setIncompleteTriggers,
-    setVisibleTriggers,
-    visibleTriggers
   };
 };
 
@@ -3891,8 +3762,7 @@ const hasVisitorIDInURL = () => {
 };
 
 function CollectorProvider({
-  children,
-  handlers = []
+  children
 }) {
   const {
     log,
@@ -3902,13 +3772,18 @@ function CollectorProvider({
     config,
     visitor,
     setVisitor,
-    removePageTrigger,
     pageTriggers,
     displayedTriggersIds,
     setPageTriggers,
-    setDisplayedTriggers,
+    addDisplayedTrigger,
+    getHandlerForTrigger,
+    removeActiveTrigger,
     set,
+    tracking: {
+      initiated: mixpanelBooted
+    },
     difiProps: {
+      defaultHandlers: handlers,
       initialDelay,
       exitIntentTriggers,
       idleTriggers,
@@ -3917,10 +3792,7 @@ function CollectorProvider({
     }
   } = useEntireStore();
   const {
-    trackEvent,
-    state: {
-      initiated: mixpanelBooted
-    }
+    trackEvent
   } = useTracking();
   const {
     canNextTriggerOccur,
@@ -3944,7 +3816,6 @@ function CollectorProvider({
     }
   });
   const [idleTimeout, setIdleTimeout] = useState(getIdleStatusDelay());
-  const {} = useEntireStore();
   const {
     setIntently
   } = useIntently();
@@ -3955,9 +3826,8 @@ function CollectorProvider({
   const brand = useBrand();
   const {
     setIncompleteTriggers,
-    setVisibleTriggers,
-    visibleTriggers: visibleIncompleteTriggers
-  } = useIncompleteTriggers();
+    visibleTriggersIssuedByIncomplete: visibleIncompleteTriggers
+  } = useEntireStore();
   const combinedTriggers = React__default.useMemo(() => {
     const _combinedTriggers = [...pageTriggers, ...visibleIncompleteTriggers];
     return _combinedTriggers;
@@ -3970,9 +3840,6 @@ function CollectorProvider({
     })) return true;
     return false;
   }, [displayedTriggersIds, combinedTriggers]);
-  const {
-    appendTrigger
-  } = useDifiStore(s => s);
   const setDisplayedTriggerByInvocation = React__default.useCallback((invocation, shouldAllowMultipleSimultaneous = false) => {
     const invokableTriggers = combinedTriggers.filter(trigger => trigger.invocation === invocation);
     invokableTriggers.forEach(invokableTrigger => {
@@ -3982,7 +3849,7 @@ function CollectorProvider({
       }
       if (invokableTrigger.behaviour === 'BEHAVIOUR_BANNER') {
         log('Banners can be stacked up, setting as visible.', invokableTrigger);
-        appendTrigger(invokableTrigger);
+        addDisplayedTrigger(invokableTrigger);
         return;
       }
       if (!shouldAllowMultipleSimultaneous && getIsBehaviourVisible(invokableTrigger.behaviour)) {
@@ -3990,26 +3857,13 @@ function CollectorProvider({
         return;
       }
       log('CollectorProvider: Triggering behaviour', invokableTrigger);
-      appendTrigger(invokableTrigger);
+      addDisplayedTrigger(invokableTrigger);
     });
-  }, [combinedTriggers, getIsBehaviourVisible, log, appendTrigger]);
+  }, [combinedTriggers, getIsBehaviourVisible, log, addDisplayedTrigger]);
   useEffect(() => {
     if (!(visibleIncompleteTriggers !== null && visibleIncompleteTriggers !== void 0 && visibleIncompleteTriggers.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [visibleIncompleteTriggers, setDisplayedTriggerByInvocation]);
-  const getHandlerForTrigger = React__default.useCallback(_trigger => {
-    const potentialHandler = handlers === null || handlers === void 0 ? void 0 : handlers.find(handler => handler.behaviour === _trigger.behaviour);
-    if (!potentialHandler) return null;
-    return potentialHandler;
-  }, [handlers]);
-  const removeActiveTrigger = useCallback(id => {
-    log(`CollectorProvider: removing id:${id} from displayedTriggersIds`);
-    const refreshedTriggers = displayedTriggersIds.filter(triggerId => triggerId !== id);
-    setDisplayedTriggers(refreshedTriggers);
-    setIncompleteTriggers(prev => prev.filter(trigger => trigger.id !== id));
-    setVisibleTriggers(prev => prev.filter(trigger => trigger.id !== id));
-    removePageTrigger(id);
-  }, [log, displayedTriggersIds, setDisplayedTriggers, setIncompleteTriggers, setVisibleTriggers, removePageTrigger]);
   const TriggerComponent = React__default.useCallback(() => {
     if (!displayedTriggersIds) return null;
     const activeTriggers = combinedTriggers.filter(trigger => displayedTriggersIds.includes(trigger.id));
@@ -4234,8 +4088,6 @@ function CollectorProvider({
     delay: initialDelay,
     name: 'fireOnLoadTriggers'
   });
-  useFormCollector();
-  useButtonCollector();
   const onPresenseChange = React__default.useCallback(presence => {
     log('presence changed', presence);
   }, [log]);
@@ -4310,7 +4162,123 @@ const useInitSession = () => {
   }, [appId, booted]);
 };
 
-const queryClient = new QueryClient();
+const init = cfg => {
+  mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
+    debug: cfg.debug,
+    track_pageview: true,
+    persistence: 'localStorage'
+  });
+};
+const useTrackingInit = () => {
+  const {
+    appId
+  } = useFingerprint();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  const {
+    initiated
+  } = useDifiStore(s => s.tracking);
+  const {
+    set
+  } = useEntireStore();
+  const {
+    registerUserData
+  } = useTracking();
+  useEffect(() => {
+    if (!appId) return;
+    if (!visitor.id) return;
+    if (initiated) return;
+    log('MixpanelProvider: booting');
+    init({
+      debug: true
+    });
+    set(prev => ({
+      tracking: {
+        ...prev.tracking,
+        initiated: true
+      }
+    }));
+    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    mixpanel.identify(visitor.id);
+  }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id, set, initiated, log, registerUserData]);
+  useEffect(() => {
+    if (!initiated) return;
+    if (!visitor.id) return;
+    if (!visitor.cohort) {
+      log('Able to register user cohort, but none provided. ');
+      return;
+    }
+    log('Registering user.cohort');
+    registerUserData({
+      u_cohort: visitor.cohort
+    });
+  }, [visitor, registerUserData, initiated, log]);
+  useEffect(() => {
+    if (!visitor.sourceId) return;
+    registerUserData({
+      sourceId: visitor.sourceId
+    });
+  }, [visitor, registerUserData]);
+};
+
+const getRecursivelyPotentialButton = el => {
+  var _el$nodeName;
+  if (!el) return null;
+  if (((_el$nodeName = el.nodeName) === null || _el$nodeName === void 0 ? void 0 : _el$nodeName.toLowerCase()) === 'button') return el;
+  if (el.parentElement) return getRecursivelyPotentialButton(el.parentElement);
+  return null;
+};
+function useButtonCollector() {
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  const {
+    trackEvent
+  } = useTracking();
+  const buttonClickListener = React__default.useCallback(e => {
+    console.log('here!', 1);
+    if (!e.target) return;
+    console.log('here!', 2);
+    const potentialButton = getRecursivelyPotentialButton(e.target);
+    console.log('here!', 3);
+    if (!potentialButton) return;
+    console.log('here!', 4);
+    const button = potentialButton;
+    console.log('here!', 5);
+    if (button.type === 'submit') return;
+    console.log('here!', 6);
+    log('useButtonCollector: button clicked', {
+      button
+    });
+    console.log('here!', 7);
+    collect({
+      button: {
+        id: button.id,
+        selector: button.innerText
+      }
+    });
+    trackEvent('button_clicked', button);
+  }, [collect, log, trackEvent]);
+  useEffect(() => {
+    if (isUndefined('document')) return;
+    if (!visitor.id) return;
+    document.addEventListener('click', buttonClickListener);
+    return () => {
+      document.removeEventListener('click', buttonClickListener);
+    };
+  }, [buttonClickListener, visitor]);
+}
+
 const useConsentCheck = (consent, consentCallback) => {
   const [consentGiven, setConsentGiven] = useState(consent);
   const {
@@ -4334,10 +4302,87 @@ const useConsentCheck = (consent, consentCallback) => {
   }, [consentCallback, consent]);
   return consentGiven;
 };
-const FingerprintProvider = props => {
+
+function useFormCollector() {
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  const {
+    trackEvent
+  } = useTracking();
+  useEffect(() => {
+    if (isUndefined('document')) return;
+    if (!visitor.id) return;
+    const formSubmitListener = e => {
+      var _e$target$nodeName, _form$getAttribute;
+      if (((_e$target$nodeName = e.target.nodeName) === null || _e$target$nodeName === void 0 ? void 0 : _e$target$nodeName.toLowerCase()) !== 'form') return;
+      const form = e === null || e === void 0 ? void 0 : e.target;
+      if ((_form$getAttribute = form.getAttribute('id')) !== null && _form$getAttribute !== void 0 && _form$getAttribute.includes(cnmFormPrefix)) {
+        log('Skipping form collection since this is a C&M form');
+        return;
+      }
+      const data = getFormEntries(form, {
+        bannedFieldPartialNames: [],
+        bannedTypes: []
+      });
+      log('useFormCollector: form submitted', {
+        data
+      });
+      trackEvent('form_submitted', {
+        id: form.id,
+        name: form.name
+      });
+      collect({
+        form: {
+          data
+        }
+      });
+    };
+    document.removeEventListener('submit', formSubmitListener);
+    document.addEventListener('submit', formSubmitListener);
+    return () => {
+      document.removeEventListener('submit', formSubmitListener);
+    };
+  }, [visitor]);
+}
+
+const interval = 250;
+const useIncompleteTriggers = () => {
+  const {
+    incompleteTriggers,
+    setVisibleTriggersIssuedByIncomplete
+  } = useEntireStore();
+  const {
+    set
+  } = useEntireStore();
+  const scan = React__default.useCallback(() => {
+    const validTriggers = incompleteTriggers.filter(trigger => {
+      const shouldTrigger = validateSignalChain(trigger.signals);
+      if (!shouldTrigger) return false;
+      return true;
+    });
+    if (!validTriggers.length) return;
+    setVisibleTriggersIssuedByIncomplete(validTriggers);
+  }, [set, incompleteTriggers, setVisibleTriggersIssuedByIncomplete]);
+  useEffect(() => {
+    if (!incompleteTriggers.length) return;
+    const intId = setInterval(scan, interval);
+    return () => {
+      clearInterval(intId);
+    };
+  }, [incompleteTriggers, setVisibleTriggersIssuedByIncomplete]);
+};
+
+const queryClient = new QueryClient();
+const Provider = props => {
   const {
     set,
-    handlers,
     addHandlers,
     difiProps
   } = useEntireStore();
@@ -4364,8 +4409,12 @@ const FingerprintProvider = props => {
     });
     addHandlers(defaultHandlers || []);
   }, [props]);
+  useTrackingInit();
   useInitVisitor();
   useInitSession();
+  useIncompleteTriggers();
+  useFormCollector();
+  useButtonCollector();
   const consentGiven = useConsentCheck(consent, consentCallback);
   useEffect(() => {
     if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
@@ -4384,18 +4433,16 @@ const FingerprintProvider = props => {
     return children;
   }
   if (!booted) {
-    console.log('booting Difi...');
     return null;
   }
-  return React__default.createElement(QueryClientProvider, {
-    client: queryClient
-  }, React__default.createElement(CollectorProvider, {
-    handlers: handlers
-  }, React__default.createElement(ErrorBoundary, {
-    onError: (error, info) => console.error(error, info),
-    fallback: React__default.createElement("div", null, "An application error occurred.")
-  }, children)));
+  return React__default.createElement(CollectorProvider, null, children);
 };
+const FingerprintProvider = props => React__default.createElement(QueryClientProvider, {
+  client: queryClient
+}, React__default.createElement(ErrorBoundary, {
+  onError: (error, info) => console.error(error, info),
+  fallback: React__default.createElement("div", null, "An application error occurred.")
+}, React__default.createElement(Provider, Object.assign({}, props))));
 
 export { CollectorContext, CollectorProvider, FingerprintProvider, onCookieChanged, useCollector, useFingerprint };
 //# sourceMappingURL=index.modern.js.map

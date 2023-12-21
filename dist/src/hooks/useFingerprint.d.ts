@@ -12,4 +12,4 @@ export declare const useFingerprint: () => Pick<import("../beautifulSugar/slices
     config?: import("../client/types").LEGACY_FingerprintConfig | undefined;
 } & {
     children?: import("react").ReactNode;
-}, "appId" | "booted" | "consent" | "exitIntentTriggers" | "idleTriggers" | "pageLoadTriggers" | "initialDelay" | "consentCallback" | "defaultHandlers" | "config" | "children"> & import("zustand/esm/vanilla").StoreApi<import("../beautifulSugar/types").DifiStore>;
+}, "appId" | "booted" | "consent" | "exitIntentTriggers" | "idleTriggers" | "pageLoadTriggers" | "initialDelay" | "consentCallback" | "defaultHandlers" | "config" | "children"> & import("zustand/esm/vanilla").StoreApi<import("../beautifulSugar/store").DifiStore>;

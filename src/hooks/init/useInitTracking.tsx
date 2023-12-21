@@ -1,11 +1,11 @@
-import mixpanel, { Callback, Config } from 'mixpanel-browser'
+import mixpanel, { Config } from 'mixpanel-browser'
 import React, { useEffect } from 'react'
-import { useDifiStore } from '../../beautifulSugar/store'
+import { useDifiStore, useEntireStore } from '../../beautifulSugar/store'
 import { getEnvVars } from '../../utils/getEnvVars'
-import { RegistrableUserProperties } from '../../utils/types'
 import { useFingerprint } from '../useFingerprint'
 import { useLogging } from '../useLogging'
 import { useVisitor } from './useInitVisitor'
+import { useTracking } from './useTracking'
 
 const init = (cfg: Partial<Config>) => {
   mixpanel.init(getEnvVars().MIXPANEL_TOKEN, {
@@ -15,62 +15,54 @@ const init = (cfg: Partial<Config>) => {
   })
 }
 
-// type TrackerState = {
-//   initiated: boolean
-// }
-
-const trackEvent = (event: string, props: any, callback?: Callback): void => {
-  return mixpanel.track(event, props, callback)
-}
-
 export type MixpanelProviderProps = {
   children?: React.ReactNode
 }
 
-export const useInitTracking = () => {
+export const useTrackingInit = () => {
   const { appId } = useFingerprint()
   const { visitor } = useVisitor()
   const { log } = useLogging()
-  const { initiated, setInitiated } = useDifiStore((s) => s.tracking)
+  const { initiated } = useDifiStore((s) => s.tracking)
+  const { set } = useEntireStore()
+
+  const { registerUserData } = useTracking()
 
   useEffect(() => {
-    if (!appId || !visitor.id) {
-      return
-    }
+    if (!appId) return
+    if (!visitor.id) return
+    if (initiated) return
 
     log('MixpanelProvider: booting')
 
+    // setInitiated(true)
     init({ debug: true })
-    setInitiated(true)
+    set((prev) => ({
+      tracking: {
+        ...prev.tracking,
+        initiated: true
+      }
+    }))
 
     log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel')
 
     mixpanel.identify(visitor.id)
-  }, [appId, visitor?.id])
-
-  const registerUserData = React.useCallback(
-    (properties: RegistrableUserProperties) => {
-      log(
-        `Mixpanel: attempting to'register/override properties: ${Object.keys(
-          properties
-        ).join(', ')}`
-      )
-
-      mixpanel.people.set(properties)
-    },
-    [log]
-  )
+  }, [appId, visitor?.id, set, initiated, log, registerUserData])
 
   useEffect(() => {
+    if (!initiated) return
+    if (!visitor.id) return
+
     if (!visitor.cohort) {
       log('Able to register user cohort, but none provided. ')
       return
     }
 
+    log('Registering user.cohort')
     registerUserData({
       u_cohort: visitor.cohort
     })
-  }, [visitor, registerUserData])
+  }, [visitor, registerUserData, initiated, log])
 
   useEffect(() => {
     if (!visitor.sourceId) return
@@ -79,12 +71,4 @@ export const useInitTracking = () => {
       sourceId: visitor.sourceId
     })
   }, [visitor, registerUserData])
-
-  return {
-    trackEvent,
-    registerUserData,
-    state: {
-      initiated
-    }
-  }
 }

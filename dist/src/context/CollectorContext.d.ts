@@ -4,7 +4,7 @@ export declare type CollectorProviderProps = {
     children?: React.ReactNode;
     handlers?: Trigger[];
 };
-export declare function CollectorProvider({ children, handlers }: CollectorProviderProps): React.JSX.Element;
+export declare function CollectorProvider({ children }: CollectorProviderProps): React.JSX.Element;
 export declare type CollectorContextInterface = {
     setPageTriggers: (triggers: Trigger[]) => void;
     setIncompleteTriggers: (triggers: IncompleteTrigger[]) => void;

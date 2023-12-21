@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './api/useCollectorMutation'
-import { useTracking } from './init/useInitTracking'
 import { useVisitor } from './init/useInitVisitor'
+import { useTracking } from './init/useTracking'
 import { useLogging } from './useLogging'
 
 // prepends a dot to the class name and joins multiple classes with dots to make a valid CSS selector
@@ -35,28 +35,26 @@ export default function useButtonCollector() {
   const { mutateAsync: collect } = useCollectorMutation()
   const { visitor } = useVisitor()
   const { log } = useLogging()
-
   const { trackEvent } = useTracking()
+  // console.log({ trackEvent })
 
-  useEffect(() => {
-    if (isUndefined('document')) return
-    if (!visitor.id) return
-
-    const buttonClickListener = (e: any) => {
+  const buttonClickListener = React.useCallback(
+    (e: any) => {
+      console.log('here!', 1)
       if (!e.target) return
-
+      console.log('here!', 2)
       const potentialButton = getRecursivelyPotentialButton(e.target)
-
+      console.log('here!', 3)
       // makes sure we fire this when clicking on a nested item inside a button
       if (!potentialButton) return
-
+      console.log('here!', 4)
       const button = potentialButton as HTMLButtonElement
-
+      console.log('here!', 5)
       // we dont want to track submitions. useFormCollector is responsible for that
       if (button.type === 'submit') return
-
+      console.log('here!', 6)
       log('useButtonCollector: button clicked', { button })
-      trackEvent('button_clicked', button)
+      console.log('here!', 7)
       collect({
         button: {
           id: button.id,
@@ -68,7 +66,14 @@ export default function useButtonCollector() {
           // selector: getButtonSelector(button)
         }
       })
-    }
+      trackEvent('button_clicked', button)
+    },
+    [collect, log, trackEvent]
+  )
+
+  useEffect(() => {
+    if (isUndefined('document')) return
+    if (!visitor.id) return
 
     // setting one listener on the entire doc rather than for each button
     // TODO: See if the same can be applied to simplify the form collector logic
@@ -77,5 +82,5 @@ export default function useButtonCollector() {
     return () => {
       document.removeEventListener('click', buttonClickListener)
     }
-  }, [visitor])
+  }, [buttonClickListener, visitor])
 }

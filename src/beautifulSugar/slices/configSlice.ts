@@ -1,7 +1,8 @@
 import { StateCreator } from 'zustand'
 import { Config } from '../../client/types'
 import { haveBrandColorsBeenConfigured } from '../../utils/brand'
-import { DifiStore, Get, Set } from '../types'
+import { DifiStore } from '../store'
+import { Get, Set } from '../types'
 import {
   defaultColors,
   defaultConfig,

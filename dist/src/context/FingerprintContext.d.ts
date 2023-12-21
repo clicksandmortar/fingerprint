@@ -1,6 +1,7 @@
-import { PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Handler } from '../client/handler';
 import { LEGACY_FingerprintConfig } from '../client/types';
+/** * @todo - extract */
 export declare type FingerprintProviderProps = PropsWithChildren<{
     appId?: string;
     consent?: boolean;
@@ -22,4 +23,5 @@ export declare type FingerprintProviderProps = PropsWithChildren<{
      */
     config?: LEGACY_FingerprintConfig;
 }>;
-export declare const FingerprintProvider: (props: FingerprintProviderProps) => {} | null | undefined;
+export declare const Provider: (props: FingerprintProviderProps) => {} | null | undefined;
+export declare const FingerprintProvider: (props: FingerprintProviderProps) => React.JSX.Element;

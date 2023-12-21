@@ -3,8 +3,8 @@ import { cnmFormPrefix } from '../components/CnMForm'
 import { getFormEntries } from '../utils/forms'
 import { isUndefined } from '../utils/page'
 import { useCollectorMutation } from './api/useCollectorMutation'
-import { useTracking } from './init/useInitTracking'
 import { useVisitor } from './init/useInitVisitor'
+import { useTracking } from './init/useTracking'
 import { useLogging } from './useLogging'
 
 /**

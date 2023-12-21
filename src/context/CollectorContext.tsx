@@ -3,7 +3,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react'
 import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
-import { useDifiStore, useEntireStore } from '../beautifulSugar/store'
+import { useEntireStore } from '../beautifulSugar/store'
 import {
   CollectorVisitorResponse,
   Conversion,
@@ -11,14 +11,11 @@ import {
   Trigger
 } from '../client/types'
 import { useCollectorMutation } from '../hooks/api/useCollectorMutation'
-import { useInitTracking } from '../hooks/init/useInitTracking'
+import { useTracking } from '../hooks/init/useTracking'
 import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
 import { useBrand } from '../hooks/useBrandConfig'
-import useButtonCollector from '../hooks/useButtonCollector'
 import useConversions from '../hooks/useConversions'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
-import useFormCollector from '../hooks/useFormCollector'
-import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
 import useIntently from '../hooks/useIntently'
 import { useLogging } from '../hooks/useLogging'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
@@ -39,24 +36,23 @@ export type CollectorProviderProps = {
 // - prevent firing the next trigger even if the signal is correct, until the active one is dismissed (which is
 // problematic as CollectorContext is not available in the Trigger component)
 // eslint-disable-next-line require-jsdoc
-export function CollectorProvider({
-  children,
-  handlers = []
-}: CollectorProviderProps) {
+export function CollectorProvider({ children }: CollectorProviderProps) {
   const { log, error } = useLogging()
 
   const {
     config,
     visitor,
     setVisitor,
-    removePageTrigger,
     pageTriggers,
     displayedTriggersIds,
     setPageTriggers,
-    setDisplayedTriggers,
+    addDisplayedTrigger,
+    getHandlerForTrigger,
+    removeActiveTrigger,
     set,
     tracking: { initiated: mixpanelBooted },
     difiProps: {
+      defaultHandlers: handlers,
       initialDelay,
       exitIntentTriggers,
       idleTriggers,
@@ -65,7 +61,7 @@ export function CollectorProvider({
     }
   } = useEntireStore()
 
-  const { trackEvent } = useInitTracking()
+  const { trackEvent } = useTracking()
 
   const {
     canNextTriggerOccur,
@@ -87,8 +83,6 @@ export function CollectorProvider({
     getIdleStatusDelay()
   )
 
-  const {} = useEntireStore()
-
   const { setIntently } = useIntently()
   const [foundWatchers, setFoundWatchers] = useState<Map<string, boolean>>(
     new Map()
@@ -96,13 +90,13 @@ export function CollectorProvider({
 
   const { setConversions } = useConversions()
   const brand = useBrand()
-  // Passing the funcs down to other contexts from here. So please keep it until Collector
-  // is refactored
+
   const {
     setIncompleteTriggers,
-    setVisibleTriggers,
-    visibleTriggers: visibleIncompleteTriggers
-  } = useIncompleteTriggers()
+    // incompleteTriggers,
+    // setVisibleTriggersIssuedByIncomplete: setVisibleTriggers,
+    visibleTriggersIssuedByIncomplete: visibleIncompleteTriggers
+  } = useEntireStore()
 
   const combinedTriggers = React.useMemo(() => {
     const _combinedTriggers = [...pageTriggers, ...visibleIncompleteTriggers]
@@ -127,8 +121,6 @@ export function CollectorProvider({
     [displayedTriggersIds, combinedTriggers]
   )
 
-  const { appendTrigger } = useDifiStore((s) => s)
-
   const setDisplayedTriggerByInvocation = React.useCallback(
     (
       invocation: Trigger['invocation'],
@@ -150,7 +142,7 @@ export function CollectorProvider({
             'Banners can be stacked up, setting as visible.',
             invokableTrigger
           )
-          appendTrigger(invokableTrigger)
+          addDisplayedTrigger(invokableTrigger)
           return
         }
 
@@ -167,10 +159,10 @@ export function CollectorProvider({
 
         log('CollectorProvider: Triggering behaviour', invokableTrigger)
         // if the trigger is already in the list, don't add it again
-        appendTrigger(invokableTrigger)
+        addDisplayedTrigger(invokableTrigger)
       })
     },
-    [combinedTriggers, getIsBehaviourVisible, log, appendTrigger]
+    [combinedTriggers, getIsBehaviourVisible, log, addDisplayedTrigger]
   )
 
   useEffect(() => {
@@ -180,45 +172,6 @@ export function CollectorProvider({
     // will need to be refactored / reworked
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
   }, [visibleIncompleteTriggers, setDisplayedTriggerByInvocation])
-
-  const getHandlerForTrigger = React.useCallback(
-    (_trigger: Trigger) => {
-      const potentialHandler = handlers?.find(
-        (handler) => handler.behaviour === _trigger.behaviour
-      )
-      if (!potentialHandler) return null
-
-      return potentialHandler
-    },
-    [handlers]
-  )
-
-  // const { incompleteTriggers, } = useDifiStore()
-
-  const removeActiveTrigger = useCallback(
-    (id: Trigger['id']) => {
-      log(`CollectorProvider: removing id:${id} from displayedTriggersIds`)
-
-      const refreshedTriggers = displayedTriggersIds.filter(
-        (triggerId: Trigger['id']) => triggerId !== id
-      )
-
-      setDisplayedTriggers(refreshedTriggers)
-      setIncompleteTriggers((prev) =>
-        prev.filter((trigger) => trigger.id !== id)
-      )
-      setVisibleTriggers((prev) => prev.filter((trigger) => trigger.id !== id))
-      removePageTrigger(id)
-    },
-    [
-      log,
-      displayedTriggersIds,
-      setDisplayedTriggers,
-      setIncompleteTriggers,
-      setVisibleTriggers,
-      removePageTrigger
-    ]
-  )
 
   const TriggerComponent = React.useCallback(():
     | (JSX.Element | null)[]
@@ -621,9 +574,6 @@ export function CollectorProvider({
     delay: initialDelay,
     name: 'fireOnLoadTriggers'
   })
-
-  useFormCollector()
-  useButtonCollector()
 
   const onPresenseChange = React.useCallback(
     (presence: PresenceType) => {

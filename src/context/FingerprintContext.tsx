@@ -1,51 +1,21 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import React, { PropsWithChildren, useEffect, useState } from 'react'
+import React, { PropsWithChildren, useEffect } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useEntireStore } from '../beautifulSugar/store'
 import { Handler } from '../client/handler'
 import { LEGACY_FingerprintConfig } from '../client/types'
 import { useInitSession } from '../hooks/init/useInitSession'
+import { useTrackingInit } from '../hooks/init/useInitTracking'
 import { useInitVisitor } from '../hooks/init/useInitVisitor'
-import { useLogging } from '../hooks/useLogging'
+import useButtonCollector from '../hooks/useButtonCollector'
+import { useConsentCheck } from '../hooks/useConsentCheck'
+import useFormCollector from '../hooks/useFormCollector'
+import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
 import { CollectorProvider } from './CollectorContext'
 
 const queryClient = new QueryClient()
 
 /** * @todo - extract */
-const useConsentCheck = (consent: boolean, consentCallback: any) => {
-  const [consentGiven, setConsentGiven] = useState(consent)
-  const { log } = useLogging()
-  /**
-   * Effect checks for user consent either via direct variable or a callback.
-   * in any case, once one of the conditions is met, the single state gets set to true, allowing the logic to flow.
-   * TODO: Think if it makes sense to memoize / derive that state instead? Gonna be tricky with an interval involved.
-   */
-  useEffect(() => {
-    if (consent) {
-      setConsentGiven(consent)
-      return
-    }
-
-    log('Fingerprint Widget Consent: ', consent)
-
-    if (!consentCallback) return
-    const consentGivenViaCallback = consentCallback()
-
-    const interval = setInterval(() => {
-      setConsentGiven(consent)
-    }, 1000)
-
-    // if the user has consented, no reason to continue pinging every sec.
-    if (consentGivenViaCallback) {
-      clearInterval(interval)
-    }
-
-    // clear on onmount
-    return () => clearInterval(interval)
-  }, [consentCallback, consent])
-
-  return consentGiven
-}
 
 export type FingerprintProviderProps = PropsWithChildren<{
   appId?: string
@@ -71,8 +41,8 @@ export type FingerprintProviderProps = PropsWithChildren<{
 
 // @todo split this into multiple providers, FingerprintProvider should
 // only bootstrap the app.
-export const FingerprintProvider = (props: FingerprintProviderProps) => {
-  const { set, handlers, addHandlers, difiProps } = useEntireStore()
+export const Provider = (props: FingerprintProviderProps) => {
+  const { set, addHandlers, difiProps } = useEntireStore()
   const {
     booted,
     appId,
@@ -92,16 +62,21 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
     addHandlers(defaultHandlers || [])
   }, [props])
 
+  // TODO: rename these to "runners" for clarity
+  useTrackingInit()
   useInitVisitor()
   useInitSession()
+  useIncompleteTriggers()
+  useFormCollector()
+  useButtonCollector()
 
   const consentGiven = useConsentCheck(consent, consentCallback)
 
   useEffect(() => {
-    // if the props have never been probided, throw an error.
+    // if the props have never been provided, throw an error.
     if (!props.appId) throw new Error('C&M Fingerprint: appId is required')
 
-    // otherwise, wait until zustand picks it up
+    // otherwise, wait until zustand initiates and start taking values from there
     if (!appId) return
     if (booted) return
     if (!consentGiven) return
@@ -125,20 +100,22 @@ export const FingerprintProvider = (props: FingerprintProviderProps) => {
   }
 
   if (!booted) {
-    console.log('booting Difi...')
     return null
   }
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <CollectorProvider handlers={handlers}>
-        <ErrorBoundary
-          onError={(error, info) => console.error(error, info)}
-          fallback={<div>An application error occurred.</div>}
-        >
-          {children}
-        </ErrorBoundary>
-      </CollectorProvider>
-    </QueryClientProvider>
-  )
+  return <CollectorProvider>{children}</CollectorProvider>
 }
+
+export const FingerprintProvider = (props: FingerprintProviderProps) => (
+  <QueryClientProvider client={queryClient}>
+    <ErrorBoundary
+      onError={(error, info) => console.error(error, info)}
+      fallback={<div>An application error occurred.</div>}
+    >
+      {/* TODO: fix - this is an error that is brought from the Script thing during refactor. 
+    No actual issue, just TS being a peepee. Its been liek that forever, needs attention */}
+      {/* @ts-ignore */}
+      <Provider {...props} />
+    </ErrorBoundary>
+  </QueryClientProvider>
+)

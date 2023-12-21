@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand'
 import { FingerprintProviderProps } from '../../context/FingerprintContext'
-import { DifiStore, Get, Set } from '../types'
+import { DifiStore } from '../store'
+import { Get, Set } from '../types'
 
 export type MutualSlice = {
   set: Set
