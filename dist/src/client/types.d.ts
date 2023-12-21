@@ -122,7 +122,7 @@ export declare type PageView = {
     referrer: Referrer;
     viewedAt: Date;
 };
-export declare type FingerprintConfig = {
+export declare type LEGACY_FingerprintConfig = {
     exitIntentDelay?: number;
     idleDelay?: number;
     triggerCooldown?: number;

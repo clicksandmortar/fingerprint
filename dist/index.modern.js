@@ -718,7 +718,13 @@ function useButtonCollector() {
       log('useButtonCollector: button clicked', {
         button
       });
-      trackEvent('button_clicked', button);
+      trackEvent('button_clicked', {
+        id: button.getAttribute('id'),
+        name: button.getAttribute('name'),
+        class: button.getAttribute('className'),
+        type: button.getAttribute('type'),
+        text: button.innerText
+      });
       collect({
         button: {
           id: button.id,
