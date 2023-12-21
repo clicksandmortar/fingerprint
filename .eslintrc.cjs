@@ -38,7 +38,13 @@ module.exports = {
       "object": "Cookies",
       "property": "set",
       "message": cookieWarning
-  }],
+  },
+{ 
+  "object": "Cookies",
+  "property": "remove",
+  "message": cookieWarning
+}
+],
     'no-restricted-syntax': [
       'error',
       {
