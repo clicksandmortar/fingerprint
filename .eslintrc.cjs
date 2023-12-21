@@ -39,11 +39,11 @@ module.exports = {
       "property": "set",
       "message": cookieWarning
   },
-{ 
-  "object": "Cookies",
-  "property": "remove",
-  "message": cookieWarning
-}
+  { 
+    "object": "Cookies",
+    "property": "remove",
+    "message": cookieWarning
+  }
 ],
     'no-restricted-syntax': [
       'error',
@@ -52,11 +52,6 @@ module.exports = {
         selector:
           `CallExpression[callee.name='setCookie']`
       },
-      {
-        message: cookieWarning,
-        selector:
-          `CallExpression[callee.name='set']`
-      }
     ],
 
     // Temporarily disabling, but we may want to bring it back eventually for consistency :)
