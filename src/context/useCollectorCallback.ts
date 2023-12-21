@@ -17,7 +17,7 @@ const useCollectorCallback = () => {
     setIncompleteTriggers,
     visitor,
     // intently: { setIntently },
-    conversions: { setConversions }
+    setConversions
   } = useEntireStore()
   const { log } = useLogging()
 

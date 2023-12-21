@@ -683,17 +683,15 @@ var createConfigSlice = function createConfigSlice(set, get) {
 
 var createConversionsSlice = function createConversionsSlice(set, _get) {
   return {
-    conversions: {
-      conversions: [],
-      setConversions: function setConversions(val) {
-        return set(function (prev) {
-          return {
-            conversions: _extends({}, prev.conversions, {
-              conversions: val
-            })
-          };
-        });
-      }
+    conversions: [],
+    setConversions: function setConversions(val) {
+      return set(function (prev) {
+        return {
+          conversions: _extends({}, prev.conversions, {
+            conversions: val
+          })
+        };
+      });
     }
   };
 };
@@ -926,7 +924,6 @@ var bootstrapVisitor = function bootstrapVisitor(_ref2) {
       visitorId = vidParam.split('?')[0];
     }
     visitor.id = visitorId;
-    setCookie(cookieAccountJWT, visitorId || '', cookieValidDays);
     var sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
@@ -1108,7 +1105,7 @@ var useSeenMutation = function useSeenMutation() {
   var _useEntireStore = useEntireStore(),
     setPageTriggers = _useEntireStore.setPageTriggers,
     setIncompleteTriggers = _useEntireStore.setIncompleteTriggers,
-    setConversions = _useEntireStore.conversions.setConversions;
+    setConversions = _useEntireStore.setConversions;
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor,
     setVisitor = _useVisitor.setVisitor;
@@ -2130,7 +2127,7 @@ var useCollectorCallback = function useCollectorCallback() {
     set = _useEntireStore.set,
     setIncompleteTriggers = _useEntireStore.setIncompleteTriggers,
     visitor = _useEntireStore.visitor,
-    setConversions = _useEntireStore.conversions.setConversions;
+    setConversions = _useEntireStore.setConversions;
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var collectorCallback = React__default.useCallback(function (response) {
@@ -3575,7 +3572,7 @@ function CollectorProvider(_ref) {
     visibleTriggersIssuedByIncomplete = _useEntireStore.visibleTriggersIssuedByIncomplete,
     idleTimeout = _useEntireStore.idleTime.idleTimeout,
     setIncompleteTriggers = _useEntireStore.setIncompleteTriggers,
-    setConversions = _useEntireStore.conversions.setConversions,
+    setConversions = _useEntireStore.setConversions,
     _useEntireStore$difiP = _useEntireStore.difiProps,
     handlers = _useEntireStore$difiP.defaultHandlers,
     initialDelay = _useEntireStore$difiP.initialDelay,
@@ -3751,7 +3748,7 @@ function CollectorProvider(_ref) {
     name: 'fireOnLoadTriggers'
   });
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
-    timeout: idleTimeout,
+    timeout: idleTimeout || 1,
     onPresenceChange: function onPresenceChange(presence) {
       log('presence changed', presence);
     },
@@ -4060,21 +4057,19 @@ var getFuncByOperator = function getFuncByOperator(operator, compareWith) {
 var scanInterval = 500;
 var useConversions = function useConversions() {
   var _useEntireStore = useEntireStore(),
-    conversions = _useEntireStore.conversions.conversions,
+    conversions = _useEntireStore.conversions,
     set = _useEntireStore.set;
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutate;
   var removeById = React__default.useCallback(function (id) {
     set(function (prev) {
-      if (!(prev !== null && prev !== void 0 && prev.conversions.conversions.length)) return prev;
-      var filteredConversions = prev.conversions.conversions.filter(function (conversion) {
+      if (!(prev !== null && prev !== void 0 && prev.conversions.length)) return prev;
+      var filteredConversions = prev.conversions.filter(function (conversion) {
         return conversion.identifier !== id;
       });
-      return _extends({}, prev, {
-        conversions: _extends({}, prev.conversions, {
-          conversions: filteredConversions
-        })
-      });
+      return {
+        conversions: filteredConversions
+      };
     });
   }, [set]);
   var scan = React__default.useCallback(function () {

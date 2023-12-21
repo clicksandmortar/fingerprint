@@ -47,7 +47,7 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
     visibleTriggersIssuedByIncomplete,
     idleTime: { idleTimeout },
     setIncompleteTriggers,
-    conversions: { setConversions },
+    setConversions,
     difiProps: {
       defaultHandlers: handlers,
       initialDelay,
@@ -56,7 +56,6 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
       pageLoadTriggers,
       booted
     }
-    // conversions: { setConversions }
   } = useEntireStore()
   const combinedTriggers = getCombinedTriggers()
   const { trackEvent } = useTracking()
@@ -349,7 +348,8 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
 
   return (
     <IdleTimerProvider
-      timeout={idleTimeout}
+      // TODO: figure out why this is misbehaving
+      timeout={idleTimeout || 1}
       onPresenceChange={(presence: PresenceType) => {
         log('presence changed', presence)
       }}

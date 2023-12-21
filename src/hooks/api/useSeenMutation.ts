@@ -18,11 +18,8 @@ export const useSeenMutation = () => {
   const { log, error } = useLogging()
   const { appId } = useFingerprint()
   const { trackEvent } = useTracking()
-  const {
-    setPageTriggers,
-    setIncompleteTriggers,
-    conversions: { setConversions }
-  } = useEntireStore()
+  const { setPageTriggers, setIncompleteTriggers, setConversions } =
+    useEntireStore()
 
   const { visitor, setVisitor } = useVisitor()
   const brand = useBrand()

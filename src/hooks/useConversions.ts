@@ -40,28 +40,21 @@ export const getFuncByOperator = (
 const scanInterval = 500
 
 const useConversions = () => {
-  const {
-    conversions: { conversions },
-    set
-  } = useEntireStore()
+  const { conversions, set } = useEntireStore()
 
   const { mutate: collect } = useCollectorMutation()
 
   const removeById = React.useCallback(
     (id: string) => {
       set((prev) => {
-        if (!prev?.conversions.conversions.length) return prev
+        if (!prev?.conversions.length) return prev
 
-        const filteredConversions = prev.conversions.conversions.filter(
+        const filteredConversions = prev.conversions.filter(
           (conversion) => conversion.identifier !== id
         )
 
         return {
-          ...prev,
-          conversions: {
-            ...prev.conversions,
-            conversions: filteredConversions
-          }
+          conversions: filteredConversions
         }
       })
     },

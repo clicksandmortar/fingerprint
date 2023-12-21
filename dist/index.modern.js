@@ -641,15 +641,13 @@ const createConfigSlice = (set, get) => ({
 });
 
 const createConversionsSlice = (set, _get) => ({
-  conversions: {
-    conversions: [],
-    setConversions: val => set(prev => ({
-      conversions: {
-        ...prev.conversions,
-        conversions: val
-      }
-    }))
-  }
+  conversions: [],
+  setConversions: val => set(prev => ({
+    conversions: {
+      ...prev.conversions,
+      conversions: val
+    }
+  }))
 });
 
 const deviceInfo = {
@@ -859,7 +857,6 @@ const bootstrapVisitor = ({
       visitorId = vidParam.split('?')[0];
     }
     visitor.id = visitorId;
-    setCookie(cookieAccountJWT, visitorId || '', cookieValidDays);
     const sourceId = urlParams.get('source_id');
     if (sourceId) visitor.sourceId = sourceId;
   }
@@ -1019,9 +1016,7 @@ const useSeenMutation = () => {
   const {
     setPageTriggers,
     setIncompleteTriggers,
-    conversions: {
-      setConversions
-    }
+    setConversions
   } = useEntireStore();
   const {
     visitor,
@@ -2026,9 +2021,7 @@ const useCollectorCallback = () => {
     set,
     setIncompleteTriggers,
     visitor,
-    conversions: {
-      setConversions
-    }
+    setConversions
   } = useEntireStore();
   const {
     log
@@ -4234,9 +4227,7 @@ function CollectorProvider({
       idleTimeout
     },
     setIncompleteTriggers,
-    conversions: {
-      setConversions
-    },
+    setConversions,
     difiProps: {
       defaultHandlers: handlers,
       initialDelay,
@@ -4416,7 +4407,7 @@ function CollectorProvider({
     name: 'fireOnLoadTriggers'
   });
   return React__default.createElement(IdleTimerProvider, {
-    timeout: idleTimeout,
+    timeout: idleTimeout || 1,
     onPresenceChange: presence => {
       log('presence changed', presence);
     },
@@ -4735,9 +4726,7 @@ const getFuncByOperator = (operator, compareWith) => {
 const scanInterval = 500;
 const useConversions = () => {
   const {
-    conversions: {
-      conversions
-    },
+    conversions,
     set
   } = useEntireStore();
   const {
@@ -4745,14 +4734,10 @@ const useConversions = () => {
   } = useCollectorMutation();
   const removeById = React__default.useCallback(id => {
     set(prev => {
-      if (!(prev !== null && prev !== void 0 && prev.conversions.conversions.length)) return prev;
-      const filteredConversions = prev.conversions.conversions.filter(conversion => conversion.identifier !== id);
+      if (!(prev !== null && prev !== void 0 && prev.conversions.length)) return prev;
+      const filteredConversions = prev.conversions.filter(conversion => conversion.identifier !== id);
       return {
-        ...prev,
-        conversions: {
-          ...prev.conversions,
-          conversions: filteredConversions
-        }
+        conversions: filteredConversions
       };
     });
   }, [set]);

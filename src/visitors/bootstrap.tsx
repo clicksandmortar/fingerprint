@@ -103,7 +103,6 @@ export const bootstrapVisitor = ({
       visitorId = vidParam.split('?')[0]
     }
     visitor.id = visitorId
-    setCookie(cookieAccountJWT, visitorId || '', cookieValidDays)
 
     const sourceId = urlParams.get('source_id')
     if (sourceId) visitor.sourceId = sourceId

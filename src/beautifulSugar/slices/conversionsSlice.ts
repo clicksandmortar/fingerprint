@@ -4,10 +4,10 @@ import { DifiStore, useDifiStore } from '../store'
 import { Get, Set } from '../types'
 
 export type ConversionsSlice = {
-  conversions: {
-    conversions: Conversion[]
-    setConversions: (val: Conversion[]) => void
-  }
+  // conversions: {
+  conversions: Conversion[]
+  setConversions: (val: Conversion[]) => void
+  // }
 }
 
 export const createConversionsSlice: StateCreator<
@@ -16,16 +16,16 @@ export const createConversionsSlice: StateCreator<
   [],
   ConversionsSlice
 > = (set: Set, _get: Get) => ({
-  conversions: {
-    conversions: [],
-    setConversions: (val: Conversion[]) =>
-      set((prev) => ({
-        conversions: {
-          ...prev.conversions,
-          conversions: val
-        }
-      }))
-  }
+  // conversions: {
+  conversions: [],
+  setConversions: (val: Conversion[]) =>
+    set((prev) => ({
+      conversions: {
+        ...prev.conversions,
+        conversions: val
+      }
+    }))
+  // }
 })
 
 export const useConversionsStore = () => useDifiStore((s) => s.conversions)
