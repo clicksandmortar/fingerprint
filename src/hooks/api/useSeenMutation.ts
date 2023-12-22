@@ -19,7 +19,6 @@ export const useSeenMutation = () => {
   const { trackEvent } = useTracking()
 
   const collectorCallback = useCollectorCallback()
-
   const { visitor } = useVisitor()
   const brand = useBrand()
 
@@ -94,7 +93,7 @@ export const useSeen = ({
     }
   }, [mutationRest, skip, hasFired, runSeen, setHasFired])
 
-  // NOTE: do not export the actual mutation,
+  // NOTE: do not export the actual mutation
   // just statuses - to prevent from running multiple times by accident
   return mutationRest
 }

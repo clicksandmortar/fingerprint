@@ -614,14 +614,17 @@ var useCollectorCallback = function useCollectorCallback() {
     setIncompleteTriggers = _useEntireStore.setIncompleteTriggers,
     visitor = _useEntireStore.visitor,
     setIntently = _useEntireStore.setIntently,
-    setConversions = _useEntireStore.setConversions;
+    setConversions = _useEntireStore.setConversions,
+    setPageTriggers = _useEntireStore.setPageTriggers;
   var _useLogging = useLogging(),
     log = _useLogging.log;
   var collectorCallback = React__default.useCallback(function (response) {
     try {
       return Promise.resolve(response.json()).then(function (payload) {
         var _payload$identifiers;
-        log('Sent collector data, retrieved:', payload);
+        log('Retrieved payload from target engine:', payload);
+        setPageTriggers((payload === null || payload === void 0 ? void 0 : payload.pageTriggers) || []);
+        setConversions(payload.conversions || []);
         var retrievedUserId = (_payload$identifiers = payload.identifiers) === null || _payload$identifiers === void 0 ? void 0 : _payload$identifiers.main;
         if (retrievedUserId) {
           updateCookie(retrievedUserId);
@@ -629,12 +632,6 @@ var useCollectorCallback = function useCollectorCallback() {
             id: retrievedUserId
           });
         }
-        set(function () {
-          return {
-            pageTriggers: payload === null || payload === void 0 ? void 0 : payload.pageTriggers,
-            config: payload === null || payload === void 0 ? void 0 : payload.config
-          };
-        });
         setIdleTimeout(getIdleStatusDelay());
         setIncompleteTriggers((payload === null || payload === void 0 ? void 0 : payload.incompleteTriggers) || []);
         setConversions((payload === null || payload === void 0 ? void 0 : payload.conversions) || []);

@@ -15,7 +15,8 @@ const useCollectorCallback = () => {
     setIncompleteTriggers,
     visitor,
     setIntently,
-    setConversions
+    setConversions,
+    setPageTriggers
   } = useEntireStore()
 
   const { log } = useLogging()
@@ -24,28 +25,26 @@ const useCollectorCallback = () => {
     async (response: Response) => {
       const payload: CollectorVisitorResponse = await response.json()
 
-      log('Sent collector data, retrieved:', payload)
+      log('Retrieved payload from target engine:', payload)
+
+      setPageTriggers(payload?.pageTriggers || [])
+      setConversions(payload.conversions || [])
 
       const retrievedUserId = payload.identifiers?.main
-
       if (retrievedUserId) {
         updateCookie(retrievedUserId)
         setVisitor({ id: retrievedUserId })
       }
 
-      set(() => ({
-        pageTriggers: payload?.pageTriggers,
-        config: payload?.config
-      }))
-
       setIdleTimeout(getIdleStatusDelay())
       setIncompleteTriggers(payload?.incompleteTriggers || [])
       setConversions(payload?.conversions || [])
-      const cohort = payload.intently ? 'intently' : 'fingerprint'
 
+      const cohort = payload.intently ? 'intently' : 'fingerprint'
       if (visitor.cohort !== cohort) setVisitor({ cohort })
 
       log('CollectorProvider: collected data')
+
       if (!payload.intently) {
         log('CollectorProvider: user is in Fingerprint cohort')
         setIntently(false)
@@ -53,6 +52,7 @@ const useCollectorCallback = () => {
         log('CollectorProvider: user is in Intently cohort')
         setIntently(true)
       }
+
       return response
     },
     [
