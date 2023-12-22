@@ -77,6 +77,7 @@ function Initiator(props: FingerprintProviderProps) {
     console.log('blaaaa 4')
     if (!hasStoreInitiated) return
     console.log('blaaaa 5')
+    // ONLY ERRORRRR
     addHandlers(defaultHandlers || [])
 
     setBooted(true)
