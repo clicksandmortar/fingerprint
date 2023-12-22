@@ -2,10 +2,10 @@
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState } from 'react'
 import { useVisitor } from '../beautifulSugar/slices/visitorSlice'
-import { useCollectorMutation } from '../hooks/api/useCollectorMutation'
-import { useLogging } from '../hooks/useLogging'
-import { useTracking } from '../hooks/useTracking'
-import useCollectorCallback from './useCollectorCallback'
+import useCollectorCallback from '../context/useCollectorCallback'
+import { useCollectorMutation } from './api/useCollectorMutation'
+import { useLogging } from './useLogging'
+import { useTracking } from './useTracking'
 
 const useWatchers = () => {
   const { trackEvent } = useTracking()

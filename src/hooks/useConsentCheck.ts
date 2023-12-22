@@ -11,7 +11,7 @@ export const useConsentCheck = (consent: boolean, consentCallback: any) => {
    */
   useEffect(() => {
     if (consent) {
-      setConsentGiven(consent)
+      setConsentGiven((prev) => (prev === consent ? prev : consent))
       return
     }
 

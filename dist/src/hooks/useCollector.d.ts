@@ -1,1 +1,1 @@
-export declare const useCollector: () => import("../context/CollectorContext").CollectorContextInterface;
+export declare function useCollector(): void;

@@ -1,1 +1,2 @@
-export declare const a = 3;
+import React from 'react';
+export declare function Triggers(): React.JSX.Element;

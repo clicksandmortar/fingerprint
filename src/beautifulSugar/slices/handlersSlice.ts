@@ -17,9 +17,13 @@ export const createHandlersSlice: StateCreator<
   HandlersSlice
 > = (set: Set, get: Get) => ({
   handlers: clientHandlers,
-  addHandlers: (handlers: Handler[]) => {
-    set({ handlers: [...get().handlers, ...handlers] })
-  },
+  addHandlers: (handlers: Handler[]) =>
+    set((prev) => ({
+      handlers: {
+        ...prev.handlers,
+        ...handlers
+      }
+    })),
   getHandlerForTrigger: (_trigger: Trigger) => {
     const potentialHandler = get().handlers?.find(
       (handler) => handler.behaviour === _trigger.behaviour

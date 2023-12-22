@@ -1,27 +1,19 @@
+/* eslint-disable require-jsdoc */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import React, { PropsWithChildren, useEffect } from 'react'
+import React, { ReactElement, useEffect } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useEntireStore } from '../beautifulSugar/store'
 import { Handler } from '../client/handler'
 import { LEGACY_FingerprintConfig } from '../client/types'
-import { useInitSession } from '../hooks/init/useInitSession'
-import { useTrackingInit } from '../hooks/init/useInitTracking'
-import { useInitVisitor } from '../hooks/init/useInitVisitor'
-import { useCollinsBookingComplete } from '../hooks/mab/useCollinsBookingComplete'
-import useButtonCollector from '../hooks/useButtonCollector'
 import { useConsentCheck } from '../hooks/useConsentCheck'
-import useConversions from '../hooks/useConversions'
-import useFormCollector from '../hooks/useFormCollector'
-import useIncompleteTriggers from '../hooks/useIncompleteTriggers'
-import useIntently from '../hooks/useIntently'
-import { CollectorProvider } from './CollectorContext'
-import useWatchers from './useWatchers'
+import Runners from './Runners'
+import { Triggers } from './useTriggers'
 
 const queryClient = new QueryClient()
 
 /** * @todo - extract */
 
-export type FingerprintProviderProps = PropsWithChildren<{
+export type FingerprintProviderProps = {
   appId?: string
   consent?: boolean
   consentCallback?: () => boolean
@@ -41,90 +33,86 @@ export type FingerprintProviderProps = PropsWithChildren<{
    * Please use the portal to configure these values. Until then this will act as override
    */
   config?: LEGACY_FingerprintConfig
-}>
+  // This is just to please typescript in this one off case.
+  // Normally we'd use `children: ReactNode`
+  children: ReactElement | null | ReactElement
+}
 
 // @todo split this into multiple providers, FingerprintProvider should
 // only bootstrap the app.
-export const Provider = (props: FingerprintProviderProps) => {
+function Initiator(props: FingerprintProviderProps) {
   const { set, get, addHandlers, difiProps } = useEntireStore()
-  const {
-    booted,
-    appId,
-    children,
-    consent = false,
-    consentCallback,
-    defaultHandlers
-  } = difiProps
+  const { booted, appId, consentCallback, defaultHandlers } = difiProps
 
-  const setBooted = (val: boolean) =>
-    set((prev) => ({ difiProps: { ...prev.difiProps, booted: val } }))
+  const setBooted = React.useCallback(
+    (val: boolean) =>
+      set((prev) => ({ difiProps: { ...prev.difiProps, booted: val } })),
+    [set]
+  )
 
-  useEffect(() => {
-    set((prev) => ({ difiProps: { ...prev.difiProps, ...props } }))
+  const matchPropsToDifiProps = React.useCallback(() => {
+    set((prev) => ({
+      difiProps: {
+        ...prev.difiProps,
+        ...props
+      }
+    }))
+  }, [props, set])
 
-    addHandlers(defaultHandlers || [])
-  }, [props, addHandlers, defaultHandlers])
-
-  // TODO: rename these to "runners" for clarity
-  useTrackingInit()
-  useInitVisitor()
-  useInitSession()
-  useIncompleteTriggers()
-  useFormCollector()
-  useButtonCollector()
-  useIntently()
-  useWatchers()
-  useConversions()
-  useCollinsBookingComplete()
-
-  const consentGiven = useConsentCheck(consent, consentCallback)
+  const consentGiven = useConsentCheck(props.consent || false, consentCallback)
   const hasStoreInitiated = !!get && !!set
 
   useEffect(() => {
     // if the props have never been provided, throw an error.
     if (!props.appId) throw new Error('C&M Fingerprint: appId is required')
+    console.log('blaaaa 1', { difiProps, props })
+    matchPropsToDifiProps()
 
     // otherwise, wait until zustand initiates and start taking values from there
     if (!appId) return
+    console.log('blaaaa 2')
     if (booted) return
+    console.log('blaaaa 3')
     if (!consentGiven) return
+    console.log('blaaaa 4')
     if (!hasStoreInitiated) return
+    console.log('blaaaa 5')
+    addHandlers(defaultHandlers || [])
 
-    const performBoot = async () => {
-      // TODO: since all the config is being retrieve on any API call including /collect
-      // we can probably remove this TODO. It is redundant.
+    setBooted(true)
+  }, [
+    appId,
+    consentGiven,
+    hasStoreInitiated,
+    booted,
+    props.appId,
+    matchPropsToDifiProps,
+    defaultHandlers,
+    addHandlers,
+    setBooted
+  ])
 
-      setBooted(true)
-    }
+  if (!appId) return null
+  console.log('blaaaa 6')
+  // TOOD: do we want to return children here?
+  // booted is false until consent is true, so this will never be rendered otherwise
+  if (!booted) return null
 
-    performBoot()
-  }, [consentGiven, hasStoreInitiated, booted, appId, props.appId])
-
-  if (!appId) {
-    return null
-  }
-
-  if (!consentGiven) {
-    return children
-  }
-
-  if (!booted) {
-    return null
-  }
-
-  return <CollectorProvider>{children}</CollectorProvider>
+  return props.children
 }
 
-export const FingerprintProvider = (props: FingerprintProviderProps) => (
-  <QueryClientProvider client={queryClient}>
-    <ErrorBoundary
-      onError={(error, info) => console.error(error, info)}
-      fallback={<div>An application error occurred.</div>}
-    >
-      {/* TODO: fix - this is an error that is brought from the Script thing during refactor. 
-    No actual issue, just TS being a peepee. Its been liek that forever, needs attention */}
-      {/* @ts-ignore */}
-      <Provider {...props} />
-    </ErrorBoundary>
-  </QueryClientProvider>
-)
+export function FingerprintProvider(props: FingerprintProviderProps) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary
+        onError={(error, info) => console.error(error, info)}
+        fallback={<div>An application error occurred.</div>}
+      >
+        <Runners />
+        <Initiator {...props} />
+
+        <Triggers />
+      </ErrorBoundary>
+    </QueryClientProvider>
+  )
+}
