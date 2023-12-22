@@ -34,20 +34,16 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
     config,
     visitor,
     displayedTriggersIds,
-    setPageTriggers,
-    // addDisplayedTrigger,
+
     setDisplayedTriggerByInvocation,
     getHandlerForTrigger,
     getIsBehaviourVisible,
-    setActiveTrigger,
-    removeActiveTrigger,
     getCombinedTriggers,
     tracking: { initiated: mixpanelBooted },
-    // intently: { setIntently },
+    setIntently,
     visibleTriggersIssuedByIncomplete,
     idleTime: { idleTimeout },
-    setIncompleteTriggers,
-    setConversions,
+
     difiProps: {
       defaultHandlers: handlers,
       initialDelay,
@@ -303,8 +299,10 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
       referrer: getReferrer() || undefined
     })
       .then((response: Response) => {
+        // as part of removing intently, remove this check. It is no longer relevant.
+        // check with the team if we want to do something on 204 instead and if should sit inside the `colletorCallback`
         if (response.status === 204) {
-          // setIntently(true)
+          setIntently(true)
           return
         }
       })
@@ -312,27 +310,11 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
       .catch((err) => {
         error('failed to store collected data', err)
       })
-  }, [visitor, brand, log, collect, trackEvent, error /*setIntently*/])
+  }, [visitor, brand, log, collect, trackEvent, error, setIntently])
 
-  const collectorContextVal = React.useMemo(
-    () => ({
-      setPageTriggers,
-      removeActiveTrigger,
-      setActiveTrigger,
-      setIncompleteTriggers,
-      setConversions
-    }),
-    [
-      setPageTriggers,
-      removeActiveTrigger,
-      setActiveTrigger,
-      setIncompleteTriggers,
-      setConversions
-    ]
-  )
   useEffect(() => {
     fireOnLoadTriggers()
-  }, [fireOnLoadTriggers])
+  }, [fireOnLoadTriggers, setIntently])
 
   useRunOnPathChange(collectAndApplyVisitorInfo, {
     skip: !booted,
@@ -349,16 +331,14 @@ export function CollectorProvider({ children }: CollectorProviderProps) {
   return (
     <IdleTimerProvider
       // TODO: figure out why this is misbehaving
-      timeout={idleTimeout || 1}
+      timeout={idleTimeout}
       onPresenceChange={(presence: PresenceType) => {
         log('presence changed', presence)
       }}
       onIdle={fireIdleTrigger}
     >
-      <CollectorContext.Provider value={collectorContextVal}>
-        {children}
-        {TriggerComponent()}
-      </CollectorContext.Provider>
+      {children}
+      {TriggerComponent()}
 
       {/* @TODO: this component has no access to any collector related stuff. Deal with this ASAP */}
     </IdleTimerProvider>

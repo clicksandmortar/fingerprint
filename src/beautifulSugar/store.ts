@@ -11,12 +11,13 @@ import {
   createincompleteTriggersSlice,
   IncompleteTriggersSlice
 } from './slices/incompleteTriggersSlice'
+import { createLoggingSlice, LoggingSlice } from './slices/loggingSlice'
 import { createMutualSlice, MutualSlice } from './slices/mutualSlice'
 import {
   createPagetriggersSlice,
   PageTriggersSlice
 } from './slices/pageTriggersSlice'
-import { IntentlySlice } from './slices/temp_intentlySlice'
+import { createIntentlySlice, IntentlySlice } from './slices/temp_intentlySlice'
 import { createTrackingSlice, TrackingSlice } from './slices/trackingSlice'
 import { createVisitorSlice, VisitorSlice } from './slices/visitorSlice'
 import { UseDifiStore } from './types'
@@ -31,19 +32,31 @@ export type DifiStore = PageTriggersSlice &
   IntentlySlice &
   IdleTimeSlice &
   // CombinedTriggersSlice &
-  ConversionsSlice
+  ConversionsSlice &
+  LoggingSlice
 
-export const useDifiStore: UseDifiStore = create((...beautifulSugar) => ({
-  ...createPagetriggersSlice(...beautifulSugar),
-  ...createConfigSlice(...beautifulSugar),
-  ...createMutualSlice(...beautifulSugar),
-  ...createHandlersSlice(...beautifulSugar),
-  ...createVisitorSlice(...beautifulSugar),
-  ...createTrackingSlice(...beautifulSugar),
-  ...createincompleteTriggersSlice(...beautifulSugar),
-  ...createConversionsSlice(...beautifulSugar),
-  ...createIdleTimeSlice(...beautifulSugar)
-  // ...createCombinedTriggerSlice(...beautifulSugar)
-}))
+export const useDifiStore: UseDifiStore = create(
+  // persist(
+  (...beautifulSugar) => ({
+    ...createLoggingSlice(...beautifulSugar),
+    ...createPagetriggersSlice(...beautifulSugar),
+    ...createConfigSlice(...beautifulSugar),
+    ...createMutualSlice(...beautifulSugar),
+    ...createHandlersSlice(...beautifulSugar),
+    ...createVisitorSlice(...beautifulSugar),
+    ...createIntentlySlice(...beautifulSugar),
+    ...createTrackingSlice(...beautifulSugar),
+    ...createincompleteTriggersSlice(...beautifulSugar),
+    ...createConversionsSlice(...beautifulSugar),
+    ...createIdleTimeSlice(...beautifulSugar)
+  })
+  // { name: 'difiStore' }
+  // )
+)
 
-export const useEntireStore = () => useDifiStore((s) => s)
+export const useEntireStore = () => {
+  const store = useDifiStore((s) => s)
+
+  if (!store.get) return {} as DifiStore
+  return store
+}

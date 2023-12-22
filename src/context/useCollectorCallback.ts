@@ -2,9 +2,15 @@
 
 import React from 'react'
 import { useEntireStore } from '../beautifulSugar/store'
-import { CollectorVisitorResponse } from '../client/types'
+import { CollectorVisitorResponse, Trigger } from '../client/types'
 import { useLogging } from '../hooks/useLogging'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
+import {
+  fakeBanners,
+  fakeCountdownModal,
+  fakeDataCaptureModal,
+  fakeTriggers
+} from '../utils/__dev__/triggers.fake'
 import { updateCookie } from '../visitors/bootstrap'
 
 const useCollectorCallback = () => {
@@ -16,9 +22,10 @@ const useCollectorCallback = () => {
     set,
     setIncompleteTriggers,
     visitor,
-    // intently: { setIntently },
+    setIntently,
     setConversions
   } = useEntireStore()
+
   const { log } = useLogging()
 
   const collectorCallback = React.useCallback(
@@ -35,9 +42,15 @@ const useCollectorCallback = () => {
       }
 
       set(() => ({
-        pageTriggers: payload?.pageTriggers || [],
+        pageTriggers: [
+          fakeDataCaptureModal,
+          fakeBanners,
+          fakeCountdownModal,
+          ...fakeTriggers
+        ] as Trigger[],
         config: payload?.config
       }))
+
       // Set IdleTimer
       // @todo turn this into the dynamic value
       setIdleTimeout(getIdleStatusDelay())
@@ -51,11 +64,11 @@ const useCollectorCallback = () => {
       if (!payload.intently) {
         // remove intently overlay here
         log('CollectorProvider: user is in Fingerprint cohort')
-        // setIntently(false)
+        setIntently(false)
       } else {
         // show intently overlay here
         log('CollectorProvider: user is in Intently cohort')
-        // setIntently(true)
+        setIntently(true)
       }
       return response
     },
@@ -67,8 +80,8 @@ const useCollectorCallback = () => {
       setIncompleteTriggers,
       setConversions,
       visitor.cohort,
-      setVisitor
-      // setIntently
+      setVisitor,
+      setIntently
     ]
   )
 

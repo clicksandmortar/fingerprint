@@ -16,9 +16,9 @@ export const createIdleTimeSlice: StateCreator<
   [],
   [],
   IdleTimeSlice
-> = (set: Set, _get: Get) => ({
+> = (set: Set, get: Get) => ({
   idleTime: {
-    idleTimeout: 0,
+    idleTimeout: get()?.config?.trigger?.userIdleThresholdSecs * 1000,
     setIdleTimeout: (val: number) =>
       set((prev) => ({
         idleTime: {

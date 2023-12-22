@@ -1,14 +1,10 @@
 import { useDifiStore } from '../beautifulSugar/store'
 
-type Logging = {
+export type Logging = {
   log: (...message: any) => void
   warn: (...message: any) => void
   error: (...message: any) => void
   info: (...message: any) => void
-}
-
-export type LoggingSlice = {
-  logging: Logging
 }
 
 const disabledLogging: Logging = {
@@ -31,10 +27,14 @@ const enabledLogging: Logging = {
   info: (...message: any) => console.info(...message)
 }
 
-export const useLogging = (): Logging => {
-  const isDebugMode = useDifiStore((s) => s.config.script.debugMode)
-
+export const getLoggingContext = (isDebugMode?: boolean) => {
   if (isDebugMode) return enabledLogging
 
   return disabledLogging
+}
+
+export const useLogging = (): Logging => {
+  const isDebugMode = useDifiStore((s) => s.config.script.debugMode)
+
+  return getLoggingContext(isDebugMode)
 }

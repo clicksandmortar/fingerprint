@@ -4,7 +4,7 @@ export declare const useFingerprint: () => Pick<import("../beautifulSugar/slices
     consent?: boolean | undefined;
     consentCallback?: (() => boolean) | undefined;
     debug: never;
-    defaultHandlers?: Pick<import("../client/types").Trigger, "id" | "invoke" | "behaviour" | "multipleOfSameBehaviourSupported">[] | undefined;
+    defaultHandlers?: Pick<import("../client/types").Trigger, "id" | "behaviour" | "invoke" | "multipleOfSameBehaviourSupported">[] | undefined;
     initialDelay?: number | undefined;
     exitIntentTriggers?: boolean | undefined;
     idleTriggers?: boolean | undefined;

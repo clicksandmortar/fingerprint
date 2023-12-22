@@ -46,7 +46,7 @@ export type FingerprintProviderProps = PropsWithChildren<{
 // @todo split this into multiple providers, FingerprintProvider should
 // only bootstrap the app.
 export const Provider = (props: FingerprintProviderProps) => {
-  const { set, addHandlers, difiProps } = useEntireStore()
+  const { set, get, addHandlers, difiProps } = useEntireStore()
   const {
     booted,
     appId,
@@ -57,14 +57,13 @@ export const Provider = (props: FingerprintProviderProps) => {
   } = difiProps
 
   const setBooted = (val: boolean) =>
-    set({ difiProps: { ...difiProps, booted: val } })
+    set((prev) => ({ difiProps: { ...prev.difiProps, booted: val } }))
 
   useEffect(() => {
-    set({
-      difiProps: { ...difiProps, ...props }
-    })
+    set((prev) => ({ difiProps: { ...prev.difiProps, ...props } }))
+
     addHandlers(defaultHandlers || [])
-  }, [props])
+  }, [props, addHandlers, defaultHandlers])
 
   // TODO: rename these to "runners" for clarity
   useTrackingInit()
@@ -79,6 +78,7 @@ export const Provider = (props: FingerprintProviderProps) => {
   useCollinsBookingComplete()
 
   const consentGiven = useConsentCheck(consent, consentCallback)
+  const hasStoreInitiated = !!get && !!set
 
   useEffect(() => {
     // if the props have never been provided, throw an error.
@@ -88,6 +88,7 @@ export const Provider = (props: FingerprintProviderProps) => {
     if (!appId) return
     if (booted) return
     if (!consentGiven) return
+    if (!hasStoreInitiated) return
 
     const performBoot = async () => {
       // TODO: since all the config is being retrieve on any API call including /collect
@@ -97,7 +98,7 @@ export const Provider = (props: FingerprintProviderProps) => {
     }
 
     performBoot()
-  }, [consentGiven, booted, appId, props.appId])
+  }, [consentGiven, hasStoreInitiated, booted, appId, props.appId])
 
   if (!appId) {
     return null

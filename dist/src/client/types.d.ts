@@ -88,9 +88,12 @@ export declare type IncompleteTrigger = Trigger & {
     signals: FESignal[];
 };
 export declare type CollectorVisitorResponse = {
-    firstSeen: Date;
-    lastSeen: Date;
-    visits: number;
+    firstSeen: string;
+    lastSeen: string;
+    visits: {
+        host: 3;
+        path: 3;
+    };
     pageTriggers: Trigger[];
     config: Config;
     incompleteTriggers?: IncompleteTrigger[];
@@ -110,6 +113,8 @@ export declare type Trigger = {
     invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode;
     behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW' | 'BEHAVIOUR_BANNER';
     brand?: any;
+    variantID?: string;
+    variantName?: string;
     multipleOfSameBehaviourSupported?: boolean;
 };
 export declare type PageView = {
@@ -117,7 +122,7 @@ export declare type PageView = {
     referrer: Referrer;
     viewedAt: Date;
 };
-export declare type FingerprintConfig = {
+export declare type LEGACY_FingerprintConfig = {
     exitIntentDelay?: number;
     idleDelay?: number;
     triggerCooldown?: number;
