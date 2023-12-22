@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // This eslint config was naenae'd by from a force much stronger than Ed - @cajacko (Charlie Jackson)
 
 // Most of the meanings are commented. When adding more rules, please comment them, and try to keep as vars.
@@ -53,6 +54,15 @@ const config = {
       {
         message: cookieWarning,
         selector: "CallExpression[callee.name='setCookie']",
+      },
+      {
+        message: cookieWarning,
+        selector: "CallExpression[callee.name='setCookie'][arguments.length!=3]",
+      },
+      // Work in progress attempting to target setCookie and restrict non-cnm cookies
+      {
+        selector: 'CallExpression[callee.name="setCookie"] > :first-child:not([name=CnMCookie])',
+        message: 'The first argument of setCookies should be an Identifier.',
       },
     ],
 
