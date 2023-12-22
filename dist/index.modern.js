@@ -438,6 +438,7 @@ const useInitVisitor = () => {
   }, [booted, session, setSession, setVisitor, log]);
   return null;
 };
+<<<<<<< HEAD
 const useVisitor = () => useDifiStore(s => s);
 
 const useConfig = () => useEntireStore().config;
@@ -460,6 +461,44 @@ const createIdleTimeSlice = (set, get) => {
         idleTime: {
           ...prev.idleTime,
           idleTimeout: val
+=======
+function useButtonCollector() {
+  const {
+    mutateAsync: collect
+  } = useCollectorMutation();
+  const {
+    visitor
+  } = useVisitor();
+  const {
+    log
+  } = useLogging();
+  const {
+    trackEvent
+  } = useMixpanel();
+  useEffect(() => {
+    if (isUndefined('document')) return;
+    if (!visitor.id) return;
+    const buttonClickListener = e => {
+      if (!e.target) return;
+      const potentialButton = getRecursivelyPotentialButton(e.target);
+      if (!potentialButton) return;
+      const button = potentialButton;
+      if (button.type === 'submit') return;
+      log('useButtonCollector: button clicked', {
+        button
+      });
+      trackEvent('button_clicked', {
+        id: button.getAttribute('id'),
+        name: button.getAttribute('name'),
+        class: button.getAttribute('className'),
+        type: button.getAttribute('type'),
+        text: button.innerText
+      });
+      collect({
+        button: {
+          id: button.id,
+          selector: button.innerText
+>>>>>>> main
         }
       })),
       lastTriggerTimeStamp: null,

@@ -513,9 +513,85 @@ var useInitVisitor = function useInitVisitor() {
   }, [booted, session, setSession, setVisitor, log]);
   return null;
 };
+<<<<<<< HEAD
 var useVisitor = function useVisitor() {
   return useDifiStore(function (s) {
     return s;
+=======
+function useButtonCollector() {
+  var _useCollectorMutation = useCollectorMutation(),
+    collect = _useCollectorMutation.mutateAsync;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _useMixpanel = useMixpanel(),
+    trackEvent = _useMixpanel.trackEvent;
+  React.useEffect(function () {
+    if (isUndefined('document')) return;
+    if (!visitor.id) return;
+    var buttonClickListener = function buttonClickListener(e) {
+      if (!e.target) return;
+      var potentialButton = getRecursivelyPotentialButton(e.target);
+      if (!potentialButton) return;
+      var button = potentialButton;
+      if (button.type === 'submit') return;
+      log('useButtonCollector: button clicked', {
+        button: button
+      });
+      trackEvent('button_clicked', {
+        id: button.getAttribute('id'),
+        name: button.getAttribute('name'),
+        "class": button.getAttribute('className'),
+        type: button.getAttribute('type'),
+        text: button.innerText
+      });
+      collect({
+        button: {
+          id: button.id,
+          selector: button.innerText
+        }
+      });
+    };
+    document.addEventListener('click', buttonClickListener);
+    return function () {
+      document.removeEventListener('click', buttonClickListener);
+    };
+  }, [visitor]);
+}
+
+var getIsVisible = function getIsVisible(selector) {
+  var element = document.querySelector(selector);
+  if (!element) return false;
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  if (window.getComputedStyle(element).display === 'none') return false;
+  if (window.getComputedStyle(element).opacity === '0') return false;
+  return true;
+};
+
+var validateSignalChain = function validateSignalChain(signals) {
+  var signalPattern = signals.map(function (signal) {
+    if (signal.op === 'IsOnPath') {
+      var _signal$parameters = signal.parameters,
+        operator = _signal$parameters[0],
+        route = _signal$parameters[1];
+      return getFuncByOperator(operator, route)(window.location.pathname);
+    }
+    if (signal.op === 'CanSeeElementOnPage') {
+      var _signal$parameters2 = signal.parameters,
+        itemQuerySelector = _signal$parameters2[0],
+        _operator = _signal$parameters2[1],
+        _route = _signal$parameters2[2];
+      var isSignalOnCorrectRoute = getFuncByOperator(_operator, _route)(window.location.pathname);
+      if (!isSignalOnCorrectRoute) return false;
+      var isVisible = getIsVisible(itemQuerySelector);
+      return isVisible;
+    }
+    if (signal.op === 'IsOnDomain') {
+      return window.location.hostname === signal.parameters[0];
+    }
+    return false;
+>>>>>>> main
   });
 };
 
