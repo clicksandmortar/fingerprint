@@ -22,7 +22,6 @@ export const createHandlersSlice: StateCreator<
       handlers: [...prev.handlers, ...handlers]
     })),
   getHandlerForTrigger: (_trigger: Trigger) => {
-    console.log('hhhh', get().handlers)
     const potentialHandler = get().handlers?.find(
       (handler) => handler.behaviour === _trigger.behaviour
     )

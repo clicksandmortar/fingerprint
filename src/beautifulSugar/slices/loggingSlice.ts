@@ -9,8 +9,7 @@ export type LoggingSlice = {
 }
 
 // NOTE: this slice is used only so we have access to debug-controlled logging
-// inside the store methods.
-// For regular code use the `useLogging()` hook instead.
+// inside the store methods. For regular code use the `useLogging()` hook instead.
 export const createLoggingSlice: StateCreator<
   DifiStore,
   [],

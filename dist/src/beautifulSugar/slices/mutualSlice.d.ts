@@ -7,7 +7,7 @@ export declare type MutualSlice = {
     get: Get;
     difiProps: Omit<DifiCombinedProps, 'debug'>;
 };
-declare type DifiCombinedProps = FingerprintContextInterface & FingerprintProviderProps;
+declare type DifiCombinedProps = FingerprintContextInterface & Omit<FingerprintProviderProps, 'children'>;
 export declare const createMutualSlice: StateCreator<DifiStore, [], [], MutualSlice>;
 export interface FingerprintContextInterface {
     appId: string;

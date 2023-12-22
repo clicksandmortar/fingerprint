@@ -1,16 +1,16 @@
 import { useMutation } from '@tanstack/react-query'
+import { useDifiStore } from '../../beautifulSugar/store'
 import { CollectorUpdate } from '../../client/types'
-import useCollectorCallback from '../../context/useCollectorCallback'
 import { deviceInfo } from '../../utils/device'
 import { hostname, request } from '../../utils/http'
 import { useVisitor } from '../init/useInitVisitor'
-import { useFingerprint } from '../useFingerprint'
+import useCollectorCallback from '../useCollectorCallback'
 import { useHostname } from '../useHostname'
 import { useLogging } from '../useLogging'
 
 export const useCollectorMutation = () => {
   const { log, error } = useLogging()
-  const { appId } = useFingerprint()
+  const { appId } = useDifiStore((s) => s.difiProps)
   const { visitor, session } = useVisitor()
 
   const requestHost = useHostname()
@@ -38,8 +38,6 @@ export const useCollectorMutation = () => {
         })
     },
     {
-      // TODO: merge this and collecor callback into one thing when we no longer require
-      // setting intently - thats the only differentiator between the callbacks
       onSuccess: collectorCallback
     }
   )

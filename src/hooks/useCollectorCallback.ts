@@ -1,17 +1,9 @@
-/* eslint-disable require-jsdoc */
-
 import React from 'react'
 import { useEntireStore } from '../beautifulSugar/store'
-import { CollectorVisitorResponse, Trigger } from '../client/types'
-import { useLogging } from '../hooks/useLogging'
-import { useTriggerDelay } from '../hooks/useTriggerDelay'
-import {
-  fakeBanners,
-  fakeCountdownModal,
-  fakeDataCaptureModal,
-  fakeTriggers
-} from '../utils/__dev__/triggers.fake'
+import { CollectorVisitorResponse } from '../client/types'
 import { updateCookie } from '../visitors/bootstrap'
+import { useLogging } from './useLogging'
+import { useTriggerDelay } from './useTriggerDelay'
 
 const useCollectorCallback = () => {
   const { getIdleStatusDelay } = useTriggerDelay()
@@ -42,17 +34,10 @@ const useCollectorCallback = () => {
       }
 
       set(() => ({
-        pageTriggers: [
-          fakeDataCaptureModal,
-          fakeBanners,
-          fakeCountdownModal,
-          ...fakeTriggers
-        ] as Trigger[],
+        pageTriggers: payload?.pageTriggers,
         config: payload?.config
       }))
 
-      // Set IdleTimer
-      // @todo turn this into the dynamic value
       setIdleTimeout(getIdleStatusDelay())
       setIncompleteTriggers(payload?.incompleteTriggers || [])
       setConversions(payload?.conversions || [])
@@ -62,11 +47,9 @@ const useCollectorCallback = () => {
 
       log('CollectorProvider: collected data')
       if (!payload.intently) {
-        // remove intently overlay here
         log('CollectorProvider: user is in Fingerprint cohort')
         setIntently(false)
       } else {
-        // show intently overlay here
         log('CollectorProvider: user is in Intently cohort')
         setIntently(true)
       }

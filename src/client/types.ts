@@ -1,3 +1,4 @@
+// TODO: split this into multiple files that make sense per context..
 import { SupportedBrand } from '../utils/brand'
 import { DeviceInfo } from '../utils/device'
 import { Visitor } from '../visitors/types'

@@ -4,7 +4,6 @@ import {
   bootstrapVisitor,
   correctCookieSubdomain
 } from '../../visitors/bootstrap'
-import { useFingerprint } from '../useFingerprint'
 import { useLogging } from '../useLogging'
 export type VisitorProviderProps = {
   children?: React.ReactNode
@@ -12,11 +11,14 @@ export type VisitorProviderProps = {
 
 // the
 export const useInitVisitor = () => {
-  // TODO: add hasVisitorIntiiated ?
-  const { booted } = useFingerprint()
   const { log } = useLogging()
 
-  const { session, setSession, setVisitor } = useEntireStore()
+  const {
+    session,
+    setSession,
+    setVisitor,
+    difiProps: { booted }
+  } = useEntireStore()
 
   useEffect(() => {
     if (!booted) {
@@ -35,7 +37,6 @@ export const useInitVisitor = () => {
     log('useInitVisitor: Correcting cookie domain to', updatedCookie)
   }, [booted, session, setSession, setVisitor, log])
 
-  // turn into hook?
   return null
 }
 

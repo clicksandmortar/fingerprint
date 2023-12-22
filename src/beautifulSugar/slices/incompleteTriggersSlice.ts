@@ -6,7 +6,6 @@ import { Get, Set } from '../types'
 export type IncompleteTriggersSlice = {
   incompleteTriggers: IncompleteTrigger[]
   setIncompleteTriggers: (val: IncompleteTrigger[]) => void
-  // TODO: see if it is the time to refactor?
   visibleTriggersIssuedByIncomplete: Trigger[]
   setVisibleTriggersIssuedByIncomplete: (val: Trigger[]) => void
 }
@@ -20,9 +19,8 @@ export const createincompleteTriggersSlice: StateCreator<
   incompleteTriggers: [],
   setIncompleteTriggers: (val: IncompleteTrigger[]) =>
     set({ incompleteTriggers: val }),
-  // @TODO: think if this can insteqd be a derived value somehow.
-  // note that shoving the interval into a memo or callback is not the way.
-  // IMHO we should aim to NOT update state here to reduce the amount of rerenders if possible.
+
+  // @TODO: think if this can instead be a derived value somehow - having multiple sources is never a good idea.
   visibleTriggersIssuedByIncomplete: [],
   setVisibleTriggersIssuedByIncomplete: (val: Trigger[]) =>
     set({ visibleTriggersIssuedByIncomplete: val })

@@ -7,7 +7,7 @@ import { Handler } from '../client/handler'
 import { LEGACY_FingerprintConfig } from '../client/types'
 import { useConsentCheck } from '../hooks/useConsentCheck'
 import Runners from './Runners'
-import { Triggers } from './useTriggers'
+import { Triggers } from './Triggers'
 
 const queryClient = new QueryClient()
 
@@ -38,11 +38,17 @@ export type FingerprintProviderProps = {
   children: ReactElement | null | ReactElement
 }
 
-// @todo split this into multiple providers, FingerprintProvider should
-// only bootstrap the app.
-function Initiator(props: FingerprintProviderProps) {
-  const { set, get, addHandlers, difiProps } = useEntireStore()
+export function FingerprintProvider(props: FingerprintProviderProps) {
+  const { set, addHandlers, difiProps } = useEntireStore()
   const { booted, appId, consentCallback, defaultHandlers } = difiProps
+
+  // consider the zustand store fully operational if both `get` and `set` functions are no longer undefined
+  // WHile building the store, I managed to run into edge cases where thsoe functions were undefined
+  // If that is ever the case, please uncomment the line below and set it to false
+  // const {get } = useEntireStore();
+  // const hasStoreInitiated = !!get && !! set
+
+  const hasStoreInitiated = true
 
   const setBooted = React.useCallback(
     (val: boolean) =>
@@ -60,24 +66,18 @@ function Initiator(props: FingerprintProviderProps) {
   }, [props, set])
 
   const consentGiven = useConsentCheck(props.consent || false, consentCallback)
-  const hasStoreInitiated = !!get && !!set
 
   useEffect(() => {
     // if the props have never been provided, throw an error.
     if (!props.appId) throw new Error('C&M Fingerprint: appId is required')
-    console.log('blaaaa 1', { difiProps, props })
+    // shove the props into the store for access all over the app
     matchPropsToDifiProps()
 
-    // otherwise, wait until zustand initiates and start taking values from there
+    // wait until zustand completes the above, then start taking values from there
     if (!appId) return
-    console.log('blaaaa 2')
     if (booted) return
-    console.log('blaaaa 3')
     if (!consentGiven) return
-    console.log('blaaaa 4')
     if (!hasStoreInitiated) return
-    console.log('blaaaa 5')
-    // ONLY ERRORRRR
     addHandlers(defaultHandlers || [])
 
     setBooted(true)
@@ -93,16 +93,11 @@ function Initiator(props: FingerprintProviderProps) {
     setBooted
   ])
 
-  if (!appId) return null
-  console.log('blaaaa 6')
+  if (!appId) return props.children
   // TOOD: do we want to return children here?
   // booted is false until consent is true, so this will never be rendered otherwise
-  if (!booted) return null
+  if (!booted) return props.children
 
-  return props.children
-}
-
-export function FingerprintProvider(props: FingerprintProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary
@@ -110,8 +105,7 @@ export function FingerprintProvider(props: FingerprintProviderProps) {
         fallback={<div>An application error occurred.</div>}
       >
         <Runners />
-        <Initiator {...props} />
-
+        {props.children}
         <Triggers />
       </ErrorBoundary>
     </QueryClientProvider>

@@ -1,7 +1,7 @@
-import { defaultColors } from '../beautifulSugar/slices/utils/configUtils'
 import { useEntireStore } from '../beautifulSugar/store'
 import { Config } from '../client/types'
 import { SupportedBrand, _LEGACY_getBrand } from '../utils/brand'
+import { defaultColors } from '../utils/configUtils'
 
 export const useConfig = () => useEntireStore().config
 

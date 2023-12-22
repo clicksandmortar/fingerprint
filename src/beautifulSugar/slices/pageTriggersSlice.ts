@@ -76,33 +76,39 @@ export const createPagetriggersSlice: StateCreator<
       setIncompleteTriggers,
       visibleTriggersIssuedByIncomplete,
       setVisibleTriggersIssuedByIncomplete,
-      removePageTrigger
+      removePageTrigger,
+      logging: { log }
     } = get()
 
-    // log(`CollectorProvider: removing id:${id} from displayedTriggersIds`)
+    log(`CollectorProvider: removing id:${id} from displayedTriggersIds`)
 
-    const refreshedTriggers = displayedTriggersIds.filter(
+    const filteredTriggers = displayedTriggersIds.filter(
       (triggerId: Trigger['id']) => triggerId !== id
     )
+    setDisplayedTriggers(filteredTriggers)
 
-    setDisplayedTriggers(refreshedTriggers)
-
-    const updatedIncompleteTriggers = incompleteTriggers.filter(
+    const filteredIncompleteTriggers = incompleteTriggers.filter(
       (trigger) => trigger.id !== id
     )
+    setIncompleteTriggers(filteredIncompleteTriggers)
 
-    setIncompleteTriggers(updatedIncompleteTriggers)
-    const updatedVisibleIncompleteTriggers =
+    const filteredVisibleIncompleteTriggers =
       visibleTriggersIssuedByIncomplete.filter((trigger) => trigger.id !== id)
-    setVisibleTriggersIssuedByIncomplete(updatedVisibleIncompleteTriggers)
+
+    setVisibleTriggersIssuedByIncomplete(filteredVisibleIncompleteTriggers)
+
     removePageTrigger(id)
   },
   setDisplayedTriggerByInvocation: (
     invocation: Trigger['invocation'],
     shouldAllowMultipleSimultaneous = false
   ) => {
-    const { addDisplayedTrigger, getIsBehaviourVisible, getCombinedTriggers } =
-      get()
+    const {
+      addDisplayedTrigger,
+      getIsBehaviourVisible,
+      getCombinedTriggers,
+      logging: { log }
+    } = get()
 
     const combinedTriggers = getCombinedTriggers()
     const invokableTriggers = combinedTriggers.filter(
@@ -111,13 +117,13 @@ export const createPagetriggersSlice: StateCreator<
 
     invokableTriggers.forEach((invokableTrigger) => {
       if (!invokableTrigger) {
-        // log('CollectorProvider: Trigger not invokable ', invokableTrigger)
+        log('CollectorProvider: Trigger not invokable ', invokableTrigger)
         return
       }
 
       if (invokableTrigger.behaviour === 'BEHAVIOUR_BANNER') {
         // @TODO: special case for banners. we should probably defione this in the handler
-        // log('Banners can be stacked up, setting as visible.', invokableTrigger)
+        log('Banners can be stacked up, setting as visible.', invokableTrigger)
         addDisplayedTrigger(invokableTrigger)
         return
       }
@@ -126,18 +132,19 @@ export const createPagetriggersSlice: StateCreator<
         !shouldAllowMultipleSimultaneous &&
         getIsBehaviourVisible(invokableTrigger.behaviour)
       ) {
-        // log(
-        //   'CollectorProvider: Behaviour already visible, not showing trigger',
-        //   invokableTrigger
-        // )
+        log(
+          'CollectorProvider: Behaviour already visible, not showing trigger',
+          invokableTrigger
+        )
         return
       }
 
-      // log('CollectorProvider: Triggering behaviour', invokableTrigger)
+      log('CollectorProvider: Triggering behaviour', invokableTrigger)
       // if the trigger is already in the list, don't add it again
       addDisplayedTrigger(invokableTrigger)
     })
   },
+  // this one had to be a function, for some reason it didnt like to be directly spread.
   getCombinedTriggers: () => {
     return [...get().pageTriggers, ...get().visibleTriggersIssuedByIncomplete]
   },
@@ -160,28 +167,13 @@ export const createPagetriggersSlice: StateCreator<
     return false
   },
   setActiveTrigger: (trigger: Trigger) => {
-    const { setPageTriggers, setDisplayedTriggerByInvocation } = get()
-    // log('CollectorProvider: manually setting trigger', trigger)
+    const {
+      setPageTriggers,
+      setDisplayedTriggerByInvocation,
+      logging: { log }
+    } = get()
+    log('CollectorProvider: manually setting trigger', trigger)
     setPageTriggers([trigger])
     setDisplayedTriggerByInvocation(trigger.invocation)
   }
-
-  // rely on combined triggers:
-
-  // setDisplayedTriggerByInvocation:
 })
-
-// export type CombinedTriggersSlice = {
-// }
-
-// export const createCombinedTriggerSlice: StateCreator<
-//   DifiStore,
-//   [],
-//   [],
-//   CombinedTriggersSlice
-// > = (_set: Set, get: Get) => ({
-//   combinedTriggers: [
-//     ...get().pageTriggers,
-//     ...get().visibleTriggersIssuedByIncomplete
-//   ]
-// })

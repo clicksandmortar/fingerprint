@@ -184,33 +184,6 @@ export default App
 | pageLoadTriggers         | `boolean`  | `false`     | Whether or not to trigger behaviours on page load                                                                                                                     |
 
 
-### useFingerprint
-
-This hook provides access to the fingerprint instance, and exposes methods to:
-
-- Register behaviour handlers
-- Track custom events (coming soon)
-
-```tsx
-import React, { Component } from 'react'
-
-import { useFingerprint } from 'fingerprint'
-
-const App = () => {
-  const {
-    appId,
-    booted,
-    trackEvent,
-  } = useFingerprint()
-
-  return (
-    <div>
-      <p>Your Application</p>
-    </div>
-  )
-}
-```
-
 ### useCookieConsent (coming soon)
 
 This hook provides access to the cookie consent instance, and exposes methods to:

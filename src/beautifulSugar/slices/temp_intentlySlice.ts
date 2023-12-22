@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand'
 import { DifiStore } from '../store'
 import { Get, Set } from '../types'
 
+// TODO: remove this mid-january 2024
 export type IntentlySlice = {
   intently: boolean
   setIntently: (intently: boolean) => void

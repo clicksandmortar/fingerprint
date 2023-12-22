@@ -9,7 +9,8 @@ export type MutualSlice = {
   difiProps: Omit<DifiCombinedProps, 'debug'> // because debug is deprecated
 }
 
-type DifiCombinedProps = FingerprintContextInterface & FingerprintProviderProps
+type DifiCombinedProps = FingerprintContextInterface &
+  Omit<FingerprintProviderProps, 'children'>
 
 export const createMutualSlice: StateCreator<DifiStore, [], [], MutualSlice> = (
   set: Set,
@@ -30,15 +31,16 @@ export interface FingerprintContextInterface {
   initialDelay: number
 }
 
-const defaultFingerprintState: DifiCombinedProps = {
+const defaultFingerprintState: FingerprintContextInterface = {
   appId: '',
   booted: false,
   consent: false,
-  // TODO: most of these should be deprecated altogether...
   exitIntentTriggers: true,
   idleTriggers: true,
   pageLoadTriggers: true,
   initialDelay: 0,
+  // @ts-ignore
+  // never gonna give you up never gonna let you down
   debug: false as never,
   defaultHandlers: [],
   consentCallback: () => false

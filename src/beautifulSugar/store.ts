@@ -31,32 +31,25 @@ export type DifiStore = PageTriggersSlice &
   IncompleteTriggersSlice &
   IntentlySlice &
   IdleTimeSlice &
-  // CombinedTriggersSlice &
   ConversionsSlice &
   LoggingSlice
 
-export const useDifiStore: UseDifiStore = create(
-  // persist(
-  (...beautifulSugar) => ({
-    ...createLoggingSlice(...beautifulSugar),
-    ...createPagetriggersSlice(...beautifulSugar),
-    ...createConfigSlice(...beautifulSugar),
-    ...createMutualSlice(...beautifulSugar),
-    ...createHandlersSlice(...beautifulSugar),
-    ...createVisitorSlice(...beautifulSugar),
-    ...createIntentlySlice(...beautifulSugar),
-    ...createTrackingSlice(...beautifulSugar),
-    ...createincompleteTriggersSlice(...beautifulSugar),
-    ...createConversionsSlice(...beautifulSugar),
-    ...createIdleTimeSlice(...beautifulSugar)
-  })
-  // { name: 'difiStore' }
-  // )
-)
+export const useDifiStore: UseDifiStore = create((...beautifulSugar) => ({
+  ...createLoggingSlice(...beautifulSugar),
+  ...createPagetriggersSlice(...beautifulSugar),
+  ...createConfigSlice(...beautifulSugar),
+  ...createMutualSlice(...beautifulSugar),
+  ...createHandlersSlice(...beautifulSugar),
+  ...createVisitorSlice(...beautifulSugar),
+  ...createIntentlySlice(...beautifulSugar),
+  ...createTrackingSlice(...beautifulSugar),
+  ...createincompleteTriggersSlice(...beautifulSugar),
+  ...createConversionsSlice(...beautifulSugar),
+  ...createIdleTimeSlice(...beautifulSugar)
+}))
 
 export const useEntireStore = () => {
   const store = useDifiStore((s) => s)
 
-  if (!store.get) return {} as DifiStore
   return store
 }

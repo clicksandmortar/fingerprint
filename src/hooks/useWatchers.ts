@@ -2,8 +2,8 @@
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState } from 'react'
 import { useVisitor } from '../beautifulSugar/slices/visitorSlice'
-import useCollectorCallback from '../context/useCollectorCallback'
 import { useCollectorMutation } from './api/useCollectorMutation'
+import useCollectorCallback from './useCollectorCallback'
 import { useLogging } from './useLogging'
 import { useTracking } from './useTracking'
 

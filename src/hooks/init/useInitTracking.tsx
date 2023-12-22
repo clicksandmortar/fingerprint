@@ -2,7 +2,6 @@ import mixpanel, { Config } from 'mixpanel-browser'
 import React, { useEffect } from 'react'
 import { useDifiStore, useEntireStore } from '../../beautifulSugar/store'
 import { getEnvVars } from '../../utils/getEnvVars'
-import { useFingerprint } from '../useFingerprint'
 import { useLogging } from '../useLogging'
 import { useTracking } from '../useTracking'
 import { useVisitor } from './useInitVisitor'
@@ -20,7 +19,7 @@ export type MixpanelProviderProps = {
 }
 
 export const useTrackingInit = () => {
-  const { appId } = useFingerprint()
+  const { appId } = useDifiStore((s) => s.difiProps)
   const { visitor } = useVisitor()
   const { log } = useLogging()
   const { initiated } = useDifiStore((s) => s.tracking)

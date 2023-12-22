@@ -24,4 +24,4 @@ export declare type FingerprintProviderProps = {
     config?: LEGACY_FingerprintConfig;
     children: ReactElement | null | ReactElement;
 };
-export declare function FingerprintProvider(props: FingerprintProviderProps): React.JSX.Element;
+export declare function FingerprintProvider(props: FingerprintProviderProps): React.JSX.Element | null;
