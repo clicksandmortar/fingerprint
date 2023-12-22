@@ -2836,14 +2836,18 @@ var createHandlersSlice = function createHandlersSlice(set, get) {
   return {
     handlers: clientHandlers,
     addHandlers: function addHandlers(handlers) {
+      if (handlers === void 0) {
+        handlers = [];
+      }
       return set(function (prev) {
         return {
-          handlers: _extends({}, prev.handlers, handlers)
+          handlers: [].concat(prev.handlers, handlers)
         };
       });
     },
     getHandlerForTrigger: function getHandlerForTrigger(_trigger) {
       var _get$handlers;
+      console.log('hhhh', get().handlers);
       var potentialHandler = (_get$handlers = get().handlers) === null || _get$handlers === void 0 ? void 0 : _get$handlers.find(function (handler) {
         return handler.behaviour === _trigger.behaviour;
       });

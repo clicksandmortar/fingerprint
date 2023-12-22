@@ -3543,14 +3543,12 @@ const clientHandlers = [{
 
 const createHandlersSlice = (set, get) => ({
   handlers: clientHandlers,
-  addHandlers: handlers => set(prev => ({
-    handlers: {
-      ...prev.handlers,
-      ...handlers
-    }
+  addHandlers: (handlers = []) => set(prev => ({
+    handlers: [...prev.handlers, ...handlers]
   })),
   getHandlerForTrigger: _trigger => {
     var _get$handlers;
+    console.log('hhhh', get().handlers);
     const potentialHandler = (_get$handlers = get().handlers) === null || _get$handlers === void 0 ? void 0 : _get$handlers.find(handler => handler.behaviour === _trigger.behaviour);
     if (!potentialHandler) return null;
     return potentialHandler;
