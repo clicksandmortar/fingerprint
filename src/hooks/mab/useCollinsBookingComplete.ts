@@ -1,8 +1,10 @@
 import React from 'react'
-import { useLogging } from '../../context/LoggingContext'
-import { useMixpanel } from '../../context/MixpanelContext'
+import { useEntireStore } from '../../beautifulSugar/store'
 import { SupportedBrand } from '../../utils/brand'
 import { useBrand } from '../useBrandConfig'
+import { useLogging } from '../useLogging'
+import useRunOnPathChange from '../useRunOnPathChange'
+import { useTracking } from '../useTracking'
 
 // if a brand is not present in this map, skip tracking via this method (other ones should pick it up)
 const collinBrandsPathConversionMap: Partial<{
@@ -20,9 +22,12 @@ const collinBrandsPathConversionMap: Partial<{
  */
 export function useCollinsBookingComplete() {
   const {
+    difiProps: { booted }
+  } = useEntireStore()
+  const {
     trackEvent,
     state: { initiated }
-  } = useMixpanel()
+  } = useTracking()
   const { log } = useLogging()
   const brand = useBrand()
 
@@ -60,5 +65,9 @@ export function useCollinsBookingComplete() {
     trackEvent('booking_complete', {})
   }, [trackEvent, log, brand, initiated])
 
-  return { checkCollinsBookingComplete }
+  useRunOnPathChange(checkCollinsBookingComplete, {
+    skip: !booted,
+    delay: 0,
+    name: 'checkCollinsBookingComplete'
+  })
 }

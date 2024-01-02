@@ -88,11 +88,14 @@ export declare type IncompleteTrigger = Trigger & {
     signals: FESignal[];
 };
 export declare type CollectorVisitorResponse = {
-    firstSeen: Date;
-    lastSeen: Date;
-    visits: number;
+    firstSeen: string;
+    lastSeen: string;
+    visits: {
+        host: 3;
+        path: 3;
+    };
     pageTriggers: Trigger[];
-    config: Config;
+    config: ConfigResponseIBlameBlixenkrone;
     incompleteTriggers?: IncompleteTrigger[];
     intently: boolean;
     identifiers?: {
@@ -110,6 +113,8 @@ export declare type Trigger = {
     invoke?: (trigger: Trigger) => void | JSX.Element | React.ReactNode;
     behaviour?: 'BEHAVIOUR_MODAL' | 'BEHAVIOUR_YOUTUBE' | 'BEHAVIOUR_INVERSE_FLOW' | 'BEHAVIOUR_BANNER';
     brand?: any;
+    variantID?: string;
+    variantName?: string;
 };
 export declare type PageView = {
     page: Page;
@@ -140,9 +145,17 @@ declare type BrandConfig = {
         greyText: string;
     };
 };
+declare type ObjectMap<T, F, W> = {
+    [K in keyof T]: T[K] extends F ? W : T[K];
+};
 export declare type Config = {
     script: ScriptConfig;
     trigger: TriggerConfig;
+    brand: BrandConfig;
+};
+export declare type ConfigResponseIBlameBlixenkrone = {
+    script: ScriptConfig;
+    trigger: ObjectMap<TriggerConfig, number, string>;
     brand: BrandConfig;
 };
 export {};

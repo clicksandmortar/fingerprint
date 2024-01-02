@@ -1,5 +1,6 @@
 import { Session } from '../sessions/types';
 import { Visitor } from './types';
+export declare const cookieAccountJWT = "b2c_token";
 export declare const cookieValidDays = 365;
 export declare const CnMCookie = "_cm";
 export declare const CnMIDCookie = "_cm_id";
