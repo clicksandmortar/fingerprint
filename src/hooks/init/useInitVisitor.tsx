@@ -9,7 +9,6 @@ export type VisitorProviderProps = {
   children?: React.ReactNode
 }
 
-// the
 export const useInitVisitor = () => {
   const { log } = useLogging()
 

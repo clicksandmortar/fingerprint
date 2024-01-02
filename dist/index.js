@@ -684,12 +684,12 @@ var useSeenMutation = function useSeenMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
     error = _useLogging.error;
+  var _useTracking = useTracking(),
+    trackEvent = _useTracking.trackEvent;
   var _useDifiStore = useDifiStore(function (s) {
       return s.difiProps;
     }),
     appId = _useDifiStore.appId;
-  var _useTracking = useTracking(),
-    trackEvent = _useTracking.trackEvent;
   var collectorCallback = useCollectorCallback();
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;

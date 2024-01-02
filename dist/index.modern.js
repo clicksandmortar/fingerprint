@@ -594,11 +594,11 @@ const useSeenMutation = () => {
     error
   } = useLogging();
   const {
-    appId
-  } = useDifiStore(s => s.difiProps);
-  const {
     trackEvent
   } = useTracking();
+  const {
+    appId
+  } = useDifiStore(s => s.difiProps);
   const collectorCallback = useCollectorCallback();
   const {
     visitor

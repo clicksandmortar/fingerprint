@@ -1,5 +1,4 @@
 import { StateCreator } from 'zustand'
-// import { logging } from '../../client/types'
 import { getLoggingContext, Logging } from '../../hooks/useLogging'
 import { DifiStore } from '../store'
 import { Get, Set } from '../types'
