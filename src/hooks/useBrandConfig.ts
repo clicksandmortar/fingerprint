@@ -1,21 +1,21 @@
-import React from 'react'
+import { useEntireStore } from '../beautifulSugar/store'
 import { Config } from '../client/types'
-import { ConfigContext, defaultColors } from '../context/Config'
 import { SupportedBrand, _LEGACY_getBrand } from '../utils/brand'
+import { defaultColors } from '../utils/configUtils'
 
-export const useConfig = () => React.useContext(ConfigContext)
+export const useConfig = () => useEntireStore().config
 
 export const useBrand = (): SupportedBrand | null => {
-  const configBrandName = useConfig().config.brand.name
+  const configBrandName = useConfig().brand.name
 
   if (configBrandName) return configBrandName
   // fallback for cases when the brand name is not set in the backend - default to original domain-check behavior
   return _LEGACY_getBrand()
 }
-export const useTriggerConfig = () => useConfig().config.trigger
-export const useScriptConfig = () => useConfig().config.script
+export const useTriggerConfig = () => useConfig().trigger
+export const useScriptConfig = () => useConfig().script
 
 export const useBrandColors = (): NonNullable<Config['brand']['colors']> => {
   // fallback to default colors. We may want to get rid of this fallback in the future
-  return useConfig().config.brand.colors || defaultColors
+  return useConfig().brand.colors || defaultColors
 }

@@ -1,3 +1,4 @@
+// TODO: split this into multiple files that make sense per context..
 import { SupportedBrand } from '../utils/brand'
 import { DeviceInfo } from '../utils/device'
 import { Visitor } from '../visitors/types'
@@ -110,9 +111,12 @@ export type IncompleteTrigger = Trigger & {
 }
 
 export type CollectorVisitorResponse = {
-  firstSeen: Date
-  lastSeen: Date
-  visits: number
+  firstSeen: string
+  lastSeen: string
+  visits: {
+    host: 3
+    path: 3
+  }
   pageTriggers: Trigger[]
   config: Config
   incompleteTriggers?: IncompleteTrigger[]
@@ -145,6 +149,8 @@ export type Trigger = {
     | 'BEHAVIOUR_INVERSE_FLOW'
     | 'BEHAVIOUR_BANNER'
   brand?: any
+  variantID?: string
+  variantName?: string
   multipleOfSameBehaviourSupported?: boolean
 }
 
@@ -154,7 +160,7 @@ export type PageView = {
   viewedAt: Date
 }
 
-export type FingerprintConfig = {
+export type LEGACY_FingerprintConfig = {
   exitIntentDelay?: number
   idleDelay?: number
   triggerCooldown?: number
