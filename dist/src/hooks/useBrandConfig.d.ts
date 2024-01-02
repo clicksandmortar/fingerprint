@@ -1,6 +1,9 @@
 import { Config } from '../client/types';
 import { SupportedBrand } from '../utils/brand';
-export declare const useConfig: () => Config;
+export declare const useConfig: () => {
+    config: Config;
+    setConfig: (config: Partial<Config>) => void;
+};
 export declare const useBrand: () => SupportedBrand | null;
 export declare const useTriggerConfig: () => {
     userIdleThresholdSecs: number;

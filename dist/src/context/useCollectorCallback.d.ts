@@ -1,4 +1,2 @@
-declare const useCollectorCallback: () => (
-  response: Response
-) => Promise<Response>
-export default useCollectorCallback
+declare const useCollectorCallback: () => (response: Response) => Promise<void>;
+export default useCollectorCallback;

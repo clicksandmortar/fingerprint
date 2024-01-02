@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
-import { useEntireStore } from '../../beautifulSugar/store'
+import { useMixpanel } from '../../context/MixpanelContext'
 import { useSeen } from '../../hooks/api/useSeenMutation'
-import { useTracking } from '../../hooks/useTracking'
+import { useCollector } from '../../hooks/useCollector'
 import { BannerTrigger } from './Banner.types'
 import HorizontalBanner from './Components/HorizontalBanner'
 import SideBanner from './Components/SideBanner'
 import { Position, resetPad } from './utils'
 
 const Banner = ({ trigger }: { trigger: BannerTrigger }) => {
-  const { removeActiveTrigger } = useEntireStore()
-  const { trackEvent } = useTracking()
+  const { removeActiveTrigger } = useCollector()
+  const { trackEvent } = useMixpanel()
   const [open, setOpen] = useState(true)
 
   useSeen({ trigger, skip: !open })

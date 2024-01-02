@@ -1,9 +1,9 @@
 import { test } from '@playwright/test'
 import { Browser, chromium } from 'playwright'
+import { cookieAccountJWT } from '../../context/FingerprintContext'
 import { Session } from '../../sessions/types'
 import {
   CnMIDCookie,
-  cookieAccountJWT,
   getCookieDomain,
   updateCookieUUID
 } from '../../visitors/bootstrap'

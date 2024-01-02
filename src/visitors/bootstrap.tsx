@@ -1,15 +1,12 @@
 import Cookies from 'js-cookie'
 import psl from 'psl'
 import { v4 as uuidv4 } from 'uuid'
+import { cookieAccountJWT } from '../context/FingerprintContext'
 import { Session } from '../sessions/types'
 import { getCookie, setCookie } from '../utils/cookies'
 import { uuidValidateV4 } from '../utils/uuid'
 import { Visitor } from './types'
 import { validVisitorId } from './utils'
-
-// TODO: These handlers for visitor and session need to be split up into SOLID following chunks, then combined.
-// It is virtually untestable at the moment.
-export const cookieAccountJWT = 'b2c_token'
 
 export const cookieValidDays = 365
 export const CnMCookie = '_cm'

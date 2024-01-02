@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect'
 import CloseButton from '../../../components/CloseButton'
+import { useLogging } from '../../../context/LoggingContext'
 import { useSeen } from '../../../hooks/api/useSeenMutation'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
-import { useLogging } from '../../../hooks/useLogging'
 import {
   getIsModalFullyClickable,
   prependClass,

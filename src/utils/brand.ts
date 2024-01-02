@@ -10,7 +10,6 @@ export type SupportedBrand =
   | 'Sizzling'
   | 'All Bar One'
   | 'Ember'
-  | 'Harvester'
 
 // eslint-disable-next-line camelcase
 const TEMP_isCNMBrand = () => {

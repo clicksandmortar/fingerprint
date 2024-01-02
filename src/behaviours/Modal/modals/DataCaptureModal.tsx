@@ -1,13 +1,13 @@
 import React, { memo, PropsWithChildren, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { useEntireStore } from '../../../beautifulSugar/store'
 import CloseButton from '../../../components/CloseButton'
 import CnMForm from '../../../components/CnMForm'
+import { useLogging } from '../../../context/LoggingContext'
+import { useMixpanel } from '../../../context/MixpanelContext'
 import { useDataCaptureMutation } from '../../../hooks/api/useDataCaptureMutation'
 import { useSeen } from '../../../hooks/api/useSeenMutation'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
-import { useLogging } from '../../../hooks/useLogging'
-import { useTracking } from '../../../hooks/useTracking'
+import { useCollector } from '../../../hooks/useCollector'
 import { getFormEntries } from '../../../utils/forms'
 import { DataCaptureModalField, DataCaptureTrigger } from '../Modal.types'
 
@@ -79,10 +79,10 @@ const DataCaptureModal = ({ trigger }: Props) => {
   const [error, setError] = React.useState<string>('')
   const [retainedHeight, setRetainedHeight] = React.useState<number>(0)
 
-  const { trackEvent } = useTracking()
+  const { trackEvent } = useMixpanel()
   const { log } = useLogging()
   const ref = React.useRef<HTMLDivElement>(null)
-  const { removeActiveTrigger } = useEntireStore()
+  const { removeActiveTrigger } = useCollector()
 
   const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
     null

@@ -1,5 +1,4 @@
 declare type EnvVars = {
-    isDev: boolean;
     FINGERPRINT_API_HOSTNAME: string;
     MIXPANEL_TOKEN: string;
 };

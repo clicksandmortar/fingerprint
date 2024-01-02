@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLogging } from '../context/LoggingContext'
 import { formatTimeStamp, getPositiveDateDiffInSec } from '../utils/date'
 import { getInterpolate } from '../utils/getInterpolate'
-import { useLogging } from './useLogging'
 
 type InterpolateVal = {
   structure: Record<string, unknown>

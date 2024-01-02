@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useEntireStore } from '../beautifulSugar/store'
+
+import { useLogging } from '../context/LoggingContext'
+import { useMixpanel } from '../context/MixpanelContext'
 import { SupportedBrand } from '../utils/brand'
 import { useBrand } from './useBrandConfig'
-import { useLogging } from './useLogging'
-import { useTracking } from './useTracking'
 
 const selectorRateMs = 100
 
@@ -19,7 +19,7 @@ function useTrackIntentlyModal({ intently }: IntentlyProps) {
   const {
     trackEvent,
     state: { initiated }
-  } = useTracking()
+  } = useMixpanel()
   const { log, error } = useLogging()
 
   const brand = useBrand()
@@ -151,12 +151,12 @@ const useRemoveIntently = ({ intently }: IntentlyProps) => {
 }
 
 export function useIntently() {
-  const {
-    // intently: { intently }
-  } = useEntireStore()
+  const [intently, setIntently] = useState<boolean>(true)
 
-  useRemoveIntently({ intently: false })
-  useTrackIntentlyModal({ intently: false })
+  useRemoveIntently({ intently })
+  useTrackIntentlyModal({ intently })
+
+  return { setIntently, intently }
 }
 
 export default useIntently

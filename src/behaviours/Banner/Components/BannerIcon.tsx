@@ -1,7 +1,7 @@
 import React from 'react'
 import { Icon, IconProps } from '../../../components/Icon'
+import { useLogging } from '../../../context/LoggingContext'
 import { useBrandColors } from '../../../hooks/useBrandConfig'
-import { useLogging } from '../../../hooks/useLogging'
 
 type Props = {
   iconName?: Icon

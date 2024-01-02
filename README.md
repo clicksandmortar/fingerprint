@@ -184,6 +184,37 @@ export default App
 | pageLoadTriggers         | `boolean`  | `false`     | Whether or not to trigger behaviours on page load                                                                                                                     |
 
 
+### useFingerprint
+
+This hook provides access to the fingerprint instance, and exposes methods to:
+
+- Register behaviour handlers
+- Track custom events (coming soon)
+
+```tsx
+import React, { Component } from 'react'
+
+import { useFingerprint } from 'fingerprint'
+
+const App = () => {
+  const {
+    appId,
+    booted,
+    currentTrigger,
+    registerHandler,
+    trackEvent,
+    trackPageView,
+    unregisterHandler
+  } = useFingerprint()
+
+  return (
+    <div>
+      <p>Your Application</p>
+    </div>
+  )
+}
+```
+
 ### useCookieConsent (coming soon)
 
 This hook provides access to the cookie consent instance, and exposes methods to:
@@ -214,6 +245,178 @@ The application ID that was passed to the `FingerprintProvider` component.
 
 A boolean value that indicates whether or not the fingerprint has been booted. This will be `false` until the fingerprint has been booted, and will then be `true` for the remainder of the application lifecycle.
 
+#### currentTrigger (coming soon)
+
+The current trigger that has been triggered. This will be `undefined` until a trigger has been triggered, and will then return a trigger object with the following shape:
+
+```ts
+{
+  behaviour: string // The behaviour that was triggered
+  // TBC
+}
+```
+
+#### registerHandler
+
+This function can be used to register a behaviour handler.
+
+A behaviour handler is a function that can either:
+
+- returns a React component that will be rendered when the behaviour is triggered, via React Portals
+- invokes change within the current component, for instance opening a modal or changing the state of a component
+- registers a React Portal that will be rendered when the behaviour is triggered, somewhere other than the root of the DOM
+
+When a behaviour handler is registered, it will be invoked whenever a matching behaviour is triggered. A match is determined by the behaviour type (i.e. `modal`) and if set, the trigger identifier (i.e. `welcome_on_homepage`). Where no matching trigger identifier is set, the behaviour handler will be invoked for all triggers of that type.
+
+If a behaviour handler returns a React component, it will be rendered via a React Portal, and will be rendered either at the root of the application or at the root of the DOM, unless otherwise specified.
+
+If a behaviour handler invokes change within the current component, it will be invoked within the current component, and will have access to the current component's state and props.
+
+Where a handler hasn't been registered for a behaviour, the behaviour will invoke the default handler, unless otherwise specified to the FingerprintProvider in the `defaultHandlers` prop.
+
+Note: When using the `registerHandler` function, you should ensure that you are not registering the same behaviour handler multiple times, and that you are unregistering the behaviour handler when the component that registered it is unmounted. This is to ensure that the behaviour handler is not invoked multiple times, and that it is not invoked when the component that registered it is unmounted.
+
+```tsx
+import React, { Component } from 'react'
+
+import { useFingerprint } from 'fingerprint'
+
+const YourComponent = () => {
+  const [showBanner, setShowBanner] = useState(false)
+  const { registerHandler, currentTrigger } = useFingerprint()
+
+  useEffect(() => {
+    registerHandler({
+      behaviour: 'modal',
+      invoke: (trigger: Trigger) => <Modal />
+    })
+
+    registerHandler({
+      id: 'welcome_on_homepage',
+      behaviour: 'modal',
+      invoke: (trigger: Trigger) => <HomepageWelcomeModal />
+    })
+
+    registerHandler({
+      behaviour: 'banner',
+      invoke: (trigger: Trigger) => setShowBanner(true)
+    })
+
+    return () => {
+      unregisterHandler({
+        behaviour: 'modal'
+      })
+
+      unregisterHandler({
+        id: 'welcome_on_homepage',
+        behaviour: 'modal'
+      })
+
+      unregisterHandler({
+        behaviour: 'banner'
+      })
+    }
+  }, [])
+
+  return (
+    <div>
+      <p>Hello World</p>
+
+      {showBanner && <Banner trigger={currentTrigger}>}
+    </div>
+  )
+}
+```
+
+#### trackEvent (coming soon)
+
+This function can be used to track custom events.
+
+```tsx
+import React, { Component } from 'react'
+
+import { useFingerprint } from 'fingerprint'
+
+const YourComponent = () => {
+  const { trackEvent } = useFingerprint()
+
+  const handleClick = () => {
+    trackEvent({
+      // TBC
+    })
+  }
+
+  return (
+    <div>
+      <p>Hello World</p>
+
+      <button onClick={handleClick}>Click Me</button>
+    </div>
+  )
+}
+```
+
+#### trackPageView (coming soon)
+
+This function can be used to track page views.
+
+```tsx
+import React, { Component } from 'react'
+
+import { useFingerprint } from 'fingerprint'
+
+const YourComponent = () => {
+  const { trackPageView } = useFingerprint()
+
+  useEffect(() => {
+    trackPageView({
+      // TBC
+    })
+  }, [])
+
+  return (
+    <div>
+      <p>Hello World</p>
+    </div>
+  )
+}
+```
+
+#### unregisterHandler
+
+This function can be used to unregister a behaviour handler. This is useful when you want to unregister a behaviour handler that was registered within a component that has since been unmounted.
+
+```tsx
+import React, { Component } from 'react'
+
+import { useFingerprint } from 'fingerprint'
+
+const YourComponent = () => {
+  const [modalOpen, setModalOpen] = useState(false)
+  const { registerHandler, unregisterHandler } = useFingerprint()
+
+  useEffect(() => {
+    registerHandler({
+      behaviour: 'modal',
+      invoke: () => setModalOpen(true)
+    })
+
+    return () => {
+      unregisterHandler({
+        behaviour: 'modal'
+      })
+    }
+  }, [])
+
+  return (
+    <div>
+      <p>Hello World</p>
+
+      {modalOpen && <Modal setModalOpen={setModalOpen} />}
+    </div>
+  )
+}
+```
 
 ## Deployments
 

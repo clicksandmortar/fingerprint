@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLogging } from './useLogging'
+import { useLogging } from '../context/LoggingContext'
 
 const useExitIntentDelay = (delay: number = 0) => {
   const { log } = useLogging()

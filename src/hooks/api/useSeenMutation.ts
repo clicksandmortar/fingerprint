@@ -1,25 +1,27 @@
 import { useMutation } from '@tanstack/react-query'
 import React, { useEffect, useState } from 'react'
-import { useDifiStore } from '../../beautifulSugar/store'
 import { BannerTrigger } from '../../behaviours/Banner/Banner.types'
 import { DataCaptureTrigger } from '../../behaviours/Modal/Modal.types'
 import { Trigger } from '../../client/types'
+import { useLogging } from '../../context/LoggingContext'
+import { useMixpanel } from '../../context/MixpanelContext'
+import { useVisitor } from '../../context/VisitorContext'
 import { deviceInfo } from '../../utils/device'
 import { hostname, request } from '../../utils/http'
 import { getPagePayload } from '../../utils/page'
-import { useVisitor } from '../init/useInitVisitor'
+import { updateCookie } from '../../visitors/bootstrap'
 import { useBrand } from '../useBrandConfig'
-import useCollectorCallback from '../useCollectorCallback'
-import { useLogging } from '../useLogging'
-import { useTracking } from '../useTracking'
+import { useCollector } from '../useCollector'
+import { useFingerprint } from '../useFingerprint'
 
 export const useSeenMutation = () => {
   const { log, error } = useLogging()
-  const { trackEvent } = useTracking()
-  const { appId } = useDifiStore((s) => s.difiProps)
+  const { appId } = useFingerprint()
+  const { trackEvent } = useMixpanel()
+  const { setPageTriggers, setIncompleteTriggers, setConversions } =
+    useCollector()
 
-  const collectorCallback = useCollectorCallback()
-  const { visitor } = useVisitor()
+  const { visitor, setVisitor } = useVisitor()
   const brand = useBrand()
 
   const trackTriggerSeen = React.useCallback(
@@ -56,7 +58,29 @@ export const useSeenMutation = () => {
         })
     },
     {
-      onSuccess: collectorCallback
+      // TODO: merge this and collecor callback into one thing when we no longer require
+      // setting intently - thats the only differentiator between the callbacks
+      onSuccess: async (res) => {
+        const r = await res.json()
+
+        log('Seen mutation: replacing triggers with:', r.pageTriggers)
+        setPageTriggers(r.pageTriggers)
+        setConversions(r.conversions || [])
+
+        const retrievedUserId = r.identifiers?.main
+        if (retrievedUserId) {
+          updateCookie(retrievedUserId)
+          setVisitor({ id: retrievedUserId })
+        }
+
+        log(
+          'Seen mutation: replacing incomplete Triggers with:',
+          r.incompleteTriggers
+        )
+
+        setIncompleteTriggers(r.incompleteTriggers || [])
+        return r
+      }
     }
   )
 }
