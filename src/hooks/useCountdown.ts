@@ -1,51 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLogging } from '../context/LoggingContext'
-import { getInterpolate } from './useInterpolate'
-
-const getPositiveDateDiffInSec = (date1: Date, date2: Date) => {
-  return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000))
-}
-
-function formatTimeStamp(targetDate: Date): string {
-  // written with help from `Cat I farted`.
-  const durationInSeconds = getPositiveDateDiffInSec(new Date(), targetDate)
-
-  const days = Math.floor(durationInSeconds / (60 * 60 * 24))
-  const hours = Math.floor((durationInSeconds % (60 * 60 * 24)) / (60 * 60))
-  const minutes = Math.floor((durationInSeconds % (60 * 60)) / 60)
-  const seconds = durationInSeconds % 60
-
-  const parts = []
-
-  if (days > 0) {
-    parts.push(`${days} day${days > 1 ? 's' : ''}`)
-  }
-
-  if (hours > 0) {
-    parts.push(`${hours} hour${hours > 1 ? 's' : ''}`)
-  }
-
-  if (minutes > 0) {
-    parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`)
-  }
-
-  if (seconds > 0) {
-    parts.push(`${seconds} second${seconds > 1 ? 's' : ''}`)
-  }
-
-  if (parts.length === 0) {
-    return '0 sec'
-  }
-
-  if (parts.length === 1) {
-    return parts[0]
-  }
-
-  const lastPart = parts.pop()
-  const formattedDuration = parts.join(' ') + ` and ${lastPart}`
-
-  return formattedDuration
-}
+import { formatTimeStamp, getPositiveDateDiffInSec } from '../utils/date'
+import { getInterpolate } from '../utils/getInterpolate'
 
 type InterpolateVal = {
   structure: Record<string, unknown>
@@ -58,9 +14,15 @@ type Props = {
   // sadly this and interpolation have to be coupled to enable putting a timer where we like
   // in our text. Otherwise we could easily remove this caca
   interpolate?: InterpolateVal
+  formatDate?: (targetDate: Date) => string
 }
 
-const useCountdown = ({ onZero, initialTimestamp, interpolate }: Props) => {
+const useCountdown = ({
+  onZero,
+  initialTimestamp,
+  interpolate,
+  formatDate = formatTimeStamp
+}: Props) => {
   const { error } = useLogging()
   const [timestamp, setTimeStamp] = useState<Date | null>(
     initialTimestamp || null
@@ -94,7 +56,7 @@ const useCountdown = ({ onZero, initialTimestamp, interpolate }: Props) => {
   }, [onZero, timestamp, intId])
 
   const interpolatefunc = useMemo(
-    () => getInterpolate(interpolate?.structure as Record<string, unknown>),
+    () => getInterpolate(interpolate?.structure || {}),
     [interpolate]
   )
 
@@ -114,7 +76,7 @@ const useCountdown = ({ onZero, initialTimestamp, interpolate }: Props) => {
       )
       return countdown
     }
-    const formatVal = (val: string) => formatTimeStamp(new Date(val))
+    const formatVal = (val: string) => formatDate(new Date(val))
 
     const interpoaltedVal = interpolatefunc(interpolate.text, formatVal)
 

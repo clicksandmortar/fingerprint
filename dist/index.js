@@ -30,6 +30,18 @@ function _extends() {
   };
   return _extends.apply(this, arguments);
 }
+function _inheritsLoose(subClass, superClass) {
+  subClass.prototype = Object.create(superClass.prototype);
+  subClass.prototype.constructor = subClass;
+  _setPrototypeOf(subClass, superClass);
+}
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+  return _setPrototypeOf(o, p);
+}
 function _objectDestructuringEmpty(obj) {
   if (obj == null) throw new TypeError("Cannot destructure " + obj);
 }
@@ -775,7 +787,13 @@ function useButtonCollector() {
       log('useButtonCollector: button clicked', {
         button: button
       });
-      trackEvent('button_clicked', button);
+      trackEvent('button_clicked', {
+        id: button.getAttribute('id'),
+        name: button.getAttribute('name'),
+        "class": button.getAttribute('className'),
+        type: button.getAttribute('type'),
+        text: button.innerText
+      });
       collect({
         button: {
           id: button.id,
@@ -1642,6 +1660,7 @@ var useCollector = function useCollector() {
   return React.useContext(CollectorContext);
 };
 
+var _excluded = ["mutate"];
 var useSeenMutation = function useSeenMutation() {
   var _useLogging = useLogging(),
     log = _useLogging.log,
@@ -1706,6 +1725,30 @@ var useSeenMutation = function useSeenMutation() {
     }
   });
 };
+var useSeen = function useSeen(_ref) {
+  var trigger = _ref.trigger,
+    skip = _ref.skip;
+  var _useState = React.useState(false),
+    hasFired = _useState[0],
+    setHasFired = _useState[1];
+  var _useSeenMutation = useSeenMutation(),
+    runSeen = _useSeenMutation.mutate,
+    mutationRest = _objectWithoutPropertiesLoose(_useSeenMutation, _excluded);
+  React.useEffect(function () {
+    if (skip) return;
+    if (hasFired) return;
+    if (mutationRest.isSuccess) return;
+    if (mutationRest.isLoading) return;
+    var tId = setTimeout(function () {
+      runSeen(trigger);
+      setHasFired(true);
+    }, 500);
+    return function () {
+      clearTimeout(tId);
+    };
+  }, [mutationRest, skip, hasFired, runSeen, setHasFired]);
+  return mutationRest;
+};
 
 var closeButtonStyles = {
   borderRadius: '100%',
@@ -1740,24 +1783,22 @@ var CloseButton = function CloseButton(_ref) {
   })));
 };
 
-var defualtFormatString = function defualtFormatString(val) {
-  return val;
-};
-var getInterpolate = function getInterpolate(structure) {
-  var interpolate = function interpolate(text, formatString) {
-    if (formatString === void 0) {
-      formatString = defualtFormatString;
-    }
-    var replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, function (match, keys) {
-      var value = transcend(structure, keys);
-      if (formatString) value = formatString(value);
-      return value !== undefined ? value : match;
-    });
-    return replacedText;
+var getDiffInDHMS = function getDiffInDHMS(targetDate, initialDate) {
+  if (initialDate === void 0) {
+    initialDate = new Date();
+  }
+  var diffInSeconds = getPositiveDateDiffInSec(targetDate, initialDate);
+  var days = Math.floor(diffInSeconds / (24 * 60 * 60));
+  var hours = Math.floor(diffInSeconds % (24 * 60 * 60) / (60 * 60));
+  var minutes = Math.floor(diffInSeconds % (60 * 60) / 60);
+  var seconds = diffInSeconds % 60;
+  return {
+    days: days,
+    minutes: minutes,
+    hours: hours,
+    seconds: seconds
   };
-  return interpolate;
 };
-
 var getPositiveDateDiffInSec = function getPositiveDateDiffInSec(date1, date2) {
   return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
 };
@@ -1790,10 +1831,35 @@ function formatTimeStamp(targetDate) {
   var formattedDuration = parts.join(' ') + (" and " + lastPart);
   return formattedDuration;
 }
+
+var defualtFormatString = function defualtFormatString(val) {
+  return val;
+};
+var getInterpolate = function getInterpolate(structure, hideMissingValues) {
+  if (hideMissingValues === void 0) {
+    hideMissingValues = true;
+  }
+  var interpolate = function interpolate(text, formatString) {
+    if (formatString === void 0) {
+      formatString = defualtFormatString;
+    }
+    var replacedText = text.replace(/\{\{\s*([\w.]+)\s*\}\}/g, function (match, keys) {
+      var value = transcend(structure, keys);
+      if (formatString) value = formatString(value);
+      if (!!match && !value && hideMissingValues) return '';
+      return value !== undefined ? value : match;
+    });
+    return replacedText;
+  };
+  return interpolate;
+};
+
 var useCountdown = function useCountdown(_ref) {
   var onZero = _ref.onZero,
     initialTimestamp = _ref.initialTimestamp,
-    interpolate = _ref.interpolate;
+    interpolate = _ref.interpolate,
+    _ref$formatDate = _ref.formatDate,
+    formatDate = _ref$formatDate === void 0 ? formatTimeStamp : _ref$formatDate;
   var _useLogging = useLogging(),
     error = _useLogging.error;
   var _useState = React.useState(initialTimestamp || null),
@@ -1827,7 +1893,7 @@ var useCountdown = function useCountdown(_ref) {
     }
   }, [onZero, timestamp, intId]);
   var interpolatefunc = React.useMemo(function () {
-    return getInterpolate(interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure);
+    return getInterpolate((interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure) || {});
   }, [interpolate]);
   var formattedCountdown = React.useMemo(function () {
     if (!interpolate) {
@@ -1843,7 +1909,7 @@ var useCountdown = function useCountdown(_ref) {
       return countdown;
     }
     var formatVal = function formatVal(val) {
-      return formatTimeStamp(new Date(val));
+      return formatDate(new Date(val));
     };
     var interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
     return interpoaltedVal;
@@ -2011,7 +2077,7 @@ var HorizontalBanner = function HorizontalBanner(_ref) {
   }));
 };
 
-var _excluded = ["icon"];
+var _excluded$1 = ["icon"];
 var Ticket = function Ticket(props) {
   return React__default.createElement("svg", Object.assign({
     xmlns: 'http://www.w3.org/2000/svg',
@@ -2049,7 +2115,7 @@ var iconList = {
 };
 var Icon = function Icon(_ref) {
   var icon = _ref.icon,
-    props = _objectWithoutPropertiesLoose(_ref, _excluded);
+    props = _objectWithoutPropertiesLoose(_ref, _excluded$1);
   var _useLogging = useLogging(),
     error = _useLogging.error;
   var IconComponent = iconList[icon];
@@ -2125,26 +2191,10 @@ var Banner = function Banner(_ref) {
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
-  var _useState2 = React.useState(false),
-    hasFired = _useState2[0],
-    setHasFired = _useState2[1];
-  var _useSeenMutation = useSeenMutation(),
-    runSeen = _useSeenMutation.mutate,
-    isSuccess = _useSeenMutation.isSuccess,
-    isLoading = _useSeenMutation.isLoading;
-  React.useEffect(function () {
-    if (!open) return;
-    if (hasFired) return;
-    if (isSuccess) return;
-    if (isLoading) return;
-    var tId = setTimeout(function () {
-      runSeen(trigger);
-    }, 500);
-    setHasFired(true);
-    return function () {
-      clearTimeout(tId);
-    };
-  }, [open, isSuccess, isLoading]);
+  useSeen({
+    trigger: trigger,
+    skip: !open
+  });
   if (!open) return null;
   var handleClickCallToAction = function handleClickCallToAction(e) {
     var _trigger$data, _trigger$data2;
@@ -2243,6 +2293,30 @@ var isModalDataCaptureModal = function isModalDataCaptureModal(trigger) {
   if (!trigger.data.successText) return false;
   return true;
 };
+function splitSenseOfUrgencyText(text) {
+  var split = text.split(/\{\{\s*countdownEndTime\s*\}\}/i);
+  return split;
+}
+var buildTextWithPotentiallyCountdown = function buildTextWithPotentiallyCountdown(text) {
+  var hasCountdown = false;
+  var text1 = '';
+  var text2 = '';
+  var split = splitSenseOfUrgencyText(text);
+  text1 = split[0];
+  if (split.length > 1) {
+    text2 = split[1];
+    hasCountdown = true;
+    return {
+      hasCountdown: hasCountdown,
+      text1: text1,
+      text2: text2
+    };
+  } else {
+    return {
+      text: text1
+    };
+  }
+};
 
 var useDataCaptureMutation = function useDataCaptureMutation() {
   var _useLogging = useLogging(),
@@ -2326,10 +2400,12 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
   var _useState = React.useState(null),
     invocationTimeStamp = _useState[0],
     setInvocationTimeStamp = _useState[1];
-  var _useSeenMutation = useSeenMutation(),
-    runSeen = _useSeenMutation.mutate,
-    isSeenSuccess = _useSeenMutation.isSuccess,
-    isSeenLoading = _useSeenMutation.isLoading;
+  var _useSeen = useSeen({
+      trigger: trigger,
+      skip: !open
+    }),
+    isSeenSuccess = _useSeen.isSuccess,
+    isSeenLoading = _useSeen.isLoading;
   var _useDataCaptureMutati = useDataCaptureMutation(),
     submit = _useDataCaptureMutati.mutate,
     isSubmissionSuccess = _useDataCaptureMutati.isSuccess,
@@ -2340,7 +2416,6 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
     if (isSeenSuccess) return;
     if (isSeenLoading) return;
     var tId = setTimeout(function () {
-      runSeen(trigger);
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString());
       }
@@ -2486,8 +2561,259 @@ var DataCaptureModal$1 = React.memo(function (_ref4) {
   }), document.body);
 });
 
+var fontSize = '2em';
+var cardFontScaleFactor = 1.5;
+var AnimatedCard = function AnimatedCard(_ref) {
+  var animation = _ref.animation,
+    digit = _ref.digit;
+  return React__default.createElement("div", {
+    className: "flipCard " + animation
+  }, React__default.createElement("span", null, digit));
+};
+var StaticCard = function StaticCard(_ref2) {
+  var position = _ref2.position,
+    digit = _ref2.digit;
+  return React__default.createElement("div", {
+    className: position
+  }, React__default.createElement("span", null, digit));
+};
+var FlipUnitContainer = function FlipUnitContainer(_ref3) {
+  var digit = _ref3.digit,
+    shuffle = _ref3.shuffle,
+    unit = _ref3.unit;
+  var currentDigit = digit;
+  var previousDigit = digit + 1;
+  if (unit !== 'hours') {
+    previousDigit = previousDigit === -1 ? 59 : previousDigit;
+  } else {
+    previousDigit = previousDigit === -1 ? 23 : previousDigit;
+  }
+  if (currentDigit < 10) {
+    currentDigit = "0" + currentDigit;
+  }
+  if (previousDigit < 10) {
+    previousDigit = "0" + previousDigit;
+  }
+  var digit1 = shuffle ? previousDigit : currentDigit;
+  var digit2 = !shuffle ? previousDigit : currentDigit;
+  var animation1 = shuffle ? 'fold' : 'unfold';
+  var animation2 = !shuffle ? 'fold' : 'unfold';
+  return React__default.createElement("div", {
+    className: 'flipUnitContainer'
+  }, React__default.createElement(StaticCard, {
+    position: 'upperCard',
+    digit: currentDigit
+  }), React__default.createElement(StaticCard, {
+    position: 'lowerCard',
+    digit: previousDigit
+  }), React__default.createElement(AnimatedCard, {
+    digit: digit1,
+    animation: animation1
+  }), React__default.createElement(AnimatedCard, {
+    digit: digit2,
+    animation: animation2
+  }));
+};
+var FlipClock = /*#__PURE__*/function (_React$Component) {
+  _inheritsLoose(FlipClock, _React$Component);
+  function FlipClock(props) {
+    var _this;
+    _this = _React$Component.call(this, props) || this;
+    _this.state = {
+      hours: 0,
+      hoursShuffle: true,
+      days: 0,
+      daysShuffle: true,
+      minutes: 0,
+      minutesShuffle: true,
+      seconds: 0,
+      secondsShuffle: true,
+      haveStylesLoaded: false
+    };
+    return _this;
+  }
+  var _proto = FlipClock.prototype;
+  _proto.componentDidMount = function componentDidMount() {
+    var _this2 = this;
+    var _this$props$colorConf = this.props.colorConfig,
+      textPrimary = _this$props$colorConf.textPrimary,
+      backgroundPrimary = _this$props$colorConf.backgroundPrimary;
+    var CSS = "\n    @import url(\"https://fonts.googleapis.com/css?family=Droid+Sans+Mono\");\n    * {\n      box-sizing: border-box;\n    }\n    \n    body {\n      margin: 0;\n    }\n    \n    .flipClock {\n      display: flex;\n      justify-content: space-between;\n    }\n    \n    .flipUnitContainer {\n      display: block;\n      position: relative;\n      width: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n      height: calc(" + fontSize + " * " + cardFontScaleFactor + ");\n      perspective-origin: 50% 50%;\n      perspective: 300px;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 3px;\n      box-shadow: 0px 10px 10px -10px grey;\n    }\n    \n    .upperCard, .lowerCard {\n      display: flex;\n      position: relative;\n      justify-content: center;\n      width: 100%;\n      height: 50%;\n      overflow: hidden;\n      border: 1px solid " + backgroundPrimary + ";\n    }\n    \n    .upperCard span, .lowerCard span {\n      font-size: " + fontSize + ";\n      font-family: \"Droid Sans Mono\", monospace;\n      font-weight: lighter;\n      color: " + textPrimary + ";\n    }\n    \n    .upperCard {\n      align-items: flex-end;\n      border-bottom: 0.5px solid " + backgroundPrimary + ";\n      border-top-left-radius: 3px;\n      border-top-right-radius: 3px;\n    }\n    .upperCard span {\n      transform: translateY(50%);\n    }\n    \n    .lowerCard {\n      align-items: flex-start;\n      border-top: 0.5px solid " + backgroundPrimary + ";\n      border-bottom-left-radius: 3px;\n      border-bottom-right-radius: 3px;\n    }\n    .lowerCard span {\n      transform: translateY(-50%);\n    }\n    \n    .flipCard {\n      display: flex;\n      justify-content: center;\n      position: absolute;\n      left: 0;\n      width: 100%;\n      height: 50%;\n      overflow: hidden;\n      -webkit-backface-visibility: hidden;\n              backface-visibility: hidden;\n    }\n    .flipCard span {\n      font-family: \"Droid Sans Mono\", monospace;\n      font-size: " + fontSize + ";\n      font-weight: lighter;\n      color: " + textPrimary + ";\n    }\n\n    .flipCard.unfold {\n      top: 50%;\n      align-items: flex-start;\n      transform-origin: 50% 0%;\n      transform: rotateX(180deg);\n      background-color: " + backgroundPrimary + ";\n      border-bottom-left-radius: 3px;\n      border-bottom-right-radius: 3px;\n      border: 0.5px solid " + backgroundPrimary + ";\n      border-top: 0.5px solid " + backgroundPrimary + ";\n    }\n    .flipCard.unfold span {\n      transform: translateY(-50%);\n    }\n    .flipCard.fold {\n      top: 0%;\n      align-items: flex-end;\n      transform-origin: 50% 100%;\n      transform: rotateX(0deg);\n      background-color: " + backgroundPrimary + ";\n      border-top-left-radius: 3px;\n      border-top-right-radius: 3px;\n      border: 0.5px solid " + backgroundPrimary + ";\n      border-bottom: 0.5px solid " + backgroundPrimary + ";\n    }\n    .flipCard.fold span {\n      transform: translateY(50%);\n    }\n    \n    .fold {\n      -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n              animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n      transform-style: preserve-3d;\n    }\n    \n    .unfold {\n      -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n              animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;\n      transform-style: preserve-3d;\n    }\n    \n    @-webkit-keyframes fold {\n      0% {\n        transform: rotateX(0deg);\n      }\n      100% {\n        transform: rotateX(-180deg);\n      }\n    }\n    \n    @keyframes fold {\n      0% {\n        transform: rotateX(0deg);\n      }\n      100% {\n        transform: rotateX(-180deg);\n      }\n    }\n    @-webkit-keyframes unfold {\n      0% {\n        transform: rotateX(180deg);\n      }\n      100% {\n        transform: rotateX(0deg);\n      }\n    }\n    @keyframes unfold {\n      0% {\n        transform: rotateX(180deg);\n      }\n      100% {\n        transform: rotateX(0deg);\n      }\n    }\n    @media screen and (max-width: 850px) {\n      .flipClock {\n        scale: 0.8\n      }\n    }\n    @media screen and (max-width: 450px) {\n      .flipClock {\n        scale: 0.5\n      }\n    }\n    ";
+    this.timerID = setInterval(function () {
+      return _this2.updateTime();
+    }, 50);
+    this.styles = document.createElement('style');
+    this.styles.appendChild(document.createTextNode(CSS));
+    document.head.appendChild(this.styles);
+    setTimeout(function () {
+      _this2.setState({
+        haveStylesLoaded: true
+      });
+    }, 500);
+  };
+  _proto.componentWillUnmount = function componentWillUnmount() {
+    clearInterval(this.timerID);
+    document.head.removeChild(this.styles);
+  };
+  _proto.updateTime = function updateTime() {
+    var startDate = this.props.startDate || new Date();
+    var diff = getDiffInDHMS(startDate, this.props.targetDate);
+    var days = diff.days,
+      hours = diff.hours,
+      minutes = diff.minutes,
+      seconds = diff.seconds;
+    if (days !== this.state.days) {
+      var daysShuffle = !this.state.daysShuffle;
+      this.setState({
+        days: days,
+        daysShuffle: daysShuffle
+      });
+    }
+    if (hours !== this.state.hours) {
+      var hoursShuffle = !this.state.hoursShuffle;
+      this.setState({
+        hours: hours,
+        hoursShuffle: hoursShuffle
+      });
+    }
+    if (hours !== this.state.hours) {
+      var _hoursShuffle = !this.state.hoursShuffle;
+      this.setState({
+        hours: hours,
+        hoursShuffle: _hoursShuffle
+      });
+    }
+    if (minutes !== this.state.minutes) {
+      var minutesShuffle = !this.state.minutesShuffle;
+      this.setState({
+        minutes: minutes,
+        minutesShuffle: minutesShuffle
+      });
+    }
+    if (seconds !== this.state.seconds) {
+      var secondsShuffle = !this.state.secondsShuffle;
+      this.setState({
+        seconds: seconds,
+        secondsShuffle: secondsShuffle
+      });
+    }
+  };
+  _proto.render = function render() {
+    var _this$state = this.state,
+      hours = _this$state.hours,
+      minutes = _this$state.minutes,
+      seconds = _this$state.seconds,
+      days = _this$state.days,
+      daysShuffle = _this$state.daysShuffle,
+      hoursShuffle = _this$state.hoursShuffle,
+      minutesShuffle = _this$state.minutesShuffle,
+      secondsShuffle = _this$state.secondsShuffle;
+    if (!this.state.haveStylesLoaded) return null;
+    var textPrimary = this.props.colorConfig.textPrimary;
+    var Separator = function Separator() {
+      return React__default.createElement("h1", {
+        style: {
+          color: textPrimary
+        }
+      }, ":");
+    };
+    return React__default.createElement("div", {
+      className: 'flipClock'
+    }, React__default.createElement(FlipUnitContainer, {
+      unit: 'days',
+      digit: days,
+      shuffle: daysShuffle
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
+      unit: 'hours',
+      digit: hours,
+      shuffle: hoursShuffle
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
+      unit: 'minutes',
+      digit: minutes,
+      shuffle: minutesShuffle
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
+      unit: 'seconds',
+      digit: seconds,
+      shuffle: secondsShuffle
+    }));
+  };
+  return FlipClock;
+}(React__default.Component);
+var CountdownFlipClock = function CountdownFlipClock(props) {
+  var colors = useBrandColors();
+  return React__default.createElement(FlipClock, Object.assign({}, props, {
+    colorConfig: colors
+  }));
+};
+
+var Header = function Header(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
+  var trigger = _ref.trigger;
+  var interpolate = getInterpolate(trigger.data || {}, true);
+  var countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  var StdHeader = function StdHeader(_ref2) {
+    var text = _ref2.text;
+    return React__default.createElement("h1", {
+      className: prependClass('main-text')
+    }, interpolate(text || ''));
+  };
+  var texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading) || '');
+  if (!countdownEndTime) return React__default.createElement(StdHeader, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading
+  });
+  if (!('hasCountdown' in texts)) return React__default.createElement(StdHeader, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading
+  });
+  return React__default.createElement("div", null, React__default.createElement(StdHeader, {
+    text: texts.text1
+  }), React__default.createElement("div", {
+    style: {
+      maxWidth: 220,
+      margin: '0.4rem auto'
+    }
+  }, React__default.createElement(CountdownFlipClock, {
+    targetDate: new Date(countdownEndTime)
+  })), texts.text2 && React__default.createElement(StdHeader, {
+    text: texts.text2
+  }));
+};
+var Header$1 = React.memo(Header);
+
+var Paragraph = function Paragraph(_ref) {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
+  var trigger = _ref.trigger;
+  var countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  var interpolate = getInterpolate(trigger.data || {}, true);
+  var StdParagraph = function StdParagraph(_ref2) {
+    var text = _ref2.text;
+    return React__default.createElement("p", {
+      className: prependClass('sub-text')
+    }, interpolate(text || ''));
+  };
+  var texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.paragraph) || '');
+  if (!countdownEndTime) return React__default.createElement(StdParagraph, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph
+  });
+  if (!('hasCountdown' in texts)) return React__default.createElement(StdParagraph, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph
+  });
+  return React__default.createElement("div", null, React__default.createElement(StdParagraph, {
+    text: texts.text1
+  }), React__default.createElement("div", {
+    style: {
+      maxWidth: 220,
+      margin: 'auto'
+    }
+  }, React__default.createElement(CountdownFlipClock, {
+    targetDate: new Date(countdownEndTime)
+  })), texts.text2 && React__default.createElement(StdParagraph, {
+    text: texts.text2
+  }));
+};
+var Paragraph$1 = React.memo(Paragraph);
+
 var StandardModal = function StandardModal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var _trigger$data, _trigger$data2, _trigger$data3;
   var trigger = _ref.trigger,
     handleClickCallToAction = _ref.handleClickCallToAction,
     handleCloseModal = _ref.handleCloseModal;
@@ -2510,11 +2836,16 @@ var StandardModal = function StandardModal(_ref) {
     height = _useModalDimensionsBa2.height,
     width = _useModalDimensionsBa2.width,
     setImageDimensions = _useModalDimensionsBa.setImageDimensions;
+  var isImageBrokenDontShowModal = !width || !height;
+  useSeen({
+    trigger: trigger,
+    skip: !stylesLoaded || isImageBrokenDontShowModal
+  });
   var appendResponsiveBehaviour = React__default.useCallback(function () {
     return reactDeviceDetect.isMobile ? "" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 2.4rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 1.3rem;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 1.6rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 0.9rem;\n  }\n}\n\n";
   }, [height, width, imageURL, reactDeviceDetect.isMobile]);
   React.useEffect(function () {
-    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : "") + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
+    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : "") + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.3);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
@@ -2543,7 +2874,7 @@ var StandardModal = function StandardModal(_ref) {
   if (!stylesLoaded) {
     return null;
   }
-  if (!width || !height) {
+  if (isImageBrokenDontShowModal) {
     error("StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate.");
     return null;
   }
@@ -2567,24 +2898,24 @@ var StandardModal = function StandardModal(_ref) {
     onClick: handleClickCloseFinal
   })), React__default.createElement("div", {
     className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
+  }, React__default.createElement(Header$1, {
+    trigger: trigger
+  }), React__default.createElement(Paragraph$1, {
+    trigger: trigger
+  })), !isModalFullyClickable && React__default.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'flex-end'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL,
     className: prependClass('cta'),
     onClick: handleClickCallToAction,
     style: {
       fontSize: '1.3rem',
       padding: '0.3rem 1rem'
     }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.buttonText))))));
 };
 
 var Modal = function Modal(_ref) {
@@ -2601,17 +2932,9 @@ var Modal = function Modal(_ref) {
     setInvocationTimeStamp = _useState2[1];
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutate;
-  var _useSeenMutation = useSeenMutation(),
-    runSeen = _useSeenMutation.mutate,
-    isSuccess = _useSeenMutation.isSuccess,
-    isLoading = _useSeenMutation.isLoading;
   React.useEffect(function () {
-    if (!open) return;
-    if (invocationTimeStamp) return;
-    if (isSuccess) return;
-    if (isLoading) return;
+    if (!!invocationTimeStamp) return;
     var tId = setTimeout(function () {
-      runSeen(trigger);
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString());
       }
@@ -2619,7 +2942,7 @@ var Modal = function Modal(_ref) {
     return function () {
       clearTimeout(tId);
     };
-  }, [open, isSuccess, isLoading]);
+  }, [invocationTimeStamp]);
   if (!open) {
     return null;
   }

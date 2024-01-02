@@ -717,7 +717,13 @@ function useButtonCollector() {
       log('useButtonCollector: button clicked', {
         button
       });
-      trackEvent('button_clicked', button);
+      trackEvent('button_clicked', {
+        id: button.getAttribute('id'),
+        name: button.getAttribute('name'),
+        class: button.getAttribute('className'),
+        type: button.getAttribute('type'),
+        text: button.innerText
+      });
       collect({
         button: {
           id: button.id,
@@ -1602,6 +1608,30 @@ const useSeenMutation = () => {
     }
   });
 };
+const useSeen = ({
+  trigger,
+  skip
+}) => {
+  const [hasFired, setHasFired] = useState(false);
+  const {
+    mutate: runSeen,
+    ...mutationRest
+  } = useSeenMutation();
+  useEffect(() => {
+    if (skip) return;
+    if (hasFired) return;
+    if (mutationRest.isSuccess) return;
+    if (mutationRest.isLoading) return;
+    const tId = setTimeout(() => {
+      runSeen(trigger);
+      setHasFired(true);
+    }, 500);
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [mutationRest, skip, hasFired, runSeen, setHasFired]);
+  return mutationRest;
+};
 
 const closeButtonStyles = {
   borderRadius: '100%',
@@ -1640,19 +1670,19 @@ const CloseButton = ({
   })));
 };
 
-const defualtFormatString = val => val;
-const getInterpolate = structure => {
-  const interpolate = (text, formatString = defualtFormatString) => {
-    const replacedText = text.replace(/\{\{\s*\.?([\w]+)\s*\}\}/g, (match, keys) => {
-      let value = transcend(structure, keys);
-      if (formatString) value = formatString(value);
-      return value !== undefined ? value : match;
-    });
-    return replacedText;
+const getDiffInDHMS = (targetDate, initialDate = new Date()) => {
+  const diffInSeconds = getPositiveDateDiffInSec(targetDate, initialDate);
+  const days = Math.floor(diffInSeconds / (24 * 60 * 60));
+  const hours = Math.floor(diffInSeconds % (24 * 60 * 60) / (60 * 60));
+  const minutes = Math.floor(diffInSeconds % (60 * 60) / 60);
+  const seconds = diffInSeconds % 60;
+  return {
+    days,
+    minutes,
+    hours,
+    seconds
   };
-  return interpolate;
 };
-
 const getPositiveDateDiffInSec = (date1, date2) => {
   return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
 };
@@ -1685,10 +1715,26 @@ function formatTimeStamp(targetDate) {
   const formattedDuration = parts.join(' ') + ` and ${lastPart}`;
   return formattedDuration;
 }
+
+const defualtFormatString = val => val;
+const getInterpolate = (structure, hideMissingValues = true) => {
+  const interpolate = (text, formatString = defualtFormatString) => {
+    const replacedText = text.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (match, keys) => {
+      let value = transcend(structure, keys);
+      if (formatString) value = formatString(value);
+      if (!!match && !value && hideMissingValues) return '';
+      return value !== undefined ? value : match;
+    });
+    return replacedText;
+  };
+  return interpolate;
+};
+
 const useCountdown = ({
   onZero,
   initialTimestamp,
-  interpolate
+  interpolate,
+  formatDate: _formatDate = formatTimeStamp
 }) => {
   const {
     error
@@ -1715,7 +1761,7 @@ const useCountdown = ({
       clearInterval(intId);
     }
   }, [onZero, timestamp, intId]);
-  const interpolatefunc = useMemo(() => getInterpolate(interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure), [interpolate]);
+  const interpolatefunc = useMemo(() => getInterpolate((interpolate === null || interpolate === void 0 ? void 0 : interpolate.structure) || {}), [interpolate]);
   const formattedCountdown = useMemo(() => {
     if (!interpolate) {
       error('No interpolation provided to timer. Rendering just countdown.');
@@ -1729,7 +1775,7 @@ const useCountdown = ({
       error('No text provided to timer interpolation. Rendering just countdown.');
       return countdown;
     }
-    const formatVal = val => formatTimeStamp(new Date(val));
+    const formatVal = val => _formatDate(new Date(val));
     const interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
     return interpoaltedVal;
   }, [countdown, interpolate, interpolatefunc]);
@@ -2021,25 +2067,10 @@ const Banner = ({
     trackEvent
   } = useMixpanel();
   const [open, setOpen] = useState(true);
-  const [hasFired, setHasFired] = useState(false);
-  const {
-    mutate: runSeen,
-    isSuccess,
-    isLoading
-  } = useSeenMutation();
-  useEffect(() => {
-    if (!open) return;
-    if (hasFired) return;
-    if (isSuccess) return;
-    if (isLoading) return;
-    const tId = setTimeout(() => {
-      runSeen(trigger);
-    }, 500);
-    setHasFired(true);
-    return () => {
-      clearTimeout(tId);
-    };
-  }, [open, isSuccess, isLoading]);
+  useSeen({
+    trigger,
+    skip: !open
+  });
   if (!open) return null;
   const handleClickCallToAction = e => {
     var _trigger$data, _trigger$data2;
@@ -2133,6 +2164,30 @@ const isModalDataCaptureModal = trigger => {
   if (!trigger.data.successText) return false;
   return true;
 };
+function splitSenseOfUrgencyText(text) {
+  const split = text.split(/\{\{\s*countdownEndTime\s*\}\}/i);
+  return split;
+}
+const buildTextWithPotentiallyCountdown = text => {
+  let hasCountdown = false;
+  let text1 = '';
+  let text2 = '';
+  const split = splitSenseOfUrgencyText(text);
+  text1 = split[0];
+  if (split.length > 1) {
+    text2 = split[1];
+    hasCountdown = true;
+    return {
+      hasCountdown,
+      text1,
+      text2
+    };
+  } else {
+    return {
+      text: text1
+    };
+  }
+};
 
 const useDataCaptureMutation = () => {
   const {
@@ -2220,10 +2275,12 @@ const DataCaptureModal = ({
   } = useCollector();
   const [invocationTimeStamp, setInvocationTimeStamp] = useState(null);
   const {
-    mutate: runSeen,
     isSuccess: isSeenSuccess,
     isLoading: isSeenLoading
-  } = useSeenMutation();
+  } = useSeen({
+    trigger,
+    skip: !open
+  });
   const {
     mutate: submit,
     isSuccess: isSubmissionSuccess,
@@ -2235,7 +2292,6 @@ const DataCaptureModal = ({
     if (isSeenSuccess) return;
     if (isSeenLoading) return;
     const tId = setTimeout(() => {
-      runSeen(trigger);
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString());
       }
@@ -2382,12 +2438,428 @@ var DataCaptureModal$1 = memo(({
   }), document.body);
 });
 
+const fontSize = '2em';
+const cardFontScaleFactor = 1.5;
+const AnimatedCard = ({
+  animation,
+  digit
+}) => {
+  return React__default.createElement("div", {
+    className: `flipCard ${animation}`
+  }, React__default.createElement("span", null, digit));
+};
+const StaticCard = ({
+  position,
+  digit
+}) => {
+  return React__default.createElement("div", {
+    className: position
+  }, React__default.createElement("span", null, digit));
+};
+const FlipUnitContainer = ({
+  digit,
+  shuffle,
+  unit
+}) => {
+  let currentDigit = digit;
+  let previousDigit = digit + 1;
+  if (unit !== 'hours') {
+    previousDigit = previousDigit === -1 ? 59 : previousDigit;
+  } else {
+    previousDigit = previousDigit === -1 ? 23 : previousDigit;
+  }
+  if (currentDigit < 10) {
+    currentDigit = `0${currentDigit}`;
+  }
+  if (previousDigit < 10) {
+    previousDigit = `0${previousDigit}`;
+  }
+  const digit1 = shuffle ? previousDigit : currentDigit;
+  const digit2 = !shuffle ? previousDigit : currentDigit;
+  const animation1 = shuffle ? 'fold' : 'unfold';
+  const animation2 = !shuffle ? 'fold' : 'unfold';
+  return React__default.createElement("div", {
+    className: 'flipUnitContainer'
+  }, React__default.createElement(StaticCard, {
+    position: 'upperCard',
+    digit: currentDigit
+  }), React__default.createElement(StaticCard, {
+    position: 'lowerCard',
+    digit: previousDigit
+  }), React__default.createElement(AnimatedCard, {
+    digit: digit1,
+    animation: animation1
+  }), React__default.createElement(AnimatedCard, {
+    digit: digit2,
+    animation: animation2
+  }));
+};
+class FlipClock extends React__default.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hours: 0,
+      hoursShuffle: true,
+      days: 0,
+      daysShuffle: true,
+      minutes: 0,
+      minutesShuffle: true,
+      seconds: 0,
+      secondsShuffle: true,
+      haveStylesLoaded: false
+    };
+  }
+  componentDidMount() {
+    const {
+      textPrimary,
+      backgroundPrimary
+    } = this.props.colorConfig;
+    const CSS = `
+    @import url("https://fonts.googleapis.com/css?family=Droid+Sans+Mono");
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+    }
+    
+    .flipClock {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .flipUnitContainer {
+      display: block;
+      position: relative;
+      width: calc(${fontSize} * ${cardFontScaleFactor});
+      height: calc(${fontSize} * ${cardFontScaleFactor});
+      perspective-origin: 50% 50%;
+      perspective: 300px;
+      background-color: ${backgroundPrimary};
+      border-radius: 3px;
+      box-shadow: 0px 10px 10px -10px grey;
+    }
+    
+    .upperCard, .lowerCard {
+      display: flex;
+      position: relative;
+      justify-content: center;
+      width: 100%;
+      height: 50%;
+      overflow: hidden;
+      border: 1px solid ${backgroundPrimary};
+    }
+    
+    .upperCard span, .lowerCard span {
+      font-size: ${fontSize};
+      font-family: "Droid Sans Mono", monospace;
+      font-weight: lighter;
+      color: ${textPrimary};
+    }
+    
+    .upperCard {
+      align-items: flex-end;
+      border-bottom: 0.5px solid ${backgroundPrimary};
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+    }
+    .upperCard span {
+      transform: translateY(50%);
+    }
+    
+    .lowerCard {
+      align-items: flex-start;
+      border-top: 0.5px solid ${backgroundPrimary};
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+    .lowerCard span {
+      transform: translateY(-50%);
+    }
+    
+    .flipCard {
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      overflow: hidden;
+      -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+    }
+    .flipCard span {
+      font-family: "Droid Sans Mono", monospace;
+      font-size: ${fontSize};
+      font-weight: lighter;
+      color: ${textPrimary};
+    }
+
+    .flipCard.unfold {
+      top: 50%;
+      align-items: flex-start;
+      transform-origin: 50% 0%;
+      transform: rotateX(180deg);
+      background-color: ${backgroundPrimary};
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+      border: 0.5px solid ${backgroundPrimary};
+      border-top: 0.5px solid ${backgroundPrimary};
+    }
+    .flipCard.unfold span {
+      transform: translateY(-50%);
+    }
+    .flipCard.fold {
+      top: 0%;
+      align-items: flex-end;
+      transform-origin: 50% 100%;
+      transform: rotateX(0deg);
+      background-color: ${backgroundPrimary};
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      border: 0.5px solid ${backgroundPrimary};
+      border-bottom: 0.5px solid ${backgroundPrimary};
+    }
+    .flipCard.fold span {
+      transform: translateY(50%);
+    }
+    
+    .fold {
+      -webkit-animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+              animation: fold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+      transform-style: preserve-3d;
+    }
+    
+    .unfold {
+      -webkit-animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+              animation: unfold 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s 1 normal forwards;
+      transform-style: preserve-3d;
+    }
+    
+    @-webkit-keyframes fold {
+      0% {
+        transform: rotateX(0deg);
+      }
+      100% {
+        transform: rotateX(-180deg);
+      }
+    }
+    
+    @keyframes fold {
+      0% {
+        transform: rotateX(0deg);
+      }
+      100% {
+        transform: rotateX(-180deg);
+      }
+    }
+    @-webkit-keyframes unfold {
+      0% {
+        transform: rotateX(180deg);
+      }
+      100% {
+        transform: rotateX(0deg);
+      }
+    }
+    @keyframes unfold {
+      0% {
+        transform: rotateX(180deg);
+      }
+      100% {
+        transform: rotateX(0deg);
+      }
+    }
+    @media screen and (max-width: 850px) {
+      .flipClock {
+        scale: 0.8
+      }
+    }
+    @media screen and (max-width: 450px) {
+      .flipClock {
+        scale: 0.5
+      }
+    }
+    `;
+    this.timerID = setInterval(() => this.updateTime(), 50);
+    this.styles = document.createElement('style');
+    this.styles.appendChild(document.createTextNode(CSS));
+    document.head.appendChild(this.styles);
+    setTimeout(() => {
+      this.setState({
+        haveStylesLoaded: true
+      });
+    }, 500);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+    document.head.removeChild(this.styles);
+  }
+  updateTime() {
+    const startDate = this.props.startDate || new Date();
+    const diff = getDiffInDHMS(startDate, this.props.targetDate);
+    const {
+      days,
+      hours,
+      minutes,
+      seconds
+    } = diff;
+    if (days !== this.state.days) {
+      const daysShuffle = !this.state.daysShuffle;
+      this.setState({
+        days,
+        daysShuffle
+      });
+    }
+    if (hours !== this.state.hours) {
+      const hoursShuffle = !this.state.hoursShuffle;
+      this.setState({
+        hours,
+        hoursShuffle
+      });
+    }
+    if (hours !== this.state.hours) {
+      const hoursShuffle = !this.state.hoursShuffle;
+      this.setState({
+        hours,
+        hoursShuffle
+      });
+    }
+    if (minutes !== this.state.minutes) {
+      const minutesShuffle = !this.state.minutesShuffle;
+      this.setState({
+        minutes,
+        minutesShuffle
+      });
+    }
+    if (seconds !== this.state.seconds) {
+      const secondsShuffle = !this.state.secondsShuffle;
+      this.setState({
+        seconds,
+        secondsShuffle
+      });
+    }
+  }
+  render() {
+    const {
+      hours,
+      minutes,
+      seconds,
+      days,
+      daysShuffle,
+      hoursShuffle,
+      minutesShuffle,
+      secondsShuffle
+    } = this.state;
+    if (!this.state.haveStylesLoaded) return null;
+    const {
+      textPrimary
+    } = this.props.colorConfig;
+    const Separator = () => React__default.createElement("h1", {
+      style: {
+        color: textPrimary
+      }
+    }, ":");
+    return React__default.createElement("div", {
+      className: 'flipClock'
+    }, React__default.createElement(FlipUnitContainer, {
+      unit: 'days',
+      digit: days,
+      shuffle: daysShuffle
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
+      unit: 'hours',
+      digit: hours,
+      shuffle: hoursShuffle
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
+      unit: 'minutes',
+      digit: minutes,
+      shuffle: minutesShuffle
+    }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
+      unit: 'seconds',
+      digit: seconds,
+      shuffle: secondsShuffle
+    }));
+  }
+}
+const CountdownFlipClock = props => {
+  const colors = useBrandColors();
+  return React__default.createElement(FlipClock, Object.assign({}, props, {
+    colorConfig: colors
+  }));
+};
+
+const Header = ({
+  trigger
+}) => {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
+  const interpolate = getInterpolate(trigger.data || {}, true);
+  const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  const StdHeader = ({
+    text
+  }) => React__default.createElement("h1", {
+    className: prependClass('main-text')
+  }, interpolate(text || ''));
+  const texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading) || '');
+  if (!countdownEndTime) return React__default.createElement(StdHeader, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading
+  });
+  if (!('hasCountdown' in texts)) return React__default.createElement(StdHeader, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.heading
+  });
+  return React__default.createElement("div", null, React__default.createElement(StdHeader, {
+    text: texts.text1
+  }), React__default.createElement("div", {
+    style: {
+      maxWidth: 220,
+      margin: '0.4rem auto'
+    }
+  }, React__default.createElement(CountdownFlipClock, {
+    targetDate: new Date(countdownEndTime)
+  })), texts.text2 && React__default.createElement(StdHeader, {
+    text: texts.text2
+  }));
+};
+var Header$1 = memo(Header);
+
+const Paragraph = ({
+  trigger
+}) => {
+  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
+  const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
+  const interpolate = getInterpolate(trigger.data || {}, true);
+  const StdParagraph = ({
+    text
+  }) => React__default.createElement("p", {
+    className: prependClass('sub-text')
+  }, interpolate(text || ''));
+  const texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.paragraph) || '');
+  if (!countdownEndTime) return React__default.createElement(StdParagraph, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph
+  });
+  if (!('hasCountdown' in texts)) return React__default.createElement(StdParagraph, {
+    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.paragraph
+  });
+  return React__default.createElement("div", null, React__default.createElement(StdParagraph, {
+    text: texts.text1
+  }), React__default.createElement("div", {
+    style: {
+      maxWidth: 220,
+      margin: 'auto'
+    }
+  }, React__default.createElement(CountdownFlipClock, {
+    targetDate: new Date(countdownEndTime)
+  })), texts.text2 && React__default.createElement(StdParagraph, {
+    text: texts.text2
+  }));
+};
+var Paragraph$1 = memo(Paragraph);
+
 const StandardModal = ({
   trigger,
   handleClickCallToAction,
   handleCloseModal
 }) => {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+  var _trigger$data, _trigger$data2, _trigger$data3;
   const {
     error
   } = useLogging();
@@ -2408,6 +2880,11 @@ const StandardModal = ({
     setImageDimensions
   } = useModalDimensionsBasedOnImage({
     imageURL
+  });
+  const isImageBrokenDontShowModal = !width || !height;
+  useSeen({
+    trigger,
+    skip: !stylesLoaded || isImageBrokenDontShowModal
   });
   const appendResponsiveBehaviour = React__default.useCallback(() => {
     return isMobile ? `` : `
@@ -2580,7 +3057,7 @@ const StandardModal = ({
     }
     
     .${prependClass('image-darken')} {
-      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.1);'}
+      ${isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.3);'}
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -2625,7 +3102,7 @@ const StandardModal = ({
   if (!stylesLoaded) {
     return null;
   }
-  if (!width || !height) {
+  if (isImageBrokenDontShowModal) {
     error("StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate.");
     return null;
   }
@@ -2649,24 +3126,24 @@ const StandardModal = ({
     onClick: handleClickCloseFinal
   })), React__default.createElement("div", {
     className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("p", {
-    className: prependClass('sub-text')
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), !isModalFullyClickable && React__default.createElement("div", {
+  }, React__default.createElement(Header$1, {
+    trigger: trigger
+  }), React__default.createElement(Paragraph$1, {
+    trigger: trigger
+  })), !isModalFullyClickable && React__default.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'flex-end'
     }
   }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
+    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL,
     className: prependClass('cta'),
     onClick: handleClickCallToAction,
     style: {
       fontSize: '1.3rem',
       padding: '0.3rem 1rem'
     }
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
+  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.buttonText))))));
 };
 
 const Modal = ({
@@ -2683,18 +3160,9 @@ const Modal = ({
   const {
     mutate: collect
   } = useCollectorMutation();
-  const {
-    mutate: runSeen,
-    isSuccess,
-    isLoading
-  } = useSeenMutation();
   useEffect(() => {
-    if (!open) return;
-    if (invocationTimeStamp) return;
-    if (isSuccess) return;
-    if (isLoading) return;
+    if (!!invocationTimeStamp) return;
     const tId = setTimeout(() => {
-      runSeen(trigger);
       if (!invocationTimeStamp) {
         setInvocationTimeStamp(new Date().toISOString());
       }
@@ -2702,7 +3170,7 @@ const Modal = ({
     return () => {
       clearTimeout(tId);
     };
-  }, [open, isSuccess, isLoading]);
+  }, [invocationTimeStamp]);
   if (!open) {
     return null;
   }
