@@ -134,19 +134,15 @@ var defaultConfig = {
     colors: defaultColors
   }
 };
+var msToSecs = function msToSecs(ms) {
+  return (ms || 0) / 1000;
+};
 var LEGACY_merge_config = function LEGACY_merge_config(config, legacy_config) {
   return {
-    displayTriggerAfterSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || 0) / 1000 || config.trigger.displayTriggerAfterSecs,
-    triggerCooldownSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || 0) / 1000 || config.trigger.triggerCooldownSecs,
-    userIdleThresholdSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || 0) / 1000 || config.trigger.userIdleThresholdSecs
+    displayTriggerAfterSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || config.trigger.displayTriggerAfterSecs,
+    triggerCooldownSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || config.trigger.triggerCooldownSecs,
+    userIdleThresholdSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || config.trigger.userIdleThresholdSecs
   };
-};
-var objStringtoObjNum = function objStringtoObjNum(obj) {
-  var newObj = {};
-  Object.keys(obj).forEach(function (key) {
-    newObj[key] = Number(obj[key]);
-  });
-  return newObj;
 };
 
 var createConfigSlice = function createConfigSlice(set, get) {
@@ -166,7 +162,7 @@ var createConfigSlice = function createConfigSlice(set, get) {
             brand: _extends({}, prev.config.brand, updatedConfigEntries.brand, {
               colors: shouldUpdateColors ? _extends({}, prev.config.brand.colors || defaultColors, argColors || {}) : prev.config.brand.colors
             }),
-            trigger: _extends({}, prev.config.trigger, objStringtoObjNum(LEGACY_merge_config(prev.config, legacy_config)))
+            trigger: _extends({}, prev.config.trigger, LEGACY_merge_config(prev.config, legacy_config))
           })
         };
       });

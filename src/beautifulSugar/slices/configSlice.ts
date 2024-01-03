@@ -4,8 +4,7 @@ import { haveBrandColorsBeenConfigured } from '../../utils/brand'
 import {
   defaultColors,
   defaultConfig,
-  LEGACY_merge_config,
-  objStringtoObjNum
+  LEGACY_merge_config
 } from '../../utils/configUtils'
 import { DifiStore } from '../store'
 import { Get, Set } from '../types'
@@ -48,18 +47,15 @@ export const createConfigSlice: StateCreator<DifiStore, [], [], ConfigSlice> = (
             // in the config state, or the default colors
             colors: shouldUpdateColors
               ? {
-                  // defaultColors here are just a fallback to keep TS happy. No need for them realistically. @TODO: look into
-                  ...(prev.config.brand.colors || defaultColors),
-                  ...(argColors || {})
-                }
+                // defaultColors here are just a fallback to keep TS happy. No need for them realistically. @TODO: look into
+                ...(prev.config.brand.colors || defaultColors),
+                ...(argColors || {})
+              }
               : prev.config.brand.colors
           },
           trigger: {
             ...prev.config.trigger,
-            // the stars aligned in the shittiest-most way making it so that the BE returns these as strings
-            ...objStringtoObjNum(
-              LEGACY_merge_config(prev.config, legacy_config)
-            )
+            ...LEGACY_merge_config(prev.config, legacy_config)
           }
         }
       }
