@@ -1,8 +1,12 @@
 import React, { useEffect } from 'react';
 import { useEntireStore } from '../beautifulSugar/store';
+import { Trigger } from '../client/types';
 import { useLogging } from './useLogging';
 
-// built with Copilot-chat
+/**
+ * Checks if an image is potentially valid based on its URL
+ * // built with Copilot-chat
+ */
 function isValidImageUrl(url: string): boolean {
   // Regular expression to match common image file extensions
   const imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
@@ -10,7 +14,7 @@ function isValidImageUrl(url: string): boolean {
   // Check if the URL matches the image file extension pattern
   if (imageExtensions.test(url)) {
     // Check if the URL starts with a valid protocol (http:// or https://)
-    if (url.startsWith("http://") || url.startsWith("https://")) {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
       return true;
     }
   }
@@ -18,73 +22,92 @@ function isValidImageUrl(url: string): boolean {
   return false;
 }
 
+/** Pulls out all urls from trigger.data regardless of key name and returns as an string[] */
+const getImageUrls = (pageTriggers: Trigger[]) => {
+  const images = pageTriggers.reduce((arr, pageTrigger) => {
+    if (typeof pageTrigger.data !== 'object') return arr;
+
+    const validUrls = Object.values(pageTrigger.data).filter((potentiallyAURL) => isValidImageUrl(potentiallyAURL));
+
+    // eslint-disable-next-line no-param-reassign, no-return-assign
+    return (arr = [...arr, ...validUrls]);
+  }, [] as string[]);
+  return images;
+};
+
 /**
  * Cache the images and make for a better UX on slower connections.
- * 
+ *
  * Preloads trigger images into picture tags and shoves into a 1x1 pixel at the bottom right
  * of the page. Many browsers don't pre-load 'invisible' images with `display: none` etc, so this hack is used.
- * 
+ *
  */
 const useImagePreload = () => {
-  const { pageTriggers } = useEntireStore()
+  const {
+    pageTriggers,
+    utility: { imagesPreloaded: stateImagesHavePreloaded, setImagesHaveLoaded },
+  } = useEntireStore();
   const { log } = useLogging();
   const [imagesToPreload, setImagesToPreload] = React.useState<number>(0);
   const [imagesLoaded, setImagesLoaded] = React.useState<number>(0);
 
-  const allImagesLoaded = pageTriggers.length > 0 ? imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 : true;
+  const shouldPreloadImages = stateImagesHavePreloaded !== 'skip';
 
-  const preloadImagesIntoPictureTag = (images: string[]) => {
-    const onAnything = () => {
-      // we want the state to be updated regardless of whether the image
-      // is loaded, if it errored, or anything else. Not doing so can prevent triggers from showing
-      log('useImgPreload - image loaded', { imagesLoaded: imagesLoaded + 1, imagesToPreload })
-      setImagesLoaded(prev => prev + 1)
-    }
+  const preloadImagesIntoPictureTag = React.useCallback(
+    (images: string[]) => {
+      /** we want the state to be updated regardless of whether the image
+       is loaded, if it errored, or anything else. Not doing so can prevent triggers from showing
+        */
+      const onAnything = () => {
+        setImagesLoaded((prev) => prev + 1);
+      };
 
-    log('useImgPreload - images to preload:', { images })
-    images.forEach((image) => {
-      const picture = document.createElement('picture')
-      const source = document.createElement('source')
-      source.srcset = image
-      picture.appendChild(source)
-      const img = document.createElement('img')
-      img.src = image;
+      log('useImgPreload - images to preload:', { images });
+      images.forEach((image) => {
+        const picture = document.createElement('picture');
+        const source = document.createElement('source');
+        source.srcset = image;
+        picture.appendChild(source);
+        const img = document.createElement('img');
+        img.src = image;
 
-      img.style.height = '1px'
-      img.style.width = '1px'
-      img.style.position = 'absolute'
-      img.style.bottom = '0'
-      img.style.right = '0'
+        img.style.height = '1px';
+        img.style.width = '1px';
+        img.style.position = 'absolute';
+        img.style.bottom = '0';
+        img.style.right = '0';
 
-      picture.appendChild(img)
-      document.body.appendChild(picture)
+        picture.appendChild(img);
+        document.body.appendChild(picture);
 
-      img.onload = onAnything
-      img.onabort = onAnything
-      img.onerror = onAnything
-    })
-
-  }
+        img.onload = onAnything;
+        img.onabort = onAnything;
+        img.onerror = onAnything;
+      });
+    },
+    [log],
+  );
 
   useEffect(() => {
+    if (!shouldPreloadImages) return;
     if (pageTriggers.length === 0) return;
-    const images = pageTriggers.reduce((arr, pageTrigger) => {
-      if (typeof pageTrigger.data !== 'object') return arr;
 
-      const validUrls = Object.values(pageTrigger.data).filter(potentiallyAURL => {
-        return isValidImageUrl(potentiallyAURL)
-      })
+    const images = getImageUrls(pageTriggers);
 
-      return arr = [...arr, ...validUrls]
-    }, [] as string[])
+    setImagesToPreload(images.length);
+    preloadImagesIntoPictureTag(images);
+  }, [pageTriggers, preloadImagesIntoPictureTag, shouldPreloadImages]);
 
-    setImagesToPreload(images.length)
-    preloadImagesIntoPictureTag(images)
-  }, [pageTriggers])
+  const allImagesLoaded = imagesToPreload === imagesLoaded
+  && imagesToPreload !== 0 && imagesLoaded !== 0 && shouldPreloadImages;
 
+  console.log({ stateImagesHavePreloaded, shouldPreloadImages, imagesLoaded });
 
-  return { allImagesLoaded };
-}
+  useEffect(() => {
+    if (!allImagesLoaded) return;
 
+    setImagesHaveLoaded(true);
+  }, [allImagesLoaded, setImagesHaveLoaded]);
+};
 
-export default useImagePreload
+export default useImagePreload;

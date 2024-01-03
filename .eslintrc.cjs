@@ -28,7 +28,7 @@ const config = {
   // Keep prettier as last so it overrides everything else. As it's best to keep prettier config
   // to a minimum, as it can be pretty tricky to match prettier with more specific rules and it
   // doesn't play nicely with a lot of editors if you do try and go more custom
-  extends: ['airbnb', 'eslint:recommended'],
+  extends: ['airbnb', 'eslint:recommended', 'plugin:react-hooks/recommended'],
   // Stop looking foconfig further up than thisr eslint
   root: true,
   parser: '@typescript-eslint/parser',
@@ -247,7 +247,7 @@ const config = {
       },
     },
     {
-      files: ['**/stories/**/*', '**/storybook/**/*', '**/storybooks/**/*', '**/*.stories.*'],
+      files: ['**/slices/**/*'],
       rules: {
         'require-jsdoc': ['off'],
         'import/no-extraneous-dependencies': ['off'],

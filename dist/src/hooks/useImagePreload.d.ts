@@ -5,7 +5,5 @@
  * of the page. Many browsers don't pre-load 'invisible' images with `display: none` etc, so this hack is used.
  *
  */
-declare const useImagePreload: () => {
-    allImagesLoaded: boolean;
-};
+declare const useImagePreload: () => void;
 export default useImagePreload;
