@@ -8,7 +8,6 @@ export type BannerTrigger = Omit<Trigger, 'data'> & {
     buttonURL?: string
     marketingText?: string
     buttonText?: string
-    // can be anything else in the furture, or dynamic. adjust as needed
     countdownEndTime?: string
     buttonIcon?: Icon
   }

@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
+import { useEntireStore } from '../../beautifulSugar/store'
 import { Trigger } from '../../client/types'
-import { useMixpanel } from '../../context/MixpanelContext'
 import { useCollectorMutation } from '../../hooks/api/useCollectorMutation'
-import { useCollector } from '../../hooks/useCollector'
+import { useTracking } from '../../hooks/useTracking'
 import { HandleCloseOptions } from './Modal.types'
-import CnMModal from './modals/StandardModal'
+import StandardModal from './modals/StandardModal'
 
 type Props = {
   trigger: Trigger
 }
 
 const Modal = ({ trigger }: Props) => {
-  const { removeActiveTrigger } = useCollector()
-  const { trackEvent } = useMixpanel()
+  const { removeActiveTrigger } = useEntireStore()
+  const { trackEvent } = useTracking()
   const [open, setOpen] = useState(true)
   const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
     null
@@ -72,7 +72,7 @@ const Modal = ({ trigger }: Props) => {
     handleCloseModal: handleCloseModal
   }
 
-  return <CnMModal {...modalProps} />
+  return <StandardModal {...modalProps} />
 }
 
 export const TriggerModal = ({ trigger }: Props) => {

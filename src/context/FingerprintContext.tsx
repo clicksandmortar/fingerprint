@@ -1,56 +1,20 @@
+/* eslint-disable require-jsdoc */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import React, { createContext, useEffect, useState } from 'react'
+import React, { ReactElement, useEffect } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { clientHandlers } from '../client/handler'
-import { FingerprintConfig, PageView, Trigger } from '../client/types'
-import { CollectorProvider } from './CollectorContext'
-import { ConfigProvider } from './Config'
-import { LoggingProvider, useLogging } from './LoggingContext'
-import { MixpanelProvider } from './MixpanelContext'
-import { VisitorProvider } from './VisitorContext'
+import { useEntireStore } from '../beautifulSugar/store'
+import { Handler } from '../client/handler'
+import { LEGACY_FingerprintConfig } from '../client/types'
+import { useConsentCheck } from '../hooks/useConsentCheck'
+import Runners from './Runners'
+import { Triggers } from './Triggers'
 
 const queryClient = new QueryClient()
 
-export const cookieAccountJWT = 'b2c_token'
-
 /** * @todo - extract */
-const useConsentCheck = (consent: boolean, consentCallback: any) => {
-  const [consentGiven, setConsentGiven] = useState(consent)
-  const { log } = useLogging()
-  /**
-   * Effect checks for user consent either via direct variable or a callback.
-   * in any case, once one of the conditions is met, the single state gets set to true, allowing the logic to flow.
-   * TODO: Think if it makes sense to memoize / derive that state instead? Gonna be tricky with an interval involved.
-   */
-  useEffect(() => {
-    if (consent) {
-      setConsentGiven(consent)
-      return
-    }
 
-    log('Fingerprint Widget Consent: ', consent)
-
-    if (!consentCallback) return
-    const consentGivenViaCallback = consentCallback()
-
-    const interval = setInterval(() => {
-      setConsentGiven(consent)
-    }, 1000)
-
-    // if the user has consented, no reason to continue pinging every sec.
-    if (consentGivenViaCallback) {
-      clearInterval(interval)
-    }
-
-    // clear on onmount
-    return () => clearInterval(interval)
-  }, [consentCallback, consent])
-
-  return consentGiven
-}
 export type FingerprintProviderProps = {
   appId?: string
-  children?: React.ReactNode
   consent?: boolean
   consentCallback?: () => boolean
   /**
@@ -59,7 +23,7 @@ export type FingerprintProviderProps = {
    * Please use the portal to configure these values.
    */
   debug: never
-  defaultHandlers?: Trigger[]
+  defaultHandlers?: Handler[]
   initialDelay?: number
   exitIntentTriggers?: boolean
   idleTriggers?: boolean
@@ -68,135 +32,82 @@ export type FingerprintProviderProps = {
    * @deprecated
    * Please use the portal to configure these values. Until then this will act as override
    */
-  config?: FingerprintConfig
+  config?: LEGACY_FingerprintConfig
+  // This is just to please typescript in this one off case.
+  // Normally we'd use `children: ReactNode`
+  children: ReactElement | null | ReactElement
 }
 
-// @todo split this into multiple providers, FingerprintProvider should
-// only bootstrap the app.
-export const FingerprintProvider = ({
-  appId,
-  children,
-  consent = false,
-  consentCallback,
-  defaultHandlers,
-  initialDelay = 0,
-  exitIntentTriggers = true,
-  idleTriggers = true,
-  pageLoadTriggers = true,
-  config: legacy_config
-}: FingerprintProviderProps) => {
-  const [booted, setBooted] = useState(false)
-  const [handlers, setHandlers] = useState(defaultHandlers || clientHandlers)
+export function FingerprintProvider(props: FingerprintProviderProps) {
+  const { set, addHandlers, difiProps } = useEntireStore()
+  const { booted, appId, consentCallback, defaultHandlers } = difiProps
 
-  const consentGiven = useConsentCheck(consent, consentCallback)
+  // consider the zustand store fully operational if both `get` and `set` functions are no longer undefined
+  // WHile building the store, I managed to run into edge cases where thsoe functions were undefined
+  // If that is ever the case, please uncomment the line below and set it to false
+  // const {get } = useEntireStore();
+  // const hasStoreInitiated = !!get && !! set
 
-  // @todo Move this to a Handlers Context and add logging.
-  const addAnotherHandler = React.useCallback(
-    (trigger: Trigger) => {
-      setHandlers((handlers) => {
-        return [...handlers, trigger]
-      })
-    },
-    [setHandlers]
+  const hasStoreInitiated = true
+
+  const setBooted = React.useCallback(
+    (val: boolean) =>
+      set((prev) => ({ difiProps: { ...prev.difiProps, booted: val } })),
+    [set]
   )
+
+  const matchPropsToDifiProps = React.useCallback(() => {
+    set((prev) => ({
+      difiProps: {
+        ...prev.difiProps,
+        ...props
+      }
+    }))
+  }, [props, set])
+
+  const consentGiven = useConsentCheck(props.consent || false, consentCallback)
 
   useEffect(() => {
-    if (!appId) throw new Error('C&M Fingerprint: appId is required')
+    // if the props have never been provided, throw an error.
+    if (!props.appId) throw new Error('C&M Fingerprint: appId is required')
+    // shove the props into the store for access all over the app
+    matchPropsToDifiProps()
+
+    // wait until zustand completes the above, then start taking values from there
+    if (!appId) return
     if (booted) return
     if (!consentGiven) return
+    if (!hasStoreInitiated) return
+    addHandlers(defaultHandlers || [])
 
-    const performBoot = async () => {
-      // TODO: since all the config is being retrieve on any API call including /collect
-      // we can probably remove this TODO. It is redundant.
+    setBooted(true)
+  }, [
+    appId,
+    consentGiven,
+    hasStoreInitiated,
+    booted,
+    props.appId,
+    matchPropsToDifiProps,
+    defaultHandlers,
+    addHandlers,
+    setBooted
+  ])
 
-      setBooted(true)
-    }
-
-    performBoot()
-  }, [consentGiven])
-
-  if (!appId) {
-    return null
-  }
-
-  if (!consentGiven) {
-    return children
-  }
+  if (!appId) return props.children
+  // TOOD: do we want to return children here?
+  // booted is false until consent is true, so this will never be rendered otherwise
+  if (!booted) return props.children
 
   return (
-    <ConfigProvider legacy_config={legacy_config}>
-      <LoggingProvider>
-        <QueryClientProvider client={queryClient}>
-          <FingerprintContext.Provider
-            value={{
-              appId,
-              booted,
-              currentTrigger: null,
-              registerHandler: addAnotherHandler,
-              trackEvent: () => {
-                alert('trackEvent not implemented')
-              },
-              trackPageView: () => {
-                alert('trackPageView not implemented')
-              },
-              unregisterHandler: () => {
-                alert('unregisterHandler not implemented')
-              },
-              initialDelay,
-              idleTriggers,
-              pageLoadTriggers,
-              exitIntentTriggers
-            }}
-          >
-            <VisitorProvider>
-              <MixpanelProvider>
-                <CollectorProvider handlers={handlers}>
-                  <ErrorBoundary
-                    onError={(error, info) => console.error(error, info)}
-                    fallback={<div>An application error occurred.</div>}
-                  >
-                    {children}
-                  </ErrorBoundary>
-                </CollectorProvider>
-              </MixpanelProvider>
-            </VisitorProvider>
-          </FingerprintContext.Provider>
-        </QueryClientProvider>
-      </LoggingProvider>
-    </ConfigProvider>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary
+        onError={(error, info) => console.error(error, info)}
+        fallback={<div>An application error occurred.</div>}
+      >
+        <Runners />
+        {props.children}
+        <Triggers />
+      </ErrorBoundary>
+    </QueryClientProvider>
   )
 }
-
-export interface FingerprintContextInterface {
-  appId: string
-  booted: boolean
-  consent?: boolean
-  currentTrigger: Trigger | null
-  exitIntentTriggers: boolean
-  idleTriggers: boolean
-  pageLoadTriggers: boolean
-  initialDelay: number
-  registerHandler: (trigger: Trigger) => void
-  trackEvent: (event: Event) => void
-  trackPageView: (pageView: PageView) => void
-  unregisterHandler: (trigger: Trigger) => void
-}
-
-const defaultFingerprintState: FingerprintContextInterface = {
-  appId: '',
-  booted: false,
-  consent: false,
-  currentTrigger: null,
-  exitIntentTriggers: false,
-  idleTriggers: false,
-  pageLoadTriggers: false,
-  initialDelay: 0,
-  registerHandler: () => {},
-  trackEvent: () => {},
-  trackPageView: () => {},
-  unregisterHandler: () => {}
-}
-
-export const FingerprintContext = createContext<FingerprintContextInterface>({
-  ...defaultFingerprintState
-})
