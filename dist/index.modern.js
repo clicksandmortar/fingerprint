@@ -4340,6 +4340,69 @@ const useExitIntentDelay = (delay = 0) => {
   };
 };
 
+function isValidImageUrl(url) {
+  const imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
+  if (imageExtensions.test(url)) {
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return true;
+    }
+  }
+  return false;
+}
+const useImagePreload = () => {
+  const {
+    pageTriggers
+  } = useEntireStore();
+  const {
+    log
+  } = useLogging();
+  const [imagesToPreload, setImagesToPreload] = React__default.useState(0);
+  const [imagesLoaded, setImagesLoaded] = React__default.useState(0);
+  const allImagesLoaded = pageTriggers.length > 0 ? imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 : true;
+  const preloadImagesIntoPictureTag = images => {
+    log('useImgPreload - images to preload:', {
+      images
+    });
+    images.forEach(image => {
+      const picture = document.createElement('picture');
+      const source = document.createElement('source');
+      source.srcset = image;
+      picture.appendChild(source);
+      const img = document.createElement('img');
+      img.src = image;
+      img.style.height = '1px';
+      img.style.width = '1px';
+      img.style.position = 'absolute';
+      img.style.bottom = '0';
+      img.style.right = '0';
+      picture.appendChild(img);
+      document.body.appendChild(picture);
+      img.onload = () => {
+        log('useImgPreload - loaded image', {
+          image,
+          img
+        });
+        setImagesLoaded(prev => prev + 1);
+      };
+    });
+  };
+  useEffect(() => {
+    if (pageTriggers.length === 0) return;
+    const images = pageTriggers.reduce((arr, pageTrigger) => {
+      if (typeof pageTrigger.data !== 'object') return arr;
+      const validUrls = Object.values(pageTrigger.data).filter(potentiallyAURL => {
+        return isValidImageUrl(potentiallyAURL);
+      });
+      return arr = [...arr, ...validUrls];
+    }, []);
+    setImagesToPreload(images.length);
+    preloadImagesIntoPictureTag(images);
+  }, [pageTriggers]);
+  return {
+    allImagesLoaded
+  };
+};
+
 const Activation = () => {
   const {
     displayedTriggersIds,
@@ -4427,24 +4490,36 @@ function Triggers() {
       daysToExpire: 0
     }
   });
+  const {
+    allImagesLoaded
+  } = useImagePreload();
   useEffect(() => {
+    if (!allImagesLoaded) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
+  }, [allImagesLoaded, visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
   useEffect(() => {
+    if (!allImagesLoaded) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete]);
+  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete, allImagesLoaded]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
+    if (!allImagesLoaded) return;
     log('Collector: attempting to fire idle time trigger');
     setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
     startCooldown();
-  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
+  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown, allImagesLoaded]);
   const {
     hasDelayPassed
   } = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.trigger.displayTriggerAfterSecs) * 1000);
   const fireExitTrigger = React__default.useCallback(() => {
+    if (!allImagesLoaded) {
+      log(`Unable to launch exit intent, because not all images have loaded yet.`);
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
     if (!hasDelayPassed) {
       log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
       log('Re-registering handler');
@@ -4461,21 +4536,23 @@ function Triggers() {
     log('Collector: attempting to fire exit trigger');
     setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
-  }, [hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
+  }, [allImagesLoaded, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   useEffect(() => {
+    if (!allImagesLoaded) return;
     if (!exitIntentTriggers) return;
     log('Collector: attempting to register exit trigger');
     registerHandler({
       id: 'clientTrigger',
       handler: fireExitTrigger
     });
-  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler, allImagesLoaded]);
   const fireOnLoadTriggers = useCallback(() => {
+    if (!allImagesLoaded) return;
     if (!pageLoadTriggers) return;
     if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
     log('Collector: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
-  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation]);
+  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation, allImagesLoaded]);
   useEffect(() => {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);

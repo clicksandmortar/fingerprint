@@ -3,6 +3,7 @@ import { IdleTimerProvider, PresenceType } from 'react-idle-timer'
 import { useExitIntent } from 'use-exit-intent'
 import { useEntireStore } from '../beautifulSugar/store'
 import useExitIntentDelay from '../hooks/useExitIntentDelay'
+import useImagePreload from '../hooks/useImagePreload'
 import { useLogging } from '../hooks/useLogging'
 import useRunOnPathChange from '../hooks/useRunOnPathChange'
 import { useTriggerDelay } from '../hooks/useTriggerDelay'
@@ -37,22 +38,39 @@ export function Triggers() {
     cookie: { key: '_cm_exit', daysToExpire: 0 }
   })
 
+  // Note: this currently blockes triggers from appearing until all images have loaded.
+  // This can in theory mean that a user misses a trigger because of a slow connection, but should be
+  // a super rare case.
+  const { allImagesLoaded } = useImagePreload()
+
   useEffect(() => {
+    if (!allImagesLoaded) return
     if (!visibleTriggersIssuedByIncomplete?.length) return
 
     // TODO: eventually we may want support for multiple signals so this
     // will need to be refactored / reworked
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
-  }, [visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation])
+  }, [
+    allImagesLoaded,
+    visibleTriggersIssuedByIncomplete,
+    setDisplayedTriggerByInvocation
+  ])
 
   useEffect(() => {
+    if (!allImagesLoaded) return
+
     if (!visibleTriggersIssuedByIncomplete?.length) return
 
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE')
-  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete])
+  }, [
+    setDisplayedTriggerByInvocation,
+    visibleTriggersIssuedByIncomplete,
+    allImagesLoaded
+  ])
 
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return
+    if (!allImagesLoaded) return
 
     /**
      * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
@@ -61,7 +79,13 @@ export function Triggers() {
     log('Collector: attempting to fire idle time trigger')
     setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME')
     startCooldown()
-  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown])
+  }, [
+    idleTriggers,
+    log,
+    setDisplayedTriggerByInvocation,
+    startCooldown,
+    allImagesLoaded
+  ])
 
   // TODO: unsafe chaining?
   const { hasDelayPassed } = useExitIntentDelay(
@@ -69,6 +93,15 @@ export function Triggers() {
   )
 
   const fireExitTrigger = React.useCallback(() => {
+    if (!allImagesLoaded) {
+      log(
+        `Unable to launch exit intent, because not all images have loaded yet.`
+      )
+      log('Re-registering handler')
+      reRegisterExitIntent()
+      return
+    }
+
     if (!hasDelayPassed) {
       log(
         `Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`
@@ -93,6 +126,7 @@ export function Triggers() {
     setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT')
     startCooldown()
   }, [
+    allImagesLoaded,
     hasDelayPassed,
     canNextTriggerOccur,
     log,
@@ -103,6 +137,8 @@ export function Triggers() {
   ])
 
   useEffect(() => {
+    if (!allImagesLoaded) return
+
     if (!exitIntentTriggers) return
 
     log('Collector: attempting to register exit trigger')
@@ -111,9 +147,17 @@ export function Triggers() {
       id: 'clientTrigger',
       handler: fireExitTrigger
     })
-  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler])
+  }, [
+    exitIntentTriggers,
+    fireExitTrigger,
+    log,
+    registerHandler,
+    allImagesLoaded
+  ])
 
   const fireOnLoadTriggers = useCallback(() => {
+    if (!allImagesLoaded) return
+
     if (!pageLoadTriggers) return
     if (!combinedTriggers?.length) return
 
@@ -123,7 +167,13 @@ export function Triggers() {
      */
     log('Collector: attempting to fire on-page-load trigger')
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true)
-  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation])
+  }, [
+    pageLoadTriggers,
+    combinedTriggers,
+    log,
+    setDisplayedTriggerByInvocation,
+    allImagesLoaded
+  ])
 
   useEffect(() => {
     fireOnLoadTriggers()

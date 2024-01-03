@@ -3663,6 +3663,73 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
+function isValidImageUrl(url) {
+  var imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
+  if (imageExtensions.test(url)) {
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return true;
+    }
+  }
+  return false;
+}
+var useImagePreload = function useImagePreload() {
+  var _useEntireStore = useEntireStore(),
+    pageTriggers = _useEntireStore.pageTriggers;
+  var _useLogging = useLogging(),
+    log = _useLogging.log;
+  var _React$useState = React__default.useState(0),
+    imagesToPreload = _React$useState[0],
+    setImagesToPreload = _React$useState[1];
+  var _React$useState2 = React__default.useState(0),
+    imagesLoaded = _React$useState2[0],
+    setImagesLoaded = _React$useState2[1];
+  var allImagesLoaded = pageTriggers.length > 0 ? imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 : true;
+  var preloadImagesIntoPictureTag = function preloadImagesIntoPictureTag(images) {
+    log('useImgPreload - images to preload:', {
+      images: images
+    });
+    images.forEach(function (image) {
+      var picture = document.createElement('picture');
+      var source = document.createElement('source');
+      source.srcset = image;
+      picture.appendChild(source);
+      var img = document.createElement('img');
+      img.src = image;
+      img.style.height = '1px';
+      img.style.width = '1px';
+      img.style.position = 'absolute';
+      img.style.bottom = '0';
+      img.style.right = '0';
+      picture.appendChild(img);
+      document.body.appendChild(picture);
+      img.onload = function () {
+        log('useImgPreload - loaded image', {
+          image: image,
+          img: img
+        });
+        setImagesLoaded(function (prev) {
+          return prev + 1;
+        });
+      };
+    });
+  };
+  React.useEffect(function () {
+    if (pageTriggers.length === 0) return;
+    var images = pageTriggers.reduce(function (arr, pageTrigger) {
+      if (typeof pageTrigger.data !== 'object') return arr;
+      var validUrls = Object.values(pageTrigger.data).filter(function (potentiallyAURL) {
+        return isValidImageUrl(potentiallyAURL);
+      });
+      return arr = [].concat(arr, validUrls);
+    }, []);
+    setImagesToPreload(images.length);
+    preloadImagesIntoPictureTag(images);
+  }, [pageTriggers]);
+  return {
+    allImagesLoaded: allImagesLoaded
+  };
+};
+
 var Activation = function Activation() {
   var _useEntireStore = useEntireStore(),
     displayedTriggersIds = _useEntireStore.displayedTriggersIds,
@@ -3743,23 +3810,34 @@ function Triggers() {
     }),
     registerHandler = _useExitIntent.registerHandler,
     reRegisterExitIntent = _useExitIntent.resetState;
+  var _useImagePreload = useImagePreload(),
+    allImagesLoaded = _useImagePreload.allImagesLoaded;
   React.useEffect(function () {
+    if (!allImagesLoaded) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
+  }, [allImagesLoaded, visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
   React.useEffect(function () {
+    if (!allImagesLoaded) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
     setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete]);
+  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete, allImagesLoaded]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
+    if (!allImagesLoaded) return;
     log('Collector: attempting to fire idle time trigger');
     setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
     startCooldown();
-  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
+  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown, allImagesLoaded]);
   var _useExitIntentDelay = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.trigger.displayTriggerAfterSecs) * 1000),
     hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
   var fireExitTrigger = React__default.useCallback(function () {
+    if (!allImagesLoaded) {
+      log("Unable to launch exit intent, because not all images have loaded yet.");
+      log('Re-registering handler');
+      reRegisterExitIntent();
+      return;
+    }
     if (!hasDelayPassed) {
       log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
       log('Re-registering handler');
@@ -3775,21 +3853,23 @@ function Triggers() {
     log('Collector: attempting to fire exit trigger');
     setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
-  }, [hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
+  }, [allImagesLoaded, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   React.useEffect(function () {
+    if (!allImagesLoaded) return;
     if (!exitIntentTriggers) return;
     log('Collector: attempting to register exit trigger');
     registerHandler({
       id: 'clientTrigger',
       handler: fireExitTrigger
     });
-  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler, allImagesLoaded]);
   var fireOnLoadTriggers = React.useCallback(function () {
+    if (!allImagesLoaded) return;
     if (!pageLoadTriggers) return;
     if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
     log('Collector: attempting to fire on-page-load trigger');
     setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
-  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation]);
+  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation, allImagesLoaded]);
   React.useEffect(function () {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
