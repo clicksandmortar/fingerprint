@@ -34,6 +34,13 @@ const useImagePreload = () => {
   const allImagesLoaded = pageTriggers.length > 0 ? imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 : true;
 
   const preloadImagesIntoPictureTag = (images: string[]) => {
+    const onAnything = () => {
+      // we want the state to be updated regardless of whether the image
+      // is loaded, if it errored, or anything else. Not doing so can prevent state from updating.
+      log('useImgPreload - image loaded', { imagesLoaded: imagesLoaded + 1, imagesToPreload })
+      setImagesLoaded(prev => prev + 1)
+    }
+
     log('useImgPreload - images to preload:', { images })
     images.forEach((image) => {
       const picture = document.createElement('picture')
@@ -51,10 +58,10 @@ const useImagePreload = () => {
 
       picture.appendChild(img)
       document.body.appendChild(picture)
-      img.onload = () => {
-        log('useImgPreload - loaded image', { image, img })
-        setImagesLoaded(prev => prev + 1)
-      }
+
+      img.onload = onAnything
+      img.onabort = onAnything
+      img.onerror = onAnything
     })
 
   }

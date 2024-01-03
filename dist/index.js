@@ -3685,6 +3685,15 @@ var useImagePreload = function useImagePreload() {
     setImagesLoaded = _React$useState2[1];
   var allImagesLoaded = pageTriggers.length > 0 ? imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 : true;
   var preloadImagesIntoPictureTag = function preloadImagesIntoPictureTag(images) {
+    var onAnything = function onAnything() {
+      log('useImgPreload - image loaded', {
+        imagesLoaded: imagesLoaded + 1,
+        imagesToPreload: imagesToPreload
+      });
+      setImagesLoaded(function (prev) {
+        return prev + 1;
+      });
+    };
     log('useImgPreload - images to preload:', {
       images: images
     });
@@ -3702,15 +3711,9 @@ var useImagePreload = function useImagePreload() {
       img.style.right = '0';
       picture.appendChild(img);
       document.body.appendChild(picture);
-      img.onload = function () {
-        log('useImgPreload - loaded image', {
-          image: image,
-          img: img
-        });
-        setImagesLoaded(function (prev) {
-          return prev + 1;
-        });
-      };
+      img.onload = onAnything;
+      img.onabort = onAnything;
+      img.onerror = onAnything;
     });
   };
   React.useEffect(function () {

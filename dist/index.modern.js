@@ -4360,6 +4360,13 @@ const useImagePreload = () => {
   const [imagesLoaded, setImagesLoaded] = React__default.useState(0);
   const allImagesLoaded = pageTriggers.length > 0 ? imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 : true;
   const preloadImagesIntoPictureTag = images => {
+    const onAnything = () => {
+      log('useImgPreload - image loaded', {
+        imagesLoaded: imagesLoaded + 1,
+        imagesToPreload
+      });
+      setImagesLoaded(prev => prev + 1);
+    };
     log('useImgPreload - images to preload:', {
       images
     });
@@ -4377,13 +4384,9 @@ const useImagePreload = () => {
       img.style.right = '0';
       picture.appendChild(img);
       document.body.appendChild(picture);
-      img.onload = () => {
-        log('useImgPreload - loaded image', {
-          image,
-          img
-        });
-        setImagesLoaded(prev => prev + 1);
-      };
+      img.onload = onAnything;
+      img.onabort = onAnything;
+      img.onerror = onAnything;
     });
   };
   useEffect(() => {
