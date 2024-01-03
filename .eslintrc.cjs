@@ -28,6 +28,8 @@ const config = {
   // Keep prettier as last so it overrides everything else. As it's best to keep prettier config
   // to a minimum, as it can be pretty tricky to match prettier with more specific rules and it
   // doesn't play nicely with a lot of editors if you do try and go more custom
+
+  // plugin:react-hooks/recommended populates the dep arrays for react hooks on almost-auto-fix.
   extends: ['airbnb', 'eslint:recommended', 'plugin:react-hooks/recommended'],
   // Stop looking foconfig further up than thisr eslint
   root: true,
