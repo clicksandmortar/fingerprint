@@ -1,4 +1,4 @@
-// this file name must remain as is, otherwise the octopus will be deployed.
+// this folder name must remain as is, otherwise the octopus will be deployed.
 import { create } from 'zustand'
 import { ConfigSlice, createConfigSlice } from './slices/configSlice'
 import {
