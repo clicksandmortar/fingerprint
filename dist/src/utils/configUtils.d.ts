@@ -7,5 +7,4 @@ export declare const LEGACY_merge_config: (config: Config, legacy_config: Props[
 declare type Props = PropsWithChildren<{
     legacy_config?: FingerprintProviderProps['config'];
 }>;
-export declare const objStringtoObjNum: (obj: any) => any;
 export {};

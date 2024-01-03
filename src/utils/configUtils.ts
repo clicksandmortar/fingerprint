@@ -31,6 +31,7 @@ export const defaultConfig: Config = {
   }
 }
 
+const msToSecs = (ms?: number) => (ms || 0) / 1000
 // Treat legacy config as a priority if there is a value in the legacy config
 // otherwise, use the one from the portal
 //
@@ -40,28 +41,16 @@ export const LEGACY_merge_config = (
   legacy_config: Props['legacy_config']
 ): Config['trigger'] => ({
   displayTriggerAfterSecs:
-    (legacy_config?.exitIntentDelay || 0) / 1000 ||
+    (msToSecs(legacy_config?.exitIntentDelay)) ||
     config.trigger.displayTriggerAfterSecs,
   triggerCooldownSecs:
-    (legacy_config?.triggerCooldown || 0) / 1000 ||
+    msToSecs(legacy_config?.triggerCooldown) ||
     config.trigger.triggerCooldownSecs,
   userIdleThresholdSecs:
-    (legacy_config?.idleDelay || 0) / 1000 ||
+    msToSecs(legacy_config?.idleDelay) ||
     config.trigger.userIdleThresholdSecs
 })
 
 type Props = PropsWithChildren<{
   legacy_config?: FingerprintProviderProps['config']
 }>
-
-// having to do this because the config is stored as a string
-// in the database.
-export const objStringtoObjNum = (obj: any) => {
-  const newObj: any = {}
-
-  Object.keys(obj).forEach((key) => {
-    newObj[key] = Number(obj[key])
-  })
-
-  return newObj
-}

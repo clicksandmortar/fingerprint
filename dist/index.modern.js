@@ -87,18 +87,12 @@ const defaultConfig = {
     colors: defaultColors
   }
 };
+const msToSecs = ms => (ms || 0) / 1000;
 const LEGACY_merge_config = (config, legacy_config) => ({
-  displayTriggerAfterSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || 0) / 1000 || config.trigger.displayTriggerAfterSecs,
-  triggerCooldownSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || 0) / 1000 || config.trigger.triggerCooldownSecs,
-  userIdleThresholdSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || 0) / 1000 || config.trigger.userIdleThresholdSecs
+  displayTriggerAfterSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || config.trigger.displayTriggerAfterSecs,
+  triggerCooldownSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || config.trigger.triggerCooldownSecs,
+  userIdleThresholdSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || config.trigger.userIdleThresholdSecs
 });
-const objStringtoObjNum = obj => {
-  const newObj = {};
-  Object.keys(obj).forEach(key => {
-    newObj[key] = Number(obj[key]);
-  });
-  return newObj;
-};
 
 const createConfigSlice = (set, get) => ({
   config: defaultConfig,
@@ -112,7 +106,11 @@ const createConfigSlice = (set, get) => ({
     const argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
     const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
     const legacy_config = get().difiProps.config;
-    if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
+    if (shouldUpdateColors) {
+      log('setConfig: setting brand colors from portal config', argColors);
+    } else {
+      log('setConfig: keeping colors in state || fallback to default');
+    }
     set(prev => {
       return {
         config: {
@@ -128,7 +126,7 @@ const createConfigSlice = (set, get) => ({
           },
           trigger: {
             ...prev.config.trigger,
-            ...objStringtoObjNum(LEGACY_merge_config(prev.config, legacy_config))
+            ...LEGACY_merge_config(prev.config, legacy_config)
           }
         }
       };
