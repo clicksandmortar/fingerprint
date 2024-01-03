@@ -36,7 +36,7 @@ const useImagePreload = () => {
   const preloadImagesIntoPictureTag = (images: string[]) => {
     const onAnything = () => {
       // we want the state to be updated regardless of whether the image
-      // is loaded, if it errored, or anything else. Not doing so can prevent state from updating.
+      // is loaded, if it errored, or anything else. Not doing so can prevent triggers from showing
       log('useImgPreload - image loaded', { imagesLoaded: imagesLoaded + 1, imagesToPreload })
       setImagesLoaded(prev => prev + 1)
     }
