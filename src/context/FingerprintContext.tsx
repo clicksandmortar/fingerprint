@@ -79,7 +79,6 @@ export function FingerprintProvider(props: FingerprintProviderProps) {
     if (!consentGiven) return
     if (!hasStoreInitiated) return
     addHandlers(defaultHandlers || [])
-
     setBooted(true)
   }, [
     appId,

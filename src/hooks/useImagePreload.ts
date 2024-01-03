@@ -61,7 +61,6 @@ const useImagePreload = () => {
 
   useEffect(() => {
     if (pageTriggers.length === 0) return;
-
     const images = pageTriggers.reduce((arr, pageTrigger) => {
       if (typeof pageTrigger.data !== 'object') return arr;
 
@@ -75,6 +74,7 @@ const useImagePreload = () => {
     setImagesToPreload(images.length)
     preloadImagesIntoPictureTag(images)
   }, [pageTriggers])
+
 
   return { allImagesLoaded };
 }

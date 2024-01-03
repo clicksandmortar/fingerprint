@@ -36,7 +36,6 @@ export default function useButtonCollector() {
   const { visitor } = useVisitor()
   const { log } = useLogging()
   const { trackEvent } = useTracking()
-  // console.log({ trackEvent })
 
   const buttonClickListener = React.useCallback(
     (e: any) => {
