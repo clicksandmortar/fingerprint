@@ -1,11 +1,12 @@
 export declare type DismissMutationData = {
-    triggerId?: string;
+    campaignId: string;
+    variantId: string;
 };
 /**
  * Mutation to dismiss a persistent trigger (like a banner) and NOT show it again to the current visitor.
  */
-export declare const useDismissMutation: <D extends DismissMutationData = {}>() => {
-    dismissTrigger: import("@tanstack/react-query").UseMutateFunction<any, unknown, D, unknown>;
+export declare const useDismissMutation: () => {
+    dismissTrigger: import("@tanstack/react-query").UseMutateFunction<any, unknown, DismissMutationData[], unknown>;
     data: undefined;
     error: null;
     isError: false;
@@ -13,16 +14,16 @@ export declare const useDismissMutation: <D extends DismissMutationData = {}>() 
     isLoading: false;
     isSuccess: false;
     status: "idle";
-    mutate: import("@tanstack/react-query").UseMutateFunction<any, unknown, D, unknown>;
+    mutate: import("@tanstack/react-query").UseMutateFunction<any, unknown, DismissMutationData[], unknown>;
     reset: () => void;
     context: unknown;
     failureCount: number;
     failureReason: unknown;
     isPaused: boolean;
-    variables: D | undefined;
-    mutateAsync: import("@tanstack/react-query").MutateFunction<any, unknown, D, unknown>;
+    variables: DismissMutationData[] | undefined;
+    mutateAsync: import("@tanstack/react-query").MutateFunction<any, unknown, DismissMutationData[], unknown>;
 } | {
-    dismissTrigger: import("@tanstack/react-query").UseMutateFunction<any, unknown, D, unknown>;
+    dismissTrigger: import("@tanstack/react-query").UseMutateFunction<any, unknown, DismissMutationData[], unknown>;
     data: undefined;
     error: null;
     isError: false;
@@ -30,16 +31,16 @@ export declare const useDismissMutation: <D extends DismissMutationData = {}>() 
     isLoading: true;
     isSuccess: false;
     status: "loading";
-    mutate: import("@tanstack/react-query").UseMutateFunction<any, unknown, D, unknown>;
+    mutate: import("@tanstack/react-query").UseMutateFunction<any, unknown, DismissMutationData[], unknown>;
     reset: () => void;
     context: unknown;
     failureCount: number;
     failureReason: unknown;
     isPaused: boolean;
-    variables: D | undefined;
-    mutateAsync: import("@tanstack/react-query").MutateFunction<any, unknown, D, unknown>;
+    variables: DismissMutationData[] | undefined;
+    mutateAsync: import("@tanstack/react-query").MutateFunction<any, unknown, DismissMutationData[], unknown>;
 } | {
-    dismissTrigger: import("@tanstack/react-query").UseMutateFunction<any, unknown, D, unknown>;
+    dismissTrigger: import("@tanstack/react-query").UseMutateFunction<any, unknown, DismissMutationData[], unknown>;
     data: undefined;
     error: unknown;
     isError: true;
@@ -47,16 +48,16 @@ export declare const useDismissMutation: <D extends DismissMutationData = {}>() 
     isLoading: false;
     isSuccess: false;
     status: "error";
-    mutate: import("@tanstack/react-query").UseMutateFunction<any, unknown, D, unknown>;
+    mutate: import("@tanstack/react-query").UseMutateFunction<any, unknown, DismissMutationData[], unknown>;
     reset: () => void;
     context: unknown;
     failureCount: number;
     failureReason: unknown;
     isPaused: boolean;
-    variables: D | undefined;
-    mutateAsync: import("@tanstack/react-query").MutateFunction<any, unknown, D, unknown>;
+    variables: DismissMutationData[] | undefined;
+    mutateAsync: import("@tanstack/react-query").MutateFunction<any, unknown, DismissMutationData[], unknown>;
 } | {
-    dismissTrigger: import("@tanstack/react-query").UseMutateFunction<any, unknown, D, unknown>;
+    dismissTrigger: import("@tanstack/react-query").UseMutateFunction<any, unknown, DismissMutationData[], unknown>;
     data: any;
     error: null;
     isError: false;
@@ -64,12 +65,12 @@ export declare const useDismissMutation: <D extends DismissMutationData = {}>() 
     isLoading: false;
     isSuccess: true;
     status: "success";
-    mutate: import("@tanstack/react-query").UseMutateFunction<any, unknown, D, unknown>;
+    mutate: import("@tanstack/react-query").UseMutateFunction<any, unknown, DismissMutationData[], unknown>;
     reset: () => void;
     context: unknown;
     failureCount: number;
     failureReason: unknown;
     isPaused: boolean;
-    variables: D | undefined;
-    mutateAsync: import("@tanstack/react-query").MutateFunction<any, unknown, D, unknown>;
+    variables: DismissMutationData[] | undefined;
+    mutateAsync: import("@tanstack/react-query").MutateFunction<any, unknown, DismissMutationData[], unknown>;
 };

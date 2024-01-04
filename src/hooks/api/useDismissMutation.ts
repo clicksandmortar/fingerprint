@@ -6,13 +6,14 @@ import useCollectorCallback from '../useCollectorCallback';
 import { useLogging } from '../useLogging';
 
 export type DismissMutationData = {
-  triggerId?: string
-}
+  campaignId: string;
+  variantId: string;
+};
 
 /**
  * Mutation to dismiss a persistent trigger (like a banner) and NOT show it again to the current visitor.
  */
-export const useDismissMutation = <D extends DismissMutationData = {}>() => {
+export const useDismissMutation = () => {
   const { log, error } = useLogging();
   const { appId } = useDifiStore((st) => st.difiProps);
   const { visitor } = useVisitor();
@@ -21,9 +22,9 @@ export const useDismissMutation = <D extends DismissMutationData = {}>() => {
   const url = `${hostname}/triggers/${appId}/${visitor.id}/dismissed`;
 
   const mutation = useMutation(
-    (data: D) => request
+    (data: DismissMutationData[]) => request
       .put(url, {
-        dismissedTriggers: [data],
+        dismissedTriggers: data,
       })
       .then((response) => {
         log('Trigger API response', response);

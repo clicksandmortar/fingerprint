@@ -40,9 +40,10 @@ function Banner({ trigger }: { trigger: BannerTrigger }) {
     trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
-    dismissTrigger({
-      triggerId: trigger.id,
-    });
+    dismissTrigger([{
+      campaignId: trigger.id,
+      variantId: trigger.variantID || '',
+    }]);
     // if applicable:
     resetPad();
   };
@@ -55,7 +56,9 @@ function Banner({ trigger }: { trigger: BannerTrigger }) {
 
   const position = trigger.data?.position as Position;
 
-  if (position === 'left' || position === 'right') return <SideBanner {...props} />;
+  if (position === 'left' || position === 'right') {
+    return <SideBanner {...props} />;
+  }
 
   return <HorizontalBanner {...props} />;
 }

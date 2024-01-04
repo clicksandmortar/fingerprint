@@ -625,7 +625,7 @@ var useDismissMutation = function useDismissMutation() {
   var url = hostname + "/triggers/" + appId + "/" + visitor.id + "/dismissed";
   var mutation = reactQuery.useMutation(function (data) {
     return request.put(url, {
-      dismissedTriggers: [data]
+      dismissedTriggers: data
     }).then(function (response) {
       log('Trigger API response', response);
       return response;
@@ -1240,9 +1240,10 @@ function Banner(_ref) {
     trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
-    dismissTrigger({
-      triggerId: trigger.id
-    });
+    dismissTrigger([{
+      campaignId: trigger.id,
+      variantId: trigger.variantID || ''
+    }]);
     resetPad();
   };
   var props = {
@@ -1251,7 +1252,9 @@ function Banner(_ref) {
     trigger: trigger
   };
   var position = (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.position;
-  if (position === 'left' || position === 'right') return React__default.createElement(SideBanner, Object.assign({}, props));
+  if (position === 'left' || position === 'right') {
+    return React__default.createElement(SideBanner, Object.assign({}, props));
+  }
   return React__default.createElement(HorizontalBanner, Object.assign({}, props));
 }
 var TriggerBanner = function TriggerBanner(_ref2) {
