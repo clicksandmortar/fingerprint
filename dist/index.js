@@ -3179,8 +3179,8 @@ function useFormCollector() {
         data: data
       });
       trackEvent('form_submitted', {
-        id: form.id,
-        name: form.name
+        id: form.getAttribute('id'),
+        name: form.getAttribute('name')
       });
       collect({
         form: {
@@ -3193,7 +3193,7 @@ function useFormCollector() {
     return function () {
       document.removeEventListener('submit', formSubmitListener);
     };
-  }, [visitor]);
+  }, [collect, log, trackEvent, visitor]);
 }
 
 var imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
@@ -3261,11 +3261,6 @@ var useImagePreload = function useImagePreload() {
     preloadImagesIntoPictureTag(images);
   }, [pageTriggers, preloadImagesIntoPictureTag, shouldPreloadImages]);
   var allImagesLoaded = imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 && shouldPreloadImages;
-  console.log({
-    stateImagesHavePreloaded: stateImagesHavePreloaded,
-    shouldPreloadImages: shouldPreloadImages,
-    imagesLoaded: imagesLoaded
-  });
   React.useEffect(function () {
     if (!allImagesLoaded) return;
     setImagesHaveLoaded(true);

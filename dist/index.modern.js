@@ -3377,8 +3377,8 @@ function useFormCollector() {
         data
       });
       trackEvent('form_submitted', {
-        id: form.id,
-        name: form.name
+        id: form.getAttribute('id'),
+        name: form.getAttribute('name')
       });
       collect({
         form: {
@@ -3391,7 +3391,7 @@ function useFormCollector() {
     return () => {
       document.removeEventListener('submit', formSubmitListener);
     };
-  }, [visitor]);
+  }, [collect, log, trackEvent, visitor]);
 }
 
 const imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
@@ -3454,11 +3454,6 @@ const useImagePreload = () => {
     preloadImagesIntoPictureTag(images);
   }, [pageTriggers, preloadImagesIntoPictureTag, shouldPreloadImages]);
   const allImagesLoaded = imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 && shouldPreloadImages;
-  console.log({
-    stateImagesHavePreloaded,
-    shouldPreloadImages,
-    imagesLoaded
-  });
   useEffect(() => {
     if (!allImagesLoaded) return;
     setImagesHaveLoaded(true);
