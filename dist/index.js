@@ -3469,14 +3469,9 @@ function useFormCollector() {
   }, [visitor]);
 }
 
+var imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
 function isValidImageUrl(url) {
-  var imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
-  if (imageExtensions.test(url)) {
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return true;
-    }
-  }
-  return false;
+  return imageExtensions.test(url);
 }
 var getImageUrls = function getImageUrls(pageTriggers) {
   var images = pageTriggers.reduce(function (arr, pageTrigger) {

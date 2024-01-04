@@ -3,23 +3,15 @@ import { useEntireStore } from '../beautifulSugar/store';
 import { Trigger } from '../client/types';
 import { useLogging } from './useLogging';
 
+const imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
 /**
  * Checks if an image is potentially valid based on its URL
  * // built with Copilot-chat
  */
 function isValidImageUrl(url: string): boolean {
   // Regular expression to match common image file extensions
-  const imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
-
   // Check if the URL matches the image file extension pattern
-  if (imageExtensions.test(url)) {
-    // Check if the URL starts with a valid protocol (http:// or https://)
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return true;
-    }
-  }
-
-  return false;
+  return imageExtensions.test(url);
 }
 
 /** Pulls out all urls from trigger.data regardless of key name and returns as an string[] */

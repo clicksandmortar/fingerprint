@@ -4148,14 +4148,9 @@ function useFormCollector() {
   }, [visitor]);
 }
 
+const imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
 function isValidImageUrl(url) {
-  const imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
-  if (imageExtensions.test(url)) {
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return true;
-    }
-  }
-  return false;
+  return imageExtensions.test(url);
 }
 const getImageUrls = pageTriggers => {
   const images = pageTriggers.reduce((arr, pageTrigger) => {
