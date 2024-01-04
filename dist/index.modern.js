@@ -87,12 +87,6 @@ const defaultConfig = {
     colors: defaultColors
   }
 };
-const msToSecs = ms => (ms || 0) / 1000;
-const LEGACY_merge_config = (config, legacy_config) => ({
-  displayTriggerAfterSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || config.trigger.displayTriggerAfterSecs,
-  triggerCooldownSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || config.trigger.triggerCooldownSecs,
-  userIdleThresholdSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || config.trigger.userIdleThresholdSecs
-});
 
 const createConfigSlice = (set, get) => ({
   config: defaultConfig,
@@ -105,32 +99,25 @@ const createConfigSlice = (set, get) => ({
     } = get();
     const argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
     const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
-    const legacy_config = get().difiProps.config;
     if (shouldUpdateColors) {
       log('setConfig: setting brand colors from portal config', argColors);
     } else {
       log('setConfig: keeping colors in state || fallback to default');
     }
-    set(prev => {
-      return {
-        config: {
-          ...prev.config,
-          ...updatedConfigEntries,
-          brand: {
-            ...prev.config.brand,
-            ...updatedConfigEntries.brand,
-            colors: shouldUpdateColors ? {
-              ...(prev.config.brand.colors || defaultColors),
-              ...(argColors || {})
-            } : prev.config.brand.colors
-          },
-          trigger: {
-            ...prev.config.trigger,
-            ...LEGACY_merge_config(prev.config, legacy_config)
-          }
+    set(prev => ({
+      config: {
+        ...prev.config,
+        ...updatedConfigEntries,
+        brand: {
+          ...prev.config.brand,
+          ...updatedConfigEntries.brand,
+          colors: shouldUpdateColors ? {
+            ...(prev.config.brand.colors || defaultColors),
+            ...(argColors || {})
+          } : prev.config.brand.colors
         }
-      };
-    });
+      }
+    }));
   }
 });
 

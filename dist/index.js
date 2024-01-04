@@ -134,16 +134,6 @@ var defaultConfig = {
     colors: defaultColors
   }
 };
-var msToSecs = function msToSecs(ms) {
-  return (ms || 0) / 1000;
-};
-var LEGACY_merge_config = function LEGACY_merge_config(config, legacy_config) {
-  return {
-    displayTriggerAfterSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || config.trigger.displayTriggerAfterSecs,
-    triggerCooldownSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || config.trigger.triggerCooldownSecs,
-    userIdleThresholdSecs: msToSecs(legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || config.trigger.userIdleThresholdSecs
-  };
-};
 
 var createConfigSlice = function createConfigSlice(set, get) {
   return {
@@ -154,7 +144,6 @@ var createConfigSlice = function createConfigSlice(set, get) {
         log = _get.logging.log;
       var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
       var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
-      var legacy_config = get().difiProps.config;
       if (shouldUpdateColors) {
         log('setConfig: setting brand colors from portal config', argColors);
       } else {
@@ -165,8 +154,7 @@ var createConfigSlice = function createConfigSlice(set, get) {
           config: _extends({}, prev.config, updatedConfigEntries, {
             brand: _extends({}, prev.config.brand, updatedConfigEntries.brand, {
               colors: shouldUpdateColors ? _extends({}, prev.config.brand.colors || defaultColors, argColors || {}) : prev.config.brand.colors
-            }),
-            trigger: _extends({}, prev.config.trigger, LEGACY_merge_config(prev.config, legacy_config))
+            })
           })
         };
       });
