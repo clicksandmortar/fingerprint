@@ -8,14 +8,14 @@ import TriggerInverse from '../behaviours/TriggerInverse'
 import { TriggerYoutube } from '../behaviours/TriggerYoutube'
 import { Trigger } from './types'
 
-export type ClientTrigger = Pick<
+// a handler is a component that renders a trigger,
+// but uses some of the same props
+export type Handler = Pick<
   Trigger,
   'id' | 'invoke' | 'behaviour' | 'multipleOfSameBehaviourSupported'
 >
 
-// a word for "possible to have multiple of the same kind":
-
-export const clientHandlers: ClientTrigger[] = [
+export const clientHandlers: Handler[] = [
   {
     id: 'modal_v1',
     behaviour: 'BEHAVIOUR_MODAL',

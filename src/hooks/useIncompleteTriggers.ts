@@ -1,20 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import { IncompleteTrigger, Trigger } from '../client/types'
-
+import React, { useEffect } from 'react'
+import { useEntireStore } from '../beautifulSugar/store'
 import { validateSignalChain } from '../utils/signals'
-import getIsVisible from './useIsElementVisible'
 
 const interval = 250
 
 const useIncompleteTriggers = () => {
-  const [incompleteTriggers, setIncompleteTriggers] = useState<
-    IncompleteTrigger[]
-  >([])
+  const { incompleteTriggers, setVisibleTriggersIssuedByIncomplete } =
+    useEntireStore()
 
-  // @TODO: think if this can insteqd be a derived value somehow.
-  // note that shoving the interval into a memo or callback is not the way.
-  // IMHO we should aim to NOT update state here to reduce the amount of rerenders if possible.
-  const [visibleTriggers, setVisibleTriggers] = useState<Trigger[]>([])
+  const { set } = useEntireStore()
 
   const scan = React.useCallback(() => {
     const validTriggers = incompleteTriggers.filter((trigger) => {
@@ -24,12 +18,10 @@ const useIncompleteTriggers = () => {
       return true
     })
 
-    setVisibleTriggers((prev) => {
-      if (!validTriggers.length) return prev
+    if (!validTriggers.length) return
 
-      return validTriggers
-    })
-  }, [setVisibleTriggers, incompleteTriggers])
+    setVisibleTriggersIssuedByIncomplete(validTriggers)
+  }, [set, incompleteTriggers, setVisibleTriggersIssuedByIncomplete])
 
   useEffect(() => {
     if (!incompleteTriggers.length) return
@@ -39,14 +31,7 @@ const useIncompleteTriggers = () => {
     return () => {
       clearInterval(intId)
     }
-  }, [incompleteTriggers, getIsVisible, setVisibleTriggers])
-
-  return {
-    incompleteTriggers,
-    setIncompleteTriggers,
-    setVisibleTriggers,
-    visibleTriggers
-  }
+  }, [incompleteTriggers, setVisibleTriggersIssuedByIncomplete])
 }
 
 export default useIncompleteTriggers

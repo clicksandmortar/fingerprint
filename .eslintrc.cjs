@@ -1,8 +1,4 @@
-// THIS IS LITERALLY A COPY FROM OUR SHARED LIB SO AS NOT TO INTRODUCE ANOTHER DEP IN THE FINAL PACAKGE
-// STILL A WORK IN PROGRESS AND NEEDS TO BE HOOKED UP PROPERLY
-//
-// ...airbnb config failing .@TODO: @ed to look into
-
+/* eslint-disable max-lines */
 // This eslint config was naenae'd by from a force much stronger than Ed - @cajacko (Charlie Jackson)
 
 // Most of the meanings are commented. When adding more rules, please comment them, and try to keep as vars.
@@ -10,42 +6,68 @@
 /*
 Change matching values in prettierrc as well:
 */
-const tabSize = 2
-const charsPerLine = 120
-const maxLinesPerFile = 150
+const tabSize = 2;
+const charsPerLine = 120;
+const maxLinesPerFile = 150;
 
-const minVariableLength = 2
+const minVariableLength = 2;
 
-const allowPropsSpread = true
-const requireJsDoc = true
+const allowPropsSpread = true;
+const requireJsDoc = true;
 
-const typescriptExtensions = ['.ts', '.tsx']
-const extensions = ['.js', '.jsx', ...typescriptExtensions]
+const typescriptExtensions = ['.ts', '.tsx'];
+const extensions = ['.js', '.jsx', ...typescriptExtensions];
 
-/*
-Uncomment if we end up using styled components later on:
-*/
-// const styleFilesPre = ['**/*styles', '**/*style'];
-// const styleFiles = [];
-// styleFilesPre.forEach((styleFile) => {
-//     extensions.forEach((extension) => {
-//         styleFiles.push(`${styleFile}${extension}`);
-//     });
-// });
-
-module.exports = {
+const cookieWarning =
+  'Be super careful when setting Cookies with Fingerprint. Doing so has the potential to cause serious issues within apps Difi is Running on. Proceed only when 100% confident. If not - please check with the team.';
+/** @type {import('eslint').ESLint.ConfigData} */
+const config = {
   // Our main extended package is eslint-config-airbnb. This is widely accepted as one of the best
   // industry standard linting configurations, and is very well documented with why they chose the
   // rules they did: https://github.com/airbnb/javascript
   // Keep prettier as last so it overrides everything else. As it's best to keep prettier config
   // to a minimum, as it can be pretty tricky to match prettier with more specific rules and it
   // doesn't play nicely with a lot of editors if you do try and go more custom
-  extends: ['airbnb', 'prettier', 'next/core-web-vitals'],
-  // Stop looking for eslint config further up than this
+
+  // plugin:react-hooks/recommended populates the dep arrays for react hooks on almost-auto-fix.
+  extends: ['airbnb', 'eslint:recommended', 'plugin:react-hooks/recommended'],
+  // Stop looking foconfig further up than thisr eslint
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: ['react-hooks', '@typescript-eslint', 'jest', 'prettier', 'import'],
+  plugins: ['react-hooks', '@typescript-eslint', 'jest', 'import'],
+
+  // Cookies have caused a P1 incicent in the past. We want to be super careful when setting cookies with DiFi.
   rules: {
+    'no-restricted-properties': [
+      'error',
+      {
+        object: 'Cookies',
+        property: 'set',
+        message: cookieWarning,
+      },
+      {
+        object: 'Cookies',
+        property: 'remove',
+        message: cookieWarning,
+      },
+    ],
+    'no-restricted-syntax': [
+      'error',
+      {
+        message: cookieWarning,
+        selector: "CallExpression[callee.name='setCookie']",
+      },
+      {
+        message: cookieWarning,
+        selector: "CallExpression[callee.name='setCookie'][arguments.length!=3]",
+      },
+      // Work in progress attempting to target setCookie and restrict non-cnm cookies
+      {
+        selector: 'CallExpression[callee.name="setCookie"] > :first-child:not([name=CnMCookie])',
+        message: 'The first argument of setCookies should be an Identifier.',
+      },
+    ],
+
     // Temporarily disabling, but we may want to bring it back eventually for consistency :)
     'import/prefer-default-export': ['off'],
     // our projects use nextJs / gatsby which inject React globally
@@ -65,14 +87,11 @@ module.exports = {
         tabWidth: tabSize,
         ignoreTemplateLiterals: true,
         ignoreStrings: true,
-        ignoreRegExpLiterals: true
-      }
+        ignoreRegExpLiterals: true,
+      },
     ],
     // Don't allow empty lines between imports
-    'padding-line-between-statements': [
-      'error',
-      { blankLine: 'never', prev: 'import', next: 'import' }
-    ],
+    'padding-line-between-statements': ['error', { blankLine: 'never', prev: 'import', next: 'import' }],
     // We don't want to specify the extensions when we import .js, .jsx, .ts, .tsx. It's entirely
     // unnecessary to do so
     'import/extensions': [
@@ -81,19 +100,19 @@ module.exports = {
         pattern: extensions.reduce(
           (accumulator, extension) => ({
             ...accumulator,
-            [extension]: 'never'
+            [extension]: 'never',
           }),
-          {}
-        )
-      }
+          {},
+        ),
+      },
     ],
     // allows devDependencies imports in test files
     'import/no-extraneous-dependencies': [
       'off',
       {
         devDependencies: ['**.test.{ts,tsx}'],
-        optionalDependencies: false
-      }
+        optionalDependencies: false,
+      },
     ],
     // Only allow jsx in .tsx or .jsx files
     'react/jsx-filename-extension': ['error', { extensions: ['.tsx', '.jsx'] }],
@@ -138,9 +157,9 @@ module.exports = {
           'h5',
           'h6',
           'to', // describes a destination for output
-          'fn' // for saga api calls to api client
-        ]
-      }
+          'fn', // for saga api calls to api client
+        ],
+      },
     ],
     // Warn the user if they are using TODO, FIXME etc. Shouldn't really be in production but there
     // can be some use cases where it is ok
@@ -158,9 +177,9 @@ module.exports = {
               FunctionDeclaration: true,
               MethodDefinition: true,
               ClassDeclaration: true,
-              ArrowFunctionExpression: true
-            }
-          }
+              ArrowFunctionExpression: true,
+            },
+          },
         ],
     // Don't let files get too large. There's always going to be some cases with class files that
     // need to be longer. Just add a eslint-ignore comment for that 1 file. Keeping this rule
@@ -170,8 +189,8 @@ module.exports = {
       {
         max: maxLinesPerFile,
         skipBlankLines: true,
-        skipComments: true
-      }
+        skipComments: true,
+      },
     ],
     // Makes it much easier to navigate imports, especially when importing loads of things
     'import/imports-first': ['error', 'absolute-first'],
@@ -180,14 +199,14 @@ module.exports = {
 
     // Labels must be controlling an input, when we use custom components this can get confused so we can specify
     //  custom components that are inputs or labels here
-    'jsx-a11y/label-has-associated-control': [
-      'warn',
-      {
-        // Most of the time we'd define the input like this
-        controlComponents: ['Style.Input'],
-        depth: 3
-      }
-    ],
+    // 'jsx-a11y/label-has-associated-control': [
+    //   'warn',
+    //   {
+    //     // Most of the time we'd define the input like this
+    //     controlComponents: ['Style.Input'],
+    //     depth: 3,
+    //   },
+    // ],
     // There are times we may genuinely want to process serially
     'no-await-in-loop': 'off',
     // There's a lot of occasions where it's important to be certain we have a boolean value
@@ -197,12 +216,12 @@ module.exports = {
       'error',
       'always',
       {
-        exceptAfterSingleLine: true
-      }
+        exceptAfterSingleLine: true,
+      },
     ],
     // Conflicts with prettier
     'react/jsx-wrap-multilines': ['off'],
-    'react/require-default-props': ['off']
+    'react/require-default-props': ['off'],
   },
 
   overrides: [
@@ -212,15 +231,12 @@ module.exports = {
       rules: {
         // Don't delay - Make your React hooks reliable today!
         // having this rule here also makes ESLINT extensions in some editors to autofill hook dependencies.
-        'react-hooks/exhaustive-deps': 'error'
-      }
+        'react-hooks/exhaustive-deps': 'error',
+      },
     },
     {
       // Only want typescript config for typescript files
-      extends: [
-        'plugin:@typescript-eslint/eslint-recommended',
-        'plugin:@typescript-eslint/recommended'
-      ],
+      extends: ['plugin:@typescript-eslint/eslint-recommended', 'plugin:@typescript-eslint/recommended'],
       files: typescriptExtensions.map((extension) => `*${extension}`),
       rules: {
         // eslint won't pick up the typescript props, so disabling here. Pointless to have prop-types
@@ -229,15 +245,24 @@ module.exports = {
         // Ensure we must put private/public on class props and methods. Makes it much more obvious what you can consume
         // and use
         '@typescript-eslint/explicit-member-accessibility': 'error',
-        '@typescript-eslint/no-explicit-any': 'error'
-      }
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
     },
-
+    {
+      files: ['**/slices/**/*'],
+      rules: {
+        'require-jsdoc': ['off'],
+        'import/no-extraneous-dependencies': ['off'],
+        '@typescript-eslint/explicit-function-return-type': ['off'],
+        'max-lines': ['off'],
+        'import/prefer-default-export': ['off'],
+      },
+    },
     {
       files: ['**/defaultContentStrings.*'],
       rules: {
-        'max-lines': ['off']
-      }
+        'max-lines': ['off'],
+      },
     },
     {
       files: [
@@ -248,22 +273,17 @@ module.exports = {
         '**/sideEffects.*',
         '**/sideEffects/**/*',
         '**/context/**/*',
-        '**/config/**/*'
+        '**/config/**/*',
       ],
       rules: {
-        'import/prefer-default-export': ['off']
-      }
+        'import/prefer-default-export': ['off'],
+      },
     },
     {
       // Turn off some rules for test files
-      files: [
-        '**/__mocks__/**/*',
-        '**/__test__/**/*',
-        '**/*.test.*',
-        '**/__utils__/**/*'
-      ],
+      files: ['**/__mocks__/**/*', '**/__tests__/**/*', '**/*.test.*', '**/__utils__/**/*'],
       env: {
-        'jest/globals': true
+        'jest/globals': true,
       },
       extends: ['plugin:jest/recommended'],
       rules: {
@@ -279,8 +299,8 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': ['off'],
         'react/jsx-props-no-spreading': ['off'],
         '@typescript-eslint/explicit-function-return-type': ['off'],
-        'import/prefer-default-export': ['off']
-      }
+        'import/prefer-default-export': ['off'],
+      },
     },
     {
       // Turn off some rules for testing typescript test files
@@ -288,8 +308,8 @@ module.exports = {
       rules: {
         'require-jsdoc': ['off'],
         'import/prefer-default-export': ['off'],
-        '@typescript-eslint/explicit-function-return-type': ['off']
-      }
+        '@typescript-eslint/explicit-function-return-type': ['off'],
+      },
     },
 
     {
@@ -305,10 +325,10 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
-            optionalDependencies: true
-          }
-        ]
-      }
+            optionalDependencies: true,
+          },
+        ],
+      },
     },
     // {
     //   // Backend data is in snake_case so we need this.
@@ -328,8 +348,8 @@ module.exports = {
       files: ['**/fixtures/**'],
       rules: {
         'max-lines': ['off'],
-        '@typescript-eslint/camelcase': ['off']
-      }
+        '@typescript-eslint/camelcase': ['off'],
+      },
     },
     {
       files: ['**/api/**'],
@@ -339,22 +359,23 @@ module.exports = {
         '@typescript-eslint/camelcase': ['off'],
         // Many of the api types are quite complex and it can be hard or pointless to type the return statements. As
         // long as everything is kept in typescript we should be fine here
-        '@typescript-eslint/explicit-function-return-type': ['off']
-      }
-    }
+        '@typescript-eslint/explicit-function-return-type': ['off'],
+      },
+    },
   ],
   settings: {
     'import/resolver': {
       node: {
-        extensions
-      }
+        extensions,
+      },
     },
     'import/extensions': extensions,
     'import/parsers': {
-      '@typescript-eslint/parser': typescriptExtensions
+      '@typescript-eslint/parser': typescriptExtensions,
     },
     react: {
-      version: '18.2'
-    }
-  }
-}
+      version: '18.2',
+    },
+  },
+};
+module.exports = config;

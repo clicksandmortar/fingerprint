@@ -1,58 +1,57 @@
-import { test } from '@playwright/test'
-import { Browser, chromium } from 'playwright'
-import { cookieAccountJWT } from '../../context/FingerprintContext'
-import { Session } from '../../sessions/types'
-import { getCookieDomain, updateCookieUUID } from '../../visitors/bootstrap'
-import { Visitor } from '../../visitors/types'
-import { validVisitorId } from '../../visitors/utils'
-import { prepPage } from '../__dev__/helpers'
-import { CnMIDCookie } from '../cookies'
+import { test } from '@playwright/test';
+import { Browser, chromium } from 'playwright';
+import { Session } from '../../sessions/types';
+import { getCookieDomain, updateCookieUUID } from '../../visitors/bootstrap';
+import { Visitor } from '../../visitors/types';
+import { validVisitorId } from '../../visitors/utils';
+import { CnMIDCookie } from '../cookies';
+import { prepPage } from '../__dev__/helpers';
 
-const { expect, describe } = test
+const { expect, describe } = test;
 
-let browser: Browser
+let browser: Browser;
 
 test.beforeAll(async () => {
-  browser = await chromium.launch()
-})
+  browser = await chromium.launch();
+});
 
 const getCookie = async (name: string, browser) => {
-  const browserContext = await browser.contexts()[0]
-  const cookies = await browserContext.cookies()
+  const browserContext = await browser.contexts()[0];
+  const cookies = await browserContext.cookies();
 
-  const cookie = cookies.find((cookie) => cookie.name === name)
-  return cookie
-}
+  const cookie = cookies.find((cookie) => cookie.name === name);
+  return cookie;
+};
 
 describe('Visitor stuff', async () => {
   test('get visitor id from the cookie', async () => {
-    await prepPage(browser)
-    const cookie = await getCookie(CnMIDCookie, browser)
+    await prepPage(browser);
+    const cookie = await getCookie(CnMIDCookie, browser);
 
-    const isVisitorIdValid = validVisitorId(cookie?.value || '')
-    test.expect(isVisitorIdValid).toBe(true)
-  })
+    const isVisitorIdValid = validVisitorId(cookie?.value || '');
+    test.expect(isVisitorIdValid).toBe(true);
+  });
 
   test('[unit] getCookieDomain', async () => {
-    const page = await prepPage(browser)
+    const page = await prepPage(browser);
 
-    const loc1 = await page.evaluate(() => location)
-    globalThis.location = loc1
+    const loc1 = await page.evaluate(() => location);
+    globalThis.location = loc1;
 
-    const domain1 = getCookieDomain()
-    expect(domain1).toEqual(null)
+    const domain1 = getCookieDomain();
+    expect(domain1).toEqual(null);
 
     await page.goto('https://example.com', {
       waitUntil: 'networkidle',
-      timeout: 60000
-    })
+      timeout: 60000,
+    });
 
-    const loc2 = await page.evaluate(() => location)
-    globalThis.location = loc2
+    const loc2 = await page.evaluate(() => location);
+    globalThis.location = loc2;
 
-    const domain2 = getCookieDomain()
-    expect(domain2).toBe('example.com')
-  })
+    const domain2 = getCookieDomain();
+    expect(domain2).toBe('example.com');
+  });
 
   test('User cookie gets updated when visitor ID is returned from API', async () => {
     // TODO: a pretty important one, but has issues with updating cookies and can't debug yet
@@ -94,57 +93,57 @@ describe('Visitor stuff', async () => {
     //   expect(splitCookie[0]).toEqual('1234-5678-9012-3456')
     //   expect(new Date(splitCookie[2])).toBeInstanceOf(Date)
     // })
-    expect(true).toBe(true)
-  })
+    expect(true).toBe(true);
+  });
   test('[unit] updateCookieUUID', async () => {
-    await prepPage(browser)
+    await prepPage(browser);
 
-    const cookie = await getCookie(CnMIDCookie, browser)
-    const uuid = '1ac5abb8-d64f-456f-bc90-b0b5f314d192'
+    const cookie = await getCookie(CnMIDCookie, browser);
+    const uuid = '1ac5abb8-d64f-456f-bc90-b0b5f314d192';
 
-    expect(cookie.value?.split('|')[0]?.length).toBeGreaterThan(0)
-    expect(cookie.value?.split('|')[0]).not.toEqual(uuid)
+    expect(cookie.value?.split('|')[0]?.length).toBeGreaterThan(0);
+    expect(cookie.value?.split('|')[0]).not.toEqual(uuid);
 
-    const cookieData = cookie?.value || ''
-    const newCookie = updateCookieUUID(cookieData, uuid)
-    const splitCookie = newCookie?.split('|') || []
+    const cookieData = cookie?.value || '';
+    const newCookie = updateCookieUUID(cookieData, uuid);
+    const splitCookie = newCookie?.split('|') || [];
 
-    expect(splitCookie.length).toEqual(3)
-    expect(splitCookie[0]).toEqual(uuid)
-    expect(splitCookie[1]).toEqual(splitCookie[1])
-    expect(new Date(splitCookie[2])).toBeInstanceOf(Date)
-  })
+    expect(splitCookie.length).toEqual(3);
+    expect(splitCookie[0]).toEqual(uuid);
+    expect(splitCookie[1]).toEqual(splitCookie[1]);
+    expect(new Date(splitCookie[2])).toBeInstanceOf(Date);
+  });
   test('[impl] updateCookie', async () => {
     // TODO: implement
-    expect(true).toBe(true)
-  })
+    expect(true).toBe(true);
+  });
 
   test('(unfinished) [impl] bootstrapVisitor ', async () => {
     // stil fails
-    const page = await prepPage(browser)
+    const page = await prepPage(browser);
 
-    let sampleSession = {
+    const sampleSession = {
       firstVisit: true,
       lastVisit: new Date().toUTCString(),
       visits: 1,
       id: '1234-5678-9012-3456',
-      endTime: new Date().toUTCString()
-    }
+      endTime: new Date().toUTCString(),
+    };
 
-    let visitor = {},
-      session = {}
-    const setVisitor = (val: Visitor) => (visitor = val)
-    const setSession = (val: Session) => (session = val)
+    let visitor = {};
+    let session = {};
+    const setVisitor = (val: Visitor) => (visitor = val);
+    const setSession = (val: Session) => (session = val);
 
-    const context = await browser.contexts()[0]
+    const context = await browser.contexts()[0];
     await context.addCookies([
       {
         name: cookieAccountJWT,
         value: '1234-5678-9012-3456',
         domain: 'localhost',
-        path: '/'
-      }
-    ])
+        path: '/',
+      },
+    ]);
 
     // const loc = await page.evaluate(() => location)
     // const window = await page.evaluate(() => window)
@@ -164,5 +163,5 @@ describe('Visitor stuff', async () => {
     // expect(session).toHaveProperty('lastVisit')
     // expect(session).toHaveProperty('visits')
     // expect(session).toHaveProperty('firstVisit')
-  })
-})
+  });
+});

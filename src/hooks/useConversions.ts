@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import { ComparisonFunc, Conversion, Operator } from '../client/types'
+import React, { useEffect } from 'react'
+import { useEntireStore } from '../beautifulSugar/store'
+import { ComparisonFunc, Operator } from '../client/types'
 import { validateSignalChain } from '../utils/signals'
 import { useCollectorMutation } from './api/useCollectorMutation'
 
@@ -39,19 +40,25 @@ export const getFuncByOperator = (
 const scanInterval = 500
 
 const useConversions = () => {
-  const [conversions, setConversions] = useState<Conversion[]>([])
+  const { conversions, set } = useEntireStore()
 
   const { mutate: collect } = useCollectorMutation()
 
   const removeById = React.useCallback(
     (id: string) => {
-      setConversions((prev) => {
-        if (!prev?.length) return prev
+      set((prev) => {
+        if (!prev?.conversions.length) return prev
 
-        return prev.filter((conversion) => conversion.identifier !== id)
+        const filteredConversions = prev.conversions.filter(
+          (conversion) => conversion.identifier !== id
+        )
+
+        return {
+          conversions: filteredConversions
+        }
       })
     },
-    [setConversions]
+    [set]
   )
 
   const scan = React.useCallback(() => {
@@ -73,8 +80,6 @@ const useConversions = () => {
     const intId = setInterval(scan, scanInterval)
     return () => clearInterval(intId)
   }, [scan])
-
-  return { conversions, setConversions }
 }
 
 export default useConversions

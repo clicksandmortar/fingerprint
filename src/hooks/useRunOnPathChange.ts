@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useLogging } from '../context/LoggingContext'
+import { useLogging } from './useLogging'
 
 type FuncProp = () => void
 type Config = {

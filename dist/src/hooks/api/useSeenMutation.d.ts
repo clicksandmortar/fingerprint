@@ -1,8 +1,15 @@
 import { BannerTrigger } from '../../behaviours/Banner/Banner.types';
 import { DataCaptureTrigger } from '../../behaviours/Modal/Modal.types';
 import { Trigger } from '../../client/types';
+/**
+ * Ping the endpoint to mark a trigger as seen and, if needed, prevent from resurfacing.
+ */
 export declare const useSeenMutation: () => import("@tanstack/react-query").UseBaseMutationResult<Response, {}, unknown, unknown>;
-export declare const useSeen: ({ trigger, skip }: {
+/**
+ * run the seen mutation after a short delay and prevent from
+ * re-firing on rerenders
+ */
+export declare const useSeen: ({ trigger, skip, }: {
     trigger: Trigger | BannerTrigger | DataCaptureTrigger;
     skip: boolean;
 }) => {
