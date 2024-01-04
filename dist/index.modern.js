@@ -19,7 +19,7 @@ const TEMP_isCNMBrand = () => {
   const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
   return isCnMBookingDomain;
 };
-const _LEGACY_getBrand = () => {
+function _LEGACY_getBrand() {
   if (typeof window === 'undefined') return null;
   if (TEMP_isCNMBrand()) return 'C&M';
   if (window.location.host.startsWith('localhost')) return 'C&M';
@@ -29,7 +29,7 @@ const _LEGACY_getBrand = () => {
   if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
   if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
   return 'C&M';
-};
+}
 const haveBrandColorsBeenConfigured = colors => {
   if (!colors) return false;
   if (typeof colors !== 'object') return false;
@@ -53,11 +53,13 @@ function getEnvVars() {
     default:
       isDev = false;
   }
-  if (isDev) return {
-    isDev,
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
+  if (isDev) {
+    return {
+      isDev,
+      FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+      MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+    };
+  }
   return {
     isDev,
     FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
@@ -140,39 +142,29 @@ const headers = {
 };
 const hostname = getEnvVars().FINGERPRINT_API_HOSTNAME;
 const request = {
-  get: async (url, params) => {
-    return await fetch(url + '?' + new URLSearchParams(params), {
-      method: 'GET',
-      headers
-    });
-  },
-  post: async (url, body) => {
-    return await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  patch: async (url, body) => {
-    return await fetch(url, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  put: async (url, body) => {
-    return await fetch(url, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(body)
-    });
-  },
-  delete: async url => {
-    return await fetch(url, {
-      method: 'DELETE',
-      headers
-    });
-  }
+  get: async (url, params) => await fetch(`${url}?${new URLSearchParams(params)}`, {
+    method: 'GET',
+    headers
+  }),
+  post: async (url, body) => await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body)
+  }),
+  patch: async (url, body) => await fetch(url, {
+    method: 'PATCH',
+    headers,
+    body: JSON.stringify(body)
+  }),
+  put: async (url, body) => await fetch(url, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(body)
+  }),
+  delete: async url => await fetch(url, {
+    method: 'DELETE',
+    headers
+  })
 };
 
 function isUndefined(o) {
@@ -250,9 +242,7 @@ const onCookieChanged = (callback, interval = 1000) => {
   }, interval);
 };
 
-const uuidValidateV4 = uuid => {
-  return validate(uuid) && version(uuid) === 4;
-};
+const uuidValidateV4 = uuid => validate(uuid) && version(uuid) === 4;
 
 const validVisitorId = id => {
   const splitCookie = id.split('|');
@@ -436,9 +426,7 @@ const useBrand = () => {
   return _LEGACY_getBrand();
 };
 const useTriggerConfig = () => useConfig().trigger;
-const useBrandColors = () => {
-  return useConfig().brand.colors || defaultColors;
-};
+const useBrandColors = () => useConfig().brand.colors || defaultColors;
 
 const createIdleTimeSlice = (set, get) => {
   var _get, _get$config, _get$config$trigger;
@@ -485,9 +473,7 @@ function useTriggerDelay() {
     if (remainingMS < 0) return 0;
     return remainingMS;
   }, [lastTriggerTimeStamp, cooldownMs]);
-  const canNextTriggerOccur = React__default.useCallback(() => {
-    return getRemainingCooldownMs() === 0;
-  }, [getRemainingCooldownMs]);
+  const canNextTriggerOccur = React__default.useCallback(() => getRemainingCooldownMs() === 0, [getRemainingCooldownMs]);
   const getIdleStatusDelay = React__default.useCallback(() => {
     const cooldownDelay = getRemainingCooldownMs();
     const delayAdjustedForCooldown = idleDelay + cooldownDelay;
@@ -554,9 +540,7 @@ const useCollectorCallback = () => {
   return collectorCallback;
 };
 
-const trackEvent = (event, props, callback) => {
-  return mixpanel.track(event, props, callback);
-};
+const trackEvent = (event, props, callback) => mixpanel.track(event, props, callback);
 const useTracking = () => {
   const {
     initiated
@@ -668,10 +652,10 @@ const closeButtonStyles = {
   display: 'grid',
   placeContent: 'center'
 };
-const CloseButton = ({
+function CloseButton({
   onClick,
   style
-}) => {
+}) {
   const buttonStyle = {
     ...closeButtonStyles,
     ...style
@@ -680,16 +664,16 @@ const CloseButton = ({
     style: buttonStyle,
     onClick: onClick
   }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '16',
-    height: '16',
-    viewBox: '0 0 16 16'
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "16",
+    height: "16",
+    viewBox: "0 0 16 16"
   }, React__default.createElement("path", {
     fill: buttonStyle.color || buttonStyle.fill,
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+    fillRule: "evenodd",
+    d: "M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z"
   })));
-};
+}
 
 const getDiffInDHMS = (targetDate, initialDate = new Date()) => {
   const diffInSeconds = getPositiveDateDiffInSec(targetDate, initialDate);
@@ -704,9 +688,7 @@ const getDiffInDHMS = (targetDate, initialDate = new Date()) => {
     seconds
   };
 };
-const getPositiveDateDiffInSec = (date1, date2) => {
-  return Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
-};
+const getPositiveDateDiffInSec = (date1, date2) => Math.abs(Math.floor((date2.getTime() - date1.getTime()) / 1000));
 function formatTimeStamp(targetDate) {
   const durationInSeconds = getPositiveDateDiffInSec(new Date(), targetDate);
   const days = Math.floor(durationInSeconds / (60 * 60 * 24));
@@ -733,7 +715,7 @@ function formatTimeStamp(targetDate) {
     return parts[0];
   }
   const lastPart = parts.pop();
-  const formattedDuration = parts.join(' ') + ` and ${lastPart}`;
+  const formattedDuration = `${parts.join(' ')} and ${lastPart}`;
   return formattedDuration;
 }
 
@@ -918,11 +900,11 @@ const useBannerContainerStyles = ({
   }
 };
 
-const HorizontalBanner = ({
+function HorizontalBanner({
   handleAction,
   handleClose,
   trigger
-}) => {
+}) {
   var _container$current, _container$current2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   const styles = useBannerStyles();
   const container = useRef(null);
@@ -972,41 +954,47 @@ const HorizontalBanner = ({
     onClick: handleClose,
     style: styles.closeButton
   }));
-};
+}
 
-const Ticket = props => React__default.createElement("svg", Object.assign({
-  xmlns: 'http://www.w3.org/2000/svg',
-  height: '16',
-  width: '18',
-  viewBox: '0 0 576 512'
-}, props), React__default.createElement("path", {
-  d: 'M64 64C28.7 64 0 92.7 0 128v64c0 8.8 7.4 15.7 15.7 18.6C34.5 217.1 48 235 48 256s-13.5 38.9-32.3 45.4C7.4 304.3 0 311.2 0 320v64c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V320c0-8.8-7.4-15.7-15.7-18.6C541.5 294.9 528 277 528 256s13.5-38.9 32.3-45.4c8.3-2.9 15.7-9.8 15.7-18.6V128c0-35.3-28.7-64-64-64H64zm64 112l0 160c0 8.8 7.2 16 16 16H432c8.8 0 16-7.2 16-16V176c0-8.8-7.2-16-16-16H144c-8.8 0-16 7.2-16 16zM96 160c0-17.7 14.3-32 32-32H448c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V160z'
-}));
-const Exclamation = props => React__default.createElement("svg", Object.assign({
-  xmlns: 'http://www.w3.org/2000/svg',
-  height: '16',
-  width: '16',
-  viewBox: '0 0 512 512'
-}, props), React__default.createElement("path", {
-  d: 'M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z'
-}));
-const Heart = props => React__default.createElement("svg", Object.assign({
-  xmlns: 'http://www.w3.org/2000/svg',
-  height: '16',
-  width: '16',
-  viewBox: '0 0 512 512'
-}, props), React__default.createElement("path", {
-  d: 'M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z'
-}));
+function Ticket(props) {
+  return React__default.createElement("svg", Object.assign({
+    xmlns: "http://www.w3.org/2000/svg",
+    height: "16",
+    width: "18",
+    viewBox: "0 0 576 512"
+  }, props), React__default.createElement("path", {
+    d: "M64 64C28.7 64 0 92.7 0 128v64c0 8.8 7.4 15.7 15.7 18.6C34.5 217.1 48 235 48 256s-13.5 38.9-32.3 45.4C7.4 304.3 0 311.2 0 320v64c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V320c0-8.8-7.4-15.7-15.7-18.6C541.5 294.9 528 277 528 256s13.5-38.9 32.3-45.4c8.3-2.9 15.7-9.8 15.7-18.6V128c0-35.3-28.7-64-64-64H64zm64 112l0 160c0 8.8 7.2 16 16 16H432c8.8 0 16-7.2 16-16V176c0-8.8-7.2-16-16-16H144c-8.8 0-16 7.2-16 16zM96 160c0-17.7 14.3-32 32-32H448c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V160z"
+  }));
+}
+function Exclamation(props) {
+  return React__default.createElement("svg", Object.assign({
+    xmlns: "http://www.w3.org/2000/svg",
+    height: "16",
+    width: "16",
+    viewBox: "0 0 512 512"
+  }, props), React__default.createElement("path", {
+    d: "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"
+  }));
+}
+function Heart(props) {
+  return React__default.createElement("svg", Object.assign({
+    xmlns: "http://www.w3.org/2000/svg",
+    height: "16",
+    width: "16",
+    viewBox: "0 0 512 512"
+  }, props), React__default.createElement("path", {
+    d: "M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"
+  }));
+}
 const iconList = {
   exclamation: Exclamation,
   ticket: Ticket,
   heart: Heart
 };
-const Icon = ({
+function Icon({
   icon,
   ...props
-}) => {
+}) {
   const {
     error
   } = useLogging();
@@ -1017,12 +1005,12 @@ const Icon = ({
     return null;
   }
   return React__default.createElement(IconComponent, Object.assign({}, props));
-};
+}
 
-const BannerIcon = ({
+function BannerIcon({
   iconName,
   IconProps
-}) => {
+}) {
   const {
     error
   } = useLogging();
@@ -1039,13 +1027,13 @@ const BannerIcon = ({
     width: 16,
     fill: textPrimary
   }, IconProps));
-};
+}
 
-const SideBanner = ({
+function SideBanner({
   handleAction,
   handleClose,
   trigger
-}) => {
+}) {
   var _trigger$data, _container$current, _container$current2, _trigger$data2, _trigger$data3;
   const container = useRef(null);
   const isFullyClickable = getIsBannerFullyClickable(trigger);
@@ -1075,11 +1063,11 @@ const SideBanner = ({
     onClick: handleClose,
     style: styles.closeButton
   }));
-};
+}
 
-const Banner = ({
+function Banner({
   trigger
-}) => {
+}) {
   var _trigger$data3;
   const {
     removeActiveTrigger
@@ -1109,23 +1097,21 @@ const Banner = ({
     resetPad();
   };
   const props = {
-    handleClose: handleClose,
+    handleClose,
     handleAction: handleClickCallToAction,
-    trigger: trigger
+    trigger
   };
   const position = (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.position;
   if (position === 'left' || position === 'right') return React__default.createElement(SideBanner, Object.assign({}, props));
   return React__default.createElement(HorizontalBanner, Object.assign({}, props));
-};
+}
 const TriggerBanner = ({
   trigger
-}) => {
-  return ReactDOM.createPortal(React__default.createElement(Banner, {
-    trigger: trigger
-  }), document.body);
-};
+}) => ReactDOM.createPortal(React__default.createElement(Banner, {
+  trigger: trigger
+}), document.body);
 
-const randomHash = 'f' + v4().split('-')[0];
+const randomHash = `f${v4().split('-')[0]}`;
 const prependClass = className => `f${randomHash}-${className}`;
 const getIsModalFullyClickable = ({
   trigger
@@ -1203,19 +1189,18 @@ const buildTextWithPotentiallyCountdown = text => {
       text1,
       text2
     };
-  } else {
-    return {
-      text: text1
-    };
   }
+  return {
+    text: text1
+  };
 };
 
 const cnmFormPrefix = 'cnm-form';
-const CnMForm = props => {
+function CnMForm(props) {
   return React__default.createElement("form", Object.assign({}, props, {
     id: `${cnmFormPrefix}-${props.id}`
   }));
-};
+}
 
 const useDataCaptureMutation = () => {
   const {
@@ -1229,18 +1214,16 @@ const useDataCaptureMutation = () => {
     visitor
   } = useVisitor();
   const collectorCallback = useCollectorCallback();
-  return useMutation(data => {
-    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id) + '/form', {
-      ...data,
-      appId
-    }).then(response => {
-      log('Trigger API response', response);
-      return response;
-    }).catch(err => {
-      error('Trigger API error', err);
-      return err;
-    });
-  }, {
+  return useMutation(data => request.post(`${hostname}/collector/${visitor === null || visitor === void 0 ? void 0 : visitor.id}/form`, {
+    ...data,
+    appId
+  }).then(response => {
+    log('Trigger API response', response);
+    return response;
+  }).catch(err => {
+    error('Trigger API error', err);
+    return err;
+  }), {
     onSuccess: collectorCallback
   });
 };
@@ -1333,10 +1316,10 @@ const getOuterLayer = ({
     transform: 'translateY(-50%)'
   };
 };
-const DataCaptureModal = ({
+function DataCaptureModal({
   trigger
-}) => {
-  var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+}) {
+  var _trigger$data3, _trigger$data4, _trigger$data5;
   const [error, setError] = React__default.useState('');
   const [retainedHeight, setRetainedHeight] = React__default.useState(0);
   const {
@@ -1387,9 +1370,7 @@ const DataCaptureModal = ({
     setError('');
     const entries = getFormEntries(e.target, {});
     trackEvent('user_submitted_data_capture', trigger);
-    const haveAllRequiredFieldsBeenSubmitted = fields.every(field => {
-      return e.target[field.name].value;
-    });
+    const haveAllRequiredFieldsBeenSubmitted = fields.every(field => e.target[field.name].value);
     if (!haveAllRequiredFieldsBeenSubmitted) setError('Please make sure all required fields are filled in.');
     log('DataCaptureModal', 'handleSubmit', 'submit', entries);
     submit({
@@ -1401,9 +1382,9 @@ const DataCaptureModal = ({
     backgroundPrimary,
     textPrimary
   } = useBrandColors();
-  const Wrapper = ({
+  function Wrapper({
     children
-  }) => {
+  }) {
     var _trigger$data;
     return React__default.createElement("div", {
       style: getOuterLayer({
@@ -1442,8 +1423,11 @@ const DataCaptureModal = ({
         padding: '2rem'
       }
     }, children)));
-  };
-  if (isSubmissionSuccess) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
+  }
+  if (isSubmissionSuccess) {
+    var _trigger$data2;
+    return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
+  }
   return React__default.createElement(Wrapper, null, React__default.createElement("h1", {
     style: {
       fontSize: '1.5rem',
@@ -1496,7 +1480,7 @@ const DataCaptureModal = ({
       textTransform: 'uppercase'
     },
     disabled: isButtonDisaled,
-    type: 'submit'
+    type: "submit"
   }, isButtonDisaled ? '...' : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)), error && React__default.createElement("p", {
     style: {
       fontSize: '0.9rem',
@@ -1505,14 +1489,12 @@ const DataCaptureModal = ({
       color: '#aa2f2f'
     }
   }, error));
-};
+}
 var DataCaptureModal$1 = memo(({
   trigger
-}) => {
-  return ReactDOM.createPortal(React__default.createElement(DataCaptureModal, {
-    trigger: trigger
-  }), document.body);
-});
+}) => ReactDOM.createPortal(React__default.createElement(DataCaptureModal, {
+  trigger: trigger
+}), document.body));
 
 const useHostname = () => {
   var _window, _window$location;
@@ -1533,49 +1515,47 @@ const useCollectorMutation = () => {
   } = useVisitor();
   const requestHost = useHostname();
   const collectorCallback = useCollectorCallback();
-  return useMutation(data => {
-    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), {
-      ...data,
-      appId,
-      visitor,
-      sessionId: session === null || session === void 0 ? void 0 : session.id,
-      hostname: requestHost,
-      device: deviceInfo
-    }).then(response => {
-      log('Collector API response', response);
-      return response;
-    }).catch(err => {
-      error('Collector API error', err);
-      return err;
-    });
-  }, {
+  return useMutation(data => request.post(`${hostname}/collector/${visitor === null || visitor === void 0 ? void 0 : visitor.id}`, {
+    ...data,
+    appId,
+    visitor,
+    sessionId: session === null || session === void 0 ? void 0 : session.id,
+    hostname: requestHost,
+    device: deviceInfo
+  }).then(response => {
+    log('Collector API response', response);
+    return response;
+  }).catch(err => {
+    error('Collector API error', err);
+    return err;
+  }), {
     onSuccess: collectorCallback
   });
 };
 
 const fontSize = '2em';
 const cardFontScaleFactor = 1.5;
-const AnimatedCard = ({
+function AnimatedCard({
   animation,
   digit
-}) => {
+}) {
   return React__default.createElement("div", {
     className: `flipCard ${animation}`
   }, React__default.createElement("span", null, digit));
-};
-const StaticCard = ({
+}
+function StaticCard({
   position,
   digit
-}) => {
+}) {
   return React__default.createElement("div", {
     className: position
   }, React__default.createElement("span", null, digit));
-};
-const FlipUnitContainer = ({
+}
+function FlipUnitContainer({
   digit,
   shuffle,
   unit
-}) => {
+}) {
   let currentDigit = digit;
   let previousDigit = digit + 1;
   if (unit !== 'hours') {
@@ -1594,12 +1574,12 @@ const FlipUnitContainer = ({
   const animation1 = shuffle ? 'fold' : 'unfold';
   const animation2 = !shuffle ? 'fold' : 'unfold';
   return React__default.createElement("div", {
-    className: 'flipUnitContainer'
+    className: "flipUnitContainer"
   }, React__default.createElement(StaticCard, {
-    position: 'upperCard',
+    position: "upperCard",
     digit: currentDigit
   }), React__default.createElement(StaticCard, {
-    position: 'lowerCard',
+    position: "lowerCard",
     digit: previousDigit
   }), React__default.createElement(AnimatedCard, {
     digit: digit1,
@@ -1608,7 +1588,7 @@ const FlipUnitContainer = ({
     digit: digit2,
     animation: animation2
   }));
-};
+}
 class FlipClock extends React__default.Component {
   constructor(props) {
     super(props);
@@ -1870,50 +1850,54 @@ class FlipClock extends React__default.Component {
     const {
       textPrimary
     } = this.props.colorConfig;
-    const Separator = () => React__default.createElement("h1", {
-      style: {
-        color: textPrimary
-      }
-    }, ":");
+    function Separator() {
+      return React__default.createElement("h1", {
+        style: {
+          color: textPrimary
+        }
+      }, ":");
+    }
     return React__default.createElement("div", {
-      className: 'flipClock'
+      className: "flipClock"
     }, React__default.createElement(FlipUnitContainer, {
-      unit: 'days',
+      unit: "days",
       digit: days,
       shuffle: daysShuffle
     }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
-      unit: 'hours',
+      unit: "hours",
       digit: hours,
       shuffle: hoursShuffle
     }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
-      unit: 'minutes',
+      unit: "minutes",
       digit: minutes,
       shuffle: minutesShuffle
     }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
-      unit: 'seconds',
+      unit: "seconds",
       digit: seconds,
       shuffle: secondsShuffle
     }));
   }
 }
-const CountdownFlipClock = props => {
+function CountdownFlipClock(props) {
   const colors = useBrandColors();
   return React__default.createElement(FlipClock, Object.assign({}, props, {
     colorConfig: colors
   }));
-};
+}
 
-const Header = ({
+function Header({
   trigger
-}) => {
+}) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
   const interpolate = getInterpolate(trigger.data || {}, true);
   const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
-  const StdHeader = ({
+  function StdHeader({
     text
-  }) => React__default.createElement("h1", {
-    className: prependClass('main-text')
-  }, interpolate(text || ''));
+  }) {
+    return React__default.createElement("h1", {
+      className: prependClass('main-text')
+    }, interpolate(text || ''));
+  }
   const texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading) || '');
   if (!countdownEndTime) return React__default.createElement(StdHeader, {
     text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading
@@ -1933,20 +1917,22 @@ const Header = ({
   })), texts.text2 && React__default.createElement(StdHeader, {
     text: texts.text2
   }));
-};
+}
 var Header$1 = memo(Header);
 
-const Paragraph = ({
+function Paragraph({
   trigger
-}) => {
+}) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
   const countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
   const interpolate = getInterpolate(trigger.data || {}, true);
-  const StdParagraph = ({
+  function StdParagraph({
     text
-  }) => React__default.createElement("p", {
-    className: prependClass('sub-text')
-  }, interpolate(text || ''));
+  }) {
+    return React__default.createElement("p", {
+      className: prependClass('sub-text')
+    }, interpolate(text || ''));
+  }
   const texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.paragraph) || '');
   if (!countdownEndTime) return React__default.createElement(StdParagraph, {
     text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph
@@ -1966,14 +1952,14 @@ const Paragraph = ({
   })), texts.text2 && React__default.createElement(StdParagraph, {
     text: texts.text2
   }));
-};
+}
 var Paragraph$1 = memo(Paragraph);
 
-const StandardModal = ({
+function StandardModal({
   trigger,
   handleClickCallToAction,
   handleCloseModal
-}) => {
+}) {
   var _trigger$data, _trigger$data2, _trigger$data3;
   const {
     error
@@ -2001,8 +1987,7 @@ const StandardModal = ({
     trigger,
     skip: !stylesLoaded || isImageBrokenDontShowModal
   });
-  const appendResponsiveBehaviour = React__default.useCallback(() => {
-    return isMobile ? `` : `
+  const appendResponsiveBehaviour = React__default.useCallback(() => isMobile ? '' : `
 
 @media screen and (max-width: 1400px) {
   .${prependClass('modal')} {
@@ -2037,8 +2022,7 @@ const StandardModal = ({
   }
 }
 
-`;
-  }, [height, width, imageURL, isMobile]);
+`, [height, width, imageURL, isMobile]);
   useEffect(() => {
     const cssToApply = `
     :root {
@@ -2074,7 +2058,7 @@ const StandardModal = ({
     }
     
     .${prependClass('modal')} {
-      ${isModalFullyClickable ? 'cursor: pointer;' : ``}
+      ${isModalFullyClickable ? 'cursor: pointer;' : ''}
       height: ${height}px;
       width: ${width}px;
       display: flex;
@@ -2259,11 +2243,11 @@ const StandardModal = ({
       padding: '0.3rem 1rem'
     }
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.buttonText))))));
-};
+}
 
-const Modal = ({
+function Modal({
   trigger
-}) => {
+}) {
   const {
     removeActiveTrigger
   } = useEntireStore();
@@ -2308,19 +2292,17 @@ const Modal = ({
     (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_self');
   };
   const modalProps = {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
+    trigger,
+    handleClickCallToAction,
+    handleCloseModal
   };
   return React__default.createElement(StandardModal, Object.assign({}, modalProps));
-};
+}
 const TriggerModal = ({
   trigger
-}) => {
-  return ReactDOM.createPortal(React__default.createElement(Modal, {
-    trigger: trigger
-  }), document.body);
-};
+}) => ReactDOM.createPortal(React__default.createElement(Modal, {
+  trigger: trigger
+}), document.body);
 
 const baseUrl = 'https://bookings-bff.starship-staging.com';
 const makeFullUrl = (resource, params = {}) => {
@@ -2333,14 +2315,14 @@ const makeFullUrl = (resource, params = {}) => {
   }
   return `${fullUri}?${new URLSearchParams(params).toString()}`;
 };
-const Button = ({
+function Button({
   children,
   className,
   onClick,
   disabled,
-  colour: _colour = 'primary'
-}) => {
-  let builtButtonClasses = `btn step-button bg-${_colour} border-${_colour} text-white hover:bg-${_colour}/80 disabled:text-${_colour}/50 disabled:border-${_colour}/50` + (className ? ' ' + className : '');
+  colour = 'primary'
+}) {
+  let builtButtonClasses = `btn step-button bg-${colour} border-${colour} text-white hover:bg-${colour}/80 disabled:text-${colour}/50 disabled:border-${colour}/50${className ? ` ${className}` : ''}`;
   if (disabled) {
     builtButtonClasses += ' disabled';
   }
@@ -2349,15 +2331,15 @@ const Button = ({
     className: builtButtonClasses,
     onClick: onClick
   }, children);
-};
-const Voucher = ({
+}
+function Voucher({
   details
-}) => {
+}) {
   return createElement("div", null, createElement("h3", null, "Terms of Voucher"), createElement("p", {
-    className: 'text-sm'
+    className: "text-sm"
   }, details.termsAndConditions));
-};
-const TriggerInverse = ({}) => {
+}
+function TriggerInverse({}) {
   const landingPage = {};
   const form = {};
   const location = {};
@@ -2427,23 +2409,23 @@ const TriggerInverse = ({}) => {
   }
   if (state.complete === true) {
     return createElement("div", {
-      className: 'container'
+      className: "container"
     }, createElement("h2", null, "Voucher Sent!"), createElement("p", {
-      className: 'text-md'
+      className: "text-md"
     }, "Good news! We've sent your voucher to the email provided!"), state.voucher && createElement("div", {
-      className: 'col-12 mt-3'
+      className: "col-12 mt-3"
     }, createElement(Voucher, {
       details: state.voucher
     })));
   }
   if (state.responseStatusCode === 409) {
     return createElement("div", {
-      className: 'container'
+      className: "container"
     }, createElement("h2", {
-      className: 'mt-3'
+      className: "mt-3"
     }, "Uh-oh!"), createElement("p", null, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\u00A0", createElement("a", {
-      href: '/help',
-      className: 'underline font-serif tracking-wide',
+      href: "/help",
+      className: "underline font-serif tracking-wide",
       onClick: () => setOpen(false)
     }, "contact us")));
   }
@@ -2458,78 +2440,78 @@ const TriggerInverse = ({}) => {
       zIndex: 9999
     }
   }, createElement("main", {
-    className: 'flex-grow flex flex-col justify-center container relative'
+    className: "flex-grow flex flex-col justify-center container relative"
   }, createElement("div", {
-    className: 'w-full'
+    className: "w-full"
   }, createElement("div", {
-    className: 'cms-content text-center md:text-left'
+    className: "cms-content text-center md:text-left"
   }, createElement("h2", null, "Get Your Voucher"), createElement("p", null, "To receive your voucher, we just need a few details from you."), createElement("h3", {
     className: `bar-title border-l-4 border-solid border-${landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour}`
   }, "Contact Info"), createElement("form", {
     onSubmit: handleSubmit(onSubmit)
   }, createElement("div", {
-    className: 'grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2'
+    className: "grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2"
   }, createElement("div", null, createElement("label", {
-    htmlFor: 'first_name'
+    htmlFor: "first_name"
   }, "First Name*"), createElement("input", Object.assign({}, register('firstName', {
     required: true,
     minLength: 2,
     maxLength: 30,
     validate: value => value.trim().length >= 2
   }), {
-    type: 'text',
-    className: 'form-input',
-    id: 'firstName'
+    type: "text",
+    className: "form-input",
+    id: "firstName"
   }))), createElement("div", null, createElement("label", {
-    htmlFor: 'last_name'
+    htmlFor: "last_name"
   }, "Last Name*"), createElement("input", Object.assign({}, register('lastName', {
     required: true,
     minLength: 2,
     maxLength: 30,
     validate: value => value.trim().length >= 2
   }), {
-    type: 'text',
-    className: 'form-input',
-    id: 'lastName'
+    type: "text",
+    className: "form-input",
+    id: "lastName"
   }))), createElement("div", null, createElement("label", {
-    htmlFor: 'email'
+    htmlFor: "email"
   }, "Email*"), createElement("input", Object.assign({}, register('emailAddress', {
     required: true
   }), {
-    type: 'email',
-    className: 'form-input',
-    id: 'email'
+    type: "email",
+    className: "form-input",
+    id: "email"
   })))), createElement("div", null, createElement("p", null, "* Required Field")), createElement("div", {
-    className: 'flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start'
+    className: "flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start"
   }, createElement("div", {
-    className: 'form-check'
+    className: "form-check"
   }, createElement("input", Object.assign({
-    type: 'checkbox'
+    type: "checkbox"
   }, register('terms', {
     required: true
   }), {
-    className: 'form-check-input',
-    id: 'terms'
+    className: "form-check-input",
+    id: "terms"
   })), ' ', createElement("label", {
-    htmlFor: 'terms',
-    className: 'form-check-label'
+    htmlFor: "terms",
+    className: "form-check-label"
   }, "I confirm that I have read & agreed with the", ' ', createElement("a", {
     href: landingPage === null || landingPage === void 0 ? void 0 : landingPage.privacyPolicy,
-    target: '_blank',
-    rel: 'noreferrer'
+    target: "_blank",
+    rel: "noreferrer"
   }, "Privacy Policy"), "*")), createElement(Button, {
-    className: 'btn mt-2 md:mt-0',
-    type: 'submit',
+    className: "btn mt-2 md:mt-0",
+    type: "submit",
     colour: landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour,
     disabled: state.busy || isSubmitting
   }, isSubmitting || state.busy ? 'Sending Voucher...' : 'Get My Voucher')), state.error && state.responseStatusCode !== 409 && createElement("div", {
     className: `alert mt-5 bg-${landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour}/20`
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
-};
+}
 
-const Youtube = ({
+function Youtube({
   trigger
-}) => {
+}) {
   var _trigger$brand, _trigger$brand2, _trigger$brand3, _trigger$brand4, _trigger$data;
   const [open, setOpen] = useState(true);
   if (!open) {
@@ -2547,7 +2529,7 @@ const Youtube = ({
     }
   }, React__default.createElement("div", {
     style: {
-      background: "#fff url('" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$brand = trigger.brand) === null || _trigger$brand === void 0 ? void 0 : _trigger$brand.backgroundImage) + "') no-repeat center center",
+      background: `#fff url('${trigger === null || trigger === void 0 ? void 0 : (_trigger$brand = trigger.brand) === null || _trigger$brand === void 0 ? void 0 : _trigger$brand.backgroundImage}') no-repeat center center`,
       position: 'absolute',
       top: '50%',
       left: '50%',
@@ -2583,21 +2565,19 @@ const Youtube = ({
     }
   }, "\u00D7"), React__default.createElement("iframe", {
     src: trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.url,
-    allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
+    allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
     style: {
       width: '500px',
       height: '260px',
       marginTop: '1rem'
     }
   }))));
-};
+}
 const TriggerYoutube = ({
   trigger
-}) => {
-  return ReactDOM.createPortal(React__default.createElement(Youtube, {
-    trigger: trigger
-  }), document.body);
-};
+}) => ReactDOM.createPortal(React__default.createElement(Youtube, {
+  trigger: trigger
+}), document.body);
 
 const clientHandlers = [{
   id: 'modal_v1',
@@ -2769,9 +2749,7 @@ const createPagetriggersSlice = (set, get) => ({
       addDisplayedTrigger(invokableTrigger);
     });
   },
-  getCombinedTriggers: () => {
-    return [...get().pageTriggers, ...get().visibleTriggersIssuedByIncomplete];
-  },
+  getCombinedTriggers: () => [...get().pageTriggers, ...get().visibleTriggersIssuedByIncomplete],
   getIsBehaviourVisible: type => {
     const {
       displayedTriggersIds,
@@ -2977,7 +2955,7 @@ const useTrackingInit = () => {
         initiated: true
       }
     }));
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    log(`MixpanelProvider: registering visitor ${visitor.id} to mixpanel`);
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id, set, initiated, log, registerUserData]);
   useEffect(() => {
@@ -3010,7 +2988,7 @@ const useRunOnPathChange = (func, config) => {
     if (config !== null && config !== void 0 && config.skip) return;
     if (!location.href) return;
     if (location.href === lastCollectedHref) return;
-    log('useRunOnPathChange: running' + (config === null || config === void 0 ? void 0 : config.name));
+    log(`useRunOnPathChange: running${config === null || config === void 0 ? void 0 : config.name}`);
     setLastCollectedHref(location.href);
     func();
   }, [func, config, lastCollectedHref]);
@@ -3132,9 +3110,7 @@ const getVisitorId = () => {
   const vid = urlParams.get('v_id');
   return vid;
 };
-const hasVisitorIDInURL = () => {
-  return getVisitorId() !== null;
-};
+const hasVisitorIDInURL = () => getVisitorId() !== null;
 
 function useCollector() {
   const {
@@ -3197,7 +3173,6 @@ function useCollector() {
     }).then(response => {
       if (response.status === 204) {
         setIntently(true);
-        return;
       }
     }).catch(err => {
       error('failed to store collected data', err);
@@ -3243,21 +3218,13 @@ const validateSignalChain = signals => {
 const getFuncByOperator = (operator, compareWith) => {
   switch (operator) {
     case 'starts_with':
-      return comparison => {
-        return comparison.toLowerCase().startsWith(compareWith.toLowerCase());
-      };
+      return comparison => comparison.toLowerCase().startsWith(compareWith.toLowerCase());
     case 'contains':
-      return comparison => {
-        return comparison.toLowerCase().includes(compareWith.toLowerCase());
-      };
+      return comparison => comparison.toLowerCase().includes(compareWith.toLowerCase());
     case 'ends_with':
-      return comparison => {
-        return comparison.toLowerCase().endsWith(compareWith.toLowerCase());
-      };
+      return comparison => comparison.toLowerCase().endsWith(compareWith.toLowerCase());
     case 'eq':
-      return comparison => {
-        return comparison.toLowerCase() === compareWith.toLowerCase();
-      };
+      return comparison => comparison.toLowerCase() === compareWith.toLowerCase();
     default:
       return () => {
         console.error('getOperator: unknown operator', operator);
@@ -3644,7 +3611,7 @@ const useExitIntentDelay = (delay = 0) => {
   };
 };
 
-const Activation = () => {
+function Activation() {
   const {
     displayedTriggersIds,
     handlers,
@@ -3660,7 +3627,7 @@ const Activation = () => {
   if (!displayedTriggersIds) return null;
   const activeTriggers = combinedTriggers.filter(trigger => displayedTriggersIds.includes(trigger.id));
   if (!activeTriggers) {
-    error(`Collector - TriggerComponent: No trigger found for displayedTriggersIds`, displayedTriggersIds);
+    error('Collector - TriggerComponent: No trigger found for displayedTriggersIds', displayedTriggersIds);
     return null;
   }
   log('Collector - TriggerComponent: available handlers include: ', handlers);
@@ -3691,7 +3658,7 @@ const Activation = () => {
     return null;
   });
   return React__default.createElement(React__default.Fragment, null, visibleComponents);
-};
+}
 var Activation$1 = React__default.memo(Activation);
 
 function Triggers() {
@@ -3718,7 +3685,7 @@ function Triggers() {
       booted
     }
   } = useEntireStore();
-  const imagePreloadingComplete = imagesPreloaded === true || imagesPreloaded === "skip";
+  const imagePreloadingComplete = imagesPreloaded === true || imagesPreloaded === 'skip';
   const altIdleDelay = (config === null || config === void 0 ? void 0 : (_config$trigger = config.trigger) === null || _config$trigger === void 0 ? void 0 : _config$trigger.userIdleThresholdSecs) * 1000;
   const combinedTriggers = getCombinedTriggers();
   const {
@@ -3731,25 +3698,25 @@ function Triggers() {
     resetState: reRegisterExitIntent
   } = useExitIntent({
     cookie: {
-      key: "_cm_exit",
+      key: '_cm_exit',
       daysToExpire: 0
     }
   });
   useEffect(() => {
     if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [imagePreloadingComplete, visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
   useEffect(() => {
     if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete, imagePreloadingComplete]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
     if (!imagePreloadingComplete) return;
-    log("Collector: attempting to fire idle time trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_IDLE_TIME");
+    log('Collector: attempting to fire idle time trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
     startCooldown();
   }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown, imagePreloadingComplete]);
   const {
@@ -3757,34 +3724,34 @@ function Triggers() {
   } = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.trigger.displayTriggerAfterSecs) * 1000);
   const fireExitTrigger = React__default.useCallback(() => {
     if (!imagePreloadingComplete) {
-      log("Unable to launch exit intent, because not all images have loaded yet.");
-      log("Re-registering handler");
+      log('Unable to launch exit intent, because not all images have loaded yet.');
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
     if (!hasDelayPassed) {
       log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
-      log("Re-registering handler");
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
     if (!canNextTriggerOccur()) {
       log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
         I will attempt again when the same signal occurs after this passes.`);
-      log("Re-registering handler");
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
-    log("Collector: attempting to fire exit trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_EXIT_INTENT");
+    log('Collector: attempting to fire exit trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
   }, [imagePreloadingComplete, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   useEffect(() => {
     if (!imagePreloadingComplete) return;
     if (!exitIntentTriggers) return;
-    log("Collector: attempting to register exit trigger");
+    log('Collector: attempting to register exit trigger');
     registerHandler({
-      id: "clientTrigger",
+      id: 'clientTrigger',
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler, imagePreloadingComplete]);
@@ -3792,8 +3759,8 @@ function Triggers() {
     if (!imagePreloadingComplete) return;
     if (!pageLoadTriggers) return;
     if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
-    log("Collector: attempting to fire on-page-load trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_PAGE_LOAD", true);
+    log('Collector: attempting to fire on-page-load trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
   }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation, imagePreloadingComplete]);
   useEffect(() => {
     fireOnLoadTriggers();
@@ -3801,12 +3768,12 @@ function Triggers() {
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
     delay: initialDelay,
-    name: "fireOnLoadTriggers"
+    name: 'fireOnLoadTriggers'
   });
   return React__default.createElement(IdleTimerProvider, {
     timeout: idleTimeout || altIdleDelay,
     onPresenceChange: presence => {
-      log("presence changed", presence);
+      log('presence changed', presence);
     },
     onIdle: fireIdleTrigger
   }, React__default.createElement(Activation$1, null));

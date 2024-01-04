@@ -1,111 +1,106 @@
-import { useEffect, useState } from 'react'
-import { isMobile } from 'react-device-detect'
-import { v4 as uuidv4 } from 'uuid'
-import { Trigger } from '../../client/types'
-import { DataCaptureTrigger } from './Modal.types'
+import { useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { v4 as uuidv4 } from 'uuid';
+import { Trigger } from '../../client/types';
+import { DataCaptureTrigger } from './Modal.types';
 
-export const randomHash = 'f' + uuidv4().split('-')[0]
+export const randomHash = `f${uuidv4().split('-')[0]}`;
 
-export const prependClass = (className: string) => `f${randomHash}-${className}`
+export const prependClass = (className: string) => `f${randomHash}-${className}`;
 
 // if no button text provided, make the entire modal clickable and dont render the button
-export const getIsModalFullyClickable = ({ trigger }: { trigger: Trigger }) => {
-  return !trigger?.data?.buttonText
-}
+export const getIsModalFullyClickable = ({ trigger }: { trigger: Trigger }) => !trigger?.data?.buttonText;
 
 const getModalSizing = (img: HTMLImageElement) => {
-  const imageRealHeight = img.height
-  const imageRealWidth = img.width
+  const imageRealHeight = img.height;
+  const imageRealWidth = img.width;
 
-  const aspectRatio = imageRealWidth / imageRealHeight
+  const aspectRatio = imageRealWidth / imageRealHeight;
 
   // chose an arbitrary 5% side margins
-  const getMaxWidth = (num: number) =>
-    window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9
-  const getMaxHeight = (num: number) =>
-    window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9
+  const getMaxWidth = (num: number) => (window.innerWidth * 0.9 > num ? num : window.innerWidth * 0.9);
+  const getMaxHeight = (num: number) => (window.innerHeight * 0.9 > num ? num : window.innerHeight * 0.9);
 
   const deviceSizeLimits = isMobile
     ? // also somewhat arbitrary, based on historic assets for both device types
-      { height: getMaxHeight(1000), width: getMaxWidth(640) }
-    : { height: getMaxHeight(490), width: getMaxWidth(819) }
+    { height: getMaxHeight(1000), width: getMaxWidth(640) }
+    : { height: getMaxHeight(490), width: getMaxWidth(819) };
 
-  const widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width)
-  const heightToUse = widthToUse / aspectRatio
+  const widthToUse = Math.min(imageRealWidth, deviceSizeLimits.width);
+  const heightToUse = widthToUse / aspectRatio;
 
   return {
     height: heightToUse,
-    width: widthToUse
-  }
-}
+    width: widthToUse,
+  };
+};
 
 export const useModalDimensionsBasedOnImage = ({
-  imageURL
+  imageURL,
 }: {
   imageURL: string
 }) => {
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,
-    height: 0
-  })
+    height: 0,
+  });
 
   useEffect(() => {
-    const img = new Image()
-    img.src = imageURL
+    const img = new Image();
+    img.src = imageURL;
 
     // repeatedly attempt to get the bloody image size. Once it loads and we get a proper value,
     // remove the interval. No, image.onload() is not predictable enough to be considered
     const id = setInterval(() => {
-      const modalSize = getModalSizing(img)
+      const modalSize = getModalSizing(img);
 
       if (modalSize.height || modalSize.width) {
-        setImageDimensions(modalSize)
-        clearInterval(id)
+        setImageDimensions(modalSize);
+        clearInterval(id);
       }
-    }, 50)
+    }, 50);
 
     return () => {
-      clearInterval(id)
-    }
-  }, [imageURL])
+      clearInterval(id);
+    };
+  }, [imageURL]);
 
-  return { imageDimensions, setImageDimensions }
-}
+  return { imageDimensions, setImageDimensions };
+};
 
 export const isModalDataCaptureModal = (
-  trigger: any
+  trigger: any,
 ): trigger is DataCaptureTrigger => {
-  if (!trigger) return false
-  if (!trigger.data) return false
+  if (!trigger) return false;
+  if (!trigger.data) return false;
 
   // TODO: currently uses the presense of successText to determine if it's a data capture modal
   // if this becomes a new behaviours, we should address this
-  if (!trigger.data.successText) return false
+  if (!trigger.data.successText) return false;
 
-  return true
-}
+  return true;
+};
 
 export function splitSenseOfUrgencyText(text: string) {
-  const split = text.split(/\{\{\s*countdownEndTime\s*\}\}/i)
-  return split
+  const split = text.split(/\{\{\s*countdownEndTime\s*\}\}/i);
+  return split;
 }
 export const buildTextWithPotentiallyCountdown = (
-  text: string
+  text: string,
 ):
   | { text: string }
   | { text1: string; hasCountdown: boolean; text2?: string } => {
-  let hasCountdown = false
-  let text1 = ''
-  let text2 = ''
+  let hasCountdown = false;
+  let text1 = '';
+  let text2 = '';
 
-  const split = splitSenseOfUrgencyText(text)
-  text1 = split[0]
+  const split = splitSenseOfUrgencyText(text);
+  text1 = split[0];
 
   if (split.length > 1) {
-    text2 = split[1]
-    hasCountdown = true
-    return { hasCountdown, text1, text2 }
-  } else {
-    return { text: text1 }
+    text2 = split[1];
+    hasCountdown = true;
+    return { hasCountdown, text1, text2 };
   }
-}
+  return { text: text1 };
+};

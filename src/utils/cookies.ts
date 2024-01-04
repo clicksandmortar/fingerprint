@@ -1,3 +1,5 @@
+// The only file where we can do Cookies.{method} calls.
+/* eslint-disable no-restricted-properties */
 import Cookies, { CookieAttributes } from 'js-cookie';
 import { getCookieDomain } from '../visitors/bootstrap';
 
@@ -46,7 +48,6 @@ export const onCookieChanged = (
     const { cookie } = document;
     if (cookie !== lastCookie) {
       try {
-        // eslint-disable-next-line standard/no-callback-literal
         callback({ oldValue: lastCookie, newValue: cookie });
       } finally {
         lastCookie = cookie;

@@ -1,4 +1,4 @@
-import { useDifiStore } from '../beautifulSugar/store'
+import { useDifiStore } from '../beautifulSugar/store';
 
 export type Logging = {
   log: (...message: any) => void
@@ -10,31 +10,31 @@ export type Logging = {
 const disabledLogging: Logging = {
   // we don't want TS to error out when you pass a param here, but NOT using it
   // creates an unused var warning. So we use ts-expect-error to silence it
-  //@ts-expect-error no unused vars
+  // @ts-expect-error no unused vars
   log: (...message) => {},
-  //@ts-expect-error no unused vars
+  // @ts-expect-error no unused vars
   warn: (...message) => {},
-  //@ts-expect-error no unused vars
+  // @ts-expect-error no unused vars
   error: (...message) => {},
-  //@ts-expect-error no unused vars
-  info: (...message) => {}
-}
+  // @ts-expect-error no unused vars
+  info: (...message) => {},
+};
 
 const enabledLogging: Logging = {
   log: (...message: any) => console.log(...message),
   warn: (...message: any) => console.warn(...message),
   error: (...message: any) => console.error(...message),
-  info: (...message: any) => console.info(...message)
-}
+  info: (...message: any) => console.info(...message),
+};
 
 export const getLoggingContext = (isDebugMode?: boolean) => {
-  if (isDebugMode) return enabledLogging
+  if (isDebugMode) return enabledLogging;
 
-  return disabledLogging
-}
+  return disabledLogging;
+};
 
 export const useLogging = (): Logging => {
-  const isDebugMode = useDifiStore((s) => s.config.script.debugMode)
+  const isDebugMode = useDifiStore((s) => s.config.script.debugMode);
 
-  return getLoggingContext(isDebugMode)
-}
+  return getLoggingContext(isDebugMode);
+};

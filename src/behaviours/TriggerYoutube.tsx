@@ -1,16 +1,16 @@
-import React, { useState } from 'react'
-import { Trigger } from '../client/types'
-import ReactDOM from 'react-dom'
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
+import { Trigger } from '../client/types';
 
 type Props = {
   trigger: Trigger
 }
 
-const Youtube = ({ trigger }: Props) => {
-  const [open, setOpen] = useState(true)
+function Youtube({ trigger }: Props) {
+  const [open, setOpen] = useState(true);
 
   if (!open) {
-    return null
+    return null;
   }
 
   return (
@@ -22,15 +22,15 @@ const Youtube = ({ trigger }: Props) => {
         width: '100vw',
         height: '100vh',
         backgroundColor: 'rgba(0,0,0,0.5)',
-        zIndex: 9999
+        zIndex: 9999,
       }}
     >
       <div
         style={{
           background:
-            "#fff url('" +
-            trigger?.brand?.backgroundImage +
-            "') no-repeat center center",
+            `#fff url('${
+              trigger?.brand?.backgroundImage
+            }') no-repeat center center`,
           position: 'absolute',
           top: '50%',
           left: '50%',
@@ -40,7 +40,7 @@ const Youtube = ({ trigger }: Props) => {
           padding: 0,
           boxShadow: '0 0 1rem rgba(0,0,0,0.5)',
           border: '3px solid white',
-          zIndex: 9999
+          zIndex: 9999,
         }}
       >
         {/** Overlay div with semi transparent background */}
@@ -49,13 +49,13 @@ const Youtube = ({ trigger }: Props) => {
             backgroundColor: trigger?.brand?.overlayColor,
             maxWidth: '600px',
             padding: '2rem',
-            borderRadius: '0.5rem'
+            borderRadius: '0.5rem',
           }}
         >
           {/** Close button */}
           <button
             onClick={() => {
-              setOpen(false)
+              setOpen(false);
             }}
             style={{
               position: 'absolute',
@@ -66,22 +66,20 @@ const Youtube = ({ trigger }: Props) => {
               color: trigger?.brand?.primaryColor,
               border: 'none',
               borderRadius: '0.5rem',
-              padding: '0 1rem'
+              padding: '0 1rem',
             }}
           >
             &times;
           </button>
           <iframe
             src={trigger?.data?.url}
-            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             style={{ width: '500px', height: '260px', marginTop: '1rem' }}
           />
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export const TriggerYoutube = ({ trigger }: Props) => {
-  return ReactDOM.createPortal(<Youtube trigger={trigger} />, document.body)
-}
+export const TriggerYoutube = ({ trigger }: Props) => ReactDOM.createPortal(<Youtube trigger={trigger} />, document.body);

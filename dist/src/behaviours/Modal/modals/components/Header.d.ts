@@ -3,5 +3,6 @@ import { Trigger } from '../../../../client/types';
 declare type Props = {
     trigger: Trigger;
 };
-declare const _default: React.MemoExoticComponent<({ trigger }: Props) => React.JSX.Element>;
+declare function Header({ trigger }: Props): React.JSX.Element;
+declare const _default: React.MemoExoticComponent<typeof Header>;
 export default _default;

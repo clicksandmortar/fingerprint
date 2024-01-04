@@ -1,7 +1,7 @@
-import { StateCreator } from 'zustand'
-import { FingerprintProviderProps } from '../../context/FingerprintContext'
-import { DifiStore } from '../store'
-import { Get, Set } from '../types'
+import { StateCreator } from 'zustand';
+import { FingerprintProviderProps } from '../../context/FingerprintContext';
+import { DifiStore } from '../store';
+import { Get, Set } from '../types';
 
 export type MutualSlice = {
   set: Set
@@ -14,12 +14,12 @@ type DifiCombinedProps = FingerprintContextInterface &
 
 export const createMutualSlice: StateCreator<DifiStore, [], [], MutualSlice> = (
   set: Set,
-  get: Get
+  get: Get,
 ) => ({
   set,
   get,
-  difiProps: defaultFingerprintState
-})
+  difiProps: defaultFingerprintState,
+});
 
 export interface FingerprintContextInterface {
   appId: string
@@ -43,5 +43,5 @@ const defaultFingerprintState: FingerprintContextInterface = {
   // never gonna give you up never gonna let you down
   debug: false as never,
   defaultHandlers: [],
-  consentCallback: () => false
-}
+  consentCallback: () => false,
+};

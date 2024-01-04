@@ -7,5 +7,5 @@ export declare const iconList: Record<Icon, React.FC>;
 declare type Props = {
     icon: Icon;
 } & IconProps;
-export declare const Icon: ({ icon, ...props }: Props) => React.JSX.Element | null;
+export declare function Icon({ icon, ...props }: Props): React.JSX.Element | null;
 export {};

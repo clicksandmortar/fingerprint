@@ -64,7 +64,7 @@ var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
   var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
   return isCnMBookingDomain;
 };
-var _LEGACY_getBrand = function _LEGACY_getBrand() {
+function _LEGACY_getBrand() {
   if (typeof window === 'undefined') return null;
   if (TEMP_isCNMBrand()) return 'C&M';
   if (window.location.host.startsWith('localhost')) return 'C&M';
@@ -74,7 +74,7 @@ var _LEGACY_getBrand = function _LEGACY_getBrand() {
   if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
   if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
   return 'C&M';
-};
+}
 var haveBrandColorsBeenConfigured = function haveBrandColorsBeenConfigured(colors) {
   if (!colors) return false;
   if (typeof colors !== 'object') return false;
@@ -100,11 +100,13 @@ function getEnvVars() {
     default:
       isDev = false;
   }
-  if (isDev) return {
-    isDev: isDev,
-    FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
-    MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
-  };
+  if (isDev) {
+    return {
+      isDev: isDev,
+      FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-staging.com',
+      MIXPANEL_TOKEN: 'd122fa924e1ea97d6b98569440c65a95'
+    };
+  }
   return {
     isDev: isDev,
     FINGERPRINT_API_HOSTNAME: 'https://target-engine-api.starship-production.com',
@@ -188,7 +190,7 @@ var hostname = getEnvVars().FINGERPRINT_API_HOSTNAME;
 var request = {
   get: function (url, params) {
     try {
-      return Promise.resolve(fetch(url + '?' + new URLSearchParams(params), {
+      return Promise.resolve(fetch(url + "?" + new URLSearchParams(params), {
         method: 'GET',
         headers: headers
       }));
@@ -759,7 +761,7 @@ var closeButtonStyles = {
   display: 'grid',
   placeContent: 'center'
 };
-var CloseButton = function CloseButton(_ref) {
+function CloseButton(_ref) {
   var onClick = _ref.onClick,
     style = _ref.style;
   var buttonStyle = _extends({}, closeButtonStyles, style);
@@ -767,16 +769,16 @@ var CloseButton = function CloseButton(_ref) {
     style: buttonStyle,
     onClick: onClick
   }, React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    width: '16',
-    height: '16',
-    viewBox: '0 0 16 16'
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "16",
+    height: "16",
+    viewBox: "0 0 16 16"
   }, React__default.createElement("path", {
     fill: buttonStyle.color || buttonStyle.fill,
-    fillRule: 'evenodd',
-    d: 'M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z'
+    fillRule: "evenodd",
+    d: "M8.707 8l3.647-3.646a.5.5 0 0 0-.708-.708L8 7.293 4.354 3.646a.5.5 0 1 0-.708.708L7.293 8l-3.647 3.646a.5.5 0 0 0 .708.708L8 8.707l3.646 3.647a.5.5 0 0 0 .708-.708L8.707 8z"
   })));
-};
+}
 
 var getDiffInDHMS = function getDiffInDHMS(targetDate, initialDate) {
   if (initialDate === void 0) {
@@ -823,7 +825,7 @@ function formatTimeStamp(targetDate) {
     return parts[0];
   }
   var lastPart = parts.pop();
-  var formattedDuration = parts.join(' ') + (" and " + lastPart);
+  var formattedDuration = parts.join(' ') + " and " + lastPart;
   return formattedDuration;
 }
 
@@ -1016,7 +1018,7 @@ var useBannerContainerStyles = function useBannerContainerStyles(_ref) {
   }
 };
 
-var HorizontalBanner = function HorizontalBanner(_ref) {
+function HorizontalBanner(_ref) {
   var _container$current, _container$current2, _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
   var handleAction = _ref.handleAction,
     handleClose = _ref.handleClose,
@@ -1070,45 +1072,45 @@ var HorizontalBanner = function HorizontalBanner(_ref) {
     onClick: handleClose,
     style: styles.closeButton
   }));
-};
+}
 
 var _excluded$1 = ["icon"];
-var Ticket = function Ticket(props) {
+function Ticket(props) {
   return React__default.createElement("svg", Object.assign({
-    xmlns: 'http://www.w3.org/2000/svg',
-    height: '16',
-    width: '18',
-    viewBox: '0 0 576 512'
+    xmlns: "http://www.w3.org/2000/svg",
+    height: "16",
+    width: "18",
+    viewBox: "0 0 576 512"
   }, props), React__default.createElement("path", {
-    d: 'M64 64C28.7 64 0 92.7 0 128v64c0 8.8 7.4 15.7 15.7 18.6C34.5 217.1 48 235 48 256s-13.5 38.9-32.3 45.4C7.4 304.3 0 311.2 0 320v64c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V320c0-8.8-7.4-15.7-15.7-18.6C541.5 294.9 528 277 528 256s13.5-38.9 32.3-45.4c8.3-2.9 15.7-9.8 15.7-18.6V128c0-35.3-28.7-64-64-64H64zm64 112l0 160c0 8.8 7.2 16 16 16H432c8.8 0 16-7.2 16-16V176c0-8.8-7.2-16-16-16H144c-8.8 0-16 7.2-16 16zM96 160c0-17.7 14.3-32 32-32H448c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V160z'
+    d: "M64 64C28.7 64 0 92.7 0 128v64c0 8.8 7.4 15.7 15.7 18.6C34.5 217.1 48 235 48 256s-13.5 38.9-32.3 45.4C7.4 304.3 0 311.2 0 320v64c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V320c0-8.8-7.4-15.7-15.7-18.6C541.5 294.9 528 277 528 256s13.5-38.9 32.3-45.4c8.3-2.9 15.7-9.8 15.7-18.6V128c0-35.3-28.7-64-64-64H64zm64 112l0 160c0 8.8 7.2 16 16 16H432c8.8 0 16-7.2 16-16V176c0-8.8-7.2-16-16-16H144c-8.8 0-16 7.2-16 16zM96 160c0-17.7 14.3-32 32-32H448c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V160z"
   }));
-};
-var Exclamation = function Exclamation(props) {
+}
+function Exclamation(props) {
   return React__default.createElement("svg", Object.assign({
-    xmlns: 'http://www.w3.org/2000/svg',
-    height: '16',
-    width: '16',
-    viewBox: '0 0 512 512'
+    xmlns: "http://www.w3.org/2000/svg",
+    height: "16",
+    width: "16",
+    viewBox: "0 0 512 512"
   }, props), React__default.createElement("path", {
-    d: 'M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z'
+    d: "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"
   }));
-};
-var Heart = function Heart(props) {
+}
+function Heart(props) {
   return React__default.createElement("svg", Object.assign({
-    xmlns: 'http://www.w3.org/2000/svg',
-    height: '16',
-    width: '16',
-    viewBox: '0 0 512 512'
+    xmlns: "http://www.w3.org/2000/svg",
+    height: "16",
+    width: "16",
+    viewBox: "0 0 512 512"
   }, props), React__default.createElement("path", {
-    d: 'M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z'
+    d: "M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"
   }));
-};
+}
 var iconList = {
   exclamation: Exclamation,
   ticket: Ticket,
   heart: Heart
 };
-var Icon = function Icon(_ref) {
+function Icon(_ref) {
   var icon = _ref.icon,
     props = _objectWithoutPropertiesLoose(_ref, _excluded$1);
   var _useLogging = useLogging(),
@@ -1120,9 +1122,9 @@ var Icon = function Icon(_ref) {
     return null;
   }
   return React__default.createElement(IconComponent, Object.assign({}, props));
-};
+}
 
-var BannerIcon = function BannerIcon(_ref) {
+function BannerIcon(_ref) {
   var iconName = _ref.iconName,
     IconProps = _ref.IconProps;
   var _useLogging = useLogging(),
@@ -1139,9 +1141,9 @@ var BannerIcon = function BannerIcon(_ref) {
     width: 16,
     fill: textPrimary
   }, IconProps));
-};
+}
 
-var SideBanner = function SideBanner(_ref) {
+function SideBanner(_ref) {
   var _trigger$data, _container$current, _container$current2, _trigger$data2, _trigger$data3;
   var handleAction = _ref.handleAction,
     handleClose = _ref.handleClose,
@@ -1174,9 +1176,9 @@ var SideBanner = function SideBanner(_ref) {
     onClick: handleClose,
     style: styles.closeButton
   }));
-};
+}
 
-var Banner = function Banner(_ref) {
+function Banner(_ref) {
   var _trigger$data3;
   var trigger = _ref.trigger;
   var _useEntireStore = useEntireStore(),
@@ -1214,7 +1216,7 @@ var Banner = function Banner(_ref) {
   var position = (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.position;
   if (position === 'left' || position === 'right') return React__default.createElement(SideBanner, Object.assign({}, props));
   return React__default.createElement(HorizontalBanner, Object.assign({}, props));
-};
+}
 var TriggerBanner = function TriggerBanner(_ref2) {
   var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Banner, {
@@ -1222,7 +1224,7 @@ var TriggerBanner = function TriggerBanner(_ref2) {
   }), document.body);
 };
 
-var randomHash = 'f' + uuid.v4().split('-')[0];
+var randomHash = "f" + uuid.v4().split('-')[0];
 var prependClass = function prependClass(className) {
   return "f" + randomHash + "-" + className;
 };
@@ -1306,19 +1308,18 @@ var buildTextWithPotentiallyCountdown = function buildTextWithPotentiallyCountdo
       text1: text1,
       text2: text2
     };
-  } else {
-    return {
-      text: text1
-    };
   }
+  return {
+    text: text1
+  };
 };
 
 var cnmFormPrefix = 'cnm-form';
-var CnMForm = function CnMForm(props) {
+function CnMForm(props) {
   return React__default.createElement("form", Object.assign({}, props, {
     id: cnmFormPrefix + "-" + props.id
   }));
-};
+}
 
 var useDataCaptureMutation = function useDataCaptureMutation() {
   var _useLogging = useLogging(),
@@ -1332,7 +1333,7 @@ var useDataCaptureMutation = function useDataCaptureMutation() {
     visitor = _useVisitor.visitor;
   var collectorCallback = useCollectorCallback();
   return reactQuery.useMutation(function (data) {
-    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id) + '/form', _extends({}, data, {
+    return request.post(hostname + "/collector/" + (visitor === null || visitor === void 0 ? void 0 : visitor.id) + "/form", _extends({}, data, {
       appId: appId
     })).then(function (response) {
       log('Trigger API response', response);
@@ -1434,8 +1435,8 @@ var getOuterLayer = function getOuterLayer(_ref) {
     transform: 'translateY(-50%)'
   };
 };
-var DataCaptureModal = function DataCaptureModal(_ref2) {
-  var _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
+function DataCaptureModal(_ref2) {
+  var _trigger$data3, _trigger$data4, _trigger$data5;
   var trigger = _ref2.trigger;
   var _React$useState = React__default.useState(''),
     error = _React$useState[0],
@@ -1501,7 +1502,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
   var _useBrandColors = useBrandColors(),
     backgroundPrimary = _useBrandColors.backgroundPrimary,
     textPrimary = _useBrandColors.textPrimary;
-  var Wrapper = function Wrapper(_ref3) {
+  function Wrapper(_ref3) {
     var _trigger$data;
     var children = _ref3.children;
     return React__default.createElement("div", {
@@ -1541,8 +1542,11 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
         padding: '2rem'
       }
     }, children)));
-  };
-  if (isSubmissionSuccess) return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
+  }
+  if (isSubmissionSuccess) {
+    var _trigger$data2;
+    return React__default.createElement(Wrapper, null, React__default.createElement("h1", null, (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.successText));
+  }
   return React__default.createElement(Wrapper, null, React__default.createElement("h1", {
     style: {
       fontSize: '1.5rem',
@@ -1597,7 +1601,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
       textTransform: 'uppercase'
     },
     disabled: isButtonDisaled,
-    type: 'submit'
+    type: "submit"
   }, isButtonDisaled ? '...' : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)), error && React__default.createElement("p", {
     style: {
       fontSize: '0.9rem',
@@ -1606,7 +1610,7 @@ var DataCaptureModal = function DataCaptureModal(_ref2) {
       color: '#aa2f2f'
     }
   }, error));
-};
+}
 var DataCaptureModal$1 = React.memo(function (_ref4) {
   var trigger = _ref4.trigger;
   return ReactDOM.createPortal(React__default.createElement(DataCaptureModal, {
@@ -1633,7 +1637,7 @@ var useCollectorMutation = function useCollectorMutation() {
   var requestHost = useHostname();
   var collectorCallback = useCollectorCallback();
   return reactQuery.useMutation(function (data) {
-    return request.post(hostname + '/collector/' + (visitor === null || visitor === void 0 ? void 0 : visitor.id), _extends({}, data, {
+    return request.post(hostname + "/collector/" + (visitor === null || visitor === void 0 ? void 0 : visitor.id), _extends({}, data, {
       appId: appId,
       visitor: visitor,
       sessionId: session === null || session === void 0 ? void 0 : session.id,
@@ -1653,21 +1657,21 @@ var useCollectorMutation = function useCollectorMutation() {
 
 var fontSize = '2em';
 var cardFontScaleFactor = 1.5;
-var AnimatedCard = function AnimatedCard(_ref) {
+function AnimatedCard(_ref) {
   var animation = _ref.animation,
     digit = _ref.digit;
   return React__default.createElement("div", {
     className: "flipCard " + animation
   }, React__default.createElement("span", null, digit));
-};
-var StaticCard = function StaticCard(_ref2) {
+}
+function StaticCard(_ref2) {
   var position = _ref2.position,
     digit = _ref2.digit;
   return React__default.createElement("div", {
     className: position
   }, React__default.createElement("span", null, digit));
-};
-var FlipUnitContainer = function FlipUnitContainer(_ref3) {
+}
+function FlipUnitContainer(_ref3) {
   var digit = _ref3.digit,
     shuffle = _ref3.shuffle,
     unit = _ref3.unit;
@@ -1689,12 +1693,12 @@ var FlipUnitContainer = function FlipUnitContainer(_ref3) {
   var animation1 = shuffle ? 'fold' : 'unfold';
   var animation2 = !shuffle ? 'fold' : 'unfold';
   return React__default.createElement("div", {
-    className: 'flipUnitContainer'
+    className: "flipUnitContainer"
   }, React__default.createElement(StaticCard, {
-    position: 'upperCard',
+    position: "upperCard",
     digit: currentDigit
   }), React__default.createElement(StaticCard, {
-    position: 'lowerCard',
+    position: "lowerCard",
     digit: previousDigit
   }), React__default.createElement(AnimatedCard, {
     digit: digit1,
@@ -1703,7 +1707,7 @@ var FlipUnitContainer = function FlipUnitContainer(_ref3) {
     digit: digit2,
     animation: animation2
   }));
-};
+}
 var FlipClock = /*#__PURE__*/function (_React$Component) {
   _inheritsLoose(FlipClock, _React$Component);
   function FlipClock(props) {
@@ -1800,53 +1804,53 @@ var FlipClock = /*#__PURE__*/function (_React$Component) {
       secondsShuffle = _this$state.secondsShuffle;
     if (!this.state.haveStylesLoaded) return null;
     var textPrimary = this.props.colorConfig.textPrimary;
-    var Separator = function Separator() {
+    function Separator() {
       return React__default.createElement("h1", {
         style: {
           color: textPrimary
         }
       }, ":");
-    };
+    }
     return React__default.createElement("div", {
-      className: 'flipClock'
+      className: "flipClock"
     }, React__default.createElement(FlipUnitContainer, {
-      unit: 'days',
+      unit: "days",
       digit: days,
       shuffle: daysShuffle
     }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
-      unit: 'hours',
+      unit: "hours",
       digit: hours,
       shuffle: hoursShuffle
     }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
-      unit: 'minutes',
+      unit: "minutes",
       digit: minutes,
       shuffle: minutesShuffle
     }), React__default.createElement(Separator, null), React__default.createElement(FlipUnitContainer, {
-      unit: 'seconds',
+      unit: "seconds",
       digit: seconds,
       shuffle: secondsShuffle
     }));
   };
   return FlipClock;
 }(React__default.Component);
-var CountdownFlipClock = function CountdownFlipClock(props) {
+function CountdownFlipClock(props) {
   var colors = useBrandColors();
   return React__default.createElement(FlipClock, Object.assign({}, props, {
     colorConfig: colors
   }));
-};
+}
 
-var Header = function Header(_ref) {
+function Header(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
   var trigger = _ref.trigger;
   var interpolate = getInterpolate(trigger.data || {}, true);
   var countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
-  var StdHeader = function StdHeader(_ref2) {
+  function StdHeader(_ref2) {
     var text = _ref2.text;
     return React__default.createElement("h1", {
       className: prependClass('main-text')
     }, interpolate(text || ''));
-  };
+  }
   var texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading) || '');
   if (!countdownEndTime) return React__default.createElement(StdHeader, {
     text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.heading
@@ -1866,20 +1870,20 @@ var Header = function Header(_ref) {
   })), texts.text2 && React__default.createElement(StdHeader, {
     text: texts.text2
   }));
-};
+}
 var Header$1 = React.memo(Header);
 
-var Paragraph = function Paragraph(_ref) {
+function Paragraph(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4;
   var trigger = _ref.trigger;
   var countdownEndTime = trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.countdownEndTime;
   var interpolate = getInterpolate(trigger.data || {}, true);
-  var StdParagraph = function StdParagraph(_ref2) {
+  function StdParagraph(_ref2) {
     var text = _ref2.text;
     return React__default.createElement("p", {
       className: prependClass('sub-text')
     }, interpolate(text || ''));
-  };
+  }
   var texts = buildTextWithPotentiallyCountdown((trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.paragraph) || '');
   if (!countdownEndTime) return React__default.createElement(StdParagraph, {
     text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph
@@ -1899,10 +1903,10 @@ var Paragraph = function Paragraph(_ref) {
   })), texts.text2 && React__default.createElement(StdParagraph, {
     text: texts.text2
   }));
-};
+}
 var Paragraph$1 = React.memo(Paragraph);
 
-var StandardModal = function StandardModal(_ref) {
+function StandardModal(_ref) {
   var _trigger$data, _trigger$data2, _trigger$data3;
   var trigger = _ref.trigger,
     handleClickCallToAction = _ref.handleClickCallToAction,
@@ -1932,10 +1936,10 @@ var StandardModal = function StandardModal(_ref) {
     skip: !stylesLoaded || isImageBrokenDontShowModal
   });
   var appendResponsiveBehaviour = React__default.useCallback(function () {
-    return reactDeviceDetect.isMobile ? "" : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 2.4rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 1.3rem;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 1.6rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 0.9rem;\n  }\n}\n\n";
+    return reactDeviceDetect.isMobile ? '' : "\n\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 2.4rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 1.3rem;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n  ." + prependClass('main-text') + " {\n    font-size: 1.6rem;\n  }\n  ." + prependClass('sub-text') + " {\n    font-size: 0.9rem;\n  }\n}\n\n";
   }, [height, width, imageURL, reactDeviceDetect.isMobile]);
   React.useEffect(function () {
-    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : "") + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.3);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
+    var cssToApply = "\n    :root {\n      --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n    }\n    \n    h1,\n    h2,\n    h3,\n    h4,\n    h5,\n    h6,\n    p,\n    a,\n    span {\n      line-height: 1.2;\n      font-family: Arial, Helvetica, sans-serif;\n    }\n    \n    ." + prependClass('overlay') + " {\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;      \n    }\n    \n    ." + prependClass('modal') + " {\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + (isModalFullyClickable ? 'transition: box-shadow 0.3s ease-in-out;' : '') + "\n      " + (isModalFullyClickable ? 'cursor: pointer;' : '') + "\n    }\n    \n    ." + prependClass('modal') + ":hover {\n      " + (isModalFullyClickable ? "\n        filter: brightness(1.05);\n        box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n      " : '') + "\n    }\n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 4rem;\n      font-style: normal;\n      text-align: center;\n      color: " + textPrimary + ";\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 2.2rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n    }\n    \n    ." + prependClass('cta') + " {\n      cursor: pointer;\n      background-color: " + backgroundPrimary + ";\n      border-radius: 2px;\n      display: block;\n      font-size: 1.3rem;\n      color: " + textPrimary + ";\n      text-align: center;\n      text-transform: uppercase;\n      margin: 1rem;\n      text-decoration: none;\n      box-shadow: 0.3rem 0.3rem white;\n    }\n    \n    ." + prependClass('cta:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    ." + prependClass('image-darken') + " {\n      " + (isModalFullyClickable ? '' : 'background: rgba(0, 0, 0, 0.3);') + "\n      height: 100%;\n      display: flex;\n      flex-direction: column;\n      justify-content: space-between;\n      width: 100%;\n    }\n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n    ";
     var styles = document.createElement('style');
     styles.type = 'text/css';
     styles.appendChild(document.createTextNode(cssToApply));
@@ -2006,9 +2010,9 @@ var StandardModal = function StandardModal(_ref) {
       padding: '0.3rem 1rem'
     }
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.buttonText))))));
-};
+}
 
-var Modal = function Modal(_ref) {
+function Modal(_ref) {
   var trigger = _ref.trigger;
   var _useEntireStore = useEntireStore(),
     removeActiveTrigger = _useEntireStore.removeActiveTrigger;
@@ -2060,7 +2064,7 @@ var Modal = function Modal(_ref) {
     handleCloseModal: handleCloseModal
   };
   return React__default.createElement(StandardModal, Object.assign({}, modalProps));
-};
+}
 var TriggerModal = function TriggerModal(_ref2) {
   var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Modal, {
@@ -2082,14 +2086,14 @@ var makeFullUrl = function makeFullUrl(resource, params) {
   }
   return fullUri + "?" + new URLSearchParams(params).toString();
 };
-var Button = function Button(_ref) {
+function Button(_ref) {
   var children = _ref.children,
     className = _ref.className,
     onClick = _ref.onClick,
     disabled = _ref.disabled,
     _ref$colour = _ref.colour,
     colour = _ref$colour === void 0 ? 'primary' : _ref$colour;
-  var builtButtonClasses = "btn step-button bg-" + colour + " border-" + colour + " text-white hover:bg-" + colour + "/80 disabled:text-" + colour + "/50 disabled:border-" + colour + "/50" + (className ? ' ' + className : '');
+  var builtButtonClasses = "btn step-button bg-" + colour + " border-" + colour + " text-white hover:bg-" + colour + "/80 disabled:text-" + colour + "/50 disabled:border-" + colour + "/50" + (className ? " " + className : '');
   if (disabled) {
     builtButtonClasses += ' disabled';
   }
@@ -2098,14 +2102,14 @@ var Button = function Button(_ref) {
     className: builtButtonClasses,
     onClick: onClick
   }, children);
-};
-var Voucher = function Voucher(_ref2) {
+}
+function Voucher(_ref2) {
   var details = _ref2.details;
   return React.createElement("div", null, React.createElement("h3", null, "Terms of Voucher"), React.createElement("p", {
-    className: 'text-sm'
+    className: "text-sm"
   }, details.termsAndConditions));
-};
-var TriggerInverse = function TriggerInverse(_ref3) {
+}
+function TriggerInverse(_ref3) {
   var onSubmit = function onSubmit(data) {
     try {
       setState({
@@ -2186,23 +2190,23 @@ var TriggerInverse = function TriggerInverse(_ref3) {
     setState = _React$useState2[1];
   if (state.complete === true) {
     return React.createElement("div", {
-      className: 'container'
+      className: "container"
     }, React.createElement("h2", null, "Voucher Sent!"), React.createElement("p", {
-      className: 'text-md'
+      className: "text-md"
     }, "Good news! We've sent your voucher to the email provided!"), state.voucher && React.createElement("div", {
-      className: 'col-12 mt-3'
+      className: "col-12 mt-3"
     }, React.createElement(Voucher, {
       details: state.voucher
     })));
   }
   if (state.responseStatusCode === 409) {
     return React.createElement("div", {
-      className: 'container'
+      className: "container"
     }, React.createElement("h2", {
-      className: 'mt-3'
+      className: "mt-3"
     }, "Uh-oh!"), React.createElement("p", null, "It seems that you already received this voucher. Please get in touch if this doesn't seem right:\xA0", React.createElement("a", {
-      href: '/help',
-      className: 'underline font-serif tracking-wide',
+      href: "/help",
+      className: "underline font-serif tracking-wide",
       onClick: function onClick() {
         return setOpen(false);
       }
@@ -2219,19 +2223,19 @@ var TriggerInverse = function TriggerInverse(_ref3) {
       zIndex: 9999
     }
   }, React.createElement("main", {
-    className: 'flex-grow flex flex-col justify-center container relative'
+    className: "flex-grow flex flex-col justify-center container relative"
   }, React.createElement("div", {
-    className: 'w-full'
+    className: "w-full"
   }, React.createElement("div", {
-    className: 'cms-content text-center md:text-left'
+    className: "cms-content text-center md:text-left"
   }, React.createElement("h2", null, "Get Your Voucher"), React.createElement("p", null, "To receive your voucher, we just need a few details from you."), React.createElement("h3", {
     className: "bar-title border-l-4 border-solid border-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour)
   }, "Contact Info"), React.createElement("form", {
     onSubmit: handleSubmit(onSubmit)
   }, React.createElement("div", {
-    className: 'grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2'
+    className: "grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2"
   }, React.createElement("div", null, React.createElement("label", {
-    htmlFor: 'first_name'
+    htmlFor: "first_name"
   }, "First Name*"), React.createElement("input", Object.assign({}, register('firstName', {
     required: true,
     minLength: 2,
@@ -2240,11 +2244,11 @@ var TriggerInverse = function TriggerInverse(_ref3) {
       return value.trim().length >= 2;
     }
   }), {
-    type: 'text',
-    className: 'form-input',
-    id: 'firstName'
+    type: "text",
+    className: "form-input",
+    id: "firstName"
   }))), React.createElement("div", null, React.createElement("label", {
-    htmlFor: 'last_name'
+    htmlFor: "last_name"
   }, "Last Name*"), React.createElement("input", Object.assign({}, register('lastName', {
     required: true,
     minLength: 2,
@@ -2253,46 +2257,46 @@ var TriggerInverse = function TriggerInverse(_ref3) {
       return value.trim().length >= 2;
     }
   }), {
-    type: 'text',
-    className: 'form-input',
-    id: 'lastName'
+    type: "text",
+    className: "form-input",
+    id: "lastName"
   }))), React.createElement("div", null, React.createElement("label", {
-    htmlFor: 'email'
+    htmlFor: "email"
   }, "Email*"), React.createElement("input", Object.assign({}, register('emailAddress', {
     required: true
   }), {
-    type: 'email',
-    className: 'form-input',
-    id: 'email'
+    type: "email",
+    className: "form-input",
+    id: "email"
   })))), React.createElement("div", null, React.createElement("p", null, "* Required Field")), React.createElement("div", {
-    className: 'flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start'
+    className: "flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start"
   }, React.createElement("div", {
-    className: 'form-check'
+    className: "form-check"
   }, React.createElement("input", Object.assign({
-    type: 'checkbox'
+    type: "checkbox"
   }, register('terms', {
     required: true
   }), {
-    className: 'form-check-input',
-    id: 'terms'
+    className: "form-check-input",
+    id: "terms"
   })), ' ', React.createElement("label", {
-    htmlFor: 'terms',
-    className: 'form-check-label'
+    htmlFor: "terms",
+    className: "form-check-label"
   }, "I confirm that I have read & agreed with the", ' ', React.createElement("a", {
     href: landingPage === null || landingPage === void 0 ? void 0 : landingPage.privacyPolicy,
-    target: '_blank',
-    rel: 'noreferrer'
+    target: "_blank",
+    rel: "noreferrer"
   }, "Privacy Policy"), "*")), React.createElement(Button, {
-    className: 'btn mt-2 md:mt-0',
-    type: 'submit',
+    className: "btn mt-2 md:mt-0",
+    type: "submit",
     colour: landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour,
     disabled: state.busy || isSubmitting
   }, isSubmitting || state.busy ? 'Sending Voucher...' : 'Get My Voucher')), state.error && state.responseStatusCode !== 409 && React.createElement("div", {
     className: "alert mt-5 bg-" + (landingPage === null || landingPage === void 0 ? void 0 : landingPage.colour) + "/20"
   }, "There was a problem sending your voucher. Please check your details and try again."))))));
-};
+}
 
-var Youtube = function Youtube(_ref) {
+function Youtube(_ref) {
   var _trigger$brand, _trigger$brand2, _trigger$brand3, _trigger$brand4, _trigger$data;
   var trigger = _ref.trigger;
   var _useState = React.useState(true),
@@ -2349,14 +2353,14 @@ var Youtube = function Youtube(_ref) {
     }
   }, "\xD7"), React__default.createElement("iframe", {
     src: trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.url,
-    allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
+    allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
     style: {
       width: '500px',
       height: '260px',
       marginTop: '1rem'
     }
   }))));
-};
+}
 var TriggerYoutube = function TriggerYoutube(_ref2) {
   var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Youtube, {
@@ -2793,7 +2797,7 @@ var useTrackingInit = function useTrackingInit() {
         })
       };
     });
-    log('MixpanelProvider: registering visitor ' + visitor.id + ' to mixpanel');
+    log("MixpanelProvider: registering visitor " + visitor.id + " to mixpanel");
     mixpanel.identify(visitor.id);
   }, [appId, visitor === null || visitor === void 0 ? void 0 : visitor.id, set, initiated, log, registerUserData]);
   React.useEffect(function () {
@@ -2827,7 +2831,7 @@ var useRunOnPathChange = function useRunOnPathChange(func, config) {
     if (config !== null && config !== void 0 && config.skip) return;
     if (!location.href) return;
     if (location.href === lastCollectedHref) return;
-    log('useRunOnPathChange: running' + (config === null || config === void 0 ? void 0 : config.name));
+    log("useRunOnPathChange: running" + (config === null || config === void 0 ? void 0 : config.name));
     setLastCollectedHref(location.href);
     func();
   }, [func, config, lastCollectedHref]);
@@ -2998,7 +3002,6 @@ function useCollector() {
     }).then(function (response) {
       if (response.status === 204) {
         setIntently(true);
-        return;
       }
     })["catch"](function (err) {
       error('failed to store collected data', err);
@@ -3453,7 +3456,7 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
-var Activation = function Activation() {
+function Activation() {
   var _useEntireStore = useEntireStore(),
     displayedTriggersIds = _useEntireStore.displayedTriggersIds,
     handlers = _useEntireStore.handlers,
@@ -3469,7 +3472,7 @@ var Activation = function Activation() {
     return displayedTriggersIds.includes(trigger.id);
   });
   if (!activeTriggers) {
-    error("Collector - TriggerComponent: No trigger found for displayedTriggersIds", displayedTriggersIds);
+    error('Collector - TriggerComponent: No trigger found for displayedTriggersIds', displayedTriggersIds);
     return null;
   }
   log('Collector - TriggerComponent: available handlers include: ', handlers);
@@ -3500,7 +3503,7 @@ var Activation = function Activation() {
     return null;
   });
   return React__default.createElement(React__default.Fragment, null, visibleComponents);
-};
+}
 var Activation$1 = React__default.memo(Activation);
 
 function Triggers() {
@@ -3520,7 +3523,7 @@ function Triggers() {
     idleTriggers = _useEntireStore$difiP.idleTriggers,
     pageLoadTriggers = _useEntireStore$difiP.pageLoadTriggers,
     booted = _useEntireStore$difiP.booted;
-  var imagePreloadingComplete = imagesPreloaded === true || imagesPreloaded === "skip";
+  var imagePreloadingComplete = imagesPreloaded === true || imagesPreloaded === 'skip';
   var altIdleDelay = (config === null || config === void 0 ? void 0 : (_config$trigger = config.trigger) === null || _config$trigger === void 0 ? void 0 : _config$trigger.userIdleThresholdSecs) * 1000;
   var combinedTriggers = getCombinedTriggers();
   var _useTriggerDelay = useTriggerDelay(),
@@ -3529,7 +3532,7 @@ function Triggers() {
     getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs;
   var _useExitIntent = useExitIntent.useExitIntent({
       cookie: {
-        key: "_cm_exit",
+        key: '_cm_exit',
         daysToExpire: 0
       }
     }),
@@ -3538,51 +3541,51 @@ function Triggers() {
   React.useEffect(function () {
     if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [imagePreloadingComplete, visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
   React.useEffect(function () {
     if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete, imagePreloadingComplete]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     if (!imagePreloadingComplete) return;
-    log("Collector: attempting to fire idle time trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_IDLE_TIME");
+    log('Collector: attempting to fire idle time trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
     startCooldown();
   }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown, imagePreloadingComplete]);
   var _useExitIntentDelay = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.trigger.displayTriggerAfterSecs) * 1000),
     hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
   var fireExitTrigger = React__default.useCallback(function () {
     if (!imagePreloadingComplete) {
-      log("Unable to launch exit intent, because not all images have loaded yet.");
-      log("Re-registering handler");
+      log('Unable to launch exit intent, because not all images have loaded yet.');
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
     if (!hasDelayPassed) {
       log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
-      log("Re-registering handler");
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
     if (!canNextTriggerOccur()) {
       log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. \n        I will attempt again when the same signal occurs after this passes.");
-      log("Re-registering handler");
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
-    log("Collector: attempting to fire exit trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_EXIT_INTENT");
+    log('Collector: attempting to fire exit trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
   }, [imagePreloadingComplete, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   React.useEffect(function () {
     if (!imagePreloadingComplete) return;
     if (!exitIntentTriggers) return;
-    log("Collector: attempting to register exit trigger");
+    log('Collector: attempting to register exit trigger');
     registerHandler({
-      id: "clientTrigger",
+      id: 'clientTrigger',
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler, imagePreloadingComplete]);
@@ -3590,8 +3593,8 @@ function Triggers() {
     if (!imagePreloadingComplete) return;
     if (!pageLoadTriggers) return;
     if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
-    log("Collector: attempting to fire on-page-load trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_PAGE_LOAD", true);
+    log('Collector: attempting to fire on-page-load trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
   }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation, imagePreloadingComplete]);
   React.useEffect(function () {
     fireOnLoadTriggers();
@@ -3599,12 +3602,12 @@ function Triggers() {
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
     delay: initialDelay,
-    name: "fireOnLoadTriggers"
+    name: 'fireOnLoadTriggers'
   });
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
     timeout: idleTimeout || altIdleDelay,
     onPresenceChange: function onPresenceChange(presence) {
-      log("presence changed", presence);
+      log('presence changed', presence);
     },
     onIdle: fireIdleTrigger
   }, React__default.createElement(Activation$1, null));

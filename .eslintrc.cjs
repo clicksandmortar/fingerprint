@@ -1,7 +1,8 @@
 /* eslint-disable max-lines */
-// This eslint config was naenae'd by from a force much stronger than Ed - @cajacko (Charlie Jackson)
+// This eslint config was naenae'd from a force much stronger than Ed - @cajacko (Charlie Jackson)
 
 // Most of the meanings are commented. When adding more rules, please comment them, and try to keep as vars.
+// ^ Ed himself is bad at following this rule lol
 
 /*
 Change matching values in prettierrc as well:
@@ -13,7 +14,9 @@ const maxLinesPerFile = 150;
 const minVariableLength = 2;
 
 const allowPropsSpread = true;
-const requireJsDoc = true;
+// Temporarily setting to false for sanity.
+// TODO:  please enable it once you are happy with  the rest of the eslint config etc
+const requireJsDoc = false;
 
 const typescriptExtensions = ['.ts', '.tsx'];
 const extensions = ['.js', '.jsx', ...typescriptExtensions];
@@ -27,12 +30,17 @@ const config = {
   // Our main extended package is eslint-config-airbnb. This is widely accepted as one of the best
   // industry standard linting configurations, and is very well documented with why they chose the
   // rules they did: https://github.com/airbnb/javascript
-  // Keep prettier as last so it overrides everything else. As it's best to keep prettier config
-  // to a minimum, as it can be pretty tricky to match prettier with more specific rules and it
-  // doesn't play nicely with a lot of editors if you do try and go more custom
 
   // plugin:react-hooks/recommended populates the dep arrays for react hooks on almost-auto-fix.
-  extends: ['airbnb', 'eslint:recommended', 'plugin:react-hooks/recommended'],
+  extends: [
+    'airbnb',
+    'eslint:recommended',
+    'plugin:react-hooks/recommended',
+    'prettier',
+    // Keep prettier as last so it overrides everything else. As it's best to keep prettier config
+    // to a minimum, as it can be pretty tricky to match prettier with more specific rules and it
+    // doesn't play nicely with a lot of editors if you do try and go more custom
+  ],
   // Stop looking foconfig further up than thisr eslint
   root: true,
   parser: '@typescript-eslint/parser',
@@ -40,8 +48,12 @@ const config = {
 
   // Cookies have caused a P1 incicent in the past. We want to be super careful when setting cookies with DiFi.
   rules: {
-    'operator-linebreak': 0,
-    'no-restricted-globals': 0,
+    'react/jsx-no-useless-fragment': 0, // this helps alleviate some TS issues with fragments
+    // 'operator-linebreak': 0, // stop complaining about long lines and preventing me from fixing them
+    // 'implicit-arrow-linebreak': 0, // stop complaining about long lines and preventing me from fixing them
+    'no-restricted-globals': 0, // location and history will have become available when difi starts
+
+    // We want to use setCookie, getCookie and removeCookie from utils/cookies.ts instead
     'no-restricted-properties': [
       'error',
       {
@@ -62,6 +74,7 @@ ${cookieMethodUsageWarning}`,
         message: cookieMethodUsageWarning,
       },
     ],
+    // Warn about the dangers of setting cookies in Difi.
     'no-restricted-syntax': [
       'error',
       {
@@ -83,10 +96,11 @@ ${cookieMethodUsageWarning}`,
     'import/prefer-default-export': ['off'],
     // our projects use nextJs / gatsby which inject React globally
     'react/react-in-jsx-scope': 'off',
-    // Ensure all prettier errors fail
-    'prettier/prettier': ['error'],
     // Leaving console messages bloats the console and worse case may leak sensitive info or inner
     // workings or lead to performance downsides, so leaving as an error.
+    // Ensure all prettier errors fail
+    'prettier/prettier': ['error'],
+
     'no-console': 'error',
     // Long lines are hard to read an review, so we want to error for them. But not for some things
     // like urls, strings, regex etc
@@ -248,7 +262,7 @@ ${cookieMethodUsageWarning}`,
     {
       // Only want typescript config for typescript files
       extends: ['plugin:@typescript-eslint/eslint-recommended', 'plugin:@typescript-eslint/recommended'],
-      files: typescriptExtensions.map((extension) => `*${extension}`),
+      files: typescriptExtensions.map(extension => `*${extension}`),
       rules: {
         // eslint won't pick up the typescript props, so disabling here. Pointless to have prop-types
         // and typescript

@@ -1,5 +1,5 @@
-import { EqualityChecker, StateSelector, StoreApi } from 'zustand'
-import { DifiStore } from './store'
+import { EqualityChecker, StateSelector, StoreApi } from 'zustand';
+import { DifiStore } from './store';
 
 export type Set = StoreApi<DifiStore>['setState']
 export type Get = StoreApi<DifiStore>['getState']

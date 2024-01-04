@@ -4,23 +4,23 @@
  */
 
 const getIsVisible = (selector: string) => {
-  const element = document.querySelector(selector)
+  const element = document.querySelector(selector);
 
-  if (!element) return false
+  if (!element) return false;
   // visibility
-  if (window.getComputedStyle(element).visibility === 'hidden') return false
-  //display
-  if (window.getComputedStyle(element).display === 'none') return false
-  //opacity
-  if (window.getComputedStyle(element).opacity === '0') return false
+  if (window.getComputedStyle(element).visibility === 'hidden') return false;
+  // display
+  if (window.getComputedStyle(element).display === 'none') return false;
+  // opacity
+  if (window.getComputedStyle(element).opacity === '0') return false;
 
   // @TODO: do we want these checks in place?
-  //height
+  // height
   // if (window.getComputedStyle(element).height === '0px') return false
-  //width
+  // width
   // if (window.getComputedStyle(element).width === '0px') return false
 
-  return true
-}
+  return true;
+};
 
-export default getIsVisible
+export default getIsVisible;

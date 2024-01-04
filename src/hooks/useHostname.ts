@@ -1,1 +1,1 @@
-export const useHostname = (): string => window?.location?.hostname || ''
+export const useHostname = (): string => window?.location?.hostname || '';

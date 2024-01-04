@@ -1,5 +1,5 @@
-import { BannerTrigger } from '../../behaviours/Banner/Banner.types'
-import { IncompleteTrigger, Trigger } from '../../client/types'
+import { BannerTrigger } from '../../behaviours/Banner/Banner.types';
+import { IncompleteTrigger, Trigger } from '../../client/types';
 
 const banner: Trigger = {
   id: '7af0fc17-6508-4b5a-9003-1039fc473250',
@@ -7,9 +7,9 @@ const banner: Trigger = {
   behaviour: 'BEHAVIOUR_BANNER',
   data: {
     buttonText: 'Run',
-    buttonURL: 'https://google.com'
-  }
-}
+    buttonURL: 'https://google.com',
+  },
+};
 
 export const fakeDataCaptureModal: Trigger = {
   id: 'data-capture-modal',
@@ -21,53 +21,53 @@ export const fakeDataCaptureModal: Trigger = {
     errorText: '',
     successText: 'Hooray!',
     heading: 'This is a data capture modal',
-    paragraph: 'And so is this'
-  }
-}
+    paragraph: 'And so is this',
+  },
+};
 
 export const fakeBanners: BannerTrigger[] = [
   {
     ...banner,
-    id: `position: 'left',`,
+    id: 'position: \'left\',',
     data: {
       ...banner.data,
       position: 'left',
       buttonIcon: 'ticket',
-      marketingText: 'AAAA!'
-    }
+      marketingText: 'AAAA!',
+    },
   },
   {
     ...banner,
-    id: `position: 'top',`,
+    id: 'position: \'top\',',
     data: {
       ...banner.data,
       position: 'top',
-      buttonText: 'Clickable'
-    }
+      buttonText: 'Clickable',
+    },
   },
   {
     ...banner,
-    id: `countdownEndTime: '2024-03-31T23:59',`,
+    id: 'countdownEndTime: \'2024-03-31T23:59\',',
     data: {
       ...banner.data,
       marketingText:
         'You only have {{ countdownEndTime }} before the horse comes',
       countdownEndTime: '2024-03-31T23:59',
-      position: 'bottom'
+      position: 'bottom',
       // buttonIcon: 'FaCoffee'
-    }
+    },
   },
   {
     ...banner,
-    id: `position: 'right',`,
+    id: 'position: \'right\',',
     data: {
       ...banner.data,
       position: 'right',
       buttonText: 'CLickable thing',
-      buttonIcon: 'heart'
-    }
-  }
-]
+      buttonIcon: 'heart',
+    },
+  },
+];
 // @ts-ignore
 export const fakeTriggers: Trigger[] = [
   // ...fakeBanners,
@@ -81,8 +81,8 @@ export const fakeTriggers: Trigger[] = [
       buttonText: 'Purchase now (EXIT INTENT)',
       buttonURL: 'http://www.google.com',
       heading: '25% Off Gift Cards',
-      paragraph: 'Get 25% off a gift card, if you buy today!'
-    }
+      paragraph: 'Get 25% off a gift card, if you buy today!',
+    },
   },
   {
     id: 'modal-trigger-id-idle',
@@ -93,10 +93,10 @@ export const fakeTriggers: Trigger[] = [
       buttonText: 'Click me',
       buttonURL: 'http://www.google.com',
       heading: 'This is an IDLE_TIME',
-      paragraph: 'And so is this'
-    }
-  }
-]
+      paragraph: 'And so is this',
+    },
+  },
+];
 
 export const fakeCountdownModal: Trigger = {
   id: 'modal-trigger-urgency',
@@ -109,9 +109,9 @@ export const fakeCountdownModal: Trigger = {
     buttonURL: 'http://www.google.com',
     heading: 'BLACK FRIDAY {{countdownEndTime}}',
     // paragraph: 'Use it wisely',
-    countdownEndTime: '2024-01-31T23:59'
-  }
-}
+    countdownEndTime: '2024-01-31T23:59',
+  },
+};
 
 export const fakeInterpolationModal: Trigger = {
   id: 'modal-trigger-interpolation-regular-text',
@@ -125,9 +125,9 @@ export const fakeInterpolationModal: Trigger = {
     firstName: 'Ed',
     lastName: 'Penguin slapper',
     heading: 'Hello {{ firstName }}',
-    paragraph: 'indeed {{ lastName }}'
-  }
-}
+    paragraph: 'indeed {{ lastName }}',
+  },
+};
 
 export const fakeIncompleteTriggers: IncompleteTrigger[] = [
   {
@@ -140,13 +140,13 @@ export const fakeIncompleteTriggers: IncompleteTrigger[] = [
       buttonText: 'Click me',
       buttonURL: 'http://www.google.com',
       heading: 'This should fire only when',
-      paragraph: 'a user sees the element with className "bla-bla" '
+      paragraph: 'a user sees the element with className "bla-bla" ',
     },
     signals: [
       {
         op: 'CanSeeElementOnPage',
-        parameters: ['.bla-bla', 'contains', '/']
-      }
-    ]
-  }
-]
+        parameters: ['.bla-bla', 'contains', '/'],
+      },
+    ],
+  },
+];

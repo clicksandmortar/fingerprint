@@ -1,37 +1,37 @@
-import React, { useEffect, useRef } from 'react'
-import CloseButton from '../../../components/CloseButton'
-import useCountdown from '../../../hooks/useCountdown'
-import { getInterpolate } from '../../../utils/getInterpolate'
-import { useBannerStyles } from '../Banner.styles'
-import { BannerProps } from '../Banner.types'
+import React, { useEffect, useRef } from 'react';
+import CloseButton from '../../../components/CloseButton';
+import useCountdown from '../../../hooks/useCountdown';
+import { getInterpolate } from '../../../utils/getInterpolate';
+import { useBannerStyles } from '../Banner.styles';
+import { BannerProps } from '../Banner.types';
 import {
   getCanBeDismissed,
   getIsBannerFullyClickable,
   Position,
   resetPad,
-  useBannerContainerStyles
-} from '../utils'
+  useBannerContainerStyles,
+} from '../utils';
 
-const HorizontalBanner = ({
+function HorizontalBanner({
   handleAction,
   handleClose,
-  trigger
-}: BannerProps) => {
-  const styles = useBannerStyles()
-  const container = useRef<HTMLDivElement | null>(null)
-  const isFullyClickable = getIsBannerFullyClickable(trigger)
+  trigger,
+}: BannerProps) {
+  const styles = useBannerStyles();
+  const container = useRef<HTMLDivElement | null>(null);
+  const isFullyClickable = getIsBannerFullyClickable(trigger);
 
-  const canBeDismissed = getCanBeDismissed()
+  const canBeDismissed = getCanBeDismissed();
 
   const containerStyles = useBannerContainerStyles({
     element: {
       width: container.current?.clientWidth || 0,
-      height: container.current?.clientHeight || 0
+      height: container.current?.clientHeight || 0,
     },
-    trigger
-  })
+    trigger,
+  });
 
-  const interpolate = getInterpolate(trigger.data || {})
+  const interpolate = getInterpolate(trigger.data || {});
 
   // TODO: This is still the old, what turned out to be terrible, interpolation thing we will fix
   const { formattedCountdown: text } = useCountdown({
@@ -43,23 +43,23 @@ const HorizontalBanner = ({
 
     interpolate: {
       text: trigger.data?.marketingText || trigger.data?.buttonText || '',
-      structure: trigger.data as Record<string, unknown>
-    }
-  })
+      structure: trigger.data as Record<string, unknown>,
+    },
+  });
 
-  const position = trigger.data?.position as Position
+  const position = trigger.data?.position as Position;
 
   useEffect(() => {
-    const bannerHeight = container.current?.clientHeight
+    const bannerHeight = container.current?.clientHeight;
 
     if (position === 'top') {
-      document.body.style.paddingTop = `${bannerHeight}px`
+      document.body.style.paddingTop = `${bannerHeight}px`;
     } else if (position === 'bottom') {
-      document.body.style.paddingBottom = `${bannerHeight}px`
+      document.body.style.paddingBottom = `${bannerHeight}px`;
     }
 
-    return resetPad
-  }, [container, position])
+    return resetPad;
+  }, [container, position]);
 
   return (
     <div
@@ -80,7 +80,7 @@ const HorizontalBanner = ({
         <CloseButton onClick={handleClose} style={styles.closeButton} />
       )}
     </div>
-  )
+  );
 }
 
-export default HorizontalBanner
+export default HorizontalBanner;

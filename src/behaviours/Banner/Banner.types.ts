@@ -1,6 +1,6 @@
-import { Trigger } from '../../client/types'
-import { Icon } from '../../components/Icon'
-import { Position } from './utils'
+import { Trigger } from '../../client/types';
+import { Icon } from '../../components/Icon';
+import { Position } from './utils';
 
 export type BannerTrigger = Omit<Trigger, 'data'> & {
   data: {

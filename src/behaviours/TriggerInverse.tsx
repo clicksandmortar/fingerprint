@@ -1,35 +1,34 @@
-import * as React from 'react'
-import { useForm } from 'react-hook-form'
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
 
-const baseUrl = 'https://bookings-bff.starship-staging.com'
+const baseUrl = 'https://bookings-bff.starship-staging.com';
 
 const makeFullUrl = (resource: any, params = {}) => {
   if (resource.startsWith('/')) {
-    resource = resource.substring(1)
+    resource = resource.substring(1);
   }
 
-  const fullUri = `${baseUrl}/${resource}`
+  const fullUri = `${baseUrl}/${resource}`;
 
   if (Object.keys(params).length === 0) {
-    return fullUri
+    return fullUri;
   }
 
-  return `${fullUri}?${new URLSearchParams(params).toString()}`
-}
+  return `${fullUri}?${new URLSearchParams(params).toString()}`;
+};
 
-const Button = ({
+function Button({
   children,
   className,
   onClick,
   disabled,
-  colour = 'primary'
-}: any) => {
-  let builtButtonClasses =
-    `btn step-button bg-${colour} border-${colour} text-white hover:bg-${colour}/80 disabled:text-${colour}/50 disabled:border-${colour}/50` +
-    (className ? ' ' + className : '')
+  colour = 'primary',
+}: any) {
+  let builtButtonClasses = `btn step-button bg-${colour} border-${colour} text-white hover:bg-${colour}/80 disabled:text-${colour}/50 disabled:border-${colour}/50${
+    className ? ` ${className}` : ''}`;
 
   if (disabled) {
-    builtButtonClasses += ' disabled'
+    builtButtonClasses += ' disabled';
   }
 
   return (
@@ -40,131 +39,131 @@ const Button = ({
     >
       {children}
     </button>
-  )
+  );
 }
 
-const Voucher = ({ details }: any) => {
+function Voucher({ details }: any) {
   return (
     <div>
       <h3>Terms of Voucher</h3>
-      <p className='text-sm'>{details.termsAndConditions}</p>
+      <p className="text-sm">{details.termsAndConditions}</p>
     </div>
-  )
+  );
 }
 
-const TriggerInverse = ({}: any) => {
-  const landingPage: any = {}
-  const form: any = {}
-  const location: any = {}
-  const [open, setOpen] = React.useState(true)
+function TriggerInverse({}: any) {
+  const landingPage: any = {};
+  const form: any = {};
+  const location: any = {};
+  const [open, setOpen] = React.useState(true);
 
   if (!open) {
-    return null
+    return null;
   }
 
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting }
-  } = useForm()
+    formState: { isSubmitting },
+  } = useForm();
   const initialState = {
     busy: false,
     complete: false,
     voucher: null,
     error: null,
-    responseStatusCode: 0
-  }
-  const [state, setState] = React.useState(initialState)
+    responseStatusCode: 0,
+  };
+  const [state, setState] = React.useState(initialState);
 
   async function submitVoucher(data: any) {
     const reqData = {
       ...data,
-      bookingLink: `${location?.origin}/${landingPage?.slug}`
-    }
+      bookingLink: `${location?.origin}/${landingPage?.slug}`,
+    };
     const response = await fetch(
       makeFullUrl(
-        `campaigns/${form?.campaign}/voucher?locationID=${landingPage?.identifier}`
+        `campaigns/${form?.campaign}/voucher?locationID=${landingPage?.identifier}`,
       ),
       {
         method: 'POST',
         headers: {
           Accept: 'application/json',
-          'Content-type': 'application/json'
+          'Content-type': 'application/json',
         },
-        body: JSON.stringify(reqData)
-      }
-    )
+        body: JSON.stringify(reqData),
+      },
+    );
     response.json().then((responseData) => {
       if (response.ok) {
         // @ts-ignore
         setState({
           busy: false,
           complete: true,
-          voucher: responseData.voucher
-        })
+          voucher: responseData.voucher,
+        });
       } else {
         // @ts-ignore
         setState({
           busy: false,
           error: responseData,
-          responseStatusCode: response.status
-        })
+          responseStatusCode: response.status,
+        });
       }
-    })
+    });
   }
 
   async function onSubmit(data: any) {
     // @ts-ignore
     setState({
-      busy: true
-    })
+      busy: true,
+    });
     try {
       if (form.campaign !== '') {
         submitVoucher(data).then(() => {
           const eventData = {
             item_name: landingPage?.name,
-            affiliation: 'Booking Flow'
-          }
-          console.log(eventData)
+            affiliation: 'Booking Flow',
+          };
+          console.log(eventData);
           // navigate(`/${landingPage?.slug}`)
-        })
+        });
       }
     } catch (e) {}
   }
 
   if (state.complete === true) {
     return (
-      <div className='container'>
+      <div className="container">
         <h2>Voucher Sent!</h2>
-        <p className='text-md'>
+        <p className="text-md">
           Good news! We've sent your voucher to the email provided!
         </p>
         {state.voucher && (
-          <div className='col-12 mt-3'>
+          <div className="col-12 mt-3">
             <Voucher details={state.voucher} />
           </div>
         )}
       </div>
-    )
+    );
   }
 
   if (state.responseStatusCode === 409) {
     return (
-      <div className='container'>
-        <h2 className='mt-3'>Uh-oh!</h2>
+      <div className="container">
+        <h2 className="mt-3">Uh-oh!</h2>
         <p>
           It seems that you already received this voucher. Please get in touch
           if this doesn't seem right:&nbsp;
           <a
-            href='/help'
-            className='underline font-serif tracking-wide'
+            href="/help"
+            className="underline font-serif tracking-wide"
             onClick={() => setOpen(false)}
           >
             contact us
           </a>
         </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -176,12 +175,12 @@ const TriggerInverse = ({}: any) => {
         width: '100vw',
         height: '100vh',
         backgroundColor: 'rgba(0,0,0,0.5)',
-        zIndex: 9999
+        zIndex: 9999,
       }}
     >
-      <main className='flex-grow flex flex-col justify-center container relative'>
-        <div className='w-full'>
-          <div className='cms-content text-center md:text-left'>
+      <main className="flex-grow flex flex-col justify-center container relative">
+        <div className="w-full">
+          <div className="cms-content text-center md:text-left">
             <h2>Get Your Voucher</h2>
             <p>To receive your voucher, we just need a few details from you.</p>
             <h3
@@ -190,42 +189,42 @@ const TriggerInverse = ({}: any) => {
               Contact Info
             </h3>
             <form onSubmit={handleSubmit(onSubmit)}>
-              <div className='grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2'>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-2">
                 <div>
-                  <label htmlFor='first_name'>First Name*</label>
+                  <label htmlFor="first_name">First Name*</label>
                   <input
                     {...register('firstName', {
                       required: true,
                       minLength: 2,
                       maxLength: 30,
-                      validate: (value) => value.trim().length >= 2
+                      validate: (value) => value.trim().length >= 2,
                     })}
-                    type='text'
-                    className='form-input'
-                    id='firstName'
+                    type="text"
+                    className="form-input"
+                    id="firstName"
                   />
                 </div>
                 <div>
-                  <label htmlFor='last_name'>Last Name*</label>
+                  <label htmlFor="last_name">Last Name*</label>
                   <input
                     {...register('lastName', {
                       required: true,
                       minLength: 2,
                       maxLength: 30,
-                      validate: (value) => value.trim().length >= 2
+                      validate: (value) => value.trim().length >= 2,
                     })}
-                    type='text'
-                    className='form-input'
-                    id='lastName'
+                    type="text"
+                    className="form-input"
+                    id="lastName"
                   />
                 </div>
                 <div>
-                  <label htmlFor='email'>Email*</label>
+                  <label htmlFor="email">Email*</label>
                   <input
                     {...register('emailAddress', { required: true })}
-                    type='email'
-                    className='form-input'
-                    id='email'
+                    type="email"
+                    className="form-input"
+                    id="email"
                   />
                 </div>
               </div>
@@ -233,20 +232,22 @@ const TriggerInverse = ({}: any) => {
                 <p>* Required Field</p>
               </div>
 
-              <div className='flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start'>
-                <div className='form-check'>
+              <div className="flex gap-x-6 gap-y-2 items-center flex-wrap justify-center lg:justify-start">
+                <div className="form-check">
                   <input
-                    type='checkbox'
+                    type="checkbox"
                     {...register('terms', { required: true })}
-                    className='form-check-input'
-                    id='terms'
-                  />{' '}
-                  <label htmlFor='terms' className='form-check-label'>
-                    I confirm that I have read & agreed with the{' '}
+                    className="form-check-input"
+                    id="terms"
+                  />
+                  {' '}
+                  <label htmlFor="terms" className="form-check-label">
+                    I confirm that I have read & agreed with the
+                    {' '}
                     <a
                       href={landingPage?.privacyPolicy}
-                      target='_blank'
-                      rel='noreferrer'
+                      target="_blank"
+                      rel="noreferrer"
                     >
                       Privacy Policy
                     </a>
@@ -254,8 +255,8 @@ const TriggerInverse = ({}: any) => {
                   </label>
                 </div>
                 <Button
-                  className='btn mt-2 md:mt-0'
-                  type='submit'
+                  className="btn mt-2 md:mt-0"
+                  type="submit"
                   colour={landingPage?.colour}
                   disabled={state.busy || isSubmitting}
                 >
@@ -275,6 +276,6 @@ const TriggerInverse = ({}: any) => {
         </div>
       </main>
     </div>
-  )
+  );
 }
-export default TriggerInverse
+export default TriggerInverse;

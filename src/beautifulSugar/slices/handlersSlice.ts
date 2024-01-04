@@ -1,8 +1,8 @@
-import { StateCreator } from 'zustand'
-import { clientHandlers, Handler } from '../../client/handler'
-import { Trigger } from '../../client/types'
-import { DifiStore } from '../store'
-import { Get, Set } from '../types'
+import { StateCreator } from 'zustand';
+import { clientHandlers, Handler } from '../../client/handler';
+import { Trigger } from '../../client/types';
+import { DifiStore } from '../store';
+import { Get, Set } from '../types';
 
 export type HandlersSlice = {
   handlers: Handler[]
@@ -17,17 +17,16 @@ export const createHandlersSlice: StateCreator<
   HandlersSlice
 > = (set: Set, get: Get) => ({
   handlers: clientHandlers,
-  addHandlers: (handlers: Handler[] = []) =>
-    set((prev) => ({
-      handlers: [...prev.handlers, ...handlers]
-    })),
+  addHandlers: (handlers: Handler[] = []) => set((prev) => ({
+    handlers: [...prev.handlers, ...handlers],
+  })),
   getHandlerForTrigger: (_trigger: Trigger) => {
     const potentialHandler = get().handlers?.find(
-      (handler) => handler.behaviour === _trigger.behaviour
-    )
+      (handler) => handler.behaviour === _trigger.behaviour,
+    );
 
-    if (!potentialHandler) return null
+    if (!potentialHandler) return null;
 
-    return potentialHandler
-  }
-})
+    return potentialHandler;
+  },
+});

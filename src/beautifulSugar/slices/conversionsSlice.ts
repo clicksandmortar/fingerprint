@@ -1,7 +1,7 @@
-import { StateCreator } from 'zustand'
-import { Conversion } from '../../client/types'
-import { DifiStore, useDifiStore } from '../store'
-import { Get, Set } from '../types'
+import { StateCreator } from 'zustand';
+import { Conversion } from '../../client/types';
+import { DifiStore, useDifiStore } from '../store';
+import { Get, Set } from '../types';
 
 export type ConversionsSlice = {
   conversions: Conversion[]
@@ -15,13 +15,12 @@ export const createConversionsSlice: StateCreator<
   ConversionsSlice
 > = (set: Set, _get: Get) => ({
   conversions: [],
-  setConversions: (val: Conversion[]) =>
-    set((prev) => ({
-      conversions: {
-        ...prev.conversions,
-        conversions: val
-      }
-    }))
-})
+  setConversions: (val: Conversion[]) => set((prev) => ({
+    conversions: {
+      ...prev.conversions,
+      conversions: val,
+    },
+  })),
+});
 
-export const useConversionsStore = () => useDifiStore((s) => s.conversions)
+export const useConversionsStore = () => useDifiStore((s) => s.conversions);
