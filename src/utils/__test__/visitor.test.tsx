@@ -4,7 +4,7 @@ import { Session } from '../../sessions/types';
 import { getCookieDomain, updateCookieUUID } from '../../visitors/bootstrap';
 import { Visitor } from '../../visitors/types';
 import { validVisitorId } from '../../visitors/utils';
-import { CnMIDCookie } from '../cookies';
+import { CnMIDCookie, cookieAccountJWT } from '../cookies';
 import { prepPage } from '../__dev__/helpers';
 
 const { expect, describe } = test;
