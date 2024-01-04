@@ -163,7 +163,33 @@ const App = () => {
 export default App
 ```
 
-## API
+### User behaviours
+
+#### Page views and interactions
+
+We use Mixpanel to track page views and interactions. To use it, run `trackEvent(EVENT_NAME, payload)` wherever is needed. If you are using a new type of event or editing an existing one, make sure to update the event documentation. How to do that you can find on this [Notion page](https://www.notion.so/clicksandmortar/Mixpanel-Events-Reporting-Guidelines-06944d425dad4aaeb94a04ea9a999f3d?pvs=4)
+
+
+#### Conversions
+
+Similar to `Incomplete triggers`, we use DiFi to track conversions. A conversion can be set up in the DiFi dashboard, and once that's done:
+- once the `/collector` is called on the applicable plage, it will return the `conversions: []` as part of its response
+- the data is then used by `src/hooks/useConversion.ts` to determine if a conversion has occured based on page URL and/or visible elements.
+- Once a conversion occurs, the hook pings `/collector` with the conversion ID and the conversion is marked as complete and removed from the conversions state.
+
+#### Form submissions and button clicks
+
+To gain more insight into users' preferences, we retain **some** of the information they enter in forms (we filter out PII and payment info before keeping it).
+
+We also track which buttons the users clicks on. At the moment, this is used to determine abandoned journeys so we can chase up with an email, increasing conversions. 
+
+Both of these are sent as part of the `/collector` payload.
+
+### Cookie integrations (to be added)
+### M&B-specific features (to be added)
+
+
+## API (more to be added)
 
 ### FingerprintProvider
 
@@ -204,6 +230,14 @@ const App = () => {
 
 
 ## Deployments
+
+### Prod
+The fingerprint script gets automatically built upon every merge into main and is deployed to `cdn.fingerprint.host`. Note that the script doesn't get updated if testing using Github actions fails - see [Testing](#testing)
+
+### CI/CD
+
+To help with testing and catching errors early, every commit that is part of a PR gets built and hosted on `https://cdn.development.fingerprint-staging.host/{{FULL_COMMIT_HASH}}/fingerprint.js`. This URL can later be used to test in prod - see [Manual Testing](#manual-testing)
+### Manual deploy
 
 To deploy, run the following AWS CLI command whilst in the 'dist' directory:
 
@@ -277,7 +311,7 @@ To do this, create a new script in Greasemonkey/Tampermonkey, and paste the foll
   window,
   document,
   'script',
-  'https://d26qevl4nkue45.cloudfront.net/fingerprint.js',
+  'https://cdn.development.fingerprint-staging.host/{{ FULL_COMMIT_HASH }}/fingerprint.js', // or use whatever script version / prod URL you want to test
   'b2a2b2a2b2a2b2a2b2a2b2a2b2a2b2a2',
   true, // Set to false to disable debug mode
   true // Set to false to disable consent
