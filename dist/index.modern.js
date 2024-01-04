@@ -87,18 +87,6 @@ const defaultConfig = {
     colors: defaultColors
   }
 };
-const LEGACY_merge_config = (config, legacy_config) => ({
-  displayTriggerAfterSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || 0) / 1000 || config.trigger.displayTriggerAfterSecs,
-  triggerCooldownSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || 0) / 1000 || config.trigger.triggerCooldownSecs,
-  userIdleThresholdSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || 0) / 1000 || config.trigger.userIdleThresholdSecs
-});
-const objStringtoObjNum = obj => {
-  const newObj = {};
-  Object.keys(obj).forEach(key => {
-    newObj[key] = Number(obj[key]);
-  });
-  return newObj;
-};
 
 const createConfigSlice = (set, get) => ({
   config: defaultConfig,
@@ -111,28 +99,25 @@ const createConfigSlice = (set, get) => ({
     } = get();
     const argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
     const shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
-    const legacy_config = get().difiProps.config;
-    if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
-    set(prev => {
-      return {
-        config: {
-          ...prev.config,
-          ...updatedConfigEntries,
-          brand: {
-            ...prev.config.brand,
-            ...updatedConfigEntries.brand,
-            colors: shouldUpdateColors ? {
-              ...(prev.config.brand.colors || defaultColors),
-              ...(argColors || {})
-            } : prev.config.brand.colors
-          },
-          trigger: {
-            ...prev.config.trigger,
-            ...objStringtoObjNum(LEGACY_merge_config(prev.config, legacy_config))
-          }
+    if (shouldUpdateColors) {
+      log('setConfig: setting brand colors from portal config', argColors);
+    } else {
+      log('setConfig: keeping colors in state || fallback to default');
+    }
+    set(prev => ({
+      config: {
+        ...prev.config,
+        ...updatedConfigEntries,
+        brand: {
+          ...prev.config.brand,
+          ...updatedConfigEntries.brand,
+          colors: shouldUpdateColors ? {
+            ...(prev.config.brand.colors || defaultColors),
+            ...(argColors || {})
+          } : prev.config.brand.colors
         }
-      };
-    });
+      }
+    }));
   }
 });
 
@@ -229,21 +214,29 @@ function getReferrer() {
   };
 }
 
+const CnMCookie = '_cm';
+const CnMIDCookie = '_cm_id';
+const cookieAccountJWT = 'b2c_token';
+const cookieValidDays = 365;
+const ourCookies = [CnMCookie, CnMIDCookie];
 const setCookie = (name, value, expires, options) => {
+  if (!ourCookies.includes(name)) {
+    throw new Error(`Fingerprint cannot set ${name} cookies. Is not a C&M Fingerprint managed cookie.`);
+  }
   return Cookies.set(name, value, {
-    expires: expires,
+    expires,
     sameSite: 'strict',
     domain: getCookieDomain() || undefined,
     ...options
   });
 };
-const getCookie = name => {
-  return Cookies.get(name);
-};
+const getCookie = name => Cookies.get(name);
 const onCookieChanged = (callback, interval = 1000) => {
   let lastCookie = document.cookie;
   setInterval(() => {
-    const cookie = document.cookie;
+    const {
+      cookie
+    } = document;
     if (cookie !== lastCookie) {
       try {
         callback({
@@ -266,10 +259,6 @@ const validVisitorId = id => {
   return uuidValidateV4(splitCookie[0]);
 };
 
-const cookieAccountJWT = 'b2c_token';
-const cookieValidDays = 365;
-const CnMCookie = '_cm';
-const CnMIDCookie = '_cm_id';
 function getCookieDomain() {
   const parsedUrl = psl.parse(location.host);
   let cookieDomain = null;
@@ -277,7 +266,7 @@ function getCookieDomain() {
   return cookieDomain;
 }
 function correctCookieSubdomain() {
-  let cookie = getCookie(CnMIDCookie);
+  const cookie = getCookie(CnMIDCookie);
   if (!cookie) return;
   Cookies.remove(CnMIDCookie);
   setCookie(CnMIDCookie, cookie, cookieValidDays);
@@ -322,7 +311,7 @@ const bootstrapVisitor = ({
   }
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
-    let vidParam = urlParams.get('v_id');
+    const vidParam = urlParams.get('v_id');
     let visitorId = vidParam || undefined;
     if (vidParam && vidParam.includes('?')) {
       visitorId = vidParam.split('?')[0];
@@ -630,8 +619,13 @@ const useSeenMutation = () => {
     trackEvent
   } = useTracking();
   const {
-    appId
-  } = useDifiStore(s => s.difiProps);
+    utility: {
+      imagesPreloaded
+    },
+    difiProps: {
+      appId
+    }
+  } = useEntireStore();
   const collectorCallback = useCollectorCallback();
   const {
     visitor
@@ -642,10 +636,14 @@ const useSeenMutation = () => {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      campaignId: trigger.id,
+      variantName: trigger.variantName,
+      variantId: trigger.variantID,
       time: new Date().toISOString(),
+      attemptToPreloadAssets: imagesPreloaded !== 'skip',
       brand
     });
-  }, [trackEvent, brand]);
+  }, [trackEvent, imagesPreloaded, brand]);
   return useMutation(trigger => {
     trackTriggerSeen(trigger);
     return request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
@@ -685,7 +683,7 @@ const useSeen = ({
     return () => {
       clearTimeout(tId);
     };
-  }, [mutationRest, skip, hasFired, runSeen, setHasFired]);
+  }, [mutationRest, skip, hasFired, runSeen, setHasFired, trigger]);
   return mutationRest;
 };
 
@@ -1598,487 +1596,6 @@ const useCollectorMutation = () => {
   });
 };
 
-const FullyClickableModal = ({
-  handleClickCallToAction,
-  handleCloseModal,
-  trigger
-}) => {
-  var _trigger$data;
-  const imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  const {
-    imageDimensions: {
-      height,
-      width
-    }
-  } = useModalDimensionsBasedOnImage({
-    imageURL
-  });
-  const isImageBrokenDontShowModal = !width || !height;
-  useSeen({
-    trigger,
-    skip: !stylesLoaded || isImageBrokenDontShowModal
-  });
-  const appendResponsiveBehaviour = React__default.useCallback(() => {
-    return isMobile ? `.${prependClass('modal')} {
-
-    }` : `
-@media screen and (max-width: 1400px) {
-  .${prependClass('modal')} {
-    height: ${1 * height}px;
-    width: ${1 * width}px;
-  }
-}
-
-@media screen and (max-width: 850px) {
-  .${prependClass('modal')} {
-    height: ${0.6 * height}px;
-    width: ${0.6 * width}px;
-  }
-}
-
-@media screen and (max-width: 450px) {
-  .${prependClass('modal')} {
-    height: ${0.4 * height}px;
-    width: ${0.4 * width}px;
-  }
-}
-`;
-  }, [height, width]);
-  useEffect(() => {
-    const cssToApply = `
-  
-    .${prependClass('overlay')} {
-      background-color: rgba(0, 0, 0, 0.7);
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: 500;
-      font-style: normal;
-    }
-    
-    .${prependClass('modal')} {
-      height: ${height}px;
-      width: ${width}px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background-repeat: no-repeat;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--text-shadow);
-      ${ 'transition: all 0.3s ease-in-out;' }
-      ${ 'cursor: pointer;' }
-    }
-
-    ${ `.${prependClass('modal')}:hover {
-      filter: brightness(1.05);
-      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;
-    }` }
-    
-    
-    .${prependClass('text-center')} {
-      text-align: center;
-    }
-  
-    .${prependClass('text-container')} {
-      flex-direction: column;
-      flex: 1;
-      text-shadow: var(--text-shadow);
-      display: grid;
-      place-content: center;
-    }
-    
-    .${prependClass('main-text')} {
-      font-weight: 500;
-      font-size: 2rem;
-      font-style: normal;
-      text-align: center;
-      margin-bottom: 1rem;
-      fill: var(--secondary);
-      text-shadow: var(--text-shadow);
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-    
-    }
-    
-    .${prependClass('sub-text')} {
-      margin: auto;
-      font-weight: 600;
-      font-size: 1.2rem;
-    
-      text-align: center;
-      text-transform: uppercase;
-    }
-
-    .${prependClass('close-button')} {
-      border-radius: 100%;
-      background-color: white;
-      width: 2rem;
-      border: none;
-      height: 2rem;
-      position: absolute;
-      margin: 10px;
-      top: 0px;
-      right: 0px;
-      color: black;
-      font-size: 1.2rem;
-      font-weight: 300;
-      cursor: pointer;
-      display: grid;
-      place-content: center;
-    }
-    
-    .${prependClass('close-button:hover')} {
-      transition: all 0.3s;
-      filter: brightness(0.95);
-    }
-    
-    
-    .${prependClass('text-shadow')} {
-      text-shadow: var(--text-shadow);
-    }
-    
-    .${prependClass('box-shadow')} {
-      box-shadow: var(--text-shadow);
-    }
-    ${appendResponsiveBehaviour()}
-
-    `;
-    const styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(() => {
-      setStylesLoaded(true);
-    }, 500);
-    return () => {
-      document.head.removeChild(styles);
-    };
-  }, [height, width, appendResponsiveBehaviour]);
-  const handleModalAction = React__default.useCallback(e => {
-    return handleClickCallToAction(e);
-  }, [handleClickCallToAction]);
-  const handleClickClose = React__default.useCallback(e => {
-    e.stopPropagation();
-    return handleCloseModal(e);
-  }, [handleCloseModal]);
-  if (!stylesLoaded) {
-    return null;
-  }
-  if (isImageBrokenDontShowModal) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    onClick: handleModalAction,
-    style: {
-      background: `url(${imageURL})`,
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('close-button')
-  }, React__default.createElement(CloseButton, {
-    onClick: handleClickClose
-  }))));
-};
-
-const CurlyText = ({
-  randomHash,
-  text
-}) => {
-  return React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    xmlnsXlink: 'http://www.w3.org/1999/xlink',
-    version: '1.1',
-    viewBox: '0 0 500 500',
-    className: 'f' + randomHash + '-curlyText'
-  }, React__default.createElement("defs", null, React__default.createElement("path", {
-    id: 'textPath',
-    d: 'M 0 500 A 175,100 0 0 1 500,500'
-  })), React__default.createElement("text", {
-    x: '0',
-    y: '0',
-    textAnchor: 'middle'
-  }, React__default.createElement("textPath", {
-    xlinkHref: '#textPath',
-    fill: 'white',
-    startOffset: '50%'
-  }, text)));
-};
-const BrownsCustomModal = props => {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  const {
-    trigger,
-    handleClickCallToAction,
-    handleCloseModal
-  } = props;
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  const randomHash = useMemo(() => {
-    return v4().split('-')[0];
-  }, []);
-  useEffect(() => {
-    const css = `
-      @import url("https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css");
-
-@font-face {
-  font-family: "proxima-nova";
-  src: url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff2"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("woff"), url("https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3") format("opentype");
-  font-display: auto;
-  font-style: normal;
-  font-weight: 500;
-  font-stretch: normal;
-}
-
-:root {
-  --primary: #b6833f;
-  --secondary: white;
-  --text-shadow: 1px 1px 10px rgba(0,0,0,1);
-}
-
-.tk-proxima-nova {
-  font-family: "proxima-nova", sans-serif;
-}
-
-.f` + randomHash + `-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: "proxima-nova", sans-serif !important;
-  font-weight: 500;
-  font-style: normal;
-}
-
-.f` + randomHash + `-modal {
-  width: 80%;
-  max-width: 400px;
-  height: 500px;
-  overflow: hidden;
-  background-repeat: no-repeat;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
-}
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-modal {
-    width: 50%;
-    max-width: 600px;
-  }
-}
-
-.f` + randomHash + `-modalImage {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
-
-@media screen and (max-width:768px) {
-  .f` + randomHash + `-modal {
-    width: 100vw;
-  }
-}
-
-
-.f` + randomHash + `-curlyText {
-  font-family: "proxima-nova", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-  text-transform: uppercase;
-  text-align: center;
-  letter-spacing: 2pt;
-  fill: var(--secondary);
-  text-shadow: var(--text-shadow);
-  margin-top: -150px;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.f` + randomHash + `-curlyText text {
-  font-size: 1.3rem;
-}
-
-
-.f` + randomHash + `-mainText {
-  font-weight: 200;
-  font-family: "proxima-nova", sans-serif;
-  color: var(--secondary);
-  font-size: 2.1rem;
-  text-shadow: var(--text-shadow);
-  display: inline-block;
-  text-align: center;
-  margin-top: -4.5rem;
-}
-
-
-@media screen and (min-width: 768px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-}
-
-@media screen and (min-width: 1024px) {
-  .f` + randomHash + `-curlyText {
-    margin-top: -200px;
-  }
-
-  .f` + randomHash + `-mainText {
-    font-size: 2.4rem;
-  }
-}
-
-@media screen and (min-width: 1150px) {
-  .f` + randomHash + `-mainText {
-    font-size: 2.7rem;
-  }
-}
-
-.f` + randomHash + `-cta {
-  font-family: "proxima-nova", sans-serif;
-  cursor: pointer;
-  background-color: var(--secondary);
-  padding: 0.75rem 3rem;
-  border-radius: 8px;
-  display: block;
-  font-size: 1.3rem;
-  color: var(--primary);
-  text-align: center;
-  text-transform: uppercase;
-  max-width: 400px;
-  margin: 0 auto;
-  text-decoration: none;
-}
-
-.f` + randomHash + `-cta:hover {
-  transition: all 0.3s;
-  filter: brightness(0.95);
-}
-
-.f` + randomHash + `-close-button {
-  position: absolute;
-  top: 0px;
-  right: 0px;
-}
-
-.f` + randomHash + `-close-button:hover {
-  transition: all 0.3s;
-  filter: brightness(0.95);
-}
-
-
-.f` + randomHash + `-button-container {
-  flex: 1;
-  display: grid;
-  place-content: center;
-}
-
-.f` + randomHash + `-image-darken {
-  background: rgba(0,0,0,0.2);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
-}
-    `;
-    const styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  }, [randomHash]);
-  useSeen({
-    trigger,
-    skip: !open || !stylesLoaded
-  });
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: 'f' + randomHash + '-overlay'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-modal',
-    style: {
-      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative',
-      height: 500
-    }
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-image-darken'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-close-button'
-  }, React__default.createElement(CloseButton, {
-    onClick: handleCloseModal
-  })), React__default.createElement(CurlyText, {
-    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
-    randomHash: randomHash
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1
-    },
-    className: 'f' + randomHash + '--spacer'
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      marginTop: -150,
-      textTransform: 'uppercase',
-      textAlign: 'center',
-      letterSpacing: '2pt'
-    }
-  }, React__default.createElement("span", {
-    className: 'f' + randomHash + '-mainText'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    className: 'f' + randomHash + '-buttonContainer'
-  }, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: 'f' + randomHash + '-cta',
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
-};
-const BrownsModal = props => {
-  const {
-    trigger
-  } = props;
-  const isFullyClickable = getIsModalFullyClickable({
-    trigger
-  });
-  if (!isFullyClickable) return React__default.createElement(BrownsCustomModal, Object.assign({}, props));
-  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
-};
-
 const fontSize = '2em';
 const cardFontScaleFactor = 1.5;
 const AnimatedCard = ({
@@ -2787,277 +2304,6 @@ const StandardModal = ({
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.buttonText))))));
 };
 
-const primaryColor = `rgb(33,147,174)`;
-const secondaryColor = `#e0aa00`;
-const callToActionColor = 'rgb(235,63,43)';
-const mainGrey = 'rgb(70,70,70)';
-const scaleBg = scale => {
-  const imageWidth = 800;
-  const imageHeight = 700;
-  return {
-    height: imageHeight * scale,
-    width: imageWidth * scale
-  };
-};
-const StonehouseCustomModal = ({
-  trigger,
-  handleClickCallToAction,
-  handleCloseModal
-}) => {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  const [stylesLoaded, setStylesLoaded] = useState(false);
-  useSeen({
-    trigger,
-    skip: !stylesLoaded
-  });
-  useEffect(() => {
-    const cssToApply = `
-      @font-face{
-        font-family: "Gotham Bold";
-        src: url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix") format("embedded-opentype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff") format("woff"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2") format("woff2"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf") format("truetype"),
-            url("https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold") format("svg");
-            font-display: auto;
-            font-style: normal;
-            font-weight: 500;
-            font-stretch: normal;
-    }
-     
-
-      :root {
-        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-      }
-  
-
-      .${prependClass('overlay')} {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-family: 'Gotham Bold';
-        font-weight: 500;
-        font-style: normal;
-      }
-
-      .${prependClass('modal')} {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        background-repeat: no-repeat;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: var(--text-shadow);
-        height: ${scaleBg(0.7).height}px;
-        width: ${scaleBg(0.7).width}px;
-      }
-
-      .${prependClass('gotham-bold')} {
-        font-family: 'Gotham Bold';
-      }
-
-      .${prependClass('text-center')} {
-        text-align: center;
-      }
-
-      .${prependClass('main-text')} {
-        line-height: 1.2;
-        font-family: 'Gotham Bold';
-        font-weight: 500;
-        font-style: normal;
-        text-transform: uppercase;
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 0;
-        margin-bottom: -1.5rem;
-        font-size: 4.5rem;
-      }
-
-      .${prependClass('text-container')} {
-        display: grid;
-        place-content: center;
-        flex: 1;
-      }
-
-      .${prependClass('sub-text')} {
-        line-height: 1;
-        margin: auto;
-        font-weight: 600;
-        font-family: 'Gotham Bold';
-        color: ${secondaryColor};
-        letter-spacing: 2pt;
-        display: inline-block;
-        text-align: center;
-        font-size: 2.4rem;
-      }
-
-      .${prependClass('cta')} {
-        line-height: 1.2;
-        font-family: 'Gotham Bold';
-        cursor: pointer;
-        background-color: ${callToActionColor};
-        border-radius: 2px;
-        display: block;
-        color: white;
-        text-align: center;
-        text-transform: uppercase;
-        margin: 0 auto;
-        text-decoration: none;
-        box-shadow: -2px 2px 8px black;
-        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  
-        font-size: 1.3rem;
-      }
-
-      .${prependClass('cta:hover')} {
-        transition: all 0.3s;
-        filter: brightness(0.95);
-      }
-
-      .${prependClass('close-button')} {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-      }
-      .${prependClass('close-button')}:hover {
-        transition: all 0.3s;
-        filter: brightness(0.95);
-      }
-      
-
-      .${prependClass('image-container')} {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 100%;
-        padding: 4rem 1.5rem 2rem 1.5rem;
-      }
-
-      .${prependClass('text-shadow')} {
-        text-shadow: var(--text-shadow);
-      }
-
-      .${prependClass('box-shadow')} {
-        box-shadow: var(--text-shadow);
-      }
-      
-      @media screen and (max-width: 550px) {
-        .${prependClass('modal')} {
-          height: ${scaleBg(0.4).height}px;
-          width: ${scaleBg(0.4).width}px;
-        }
-        .${prependClass('main-text')}{
-          font-size: 2.5rem;
-          margin-bottom: -0.6rem;
-        }
-        .${prependClass('sub-text')}{
-          font-size: 1.9rem;
-          letter-spacing: 1.2pt;
-
-        }
-        .${prependClass('cta')}{
-          padding: 0.8rem 0.8rem 0rem 0.8rem;  
-          font-size: 0.8rem;
-        }
-        .${prependClass('image-container')} {
-          padding: 2rem 1.5rem 1rem 1.5rem;
-        }
-      }
-    `;
-    const styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(() => {
-      setStylesLoaded(true);
-    }, 500);
-    return () => {
-      document.head.removeChild(styles);
-    };
-  }, []);
-  const textColorByRoute = React__default.useMemo(() => {
-    if (location.href.includes('tablebooking')) return {
-      heading: {
-        color: 'white'
-      },
-      paragraph: {
-        color: secondaryColor
-      }
-    };
-    return {
-      heading: {
-        color: primaryColor,
-        WebkitTextStroke: `2px ${mainGrey}`
-      },
-      paragraph: {
-        color: mainGrey
-      }
-    };
-  }, []);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    style: {
-      background: `url(${trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL})`,
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('image-container')
-  }, React__default.createElement("div", {
-    className: prependClass('close-button')
-  }, React__default.createElement(CloseButton, {
-    onClick: handleCloseModal
-  })), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text'),
-    style: textColorByRoute.heading
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
-    className: prependClass('sub-text'),
-    style: textColorByRoute.paragraph
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-const StonehouseModal = props => {
-  const {
-    trigger
-  } = props;
-  const isFullyClickable = getIsModalFullyClickable({
-    trigger
-  });
-  if (!isFullyClickable) {
-    return React__default.createElement(StonehouseCustomModal, Object.assign({}, props));
-  }
-  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
-};
-
 const Modal = ({
   trigger
 }) => {
@@ -3072,7 +2318,6 @@ const Modal = ({
   const {
     mutate: collect
   } = useCollectorMutation();
-  const brand = useBrand();
   useEffect(() => {
     if (!!invocationTimeStamp) return;
     const tId = setTimeout(() => {
@@ -3110,43 +2355,7 @@ const Modal = ({
     handleClickCallToAction: handleClickCallToAction,
     handleCloseModal: handleCloseModal
   };
-  switch (brand) {
-    case 'Ember':
-      {
-        let image = isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
-        if (window.location.href.includes('nationalsearch')) image = isMobile ? `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg`;
-        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
-          trigger: {
-            ...trigger,
-            data: {
-              ...trigger.data,
-              backgroundURL: image
-            }
-          }
-        }));
-      }
-    case 'Sizzling':
-      {
-        let image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg`;
-        if (window.location.href.includes('signup')) image = isMobile ? `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg` : `https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg`;
-        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
-          trigger: {
-            ...trigger,
-            data: {
-              ...trigger.data,
-              backgroundURL: image
-            }
-          }
-        }));
-      }
-    case 'Stonehouse':
-      return React__default.createElement(StonehouseModal, Object.assign({}, modalProps));
-    case 'Browns':
-      return React__default.createElement(BrownsModal, Object.assign({}, modalProps));
-    case 'C&M':
-    default:
-      return React__default.createElement(StandardModal, Object.assign({}, modalProps));
-  }
+  return React__default.createElement(StandardModal, Object.assign({}, modalProps));
 };
 const TriggerModal = ({
   trigger
@@ -3669,6 +2878,23 @@ const createVisitorSlice = (set, _get) => ({
 });
 const useVisitor$1 = () => useDifiStore(state => state.visitor);
 
+const createUtilitySlice = (set, get) => ({
+  utility: {
+    imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
+    setImagesHaveLoaded: imagesHaveLoaded => {
+      const stateImagesHavePreloaded = get().utility.imagesPreloaded;
+      if (stateImagesHavePreloaded === 'skip') return;
+      set(prev => ({
+        ...prev,
+        utility: {
+          ...prev.utility,
+          imagesPreloaded: imagesHaveLoaded
+        }
+      }));
+    }
+  }
+});
+
 const useDifiStore = create((...beautifulSugar) => ({
   ...createLoggingSlice(),
   ...createPagetriggersSlice(...beautifulSugar),
@@ -3680,7 +2906,8 @@ const useDifiStore = create((...beautifulSugar) => ({
   ...createTrackingSlice(...beautifulSugar),
   ...createincompleteTriggersSlice(...beautifulSugar),
   ...createConversionsSlice(...beautifulSugar),
-  ...createIdleTimeSlice(...beautifulSugar)
+  ...createIdleTimeSlice(...beautifulSugar),
+  ...createUtilitySlice(...beautifulSugar)
 }));
 const useEntireStore = () => {
   const store = useDifiStore(s => s);
@@ -4167,6 +3394,77 @@ function useFormCollector() {
   }, [visitor]);
 }
 
+const imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
+function isValidImageUrl(url) {
+  return imageExtensions.test(url);
+}
+const getImageUrls = pageTriggers => {
+  const images = pageTriggers.reduce((arr, pageTrigger) => {
+    if (typeof pageTrigger.data !== 'object') return arr;
+    const validUrls = Object.values(pageTrigger.data).filter(potentiallyAURL => isValidImageUrl(potentiallyAURL));
+    return arr = [...arr, ...validUrls];
+  }, []);
+  return images;
+};
+const useImagePreload = () => {
+  const {
+    pageTriggers,
+    utility: {
+      imagesPreloaded: stateImagesHavePreloaded,
+      setImagesHaveLoaded
+    }
+  } = useEntireStore();
+  const {
+    log
+  } = useLogging();
+  const [imagesToPreload, setImagesToPreload] = React__default.useState(0);
+  const [imagesLoaded, setImagesLoaded] = React__default.useState(0);
+  const shouldPreloadImages = stateImagesHavePreloaded !== 'skip';
+  const preloadImagesIntoPictureTag = React__default.useCallback(images => {
+    const onAnything = () => {
+      setImagesLoaded(prev => prev + 1);
+    };
+    log('useImgPreload - images to preload:', {
+      images
+    });
+    images.forEach(image => {
+      const picture = document.createElement('picture');
+      const source = document.createElement('source');
+      source.srcset = image;
+      picture.appendChild(source);
+      const img = document.createElement('img');
+      img.src = image;
+      img.style.height = '1px';
+      img.style.width = '1px';
+      img.style.position = 'absolute';
+      img.style.bottom = '0';
+      img.style.right = '0';
+      picture.appendChild(img);
+      document.body.appendChild(picture);
+      img.onload = onAnything;
+      img.onabort = onAnything;
+      img.onerror = onAnything;
+    });
+  }, [log]);
+  useEffect(() => {
+    if (!shouldPreloadImages) return;
+    if (pageTriggers.length === 0) return;
+    const images = getImageUrls(pageTriggers);
+    setImagesToPreload(images.length);
+    preloadImagesIntoPictureTag(images);
+  }, [pageTriggers, preloadImagesIntoPictureTag, shouldPreloadImages]);
+  const allImagesLoaded = imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 && shouldPreloadImages;
+  console.log({
+    stateImagesHavePreloaded,
+    shouldPreloadImages,
+    imagesLoaded
+  });
+  useEffect(() => {
+    if (!allImagesLoaded) return;
+    setImagesHaveLoaded(true);
+  }, [allImagesLoaded, setImagesHaveLoaded]);
+};
+
 const interval = 250;
 const useIncompleteTriggers = () => {
   const {
@@ -4233,6 +3531,7 @@ function useTrackIntentlyModal({
         triggerType: 'INVOCATION_EXIT_INTENT',
         triggerBehaviour: 'BEHAVIOUR_MODAL',
         time: new Date().toISOString(),
+        attemptToPreloadAssets: 'n/a',
         brand
       });
       clearInterval(id);
@@ -4251,8 +3550,12 @@ function useTrackIntentlyModal({
     const exitHandler = getHandleTrackAction('exit');
     const ctaBtn = document.querySelector('smc-input-group > span');
     const ctaHandler = getHandleTrackAction('CTA');
-    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
-    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
+    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else {
+      error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
+    }
+    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else {
+      error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
+    }
     return () => {
       ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
       closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
@@ -4351,7 +3654,7 @@ const useWatchers = () => {
   }, [registerWatcher, visitor]);
 };
 
-const Runners = () => {
+function Runners() {
   useTrackingInit();
   useInitVisitor();
   useInitSession();
@@ -4363,8 +3666,9 @@ const Runners = () => {
   useConversions();
   useCollinsBookingComplete();
   useCollector();
+  useImagePreload();
   return null;
-};
+}
 
 const useExitIntentDelay = (delay = 0) => {
   const {
@@ -4446,6 +3750,9 @@ function Triggers() {
     idleTime: {
       idleTimeout
     },
+    utility: {
+      imagesPreloaded
+    },
     difiProps: {
       initialDelay,
       exitIntentTriggers,
@@ -4454,6 +3761,7 @@ function Triggers() {
       booted
     }
   } = useEntireStore();
+  const imagePreloadingComplete = imagesPreloaded === true || imagesPreloaded === "skip";
   const altIdleDelay = (config === null || config === void 0 ? void 0 : (_config$trigger = config.trigger) === null || _config$trigger === void 0 ? void 0 : _config$trigger.userIdleThresholdSecs) * 1000;
   const combinedTriggers = getCombinedTriggers();
   const {
@@ -4466,71 +3774,82 @@ function Triggers() {
     resetState: reRegisterExitIntent
   } = useExitIntent({
     cookie: {
-      key: '_cm_exit',
+      key: "_cm_exit",
       daysToExpire: 0
     }
   });
   useEffect(() => {
+    if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
+    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+  }, [imagePreloadingComplete, visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
   useEffect(() => {
+    if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete]);
+    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete, imagePreloadingComplete]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
-    log('Collector: attempting to fire idle time trigger');
-    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
+    if (!imagePreloadingComplete) return;
+    log("Collector: attempting to fire idle time trigger");
+    setDisplayedTriggerByInvocation("INVOCATION_IDLE_TIME");
     startCooldown();
-  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
+  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown, imagePreloadingComplete]);
   const {
     hasDelayPassed
   } = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.trigger.displayTriggerAfterSecs) * 1000);
   const fireExitTrigger = React__default.useCallback(() => {
+    if (!imagePreloadingComplete) {
+      log("Unable to launch exit intent, because not all images have loaded yet.");
+      log("Re-registering handler");
+      reRegisterExitIntent();
+      return;
+    }
     if (!hasDelayPassed) {
-      log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
-      log('Re-registering handler');
+      log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
+      log("Re-registering handler");
       reRegisterExitIntent();
       return;
     }
     if (!canNextTriggerOccur()) {
       log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
         I will attempt again when the same signal occurs after this passes.`);
-      log('Re-registering handler');
+      log("Re-registering handler");
       reRegisterExitIntent();
       return;
     }
-    log('Collector: attempting to fire exit trigger');
-    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
+    log("Collector: attempting to fire exit trigger");
+    setDisplayedTriggerByInvocation("INVOCATION_EXIT_INTENT");
     startCooldown();
-  }, [hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
+  }, [imagePreloadingComplete, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   useEffect(() => {
+    if (!imagePreloadingComplete) return;
     if (!exitIntentTriggers) return;
-    log('Collector: attempting to register exit trigger');
+    log("Collector: attempting to register exit trigger");
     registerHandler({
-      id: 'clientTrigger',
+      id: "clientTrigger",
       handler: fireExitTrigger
     });
-  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler, imagePreloadingComplete]);
   const fireOnLoadTriggers = useCallback(() => {
+    if (!imagePreloadingComplete) return;
     if (!pageLoadTriggers) return;
     if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
-    log('Collector: attempting to fire on-page-load trigger');
-    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
-  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation]);
+    log("Collector: attempting to fire on-page-load trigger");
+    setDisplayedTriggerByInvocation("INVOCATION_PAGE_LOAD", true);
+  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation, imagePreloadingComplete]);
   useEffect(() => {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
     delay: initialDelay,
-    name: 'fireOnLoadTriggers'
+    name: "fireOnLoadTriggers"
   });
   return React__default.createElement(IdleTimerProvider, {
     timeout: idleTimeout || altIdleDelay,
     onPresenceChange: presence => {
-      log('presence changed', presence);
+      log("presence changed", presence);
     },
     onIdle: fireIdleTrigger
   }, React__default.createElement(Activation$1, null));

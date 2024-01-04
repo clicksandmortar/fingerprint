@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
-import { useDifiStore } from '../../beautifulSugar/store';
+import { useEntireStore } from '../../beautifulSugar/store';
 import { BannerTrigger } from '../../behaviours/Banner/Banner.types';
 import { DataCaptureTrigger } from '../../behaviours/Modal/Modal.types';
 import { Trigger } from '../../client/types';
@@ -19,7 +19,7 @@ import { useTracking } from '../useTracking';
 export const useSeenMutation = () => {
   const { log, error } = useLogging();
   const { trackEvent } = useTracking();
-  const { appId } = useDifiStore((s) => s.difiProps);
+  const { utility: { imagesPreloaded }, difiProps: { appId } } = useEntireStore();
 
   const collectorCallback = useCollectorCallback();
   const { visitor } = useVisitor();
@@ -31,11 +31,18 @@ export const useSeenMutation = () => {
         triggerId: trigger.id,
         triggerType: trigger.invocation,
         triggerBehaviour: trigger.behaviour,
+        // note that triggerId == campaignId has NOT always been the case.
+        // When aggregating data, use payload.campaignId for campaigns, rather than
+        //  payload.triggerId
+        campaignId: trigger.id,
+        variantName: trigger.variantName,
+        variantId: trigger.variantID,
         time: new Date().toISOString(),
+        attemptToPreloadAssets: imagesPreloaded !== 'skip',
         brand,
       });
     },
-    [trackEvent, brand],
+    [trackEvent, imagesPreloaded, brand],
   );
 
   return useMutation<Response, {}, unknown, unknown>(
@@ -64,6 +71,10 @@ export const useSeenMutation = () => {
   );
 };
 
+/**
+ * run the seen mutation after a short delay and prevent from
+ * re-firing on rerenders
+ */
 export const useSeen = ({
   trigger,
   skip,
@@ -94,7 +105,7 @@ export const useSeen = ({
     return () => {
       clearTimeout(tId);
     };
-  }, [mutationRest, skip, hasFired, runSeen, setHasFired]);
+  }, [mutationRest, skip, hasFired, runSeen, setHasFired, trigger]);
 
   // NOTE: do not export the actual mutation
   // just statuses - to prevent from running multiple times by accident
