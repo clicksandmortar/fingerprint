@@ -2673,6 +2673,25 @@ var createTrackingSlice = function createTrackingSlice(set, _get) {
   };
 };
 
+var createUtilitySlice = function createUtilitySlice(set, get) {
+  return {
+    utility: {
+      imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
+      setImagesHaveLoaded: function setImagesHaveLoaded(imagesHaveLoaded) {
+        var stateImagesHavePreloaded = get().utility.imagesPreloaded;
+        if (stateImagesHavePreloaded === 'skip') return;
+        set(function (prev) {
+          return _extends({}, prev, {
+            utility: _extends({}, prev.utility, {
+              imagesPreloaded: imagesHaveLoaded
+            })
+          });
+        });
+      }
+    }
+  };
+};
+
 var createVisitorSlice = function createVisitorSlice(set, _get) {
   return {
     visitor: {},
@@ -2695,25 +2714,6 @@ var useVisitor$1 = function useVisitor() {
   return useDifiStore(function (state) {
     return state.visitor;
   });
-};
-
-var createUtilitySlice = function createUtilitySlice(set, get) {
-  return {
-    utility: {
-      imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
-      setImagesHaveLoaded: function setImagesHaveLoaded(imagesHaveLoaded) {
-        var stateImagesHavePreloaded = get().utility.imagesPreloaded;
-        if (stateImagesHavePreloaded === 'skip') return;
-        set(function (prev) {
-          return _extends({}, prev, {
-            utility: _extends({}, prev.utility, {
-              imagesPreloaded: imagesHaveLoaded
-            })
-          });
-        });
-      }
-    }
-  };
 };
 
 var useDifiStore = zustand.create(function () {

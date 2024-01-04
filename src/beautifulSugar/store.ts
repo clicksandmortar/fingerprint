@@ -19,10 +19,9 @@ import {
 } from './slices/pageTriggersSlice';
 import { createIntentlySlice, IntentlySlice } from './slices/temp_intentlySlice';
 import { createTrackingSlice, TrackingSlice } from './slices/trackingSlice';
+import { createUtilitySlice, UtilitySlice } from './slices/utilitySlice';
 import { createVisitorSlice, VisitorSlice } from './slices/visitorSlice';
 import { UseDifiStore } from './types';
-// this file name must remain as is, otherwise the octopus will be deployed.
-import { createUtilitySlice, UtilitySlice } from './slices/utilitySlice';
 
 export type DifiStore = PageTriggersSlice &
   ConfigSlice &

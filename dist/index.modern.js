@@ -2863,21 +2863,6 @@ const createTrackingSlice = (set, _get) => ({
   }
 });
 
-const createVisitorSlice = (set, _get) => ({
-  visitor: {},
-  setVisitor: partialVisitor => set(prev => ({
-    visitor: {
-      ...prev.visitor,
-      ...partialVisitor
-    }
-  })),
-  session: {},
-  setSession: updatedSession => set({
-    session: updatedSession
-  })
-});
-const useVisitor$1 = () => useDifiStore(state => state.visitor);
-
 const createUtilitySlice = (set, get) => ({
   utility: {
     imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
@@ -2894,6 +2879,21 @@ const createUtilitySlice = (set, get) => ({
     }
   }
 });
+
+const createVisitorSlice = (set, _get) => ({
+  visitor: {},
+  setVisitor: partialVisitor => set(prev => ({
+    visitor: {
+      ...prev.visitor,
+      ...partialVisitor
+    }
+  })),
+  session: {},
+  setSession: updatedSession => set({
+    session: updatedSession
+  })
+});
+const useVisitor$1 = () => useDifiStore(state => state.visitor);
 
 const useDifiStore = create((...beautifulSugar) => ({
   ...createLoggingSlice(),
