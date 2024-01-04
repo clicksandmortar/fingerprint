@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
-import { useDifiStore, useEntireStore } from '../../beautifulSugar/store';
+import { useEntireStore } from '../../beautifulSugar/store';
 import { BannerTrigger } from '../../behaviours/Banner/Banner.types';
 import { DataCaptureTrigger } from '../../behaviours/Modal/Modal.types';
 import { Trigger } from '../../client/types';
@@ -12,14 +12,14 @@ import { useBrand } from '../useBrandConfig';
 import useCollectorCallback from '../useCollectorCallback';
 import { useLogging } from '../useLogging';
 import { useTracking } from '../useTracking';
+
 /**
- * Ping the endpoint to mark a trigger as seen and, if needed, prevent from resurfacing.
- */
+* Mutation to mark a trigger as seen and NOT show it again to the current visitor.
+*/
 export const useSeenMutation = () => {
   const { log, error } = useLogging();
   const { trackEvent } = useTracking();
-  const { appId } = useDifiStore((s) => s.difiProps);
-  const { utility: { imagesPreloaded } } = useEntireStore();
+  const { utility: { imagesPreloaded }, difiProps: { appId } } = useEntireStore();
 
   const collectorCallback = useCollectorCallback();
   const { visitor } = useVisitor();

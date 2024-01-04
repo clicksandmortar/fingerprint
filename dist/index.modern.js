@@ -429,17 +429,6 @@ const useInitVisitor = () => {
 };
 const useVisitor = () => useDifiStore(s => s);
 
-const useConfig = () => useEntireStore().config;
-const useBrand = () => {
-  const configBrandName = useConfig().brand.name;
-  if (configBrandName) return configBrandName;
-  return _LEGACY_getBrand();
-};
-const useTriggerConfig = () => useConfig().trigger;
-const useBrandColors = () => {
-  return useConfig().brand.colors || defaultColors;
-};
-
 const createIdleTimeSlice = (set, get) => {
   var _get, _get$config, _get$config$trigger;
   return {
@@ -462,6 +451,17 @@ const createIdleTimeSlice = (set, get) => {
   };
 };
 const useIdleTime = () => useDifiStore(s => s.idleTime);
+
+const useConfig = () => useEntireStore().config;
+const useBrand = () => {
+  const configBrandName = useConfig().brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
+};
+const useTriggerConfig = () => useConfig().trigger;
+const useBrandColors = () => {
+  return useConfig().brand.colors || defaultColors;
+};
 
 function useTriggerDelay() {
   const {
@@ -554,6 +554,39 @@ const useCollectorCallback = () => {
   return collectorCallback;
 };
 
+const useDismissMutation = () => {
+  const {
+    log,
+    error
+  } = useLogging();
+  const {
+    appId
+  } = useDifiStore(st => st.difiProps);
+  const {
+    visitor
+  } = useVisitor();
+  const collectorCallback = useCollectorCallback();
+  const url = `${hostname}/triggers/${appId}/${visitor.id}/dismissed`;
+  const mutation = useMutation(data => request.put(url, {
+    dismissedTriggers: data,
+    visitor,
+    page: getPagePayload(),
+    device: deviceInfo
+  }).then(response => {
+    log('Trigger API response', response);
+    return response;
+  }).catch(err => {
+    error('Trigger API error', err);
+    return err;
+  }), {
+    onSuccess: collectorCallback
+  });
+  return {
+    ...mutation,
+    dismissTrigger: mutation.mutate
+  };
+};
+
 const trackEvent = (event, props, callback) => {
   return mixpanel.track(event, props, callback);
 };
@@ -586,11 +619,11 @@ const useSeenMutation = () => {
     trackEvent
   } = useTracking();
   const {
-    appId
-  } = useDifiStore(s => s.difiProps);
-  const {
     utility: {
       imagesPreloaded
+    },
+    difiProps: {
+      appId
     }
   } = useEntireStore();
   const collectorCallback = useCollectorCallback();
@@ -1077,9 +1110,9 @@ const SideBanner = ({
   }));
 };
 
-const Banner = ({
+function Banner({
   trigger
-}) => {
+}) {
   var _trigger$data3;
   const {
     removeActiveTrigger
@@ -1088,16 +1121,22 @@ const Banner = ({
     trackEvent
   } = useTracking();
   const [open, setOpen] = useState(true);
+  const {
+    dismissTrigger
+  } = useDismissMutation();
   useSeen({
     trigger,
     skip: !open
   });
   if (!open) return null;
   const handleClickCallToAction = e => {
-    var _trigger$data, _trigger$data2;
+    var _trigger$data;
     e.preventDefault();
     trackEvent('user_clicked_button', trigger);
-    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    if (trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonURL) {
+      var _trigger$data2;
+      window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    }
     setOpen(false);
     resetPad();
   };
@@ -1106,24 +1145,28 @@ const Banner = ({
     trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
+    dismissTrigger([{
+      campaignId: trigger.id,
+      variantId: trigger.variantID || ''
+    }]);
     resetPad();
   };
   const props = {
-    handleClose: handleClose,
+    handleClose,
     handleAction: handleClickCallToAction,
-    trigger: trigger
+    trigger
   };
   const position = (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.position;
-  if (position === 'left' || position === 'right') return React__default.createElement(SideBanner, Object.assign({}, props));
+  if (position === 'left' || position === 'right') {
+    return React__default.createElement(SideBanner, Object.assign({}, props));
+  }
   return React__default.createElement(HorizontalBanner, Object.assign({}, props));
-};
+}
 const TriggerBanner = ({
   trigger
-}) => {
-  return ReactDOM.createPortal(React__default.createElement(Banner, {
-    trigger: trigger
-  }), document.body);
-};
+}) => ReactDOM.createPortal(React__default.createElement(Banner, {
+  trigger: trigger
+}), document.body);
 
 const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;
@@ -2820,21 +2863,6 @@ const createTrackingSlice = (set, _get) => ({
   }
 });
 
-const createVisitorSlice = (set, _get) => ({
-  visitor: {},
-  setVisitor: partialVisitor => set(prev => ({
-    visitor: {
-      ...prev.visitor,
-      ...partialVisitor
-    }
-  })),
-  session: {},
-  setSession: updatedSession => set({
-    session: updatedSession
-  })
-});
-const useVisitor$1 = () => useDifiStore(state => state.visitor);
-
 const createUtilitySlice = (set, get) => ({
   utility: {
     imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
@@ -2851,6 +2879,21 @@ const createUtilitySlice = (set, get) => ({
     }
   }
 });
+
+const createVisitorSlice = (set, _get) => ({
+  visitor: {},
+  setVisitor: partialVisitor => set(prev => ({
+    visitor: {
+      ...prev.visitor,
+      ...partialVisitor
+    }
+  })),
+  session: {},
+  setSession: updatedSession => set({
+    session: updatedSession
+  })
+});
+const useVisitor$1 = () => useDifiStore(state => state.visitor);
 
 const useDifiStore = create((...beautifulSugar) => ({
   ...createLoggingSlice(),

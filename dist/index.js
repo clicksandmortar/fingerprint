@@ -512,21 +512,6 @@ var useVisitor = function useVisitor() {
   });
 };
 
-var useConfig = function useConfig() {
-  return useEntireStore().config;
-};
-var useBrand = function useBrand() {
-  var configBrandName = useConfig().brand.name;
-  if (configBrandName) return configBrandName;
-  return _LEGACY_getBrand();
-};
-var useTriggerConfig = function useTriggerConfig() {
-  return useConfig().trigger;
-};
-var useBrandColors = function useBrandColors() {
-  return useConfig().brand.colors || defaultColors;
-};
-
 var createIdleTimeSlice = function createIdleTimeSlice(set, get) {
   var _get, _get$config, _get$config$trigger;
   return {
@@ -558,6 +543,21 @@ var useIdleTime = function useIdleTime() {
   return useDifiStore(function (s) {
     return s.idleTime;
   });
+};
+
+var useConfig = function useConfig() {
+  return useEntireStore().config;
+};
+var useBrand = function useBrand() {
+  var configBrandName = useConfig().brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
+};
+var useTriggerConfig = function useTriggerConfig() {
+  return useConfig().trigger;
+};
+var useBrandColors = function useBrandColors() {
+  return useConfig().brand.colors || defaultColors;
 };
 
 function useTriggerDelay() {
@@ -649,6 +649,39 @@ var useCollectorCallback = function useCollectorCallback() {
   return collectorCallback;
 };
 
+var useDismissMutation = function useDismissMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useDifiStore = useDifiStore(function (st) {
+      return st.difiProps;
+    }),
+    appId = _useDifiStore.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var collectorCallback = useCollectorCallback();
+  var url = hostname + "/triggers/" + appId + "/" + visitor.id + "/dismissed";
+  var mutation = reactQuery.useMutation(function (data) {
+    return request.put(url, {
+      dismissedTriggers: data,
+      visitor: visitor,
+      page: getPagePayload(),
+      device: deviceInfo
+    }).then(function (response) {
+      log('Trigger API response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Trigger API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: collectorCallback
+  });
+  return _extends({}, mutation, {
+    dismissTrigger: mutation.mutate
+  });
+};
+
 var trackEvent = function trackEvent(event, props, callback) {
   return mixpanel.track(event, props, callback);
 };
@@ -679,12 +712,9 @@ var useSeenMutation = function useSeenMutation() {
     error = _useLogging.error;
   var _useTracking = useTracking(),
     trackEvent = _useTracking.trackEvent;
-  var _useDifiStore = useDifiStore(function (s) {
-      return s.difiProps;
-    }),
-    appId = _useDifiStore.appId;
   var _useEntireStore = useEntireStore(),
-    imagesPreloaded = _useEntireStore.utility.imagesPreloaded;
+    imagesPreloaded = _useEntireStore.utility.imagesPreloaded,
+    appId = _useEntireStore.difiProps.appId;
   var collectorCallback = useCollectorCallback();
   var _useVisitor = useVisitor(),
     visitor = _useVisitor.visitor;
@@ -1176,7 +1206,7 @@ var SideBanner = function SideBanner(_ref) {
   }));
 };
 
-var Banner = function Banner(_ref) {
+function Banner(_ref) {
   var _trigger$data3;
   var trigger = _ref.trigger;
   var _useEntireStore = useEntireStore(),
@@ -1186,16 +1216,21 @@ var Banner = function Banner(_ref) {
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
+  var _useDismissMutation = useDismissMutation(),
+    dismissTrigger = _useDismissMutation.dismissTrigger;
   useSeen({
     trigger: trigger,
     skip: !open
   });
   if (!open) return null;
   var handleClickCallToAction = function handleClickCallToAction(e) {
-    var _trigger$data, _trigger$data2;
+    var _trigger$data;
     e.preventDefault();
     trackEvent('user_clicked_button', trigger);
-    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    if (trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonURL) {
+      var _trigger$data2;
+      window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    }
     setOpen(false);
     resetPad();
   };
@@ -1204,6 +1239,10 @@ var Banner = function Banner(_ref) {
     trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
+    dismissTrigger([{
+      campaignId: trigger.id,
+      variantId: trigger.variantID || ''
+    }]);
     resetPad();
   };
   var props = {
@@ -1212,9 +1251,11 @@ var Banner = function Banner(_ref) {
     trigger: trigger
   };
   var position = (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.position;
-  if (position === 'left' || position === 'right') return React__default.createElement(SideBanner, Object.assign({}, props));
+  if (position === 'left' || position === 'right') {
+    return React__default.createElement(SideBanner, Object.assign({}, props));
+  }
   return React__default.createElement(HorizontalBanner, Object.assign({}, props));
-};
+}
 var TriggerBanner = function TriggerBanner(_ref2) {
   var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Banner, {
@@ -2632,6 +2673,25 @@ var createTrackingSlice = function createTrackingSlice(set, _get) {
   };
 };
 
+var createUtilitySlice = function createUtilitySlice(set, get) {
+  return {
+    utility: {
+      imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
+      setImagesHaveLoaded: function setImagesHaveLoaded(imagesHaveLoaded) {
+        var stateImagesHavePreloaded = get().utility.imagesPreloaded;
+        if (stateImagesHavePreloaded === 'skip') return;
+        set(function (prev) {
+          return _extends({}, prev, {
+            utility: _extends({}, prev.utility, {
+              imagesPreloaded: imagesHaveLoaded
+            })
+          });
+        });
+      }
+    }
+  };
+};
+
 var createVisitorSlice = function createVisitorSlice(set, _get) {
   return {
     visitor: {},
@@ -2654,25 +2714,6 @@ var useVisitor$1 = function useVisitor() {
   return useDifiStore(function (state) {
     return state.visitor;
   });
-};
-
-var createUtilitySlice = function createUtilitySlice(set, get) {
-  return {
-    utility: {
-      imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
-      setImagesHaveLoaded: function setImagesHaveLoaded(imagesHaveLoaded) {
-        var stateImagesHavePreloaded = get().utility.imagesPreloaded;
-        if (stateImagesHavePreloaded === 'skip') return;
-        set(function (prev) {
-          return _extends({}, prev, {
-            utility: _extends({}, prev.utility, {
-              imagesPreloaded: imagesHaveLoaded
-            })
-          });
-        });
-      }
-    }
-  };
 };
 
 var useDifiStore = zustand.create(function () {
