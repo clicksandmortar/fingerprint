@@ -31,6 +31,9 @@ export const useSeenMutation = () => {
         triggerId: trigger.id,
         triggerType: trigger.invocation,
         triggerBehaviour: trigger.behaviour,
+        variantName: trigger.variantName,
+        variantId: trigger.variantID,
+        // TODO: add campaignName: trigger.campaignName??, when its available
         time: new Date().toISOString(),
         attemptToPreloadAssets: imagesPreloaded !== 'skip',
         brand,

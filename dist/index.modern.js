@@ -614,6 +614,8 @@ const useSeenMutation = () => {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      variantName: trigger.variantName,
+      variantId: trigger.variantID,
       time: new Date().toISOString(),
       attemptToPreloadAssets: imagesPreloaded !== 'skip',
       brand
