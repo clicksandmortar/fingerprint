@@ -214,21 +214,29 @@ function getReferrer() {
   };
 }
 
+const CnMCookie = '_cm';
+const CnMIDCookie = '_cm_id';
+const cookieAccountJWT = 'b2c_token';
+const cookieValidDays = 365;
+const ourCookies = [CnMCookie, CnMIDCookie];
 const setCookie = (name, value, expires, options) => {
+  if (!ourCookies.includes(name)) {
+    throw new Error(`Fingerprint cannot set ${name} cookies. Is not a C&M Fingerprint managed cookie.`);
+  }
   return Cookies.set(name, value, {
-    expires: expires,
+    expires,
     sameSite: 'strict',
     domain: getCookieDomain() || undefined,
     ...options
   });
 };
-const getCookie = name => {
-  return Cookies.get(name);
-};
+const getCookie = name => Cookies.get(name);
 const onCookieChanged = (callback, interval = 1000) => {
   let lastCookie = document.cookie;
   setInterval(() => {
-    const cookie = document.cookie;
+    const {
+      cookie
+    } = document;
     if (cookie !== lastCookie) {
       try {
         callback({
@@ -251,10 +259,6 @@ const validVisitorId = id => {
   return uuidValidateV4(splitCookie[0]);
 };
 
-const cookieAccountJWT = 'b2c_token';
-const cookieValidDays = 365;
-const CnMCookie = '_cm';
-const CnMIDCookie = '_cm_id';
 function getCookieDomain() {
   const parsedUrl = psl.parse(location.host);
   let cookieDomain = null;
@@ -262,7 +266,7 @@ function getCookieDomain() {
   return cookieDomain;
 }
 function correctCookieSubdomain() {
-  let cookie = getCookie(CnMIDCookie);
+  const cookie = getCookie(CnMIDCookie);
   if (!cookie) return;
   Cookies.remove(CnMIDCookie);
   setCookie(CnMIDCookie, cookie, cookieValidDays);
@@ -307,7 +311,7 @@ const bootstrapVisitor = ({
   }
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
-    let vidParam = urlParams.get('v_id');
+    const vidParam = urlParams.get('v_id');
     let visitorId = vidParam || undefined;
     if (vidParam && vidParam.includes('?')) {
       visitorId = vidParam.split('?')[0];
@@ -584,6 +588,11 @@ const useSeenMutation = () => {
   const {
     appId
   } = useDifiStore(s => s.difiProps);
+  const {
+    utility: {
+      imagesPreloaded
+    }
+  } = useEntireStore();
   const collectorCallback = useCollectorCallback();
   const {
     visitor
@@ -594,10 +603,14 @@ const useSeenMutation = () => {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      campaignId: trigger.id,
+      variantName: trigger.variantName,
+      variantId: trigger.variantID,
       time: new Date().toISOString(),
+      attemptToPreloadAssets: imagesPreloaded !== 'skip',
       brand
     });
-  }, [trackEvent, brand]);
+  }, [trackEvent, imagesPreloaded, brand]);
   return useMutation(trigger => {
     trackTriggerSeen(trigger);
     return request.put(`${hostname}/triggers/${appId}/${visitor.id}/seen`, {
@@ -637,7 +650,7 @@ const useSeen = ({
     return () => {
       clearTimeout(tId);
     };
-  }, [mutationRest, skip, hasFired, runSeen, setHasFired]);
+  }, [mutationRest, skip, hasFired, runSeen, setHasFired, trigger]);
   return mutationRest;
 };
 
@@ -2822,6 +2835,23 @@ const createVisitorSlice = (set, _get) => ({
 });
 const useVisitor$1 = () => useDifiStore(state => state.visitor);
 
+const createUtilitySlice = (set, get) => ({
+  utility: {
+    imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
+    setImagesHaveLoaded: imagesHaveLoaded => {
+      const stateImagesHavePreloaded = get().utility.imagesPreloaded;
+      if (stateImagesHavePreloaded === 'skip') return;
+      set(prev => ({
+        ...prev,
+        utility: {
+          ...prev.utility,
+          imagesPreloaded: imagesHaveLoaded
+        }
+      }));
+    }
+  }
+});
+
 const useDifiStore = create((...beautifulSugar) => ({
   ...createLoggingSlice(),
   ...createPagetriggersSlice(...beautifulSugar),
@@ -2833,7 +2863,8 @@ const useDifiStore = create((...beautifulSugar) => ({
   ...createTrackingSlice(...beautifulSugar),
   ...createincompleteTriggersSlice(...beautifulSugar),
   ...createConversionsSlice(...beautifulSugar),
-  ...createIdleTimeSlice(...beautifulSugar)
+  ...createIdleTimeSlice(...beautifulSugar),
+  ...createUtilitySlice(...beautifulSugar)
 }));
 const useEntireStore = () => {
   const store = useDifiStore(s => s);
@@ -3320,6 +3351,77 @@ function useFormCollector() {
   }, [visitor]);
 }
 
+const imageExtensions = /\.(jpg|jpeg|png|gif|bmp)$/i;
+function isValidImageUrl(url) {
+  return imageExtensions.test(url);
+}
+const getImageUrls = pageTriggers => {
+  const images = pageTriggers.reduce((arr, pageTrigger) => {
+    if (typeof pageTrigger.data !== 'object') return arr;
+    const validUrls = Object.values(pageTrigger.data).filter(potentiallyAURL => isValidImageUrl(potentiallyAURL));
+    return arr = [...arr, ...validUrls];
+  }, []);
+  return images;
+};
+const useImagePreload = () => {
+  const {
+    pageTriggers,
+    utility: {
+      imagesPreloaded: stateImagesHavePreloaded,
+      setImagesHaveLoaded
+    }
+  } = useEntireStore();
+  const {
+    log
+  } = useLogging();
+  const [imagesToPreload, setImagesToPreload] = React__default.useState(0);
+  const [imagesLoaded, setImagesLoaded] = React__default.useState(0);
+  const shouldPreloadImages = stateImagesHavePreloaded !== 'skip';
+  const preloadImagesIntoPictureTag = React__default.useCallback(images => {
+    const onAnything = () => {
+      setImagesLoaded(prev => prev + 1);
+    };
+    log('useImgPreload - images to preload:', {
+      images
+    });
+    images.forEach(image => {
+      const picture = document.createElement('picture');
+      const source = document.createElement('source');
+      source.srcset = image;
+      picture.appendChild(source);
+      const img = document.createElement('img');
+      img.src = image;
+      img.style.height = '1px';
+      img.style.width = '1px';
+      img.style.position = 'absolute';
+      img.style.bottom = '0';
+      img.style.right = '0';
+      picture.appendChild(img);
+      document.body.appendChild(picture);
+      img.onload = onAnything;
+      img.onabort = onAnything;
+      img.onerror = onAnything;
+    });
+  }, [log]);
+  useEffect(() => {
+    if (!shouldPreloadImages) return;
+    if (pageTriggers.length === 0) return;
+    const images = getImageUrls(pageTriggers);
+    setImagesToPreload(images.length);
+    preloadImagesIntoPictureTag(images);
+  }, [pageTriggers, preloadImagesIntoPictureTag, shouldPreloadImages]);
+  const allImagesLoaded = imagesToPreload === imagesLoaded && imagesToPreload !== 0 && imagesLoaded !== 0 && shouldPreloadImages;
+  console.log({
+    stateImagesHavePreloaded,
+    shouldPreloadImages,
+    imagesLoaded
+  });
+  useEffect(() => {
+    if (!allImagesLoaded) return;
+    setImagesHaveLoaded(true);
+  }, [allImagesLoaded, setImagesHaveLoaded]);
+};
+
 const interval = 250;
 const useIncompleteTriggers = () => {
   const {
@@ -3386,6 +3488,7 @@ function useTrackIntentlyModal({
         triggerType: 'INVOCATION_EXIT_INTENT',
         triggerBehaviour: 'BEHAVIOUR_MODAL',
         time: new Date().toISOString(),
+        attemptToPreloadAssets: 'n/a',
         brand
       });
       clearInterval(id);
@@ -3404,8 +3507,12 @@ function useTrackIntentlyModal({
     const exitHandler = getHandleTrackAction('exit');
     const ctaBtn = document.querySelector('smc-input-group > span');
     const ctaHandler = getHandleTrackAction('CTA');
-    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
-    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
+    if (closeBtn) closeBtn.addEventListener('click', exitHandler);else {
+      error('useTrackIntentlyModal: Could not locate close button, skipping tracking performance.');
+    }
+    if (ctaBtn) ctaBtn.addEventListener('click', ctaHandler);else {
+      error('useTrackIntentlyModal: Could not locate CTA button, skipping tracking performance.');
+    }
     return () => {
       ctaBtn === null || ctaBtn === void 0 ? void 0 : ctaBtn.removeEventListener('click', ctaHandler);
       closeBtn === null || closeBtn === void 0 ? void 0 : closeBtn.removeEventListener('click', exitHandler);
@@ -3504,7 +3611,7 @@ const useWatchers = () => {
   }, [registerWatcher, visitor]);
 };
 
-const Runners = () => {
+function Runners() {
   useTrackingInit();
   useInitVisitor();
   useInitSession();
@@ -3516,8 +3623,9 @@ const Runners = () => {
   useConversions();
   useCollinsBookingComplete();
   useCollector();
+  useImagePreload();
   return null;
-};
+}
 
 const useExitIntentDelay = (delay = 0) => {
   const {
@@ -3599,6 +3707,9 @@ function Triggers() {
     idleTime: {
       idleTimeout
     },
+    utility: {
+      imagesPreloaded
+    },
     difiProps: {
       initialDelay,
       exitIntentTriggers,
@@ -3607,6 +3718,7 @@ function Triggers() {
       booted
     }
   } = useEntireStore();
+  const imagePreloadingComplete = imagesPreloaded === true || imagesPreloaded === "skip";
   const altIdleDelay = (config === null || config === void 0 ? void 0 : (_config$trigger = config.trigger) === null || _config$trigger === void 0 ? void 0 : _config$trigger.userIdleThresholdSecs) * 1000;
   const combinedTriggers = getCombinedTriggers();
   const {
@@ -3619,71 +3731,82 @@ function Triggers() {
     resetState: reRegisterExitIntent
   } = useExitIntent({
     cookie: {
-      key: '_cm_exit',
+      key: "_cm_exit",
       daysToExpire: 0
     }
   });
   useEffect(() => {
+    if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
+    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+  }, [imagePreloadingComplete, visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
   useEffect(() => {
+    if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
-  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete]);
+    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete, imagePreloadingComplete]);
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
-    log('Collector: attempting to fire idle time trigger');
-    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
+    if (!imagePreloadingComplete) return;
+    log("Collector: attempting to fire idle time trigger");
+    setDisplayedTriggerByInvocation("INVOCATION_IDLE_TIME");
     startCooldown();
-  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown]);
+  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown, imagePreloadingComplete]);
   const {
     hasDelayPassed
   } = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.trigger.displayTriggerAfterSecs) * 1000);
   const fireExitTrigger = React__default.useCallback(() => {
+    if (!imagePreloadingComplete) {
+      log("Unable to launch exit intent, because not all images have loaded yet.");
+      log("Re-registering handler");
+      reRegisterExitIntent();
+      return;
+    }
     if (!hasDelayPassed) {
-      log(`Unable to launch exit intent, because of the exit intent delay hasn't passed yet.`);
-      log('Re-registering handler');
+      log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
+      log("Re-registering handler");
       reRegisterExitIntent();
       return;
     }
     if (!canNextTriggerOccur()) {
       log(`Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
         I will attempt again when the same signal occurs after this passes.`);
-      log('Re-registering handler');
+      log("Re-registering handler");
       reRegisterExitIntent();
       return;
     }
-    log('Collector: attempting to fire exit trigger');
-    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
+    log("Collector: attempting to fire exit trigger");
+    setDisplayedTriggerByInvocation("INVOCATION_EXIT_INTENT");
     startCooldown();
-  }, [hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
+  }, [imagePreloadingComplete, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   useEffect(() => {
+    if (!imagePreloadingComplete) return;
     if (!exitIntentTriggers) return;
-    log('Collector: attempting to register exit trigger');
+    log("Collector: attempting to register exit trigger");
     registerHandler({
-      id: 'clientTrigger',
+      id: "clientTrigger",
       handler: fireExitTrigger
     });
-  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler]);
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler, imagePreloadingComplete]);
   const fireOnLoadTriggers = useCallback(() => {
+    if (!imagePreloadingComplete) return;
     if (!pageLoadTriggers) return;
     if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
-    log('Collector: attempting to fire on-page-load trigger');
-    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
-  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation]);
+    log("Collector: attempting to fire on-page-load trigger");
+    setDisplayedTriggerByInvocation("INVOCATION_PAGE_LOAD", true);
+  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation, imagePreloadingComplete]);
   useEffect(() => {
     fireOnLoadTriggers();
   }, [fireOnLoadTriggers]);
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
     delay: initialDelay,
-    name: 'fireOnLoadTriggers'
+    name: "fireOnLoadTriggers"
   });
   return React__default.createElement(IdleTimerProvider, {
     timeout: idleTimeout || altIdleDelay,
     onPresenceChange: presence => {
-      log('presence changed', presence);
+      log("presence changed", presence);
     },
     onIdle: fireIdleTrigger
   }, React__default.createElement(Activation$1, null));

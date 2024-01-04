@@ -20,6 +20,8 @@ const extensions = ['.js', '.jsx', ...typescriptExtensions];
 
 const cookieWarning =
   'Be super careful when setting Cookies with Fingerprint. Doing so has the potential to cause serious issues within apps Difi is Running on. Proceed only when 100% confident. If not - please check with the team.';
+
+const cookieMethodUsageWarning = 'Please use the cookie methods in `utils/cookies.ts`';
 /** @type {import('eslint').ESLint.ConfigData} */
 const config = {
   // Our main extended package is eslint-config-airbnb. This is widely accepted as one of the best
@@ -28,7 +30,9 @@ const config = {
   // Keep prettier as last so it overrides everything else. As it's best to keep prettier config
   // to a minimum, as it can be pretty tricky to match prettier with more specific rules and it
   // doesn't play nicely with a lot of editors if you do try and go more custom
-  extends: ['airbnb', 'eslint:recommended'],
+
+  // plugin:react-hooks/recommended populates the dep arrays for react hooks on almost-auto-fix.
+  extends: ['airbnb', 'eslint:recommended', 'plugin:react-hooks/recommended'],
   // Stop looking foconfig further up than thisr eslint
   root: true,
   parser: '@typescript-eslint/parser',
@@ -36,17 +40,26 @@ const config = {
 
   // Cookies have caused a P1 incicent in the past. We want to be super careful when setting cookies with DiFi.
   rules: {
+    'operator-linebreak': 0,
+    'no-restricted-globals': 0,
     'no-restricted-properties': [
       'error',
       {
         object: 'Cookies',
         property: 'set',
-        message: cookieWarning,
+        message: `${cookieWarning} 
+
+${cookieMethodUsageWarning}`,
+      },
+      {
+        object: 'Cookies',
+        property: 'get',
+        message: cookieMethodUsageWarning,
       },
       {
         object: 'Cookies',
         property: 'remove',
-        message: cookieWarning,
+        message: cookieMethodUsageWarning,
       },
     ],
     'no-restricted-syntax': [
@@ -247,7 +260,7 @@ const config = {
       },
     },
     {
-      files: ['**/stories/**/*', '**/storybook/**/*', '**/storybooks/**/*', '**/*.stories.*'],
+      files: ['**/slices/**/*'],
       rules: {
         'require-jsdoc': ['off'],
         'import/no-extraneous-dependencies': ['off'],
