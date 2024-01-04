@@ -39,16 +39,8 @@ import 'fingerprint/dist/index.css'
 const App = () => {
   return (
     <FingerprintProvider
-      // Required
       appId='b2a2b2a2b2a2b2a2b2a2b2a2b2a2b2a2'
-      // Optional
       consent={true}
-      consentCallback={() => {}}
-      debug={process.env.NODE_ENV === 'development'}
-      defaultHandlers={[]}
-      initialDelay={0}
-      // Coming soon
-      minimumDelay={15000}
     >
       <YourApp />
     </FingerprintProvider>
@@ -60,16 +52,20 @@ export default App
 
 ## How it works
 
+Upon mount of the `FingerprintProvider` component, the Fingerprint will make a request to the collector's `/collect` endpoint to retrieve the app configuration, triggers, conversion info and more. This and subsequent calls to the collector are later used to drive the behaviour of the entire DiFi app.
+
 ### Events
 
 The Fingerprint will track the following events:
 
 - Page views
-- Interaction (Page & Component) (coming soon)
-- Clicks (coming soon)
-- Scrolls (coming soon)
-- Form submissions (coming soon)
-- Custom events (coming soon)
+- Interactions:
+  - Button clicks
+  - Form submissions
+  - Page navigation (BE)
+- Form submissions
+- Triggered behaviours
+- Custom events (coming soon?)
 
 ### Triggers
 
@@ -92,19 +88,19 @@ Triggers can be configured via the Fingerprint dashboard using a combination of 
 - Time since last visit
 - Time since last conversion
 - Time since last page view
-- Time since last interaction
-  etc.
+- Type of device (mobile, desktop)
+- etc.
 
-Only one server-side request is made per page view, and the Fingerprint will then use the data that has been returned to determine which server-side behaviour should be triggered.
+One server-side request is made per page view, and the Fingerprint will then use the data that has been returned to determine which server-side behaviour should be triggered.
 
-Client-side behaviours can also be triggered, and these can be configured via the Fingerprint dashboard using a combination of one or more conditions:
+Once a trigger has occured, the collector's `/seen` endpoint is pinged and the trigger data is updated and used as the new source of truth. `/dismiss` is called for some triggers with the same outcome
+
+Client-side behaviours (a.k.a Incomplete Triggers) are front-end driven behaviours that run when certain client conditions are met. These can be configured via the Fingerprint dashboard using a combination of one or more conditions:
 
 - Page URL
-- Interaction with a specific component
-- Click on a specific element
-- Scroll to a specific element
+- Visibility of a specific element
 
-When using a combination of server and client-side triggers, it's important to note that the server trigger is nearly always evaluated first. This is because the server trigger is evaluated as soon as the page loads, whereas the client trigger is evaluated when the user interacts with the page.
+When using a combination of server and client-side triggers, it's important to keep in mind when each trigger can potentially occur on the page. There are restrictions set in place in code to prevent multiple triggers of the same kind from occuring simultaneously, but it's important to keep this in mind when configuring triggers to avoid a super annoying UX.
 
 Additionally, an appropriate minimum delay time between triggers should be configured to ensure the user isn't bombarded with triggers. The default minimum delay time is 15 seconds, but this should be adjusted based on the average page view duration.
 
@@ -114,10 +110,12 @@ When a behaviour is triggered, the Fingerprint will invoke a handler that has be
 
 A behaviour handler is a function that can either:
 
-- returns a React component that will be rendered when the behaviour is triggered, via React Portals
-- invokes change within the current component, for instance opening a modal or changing the state of a component
+- returns a React component that will be rendered when the behaviour is triggered, via React Portals, like opening a popup or banner
+- invokes change within the current component or changing the state of a component
 
 When a behaviour handler is registered, it will be invoked whenever the behaviour is triggered.
+
+Out of the box we support the behvaiours listed in `src/client/handler.tsx` and allow React apps using the `Fingerprint` wrapper to add their own handlers in the `defaultHandlers` prop.
 
 ### Cookie Consent
 
@@ -169,14 +167,12 @@ export default App
 
 ### FingerprintProvider
 
-#### Note: a lot of these fields are going to be moved to BE and configurable from Portal #soon
 
 | Prop                     | Type       | Default     | Description                                                                                                                                                           |
 | ------------------------ | ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| appId                    | `string`   | `undefined` | The application ID to use for fingerprint tracking. Fingerprint will not start tracking data until this is set, and has been validated by the server.                 |
+| appId                    | `string`   | `undefined` | The application ID (in most cases = `TradingEntity.id`) to use for fingerprint tracking. Fingerprint will not start tracking data until this is set, and has been validated by the server.                 |
 | defaultHandlers          | `object`   | `{}`        | A map of default handlers to use for behaviours that don't have a handler registered. Set this to an empty object to disable the default handlers.                    |
 | initialDelay             | `number`   | `0`         | The initial delay in milliseconds before the Fingerprint will start tracking data and provide the first trigger.                                                      |
-| minimumDelay             | `number`   | `15000`     | The minimum delay in milliseconds between triggers.                                                                                                                   |
 | consent                  | `boolean`  | `false`     | Whether or not the user has consented to the use of cookies.                                                                                                          |
 | consentCallback          | `function` | `undefined` | A callback function that will be invoked every second to check the consent status. The return value of this function will be used to determine the consent status.    |
 | exitIntentTriggers       | `boolean`  | `false`     | Whether or not to use exit intent to trigger behaviours.                                                                                                              |
@@ -205,14 +201,6 @@ const App = () => {
   )
 }
 ```
-
-#### appId
-
-The application ID that was passed to the `FingerprintProvider` component.
-
-#### booted
-
-A boolean value that indicates whether or not the fingerprint has been booted. This will be `false` until the fingerprint has been booted, and will then be `true` for the remainder of the application lifecycle.
 
 
 ## Deployments
@@ -253,7 +241,9 @@ You can then embed the fingerprint script in any website using the following scr
 
 ## Testing
 
-## Manual Testing
+### Manual Testing
+
+#### [MAB] Please note that this is currently failing on their domains due to their security policy only allowing the prod version of DiFi. You can still test on localhost or on their stage-65 domains.
 
 Looking to test the Fingerprint on a production website? You can dynamically inject the Fingerprint script into any website by enabling a Greasemonkey/Tampermonkey script.
 
@@ -303,12 +293,11 @@ Like any other C&M frontend package, automated testing is performed by `Percy + 
 
 Playwright docs [here](https://playwright.dev/docs/intro)
 ### Structure 
-Currently all tests sit in `src/utils/dev/__test__` for simplicity along with:
+Currently all tests sit in `src/utils/__test__` for simplicity along with:
 - a `testHelpers.ts` file which contains some helper functions for the tests
-- `response.fake.ts` with a fake response from the server.
+- `*.fake.ts` with a fake responses from the server and trigger objects.
 
 Rather than being separated by files, the tests are currently separated by concern (e.g. visitor.test.tsx contains all tests related to the visitor object). This may change in the future.
-
 
 ### Tests
 
@@ -316,7 +305,7 @@ Rather than being separated by files, the tests are currently separated by conce
 - Tests are run in `headless` mode by default. Use `yarn test:playwright -ui` for a more convenient DX via a testing utility, or `--headed` to see what's going on
 - We test on 3 browsers - 2 desktop and 1 mobile. If you have platform specific behaviours (e.g. mobile modal vs desktop modal) then make sure your tests cover both.
 - You are welcome to edit the `response.fake.ts` file to change the response from the server. This is useful for testing different behaviours.
-- Mocking the `/seen` is not implemented yet - you are welcome to add a helper function to do this.
+- Mocking the `/seen` or `/dismiss` endpoints is not implemented yet - you are welcome to add a helper function to do this.
 
 ### Issues and limitations
 
