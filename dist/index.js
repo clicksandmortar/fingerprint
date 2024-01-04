@@ -6,10 +6,10 @@ var React__default = _interopDefault(React);
 var reactErrorBoundary = require('react-error-boundary');
 var zustand = require('zustand');
 var ReactDOM = _interopDefault(require('react-dom'));
+var reactDeviceDetect = require('react-device-detect');
 var Cookies = _interopDefault(require('js-cookie'));
 var psl = _interopDefault(require('psl'));
 var uuid = require('uuid');
-var reactDeviceDetect = require('react-device-detect');
 var mixpanel = _interopDefault(require('mixpanel-browser'));
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
@@ -189,6 +189,10 @@ var createConversionsSlice = function createConversionsSlice(set, _get) {
   };
 };
 
+var deviceInfo = {
+  type: reactDeviceDetect.isMobile ? 'mobile' : 'desktop'
+};
+
 var headers = {
   'Content-Type': 'application/json'
 };
@@ -248,6 +252,47 @@ var request = {
     }
   }
 };
+
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+    var _cur$split = cur.split('='),
+      key = _cur$split[0],
+      value = _cur$split[1];
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  var params = getReducedSearchParams();
+  var hash = window.location.hash.substring(2);
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    hash: hash,
+    params: params
+  };
+}
+function getReferrer() {
+  var params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
 
 var setCookie = function setCookie(name, value, expires, options) {
   return Cookies.set(name, value, _extends({
@@ -625,7 +670,10 @@ var useDismissMutation = function useDismissMutation() {
   var url = hostname + "/triggers/" + appId + "/" + visitor.id + "/dismissed";
   var mutation = reactQuery.useMutation(function (data) {
     return request.put(url, {
-      dismissedTriggers: data
+      dismissedTriggers: data,
+      visitor: visitor,
+      page: getPagePayload(),
+      device: deviceInfo
     }).then(function (response) {
       log('Trigger API response', response);
       return response;
@@ -640,51 +688,6 @@ var useDismissMutation = function useDismissMutation() {
     dismissTrigger: mutation.mutate
   });
 };
-
-var deviceInfo = {
-  type: reactDeviceDetect.isMobile ? 'mobile' : 'desktop'
-};
-
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-    var _cur$split = cur.split('='),
-      key = _cur$split[0],
-      value = _cur$split[1];
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  var params = getReducedSearchParams();
-  var hash = window.location.hash.substring(2);
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    hash: hash,
-    params: params
-  };
-}
-function getReferrer() {
-  var params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
 
 var trackEvent = function trackEvent(event, props, callback) {
   return mixpanel.track(event, props, callback);

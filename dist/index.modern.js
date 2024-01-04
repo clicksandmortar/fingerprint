@@ -3,10 +3,10 @@ import React__default, { useEffect, useState, useMemo, useRef, memo, createEleme
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'zustand';
 import ReactDOM from 'react-dom';
+import { isMobile } from 'react-device-detect';
 import Cookies from 'js-cookie';
 import psl from 'psl';
 import { validate, version, v4 } from 'uuid';
-import { isMobile } from 'react-device-detect';
 import mixpanel from 'mixpanel-browser';
 import transcend from 'lodash.get';
 import { useForm } from 'react-hook-form';
@@ -146,6 +146,10 @@ const createConversionsSlice = (set, _get) => ({
   }))
 });
 
+const deviceInfo = {
+  type: isMobile ? 'mobile' : 'desktop'
+};
+
 const headers = {
   'Content-Type': 'application/json'
 };
@@ -185,6 +189,45 @@ const request = {
     });
   }
 };
+
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+    const [key, value] = cur.split('=');
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  const params = getReducedSearchParams();
+  const hash = window.location.hash.substring(2);
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    hash,
+    params
+  };
+}
+function getReferrer() {
+  const params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
 
 const setCookie = (name, value, expires, options) => {
   return Cookies.set(name, value, {
@@ -536,7 +579,10 @@ const useDismissMutation = () => {
   const collectorCallback = useCollectorCallback();
   const url = `${hostname}/triggers/${appId}/${visitor.id}/dismissed`;
   const mutation = useMutation(data => request.put(url, {
-    dismissedTriggers: data
+    dismissedTriggers: data,
+    visitor,
+    page: getPagePayload(),
+    device: deviceInfo
   }).then(response => {
     log('Trigger API response', response);
     return response;
@@ -551,49 +597,6 @@ const useDismissMutation = () => {
     dismissTrigger: mutation.mutate
   };
 };
-
-const deviceInfo = {
-  type: isMobile ? 'mobile' : 'desktop'
-};
-
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-    const [key, value] = cur.split('=');
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  const params = getReducedSearchParams();
-  const hash = window.location.hash.substring(2);
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    hash,
-    params
-  };
-}
-function getReferrer() {
-  const params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
 
 const trackEvent = (event, props, callback) => {
   return mixpanel.track(event, props, callback);

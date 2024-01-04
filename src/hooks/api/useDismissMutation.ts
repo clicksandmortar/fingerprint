@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useDifiStore } from '../../beautifulSugar/store';
+import { deviceInfo } from '../../utils/device';
 import { hostname, request } from '../../utils/http';
+import { getPagePayload } from '../../utils/page';
 import { useVisitor } from '../init/useInitVisitor';
 import useCollectorCallback from '../useCollectorCallback';
 import { useLogging } from '../useLogging';
@@ -25,6 +27,9 @@ export const useDismissMutation = () => {
     (data: DismissMutationData[]) => request
       .put(url, {
         dismissedTriggers: data,
+        visitor,
+        page: getPagePayload(),
+        device: deviceInfo,
       })
       .then((response) => {
         log('Trigger API response', response);
