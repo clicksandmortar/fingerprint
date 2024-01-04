@@ -134,20 +134,6 @@ var defaultConfig = {
     colors: defaultColors
   }
 };
-var LEGACY_merge_config = function LEGACY_merge_config(config, legacy_config) {
-  return {
-    displayTriggerAfterSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.exitIntentDelay) || 0) / 1000 || config.trigger.displayTriggerAfterSecs,
-    triggerCooldownSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.triggerCooldown) || 0) / 1000 || config.trigger.triggerCooldownSecs,
-    userIdleThresholdSecs: ((legacy_config === null || legacy_config === void 0 ? void 0 : legacy_config.idleDelay) || 0) / 1000 || config.trigger.userIdleThresholdSecs
-  };
-};
-var objStringtoObjNum = function objStringtoObjNum(obj) {
-  var newObj = {};
-  Object.keys(obj).forEach(function (key) {
-    newObj[key] = Number(obj[key]);
-  });
-  return newObj;
-};
 
 var createConfigSlice = function createConfigSlice(set, get) {
   return {
@@ -158,15 +144,17 @@ var createConfigSlice = function createConfigSlice(set, get) {
         log = _get.logging.log;
       var argColors = updatedConfigEntries === null || updatedConfigEntries === void 0 ? void 0 : (_updatedConfigEntries = updatedConfigEntries.brand) === null || _updatedConfigEntries === void 0 ? void 0 : _updatedConfigEntries.colors;
       var shouldUpdateColors = haveBrandColorsBeenConfigured(argColors);
-      var legacy_config = get().difiProps.config;
-      if (shouldUpdateColors) log('setConfig: setting brand colors from portal config', argColors);else log('setConfig: keeping colors in state || fallback to default');
+      if (shouldUpdateColors) {
+        log('setConfig: setting brand colors from portal config', argColors);
+      } else {
+        log('setConfig: keeping colors in state || fallback to default');
+      }
       set(function (prev) {
         return {
           config: _extends({}, prev.config, updatedConfigEntries, {
             brand: _extends({}, prev.config.brand, updatedConfigEntries.brand, {
               colors: shouldUpdateColors ? _extends({}, prev.config.brand.colors || defaultColors, argColors || {}) : prev.config.brand.colors
-            }),
-            trigger: _extends({}, prev.config.trigger, objStringtoObjNum(LEGACY_merge_config(prev.config, legacy_config)))
+            })
           })
         };
       });
@@ -1663,175 +1651,6 @@ var useCollectorMutation = function useCollectorMutation() {
   });
 };
 
-var FullyClickableModal = function FullyClickableModal(_ref) {
-  var _trigger$data;
-  var handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal,
-    trigger = _ref.trigger;
-  var imageURL = (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) || '';
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var _useModalDimensionsBa = useModalDimensionsBasedOnImage({
-      imageURL: imageURL
-    }),
-    _useModalDimensionsBa2 = _useModalDimensionsBa.imageDimensions,
-    height = _useModalDimensionsBa2.height,
-    width = _useModalDimensionsBa2.width;
-  var isImageBrokenDontShowModal = !width || !height;
-  useSeen({
-    trigger: trigger,
-    skip: !stylesLoaded || isImageBrokenDontShowModal
-  });
-  var appendResponsiveBehaviour = React__default.useCallback(function () {
-    return reactDeviceDetect.isMobile ? "." + prependClass('modal') + " {\n\n    }" : "\n@media screen and (max-width: 1400px) {\n  ." + prependClass('modal') + " {\n    height: " + 1 * height + "px;\n    width: " + 1 * width + "px;\n  }\n}\n\n@media screen and (max-width: 850px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.6 * height + "px;\n    width: " + 0.6 * width + "px;\n  }\n}\n\n@media screen and (max-width: 450px) {\n  ." + prependClass('modal') + " {\n    height: " + 0.4 * height + "px;\n    width: " + 0.4 * width + "px;\n  }\n}\n";
-  }, [height, width]);
-  React.useEffect(function () {
-    var cssToApply = "\n  \n    ." + prependClass('overlay') + " {\n      background-color: rgba(0, 0, 0, 0.7);\n      position: fixed;\n      top: 0;\n      left: 0;\n      width: 100vw;\n      height: 100vh;\n      z-index: 9999;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      font-weight: 500;\n      font-style: normal;\n    }\n    \n    ." + prependClass('modal') + " {\n      height: " + height + "px;\n      width: " + width + "px;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n      background-repeat: no-repeat;\n      display: flex;\n      flex-direction: column;\n      align-items: center;\n      justify-content: space-between;\n      box-shadow: var(--text-shadow);\n      " + ( 'transition: all 0.3s ease-in-out;' ) + "\n      " + ( 'cursor: pointer;' ) + "\n    }\n\n    " + ( "." + prependClass('modal') + ":hover {\n      filter: brightness(1.05);\n      box-shadow: 0.1rem 0.1rem 10px #7b7b7b;\n    }" ) + "\n    \n    \n    ." + prependClass('text-center') + " {\n      text-align: center;\n    }\n  \n    ." + prependClass('text-container') + " {\n      flex-direction: column;\n      flex: 1;\n      text-shadow: var(--text-shadow);\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('main-text') + " {\n      font-weight: 500;\n      font-size: 2rem;\n      font-style: normal;\n      text-align: center;\n      margin-bottom: 1rem;\n      fill: var(--secondary);\n      text-shadow: var(--text-shadow);\n      max-width: 400px;\n      margin-left: auto;\n      margin-right: auto;\n    \n    }\n    \n    ." + prependClass('sub-text') + " {\n      margin: auto;\n      font-weight: 600;\n      font-size: 1.2rem;\n    \n      text-align: center;\n      text-transform: uppercase;\n    }\n\n    ." + prependClass('close-button') + " {\n      border-radius: 100%;\n      background-color: white;\n      width: 2rem;\n      border: none;\n      height: 2rem;\n      position: absolute;\n      margin: 10px;\n      top: 0px;\n      right: 0px;\n      color: black;\n      font-size: 1.2rem;\n      font-weight: 300;\n      cursor: pointer;\n      display: grid;\n      place-content: center;\n    }\n    \n    ." + prependClass('close-button:hover') + " {\n      transition: all 0.3s;\n      filter: brightness(0.95);\n    }\n    \n    \n    ." + prependClass('text-shadow') + " {\n      text-shadow: var(--text-shadow);\n    }\n    \n    ." + prependClass('box-shadow') + " {\n      box-shadow: var(--text-shadow);\n    }\n    " + appendResponsiveBehaviour() + "\n\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-    return function () {
-      document.head.removeChild(styles);
-    };
-  }, [height, width, appendResponsiveBehaviour]);
-  var handleModalAction = React__default.useCallback(function (e) {
-    return handleClickCallToAction(e);
-  }, [handleClickCallToAction]);
-  var handleClickClose = React__default.useCallback(function (e) {
-    e.stopPropagation();
-    return handleCloseModal(e);
-  }, [handleCloseModal]);
-  if (!stylesLoaded) {
-    return null;
-  }
-  if (isImageBrokenDontShowModal) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    onClick: handleModalAction,
-    style: {
-      background: "url(" + imageURL + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('close-button')
-  }, React__default.createElement(CloseButton, {
-    onClick: handleClickClose
-  }))));
-};
-
-var CurlyText = function CurlyText(_ref) {
-  var randomHash = _ref.randomHash,
-    text = _ref.text;
-  return React__default.createElement("svg", {
-    xmlns: 'http://www.w3.org/2000/svg',
-    xmlnsXlink: 'http://www.w3.org/1999/xlink',
-    version: '1.1',
-    viewBox: '0 0 500 500',
-    className: 'f' + randomHash + '-curlyText'
-  }, React__default.createElement("defs", null, React__default.createElement("path", {
-    id: 'textPath',
-    d: 'M 0 500 A 175,100 0 0 1 500,500'
-  })), React__default.createElement("text", {
-    x: '0',
-    y: '0',
-    textAnchor: 'middle'
-  }, React__default.createElement("textPath", {
-    xlinkHref: '#textPath',
-    fill: 'white',
-    startOffset: '50%'
-  }, text)));
-};
-var BrownsCustomModal = function BrownsCustomModal(props) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = props.trigger,
-    handleClickCallToAction = props.handleClickCallToAction,
-    handleCloseModal = props.handleCloseModal;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  var randomHash = React.useMemo(function () {
-    return uuid.v4().split('-')[0];
-  }, []);
-  React.useEffect(function () {
-    var css = "\n      @import url(\"https://p.typekit.net/p.css?s=1&k=olr0pvp&ht=tk&f=25136&a=50913812&app=typekit&e=css\");\n\n@font-face {\n  font-family: \"proxima-nova\";\n  src: url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff2\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"woff\"), url(\"https://use.typekit.net/af/23e139/00000000000000007735e605/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3\") format(\"opentype\");\n  font-display: auto;\n  font-style: normal;\n  font-weight: 500;\n  font-stretch: normal;\n}\n\n:root {\n  --primary: #b6833f;\n  --secondary: white;\n  --text-shadow: 1px 1px 10px rgba(0,0,0,1);\n}\n\n.tk-proxima-nova {\n  font-family: \"proxima-nova\", sans-serif;\n}\n\n.f" + randomHash + "-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100vw;\n  height: 100vh;\n  background-color: rgba(0, 0, 0, 0.5);\n  z-index: 9999;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  font-family: \"proxima-nova\", sans-serif !important;\n  font-weight: 500;\n  font-style: normal;\n}\n\n.f" + randomHash + "-modal {\n  width: 80%;\n  max-width: 400px;\n  height: 500px;\n  overflow: hidden;\n  background-repeat: no-repeat;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: space-between;\n  box-shadow: 0px 0px 10px rgba(0,0,0,0.5);\n}\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-modal {\n    width: 50%;\n    max-width: 600px;\n  }\n}\n\n.f" + randomHash + "-modalImage {\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 0;\n  bottom: 0;\n  background-position: center;\n  background-size: cover;\n  background-repeat: no-repeat;\n}\n\n\n@media screen and (max-width:768px) {\n  .f" + randomHash + "-modal {\n    width: 100vw;\n  }\n}\n\n\n.f" + randomHash + "-curlyText {\n  font-family: \"proxima-nova\", sans-serif;\n  font-weight: 500;\n  font-style: normal;\n  text-transform: uppercase;\n  text-align: center;\n  letter-spacing: 2pt;\n  fill: var(--secondary);\n  text-shadow: var(--text-shadow);\n  margin-top: -150px;\n  max-width: 400px;\n  margin-left: auto;\n  margin-right: auto;\n}\n\n.f" + randomHash + "-curlyText text {\n  font-size: 1.3rem;\n}\n\n\n.f" + randomHash + "-mainText {\n  font-weight: 200;\n  font-family: \"proxima-nova\", sans-serif;\n  color: var(--secondary);\n  font-size: 2.1rem;\n  text-shadow: var(--text-shadow);\n  display: inline-block;\n  text-align: center;\n  margin-top: -4.5rem;\n}\n\n\n@media screen and (min-width: 768px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n}\n\n@media screen and (min-width: 1024px) {\n  .f" + randomHash + "-curlyText {\n    margin-top: -200px;\n  }\n\n  .f" + randomHash + "-mainText {\n    font-size: 2.4rem;\n  }\n}\n\n@media screen and (min-width: 1150px) {\n  .f" + randomHash + "-mainText {\n    font-size: 2.7rem;\n  }\n}\n\n.f" + randomHash + "-cta {\n  font-family: \"proxima-nova\", sans-serif;\n  cursor: pointer;\n  background-color: var(--secondary);\n  padding: 0.75rem 3rem;\n  border-radius: 8px;\n  display: block;\n  font-size: 1.3rem;\n  color: var(--primary);\n  text-align: center;\n  text-transform: uppercase;\n  max-width: 400px;\n  margin: 0 auto;\n  text-decoration: none;\n}\n\n.f" + randomHash + "-cta:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n.f" + randomHash + "-close-button {\n  position: absolute;\n  top: 0px;\n  right: 0px;\n}\n\n.f" + randomHash + "-close-button:hover {\n  transition: all 0.3s;\n  filter: brightness(0.95);\n}\n\n\n.f" + randomHash + "-button-container {\n  flex: 1;\n  display: grid;\n  place-content: center;\n}\n\n.f" + randomHash + "-image-darken {\n  background: rgba(0,0,0,0.2);\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n  padding: 2rem;\n}\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(css));
-    document.head.appendChild(styles);
-    setStylesLoaded(true);
-  }, [randomHash]);
-  useSeen({
-    trigger: trigger,
-    skip: !open || !stylesLoaded
-  });
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: 'f' + randomHash + '-overlay'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-modal',
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative',
-      height: 500
-    }
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-image-darken'
-  }, React__default.createElement("div", {
-    className: 'f' + randomHash + '-close-button'
-  }, React__default.createElement(CloseButton, {
-    onClick: handleCloseModal
-  })), React__default.createElement(CurlyText, {
-    text: trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading,
-    randomHash: randomHash
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1
-    },
-    className: 'f' + randomHash + '--spacer'
-  }), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      marginTop: -150,
-      textTransform: 'uppercase',
-      textAlign: 'center',
-      letterSpacing: '2pt'
-    }
-  }, React__default.createElement("span", {
-    className: 'f' + randomHash + '-mainText'
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    className: 'f' + randomHash + '-buttonContainer'
-  }, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: 'f' + randomHash + '-cta',
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText)))));
-};
-var BrownsModal = function BrownsModal(props) {
-  var trigger = props.trigger;
-  var isFullyClickable = getIsModalFullyClickable({
-    trigger: trigger
-  });
-  if (!isFullyClickable) return React__default.createElement(BrownsCustomModal, Object.assign({}, props));
-  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
-};
-
 var fontSize = '2em';
 var cardFontScaleFactor = 1.5;
 var AnimatedCard = function AnimatedCard(_ref) {
@@ -2189,114 +2008,6 @@ var StandardModal = function StandardModal(_ref) {
   }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.buttonText))))));
 };
 
-var primaryColor = "rgb(33,147,174)";
-var secondaryColor = "#e0aa00";
-var callToActionColor = 'rgb(235,63,43)';
-var mainGrey = 'rgb(70,70,70)';
-var scaleBg = function scaleBg(scale) {
-  var imageWidth = 800;
-  var imageHeight = 700;
-  return {
-    height: imageHeight * scale,
-    width: imageWidth * scale
-  };
-};
-var StonehouseCustomModal = function StonehouseCustomModal(_ref) {
-  var _trigger$data, _trigger$data2, _trigger$data3, _trigger$data4, _trigger$data5;
-  var trigger = _ref.trigger,
-    handleClickCallToAction = _ref.handleClickCallToAction,
-    handleCloseModal = _ref.handleCloseModal;
-  var _useState = React.useState(false),
-    stylesLoaded = _useState[0],
-    setStylesLoaded = _useState[1];
-  useSeen({
-    trigger: trigger,
-    skip: !stylesLoaded
-  });
-  React.useEffect(function () {
-    var cssToApply = "\n      @font-face{\n        font-family: \"Gotham Bold\";\n        src: url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.eot?#iefix\") format(\"embedded-opentype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff\") format(\"woff\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.woff2\") format(\"woff2\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.ttf\") format(\"truetype\"),\n            url(\"https://db.onlinewebfonts.com/t/db33e70bc9dee9fa9ae9737ad83d77ba.svg#Gotham-Bold\") format(\"svg\");\n            font-display: auto;\n            font-style: normal;\n            font-weight: 500;\n            font-stretch: normal;\n    }\n     \n\n      :root {\n        --text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);\n      }\n  \n\n      ." + prependClass('overlay') + " {\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100vw;\n        height: 100vh;\n        background-color: rgba(0, 0, 0, 0.5);\n        z-index: 9999;\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n      }\n\n      ." + prependClass('modal') + " {\n        display: flex;\n        flex-direction: column;\n        overflow: hidden;\n        background-repeat: no-repeat;\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: space-between;\n        box-shadow: var(--text-shadow);\n        height: " + scaleBg(0.7).height + "px;\n        width: " + scaleBg(0.7).width + "px;\n      }\n\n      ." + prependClass('gotham-bold') + " {\n        font-family: 'Gotham Bold';\n      }\n\n      ." + prependClass('text-center') + " {\n        text-align: center;\n      }\n\n      ." + prependClass('main-text') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        font-weight: 500;\n        font-style: normal;\n        text-transform: uppercase;\n        text-align: center;\n        margin-left: auto;\n        margin-right: auto;\n        margin-top: 0;\n        margin-bottom: -1.5rem;\n        font-size: 4.5rem;\n      }\n\n      ." + prependClass('text-container') + " {\n        display: grid;\n        place-content: center;\n        flex: 1;\n      }\n\n      ." + prependClass('sub-text') + " {\n        line-height: 1;\n        margin: auto;\n        font-weight: 600;\n        font-family: 'Gotham Bold';\n        color: " + secondaryColor + ";\n        letter-spacing: 2pt;\n        display: inline-block;\n        text-align: center;\n        font-size: 2.4rem;\n      }\n\n      ." + prependClass('cta') + " {\n        line-height: 1.2;\n        font-family: 'Gotham Bold';\n        cursor: pointer;\n        background-color: " + callToActionColor + ";\n        border-radius: 2px;\n        display: block;\n        color: white;\n        text-align: center;\n        text-transform: uppercase;\n        margin: 0 auto;\n        text-decoration: none;\n        box-shadow: -2px 2px 8px black;\n        padding: 1.2rem 1.2rem 0.2rem 1.2rem;  \n        font-size: 1.3rem;\n      }\n\n      ." + prependClass('cta:hover') + " {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n\n      ." + prependClass('close-button') + " {\n        position: absolute;\n        top: 0px;\n        right: 0px;\n      }\n      ." + prependClass('close-button') + ":hover {\n        transition: all 0.3s;\n        filter: brightness(0.95);\n      }\n      \n\n      ." + prependClass('image-container') + " {\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        width: 100%;\n        padding: 4rem 1.5rem 2rem 1.5rem;\n      }\n\n      ." + prependClass('text-shadow') + " {\n        text-shadow: var(--text-shadow);\n      }\n\n      ." + prependClass('box-shadow') + " {\n        box-shadow: var(--text-shadow);\n      }\n      \n      @media screen and (max-width: 550px) {\n        ." + prependClass('modal') + " {\n          height: " + scaleBg(0.4).height + "px;\n          width: " + scaleBg(0.4).width + "px;\n        }\n        ." + prependClass('main-text') + "{\n          font-size: 2.5rem;\n          margin-bottom: -0.6rem;\n        }\n        ." + prependClass('sub-text') + "{\n          font-size: 1.9rem;\n          letter-spacing: 1.2pt;\n\n        }\n        ." + prependClass('cta') + "{\n          padding: 0.8rem 0.8rem 0rem 0.8rem;  \n          font-size: 0.8rem;\n        }\n        ." + prependClass('image-container') + " {\n          padding: 2rem 1.5rem 1rem 1.5rem;\n        }\n      }\n    ";
-    var styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(cssToApply));
-    document.head.appendChild(styles);
-    setTimeout(function () {
-      setStylesLoaded(true);
-    }, 500);
-    return function () {
-      document.head.removeChild(styles);
-    };
-  }, []);
-  var textColorByRoute = React__default.useMemo(function () {
-    if (location.href.includes('tablebooking')) return {
-      heading: {
-        color: 'white'
-      },
-      paragraph: {
-        color: secondaryColor
-      }
-    };
-    return {
-      heading: {
-        color: primaryColor,
-        WebkitTextStroke: "2px " + mainGrey
-      },
-      paragraph: {
-        color: mainGrey
-      }
-    };
-  }, []);
-  if (!stylesLoaded) {
-    return null;
-  }
-  return React__default.createElement("div", {
-    className: prependClass('overlay')
-  }, React__default.createElement("div", {
-    className: prependClass('modal'),
-    style: {
-      background: "url(" + (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.backgroundURL) + ")",
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundSize: 'cover',
-      position: 'relative'
-    }
-  }, React__default.createElement("div", {
-    className: prependClass('image-container')
-  }, React__default.createElement("div", {
-    className: prependClass('close-button')
-  }, React__default.createElement(CloseButton, {
-    onClick: handleCloseModal
-  })), React__default.createElement("div", {
-    className: prependClass('text-container')
-  }, React__default.createElement("h1", {
-    className: prependClass('main-text'),
-    style: textColorByRoute.heading
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.heading), React__default.createElement("span", {
-    className: prependClass('sub-text'),
-    style: textColorByRoute.paragraph
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.paragraph)), React__default.createElement("div", {
-    style: {
-      flex: 1,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    }
-  }, React__default.createElement("div", null, React__default.createElement("a", {
-    href: trigger === null || trigger === void 0 ? void 0 : (_trigger$data4 = trigger.data) === null || _trigger$data4 === void 0 ? void 0 : _trigger$data4.buttonURL,
-    className: prependClass('cta'),
-    onClick: handleClickCallToAction
-  }, trigger === null || trigger === void 0 ? void 0 : (_trigger$data5 = trigger.data) === null || _trigger$data5 === void 0 ? void 0 : _trigger$data5.buttonText))))));
-};
-var StonehouseModal = function StonehouseModal(props) {
-  var trigger = props.trigger;
-  var isFullyClickable = getIsModalFullyClickable({
-    trigger: trigger
-  });
-  if (!isFullyClickable) {
-    return React__default.createElement(StonehouseCustomModal, Object.assign({}, props));
-  }
-  return React__default.createElement(FullyClickableModal, Object.assign({}, props));
-};
-
 var Modal = function Modal(_ref) {
   var trigger = _ref.trigger;
   var _useEntireStore = useEntireStore(),
@@ -2311,7 +2022,6 @@ var Modal = function Modal(_ref) {
     setInvocationTimeStamp = _useState2[1];
   var _useCollectorMutation = useCollectorMutation(),
     collect = _useCollectorMutation.mutate;
-  var brand = useBrand();
   React.useEffect(function () {
     if (!!invocationTimeStamp) return;
     var tId = setTimeout(function () {
@@ -2349,39 +2059,7 @@ var Modal = function Modal(_ref) {
     handleClickCallToAction: handleClickCallToAction,
     handleCloseModal: handleCloseModal
   };
-  switch (brand) {
-    case 'Ember':
-      {
-        var image = reactDeviceDetect.isMobile ? 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow-m.jpg' : 'https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-booknow.jpg';
-        if (window.location.href.includes('nationalsearch')) image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/ember/emb-2023-intentlyscreen-christmas-findoutmore.jpg";
-        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
-          trigger: _extends({}, trigger, {
-            data: _extends({}, trigger.data, {
-              backgroundURL: image
-            })
-          })
-        }));
-      }
-    case 'Sizzling':
-      {
-        var _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-booknow.jpg";
-        if (window.location.href.includes('signup')) _image = reactDeviceDetect.isMobile ? "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore-m.jpg" : "https://cdn.fingerprint.host/assets/sizzling/siz-2023-intentlyscreen-christmas-findoutmore.jpg";
-        return React__default.createElement(StandardModal, Object.assign({}, modalProps, {
-          trigger: _extends({}, trigger, {
-            data: _extends({}, trigger.data, {
-              backgroundURL: _image
-            })
-          })
-        }));
-      }
-    case 'Stonehouse':
-      return React__default.createElement(StonehouseModal, Object.assign({}, modalProps));
-    case 'Browns':
-      return React__default.createElement(BrownsModal, Object.assign({}, modalProps));
-    case 'C&M':
-    default:
-      return React__default.createElement(StandardModal, Object.assign({}, modalProps));
-  }
+  return React__default.createElement(StandardModal, Object.assign({}, modalProps));
 };
 var TriggerModal = function TriggerModal(_ref2) {
   var trigger = _ref2.trigger;
@@ -2954,25 +2632,6 @@ var createTrackingSlice = function createTrackingSlice(set, _get) {
   };
 };
 
-var createUtilitySlice = function createUtilitySlice(set, get) {
-  return {
-    utility: {
-      imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
-      setImagesHaveLoaded: function setImagesHaveLoaded(imagesHaveLoaded) {
-        var stateImagesHavePreloaded = get().utility.imagesPreloaded;
-        if (stateImagesHavePreloaded === 'skip') return;
-        set(function (prev) {
-          return _extends({}, prev, {
-            utility: _extends({}, prev.utility, {
-              imagesPreloaded: imagesHaveLoaded
-            })
-          });
-        });
-      }
-    }
-  };
-};
-
 var createVisitorSlice = function createVisitorSlice(set, _get) {
   return {
     visitor: {},
@@ -2995,6 +2654,25 @@ var useVisitor$1 = function useVisitor() {
   return useDifiStore(function (state) {
     return state.visitor;
   });
+};
+
+var createUtilitySlice = function createUtilitySlice(set, get) {
+  return {
+    utility: {
+      imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
+      setImagesHaveLoaded: function setImagesHaveLoaded(imagesHaveLoaded) {
+        var stateImagesHavePreloaded = get().utility.imagesPreloaded;
+        if (stateImagesHavePreloaded === 'skip') return;
+        set(function (prev) {
+          return _extends({}, prev, {
+            utility: _extends({}, prev.utility, {
+              imagesPreloaded: imagesHaveLoaded
+            })
+          });
+        });
+      }
+    }
+  };
 };
 
 var useDifiStore = zustand.create(function () {
@@ -3961,7 +3639,7 @@ function FingerprintProvider(props) {
   }, [props, set]);
   var consentGiven = useConsentCheck(props.consent || false, consentCallback);
   React.useEffect(function () {
-    if (!props.appId) throw new Error("C&M Fingerprint: appId is required");
+    if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
     matchPropsToDifiProps();
     if (!appId) return;
     if (booted) return;

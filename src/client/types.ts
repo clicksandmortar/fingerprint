@@ -1,7 +1,7 @@
 // TODO: split this into multiple files that make sense per context..
-import { SupportedBrand } from '../utils/brand'
-import { DeviceInfo } from '../utils/device'
-import { Visitor } from '../visitors/types'
+import { SupportedBrand } from '../utils/brand';
+import { DeviceInfo } from '../utils/device';
+import { Visitor } from '../visitors/types';
 
 export type Interaction = {
   variantID: string
@@ -133,7 +133,7 @@ export type Invocation =
   | 'INVOCATION_PAGE_LOAD'
   | 'INVOCATION_ELEMENT_VISIBLE'
 
-//TODO: this should be split into separate BannerTrigger, ModalTrigger, etc for type safety
+// TODO: this should be split into separate BannerTrigger, ModalTrigger, etc for type safety
 export type Trigger = {
   id: string
   invocation?: Invocation
@@ -158,12 +158,6 @@ export type PageView = {
   page: Page
   referrer: Referrer
   viewedAt: Date
-}
-
-export type LEGACY_FingerprintConfig = {
-  exitIntentDelay?: number
-  idleDelay?: number
-  triggerCooldown?: number
 }
 
 type ScriptConfig = {

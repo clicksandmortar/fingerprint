@@ -1,18 +1,28 @@
-// this file name must remain as is, otherwise the octopus will be deployed.
+// this folder name must remain as is, otherwise the octopus will be deployed.
 import { create } from 'zustand';
 import { ConfigSlice, createConfigSlice } from './slices/configSlice';
-import { ConversionsSlice, createConversionsSlice } from './slices/conversionsSlice';
+import {
+  ConversionsSlice,
+  createConversionsSlice,
+} from './slices/conversionsSlice';
 import { createHandlersSlice, HandlersSlice } from './slices/handlersSlice';
 import { createIdleTimeSlice, IdleTimeSlice } from './slices/idleTimeSlice';
-import { createincompleteTriggersSlice, IncompleteTriggersSlice } from './slices/incompleteTriggersSlice';
+import {
+  createincompleteTriggersSlice,
+  IncompleteTriggersSlice,
+} from './slices/incompleteTriggersSlice';
 import { createLoggingSlice, LoggingSlice } from './slices/loggingSlice';
 import { createMutualSlice, MutualSlice } from './slices/mutualSlice';
-import { createPagetriggersSlice, PageTriggersSlice } from './slices/pageTriggersSlice';
+import {
+  createPagetriggersSlice,
+  PageTriggersSlice,
+} from './slices/pageTriggersSlice';
 import { createIntentlySlice, IntentlySlice } from './slices/temp_intentlySlice';
 import { createTrackingSlice, TrackingSlice } from './slices/trackingSlice';
-import { createUtilitySlice, UtilitySlice } from './slices/utilitySlice';
 import { createVisitorSlice, VisitorSlice } from './slices/visitorSlice';
 import { UseDifiStore } from './types';
+// this file name must remain as is, otherwise the octopus will be deployed.
+import { createUtilitySlice, UtilitySlice } from './slices/utilitySlice';
 
 export type DifiStore = PageTriggersSlice &
   ConfigSlice &
