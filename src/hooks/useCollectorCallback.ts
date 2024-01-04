@@ -1,12 +1,12 @@
-import React from 'react'
-import { useEntireStore } from '../beautifulSugar/store'
-import { CollectorVisitorResponse } from '../client/types'
-import { updateCookie } from '../visitors/bootstrap'
-import { useLogging } from './useLogging'
-import { useTriggerDelay } from './useTriggerDelay'
+import React from 'react';
+import { useEntireStore } from '../beautifulSugar/store';
+import { CollectorVisitorResponse } from '../client/types';
+import { updateCookie } from '../visitors/bootstrap';
+import { useLogging } from './useLogging';
+import { useTriggerDelay } from './useTriggerDelay';
 
 const useCollectorCallback = () => {
-  const { getIdleStatusDelay } = useTriggerDelay()
+  const { getIdleStatusDelay } = useTriggerDelay();
 
   const {
     idleTime: { setIdleTimeout },
@@ -16,44 +16,44 @@ const useCollectorCallback = () => {
     visitor,
     setIntently,
     setConversions,
-    setPageTriggers
-  } = useEntireStore()
+    setPageTriggers,
+  } = useEntireStore();
 
-  const { log } = useLogging()
+  const { log } = useLogging();
 
   const collectorCallback = React.useCallback(
     async (response: Response) => {
-      const payload: CollectorVisitorResponse = await response.json()
+      const payload: CollectorVisitorResponse = await response.json();
 
-      log('Retrieved payload from target engine:', payload)
+      log('Retrieved payload from target engine:', payload);
 
-      setPageTriggers(payload?.pageTriggers || [])
-      setConversions(payload.conversions || [])
+      setPageTriggers(payload?.pageTriggers || []);
+      setConversions(payload.conversions || []);
 
-      const retrievedUserId = payload.identifiers?.main
+      const retrievedUserId = payload.identifiers?.main;
       if (retrievedUserId) {
-        updateCookie(retrievedUserId)
-        setVisitor({ id: retrievedUserId })
+        updateCookie(retrievedUserId);
+        setVisitor({ id: retrievedUserId });
       }
 
-      setIdleTimeout(getIdleStatusDelay())
-      setIncompleteTriggers(payload?.incompleteTriggers || [])
-      setConversions(payload?.conversions || [])
+      setIdleTimeout(getIdleStatusDelay());
+      setIncompleteTriggers(payload?.incompleteTriggers || []);
+      setConversions(payload?.conversions || []);
 
-      const cohort = payload.intently ? 'intently' : 'fingerprint'
-      if (visitor.cohort !== cohort) setVisitor({ cohort })
+      const cohort = payload.intently ? 'intently' : 'fingerprint';
+      if (visitor.cohort !== cohort) setVisitor({ cohort });
 
-      log('CollectorProvider: collected data')
+      log('CollectorProvider: collected data');
 
       if (!payload.intently) {
-        log('CollectorProvider: user is in Fingerprint cohort')
-        setIntently(false)
+        log('CollectorProvider: user is in Fingerprint cohort');
+        setIntently(false);
       } else {
-        log('CollectorProvider: user is in Intently cohort')
-        setIntently(true)
+        log('CollectorProvider: user is in Intently cohort');
+        setIntently(true);
       }
 
-      return response
+      return response;
     },
     [
       log,
@@ -64,11 +64,11 @@ const useCollectorCallback = () => {
       setConversions,
       visitor.cohort,
       setVisitor,
-      setIntently
-    ]
-  )
+      setIntently,
+    ],
+  );
 
-  return collectorCallback
-}
+  return collectorCallback;
+};
 
-export default useCollectorCallback
+export default useCollectorCallback;

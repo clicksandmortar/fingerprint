@@ -9,7 +9,7 @@ declare type Props = {
     interpolate?: InterpolateVal;
     formatDate?: (targetDate: Date) => string;
 };
-declare const useCountdown: ({ onZero, initialTimestamp, interpolate, formatDate }: Props) => {
+declare const useCountdown: ({ onZero, initialTimestamp, interpolate, formatDate, }: Props) => {
     countdown: string;
     setTimeStamp: import("react").Dispatch<import("react").SetStateAction<Date | null>>;
     formattedCountdown: string | null;

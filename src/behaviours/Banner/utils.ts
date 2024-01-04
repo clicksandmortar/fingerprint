@@ -1,22 +1,21 @@
-import React from 'react'
-import { useBrandColors } from '../../hooks/useBrandConfig'
-import { BannerTrigger } from './Banner.types'
+import React from 'react';
+import { useBrandColors } from '../../hooks/useBrandConfig';
+import { BannerTrigger } from './Banner.types';
 
 export type Position = 'top' | 'bottom' | 'left' | 'right'
 
 export const resetPad = () => {
-  document.body.style.paddingTop = 'inherit'
-}
+  document.body.style.paddingTop = 'inherit';
+};
 
-export const getCanBeDismissed = () => {
+export const getCanBeDismissed = () =>
   // TODO: implement if needed
-  return true
-}
+  true;
 
 export const getIsBannerFullyClickable = (trigger: BannerTrigger) => {
-  const isFullyClickable = !trigger.data?.marketingText
-  return isFullyClickable
-}
+  const isFullyClickable = !trigger.data?.marketingText;
+  return isFullyClickable;
+};
 
 /**
  * Styles extracted from the Banner component
@@ -25,15 +24,15 @@ export const getIsBannerFullyClickable = (trigger: BannerTrigger) => {
  */
 export const useBannerContainerStyles = ({
   trigger,
-  element: { width, height }
+  element: { width, height },
 }: {
   trigger: BannerTrigger
   element: { width: number; height: number }
 }) => {
-  const position = trigger.data?.position as Position
-  const isFullyClickable = getIsBannerFullyClickable(trigger)
+  const position = trigger.data?.position as Position;
+  const isFullyClickable = getIsBannerFullyClickable(trigger);
 
-  const { backgroundPrimary, textPrimary } = useBrandColors()
+  const { backgroundPrimary, textPrimary } = useBrandColors();
 
   const mutualStyles: React.CSSProperties = {
     fontFamily: 'sans-serif',
@@ -43,12 +42,12 @@ export const useBannerContainerStyles = ({
     alignItems: 'center',
     color: textPrimary,
     backgroundColor: backgroundPrimary,
-    cursor: isFullyClickable ? 'pointer' : 'default'
-  }
+    cursor: isFullyClickable ? 'pointer' : 'default',
+  };
 
   // since the rotation position is pivoting around a corner, we need to calculate
   // the width of the container and then use that to offset the translate slightly to center it properly
-  const offset = 0.5 * width + 0.5 * height
+  const offset = 0.5 * width + 0.5 * height;
 
   switch (position) {
     case 'left':
@@ -60,8 +59,8 @@ export const useBannerContainerStyles = ({
         top: '50%',
         left: 0,
         transform: 'translateY(-50%)',
-        borderRadius: '10px 10px 0 0'
-      }
+        borderRadius: '10px 10px 0 0',
+      };
     case 'right':
       return {
         ...mutualStyles,
@@ -71,8 +70,8 @@ export const useBannerContainerStyles = ({
         top: '50%',
         right: 0,
         transform: 'translateY(-50%)',
-        borderRadius: '10px 10px 0 0'
-      }
+        borderRadius: '10px 10px 0 0',
+      };
 
     case 'top':
     case 'bottom':
@@ -80,9 +79,9 @@ export const useBannerContainerStyles = ({
         ...mutualStyles,
         [position]: 0,
         left: 0,
-        width: '100%'
-      }
+        width: '100%',
+      };
     default:
-      return {} as never
+      return {} as never;
   }
-}
+};

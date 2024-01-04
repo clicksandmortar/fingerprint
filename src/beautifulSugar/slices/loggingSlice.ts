@@ -1,7 +1,7 @@
-import { StateCreator } from 'zustand'
-import { getLoggingContext, Logging } from '../../hooks/useLogging'
-import { DifiStore } from '../store'
-import { Get, Set } from '../types'
+import { StateCreator } from 'zustand';
+import { getLoggingContext, Logging } from '../../hooks/useLogging';
+import { DifiStore } from '../store';
+import { Get, Set } from '../types';
 
 export type LoggingSlice = {
   logging: Logging
@@ -15,5 +15,5 @@ export const createLoggingSlice: StateCreator<
   [],
   LoggingSlice
 > = (_set: Set, get: Get) => ({
-  logging: getLoggingContext(get?.()?.config?.script?.debugMode)
-})
+  logging: getLoggingContext(get?.()?.config?.script?.debugMode),
+});

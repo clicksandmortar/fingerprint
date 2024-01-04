@@ -1,20 +1,20 @@
-import React from 'react'
-import { Icon, IconProps } from '../../../components/Icon'
-import { useBrandColors } from '../../../hooks/useBrandConfig'
-import { useLogging } from '../../../hooks/useLogging'
+import React from 'react';
+import { Icon, IconProps } from '../../../components/Icon';
+import { useBrandColors } from '../../../hooks/useBrandConfig';
+import { useLogging } from '../../../hooks/useLogging';
 
 type Props = {
   iconName?: Icon
   IconProps?: IconProps
 }
 
-const BannerIcon = ({ iconName, IconProps }: Props) => {
-  const { error } = useLogging()
-  const { textPrimary } = useBrandColors()
+function BannerIcon({ iconName, IconProps }: Props) {
+  const { error } = useLogging();
+  const { textPrimary } = useBrandColors();
   // This breks typical component context rules, but keeping here for now for cleanliness
   if (!iconName) {
-    error('BannerIcon: iconName not provided')
-    return null
+    error('BannerIcon: iconName not provided');
+    return null;
   }
 
   return (
@@ -25,7 +25,7 @@ const BannerIcon = ({ iconName, IconProps }: Props) => {
       fill={textPrimary}
       {...IconProps}
     />
-  )
+  );
 }
 
-export default BannerIcon
+export default BannerIcon;

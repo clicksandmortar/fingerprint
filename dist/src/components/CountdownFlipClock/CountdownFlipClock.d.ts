@@ -8,5 +8,5 @@ declare type Props = FlipClockProps;
 export declare type ConfigHOCProps = {
     colorConfig: ReturnType<typeof useBrandColors>;
 };
-declare const CountdownFlipClock: (props: Props) => React.JSX.Element;
+declare function CountdownFlipClock(props: Props): React.JSX.Element;
 export default CountdownFlipClock;

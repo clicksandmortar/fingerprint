@@ -8,7 +8,7 @@ export declare const getIsBannerFullyClickable: (trigger: BannerTrigger) => bool
  * Relies on brand colors from useBrandColors,
  * so has to be a hook
  */
-export declare const useBannerContainerStyles: ({ trigger, element: { width, height } }: {
+export declare const useBannerContainerStyles: ({ trigger, element: { width, height }, }: {
     trigger: BannerTrigger;
     element: {
         width: number;

@@ -1,26 +1,25 @@
-import React, { memo } from 'react'
-import { Trigger } from '../../../../client/types'
-import CountdownFlipClock from '../../../../components/CountdownFlipClock/CountdownFlipClock'
-import { getInterpolate } from '../../../../utils/getInterpolate'
-import { buildTextWithPotentiallyCountdown, prependClass } from '../../helpers'
+import React, { memo } from 'react';
+import { Trigger } from '../../../../client/types';
+import CountdownFlipClock from '../../../../components/CountdownFlipClock/CountdownFlipClock';
+import { getInterpolate } from '../../../../utils/getInterpolate';
+import { buildTextWithPotentiallyCountdown, prependClass } from '../../helpers';
 
 type Props = { trigger: Trigger }
 
 // NOTE: the styles here rely on the styles useEffect in StandardModal.tsx
-const Header = ({ trigger }: Props) => {
-  const interpolate = getInterpolate(trigger.data || {}, true)
+function Header({ trigger }: Props) {
+  const interpolate = getInterpolate(trigger.data || {}, true);
 
-  const countdownEndTime = trigger?.data?.countdownEndTime
+  const countdownEndTime = trigger?.data?.countdownEndTime;
 
-  const StdHeader = ({ text }: { text: string | undefined }) => (
-    <h1 className={prependClass('main-text')}>{interpolate(text || '')}</h1>
-  )
+  function StdHeader({ text }: { text: string | undefined }) {
+    return <h1 className={prependClass('main-text')}>{interpolate(text || '')}</h1>;
+  }
 
-  const texts = buildTextWithPotentiallyCountdown(trigger?.data?.heading || '')
+  const texts = buildTextWithPotentiallyCountdown(trigger?.data?.heading || '');
 
-  if (!countdownEndTime) return <StdHeader text={trigger?.data?.heading} />
-  if (!('hasCountdown' in texts))
-    return <StdHeader text={trigger?.data?.heading} />
+  if (!countdownEndTime) return <StdHeader text={trigger?.data?.heading} />;
+  if (!('hasCountdown' in texts)) return <StdHeader text={trigger?.data?.heading} />;
 
   return (
     <div>
@@ -30,7 +29,7 @@ const Header = ({ trigger }: Props) => {
       </div>
       {texts.text2 && <StdHeader text={texts.text2} />}
     </div>
-  )
+  );
 }
 
-export default memo(Header)
+export default memo(Header);

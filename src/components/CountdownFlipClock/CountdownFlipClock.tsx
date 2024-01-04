@@ -1,6 +1,6 @@
-import React from 'react'
-import { useBrandColors } from '../../hooks/useBrandConfig'
-import { getDiffInDHMS } from '../../utils/date'
+import React from 'react';
+import { useBrandColors } from '../../hooks/useBrandConfig';
+import { getDiffInDHMS } from '../../utils/date';
 
 /**
  * Note: For some reason the flip animation gets broken whenever you try to convert this into a fully functional component.
@@ -9,81 +9,81 @@ import { getDiffInDHMS } from '../../utils/date'
  * IDea taken from here https://codepen.io/liborgabrhel/pen/JyJzjb and modified to meet our needs.
  */
 
-const fontSize = '2em'
-const cardFontScaleFactor = 1.5
+const fontSize = '2em';
+const cardFontScaleFactor = 1.5;
 
-const AnimatedCard = ({
+function AnimatedCard({
   animation,
-  digit
+  digit,
 }: {
   animation: string
   digit: number | string
-}) => {
+}) {
   return (
     <div className={`flipCard ${animation}`}>
       <span>{digit}</span>
     </div>
-  )
+  );
 }
 
-const StaticCard = ({
+function StaticCard({
   position,
-  digit
+  digit,
 }: {
   position: string
   digit: number | string
-}) => {
+}) {
   return (
     <div className={position}>
       <span>{digit}</span>
     </div>
-  )
+  );
 }
 
-const FlipUnitContainer = ({
+function FlipUnitContainer({
   digit,
   shuffle,
-  unit
+  unit,
 }: {
   digit: number
   shuffle: boolean
   unit: string
-}) => {
+}) {
   // assign digit values
-  let currentDigit: number | string = digit
-  let previousDigit: number | string = digit + 1
+  let currentDigit: number | string = digit;
+  let previousDigit: number | string = digit + 1;
 
   // to prevent a negative value
   if (unit !== 'hours') {
-    previousDigit = previousDigit === -1 ? 59 : previousDigit
+    previousDigit = previousDigit === -1 ? 59 : previousDigit;
   } else {
-    previousDigit = previousDigit === -1 ? 23 : previousDigit
+    previousDigit = previousDigit === -1 ? 23 : previousDigit;
   }
 
   // add zero
   if (currentDigit < 10) {
-    currentDigit = `0${currentDigit}`
+    currentDigit = `0${currentDigit}`;
   }
   if (previousDigit < 10) {
-    previousDigit = `0${previousDigit}`
+    previousDigit = `0${previousDigit}`;
   }
 
   // shuffle digits
-  const digit1 = shuffle ? previousDigit : currentDigit
-  const digit2 = !shuffle ? previousDigit : currentDigit
+  const digit1 = shuffle ? previousDigit : currentDigit;
+  const digit2 = !shuffle ? previousDigit : currentDigit;
 
   // shuffle animations
-  const animation1 = shuffle ? 'fold' : 'unfold'
-  const animation2 = !shuffle ? 'fold' : 'unfold'
+  const animation1 = shuffle ? 'fold' : 'unfold';
+  const animation2 = !shuffle ? 'fold' : 'unfold';
 
   return (
-    <div className={'flipUnitContainer'}>
-      <StaticCard position={'upperCard'} digit={currentDigit} />
-      <StaticCard position={'lowerCard'} digit={previousDigit} />
+    <div className="flipUnitContainer">
+      <StaticCard position="upperCard" digit={currentDigit} />
+      <StaticCard position="lowerCard" digit={previousDigit} />
       <AnimatedCard digit={digit1} animation={animation1} />
       <AnimatedCard digit={digit2} animation={animation2} />
     </div>
-  )
+  );
 }
 
 export type FlipClockProps = {
@@ -109,7 +109,7 @@ class FlipClock extends React.Component<
   State
 > {
   constructor(props: FlipClockProps & ConfigHOCProps) {
-    super(props)
+    super(props);
     this.state = {
       hours: 0,
       hoursShuffle: true,
@@ -119,14 +119,15 @@ class FlipClock extends React.Component<
       minutesShuffle: true,
       seconds: 0,
       secondsShuffle: true,
-      haveStylesLoaded: false
-    }
+      haveStylesLoaded: false,
+    };
   }
-  private timerID: NodeJS.Timer
-  private styles: HTMLStyleElement
+
+  private timerID: NodeJS.Timer;
+  private styles: HTMLStyleElement;
 
   componentDidMount() {
-    const { textPrimary, backgroundPrimary } = this.props.colorConfig
+    const { textPrimary, backgroundPrimary } = this.props.colorConfig;
     const CSS = `
     @import url("https://fonts.googleapis.com/css?family=Droid+Sans+Mono");
     * {
@@ -293,65 +294,67 @@ class FlipClock extends React.Component<
         scale: 0.5
       }
     }
-    `
+    `;
 
-    this.timerID = setInterval(() => this.updateTime(), 50)
-    this.styles = document.createElement('style')
-    this.styles.appendChild(document.createTextNode(CSS))
-    document.head.appendChild(this.styles)
+    this.timerID = setInterval(() => this.updateTime(), 50);
+    this.styles = document.createElement('style');
+    this.styles.appendChild(document.createTextNode(CSS));
+    document.head.appendChild(this.styles);
     setTimeout(() => {
-      this.setState({ haveStylesLoaded: true })
-    }, 500)
+      this.setState({ haveStylesLoaded: true });
+    }, 500);
   }
 
   componentWillUnmount() {
-    clearInterval(this.timerID)
-    document.head.removeChild(this.styles)
+    clearInterval(this.timerID);
+    document.head.removeChild(this.styles);
   }
 
   updateTime() {
-    const startDate = this.props.startDate || new Date()
+    const startDate = this.props.startDate || new Date();
 
-    const diff = getDiffInDHMS(startDate, this.props.targetDate)
-    const { days, hours, minutes, seconds } = diff
+    const diff = getDiffInDHMS(startDate, this.props.targetDate);
+    const {
+      days, hours, minutes, seconds,
+    } = diff;
 
     if (days !== this.state.days) {
-      const daysShuffle = !this.state.daysShuffle
+      const daysShuffle = !this.state.daysShuffle;
       this.setState({
         days,
-        daysShuffle
-      })
+        daysShuffle,
+      });
     }
     if (hours !== this.state.hours) {
-      const hoursShuffle = !this.state.hoursShuffle
+      const hoursShuffle = !this.state.hoursShuffle;
       this.setState({
         hours,
-        hoursShuffle
-      })
+        hoursShuffle,
+      });
     }
     // on hour chanage, update hours and shuffle state
     if (hours !== this.state.hours) {
-      const hoursShuffle = !this.state.hoursShuffle
+      const hoursShuffle = !this.state.hoursShuffle;
       this.setState({
         hours,
-        hoursShuffle
-      })
+        hoursShuffle,
+      });
     }
     // on minute chanage, update minutes and shuffle state
     if (minutes !== this.state.minutes) {
-      const minutesShuffle = !this.state.minutesShuffle
+      const minutesShuffle = !this.state.minutesShuffle;
       this.setState({
         minutes,
-        minutesShuffle
-      })
+        minutesShuffle,
+      });
     }
     // on second chanage, update seconds and shuffle state
     if (seconds !== this.state.seconds) {
-      const secondsShuffle = !this.state.secondsShuffle
+      const secondsShuffle = !this.state.secondsShuffle;
       this.setState({
         seconds,
-        secondsShuffle
-      })
+        secondsShuffle,
+      });
     }
   }
 
@@ -364,38 +367,40 @@ class FlipClock extends React.Component<
       daysShuffle,
       hoursShuffle,
       minutesShuffle,
-      secondsShuffle
-    } = this.state
+      secondsShuffle,
+    } = this.state;
 
-    if (!this.state.haveStylesLoaded) return null
+    if (!this.state.haveStylesLoaded) return null;
 
-    const { textPrimary } = this.props.colorConfig
+    const { textPrimary } = this.props.colorConfig;
 
-    const Separator = () => <h1 style={{ color: textPrimary }}>:</h1>
+    function Separator() {
+      return <h1 style={{ color: textPrimary }}>:</h1>;
+    }
 
     return (
-      <div className={'flipClock'}>
-        <FlipUnitContainer unit={'days'} digit={days} shuffle={daysShuffle} />
+      <div className="flipClock">
+        <FlipUnitContainer unit="days" digit={days} shuffle={daysShuffle} />
         <Separator />
         <FlipUnitContainer
-          unit={'hours'}
+          unit="hours"
           digit={hours}
           shuffle={hoursShuffle}
         />
         <Separator />
         <FlipUnitContainer
-          unit={'minutes'}
+          unit="minutes"
           digit={minutes}
           shuffle={minutesShuffle}
         />
         <Separator />
         <FlipUnitContainer
-          unit={'seconds'}
+          unit="seconds"
           digit={seconds}
           shuffle={secondsShuffle}
         />
       </div>
-    )
+    );
   }
 }
 
@@ -407,10 +412,10 @@ export type ConfigHOCProps = {
 
 // Adds colorConfig prop to FlipClock.
 // Add all your hook logic here if you need to and pass as props..
-const CountdownFlipClock = (props: Props) => {
-  const colors = useBrandColors()
+function CountdownFlipClock(props: Props) {
+  const colors = useBrandColors();
 
-  return <FlipClock {...props} colorConfig={colors} />
+  return <FlipClock {...props} colorConfig={colors} />;
 }
 
-export default CountdownFlipClock
+export default CountdownFlipClock;

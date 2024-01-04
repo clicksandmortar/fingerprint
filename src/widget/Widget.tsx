@@ -1,5 +1,5 @@
-import React from 'react'
-import { FingerprintProvider } from '../context/FingerprintContext'
+import React from 'react';
+import { FingerprintProvider } from '../context/FingerprintContext';
 
 type Props = {
   appId?: string
@@ -7,12 +7,12 @@ type Props = {
   debug?: boolean
 }
 
-export const Widget = ({ appId, consent }: Props) => {
+export function Widget({ appId, consent }: Props) {
   return (
     <FingerprintProvider
       appId={appId}
       consent={consent}
       debug={false as never}
     />
-  )
+  );
 }

@@ -6,47 +6,46 @@
  * competitor. We succeeded. This name remains as a reminder of a dark time in Difi's
  * history.
  */
-import React, { useEffect, useState } from 'react'
-import { isMobile } from 'react-device-detect'
-import CloseButton from '../../../components/CloseButton'
-import { useSeen } from '../../../hooks/api/useSeenMutation'
-import { useBrandColors } from '../../../hooks/useBrandConfig'
-import { useLogging } from '../../../hooks/useLogging'
+import React, { useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import CloseButton from '../../../components/CloseButton';
+import { useSeen } from '../../../hooks/api/useSeenMutation';
+import { useBrandColors } from '../../../hooks/useBrandConfig';
+import { useLogging } from '../../../hooks/useLogging';
 import {
   getIsModalFullyClickable,
   prependClass,
-  useModalDimensionsBasedOnImage
-} from '../helpers'
-import { ModalProps } from '../Modal.types'
-import Header from './components/Header'
-import Paragraph from './components/Paragraph'
+  useModalDimensionsBasedOnImage,
+} from '../helpers';
+import { ModalProps } from '../Modal.types';
+import Header from './components/Header';
+import Paragraph from './components/Paragraph';
 
-const StandardModal = ({
+function StandardModal({
   trigger,
   handleClickCallToAction,
-  handleCloseModal
-}: ModalProps) => {
-  const { error } = useLogging()
-  const isModalFullyClickable = getIsModalFullyClickable({ trigger })
-  const [stylesLoaded, setStylesLoaded] = useState(false)
+  handleCloseModal,
+}: ModalProps) {
+  const { error } = useLogging();
+  const isModalFullyClickable = getIsModalFullyClickable({ trigger });
+  const [stylesLoaded, setStylesLoaded] = useState(false);
 
-  const { textPrimary, backgroundPrimary } = useBrandColors()
-  const imageURL = trigger?.data?.backgroundURL || ''
+  const { textPrimary, backgroundPrimary } = useBrandColors();
+  const imageURL = trigger?.data?.backgroundURL || '';
   const {
     imageDimensions: { height, width },
-    setImageDimensions
+    setImageDimensions,
   } = useModalDimensionsBasedOnImage({
-    imageURL
-  })
+    imageURL,
+  });
 
-  const isImageBrokenDontShowModal = !width || !height
+  const isImageBrokenDontShowModal = !width || !height;
 
-  useSeen({ trigger, skip: !stylesLoaded || isImageBrokenDontShowModal })
+  useSeen({ trigger, skip: !stylesLoaded || isImageBrokenDontShowModal });
 
-  const appendResponsiveBehaviour = React.useCallback(() => {
-    return isMobile
-      ? ``
-      : `
+  const appendResponsiveBehaviour = React.useCallback(() => (isMobile
+    ? ''
+    : `
 
 @media screen and (max-width: 1400px) {
   .${prependClass('modal')} {
@@ -81,8 +80,7 @@ const StandardModal = ({
   }
 }
 
-`
-  }, [height, width, imageURL, isMobile])
+`), [height, width, imageURL, isMobile]);
 
   useEffect(() => {
     // @todo: note that because of the font being screwed up a bit on all of these host urls,
@@ -122,7 +120,7 @@ const StandardModal = ({
     }
     
     .${prependClass('modal')} {
-      ${isModalFullyClickable ? 'cursor: pointer;' : ``}
+      ${isModalFullyClickable ? 'cursor: pointer;' : ''}
       height: ${height}px;
       width: ${width}px;
       display: flex;
@@ -139,13 +137,13 @@ const StandardModal = ({
     
     .${prependClass('modal')}:hover {
       ${
-        isModalFullyClickable
-          ? `
+  isModalFullyClickable
+    ? `
         filter: brightness(1.05);
         box-shadow: 0.1rem 0.1rem 10px #7b7b7b;
       `
-          : ''
-      }
+    : ''
+}
     }
     
     .${prependClass('text-center')} {
@@ -240,46 +238,46 @@ const StandardModal = ({
       box-shadow: var(--text-shadow);
     }
     ${appendResponsiveBehaviour()}
-    `
+    `;
 
-    const styles = document.createElement('style')
-    styles.type = 'text/css'
-    styles.appendChild(document.createTextNode(cssToApply))
-    document.head.appendChild(styles)
+    const styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
     setTimeout(() => {
-      setStylesLoaded(true)
-    }, 500)
+      setStylesLoaded(true);
+    }, 500);
     return () => {
-      document.head.removeChild(styles)
-    }
-  }, [isModalFullyClickable, height, width, appendResponsiveBehaviour])
+      document.head.removeChild(styles);
+    };
+  }, [isModalFullyClickable, height, width, appendResponsiveBehaviour]);
 
   const getHandleModalActionFinal = React.useCallback(() => {
-    if (!isModalFullyClickable) return undefined
+    if (!isModalFullyClickable) return undefined;
 
     return (e: any) => {
-      setImageDimensions({ width: 0, height: 0 })
-      handleClickCallToAction(e)
-    }
-  }, [handleClickCallToAction])
+      setImageDimensions({ width: 0, height: 0 });
+      handleClickCallToAction(e);
+    };
+  }, [handleClickCallToAction]);
 
   const handleClickCloseFinal = React.useCallback(
     (e: any) => {
-      e.stopPropagation()
-      return handleCloseModal(e)
+      e.stopPropagation();
+      return handleCloseModal(e);
     },
-    [handleCloseModal]
-  )
+    [handleCloseModal],
+  );
 
   if (!stylesLoaded) {
-    return null
+    return null;
   }
 
   if (isImageBrokenDontShowModal) {
     error(
-      "StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate."
-    )
-    return null
+      "StandardModal: Couldn't get image dimensions, so not showing trigger. Investigate.",
+    );
+    return null;
   }
 
   return (
@@ -292,7 +290,7 @@ const StandardModal = ({
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
-          position: 'relative'
+          position: 'relative',
         }}
       >
         <div className={prependClass('image-darken')}>
@@ -309,7 +307,7 @@ const StandardModal = ({
             <div
               style={{
                 display: 'flex',
-                justifyContent: 'flex-end'
+                justifyContent: 'flex-end',
               }}
             >
               <div>
@@ -319,7 +317,7 @@ const StandardModal = ({
                   onClick={handleClickCallToAction}
                   style={{
                     fontSize: '1.3rem',
-                    padding: '0.3rem 1rem'
+                    padding: '0.3rem 1rem',
                   }}
                 >
                   {trigger?.data?.buttonText}
@@ -330,7 +328,7 @@ const StandardModal = ({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default StandardModal
+export default StandardModal;

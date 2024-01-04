@@ -1,6 +1,6 @@
 import { Config } from '../client/types';
 export declare type SupportedBrand = 'Browns' | 'Stonehouse' | 'C&M' | 'Sizzling' | 'All Bar One' | 'Ember' | 'Harvester';
-export declare const _LEGACY_getBrand: () => SupportedBrand | null;
+export declare function _LEGACY_getBrand(): SupportedBrand | null;
 /**
  * By default all brand colors are set to #000000.
  */

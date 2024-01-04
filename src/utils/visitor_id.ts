@@ -1,12 +1,10 @@
 export const getVisitorId = (): string | null => {
-  if (typeof window === 'undefined') return null
+  if (typeof window === 'undefined') return null;
 
-  const urlParams = new URLSearchParams(window.location.search)
-  const vid = urlParams.get('v_id')
+  const urlParams = new URLSearchParams(window.location.search);
+  const vid = urlParams.get('v_id');
 
-  return vid
-}
+  return vid;
+};
 
-export const hasVisitorIDInURL = (): boolean => {
-  return getVisitorId() !== null
-}
+export const hasVisitorIDInURL = (): boolean => getVisitorId() !== null;

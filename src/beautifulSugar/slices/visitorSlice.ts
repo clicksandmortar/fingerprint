@@ -1,8 +1,8 @@
-import { StateCreator } from 'zustand'
-import { Session } from '../../sessions/types'
-import { Visitor } from '../../visitors/types'
-import { DifiStore, useDifiStore } from '../store'
-import { Get, Set } from '../types'
+import { StateCreator } from 'zustand';
+import { Session } from '../../sessions/types';
+import { Visitor } from '../../visitors/types';
+import { DifiStore, useDifiStore } from '../store';
+import { Get, Set } from '../types';
 
 export type VisitorSlice = {
   visitor: Visitor
@@ -18,15 +18,14 @@ export const createVisitorSlice: StateCreator<
   VisitorSlice
 > = (set: Set, _get: Get) => ({
   visitor: {} as Visitor,
-  setVisitor: (partialVisitor: Visitor) =>
-    set((prev: DifiStore) => ({
-      visitor: {
-        ...prev.visitor,
-        ...partialVisitor
-      }
-    })),
+  setVisitor: (partialVisitor: Visitor) => set((prev: DifiStore) => ({
+    visitor: {
+      ...prev.visitor,
+      ...partialVisitor,
+    },
+  })),
   session: {} as Session,
-  setSession: (updatedSession: Session) => set({ session: updatedSession })
-})
+  setSession: (updatedSession: Session) => set({ session: updatedSession }),
+});
 
-export const useVisitor = () => useDifiStore((state) => state.visitor)
+export const useVisitor = () => useDifiStore((state) => state.visitor);

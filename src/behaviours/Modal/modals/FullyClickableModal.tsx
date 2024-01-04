@@ -5,12 +5,12 @@
  *
  */
 
-import React, { useEffect, useState } from 'react'
-import { isMobile } from 'react-device-detect'
-import { Trigger } from '../../../client/types'
-import CloseButton from '../../../components/CloseButton'
-import { useSeen } from '../../../hooks/api/useSeenMutation'
-import { prependClass, useModalDimensionsBasedOnImage } from '../helpers'
+import React, { useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { Trigger } from '../../../client/types';
+import CloseButton from '../../../components/CloseButton';
+import { useSeen } from '../../../hooks/api/useSeenMutation';
+import { prependClass, useModalDimensionsBasedOnImage } from '../helpers';
 
 type Props = {
   handleClickCallToAction: (e: any) => void
@@ -18,30 +18,29 @@ type Props = {
   trigger: Trigger
 }
 
-const FullyClickableModal = ({
+function FullyClickableModal({
   handleClickCallToAction,
   handleCloseModal,
-  trigger
-}: Props) => {
-  const imageURL = trigger?.data?.backgroundURL || ''
+  trigger,
+}: Props) {
+  const imageURL = trigger?.data?.backgroundURL || '';
 
-  const [stylesLoaded, setStylesLoaded] = useState(false)
+  const [stylesLoaded, setStylesLoaded] = useState(false);
 
   const {
-    imageDimensions: { height, width }
+    imageDimensions: { height, width },
   } = useModalDimensionsBasedOnImage({
-    imageURL
-  })
-  const isImageBrokenDontShowModal = !width || !height
+    imageURL,
+  });
+  const isImageBrokenDontShowModal = !width || !height;
 
-  useSeen({ trigger, skip: !stylesLoaded || isImageBrokenDontShowModal })
+  useSeen({ trigger, skip: !stylesLoaded || isImageBrokenDontShowModal });
 
-  const appendResponsiveBehaviour = React.useCallback(() => {
-    return isMobile
-      ? `.${prependClass('modal')} {
+  const appendResponsiveBehaviour = React.useCallback(() => (isMobile
+    ? `.${prependClass('modal')} {
 
     }`
-      : `
+    : `
 @media screen and (max-width: 1400px) {
   .${prependClass('modal')} {
     height: ${1 * height}px;
@@ -62,11 +61,10 @@ const FullyClickableModal = ({
     width: ${0.4 * width}px;
   }
 }
-`
-  }, [height, width])
+`), [height, width]);
 
   // TODO:reminder:
-  const isEntireModalClickable = true
+  const isEntireModalClickable = true;
 
   useEffect(() => {
     // @todo: note that because of the font being screwed up a bit on all of these host urls,
@@ -106,13 +104,13 @@ const FullyClickableModal = ({
     }
 
     ${
-      isEntireModalClickable
-        ? `.${prependClass('modal')}:hover {
+  isEntireModalClickable
+    ? `.${prependClass('modal')}:hover {
       filter: brightness(1.05);
       box-shadow: 0.1rem 0.1rem 10px #7b7b7b;
     }`
-        : ''
-    }
+    : ''
+}
     
     
     .${prependClass('text-center')} {
@@ -183,41 +181,39 @@ const FullyClickableModal = ({
     }
     ${appendResponsiveBehaviour()}
 
-    `
+    `;
 
-    const styles = document.createElement('style')
-    styles.type = 'text/css'
-    styles.appendChild(document.createTextNode(cssToApply))
-    document.head.appendChild(styles)
+    const styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(cssToApply));
+    document.head.appendChild(styles);
     setTimeout(() => {
-      setStylesLoaded(true)
-    }, 500)
+      setStylesLoaded(true);
+    }, 500);
 
     return () => {
-      document.head.removeChild(styles)
-    }
-  }, [height, width, appendResponsiveBehaviour])
+      document.head.removeChild(styles);
+    };
+  }, [height, width, appendResponsiveBehaviour]);
 
   const handleModalAction = React.useCallback(
-    (e: any) => {
-      return handleClickCallToAction(e)
-    },
-    [handleClickCallToAction]
-  )
+    (e: any) => handleClickCallToAction(e),
+    [handleClickCallToAction],
+  );
 
   const handleClickClose = React.useCallback(
     (e: any) => {
-      e.stopPropagation()
-      return handleCloseModal(e)
+      e.stopPropagation();
+      return handleCloseModal(e);
     },
-    [handleCloseModal]
-  )
+    [handleCloseModal],
+  );
 
   if (!stylesLoaded) {
-    return null
+    return null;
   }
   if (isImageBrokenDontShowModal) {
-    return null
+    return null;
   }
 
   return (
@@ -230,7 +226,7 @@ const FullyClickableModal = ({
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
-          position: 'relative'
+          position: 'relative',
         }}
       >
         <div className={prependClass('close-button')}>
@@ -238,6 +234,6 @@ const FullyClickableModal = ({
         </div>
       </div>
     </div>
-  )
+  );
 }
-export default FullyClickableModal
+export default FullyClickableModal;

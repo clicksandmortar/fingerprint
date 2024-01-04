@@ -1,12 +1,12 @@
-import { CollectorVisitorResponse } from '../../client/types'
-import { SupportedBrand } from '../brand'
-import { fakeBanners } from './triggers.fake'
+import { CollectorVisitorResponse } from '../../client/types';
+import { SupportedBrand } from '../brand';
+import { fakeBanners } from './triggers.fake';
 
 export const fakeCollectorResp: CollectorVisitorResponse = {
   firstSeen: '2023-12-08T08:29:32.178245531Z',
   visits: {
     host: 1,
-    path: 1
+    path: 1,
   },
   pageTriggers: [
     ...fakeBanners,
@@ -20,8 +20,8 @@ export const fakeCollectorResp: CollectorVisitorResponse = {
         buttonText: 'Click me!',
         buttonURL: 'http://www.google.com/',
         heading: 'Hello',
-        paragraph: 'Hello there again!'
-      }
+        paragraph: 'Hello there again!',
+      },
 
       // variantID: '52d5fe24-fc27-44bd-962a-6d8e9f6eb3d9',
       //   // variantName: ''
@@ -49,17 +49,17 @@ export const fakeCollectorResp: CollectorVisitorResponse = {
       //   }
       //   // variantID: '5c9780d8-b3bd-4f0b-b37b-5f798ebfab66',
       //   // variantName: 'Mobile meow'
-    }
+    },
   ],
   config: {
     script: {
-      debugMode: true
+      debugMode: true,
       // debugMode: false
     },
     trigger: {
       userIdleThresholdSecs: 0,
       displayTriggerAfterSecs: 0,
-      triggerCooldownSecs: 0
+      triggerCooldownSecs: 0,
     },
     brand: {
       name: 'Harvester' as SupportedBrand,
@@ -69,9 +69,9 @@ export const fakeCollectorResp: CollectorVisitorResponse = {
         backgroundSecondary: '#00ffe7',
         shadeOfGrey: '#000000',
         textPrimary: '#ffffff',
-        greyText: '#000000'
-      }
-    }
+        greyText: '#000000',
+      },
+    },
   },
   conversions: [
     {
@@ -79,42 +79,42 @@ export const fakeCollectorResp: CollectorVisitorResponse = {
       signals: [
         {
           op: 'IsOnPath',
-          parameters: ['starts_with', '/']
+          parameters: ['starts_with', '/'],
         },
         {
           op: 'CanSeeElementOnPage',
-          parameters: ['#test', 'contains', '/']
+          parameters: ['#test', 'contains', '/'],
         },
         {
           op: 'IsOnDomain',
-          parameters: ['localhost']
-        }
+          parameters: ['localhost'],
+        },
       ],
-      analyticsEvent: 'unnecessary-event-ids'
+      analyticsEvent: 'unnecessary-event-ids',
     },
     {
       identifier: '1842e390-fb0b-415c-842e-bf30a8783786',
       signals: [
         {
           op: 'CanSeeElementOnPage',
-          parameters: ['.stage-5', 'starts_with', '/tablebooking']
-        }
+          parameters: ['.stage-5', 'starts_with', '/tablebooking'],
+        },
       ],
-      analyticsEvent: 'test_event'
+      analyticsEvent: 'test_event',
     },
     {
       identifier: 'c317e593-e436-4424-bb1a-89809ae55066',
       signals: [
         {
           op: 'CanSeeElementOnPage',
-          parameters: ['.stage-5', 'contains', '/tablebooking']
-        }
+          parameters: ['.stage-5', 'contains', '/tablebooking'],
+        },
       ],
-      analyticsEvent: 'eds-test-config'
-    }
+      analyticsEvent: 'eds-test-config',
+    },
   ],
   identifiers: {
-    main: '1a1a1a11-1aaa-111a-1111-aa11aaa11111'
+    main: '1a1a1a11-1aaa-111a-1111-aa11aaa11111',
   },
-  intently: false
-}
+  intently: false,
+};

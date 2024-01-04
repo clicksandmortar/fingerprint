@@ -1,42 +1,42 @@
-import React, { useEffect, useState } from 'react'
-import ReactDOM from 'react-dom'
-import { useEntireStore } from '../../beautifulSugar/store'
-import { Trigger } from '../../client/types'
-import { useCollectorMutation } from '../../hooks/api/useCollectorMutation'
-import { useTracking } from '../../hooks/useTracking'
-import { HandleCloseOptions } from './Modal.types'
-import StandardModal from './modals/StandardModal'
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { useEntireStore } from '../../beautifulSugar/store';
+import { Trigger } from '../../client/types';
+import { useCollectorMutation } from '../../hooks/api/useCollectorMutation';
+import { useTracking } from '../../hooks/useTracking';
+import { HandleCloseOptions } from './Modal.types';
+import StandardModal from './modals/StandardModal';
 
 type Props = {
   trigger: Trigger
 }
 
-const Modal = ({ trigger }: Props) => {
-  const { removeActiveTrigger } = useEntireStore()
-  const { trackEvent } = useTracking()
-  const [open, setOpen] = useState(true)
+function Modal({ trigger }: Props) {
+  const { removeActiveTrigger } = useEntireStore();
+  const { trackEvent } = useTracking();
+  const [open, setOpen] = useState(true);
   const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
-    null
-  )
+    null,
+  );
 
-  const { mutate: collect } = useCollectorMutation()
+  const { mutate: collect } = useCollectorMutation();
 
   useEffect(() => {
-    if (!!invocationTimeStamp) return
+    if (!!invocationTimeStamp) return;
 
     const tId = setTimeout(() => {
       if (!invocationTimeStamp) {
-        setInvocationTimeStamp(new Date().toISOString())
+        setInvocationTimeStamp(new Date().toISOString());
       }
-    }, 500)
+    }, 500);
 
     return () => {
-      clearTimeout(tId)
-    }
-  }, [invocationTimeStamp])
+      clearTimeout(tId);
+    };
+  }, [invocationTimeStamp]);
 
   if (!open) {
-    return null
+    return null;
   }
 
   const handleCloseModal = (options?: HandleCloseOptions) => {
@@ -46,35 +46,33 @@ const Modal = ({ trigger }: Props) => {
     //     shownAt: invocationTimeStamp || ''
     //   }
     // })
-    removeActiveTrigger(trigger.id)
-    setOpen(false)
+    removeActiveTrigger(trigger.id);
+    setOpen(false);
 
-    if (options?.skipTrackingEvent) return
+    if (options?.skipTrackingEvent) return;
 
-    trackEvent('user_closed_trigger', trigger)
-  }
+    trackEvent('user_closed_trigger', trigger);
+  };
 
   const handleClickCallToAction = (e: any) => {
-    e.preventDefault()
+    e.preventDefault();
     collect({
       cta: {
         variantID: trigger.id,
-        shownAt: invocationTimeStamp || new Date().toISOString()
-      }
-    })
-    trackEvent('user_clicked_button', trigger)
-    trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self')
-  }
+        shownAt: invocationTimeStamp || new Date().toISOString(),
+      },
+    });
+    trackEvent('user_clicked_button', trigger);
+    trigger?.data?.buttonURL && window.open(trigger?.data?.buttonURL, '_self');
+  };
 
   const modalProps = {
-    trigger: trigger,
-    handleClickCallToAction: handleClickCallToAction,
-    handleCloseModal: handleCloseModal
-  }
+    trigger,
+    handleClickCallToAction,
+    handleCloseModal,
+  };
 
-  return <StandardModal {...modalProps} />
+  return <StandardModal {...modalProps} />;
 }
 
-export const TriggerModal = ({ trigger }: Props) => {
-  return ReactDOM.createPortal(<Modal trigger={trigger} />, document.body)
-}
+export const TriggerModal = ({ trigger }: Props) => ReactDOM.createPortal(<Modal trigger={trigger} />, document.body);

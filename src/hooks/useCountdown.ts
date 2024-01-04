@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
-import { formatTimeStamp, getPositiveDateDiffInSec } from '../utils/date'
-import { getInterpolate } from '../utils/getInterpolate'
-import { useLogging } from './useLogging'
+import { useEffect, useMemo, useState } from 'react';
+import { formatTimeStamp, getPositiveDateDiffInSec } from '../utils/date';
+import { getInterpolate } from '../utils/getInterpolate';
+import { useLogging } from './useLogging';
 
 type InterpolateVal = {
   structure: Record<string, unknown>
@@ -21,69 +21,69 @@ const useCountdown = ({
   onZero,
   initialTimestamp,
   interpolate,
-  formatDate = formatTimeStamp
+  formatDate = formatTimeStamp,
 }: Props) => {
-  const { error } = useLogging()
+  const { error } = useLogging();
   const [timestamp, setTimeStamp] = useState<Date | null>(
-    initialTimestamp || null
-  )
-  const [countdown, setCountdown] = useState<string>('')
-  const [intId, setIntId] = useState<any>()
+    initialTimestamp || null,
+  );
+  const [countdown, setCountdown] = useState<string>('');
+  const [intId, setIntId] = useState<any>();
 
   useEffect(() => {
-    if (timestamp === null) return
+    if (timestamp === null) return;
 
     const id = setInterval(() => {
-      const result = formatTimeStamp(new Date(timestamp))
-      setCountdown(result)
-    }, 1000)
+      const result = formatTimeStamp(new Date(timestamp));
+      setCountdown(result);
+    }, 1000);
 
-    setIntId(id)
-    return () => clearInterval(id)
-  }, [timestamp])
+    setIntId(id);
+    return () => clearInterval(id);
+  }, [timestamp]);
 
   useEffect(() => {
-    if (!onZero) return
-    if (timestamp === null) return
+    if (!onZero) return;
+    if (timestamp === null) return;
 
-    const currentDate = new Date()
-    const diff = getPositiveDateDiffInSec(currentDate, new Date(timestamp))
+    const currentDate = new Date();
+    const diff = getPositiveDateDiffInSec(currentDate, new Date(timestamp));
 
     if (diff <= 0) {
-      onZero()
-      clearInterval(intId)
+      onZero();
+      clearInterval(intId);
     }
-  }, [onZero, timestamp, intId])
+  }, [onZero, timestamp, intId]);
 
   const interpolatefunc = useMemo(
     () => getInterpolate(interpolate?.structure || {}),
-    [interpolate]
-  )
+    [interpolate],
+  );
 
   const formattedCountdown = useMemo(() => {
     if (!interpolate) {
-      error('No interpolation provided to timer. Rendering just countdown.')
-      return countdown
+      error('No interpolation provided to timer. Rendering just countdown.');
+      return countdown;
     }
     if (!interpolatefunc) {
-      error("interpolatefunc couldn't be created. Rendering just countdown.")
-      return countdown
+      error("interpolatefunc couldn't be created. Rendering just countdown.");
+      return countdown;
     }
 
     if (!interpolate?.text) {
       error(
-        'No text provided to timer interpolation. Rendering just countdown.'
-      )
-      return countdown
+        'No text provided to timer interpolation. Rendering just countdown.',
+      );
+      return countdown;
     }
-    const formatVal = (val: string) => formatDate(new Date(val))
+    const formatVal = (val: string) => formatDate(new Date(val));
 
-    const interpoaltedVal = interpolatefunc(interpolate.text, formatVal)
+    const interpoaltedVal = interpolatefunc(interpolate.text, formatVal);
 
-    return interpoaltedVal
-  }, [countdown, interpolate, interpolatefunc])
+    return interpoaltedVal;
+  }, [countdown, interpolate, interpolatefunc]);
 
-  return { countdown, setTimeStamp, formattedCountdown }
-}
+  return { countdown, setTimeStamp, formattedCountdown };
+};
 
-export default useCountdown
+export default useCountdown;

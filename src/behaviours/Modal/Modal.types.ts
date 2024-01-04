@@ -1,4 +1,4 @@
-import { Trigger } from '../../client/types'
+import { Trigger } from '../../client/types';
 
 export type ModalProps<T = Trigger> = {
   trigger: T

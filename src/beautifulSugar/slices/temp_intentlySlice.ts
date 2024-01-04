@@ -1,6 +1,6 @@
-import { StateCreator } from 'zustand'
-import { DifiStore } from '../store'
-import { Get, Set } from '../types'
+import { StateCreator } from 'zustand';
+import { DifiStore } from '../store';
+import { Get, Set } from '../types';
 
 // TODO: remove this mid-january 2024
 export type IntentlySlice = {
@@ -16,6 +16,6 @@ export const createIntentlySlice: StateCreator<
 > = (set: Set, _get: Get) => ({
   intently: true,
   setIntently: (val: boolean) => {
-    set({ intently: val })
-  }
-})
+    set({ intently: val });
+  },
+});

@@ -1,28 +1,28 @@
-import React, { useRef } from 'react'
-import CloseButton from '../../../components/CloseButton'
-import { useBannerStyles } from '../Banner.styles'
-import { BannerProps } from '../Banner.types'
+import React, { useRef } from 'react';
+import CloseButton from '../../../components/CloseButton';
+import { useBannerStyles } from '../Banner.styles';
+import { BannerProps } from '../Banner.types';
 import {
   getCanBeDismissed,
   getIsBannerFullyClickable,
-  useBannerContainerStyles
-} from '../utils'
-import BannerIcon from './BannerIcon'
+  useBannerContainerStyles,
+} from '../utils';
+import BannerIcon from './BannerIcon';
 
-const SideBanner = ({ handleAction, handleClose, trigger }: BannerProps) => {
-  const container = useRef<HTMLDivElement | null>(null)
-  const isFullyClickable = getIsBannerFullyClickable(trigger)
-  const shouldRenderIcon = !!trigger.data?.buttonIcon
-  const canBeDismissed = getCanBeDismissed()
-  const styles = useBannerStyles()
+function SideBanner({ handleAction, handleClose, trigger }: BannerProps) {
+  const container = useRef<HTMLDivElement | null>(null);
+  const isFullyClickable = getIsBannerFullyClickable(trigger);
+  const shouldRenderIcon = !!trigger.data?.buttonIcon;
+  const canBeDismissed = getCanBeDismissed();
+  const styles = useBannerStyles();
 
   const containerStyles = useBannerContainerStyles({
     element: {
       width: container.current?.clientWidth || 0,
-      height: container.current?.clientHeight || 0
+      height: container.current?.clientHeight || 0,
     },
-    trigger
-  })
+    trigger,
+  });
 
   return (
     <div
@@ -46,7 +46,7 @@ const SideBanner = ({ handleAction, handleClose, trigger }: BannerProps) => {
         <CloseButton onClick={handleClose} style={styles.closeButton} />
       )}
     </div>
-  )
+  );
 }
 
-export default SideBanner
+export default SideBanner;

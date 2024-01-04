@@ -1,19 +1,21 @@
-import React, { memo, PropsWithChildren, useEffect, useState } from 'react'
-import ReactDOM from 'react-dom'
-import { useEntireStore } from '../../../beautifulSugar/store'
-import CloseButton from '../../../components/CloseButton'
-import CnMForm from '../../../components/CnMForm'
-import { useDataCaptureMutation } from '../../../hooks/api/useDataCaptureMutation'
-import { useSeen } from '../../../hooks/api/useSeenMutation'
-import { useBrandColors } from '../../../hooks/useBrandConfig'
-import { useLogging } from '../../../hooks/useLogging'
-import { useTracking } from '../../../hooks/useTracking'
-import { getFormEntries } from '../../../utils/forms'
-import { DataCaptureModalField, DataCaptureTrigger } from '../Modal.types'
+import React, {
+  memo, PropsWithChildren, useEffect, useState,
+} from 'react';
+import ReactDOM from 'react-dom';
+import { useEntireStore } from '../../../beautifulSugar/store';
+import CloseButton from '../../../components/CloseButton';
+import CnMForm from '../../../components/CnMForm';
+import { useDataCaptureMutation } from '../../../hooks/api/useDataCaptureMutation';
+import { useSeen } from '../../../hooks/api/useSeenMutation';
+import { useBrandColors } from '../../../hooks/useBrandConfig';
+import { useLogging } from '../../../hooks/useLogging';
+import { useTracking } from '../../../hooks/useTracking';
+import { getFormEntries } from '../../../utils/forms';
+import { DataCaptureModalField, DataCaptureTrigger } from '../Modal.types';
 
 // TODO: switch this to true to make the modal appear on the right and non-block :)
 // Eventually we want to move it to Portal and make it dynamic
-const isViewBlockingModal = false
+const isViewBlockingModal = false;
 
 // fields are not hardcoded to only be these. Once we make it dynamic, as long as the shape
 // is the same, just use trigger.data.fields or whatever
@@ -22,24 +24,24 @@ const fields: DataCaptureModalField[] = [
     name: 'name',
     label: 'Name',
     type: 'text',
-    required: true
+    required: true,
   },
   {
     name: 'phone',
     label: 'Phone',
     type: 'text',
-    required: false
+    required: false,
   },
   {
     name: 'email',
     label: 'Email',
     type: 'email',
-    required: true
-  }
-]
+    required: true,
+  },
+];
 
 const getOuterLayer = ({
-  isViewBlockingModal
+  isViewBlockingModal,
 }: {
   isViewBlockingModal: boolean
 }): React.CSSProperties => {
@@ -53,8 +55,8 @@ const getOuterLayer = ({
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
       zIndex: 999,
       display: 'grid',
-      placeContent: 'center'
-    }
+      placeContent: 'center',
+    };
   }
 
   return {
@@ -62,9 +64,9 @@ const getOuterLayer = ({
     position: 'fixed',
     right: '3vw',
     top: '50%',
-    transform: 'translateY(-50%)'
-  }
-}
+    transform: 'translateY(-50%)',
+  };
+};
 type Props = { trigger: DataCaptureTrigger }
 
 type FormSubmissionBody = {
@@ -75,86 +77,83 @@ type FormSubmissionBody = {
   }
 }
 
-const DataCaptureModal = ({ trigger }: Props) => {
-  const [error, setError] = React.useState<string>('')
-  const [retainedHeight, setRetainedHeight] = React.useState<number>(0)
+function DataCaptureModal({ trigger }: Props) {
+  const [error, setError] = React.useState<string>('');
+  const [retainedHeight, setRetainedHeight] = React.useState<number>(0);
 
-  const { trackEvent } = useTracking()
-  const { log } = useLogging()
-  const ref = React.useRef<HTMLDivElement>(null)
-  const { removeActiveTrigger } = useEntireStore()
+  const { trackEvent } = useTracking();
+  const { log } = useLogging();
+  const ref = React.useRef<HTMLDivElement>(null);
+  const { removeActiveTrigger } = useEntireStore();
 
   const [invocationTimeStamp, setInvocationTimeStamp] = useState<null | string>(
-    null
-  )
+    null,
+  );
   const { isSuccess: isSeenSuccess, isLoading: isSeenLoading } = useSeen({
     trigger,
-    skip: !open
-  })
+    skip: !open,
+  });
 
   const {
     mutate: submit,
     isSuccess: isSubmissionSuccess,
-    isLoading: isSubmissionLoading
-  } = useDataCaptureMutation<FormSubmissionBody>()
+    isLoading: isSubmissionLoading,
+  } = useDataCaptureMutation<FormSubmissionBody>();
 
   useEffect(() => {
-    if (!open) return
-    if (invocationTimeStamp) return
-    if (isSeenSuccess) return
-    if (isSeenLoading) return
+    if (!open) return;
+    if (invocationTimeStamp) return;
+    if (isSeenSuccess) return;
+    if (isSeenLoading) return;
 
     // seen gets called multiple times since Collector currently
     // like to over-rerender componets. This timeout prevents from firing a ton
     const tId = setTimeout(() => {
       if (!invocationTimeStamp) {
-        setInvocationTimeStamp(new Date().toISOString())
+        setInvocationTimeStamp(new Date().toISOString());
       }
-    }, 500)
+    }, 500);
 
     return () => {
-      clearTimeout(tId)
-    }
-  }, [open, isSeenSuccess, isSeenLoading])
+      clearTimeout(tId);
+    };
+  }, [open, isSeenSuccess, isSeenLoading]);
 
   const handleCloseModal = () => {
-    removeActiveTrigger(trigger.id)
+    removeActiveTrigger(trigger.id);
 
-    if (!isSubmissionSuccess) trackEvent('user_closed_trigger', trigger)
-    //TODO: Enable this if we find value in tracking the "close after submission"
+    if (!isSubmissionSuccess) trackEvent('user_closed_trigger', trigger);
+    // TODO: Enable this if we find value in tracking the "close after submission"
     // else trackEvent('user_dismissed_trigger_after_conversion', trigger)
-  }
+  };
 
   const handleSubmit = (e: any) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    setRetainedHeight(ref.current?.clientHeight || 0)
-    setError('')
+    setRetainedHeight(ref.current?.clientHeight || 0);
+    setError('');
 
-    const entries = getFormEntries(e.target, {})
+    const entries = getFormEntries(e.target, {});
 
-    trackEvent('user_submitted_data_capture', trigger)
+    trackEvent('user_submitted_data_capture', trigger);
 
-    const haveAllRequiredFieldsBeenSubmitted = fields.every((field) => {
-      return e.target[field.name].value
-    })
+    const haveAllRequiredFieldsBeenSubmitted = fields.every((field) => e.target[field.name].value);
 
-    if (!haveAllRequiredFieldsBeenSubmitted)
-      setError('Please make sure all required fields are filled in.')
+    if (!haveAllRequiredFieldsBeenSubmitted) setError('Please make sure all required fields are filled in.');
 
-    log('DataCaptureModal', 'handleSubmit', 'submit', entries)
-    submit({ formData: entries })
+    log('DataCaptureModal', 'handleSubmit', 'submit', entries);
+    submit({ formData: entries });
     // Perform form submission logic here
     // e.g., post form info to useCollectorMutation
     // Hide the form and show the submission text
     // You can use state or CSS classes to toggle visibility
-  }
+  };
 
-  const isButtonDisaled = isSubmissionLoading
-  const { backgroundPrimary, textPrimary } = useBrandColors()
+  const isButtonDisaled = isSubmissionLoading;
+  const { backgroundPrimary, textPrimary } = useBrandColors();
 
-  const Wrapper = ({ children }: PropsWithChildren<{}>) => (
-    <div style={getOuterLayer({ isViewBlockingModal })}>
+  function Wrapper({ children }: PropsWithChildren<{}>) {
+    return <div style={getOuterLayer({ isViewBlockingModal })}>
       <div
         ref={ref}
         style={{
@@ -166,7 +165,7 @@ const DataCaptureModal = ({ trigger }: Props) => {
           borderRadius: '16px',
           width: '400px',
           maxWidth: '94vw',
-          position: 'relative'
+          position: 'relative',
         }}
       >
         <div style={{ position: 'absolute', top: 5, right: 5 }}>
@@ -181,21 +180,22 @@ const DataCaptureModal = ({ trigger }: Props) => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            padding: '2rem'
+            padding: '2rem',
           }}
         >
           {children}
         </div>
       </div>
-    </div>
-  )
+    </div>;
+  }
 
-  if (isSubmissionSuccess)
+  if (isSubmissionSuccess) {
     return (
       <Wrapper>
         <h1>{trigger.data?.successText}</h1>
       </Wrapper>
-    )
+    );
+  }
 
   return (
     <Wrapper>
@@ -204,7 +204,7 @@ const DataCaptureModal = ({ trigger }: Props) => {
           fontSize: '1.5rem',
           marginBottom: '1rem',
           textTransform: 'uppercase',
-          color: textPrimary
+          color: textPrimary,
         }}
       >
         {trigger.data?.heading}
@@ -214,7 +214,7 @@ const DataCaptureModal = ({ trigger }: Props) => {
           fontSize: '0.9rem',
           lineHeight: 1.5,
           marginBottom: '1rem',
-          color: textPrimary
+          color: textPrimary,
         }}
       >
         {trigger.data?.paragraph}
@@ -239,7 +239,7 @@ const DataCaptureModal = ({ trigger }: Props) => {
               padding: '1rem 0.4rem',
               fontSize: '0.8rem',
               outline: 'none',
-              marginBottom: '0.4rem'
+              marginBottom: '0.4rem',
             }}
           />
         ))}
@@ -257,10 +257,10 @@ const DataCaptureModal = ({ trigger }: Props) => {
             cursor: 'pointer',
             border: 'none',
             letterSpacing: '0.05rem',
-            textTransform: 'uppercase'
+            textTransform: 'uppercase',
           }}
           disabled={isButtonDisaled}
-          type='submit'
+          type="submit"
         >
           {isButtonDisaled ? '...' : trigger.data?.buttonText}
         </button>
@@ -271,21 +271,19 @@ const DataCaptureModal = ({ trigger }: Props) => {
             fontSize: '0.9rem',
             lineHeight: 1.5,
             marginBottom: '1rem',
-            color: '#aa2f2f'
+            color: '#aa2f2f',
           }}
         >
           {error}
         </p>
       )}
     </Wrapper>
-  )
+  );
 }
 
 // TODO: rethink. we can potentially get rid of portals entirely in this app, since the styling is
 // position: fixed/absolute in all cases anyway. Keeping for now since we know it works
-export default memo(({ trigger }: Props) => {
-  return ReactDOM.createPortal(
-    <DataCaptureModal trigger={trigger} />,
-    document.body
-  )
-})
+export default memo(({ trigger }: Props) => ReactDOM.createPortal(
+  <DataCaptureModal trigger={trigger} />,
+  document.body,
+));

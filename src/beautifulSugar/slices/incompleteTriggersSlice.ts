@@ -1,7 +1,7 @@
-import { StateCreator } from 'zustand'
-import { IncompleteTrigger, Trigger } from '../../client/types'
-import { DifiStore } from '../store'
-import { Get, Set } from '../types'
+import { StateCreator } from 'zustand';
+import { IncompleteTrigger, Trigger } from '../../client/types';
+import { DifiStore } from '../store';
+import { Get, Set } from '../types';
 
 export type IncompleteTriggersSlice = {
   incompleteTriggers: IncompleteTrigger[]
@@ -17,11 +17,9 @@ export const createincompleteTriggersSlice: StateCreator<
   IncompleteTriggersSlice
 > = (set: Set, _get: Get) => ({
   incompleteTriggers: [],
-  setIncompleteTriggers: (val: IncompleteTrigger[]) =>
-    set({ incompleteTriggers: val }),
+  setIncompleteTriggers: (val: IncompleteTrigger[]) => set({ incompleteTriggers: val }),
 
   // @TODO: think if this can instead be a derived value somehow - having multiple sources is never a good idea.
   visibleTriggersIssuedByIncomplete: [],
-  setVisibleTriggersIssuedByIncomplete: (val: Trigger[]) =>
-    set({ visibleTriggersIssuedByIncomplete: val })
-})
+  setVisibleTriggersIssuedByIncomplete: (val: Trigger[]) => set({ visibleTriggersIssuedByIncomplete: val }),
+});

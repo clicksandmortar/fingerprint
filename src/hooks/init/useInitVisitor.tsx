@@ -1,42 +1,43 @@
-import React, { useEffect } from 'react'
-import { useDifiStore, useEntireStore } from '../../beautifulSugar/store'
+import React, { useEffect } from 'react';
+import { useDifiStore, useEntireStore } from '../../beautifulSugar/store';
 import {
   bootstrapVisitor,
-  correctCookieSubdomain
-} from '../../visitors/bootstrap'
-import { useLogging } from '../useLogging'
+  correctCookieSubdomain,
+} from '../../visitors/bootstrap';
+import { useLogging } from '../useLogging';
+
 export type VisitorProviderProps = {
   children?: React.ReactNode
 }
 
 export const useInitVisitor = () => {
-  const { log } = useLogging()
+  const { log } = useLogging();
 
   const {
     session,
     setSession,
     setVisitor,
-    difiProps: { booted }
-  } = useEntireStore()
+    difiProps: { booted },
+  } = useEntireStore();
 
   useEffect(() => {
     if (!booted) {
-      log('useInitVisitor: not booted')
-      return
+      log('useInitVisitor: not booted');
+      return;
     }
 
-    log('useInitVisitor: booting')
+    log('useInitVisitor: booting');
     bootstrapVisitor({
       setVisitor,
       session,
-      setSession
-    })
+      setSession,
+    });
 
-    const updatedCookie = correctCookieSubdomain()
-    log('useInitVisitor: Correcting cookie domain to', updatedCookie)
-  }, [booted, session, setSession, setVisitor, log])
+    const updatedCookie = correctCookieSubdomain();
+    log('useInitVisitor: Correcting cookie domain to', updatedCookie);
+  }, [booted, session, setSession, setVisitor, log]);
 
-  return null
-}
+  return null;
+};
 
-export const useVisitor = () => useDifiStore((s) => s)
+export const useVisitor = () => useDifiStore((s) => s);
