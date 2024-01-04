@@ -48,10 +48,10 @@ export const createConfigSlice: StateCreator<DifiStore, [], [], ConfigSlice> = (
             // in the config state, or the default colors
             colors: shouldUpdateColors
               ? {
-                  // defaultColors here are just a fallback to keep TS happy. No need for them realistically. @TODO: look into
-                  ...(prev.config.brand.colors || defaultColors),
-                  ...(argColors || {})
-                }
+                // defaultColors here are just a fallback to keep TS happy. No need for them realistically. @TODO: look into
+                ...(prev.config.brand.colors || defaultColors),
+                ...(argColors || {})
+              }
               : prev.config.brand.colors
           },
           trigger: {

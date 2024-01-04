@@ -1,6 +1,6 @@
-import React, { ReactElement } from 'react';
-import { Handler } from '../client/handler';
-import { LEGACY_FingerprintConfig } from '../client/types';
+import React, { ReactElement } from "react";
+import { Handler } from "../client/handler";
+import { LEGACY_FingerprintConfig } from "../client/types";
 /** * @todo - extract */
 export declare type FingerprintProviderProps = {
     appId?: string;
