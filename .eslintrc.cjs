@@ -38,6 +38,7 @@ const config = {
 
   // Cookies have caused a P1 incicent in the past. We want to be super careful when setting cookies with DiFi.
   rules: {
+    'no-restricted-globals': 0,
     'no-restricted-properties': [
       'error',
       {

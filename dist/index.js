@@ -294,7 +294,15 @@ function getReferrer() {
   };
 }
 
+var CnMCookie = '_cm';
+var CnMIDCookie = '_cm_id';
+var cookieAccountJWT = 'b2c_token';
+var cookieValidDays = 365;
+var ourCookies = [CnMCookie, CnMIDCookie];
 var setCookie = function setCookie(name, value, expires, options) {
+  if (!ourCookies.includes(name)) {
+    throw new Error("Fingerprint cannot set " + name + " cookies. Is not a C&M Fingerprint managed cookie.");
+  }
   return Cookies.set(name, value, _extends({
     expires: expires,
     sameSite: 'strict',
@@ -310,7 +318,8 @@ var onCookieChanged = function onCookieChanged(callback, interval) {
   }
   var lastCookie = document.cookie;
   setInterval(function () {
-    var cookie = document.cookie;
+    var _document = document,
+      cookie = _document.cookie;
     if (cookie !== lastCookie) {
       try {
         callback({
@@ -333,10 +342,6 @@ var validVisitorId = function validVisitorId(id) {
   return uuidValidateV4(splitCookie[0]);
 };
 
-var cookieAccountJWT = 'b2c_token';
-var cookieValidDays = 365;
-var CnMCookie = '_cm';
-var CnMIDCookie = '_cm_id';
 function getCookieDomain() {
   var parsedUrl = psl.parse(location.host);
   var cookieDomain = null;

@@ -229,21 +229,29 @@ function getReferrer() {
   };
 }
 
+const CnMCookie = '_cm';
+const CnMIDCookie = '_cm_id';
+const cookieAccountJWT = 'b2c_token';
+const cookieValidDays = 365;
+const ourCookies = [CnMCookie, CnMIDCookie];
 const setCookie = (name, value, expires, options) => {
+  if (!ourCookies.includes(name)) {
+    throw new Error(`Fingerprint cannot set ${name} cookies. Is not a C&M Fingerprint managed cookie.`);
+  }
   return Cookies.set(name, value, {
-    expires: expires,
+    expires,
     sameSite: 'strict',
     domain: getCookieDomain() || undefined,
     ...options
   });
 };
-const getCookie = name => {
-  return Cookies.get(name);
-};
+const getCookie = name => Cookies.get(name);
 const onCookieChanged = (callback, interval = 1000) => {
   let lastCookie = document.cookie;
   setInterval(() => {
-    const cookie = document.cookie;
+    const {
+      cookie
+    } = document;
     if (cookie !== lastCookie) {
       try {
         callback({
@@ -266,10 +274,6 @@ const validVisitorId = id => {
   return uuidValidateV4(splitCookie[0]);
 };
 
-const cookieAccountJWT = 'b2c_token';
-const cookieValidDays = 365;
-const CnMCookie = '_cm';
-const CnMIDCookie = '_cm_id';
 function getCookieDomain() {
   const parsedUrl = psl.parse(location.host);
   let cookieDomain = null;
@@ -277,7 +281,7 @@ function getCookieDomain() {
   return cookieDomain;
 }
 function correctCookieSubdomain() {
-  let cookie = getCookie(CnMIDCookie);
+  const cookie = getCookie(CnMIDCookie);
   if (!cookie) return;
   Cookies.remove(CnMIDCookie);
   setCookie(CnMIDCookie, cookie, cookieValidDays);
@@ -322,7 +326,7 @@ const bootstrapVisitor = ({
   }
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
-    let vidParam = urlParams.get('v_id');
+    const vidParam = urlParams.get('v_id');
     let visitorId = vidParam || undefined;
     if (vidParam && vidParam.includes('?')) {
       visitorId = vidParam.split('?')[0];

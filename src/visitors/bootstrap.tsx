@@ -3,7 +3,7 @@ import psl from 'psl';
 import { v4 as uuidv4 } from 'uuid';
 import { Session } from '../sessions/types';
 import {
-  CnMIDCookie, cookieValidDays, getCookie, setCookie,
+  CnMIDCookie, cookieAccountJWT, cookieValidDays, getCookie, setCookie,
 } from '../utils/cookies';
 import { uuidValidateV4 } from '../utils/uuid';
 import { Visitor } from './types';
