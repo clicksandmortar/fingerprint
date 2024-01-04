@@ -6,10 +6,10 @@ var React__default = _interopDefault(React);
 var reactErrorBoundary = require('react-error-boundary');
 var zustand = require('zustand');
 var ReactDOM = _interopDefault(require('react-dom'));
-var reactDeviceDetect = require('react-device-detect');
 var Cookies = _interopDefault(require('js-cookie'));
 var psl = _interopDefault(require('psl'));
 var uuid = require('uuid');
+var reactDeviceDetect = require('react-device-detect');
 var mixpanel = _interopDefault(require('mixpanel-browser'));
 var transcend = _interopDefault(require('lodash.get'));
 var reactHookForm = require('react-hook-form');
@@ -189,10 +189,6 @@ var createConversionsSlice = function createConversionsSlice(set, _get) {
   };
 };
 
-var deviceInfo = {
-  type: reactDeviceDetect.isMobile ? 'mobile' : 'desktop'
-};
-
 var headers = {
   'Content-Type': 'application/json'
 };
@@ -252,47 +248,6 @@ var request = {
     }
   }
 };
-
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
-    var _cur$split = cur.split('='),
-      key = _cur$split[0],
-      value = _cur$split[1];
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  var params = getReducedSearchParams();
-  var hash = window.location.hash.substring(2);
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    hash: hash,
-    params: params
-  };
-}
-function getReferrer() {
-  var params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
 
 var setCookie = function setCookie(name, value, expires, options) {
   return Cookies.set(name, value, _extends({
@@ -519,21 +474,6 @@ var useVisitor = function useVisitor() {
   });
 };
 
-var useConfig = function useConfig() {
-  return useEntireStore().config;
-};
-var useBrand = function useBrand() {
-  var configBrandName = useConfig().brand.name;
-  if (configBrandName) return configBrandName;
-  return _LEGACY_getBrand();
-};
-var useTriggerConfig = function useTriggerConfig() {
-  return useConfig().trigger;
-};
-var useBrandColors = function useBrandColors() {
-  return useConfig().brand.colors || defaultColors;
-};
-
 var createIdleTimeSlice = function createIdleTimeSlice(set, get) {
   var _get, _get$config, _get$config$trigger;
   return {
@@ -565,6 +505,21 @@ var useIdleTime = function useIdleTime() {
   return useDifiStore(function (s) {
     return s.idleTime;
   });
+};
+
+var useConfig = function useConfig() {
+  return useEntireStore().config;
+};
+var useBrand = function useBrand() {
+  var configBrandName = useConfig().brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
+};
+var useTriggerConfig = function useTriggerConfig() {
+  return useConfig().trigger;
+};
+var useBrandColors = function useBrandColors() {
+  return useConfig().brand.colors || defaultColors;
 };
 
 function useTriggerDelay() {
@@ -655,6 +610,81 @@ var useCollectorCallback = function useCollectorCallback() {
   }, [log, set, setIdleTimeout, getIdleStatusDelay, setIncompleteTriggers, setConversions, visitor.cohort, setVisitor, setIntently]);
   return collectorCallback;
 };
+
+var useDismissMutation = function useDismissMutation() {
+  var _useLogging = useLogging(),
+    log = _useLogging.log,
+    error = _useLogging.error;
+  var _useDifiStore = useDifiStore(function (st) {
+      return st.difiProps;
+    }),
+    appId = _useDifiStore.appId;
+  var _useVisitor = useVisitor(),
+    visitor = _useVisitor.visitor;
+  var collectorCallback = useCollectorCallback();
+  var url = hostname + "/triggers/" + appId + "/" + visitor.id + "/dismissed";
+  var mutation = reactQuery.useMutation(function (data) {
+    return request.put(url, {
+      dismissedTriggers: [data]
+    }).then(function (response) {
+      log('Trigger API response', response);
+      return response;
+    })["catch"](function (err) {
+      error('Trigger API error', err);
+      return err;
+    });
+  }, {
+    onSuccess: collectorCallback
+  });
+  return _extends({}, mutation, {
+    dismissTrigger: mutation.mutate
+  });
+};
+
+var deviceInfo = {
+  type: reactDeviceDetect.isMobile ? 'mobile' : 'desktop'
+};
+
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce(function (acc, cur) {
+    var _cur$split = cur.split('='),
+      key = _cur$split[0],
+      value = _cur$split[1];
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  var params = getReducedSearchParams();
+  var hash = window.location.hash.substring(2);
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    hash: hash,
+    params: params
+  };
+}
+function getReferrer() {
+  var params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
 
 var trackEvent = function trackEvent(event, props, callback) {
   return mixpanel.track(event, props, callback);
@@ -1177,7 +1207,7 @@ var SideBanner = function SideBanner(_ref) {
   }));
 };
 
-var Banner = function Banner(_ref) {
+function Banner(_ref) {
   var _trigger$data3;
   var trigger = _ref.trigger;
   var _useEntireStore = useEntireStore(),
@@ -1187,16 +1217,21 @@ var Banner = function Banner(_ref) {
   var _useState = React.useState(true),
     open = _useState[0],
     setOpen = _useState[1];
+  var _useDismissMutation = useDismissMutation(),
+    dismissTrigger = _useDismissMutation.dismissTrigger;
   useSeen({
     trigger: trigger,
     skip: !open
   });
   if (!open) return null;
   var handleClickCallToAction = function handleClickCallToAction(e) {
-    var _trigger$data, _trigger$data2;
+    var _trigger$data;
     e.preventDefault();
     trackEvent('user_clicked_button', trigger);
-    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    if (trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonURL) {
+      var _trigger$data2;
+      window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    }
     setOpen(false);
     resetPad();
   };
@@ -1205,6 +1240,9 @@ var Banner = function Banner(_ref) {
     trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
+    dismissTrigger({
+      triggerId: trigger.id
+    });
     resetPad();
   };
   var props = {
@@ -1215,7 +1253,7 @@ var Banner = function Banner(_ref) {
   var position = (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.position;
   if (position === 'left' || position === 'right') return React__default.createElement(SideBanner, Object.assign({}, props));
   return React__default.createElement(HorizontalBanner, Object.assign({}, props));
-};
+}
 var TriggerBanner = function TriggerBanner(_ref2) {
   var trigger = _ref2.trigger;
   return ReactDOM.createPortal(React__default.createElement(Banner, {

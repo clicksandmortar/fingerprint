@@ -3,10 +3,10 @@ import React__default, { useEffect, useState, useMemo, useRef, memo, createEleme
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'zustand';
 import ReactDOM from 'react-dom';
-import { isMobile } from 'react-device-detect';
 import Cookies from 'js-cookie';
 import psl from 'psl';
 import { validate, version, v4 } from 'uuid';
+import { isMobile } from 'react-device-detect';
 import mixpanel from 'mixpanel-browser';
 import transcend from 'lodash.get';
 import { useForm } from 'react-hook-form';
@@ -146,10 +146,6 @@ const createConversionsSlice = (set, _get) => ({
   }))
 });
 
-const deviceInfo = {
-  type: isMobile ? 'mobile' : 'desktop'
-};
-
 const headers = {
   'Content-Type': 'application/json'
 };
@@ -189,45 +185,6 @@ const request = {
     });
   }
 };
-
-function isUndefined(o) {
-  return typeof o === 'undefined';
-}
-function getReducedSearchParams() {
-  if (isUndefined(window)) return {};
-  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
-    const [key, value] = cur.split('=');
-    if (!key) return acc;
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-function getPagePayload() {
-  if (isUndefined(window)) return null;
-  const params = getReducedSearchParams();
-  const hash = window.location.hash.substring(2);
-  return {
-    url: window.location.href,
-    path: window.location.pathname,
-    title: document.title,
-    hash,
-    params
-  };
-}
-function getReferrer() {
-  const params = getReducedSearchParams();
-  return {
-    url: document.referrer,
-    title: '',
-    utm: {
-      source: params === null || params === void 0 ? void 0 : params.utm_source,
-      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
-      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
-      term: params === null || params === void 0 ? void 0 : params.utm_term,
-      content: params === null || params === void 0 ? void 0 : params.utm_content
-    }
-  };
-}
 
 const setCookie = (name, value, expires, options) => {
   return Cookies.set(name, value, {
@@ -440,17 +397,6 @@ const useInitVisitor = () => {
 };
 const useVisitor = () => useDifiStore(s => s);
 
-const useConfig = () => useEntireStore().config;
-const useBrand = () => {
-  const configBrandName = useConfig().brand.name;
-  if (configBrandName) return configBrandName;
-  return _LEGACY_getBrand();
-};
-const useTriggerConfig = () => useConfig().trigger;
-const useBrandColors = () => {
-  return useConfig().brand.colors || defaultColors;
-};
-
 const createIdleTimeSlice = (set, get) => {
   var _get, _get$config, _get$config$trigger;
   return {
@@ -473,6 +419,17 @@ const createIdleTimeSlice = (set, get) => {
   };
 };
 const useIdleTime = () => useDifiStore(s => s.idleTime);
+
+const useConfig = () => useEntireStore().config;
+const useBrand = () => {
+  const configBrandName = useConfig().brand.name;
+  if (configBrandName) return configBrandName;
+  return _LEGACY_getBrand();
+};
+const useTriggerConfig = () => useConfig().trigger;
+const useBrandColors = () => {
+  return useConfig().brand.colors || defaultColors;
+};
 
 function useTriggerDelay() {
   const {
@@ -564,6 +521,79 @@ const useCollectorCallback = () => {
   }, [log, set, setIdleTimeout, getIdleStatusDelay, setIncompleteTriggers, setConversions, visitor.cohort, setVisitor, setIntently]);
   return collectorCallback;
 };
+
+const useDismissMutation = () => {
+  const {
+    log,
+    error
+  } = useLogging();
+  const {
+    appId
+  } = useDifiStore(st => st.difiProps);
+  const {
+    visitor
+  } = useVisitor();
+  const collectorCallback = useCollectorCallback();
+  const url = `${hostname}/triggers/${appId}/${visitor.id}/dismissed`;
+  const mutation = useMutation(data => request.put(url, {
+    dismissedTriggers: [data]
+  }).then(response => {
+    log('Trigger API response', response);
+    return response;
+  }).catch(err => {
+    error('Trigger API error', err);
+    return err;
+  }), {
+    onSuccess: collectorCallback
+  });
+  return {
+    ...mutation,
+    dismissTrigger: mutation.mutate
+  };
+};
+
+const deviceInfo = {
+  type: isMobile ? 'mobile' : 'desktop'
+};
+
+function isUndefined(o) {
+  return typeof o === 'undefined';
+}
+function getReducedSearchParams() {
+  if (isUndefined(window)) return {};
+  return new URLSearchParams(window.location.search).toString().split('&').reduce((acc, cur) => {
+    const [key, value] = cur.split('=');
+    if (!key) return acc;
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+function getPagePayload() {
+  if (isUndefined(window)) return null;
+  const params = getReducedSearchParams();
+  const hash = window.location.hash.substring(2);
+  return {
+    url: window.location.href,
+    path: window.location.pathname,
+    title: document.title,
+    hash,
+    params
+  };
+}
+function getReferrer() {
+  const params = getReducedSearchParams();
+  return {
+    url: document.referrer,
+    title: '',
+    utm: {
+      source: params === null || params === void 0 ? void 0 : params.utm_source,
+      medium: params === null || params === void 0 ? void 0 : params.utm_medium,
+      campaign: params === null || params === void 0 ? void 0 : params.utm_campaign,
+      term: params === null || params === void 0 ? void 0 : params.utm_term,
+      content: params === null || params === void 0 ? void 0 : params.utm_content
+    }
+  };
+}
 
 const trackEvent = (event, props, callback) => {
   return mixpanel.track(event, props, callback);
@@ -1079,9 +1109,9 @@ const SideBanner = ({
   }));
 };
 
-const Banner = ({
+function Banner({
   trigger
-}) => {
+}) {
   var _trigger$data3;
   const {
     removeActiveTrigger
@@ -1090,16 +1120,22 @@ const Banner = ({
     trackEvent
   } = useTracking();
   const [open, setOpen] = useState(true);
+  const {
+    dismissTrigger
+  } = useDismissMutation();
   useSeen({
     trigger,
     skip: !open
   });
   if (!open) return null;
   const handleClickCallToAction = e => {
-    var _trigger$data, _trigger$data2;
+    var _trigger$data;
     e.preventDefault();
     trackEvent('user_clicked_button', trigger);
-    (trigger === null || trigger === void 0 ? void 0 : (_trigger$data = trigger.data) === null || _trigger$data === void 0 ? void 0 : _trigger$data.buttonURL) && window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    if (trigger !== null && trigger !== void 0 && (_trigger$data = trigger.data) !== null && _trigger$data !== void 0 && _trigger$data.buttonURL) {
+      var _trigger$data2;
+      window.open(trigger === null || trigger === void 0 ? void 0 : (_trigger$data2 = trigger.data) === null || _trigger$data2 === void 0 ? void 0 : _trigger$data2.buttonURL, '_blank');
+    }
     setOpen(false);
     resetPad();
   };
@@ -1108,24 +1144,25 @@ const Banner = ({
     trackEvent('user_closed_trigger', trigger);
     removeActiveTrigger(trigger.id);
     setOpen(false);
+    dismissTrigger({
+      triggerId: trigger.id
+    });
     resetPad();
   };
   const props = {
-    handleClose: handleClose,
+    handleClose,
     handleAction: handleClickCallToAction,
-    trigger: trigger
+    trigger
   };
   const position = (_trigger$data3 = trigger.data) === null || _trigger$data3 === void 0 ? void 0 : _trigger$data3.position;
   if (position === 'left' || position === 'right') return React__default.createElement(SideBanner, Object.assign({}, props));
   return React__default.createElement(HorizontalBanner, Object.assign({}, props));
-};
+}
 const TriggerBanner = ({
   trigger
-}) => {
-  return ReactDOM.createPortal(React__default.createElement(Banner, {
-    trigger: trigger
-  }), document.body);
-};
+}) => ReactDOM.createPortal(React__default.createElement(Banner, {
+  trigger: trigger
+}), document.body);
 
 const randomHash = 'f' + v4().split('-')[0];
 const prependClass = className => `f${randomHash}-${className}`;

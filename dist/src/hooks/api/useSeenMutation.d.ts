@@ -1,8 +1,11 @@
 import { BannerTrigger } from '../../behaviours/Banner/Banner.types';
 import { DataCaptureTrigger } from '../../behaviours/Modal/Modal.types';
 import { Trigger } from '../../client/types';
+/**
+* Mutation to mark a trigger as seen and NOT show it again to the current visitor.
+*/
 export declare const useSeenMutation: () => import("@tanstack/react-query").UseBaseMutationResult<Response, {}, unknown, unknown>;
-export declare const useSeen: ({ trigger, skip }: {
+export declare const useSeen: ({ trigger, skip, }: {
     trigger: Trigger | BannerTrigger | DataCaptureTrigger;
     skip: boolean;
 }) => {
