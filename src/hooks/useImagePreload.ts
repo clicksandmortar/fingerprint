@@ -93,8 +93,6 @@ const useImagePreload = () => {
   const allImagesLoaded = imagesToPreload === imagesLoaded
   && imagesToPreload !== 0 && imagesLoaded !== 0 && shouldPreloadImages;
 
-  console.log({ stateImagesHavePreloaded, shouldPreloadImages, imagesLoaded });
-
   useEffect(() => {
     if (!allImagesLoaded) return;
 
