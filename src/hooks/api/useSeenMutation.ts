@@ -31,9 +31,12 @@ export const useSeenMutation = () => {
         triggerId: trigger.id,
         triggerType: trigger.invocation,
         triggerBehaviour: trigger.behaviour,
+        // note that triggerId == campaignId has NOT always been the case.
+        // When aggregating data, use payload.campaignId for campaigns, rather than
+        //  payload.triggerId
+        campaignId: trigger.id,
         variantName: trigger.variantName,
         variantId: trigger.variantID,
-        // TODO: add campaignName: trigger.campaignName??, when its available
         time: new Date().toISOString(),
         attemptToPreloadAssets: imagesPreloaded !== 'skip',
         brand,

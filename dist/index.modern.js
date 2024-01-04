@@ -614,6 +614,7 @@ const useSeenMutation = () => {
       triggerId: trigger.id,
       triggerType: trigger.invocation,
       triggerBehaviour: trigger.behaviour,
+      campaignId: trigger.id,
       variantName: trigger.variantName,
       variantId: trigger.variantID,
       time: new Date().toISOString(),
