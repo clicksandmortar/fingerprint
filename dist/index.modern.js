@@ -15,30 +15,6 @@ import uniqueBy from 'lodash.uniqby';
 import { IdleTimerProvider } from 'react-idle-timer';
 import { useExitIntent } from 'use-exit-intent';
 
-const TEMP_isCNMBrand = () => {
-  if (typeof window === 'undefined') return false;
-  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-const _LEGACY_getBrand = () => {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
-  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
-  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
-  return 'C&M';
-};
-const haveBrandColorsBeenConfigured = colors => {
-  if (!colors) return false;
-  if (typeof colors !== 'object') return false;
-  if (Object.keys(colors).length === 0) return false;
-  if (Object.values(colors).every(color => color === '#000000')) return false;
-  return true;
-};
-
 function getEnvVars() {
   var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
   let isDev = false;
@@ -65,6 +41,30 @@ function getEnvVars() {
     MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
   };
 }
+
+const TEMP_isCNMBrand = () => {
+  if (typeof window === 'undefined') return false;
+  const isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+const _LEGACY_getBrand = () => {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+const haveBrandColorsBeenConfigured = colors => {
+  if (!colors) return false;
+  if (typeof colors !== 'object') return false;
+  if (Object.keys(colors).length === 0) return false;
+  if (Object.values(colors).every(color => color === '#000000')) return false;
+  return true;
+};
 
 const defaultColors = {
   backgroundPrimary: '#2a3d6d',
@@ -2864,6 +2864,23 @@ const createTrackingSlice = (set, _get) => ({
   }
 });
 
+const createUtilitySlice = (set, get) => ({
+  utility: {
+    imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
+    setImagesHaveLoaded: imagesHaveLoaded => {
+      const stateImagesHavePreloaded = get().utility.imagesPreloaded;
+      if (stateImagesHavePreloaded === 'skip') return;
+      set(prev => ({
+        ...prev,
+        utility: {
+          ...prev.utility,
+          imagesPreloaded: imagesHaveLoaded
+        }
+      }));
+    }
+  }
+});
+
 const createVisitorSlice = (set, _get) => ({
   visitor: {},
   setVisitor: partialVisitor => set(prev => ({
@@ -2890,9 +2907,11 @@ const useDifiStore = create(devtools((...beautifulSugar) => ({
   ...createTrackingSlice(...beautifulSugar),
   ...createincompleteTriggersSlice(...beautifulSugar),
   ...createConversionsSlice(...beautifulSugar),
-  ...createIdleTimeSlice(...beautifulSugar)
+  ...createIdleTimeSlice(...beautifulSugar),
+  ...createUtilitySlice(...beautifulSugar)
 }), {
-  name: 'DifiStore'
+  name: 'DIFIStore',
+  enabled: getEnvVars().isDev
 }));
 const useEntireStore = () => {
   const store = useDifiStore(s => s);

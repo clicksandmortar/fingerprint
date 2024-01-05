@@ -60,32 +60,6 @@ function _objectWithoutPropertiesLoose(source, excluded) {
   return target;
 }
 
-var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
-  if (typeof window === 'undefined') return false;
-  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-var _LEGACY_getBrand = function _LEGACY_getBrand() {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
-  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
-  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
-  return 'C&M';
-};
-var haveBrandColorsBeenConfigured = function haveBrandColorsBeenConfigured(colors) {
-  if (!colors) return false;
-  if (typeof colors !== 'object') return false;
-  if (Object.keys(colors).length === 0) return false;
-  if (Object.values(colors).every(function (color) {
-    return color === '#000000';
-  })) return false;
-  return true;
-};
-
 function getEnvVars() {
   var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
   var isDev = false;
@@ -112,6 +86,32 @@ function getEnvVars() {
     MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
   };
 }
+
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+var _LEGACY_getBrand = function _LEGACY_getBrand() {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+var haveBrandColorsBeenConfigured = function haveBrandColorsBeenConfigured(colors) {
+  if (!colors) return false;
+  if (typeof colors !== 'object') return false;
+  if (Object.keys(colors).length === 0) return false;
+  if (Object.values(colors).every(function (color) {
+    return color === '#000000';
+  })) return false;
+  return true;
+};
 
 var defaultColors = {
   backgroundPrimary: '#2a3d6d',
@@ -2674,6 +2674,25 @@ var createTrackingSlice = function createTrackingSlice(set, _get) {
   };
 };
 
+var createUtilitySlice = function createUtilitySlice(set, get) {
+  return {
+    utility: {
+      imagesPreloaded: Math.random() > 0.5 ? 'skip' : false,
+      setImagesHaveLoaded: function setImagesHaveLoaded(imagesHaveLoaded) {
+        var stateImagesHavePreloaded = get().utility.imagesPreloaded;
+        if (stateImagesHavePreloaded === 'skip') return;
+        set(function (prev) {
+          return _extends({}, prev, {
+            utility: _extends({}, prev.utility, {
+              imagesPreloaded: imagesHaveLoaded
+            })
+          });
+        });
+      }
+    }
+  };
+};
+
 var createVisitorSlice = function createVisitorSlice(set, _get) {
   return {
     visitor: {},
@@ -2699,9 +2718,10 @@ var useVisitor$1 = function useVisitor() {
 };
 
 var useDifiStore = zustand.create(middleware.devtools(function () {
-  return _extends({}, createLoggingSlice.apply(void 0, arguments), createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments), createIntentlySlice.apply(void 0, arguments), createTrackingSlice.apply(void 0, arguments), createincompleteTriggersSlice.apply(void 0, arguments), createConversionsSlice.apply(void 0, arguments), createIdleTimeSlice.apply(void 0, arguments));
+  return _extends({}, createLoggingSlice.apply(void 0, arguments), createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments), createIntentlySlice.apply(void 0, arguments), createTrackingSlice.apply(void 0, arguments), createincompleteTriggersSlice.apply(void 0, arguments), createConversionsSlice.apply(void 0, arguments), createIdleTimeSlice.apply(void 0, arguments), createUtilitySlice.apply(void 0, arguments));
 }, {
-  name: 'DifiStore'
+  name: 'DIFIStore',
+  enabled: getEnvVars().isDev
 }));
 var useEntireStore = function useEntireStore() {
   var store = useDifiStore(function (s) {

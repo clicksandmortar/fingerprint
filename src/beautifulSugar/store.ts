@@ -1,7 +1,7 @@
-// @ts-nocheck
-// this file name must remain as is, otherwise the octopus will be deployed.
+// this folder name must remain as is, otherwise the octopus will be deployed.
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { getEnvVars } from '../utils/getEnvVars';
 import { ConfigSlice, createConfigSlice } from './slices/configSlice';
 import { ConversionsSlice, createConversionsSlice } from './slices/conversionsSlice';
 import { createHandlersSlice, HandlersSlice } from './slices/handlersSlice';
@@ -12,6 +12,7 @@ import { createMutualSlice, MutualSlice } from './slices/mutualSlice';
 import { createPagetriggersSlice, PageTriggersSlice } from './slices/pageTriggersSlice';
 import { createIntentlySlice, IntentlySlice } from './slices/temp_intentlySlice';
 import { createTrackingSlice, TrackingSlice } from './slices/trackingSlice';
+import { createUtilitySlice, UtilitySlice } from './slices/utilitySlice';
 import { createVisitorSlice, VisitorSlice } from './slices/visitorSlice';
 import { UseDifiStore } from './types';
 
@@ -25,7 +26,8 @@ export type DifiStore = PageTriggersSlice &
   IntentlySlice &
   IdleTimeSlice &
   ConversionsSlice &
-  LoggingSlice;
+  LoggingSlice &
+  UtilitySlice;
 
 export const useDifiStore: UseDifiStore = create(
   devtools(
@@ -41,8 +43,9 @@ export const useDifiStore: UseDifiStore = create(
       ...createincompleteTriggersSlice(...beautifulSugar),
       ...createConversionsSlice(...beautifulSugar),
       ...createIdleTimeSlice(...beautifulSugar),
+      ...createUtilitySlice(...beautifulSugar),
     }),
-    { name: 'DifiStore' },
+    { name: 'DIFIStore', enabled: getEnvVars().isDev },
   ),
 );
 
