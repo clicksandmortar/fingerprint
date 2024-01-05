@@ -1,5 +1,7 @@
 import { StateCreator } from 'zustand';
 import { Trigger } from '../../client/types';
+import { DifiStore } from '../store';
+export declare function getCombinedTriggersFromStore(store: DifiStore): Trigger[];
 export declare type PageTriggersSlice = {
     pageTriggers: Trigger[];
     displayedTriggersIds: Trigger['id'][];
@@ -11,6 +13,5 @@ export declare type PageTriggersSlice = {
     setDisplayedTriggerByInvocation: (invocation: Trigger['invocation'], shouldAllowMultipleSimultaneous?: boolean) => void;
     getIsBehaviourVisible: (type: Trigger['behaviour']) => boolean;
     setActiveTrigger: (trigger: Trigger) => void;
-    getCombinedTriggers: () => Trigger[];
 };
-export declare const createPagetriggersSlice: StateCreator<PageTriggersSlice, [], [], PageTriggersSlice>;
+export declare const createPagetriggersSlice: StateCreator<DifiStore, [], [], PageTriggersSlice>;

@@ -1,3 +1,4 @@
 import React from 'react';
-declare const _default: React.MemoExoticComponent<() => React.JSX.Element | null>;
+declare function Activation(): React.JSX.Element | null;
+declare const _default: React.MemoExoticComponent<typeof Activation>;
 export default _default;
