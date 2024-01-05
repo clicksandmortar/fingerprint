@@ -34,6 +34,21 @@ _Do note that the code does NOT get updated if parcel encounters a typescript er
 
 If the target app is a React app (see [Usage](#usage)), it should also start auto-refreshing on Difi changes.
 
+## Tooling
+
+It is recommended you have the following extensions installed:
+- ESLint (with Prettier) package for your editor
+- React dev tools browser extension - general component debugging
+- Redux dev tools browser extension - zustand store debugging.
+
+Please note that the redux state history feature currently crashes the app. This is likely due to a compatibility issue between the slice pattern of zustand and the redux dev tools. Further investigation to be done.
+
+## Debugging
+
+Use the tools above to aid in your debugging experience.
+
+There are logs scattered all over the app to help you debug via the browser console. Make sure you configure the trading entity's `debug` flag to `true` to see them.
+
 ## Building
 
 We have 2 different build scripts:
@@ -278,7 +293,6 @@ We also track which buttons the users clicks on. At the moment, this is used to 
 Both of these are sent as part of the `/collector` payload.
 
 ### Cookie integrations (to be added)
-### M&B-specific features (to be added)
 
 
 ## API (more to be added)
@@ -369,7 +383,7 @@ You can then embed the fingerprint script in any website using the following scr
 
 ### Manual Testing
 
-#### [MAB] Please note that this is currently failing on their domains due to their security policy only allowing the prod version of DiFi. You can still test on localhost or on their stage-65 domains.
+#### Please note that this approach may fail on some domains based on their security policy. 
 
 Looking to test the Fingerprint on a production website? You can dynamically inject the Fingerprint script into any website by enabling a Greasemonkey/Tampermonkey script.
 
@@ -382,14 +396,6 @@ To do this, create a new script in Greasemonkey/Tampermonkey, and paste the foll
 // @grant    none
 // @match *://*.clicksandmortar.tech/*
 // @match *://*.harvester.co.uk/*
-// @match *://*.browns-restaurants.co.uk/*
-// @match *://*.tobycarvery.co.uk/*
-// @match *://*.vintageinn.co.uk/*
-// @match *://*.stonehouse.co.uk/*
-// @match *://*.emberinns.co.uk/*
-// @match *://*.sizzlingpubs.co.uk/*
-// @match *://*.allbarone.co.uk/*
-// @match *://*.vercel.app/*
 // ==/UserScript==
 
 ;(function (f, i, n, g, e, rp, ri, nt) {
