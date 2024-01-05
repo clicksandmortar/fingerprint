@@ -22,9 +22,23 @@ yarn link
 yarn link fingerprint
 ```
 
-## Development (Coming Soon)
+## Development
 
-You'll need a .env file for development, copy the .env.example file and fill in the values.
+To start developing the Fingerprint, run the following command:
+
+```bash
+yarn start
+```
+This will start a Difi in --watch mode and update the build on every code change.
+_Do note that the code does NOT get updated if parcel encounters a typescript error_
+
+If the target app is a React app (see [Usage](#usage)), it should also start auto-refreshing on Difi changes.
+
+## Building
+
+We have 2 different build scripts:
+`yarn build:fingerprint` - builds the static script embedable onto any website
+`yarn build` - runs parcel and creates the difi package, usable by React. 
 
 ## Usage
 
@@ -53,6 +67,84 @@ export default App
 ## How it works
 
 Upon mount of the `FingerprintProvider` component, the Fingerprint will make a request to the collector's `/collect` endpoint to retrieve the app configuration, triggers, conversion info and more. This and subsequent calls to the collector are later used to drive the behaviour of the entire DiFi app.
+
+## State management
+
+### History
+
+Up until recently we have used the `React.Context` API to manage our app's state. However, as the app grew, it became a nightmare to manage state and pass around necessary props to all our components. Not only that, but the components up in the HTML tree never saw the necessary state and had to have features recreated. Example (all of these wrappers are `React.Contexts`):
+
+```tsx
+<Config>                     // ❌ <- would never have access to logging
+  <Logging>                  // ❌ <- would never have access to Fingerprint logic
+    <FingerprintProvider>    // ❌ <- would never have access to Collector
+      <Collector>            // ❌ <- API calls and 90% of the logic, A.K.A a huge problem
+        {children}           // ✅ <- target App has access to all of the above.
+      <Collector>
+    </FingerprintProvider>
+  </Logging>
+</Config>
+```
+and a bunch more issues making our code impossible to maintain.
+
+So to alleviate that, we migrated to using a store solution - `Zustand` in this case.
+
+### How Zustand works
+
+Evertything we need for state management sits inside `src/beautifulSugar`.
+
+The store follows the slice pattern, see `src/beautifulSugar/slices` - you can read more in the [Zustand docs](https://github.com/pmndrs/zustand/blob/main/docs/guides/slices-pattern.md)
+
+If you need to add a new piece of state:
+- Create a slice file
+- Follow the pattern in the other slices
+- Update the `DifiStore` type to include the slice's type definition
+- Append the slice to the combiner in `src/beautifulSugar/store.ts`
+
+### Using state
+
+_Unless more than one component needs the state to be reachable, try to avoid overcrowding the store. If you need to break your component down into smaller chunks, use hooks instead._
+
+#### Getting values
+All of the same React patterns apply when working with Zustand. Generally, you can use the `useEntireStore` hook to get access to the entire store object, and then select the data you need:
+
+```
+const { pageTriggers } = useEntireStore()
+```
+
+If that doesn't satisfy your needs or TS is giving you problems, the payload includes the `get` function that allows you to get the value of any item in the store. Follow the `Zustand` docs for more info.
+
+#### Setting values
+
+You can either set values by using the `set` setter (also in the payload of `useEntireStore`), or by creating a handler inside the slice to do that. 
+
+When using `set()`, treat it the same way you would treat `setState` in a `React Class Component` - the data is immutable and you can update the state with just the top level key-values.
+
+
+```tsx
+const { set } = useEntireStore()
+
+const someHandler = () => {
+  set({ 
+    // no need to include the entire state
+    pageTriggers: {
+      ...pageTriggers, 
+      ...newTriggers
+    }
+  })
+
+  // OR 
+
+  set(prevState => ({ 
+    ...prevState,
+    // do include the entire state
+    pageTriggers: {
+      ...prevState.pageTriggers, 
+      ...newTriggers
+    }
+  }))
+}
+```
 
 ### Events
 
@@ -326,6 +418,15 @@ You can then enable the script on any website by updating the `@match` URL, and 
 Like any other C&M frontend package, automated testing is performed by `Percy + Playwright` through `Github Actions`. The workflow can be found in `.github/workflows/playwright.yml`. (`Jest` will likely be added to the mix soon)
 
 Playwright docs [here](https://playwright.dev/docs/intro)
+
+It is recommended you run tests locally before pushing, to save yourself build time in the cloud. 
+The testing utility also has a lot of helpful debugging features.
+
+To do that:
+
+- Run `yarn test:playwright`. It will launch the testing suite.
+- Once there, hit the green button to run tests
+- Explore the app to debug any occuring issues
 ### Structure 
 Currently all tests sit in `src/utils/__test__` for simplicity along with:
 - a `testHelpers.ts` file which contains some helper functions for the tests
@@ -336,10 +437,9 @@ Rather than being separated by files, the tests are currently separated by conce
 ### Tests
 
 - There is no consistent way of writing tests currently - follow existing examples or refer to the Playwright docs.
-- Tests are run in `headless` mode by default. Use `yarn test:playwright -ui` for a more convenient DX via a testing utility, or `--headed` to see what's going on
-- We test on 3 browsers - 2 desktop and 1 mobile. If you have platform specific behaviours (e.g. mobile modal vs desktop modal) then make sure your tests cover both.
-- You are welcome to edit the `response.fake.ts` file to change the response from the server. This is useful for testing different behaviours.
-- Mocking the `/seen` or `/dismiss` endpoints is not implemented yet - you are welcome to add a helper function to do this.
+- We test on 3 browsers - 2 desktop and 1 mobile. If you have platform specific behaviours (e.g. mobile modal vs desktop modal) then make sure your tests cover both or run on the appropriate "hardware"
+- You are welcome to edit the `response.fake.ts` file to change the response from the server. 
+- Mocking the `/seen`, `/trigger/...` or `/dismiss` endpoints is not implemented yet - feel free to add a helper to do this.
 
 ### Issues and limitations
 
