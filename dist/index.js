@@ -5,6 +5,7 @@ var React = require('react');
 var React__default = _interopDefault(React);
 var reactErrorBoundary = require('react-error-boundary');
 var zustand = require('zustand');
+var middleware = require('zustand/middleware');
 var ReactDOM = _interopDefault(require('react-dom'));
 var reactDeviceDetect = require('react-device-detect');
 var Cookies = _interopDefault(require('js-cookie'));
@@ -2967,9 +2968,11 @@ var useVisitor$1 = function useVisitor() {
   });
 };
 
-var useDifiStore = zustand.create(function () {
+var useDifiStore = zustand.create(middleware.devtools(function () {
   return _extends({}, createLoggingSlice.apply(void 0, arguments), createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments), createIntentlySlice.apply(void 0, arguments), createTrackingSlice.apply(void 0, arguments), createincompleteTriggersSlice.apply(void 0, arguments), createConversionsSlice.apply(void 0, arguments), createIdleTimeSlice.apply(void 0, arguments));
-});
+}, {
+  name: 'DifiStore'
+}));
 var useEntireStore = function useEntireStore() {
   var store = useDifiStore(function (s) {
     return s;
@@ -3830,13 +3833,15 @@ function FingerprintProvider(props) {
   var matchPropsToDifiProps = React__default.useCallback(function () {
     set(function (prev) {
       return {
-        difiProps: _extends({}, prev.difiProps, props)
+        difiProps: _extends({}, prev.difiProps, _extends({}, props, {
+          children: undefined
+        }))
       };
     });
   }, [props, set]);
   var consentGiven = useConsentCheck(props.consent || false, consentCallback);
   React.useEffect(function () {
-    if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
+    if (!props.appId) throw new Error("C&M Fingerprint: appId is required");
     matchPropsToDifiProps();
     if (!appId) return;
     if (booted) return;

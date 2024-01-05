@@ -105,6 +105,7 @@
     "use-exit-intent": "^1.0.7",
     "use-local-storage-state": "^18.3.3",
     "uuid": "^9.0.0",
+    "zukeeper": "^1.0.2",
     "zustand": "^4.4.7"
   },
   "@parcel/transformer-js": {

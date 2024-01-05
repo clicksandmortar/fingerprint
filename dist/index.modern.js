@@ -2,6 +2,7 @@ import { useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-q
 import React__default, { useEffect, useState, useMemo, useRef, memo, createElement, useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 import ReactDOM from 'react-dom';
 import { isMobile } from 'react-device-detect';
 import Cookies from 'js-cookie';
@@ -3626,7 +3627,7 @@ const createVisitorSlice = (set, _get) => ({
 });
 const useVisitor$1 = () => useDifiStore(state => state.visitor);
 
-const useDifiStore = create((...beautifulSugar) => ({
+const useDifiStore = create(devtools((...beautifulSugar) => ({
   ...createLoggingSlice(),
   ...createPagetriggersSlice(...beautifulSugar),
   ...createConfigSlice(...beautifulSugar),
@@ -3638,6 +3639,8 @@ const useDifiStore = create((...beautifulSugar) => ({
   ...createincompleteTriggersSlice(...beautifulSugar),
   ...createConversionsSlice(...beautifulSugar),
   ...createIdleTimeSlice(...beautifulSugar)
+}), {
+  name: 'DifiStore'
 }));
 const useEntireStore = () => {
   const store = useDifiStore(s => s);
@@ -4517,13 +4520,16 @@ function FingerprintProvider(props) {
     set(prev => ({
       difiProps: {
         ...prev.difiProps,
-        ...props
+        ...{
+          ...props,
+          children: undefined
+        }
       }
     }));
   }, [props, set]);
   const consentGiven = useConsentCheck(props.consent || false, consentCallback);
   useEffect(() => {
-    if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
+    if (!props.appId) throw new Error("C&M Fingerprint: appId is required");
     matchPropsToDifiProps();
     if (!appId) return;
     if (booted) return;
