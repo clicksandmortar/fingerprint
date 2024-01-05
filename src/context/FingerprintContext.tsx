@@ -44,10 +44,21 @@ export function FingerprintProvider(props: FingerprintProviderProps) {
   );
 
   const matchPropsToDifiProps = React.useCallback(() => {
+    const propsToStore = Object.keys(props).reduce((acc, key) => {
+      // removes debug and children key from props before shoving into state.
+      // children prop makes zustand slow and dev tools crash
+      if (key === 'children') return acc;
+      if (key === 'debug') return acc;
+
+      acc[key] = props[key];
+
+      return acc;
+    }, {});
+
     set((prev) => ({
       difiProps: {
         ...prev.difiProps,
-        ...props,
+        ...propsToStore,
       },
     }));
   }, [props, set]);
