@@ -1,34 +1,30 @@
-import { StateCreator } from 'zustand'
-import { FingerprintProviderProps } from '../../context/FingerprintContext'
-import { DifiStore } from '../store'
-import { Get, Set } from '../types'
+import { StateCreator } from 'zustand';
+import { FingerprintProviderProps } from '../../context/FingerprintContext';
+import { DifiStore } from '../store';
+import { Get, Set } from '../types';
 
 export type MutualSlice = {
-  set: Set
-  get: Get
-  difiProps: Omit<DifiCombinedProps, 'debug'> // because debug is deprecated
-}
+  set: Set;
+  get: Get;
+  difiProps: Omit<DifiCombinedProps, 'debug' | 'children'>; // because debug is deprecated, and we dont want to store children in store 🤡
+};
 
-type DifiCombinedProps = FingerprintContextInterface &
-  Omit<FingerprintProviderProps, 'children'>
+type DifiCombinedProps = FingerprintContextInterface & Omit<FingerprintProviderProps, 'children'>;
 
-export const createMutualSlice: StateCreator<DifiStore, [], [], MutualSlice> = (
-  set: Set,
-  get: Get
-) => ({
+export const createMutualSlice: StateCreator<DifiStore, [], [], MutualSlice> = (set: Set, get: Get) => ({
   set,
   get,
-  difiProps: defaultFingerprintState
-})
+  difiProps: defaultFingerprintState,
+});
 
 export interface FingerprintContextInterface {
-  appId: string
-  booted: boolean
-  consent?: boolean
-  exitIntentTriggers: boolean
-  idleTriggers: boolean
-  pageLoadTriggers: boolean
-  initialDelay: number
+  appId: string;
+  booted: boolean;
+  consent?: boolean;
+  exitIntentTriggers: boolean;
+  idleTriggers: boolean;
+  pageLoadTriggers: boolean;
+  initialDelay: number;
 }
 
 const defaultFingerprintState: FingerprintContextInterface = {
@@ -43,5 +39,5 @@ const defaultFingerprintState: FingerprintContextInterface = {
   // never gonna give you up never gonna let you down
   debug: false as never,
   defaultHandlers: [],
-  consentCallback: () => false
-}
+  consentCallback: () => false,
+};

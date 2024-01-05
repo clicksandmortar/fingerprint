@@ -3667,9 +3667,15 @@ function FingerprintProvider(props) {
     });
   }, [set]);
   var matchPropsToDifiProps = React__default.useCallback(function () {
+    var propsToStore = Object.keys(props).reduce(function (acc, key) {
+      if (key === 'children') return acc;
+      if (key === 'debug') return acc;
+      acc[key] = props[key];
+      return acc;
+    }, {});
     set(function (prev) {
       return {
-        difiProps: _extends({}, prev.difiProps, props)
+        difiProps: _extends({}, prev.difiProps, propsToStore)
       };
     });
   }, [props, set]);

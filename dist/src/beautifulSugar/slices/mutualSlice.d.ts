@@ -5,7 +5,7 @@ import { Get, Set } from '../types';
 export declare type MutualSlice = {
     set: Set;
     get: Get;
-    difiProps: Omit<DifiCombinedProps, 'debug'>;
+    difiProps: Omit<DifiCombinedProps, 'debug' | 'children'>;
 };
 declare type DifiCombinedProps = FingerprintContextInterface & Omit<FingerprintProviderProps, 'children'>;
 export declare const createMutualSlice: StateCreator<DifiStore, [], [], MutualSlice>;
