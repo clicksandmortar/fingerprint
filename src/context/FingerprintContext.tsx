@@ -25,7 +25,9 @@ export type FingerprintProviderProps = {
 };
 
 export function FingerprintProvider(props: FingerprintProviderProps) {
-  const { set, addHandlers, difiProps } = useEntireStore();
+  const {
+    set, get, addHandlers, difiProps,
+  } = useEntireStore();
   const {
     booted, appId, consentCallback, defaultHandlers,
   } = difiProps;
@@ -47,7 +49,16 @@ export function FingerprintProvider(props: FingerprintProviderProps) {
     set((prev) => ({
       difiProps: {
         ...prev.difiProps,
-        ...props,
+        // removes debug and children key from props before shoving into state.
+
+        ...Object.keys(props).reduce((acc, key) => {
+          if (key === 'children') return acc;
+          if (key === 'debug') return acc;
+
+          acc[key] = props[key];
+
+          return acc;
+        }, {}),
       },
     }));
   }, [props, set]);
@@ -60,6 +71,7 @@ export function FingerprintProvider(props: FingerprintProviderProps) {
     // shove the props into the store for access all over the app
     matchPropsToDifiProps();
 
+    if (!get || !set) return;
     // wait until zustand completes the above, then start taking values from there
     if (!appId) return;
     if (booted) return;
@@ -68,6 +80,8 @@ export function FingerprintProvider(props: FingerprintProviderProps) {
     addHandlers(defaultHandlers || []);
     setBooted(true);
   }, [
+    get,
+    set,
     appId,
     consentGiven,
     hasStoreInitiated,

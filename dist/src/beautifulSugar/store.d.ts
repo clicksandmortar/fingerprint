@@ -13,4 +13,5 @@ import { VisitorSlice } from './slices/visitorSlice';
 import { UseDifiStore } from './types';
 export declare type DifiStore = PageTriggersSlice & ConfigSlice & MutualSlice & HandlersSlice & VisitorSlice & TrackingSlice & IncompleteTriggersSlice & IntentlySlice & IdleTimeSlice & ConversionsSlice & LoggingSlice & UtilitySlice;
 export declare const useDifiStore: UseDifiStore;
+export declare const useCombinedTriggers: () => import("../client/types").Trigger[];
 export declare const useEntireStore: () => PageTriggersSlice & ConfigSlice & MutualSlice & HandlersSlice & VisitorSlice & TrackingSlice & IncompleteTriggersSlice & IntentlySlice & IdleTimeSlice & ConversionsSlice & LoggingSlice & UtilitySlice & import("zustand/esm/vanilla").StoreApi<DifiStore>;

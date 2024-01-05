@@ -59,31 +59,29 @@ function _objectWithoutPropertiesLoose(source, excluded) {
   return target;
 }
 
-var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
-  if (typeof window === 'undefined') return false;
-  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
-  return isCnMBookingDomain;
-};
-var _LEGACY_getBrand = function _LEGACY_getBrand() {
-  if (typeof window === 'undefined') return null;
-  if (TEMP_isCNMBrand()) return 'C&M';
-  if (window.location.host.startsWith('localhost')) return 'C&M';
-  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
-  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
-  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
-  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
-  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
-  return 'C&M';
-};
-var haveBrandColorsBeenConfigured = function haveBrandColorsBeenConfigured(colors) {
-  if (!colors) return false;
-  if (typeof colors !== 'object') return false;
-  if (Object.keys(colors).length === 0) return false;
-  if (Object.values(colors).every(function (color) {
-    return color === '#000000';
-  })) return false;
-  return true;
-};
+function zukeeper(createFunction) {
+  return (set, get) => {
+    const store = createFunction(set, get);
+    for (let key in store) {
+      if (typeof store[key] === 'function') {
+        let functionDefinition = store[key];
+        store[key] = (...args) => {
+          let currstate = get();
+          window.postMessage({
+            body: 'Innit',
+            state: JSON.stringify(currstate)
+          });
+          functionDefinition(...args);
+          currstate = get();
+          window.postMessage({
+            body: 'Data',
+            state: JSON.stringify(currstate),
+            actions: key,
+          });
+        };
+      }    }    return store;
+  };
+}
 
 function getEnvVars() {
   var _window, _window$location, _window$location$host, _window2, _window2$location, _window2$location$hos, _window3, _window3$location, _window4, _window4$location, _window5, _window5$location;
@@ -111,6 +109,32 @@ function getEnvVars() {
     MIXPANEL_TOKEN: 'cfca3a93becd5735a4f04dc8e10ede27'
   };
 }
+
+var TEMP_isCNMBrand = function TEMP_isCNMBrand() {
+  if (typeof window === 'undefined') return false;
+  var isCnMBookingDomain = /^book\.[A-Za-z0-9.!@#$%^&*()-_+=~{}[\]:;<>,?/|]+\.co\.uk$/.test(window.location.host);
+  return isCnMBookingDomain;
+};
+var _LEGACY_getBrand = function _LEGACY_getBrand() {
+  if (typeof window === 'undefined') return null;
+  if (TEMP_isCNMBrand()) return 'C&M';
+  if (window.location.host.startsWith('localhost')) return 'C&M';
+  if (window.location.host.includes('stonehouserestaurants.co.uk')) return 'Stonehouse';
+  if (window.location.host.includes('browns-restaurants.co.uk')) return 'Browns';
+  if (window.location.host.includes('sizzlingpubs.co.uk')) return 'Sizzling';
+  if (window.location.host.includes('emberinns.co.uk')) return 'Ember';
+  if (window.location.host.includes('allbarone.co.uk')) return 'All Bar One';
+  return 'C&M';
+};
+var haveBrandColorsBeenConfigured = function haveBrandColorsBeenConfigured(colors) {
+  if (!colors) return false;
+  if (typeof colors !== 'object') return false;
+  if (Object.keys(colors).length === 0) return false;
+  if (Object.values(colors).every(function (color) {
+    return color === '#000000';
+  })) return false;
+  return true;
+};
 
 var defaultColors = {
   backgroundPrimary: '#2a3d6d',
@@ -2521,6 +2545,9 @@ var defaultFingerprintState = {
   }
 };
 
+function getCombinedTriggersFromStore(store) {
+  return [].concat(store.pageTriggers, store.visibleTriggersIssuedByIncomplete) || [];
+}
 var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
   return {
     pageTriggers: [],
@@ -2592,9 +2619,8 @@ var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
       var _get2 = get(),
         addDisplayedTrigger = _get2.addDisplayedTrigger,
         getIsBehaviourVisible = _get2.getIsBehaviourVisible,
-        getCombinedTriggers = _get2.getCombinedTriggers,
         log = _get2.logging.log;
-      var combinedTriggers = getCombinedTriggers();
+      var combinedTriggers = getCombinedTriggersFromStore(get());
       var invokableTriggers = combinedTriggers.filter(function (trigger) {
         return trigger.invocation === invocation;
       });
@@ -2616,21 +2642,18 @@ var createPagetriggersSlice = function createPagetriggersSlice(set, get) {
         addDisplayedTrigger(invokableTrigger);
       });
     },
-    getCombinedTriggers: function getCombinedTriggers() {
-      return [].concat(get().pageTriggers, get().visibleTriggersIssuedByIncomplete);
-    },
     getIsBehaviourVisible: function getIsBehaviourVisible(type) {
       var _get3 = get(),
-        displayedTriggersIds = _get3.displayedTriggersIds,
-        getCombinedTriggers = _get3.getCombinedTriggers;
-      var combinedTriggers = getCombinedTriggers();
+        displayedTriggersIds = _get3.displayedTriggersIds;
       if (displayedTriggersIds.length === 0) return false;
       if (displayedTriggersIds.find(function (triggerId) {
-        var _combinedTriggers$fin;
-        return ((_combinedTriggers$fin = combinedTriggers.find(function (trigger) {
+        var _getCombinedTriggersF;
+        return ((_getCombinedTriggersF = getCombinedTriggersFromStore(get()).find(function (trigger) {
           return trigger.id === triggerId;
-        })) === null || _combinedTriggers$fin === void 0 ? void 0 : _combinedTriggers$fin.behaviour) === type;
-      })) return true;
+        })) === null || _getCombinedTriggersF === void 0 ? void 0 : _getCombinedTriggersF.behaviour) === type;
+      })) {
+        return true;
+      }
       return false;
     },
     setActiveTrigger: function setActiveTrigger(trigger) {
@@ -2716,15 +2739,25 @@ var useVisitor$1 = function useVisitor() {
   });
 };
 
-var useDifiStore = zustand.create(function () {
-  return _extends({}, createLoggingSlice.apply(void 0, arguments), createPagetriggersSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments), createIntentlySlice.apply(void 0, arguments), createTrackingSlice.apply(void 0, arguments), createincompleteTriggersSlice.apply(void 0, arguments), createConversionsSlice.apply(void 0, arguments), createIdleTimeSlice.apply(void 0, arguments), createUtilitySlice.apply(void 0, arguments));
-});
+var useDifiStore = zustand.create(zukeeper(function () {
+  return _extends({}, createLoggingSlice.apply(void 0, arguments), createConfigSlice.apply(void 0, arguments), createMutualSlice.apply(void 0, arguments), createHandlersSlice.apply(void 0, arguments), createVisitorSlice.apply(void 0, arguments), createIntentlySlice.apply(void 0, arguments), createTrackingSlice.apply(void 0, arguments), createincompleteTriggersSlice.apply(void 0, arguments), createConversionsSlice.apply(void 0, arguments), createIdleTimeSlice.apply(void 0, arguments), createUtilitySlice.apply(void 0, arguments), createPagetriggersSlice.apply(void 0, arguments));
+}, {
+  name: 'DIFIStore',
+  enabled: getEnvVars().isDev
+}));
+var useCombinedTriggers = function useCombinedTriggers() {
+  var store = useDifiStore(function (s) {
+    return s;
+  });
+  return getCombinedTriggersFromStore(store);
+};
 var useEntireStore = function useEntireStore() {
   var store = useDifiStore(function (s) {
     return s;
   });
   return store;
 };
+window.store = useDifiStore;
 
 var useConsentCheck = function useConsentCheck(consent, consentCallback) {
   var _useState = React.useState(consent),
@@ -3489,23 +3522,22 @@ var useExitIntentDelay = function useExitIntentDelay(delay) {
   };
 };
 
-var Activation = function Activation() {
+function Activation() {
   var _useEntireStore = useEntireStore(),
     displayedTriggersIds = _useEntireStore.displayedTriggersIds,
     handlers = _useEntireStore.handlers,
     getHandlerForTrigger = _useEntireStore.getHandlerForTrigger,
-    getCombinedTriggers = _useEntireStore.getCombinedTriggers,
     getIsBehaviourVisible = _useEntireStore.getIsBehaviourVisible,
     _useEntireStore$loggi = _useEntireStore.logging,
     log = _useEntireStore$loggi.log,
     error = _useEntireStore$loggi.error;
-  var combinedTriggers = getCombinedTriggers();
+  var combinedTriggers = useCombinedTriggers();
   if (!displayedTriggersIds) return null;
   var activeTriggers = combinedTriggers.filter(function (trigger) {
     return displayedTriggersIds.includes(trigger.id);
   });
   if (!activeTriggers) {
-    error("Collector - TriggerComponent: No trigger found for displayedTriggersIds", displayedTriggersIds);
+    error('Collector - TriggerComponent: No trigger found for displayedTriggersIds', displayedTriggersIds);
     return null;
   }
   log('Collector - TriggerComponent: available handlers include: ', handlers);
@@ -3536,7 +3568,7 @@ var Activation = function Activation() {
     return null;
   });
   return React__default.createElement(React__default.Fragment, null, visibleComponents);
-};
+}
 var Activation$1 = React__default.memo(Activation);
 
 function Triggers() {
@@ -3546,7 +3578,6 @@ function Triggers() {
   var _useEntireStore = useEntireStore(),
     config = _useEntireStore.config,
     setDisplayedTriggerByInvocation = _useEntireStore.setDisplayedTriggerByInvocation,
-    getCombinedTriggers = _useEntireStore.getCombinedTriggers,
     visibleTriggersIssuedByIncomplete = _useEntireStore.visibleTriggersIssuedByIncomplete,
     idleTimeout = _useEntireStore.idleTime.idleTimeout,
     imagesPreloaded = _useEntireStore.utility.imagesPreloaded,
@@ -3556,16 +3587,16 @@ function Triggers() {
     idleTriggers = _useEntireStore$difiP.idleTriggers,
     pageLoadTriggers = _useEntireStore$difiP.pageLoadTriggers,
     booted = _useEntireStore$difiP.booted;
-  var imagePreloadingComplete = imagesPreloaded === true || imagesPreloaded === "skip";
+  var combinedTriggers = useCombinedTriggers();
+  var imagePreloadingComplete = imagesPreloaded === true || imagesPreloaded === 'skip';
   var altIdleDelay = (config === null || config === void 0 ? void 0 : (_config$trigger = config.trigger) === null || _config$trigger === void 0 ? void 0 : _config$trigger.userIdleThresholdSecs) * 1000;
-  var combinedTriggers = getCombinedTriggers();
   var _useTriggerDelay = useTriggerDelay(),
     canNextTriggerOccur = _useTriggerDelay.canNextTriggerOccur,
     startCooldown = _useTriggerDelay.startCooldown,
     getRemainingCooldownMs = _useTriggerDelay.getRemainingCooldownMs;
   var _useExitIntent = useExitIntent.useExitIntent({
       cookie: {
-        key: "_cm_exit",
+        key: '_cm_exit',
         daysToExpire: 0
       }
     }),
@@ -3574,51 +3605,51 @@ function Triggers() {
   React.useEffect(function () {
     if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [imagePreloadingComplete, visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
   React.useEffect(function () {
     if (!imagePreloadingComplete) return;
     if (!(visibleTriggersIssuedByIncomplete !== null && visibleTriggersIssuedByIncomplete !== void 0 && visibleTriggersIssuedByIncomplete.length)) return;
-    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
   }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete, imagePreloadingComplete]);
   var fireIdleTrigger = React.useCallback(function () {
     if (!idleTriggers) return;
     if (!imagePreloadingComplete) return;
-    log("Collector: attempting to fire idle time trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_IDLE_TIME");
+    log('Collector: attempting to fire idle time trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
     startCooldown();
   }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown, imagePreloadingComplete]);
   var _useExitIntentDelay = useExitIntentDelay((config === null || config === void 0 ? void 0 : config.trigger.displayTriggerAfterSecs) * 1000),
     hasDelayPassed = _useExitIntentDelay.hasDelayPassed;
   var fireExitTrigger = React__default.useCallback(function () {
     if (!imagePreloadingComplete) {
-      log("Unable to launch exit intent, because not all images have loaded yet.");
-      log("Re-registering handler");
+      log('Unable to launch exit intent, because not all images have loaded yet.');
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
     if (!hasDelayPassed) {
       log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
-      log("Re-registering handler");
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
     if (!canNextTriggerOccur()) {
       log("Tried to launch EXIT trigger, but can't because of cooldown, " + getRemainingCooldownMs() + "ms remaining. \n        I will attempt again when the same signal occurs after this passes.");
-      log("Re-registering handler");
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
-    log("Collector: attempting to fire exit trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_EXIT_INTENT");
+    log('Collector: attempting to fire exit trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
   }, [imagePreloadingComplete, hasDelayPassed, canNextTriggerOccur, log, setDisplayedTriggerByInvocation, startCooldown, reRegisterExitIntent, getRemainingCooldownMs]);
   React.useEffect(function () {
     if (!imagePreloadingComplete) return;
     if (!exitIntentTriggers) return;
-    log("Collector: attempting to register exit trigger");
+    log('Collector: attempting to register exit trigger');
     registerHandler({
-      id: "clientTrigger",
+      id: 'clientTrigger',
       handler: fireExitTrigger
     });
   }, [exitIntentTriggers, fireExitTrigger, log, registerHandler, imagePreloadingComplete]);
@@ -3626,8 +3657,8 @@ function Triggers() {
     if (!imagePreloadingComplete) return;
     if (!pageLoadTriggers) return;
     if (!(combinedTriggers !== null && combinedTriggers !== void 0 && combinedTriggers.length)) return;
-    log("Collector: attempting to fire on-page-load trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_PAGE_LOAD", true);
+    log('Collector: attempting to fire on-page-load trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
   }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation, imagePreloadingComplete]);
   React.useEffect(function () {
     fireOnLoadTriggers();
@@ -3635,12 +3666,12 @@ function Triggers() {
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
     delay: initialDelay,
-    name: "fireOnLoadTriggers"
+    name: 'fireOnLoadTriggers'
   });
   return React__default.createElement(reactIdleTimer.IdleTimerProvider, {
     timeout: idleTimeout || altIdleDelay,
     onPresenceChange: function onPresenceChange(presence) {
-      log("presence changed", presence);
+      log('presence changed', presence);
     },
     onIdle: fireIdleTrigger
   }, React__default.createElement(Activation$1, null));
@@ -3650,6 +3681,7 @@ var queryClient = new reactQuery.QueryClient();
 function FingerprintProvider(props) {
   var _useEntireStore = useEntireStore(),
     set = _useEntireStore.set,
+    get = _useEntireStore.get,
     addHandlers = _useEntireStore.addHandlers,
     difiProps = _useEntireStore.difiProps;
   var booted = difiProps.booted,
@@ -3669,7 +3701,12 @@ function FingerprintProvider(props) {
   var matchPropsToDifiProps = React__default.useCallback(function () {
     set(function (prev) {
       return {
-        difiProps: _extends({}, prev.difiProps, props)
+        difiProps: _extends({}, prev.difiProps, Object.keys(props).reduce(function (acc, key) {
+          if (key === 'children') return acc;
+          if (key === 'debug') return acc;
+          acc[key] = props[key];
+          return acc;
+        }, {}))
       };
     });
   }, [props, set]);
@@ -3677,12 +3714,13 @@ function FingerprintProvider(props) {
   React.useEffect(function () {
     if (!props.appId) throw new Error('C&M Fingerprint: appId is required');
     matchPropsToDifiProps();
+    if (!get || !set) return;
     if (!appId) return;
     if (booted) return;
     if (!consentGiven) return;
     addHandlers(defaultHandlers || []);
     setBooted(true);
-  }, [appId, consentGiven, hasStoreInitiated, booted, props.appId, matchPropsToDifiProps, defaultHandlers, addHandlers, setBooted]);
+  }, [get, set, appId, consentGiven, hasStoreInitiated, booted, props.appId, matchPropsToDifiProps, defaultHandlers, addHandlers, setBooted]);
   if (!appId) return props.children;
   if (!booted) return props.children;
   return React__default.createElement(reactQuery.QueryClientProvider, {

@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect } from "react";
-import { IdleTimerProvider, PresenceType } from "react-idle-timer";
-import { useExitIntent } from "use-exit-intent";
-import { useEntireStore } from "../beautifulSugar/store";
-import useExitIntentDelay from "../hooks/useExitIntentDelay";
-import { useLogging } from "../hooks/useLogging";
-import useRunOnPathChange from "../hooks/useRunOnPathChange";
-import { useTriggerDelay } from "../hooks/useTriggerDelay";
-import Activation from "./Activation";
+import React, { useCallback, useEffect } from 'react';
+import { IdleTimerProvider, PresenceType } from 'react-idle-timer';
+import { useExitIntent } from 'use-exit-intent';
+import { useCombinedTriggers, useEntireStore } from '../beautifulSugar/store';
+import useExitIntentDelay from '../hooks/useExitIntentDelay';
+import { useLogging } from '../hooks/useLogging';
+import useRunOnPathChange from '../hooks/useRunOnPathChange';
+import { useTriggerDelay } from '../hooks/useTriggerDelay';
+import Activation from './Activation';
 
 export function Triggers() {
   const { log } = useLogging();
@@ -14,33 +14,27 @@ export function Triggers() {
   const {
     config,
     setDisplayedTriggerByInvocation,
-    getCombinedTriggers,
     visibleTriggersIssuedByIncomplete,
     idleTime: { idleTimeout },
     utility: { imagesPreloaded },
 
     difiProps: {
-      initialDelay,
-      exitIntentTriggers,
-      idleTriggers,
-      pageLoadTriggers,
-      booted,
+      initialDelay, exitIntentTriggers, idleTriggers, pageLoadTriggers, booted,
     },
   } = useEntireStore();
 
-  const imagePreloadingComplete =
-    imagesPreloaded === true || imagesPreloaded === "skip";
+  const combinedTriggers = useCombinedTriggers();
+
+  const imagePreloadingComplete = imagesPreloaded === true || imagesPreloaded === 'skip';
 
   const altIdleDelay = config?.trigger?.userIdleThresholdSecs * 1000;
-  const combinedTriggers = getCombinedTriggers();
 
-  const { canNextTriggerOccur, startCooldown, getRemainingCooldownMs } =
-    useTriggerDelay();
+  const { canNextTriggerOccur, startCooldown, getRemainingCooldownMs } = useTriggerDelay();
 
   // @todo remove this for our own exit intent implementation, for instance:
   // https://fullstackheroes.com/tutorials/react/exit-intent-react/
   const { registerHandler, resetState: reRegisterExitIntent } = useExitIntent({
-    cookie: { key: "_cm_exit", daysToExpire: 0 },
+    cookie: { key: '_cm_exit', daysToExpire: 0 },
   });
 
   useEffect(() => {
@@ -49,24 +43,16 @@ export function Triggers() {
 
     // TODO: eventually we may want support for multiple signals so this
     // will need to be refactored / reworked
-    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
-  }, [
-    imagePreloadingComplete,
-    visibleTriggersIssuedByIncomplete,
-    setDisplayedTriggerByInvocation,
-  ]);
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
+  }, [imagePreloadingComplete, visibleTriggersIssuedByIncomplete, setDisplayedTriggerByInvocation]);
 
   useEffect(() => {
     if (!imagePreloadingComplete) return;
 
     if (!visibleTriggersIssuedByIncomplete?.length) return;
 
-    setDisplayedTriggerByInvocation("INVOCATION_ELEMENT_VISIBLE");
-  }, [
-    setDisplayedTriggerByInvocation,
-    visibleTriggersIssuedByIncomplete,
-    imagePreloadingComplete,
-  ]);
+    setDisplayedTriggerByInvocation('INVOCATION_ELEMENT_VISIBLE');
+  }, [setDisplayedTriggerByInvocation, visibleTriggersIssuedByIncomplete, imagePreloadingComplete]);
 
   const fireIdleTrigger = useCallback(() => {
     if (!idleTriggers) return;
@@ -76,37 +62,25 @@ export function Triggers() {
      * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
      * the diff elsewhere
      */
-    log("Collector: attempting to fire idle time trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_IDLE_TIME");
+    log('Collector: attempting to fire idle time trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_IDLE_TIME');
     startCooldown();
-  }, [
-    idleTriggers,
-    log,
-    setDisplayedTriggerByInvocation,
-    startCooldown,
-    imagePreloadingComplete,
-  ]);
+  }, [idleTriggers, log, setDisplayedTriggerByInvocation, startCooldown, imagePreloadingComplete]);
 
   // TODO: unsafe chaining?
-  const { hasDelayPassed } = useExitIntentDelay(
-    config?.trigger.displayTriggerAfterSecs * 1000
-  );
+  const { hasDelayPassed } = useExitIntentDelay(config?.trigger.displayTriggerAfterSecs * 1000);
 
   const fireExitTrigger = React.useCallback(() => {
     if (!imagePreloadingComplete) {
-      log(
-        "Unable to launch exit intent, because not all images have loaded yet."
-      );
-      log("Re-registering handler");
+      log('Unable to launch exit intent, because not all images have loaded yet.');
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
 
     if (!hasDelayPassed) {
-      log(
-        "Unable to launch exit intent, because of the exit intent delay hasn't passed yet."
-      );
-      log("Re-registering handler");
+      log("Unable to launch exit intent, because of the exit intent delay hasn't passed yet.");
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
@@ -114,16 +88,16 @@ export function Triggers() {
     if (!canNextTriggerOccur()) {
       log(
         `Tried to launch EXIT trigger, but can't because of cooldown, ${getRemainingCooldownMs()}ms remaining. 
-        I will attempt again when the same signal occurs after this passes.`
+        I will attempt again when the same signal occurs after this passes.`,
       );
 
-      log("Re-registering handler");
+      log('Re-registering handler');
       reRegisterExitIntent();
       return;
     }
 
-    log("Collector: attempting to fire exit trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_EXIT_INTENT");
+    log('Collector: attempting to fire exit trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_EXIT_INTENT');
     startCooldown();
   }, [
     imagePreloadingComplete,
@@ -141,19 +115,13 @@ export function Triggers() {
 
     if (!exitIntentTriggers) return;
 
-    log("Collector: attempting to register exit trigger");
+    log('Collector: attempting to register exit trigger');
 
     registerHandler({
-      id: "clientTrigger",
+      id: 'clientTrigger',
       handler: fireExitTrigger,
     });
-  }, [
-    exitIntentTriggers,
-    fireExitTrigger,
-    log,
-    registerHandler,
-    imagePreloadingComplete,
-  ]);
+  }, [exitIntentTriggers, fireExitTrigger, log, registerHandler, imagePreloadingComplete]);
 
   const fireOnLoadTriggers = useCallback(() => {
     if (!imagePreloadingComplete) return;
@@ -165,15 +133,9 @@ export function Triggers() {
      * @Note Idle trigger doesnt need to worry about cooldown, since its timeout gets adjusted for
      * the diff elsewhere
      */
-    log("Collector: attempting to fire on-page-load trigger");
-    setDisplayedTriggerByInvocation("INVOCATION_PAGE_LOAD", true);
-  }, [
-    pageLoadTriggers,
-    combinedTriggers,
-    log,
-    setDisplayedTriggerByInvocation,
-    imagePreloadingComplete,
-  ]);
+    log('Collector: attempting to fire on-page-load trigger');
+    setDisplayedTriggerByInvocation('INVOCATION_PAGE_LOAD', true);
+  }, [pageLoadTriggers, combinedTriggers, log, setDisplayedTriggerByInvocation, imagePreloadingComplete]);
 
   useEffect(() => {
     fireOnLoadTriggers();
@@ -182,14 +144,14 @@ export function Triggers() {
   useRunOnPathChange(fireOnLoadTriggers, {
     skip: !booted,
     delay: initialDelay,
-    name: "fireOnLoadTriggers",
+    name: 'fireOnLoadTriggers',
   });
 
   return (
     <IdleTimerProvider
       timeout={idleTimeout || altIdleDelay}
       onPresenceChange={(presence: PresenceType) => {
-        log("presence changed", presence);
+        log('presence changed', presence);
       }}
       onIdle={fireIdleTrigger}
     >
