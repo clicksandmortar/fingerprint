@@ -4,35 +4,21 @@ import React, { ReactElement, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useEntireStore } from "../beautifulSugar/store";
 import { Handler } from "../client/handler";
-import { LEGACY_FingerprintConfig } from "../client/types";
 import { useConsentCheck } from "../hooks/useConsentCheck";
 import Runners from "./Runners";
 import { Triggers } from "./Triggers";
 
 const queryClient = new QueryClient();
 
-/** * @todo - extract */
-
 export type FingerprintProviderProps = {
   appId?: string;
   consent?: boolean;
   consentCallback?: () => boolean;
-  /**
-   * @deprecated
-   * This debug param is no longer used.
-   * Please use the portal to configure these values.
-   */
-  debug: never;
   defaultHandlers?: Handler[];
   initialDelay?: number;
   exitIntentTriggers?: boolean;
   idleTriggers?: boolean;
   pageLoadTriggers?: boolean;
-  /**
-   * @deprecated
-   * Please use the portal to configure these values. Until then this will act as override
-   */
-  config?: LEGACY_FingerprintConfig;
   // This is just to please typescript in this one off case.
   // Normally we'd use `children: ReactNode`
   children: ReactElement | null | ReactElement;
@@ -79,7 +65,6 @@ export function FingerprintProvider(props: FingerprintProviderProps) {
     if (!consentGiven) return;
     if (!hasStoreInitiated) return;
     addHandlers(defaultHandlers || []);
-
     setBooted(true);
   }, [
     appId,

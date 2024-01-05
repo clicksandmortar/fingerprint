@@ -1,11 +1,11 @@
-import { useEffect } from 'react'
-import { cnmFormPrefix } from '../components/CnMForm'
-import { getFormEntries } from '../utils/forms'
-import { isUndefined } from '../utils/page'
-import { useCollectorMutation } from './api/useCollectorMutation'
-import { useVisitor } from './init/useInitVisitor'
-import { useLogging } from './useLogging'
-import { useTracking } from './useTracking'
+import { useEffect } from 'react';
+import { cnmFormPrefix } from '../components/CnMForm';
+import { getFormEntries } from '../utils/forms';
+import { isUndefined } from '../utils/page';
+import { useCollectorMutation } from './api/useCollectorMutation';
+import { useVisitor } from './init/useInitVisitor';
+import { useLogging } from './useLogging';
+import { useTracking } from './useTracking';
 
 /**
  * Hook into forms on the page and collect their data
@@ -22,53 +22,55 @@ import { useTracking } from './useTracking'
     3.2 Use whatever property of the input is available as the field name: name, id, placeholder, type.
     3.3 collect the data and send it to the server
     3.4 without waiting for the server response, continue with the default behaviour
-* 4. 
+* 4.
  */
 export default function useFormCollector() {
-  const { mutateAsync: collect } = useCollectorMutation()
-  const { visitor } = useVisitor()
-  const { log } = useLogging()
-  const { trackEvent } = useTracking()
+  const { mutateAsync: collect } = useCollectorMutation();
+  const { visitor } = useVisitor();
+  const { log } = useLogging();
+  const { trackEvent } = useTracking();
 
   useEffect(() => {
-    if (isUndefined('document')) return
+    if (isUndefined('document')) return;
 
-    if (!visitor.id) return
+    if (!visitor.id) return;
 
+    /** Listener method to run on form submission */
     const formSubmitListener = (e: any) => {
-      if (e.target.nodeName?.toLowerCase() !== 'form') return
+      if (e.target.nodeName?.toLowerCase() !== 'form') return;
 
-      const form = e?.target as HTMLFormElement
+      const form = e?.target as HTMLFormElement;
 
       if (form.getAttribute('id')?.includes(cnmFormPrefix)) {
-        log('Skipping form collection since this is a C&M form')
-        return
+        log('Skipping form collection since this is a C&M form');
+        return;
       }
 
       const data = getFormEntries(form, {
         bannedFieldPartialNames: [],
-        bannedTypes: []
-      })
+        bannedTypes: [],
+      });
 
-      log('useFormCollector: form submitted', { data })
+      log('useFormCollector: form submitted', { data });
 
       trackEvent('form_submitted', {
-        id: form.id,
-        name: form.name
-      })
+        id: form.getAttribute('id'),
+        name: form.getAttribute('name'),
+      });
       collect({
         form: {
-          data
-        }
-      })
-    }
+          data,
+        },
+      });
+    };
 
     // reset listeners, so we never end up listening to the same form twice
-    document.removeEventListener('submit', formSubmitListener)
-    document.addEventListener('submit', formSubmitListener)
+    document.removeEventListener('submit', formSubmitListener);
+    document.addEventListener('submit', formSubmitListener);
 
+    // eslint-disable-next-line consistent-return
     return () => {
-      document.removeEventListener('submit', formSubmitListener)
-    }
-  }, [visitor])
+      document.removeEventListener('submit', formSubmitListener);
+    };
+  }, [collect, log, trackEvent, visitor]);
 }

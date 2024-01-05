@@ -1,2 +1,2 @@
-declare const Runners: () => null;
+declare function Runners(): null;
 export default Runners;
