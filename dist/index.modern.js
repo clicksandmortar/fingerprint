@@ -3871,10 +3871,16 @@ function FingerprintProvider(props) {
     }
   })), [set]);
   const matchPropsToDifiProps = React__default.useCallback(() => {
+    const propsToStore = Object.keys(props).reduce((acc, key) => {
+      if (key === 'children') return acc;
+      if (key === 'debug') return acc;
+      acc[key] = props[key];
+      return acc;
+    }, {});
     set(prev => ({
       difiProps: {
         ...prev.difiProps,
-        ...props
+        ...propsToStore
       }
     }));
   }, [props, set]);
